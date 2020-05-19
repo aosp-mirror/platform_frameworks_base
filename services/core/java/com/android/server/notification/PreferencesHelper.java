@@ -139,6 +139,7 @@ public class PreferencesHelper implements RankingConfig {
      * fields.
      */
     private static final int DEFAULT_LOCKED_APP_FIELDS = 0;
+    private final SysUiStatsEvent.BuilderFactory mStatsEventBuilderFactory;
 
     /**
      * All user-lockable fields for a given application.
@@ -170,13 +171,15 @@ public class PreferencesHelper implements RankingConfig {
 
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger,
-            AppOpsManager appOpsManager) {
+            AppOpsManager appOpsManager,
+            SysUiStatsEvent.BuilderFactory statsEventBuilderFactory) {
         mContext = context;
         mZenModeHelper = zenHelper;
         mRankingHandler = rankingHandler;
         mPm = pm;
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
+        mStatsEventBuilderFactory = statsEventBuilderFactory;
 
         updateBadgingEnabled();
         updateBubblesEnabled();
@@ -1897,7 +1900,7 @@ public class PreferencesHelper implements RankingConfig {
                 if (i > NOTIFICATION_PREFERENCES_PULL_LIMIT) {
                     break;
                 }
-                StatsEvent.Builder event = StatsEvent.newBuilder()
+                SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
                         .setAtomId(PACKAGE_NOTIFICATION_PREFERENCES);
                 final PackagePreferences r = mPackagePreferences.valueAt(i);
                 event.writeInt(r.uid);
@@ -1926,7 +1929,7 @@ public class PreferencesHelper implements RankingConfig {
                     if (++totalChannelsPulled > NOTIFICATION_CHANNEL_PULL_LIMIT) {
                         break;
                     }
-                    StatsEvent.Builder event = StatsEvent.newBuilder()
+                    SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
                             .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES);
                     event.writeInt(r.uid);
                     event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
@@ -1961,7 +1964,7 @@ public class PreferencesHelper implements RankingConfig {
                     if (++totalGroupsPulled > NOTIFICATION_CHANNEL_GROUP_PULL_LIMIT) {
                         break;
                     }
-                    StatsEvent.Builder event = StatsEvent.newBuilder()
+                    SysUiStatsEvent.Builder event = mStatsEventBuilderFactory.newBuilder()
                             .setAtomId(PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES);
                     event.writeInt(r.uid);
                     event.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);

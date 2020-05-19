@@ -29,6 +29,16 @@ import static android.app.NotificationManager.IMPORTANCE_MAX;
 import static android.app.NotificationManager.IMPORTANCE_NONE;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
+import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
+import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.CHANNEL_ID_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.CHANNEL_NAME_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IMPORTANCE_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IS_CONVERSATION_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IS_DELETED_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IS_DEMOTED_CONVERSATION_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.IS_IMPORTANT_CONVERSATION_FIELD_NUMBER;
+import static com.android.os.AtomsProto.PackageNotificationChannelPreferences.UID_FIELD_NUMBER;
 import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
 
@@ -90,7 +100,6 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
 
-
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -109,6 +118,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -145,6 +155,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     private PreferencesHelper mHelper;
     private AudioAttributes mAudioAttributes;
     private NotificationChannelLoggerFake mLogger = new NotificationChannelLoggerFake();
+    private WrappedSysUiStatsEvent.WrappedBuilderFactory mStatsEventBuilderFactory;
 
     @Before
     public void setUp() throws Exception {
@@ -196,8 +207,11 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         when(mAppOpsManager.noteOpNoThrow(anyInt(), anyInt(),
                 anyString(), eq(null), anyString())).thenReturn(MODE_DEFAULT);
+
+        mStatsEventBuilderFactory = new WrappedSysUiStatsEvent.WrappedBuilderFactory();
+
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         resetZenModeHelper();
 
         mAudioAttributes = new AudioAttributes.Builder()
@@ -1482,7 +1496,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 NotificationManager.Policy.STATE_CHANNELS_BYPASSING_DND, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, times(1)).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -1494,7 +1508,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mTestNotificationPolicy = new NotificationManager.Policy(0, 0, 0, 0, 0, 0);
         when(mMockZenModeHelper.getNotificationPolicy()).thenReturn(mTestNotificationPolicy);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         assertFalse(mHelper.areChannelsBypassingDnd());
         verify(mMockZenModeHelper, never()).setNotificationPolicy(any());
         resetZenModeHelper();
@@ -2261,7 +2275,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 + "</package>\n"
                 + "</ranking>\n";
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadByteArrayXml(preQXml.getBytes(), true, UserHandle.USER_SYSTEM);
 
         assertEquals(PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
@@ -2274,7 +2288,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(!PreferencesHelper.DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS,
@@ -2371,7 +2385,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2383,7 +2397,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals("other", mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2396,7 +2410,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertNull(mHelper.getNotificationDelegate(PKG_O, UID_O));
@@ -2409,7 +2423,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         // appears disabled
@@ -2428,7 +2442,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         // appears disabled
@@ -2447,7 +2461,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(BUBBLE_PREFERENCE_NONE, mHelper.getBubblePreference(PKG_O, UID_O));
@@ -2502,7 +2516,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(BUBBLE_PREFERENCE_SELECTED, mHelper.getBubblePreference(PKG_O, UID_O));
@@ -2519,7 +2533,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         ByteArrayOutputStream baos = writeXmlAndPurge(PKG_O, UID_O, false, UserHandle.USER_ALL);
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
         loadStreamXml(baos, false, UserHandle.USER_ALL);
 
         assertEquals(mHelper.getBubblePreference(PKG_O, UID_O), BUBBLE_PREFERENCE_NONE);
@@ -2998,31 +3012,6 @@ public class PreferencesHelperTest extends UiServiceTestCase {
                 PKG_O, UID_O, parent.getId(), conversationId, false, false), conversationId);
     }
 
-
-    @Test
-    public void testPullConversationNotificationChannel() {
-        String conversationId = "friend";
-
-        NotificationChannel parent =
-                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
-        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
-
-        String channelId = String.format(
-                CONVERSATION_CHANNEL_ID_FORMAT, parent.getId(), conversationId);
-        NotificationChannel friend = new NotificationChannel(channelId,
-                "messages", IMPORTANCE_DEFAULT);
-        friend.setConversationId(parent.getId(), conversationId);
-        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
-        ArrayList<StatsEvent> events = new ArrayList<>();
-        mHelper.pullPackageChannelPreferencesStats(events);
-        boolean found = false;
-        for (StatsEvent event : events) {
-            // TODO(b/153195691): inspect the content once it is possible to do so
-            found = true;
-        }
-        assertTrue("conversation was not in the pull", found);
-    }
-
     @Test
     public void testGetNotificationChannel_conversationProvidedByNotCustomizedYet() {
         String conversationId = "friend";
@@ -3056,7 +3045,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testPlaceholderConversationId_shortcutRequired() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -3075,7 +3064,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testNormalConversationId_shortcutRequired() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -3094,7 +3083,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     @Test
     public void testNoConversationId_shortcutRequired() throws Exception {
         mHelper = new PreferencesHelper(getContext(), mPm, mHandler, mMockZenModeHelper, mLogger,
-                mAppOpsManager);
+                mAppOpsManager, mStatsEventBuilderFactory);
 
         final String xml = "<ranking version=\"1\">\n"
                 + "<package name=\"" + PKG_O + "\" uid=\"" + UID_O + "\" >\n"
@@ -3455,5 +3444,152 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         // and is invalid once complete msgs are sent
         mHelper.setValidMessageSent(PKG_P, UID_P);
         assertFalse(mHelper.hasUserDemotedInvalidMsgApp(PKG_P, UID_P));
+    }
+
+    @Test
+    public void testPullPackageChannelPreferencesStats() {
+        String channelId = "parent";
+        String name = "messages";
+        NotificationChannel fodderA = new NotificationChannel("a", "a", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, UID_O, fodderA, true, false);
+        NotificationChannel channel =
+                new NotificationChannel(channelId, name, IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channel, true, false);
+        NotificationChannel fodderB = new NotificationChannel("b", "b", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, fodderB, true, false);
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackageChannelPreferencesStats(events);
+
+        int found = 0;
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES
+                    && channelId.equals(builder.getValue(CHANNEL_ID_FIELD_NUMBER))) {
+                ++found;
+                assertEquals("uid", UID_O, builder.getValue(UID_FIELD_NUMBER));
+                assertTrue("uid annotation", builder.getBooleanAnnotation(
+                        UID_FIELD_NUMBER, ANNOTATION_ID_IS_UID));
+                assertEquals("importance", IMPORTANCE_DEFAULT, builder.getValue(
+                        IMPORTANCE_FIELD_NUMBER));
+                assertEquals("name", name, builder.getValue(CHANNEL_NAME_FIELD_NUMBER));
+                assertFalse("isconv", builder.getBoolean(IS_CONVERSATION_FIELD_NUMBER));
+                assertFalse("deleted", builder.getBoolean(IS_DELETED_FIELD_NUMBER));
+            }
+        }
+    }
+
+    @Test
+    public void testPullPackageChannelPreferencesStats_one_to_one() {
+        NotificationChannel channelA = new NotificationChannel("a", "a", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channelA, true, false);
+        NotificationChannel channelB = new NotificationChannel("b", "b", IMPORTANCE_LOW);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channelB, true, false);
+        NotificationChannel channelC = new NotificationChannel("c", "c", IMPORTANCE_HIGH);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channelC, true, false);
+
+        List<String> channels = new LinkedList<>(Arrays.asList("a", "b", "c"));
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackageChannelPreferencesStats(events);
+
+        int found = 0;
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES) {
+                Object id = builder.getValue(CHANNEL_ID_FIELD_NUMBER);
+                assertTrue("missing channel in the output", channels.contains(id));
+                channels.remove(id);
+            }
+        }
+        assertTrue("unexpected channel in output", channels.isEmpty());
+    }
+
+    @Test
+    public void testPullPackageChannelPreferencesStats_conversation() {
+        String conversationId = "friend";
+
+        NotificationChannel parent =
+                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+
+        String channelId = String.format(
+                CONVERSATION_CHANNEL_ID_FORMAT, parent.getId(), conversationId);
+        String name = "conversation";
+        NotificationChannel friend = new NotificationChannel(channelId,
+                name, IMPORTANCE_DEFAULT);
+        friend.setConversationId(parent.getId(), conversationId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackageChannelPreferencesStats(events);
+
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES
+                    && channelId.equals(builder.getValue(CHANNEL_ID_FIELD_NUMBER))) {
+                assertTrue("isConveration should be true", builder.getBoolean(
+                        IS_CONVERSATION_FIELD_NUMBER));
+                assertFalse("not demoted", builder.getBoolean(
+                        IS_DEMOTED_CONVERSATION_FIELD_NUMBER));
+                assertFalse("not important", builder.getBoolean(
+                        IS_IMPORTANT_CONVERSATION_FIELD_NUMBER));
+            }
+        }
+    }
+
+    @Test
+    public void testPullPackageChannelPreferencesStats_conversation_demoted() {
+        NotificationChannel parent =
+                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+        String channelId = String.format(
+                CONVERSATION_CHANNEL_ID_FORMAT, parent.getId(), "friend");
+        NotificationChannel friend = new NotificationChannel(channelId,
+                "conversation", IMPORTANCE_DEFAULT);
+        friend.setConversationId(parent.getId(), "friend");
+        friend.setDemoted(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackageChannelPreferencesStats(events);
+
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES
+                    && channelId.equals(builder.getValue(CHANNEL_ID_FIELD_NUMBER))) {
+                assertTrue("isConveration should be true", builder.getBoolean(
+                        IS_CONVERSATION_FIELD_NUMBER));
+                assertTrue("is demoted", builder.getBoolean(
+                        IS_DEMOTED_CONVERSATION_FIELD_NUMBER));
+                assertFalse("not important", builder.getBoolean(
+                        IS_IMPORTANT_CONVERSATION_FIELD_NUMBER));
+            }
+        }
+    }
+
+    @Test
+    public void testPullPackageChannelPreferencesStats_conversation_priority() {
+        NotificationChannel parent =
+                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+        String channelId = String.format(
+                CONVERSATION_CHANNEL_ID_FORMAT, parent.getId(), "friend");
+        NotificationChannel friend = new NotificationChannel(channelId,
+                "conversation", IMPORTANCE_DEFAULT);
+        friend.setConversationId(parent.getId(), "friend");
+        friend.setImportantConversation(true);
+        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackageChannelPreferencesStats(events);
+
+        for (WrappedSysUiStatsEvent.WrappedBuilder builder : mStatsEventBuilderFactory.builders) {
+            if (builder.getAtomId() == PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES
+                    && channelId.equals(builder.getValue(CHANNEL_ID_FIELD_NUMBER))) {
+                assertTrue("isConveration should be true", builder.getBoolean(
+                        IS_CONVERSATION_FIELD_NUMBER));
+                assertFalse("not demoted", builder.getBoolean(
+                        IS_DEMOTED_CONVERSATION_FIELD_NUMBER));
+                assertTrue("is important", builder.getBoolean(
+                        IS_IMPORTANT_CONVERSATION_FIELD_NUMBER));
+            }
+        }
     }
 }
