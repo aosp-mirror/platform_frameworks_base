@@ -349,6 +349,25 @@ EGLConfig BootAnimation::getEglConfig(const EGLDisplay& display) {
     return config;
 }
 
+ui::Size BootAnimation::limitSurfaceSize(int width, int height) const {
+    ui::Size limited(width, height);
+    bool wasLimited = false;
+    const float aspectRatio = float(width) / float(height);
+    if (mMaxWidth != 0 && width > mMaxWidth) {
+        limited.height = mMaxWidth / aspectRatio;
+        limited.width = mMaxWidth;
+        wasLimited = true;
+    }
+    if (mMaxHeight != 0 && limited.height > mMaxHeight) {
+        limited.height = mMaxHeight;
+        limited.width = mMaxHeight * aspectRatio;
+        wasLimited = true;
+    }
+    SLOGV_IF(wasLimited, "Surface size has been limited to [%dx%d] from [%dx%d]",
+             limited.width, limited.height, width, height);
+    return limited;
+}
+
 status_t BootAnimation::readyToRun() {
     mAssets.addDefaultAssets();
 
@@ -362,8 +381,10 @@ status_t BootAnimation::readyToRun() {
     if (error != NO_ERROR)
         return error;
 
-    const ui::Size& resolution = displayConfig.resolution;
-
+    mMaxWidth = android::base::GetIntProperty("ro.surface_flinger.max_graphics_width", 0);
+    mMaxHeight = android::base::GetIntProperty("ro.surface_flinger.max_graphics_height", 0);
+    ui::Size resolution = displayConfig.resolution;
+    resolution = limitSurfaceSize(resolution.width, resolution.height);
     // create the native surface
     sp<SurfaceControl> control = session()->createSurface(String8("BootAnimation"),
             resolution.getWidth(), resolution.getHeight(), PIXEL_FORMAT_RGB_565);
@@ -459,8 +480,9 @@ void BootAnimation::resizeSurface(int newWidth, int newHeight) {
     eglMakeCurrent(mDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
     eglDestroySurface(mDisplay, mSurface);
 
-    mWidth = newWidth;
-    mHeight = newHeight;
+    const auto limitedSize = limitSurfaceSize(newWidth, newHeight);
+    mWidth = limitedSize.width;
+    mHeight = limitedSize.height;
 
     SurfaceComposerClient::Transaction t;
     t.setSize(mFlingerSurfaceControl, mWidth, mHeight);
