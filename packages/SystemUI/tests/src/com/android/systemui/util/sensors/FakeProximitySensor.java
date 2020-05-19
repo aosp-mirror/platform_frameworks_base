@@ -20,6 +20,7 @@ import android.content.res.Resources;
 
 public class FakeProximitySensor extends ProximitySensor {
     private boolean mAvailable;
+    private boolean mRegistered;
 
     public FakeProximitySensor(Resources resources, AsyncSensorManager sensorManager) {
         super(resources, sensorManager);
@@ -35,17 +36,22 @@ public class FakeProximitySensor extends ProximitySensor {
     }
 
     @Override
+    public boolean isRegistered() {
+        return mRegistered;
+    }
+
+    @Override
     public boolean getSensorAvailable() {
         return mAvailable;
     }
 
     @Override
     protected void registerInternal() {
-        // no-op
+        mRegistered = !mPaused;
     }
 
     @Override
     protected void unregisterInternal() {
-        // no-op
+        mRegistered = false;
     }
 }
