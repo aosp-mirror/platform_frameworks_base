@@ -92,6 +92,9 @@ java_defaults {
         sdk_version: "module_current",
     },
 
+    // Configure framework module specific metalava options.
+    droiddoc_options: [mainline_stubs_args],
+
     // The stub libraries must be visible to frameworks/base so they can be combined
     // into API specific libraries.
     stubs_library_visibility: [
