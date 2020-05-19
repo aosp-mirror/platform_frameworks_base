@@ -12683,6 +12683,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Binder.restoreCallingIdentity(ident);
             }
         }
+
+        @Override
+        public ComponentName getProfileOwnerAsUser(int userHandle) {
+            return DevicePolicyManagerService.this.getProfileOwnerAsUser(userHandle);
+        }
     }
 
     private Intent createShowAdminSupportIntent(ComponentName admin, int userId) {
