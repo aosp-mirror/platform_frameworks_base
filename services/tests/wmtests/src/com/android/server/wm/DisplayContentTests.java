@@ -57,7 +57,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -1060,8 +1059,6 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testApplyTopFixedRotationTransform() {
         mWm.mIsFixedRotationTransformEnabled = true;
-        mDisplayContent.getDisplayPolicy().addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
-        mDisplayContent.getDisplayPolicy().addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         final Configuration config90 = new Configuration();
         mDisplayContent.computeScreenConfiguration(config90, ROTATION_90);
 
@@ -1081,12 +1078,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
-
-        assertNotNull(mDisplayContent.mFixedRotationAnimationController);
-        assertTrue(mStatusBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
-                ANIMATION_TYPE_FIXED_TRANSFORM));
-        assertTrue(mNavBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
-                ANIMATION_TYPE_FIXED_TRANSFORM));
 
         final Rect outFrame = new Rect();
         final Rect outInsets = new Rect();
@@ -1140,9 +1131,6 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(app.hasFixedRotationTransform());
         assertFalse(app2.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
-
-        mDisplayContent.finishFixedRotationAnimation();
-        assertNull(mDisplayContent.mFixedRotationAnimationController);
     }
 
     @Test
