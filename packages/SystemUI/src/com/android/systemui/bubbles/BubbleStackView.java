@@ -656,7 +656,8 @@ public class BubbleStackView extends FrameLayout
             @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
-            NotificationShadeWindowController notificationShadeWindowController) {
+            NotificationShadeWindowController notificationShadeWindowController,
+            Runnable allBubblesAnimatedOutAction) {
         super(context);
 
         mBubbleData = data;
@@ -691,11 +692,18 @@ public class BubbleStackView extends FrameLayout
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
+        final Runnable onBubbleAnimatedOut = () -> {
+            if (getBubbleCount() == 0) {
+                allBubblesAnimatedOutAction.run();
+            }
+        };
+
         mStackAnimationController = new StackAnimationController(
-                floatingContentCoordinator, this::getBubbleCount);
+                floatingContentCoordinator, this::getBubbleCount, onBubbleAnimatedOut);
 
         mExpandedAnimationController = new ExpandedAnimationController(
-                mDisplaySize, mExpandedViewPadding, res.getConfiguration().orientation);
+                mDisplaySize, mExpandedViewPadding, res.getConfiguration().orientation,
+                onBubbleAnimatedOut);
         mSurfaceSynchronizer = synchronizer != null ? synchronizer : DEFAULT_SURFACE_SYNCHRONIZER;
 
         setUpUserEducation();
