@@ -20,5 +20,8 @@ java_sdk_library {
     api_packages: ["com.android.media.tv.remoteprovider"],
     dex_preopt: {
         enabled: false,
-    }
+    },
+    static_libs: [
+        "android-support-annotations"
+    ],
 }
