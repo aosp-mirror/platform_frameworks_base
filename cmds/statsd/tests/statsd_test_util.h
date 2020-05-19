@@ -149,7 +149,11 @@ State CreateUidProcessState();
 // Create State proto for overlay state atom.
 State CreateOverlayState();
 
+// Create State proto for screen state atom with on/off map.
 State CreateScreenStateWithOnOffMap(int64_t screenOnId, int64_t screenOffId);
+
+// Create State proto for screen state atom with simple on/off map.
+State CreateScreenStateWithSimpleOnOffMap(int64_t screenOnId, int64_t screenOffId);
 
 // Create StateGroup proto for ScreenState ON group
 StateMap_StateGroup CreateScreenStateOnGroup(int64_t screenOnId);
@@ -157,8 +161,17 @@ StateMap_StateGroup CreateScreenStateOnGroup(int64_t screenOnId);
 // Create StateGroup proto for ScreenState OFF group
 StateMap_StateGroup CreateScreenStateOffGroup(int64_t screenOffId);
 
+// Create StateGroup proto for simple ScreenState ON group
+StateMap_StateGroup CreateScreenStateSimpleOnGroup(int64_t screenOnId);
+
+// Create StateGroup proto for simple ScreenState OFF group
+StateMap_StateGroup CreateScreenStateSimpleOffGroup(int64_t screenOffId);
+
 // Create StateMap proto for ScreenState ON/OFF map
 StateMap CreateScreenStateOnOffMap(int64_t screenOnId, int64_t screenOffId);
+
+// Create StateMap proto for simple ScreenState ON/OFF map
+StateMap CreateScreenStateSimpleOnOffMap(int64_t screenOnId, int64_t screenOffId);
 
 // Add a predicate to the predicate combination.
 void addPredicateToPredicateCombination(const Predicate& predicate, Predicate* combination);
