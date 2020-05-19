@@ -204,7 +204,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
     // Notification title and text for setManagedProfileMaximumTimeOff tests:
     private static final String PROFILE_OFF_SUSPENSION_TITLE = "suspension_title";
     private static final String PROFILE_OFF_SUSPENSION_TEXT = "suspension_text";
-    private static final String PROFILE_OFF_SUSPENSION_TOMORROW_TEXT = "suspension_tomorrow_text";
+    private static final String PROFILE_OFF_SUSPENSION_SOON_TEXT = "suspension_tomorrow_text";
 
     @Override
     protected void setUp() throws Exception {
@@ -6331,7 +6331,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // Now the user should see a warning notification.
         verify(getServices().notificationManager, times(1))
                 .notify(anyInt(), argThat(hasExtra(EXTRA_TITLE, PROFILE_OFF_SUSPENSION_TITLE,
-                        EXTRA_TEXT, PROFILE_OFF_SUSPENSION_TOMORROW_TEXT)));
+                        EXTRA_TEXT, PROFILE_OFF_SUSPENSION_SOON_TEXT)));
         // Apps shouldn't be suspended yet.
         verifyZeroInteractions(getServices().ipackageManager);
         clearInvocations(getServices().alarmManager);
@@ -6482,7 +6482,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         // To allow creation of Notification via Notification.Builder
         mContext.applicationInfo = mRealTestContext.getApplicationInfo();
 
-        // Setup notification titles.
+        // Setup resources to render notification titles and texts.
         when(mServiceContext.resources
                 .getString(R.string.personal_apps_suspension_title))
                 .thenReturn(PROFILE_OFF_SUSPENSION_TITLE);
@@ -6490,14 +6490,19 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .getString(R.string.personal_apps_suspension_text))
                 .thenReturn(PROFILE_OFF_SUSPENSION_TEXT);
         when(mServiceContext.resources
-                .getString(R.string.personal_apps_suspension_tomorrow_text))
-                .thenReturn(PROFILE_OFF_SUSPENSION_TOMORROW_TEXT);
+                .getString(eq(R.string.personal_apps_suspension_soon_text),
+                        anyString(), anyString(), anyInt()))
+                .thenReturn(PROFILE_OFF_SUSPENSION_SOON_TEXT);
+
+        // Make locale available for date formatting:
+        when(mServiceContext.resources.getConfiguration())
+                .thenReturn(mRealTestContext.getResources().getConfiguration());
 
         clearInvocations(getServices().ipackageManager);
     }
 
     private static Matcher<Notification> hasExtra(String... extras) {
-        assertEquals("Odd numebr of extra key-values", 0, extras.length % 2);
+        assertEquals("Odd number of extra key-values", 0, extras.length % 2);
         return new BaseMatcher<Notification>() {
             @Override
             public boolean matches(Object item) {

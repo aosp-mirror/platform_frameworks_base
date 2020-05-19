@@ -42,6 +42,8 @@ interface ControlsModel {
      */
     val elements: List<ElementWrapper>
 
+    val moveHelper: MoveHelper?
+
     /**
      * Change the favorite status of a particular control.
      */
@@ -68,6 +70,34 @@ interface ControlsModel {
          * Use to notify that the model has changed for the first time
          */
         fun onFirstChange()
+    }
+
+    /**
+     * Interface to facilitate moving controls from an [AccessibilityDelegate].
+     *
+     * All positions should be 0 based.
+     */
+    interface MoveHelper {
+
+        /**
+         * Whether the control in `position` can be moved to the position before it.
+         */
+        fun canMoveBefore(position: Int): Boolean
+
+        /**
+         * Whether the control in `position` can be moved to the position after it.
+         */
+        fun canMoveAfter(position: Int): Boolean
+
+        /**
+         * Move the control in `position` to the position before it.
+         */
+        fun moveBefore(position: Int)
+
+        /**
+         * Move the control in `position` to the position after it.
+         */
+        fun moveAfter(position: Int)
     }
 }
 

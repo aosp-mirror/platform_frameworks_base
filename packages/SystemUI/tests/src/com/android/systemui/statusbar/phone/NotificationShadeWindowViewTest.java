@@ -83,6 +83,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
     @Mock private NotificationStackScrollLayout mNotificationStackScrollLayout;
     @Mock private NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock private SuperStatusBarViewFactory mStatusBarViewFactory;
+    @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
 
     @Before
     public void setUp() {
@@ -121,7 +122,7 @@ public class NotificationShadeWindowViewTest extends SysuiTestCase {
                 mNotificationPanelViewController,
                 mStatusBarViewFactory);
         mController.setupExpandedStatusBar();
-        mController.setService(mStatusBar);
+        mController.setService(mStatusBar, mNotificationShadeWindowController);
         mController.setDragDownHelper(mDragDownHelper);
 
     }
