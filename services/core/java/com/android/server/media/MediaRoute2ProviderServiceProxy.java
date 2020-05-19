@@ -60,7 +60,7 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     private Connection mActiveConnection;
     private boolean mConnectionReady;
 
-    private RouteDiscoveryPreference mPendingDiscoveryPreference = null;
+    private RouteDiscoveryPreference mLastDiscoveryPreference = null;
 
     MediaRoute2ProviderServiceProxy(@NonNull Context context, @NonNull ComponentName componentName,
             int userId) {
@@ -98,11 +98,10 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
 
     @Override
     public void updateDiscoveryPreference(RouteDiscoveryPreference discoveryPreference) {
+        mLastDiscoveryPreference = discoveryPreference;
         if (mConnectionReady) {
             mActiveConnection.updateDiscoveryPreference(discoveryPreference);
             updateBinding();
-        } else {
-            mPendingDiscoveryPreference = discoveryPreference;
         }
     }
 
@@ -277,9 +276,8 @@ final class MediaRoute2ProviderServiceProxy extends MediaRoute2Provider
     private void onConnectionReady(Connection connection) {
         if (mActiveConnection == connection) {
             mConnectionReady = true;
-            if (mPendingDiscoveryPreference != null) {
-                updateDiscoveryPreference(mPendingDiscoveryPreference);
-                mPendingDiscoveryPreference = null;
+            if (mLastDiscoveryPreference != null) {
+                updateDiscoveryPreference(mLastDiscoveryPreference);
             }
         }
     }
