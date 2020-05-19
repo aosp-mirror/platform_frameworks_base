@@ -16,6 +16,8 @@
 
 package com.android.server.pm.permission;
 
+import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.util.ArrayMap;
@@ -30,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -69,6 +72,9 @@ public final class PermissionsState {
     private ArrayMap<String, PermissionData> mPermissions;
 
     private int[] mGlobalGids = NO_GIDS;
+
+    @Nullable
+    private SparseBooleanArray mMissing;
 
     private SparseBooleanArray mPermissionReviewRequired;
 
@@ -132,6 +138,23 @@ public final class PermissionsState {
                     other.mGlobalGids.length);
         }
 
+        if (mMissing != null) {
+            if (other.mMissing == null) {
+                mMissing = null;
+            } else {
+                mMissing.clear();
+            }
+        }
+        if (other.mMissing != null) {
+            if (mMissing == null) {
+                mMissing = new SparseBooleanArray();
+            }
+            final int missingSize = other.mMissing.size();
+            for (int i = 0; i < missingSize; i++) {
+                mMissing.put(other.mMissing.keyAt(i), other.mMissing.valueAt(i));
+            }
+        }
+
         if (mPermissionReviewRequired != null) {
             if (other.mPermissionReviewRequired == null) {
                 mPermissionReviewRequired = null;
@@ -175,6 +198,10 @@ public final class PermissionsState {
             }
         }
 
+        if (!Objects.equals(mMissing, other.mMissing)) {
+            return false;
+        }
+
         if (mPermissionReviewRequired == null) {
             if (other.mPermissionReviewRequired != null) {
                 return false;
@@ -183,6 +210,35 @@ public final class PermissionsState {
             return false;
         }
         return Arrays.equals(mGlobalGids, other.mGlobalGids);
+    }
+
+    /**
+     * Check whether the permissions state is missing for a user. This can happen if permission
+     * state is rolled back and we'll need to generate a reasonable default state to keep the app
+     * usable.
+     */
+    public boolean isMissing(@UserIdInt int userId) {
+        return mMissing != null && mMissing.get(userId);
+    }
+
+    /**
+     * Set whether the permissions state is missing for a user. This can happen if permission state
+     * is rolled back and we'll need to generate a reasonable default state to keep the app usable.
+     */
+    public void setMissing(boolean missing, @UserIdInt int userId) {
+        if (missing) {
+            if (mMissing == null) {
+                mMissing = new SparseBooleanArray();
+            }
+            mMissing.put(userId, true);
+        } else {
+            if (mMissing != null) {
+                mMissing.delete(userId);
+                if (mMissing.size() == 0) {
+                    mMissing = null;
+                }
+            }
+        }
     }
 
     public boolean isPermissionReviewRequired(int userId) {
@@ -569,6 +625,7 @@ public final class PermissionsState {
             invalidateCache();
         }
 
+        mMissing = null;
         mPermissionReviewRequired = null;
     }
 
