@@ -292,9 +292,6 @@ private:
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsWithActivation);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEventsNoCondition);
     FRIEND_TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
-    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
 
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_single_bucket);
     FRIEND_TEST(AnomalyDetectionE2eTest, TestSlicedCountMetric_multiple_buckets);
@@ -322,6 +319,7 @@ private:
             TestActivationOnBootMultipleActivationsDifferentActivationTypes);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationsPersistAcrossSystemServerRestart);
 
+    FRIEND_TEST(CountMetricE2eTest, TestInitialConditionChanges);
     FRIEND_TEST(CountMetricE2eTest, TestSlicedState);
     FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithMap);
     FRIEND_TEST(CountMetricE2eTest, TestMultipleSlicedStates);
@@ -339,6 +337,10 @@ private:
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSuperset);
     FRIEND_TEST(DurationMetricE2eTest, TestWithSlicedStatePrimaryFieldsSubset);
 
+    FRIEND_TEST(ValueMetricE2eTest, TestInitialConditionChanges);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
+    FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_WithActivation);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
