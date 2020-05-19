@@ -536,13 +536,16 @@ public final class SmsApplication {
 
         // Assign permission to special system apps
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
-                PHONE_PACKAGE_NAME);
+                PHONE_PACKAGE_NAME, true);
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
-                BLUETOOTH_PACKAGE_NAME);
+                BLUETOOTH_PACKAGE_NAME, true);
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
-                MMS_SERVICE_PACKAGE_NAME);
+                MMS_SERVICE_PACKAGE_NAME, true);
         assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
-                TELEPHONY_PROVIDER_PACKAGE_NAME);
+                TELEPHONY_PROVIDER_PACKAGE_NAME, true);
+        // CellbroadcastReceiver is a mainline module thus skip signature match.
+        assignExclusiveSmsPermissionsToSystemApp(context, packageManager, appOps,
+                CellBroadcastUtils.getDefaultCellBroadcastReceiverPackageName(context), false);
 
         // Give AppOps permission to UID 1001 which contains multiple
         // apps, all of them should be able to write to telephony provider.
@@ -744,17 +747,23 @@ public final class SmsApplication {
      * @param packageManager The package manager instance
      * @param appOps The AppOps manager instance
      * @param packageName The package name of the system app
+     * @param sigatureMatch whether to check signature match
      */
     private static void assignExclusiveSmsPermissionsToSystemApp(Context context,
-            PackageManager packageManager, AppOpsManager appOps, String packageName) {
+            PackageManager packageManager, AppOpsManager appOps, String packageName,
+            boolean sigatureMatch) {
         // First check package signature matches the caller's package signature.
         // Since this class is only used internally by the system, this check makes sure
         // the package signature matches system signature.
-        final int result = packageManager.checkSignatures(context.getPackageName(), packageName);
-        if (result != PackageManager.SIGNATURE_MATCH) {
-            Log.e(LOG_TAG, packageName + " does not have system signature");
-            return;
+        if (sigatureMatch) {
+            final int result = packageManager.checkSignatures(context.getPackageName(),
+                    packageName);
+            if (result != PackageManager.SIGNATURE_MATCH) {
+                Log.e(LOG_TAG, packageName + " does not have system signature");
+                return;
+            }
         }
+
         try {
             PackageInfo info = packageManager.getPackageInfo(packageName, 0);
             int mode = appOps.unsafeCheckOp(AppOpsManager.OPSTR_WRITE_SMS, info.applicationInfo.uid,
