@@ -8604,7 +8604,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         // Shared lib filtering done in generateApplicationInfoFromSettingsLPw
                         // and already converts to externally visible package name
                         ai = generateApplicationInfoFromSettingsLPw(ps.name,
-                                callingUid, effectiveFlags, userId);
+                                effectiveFlags, callingUid, userId);
                     }
                     if (ai != null) {
                         list.add(ai);
