@@ -1666,6 +1666,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         if (avr == null) {
             return;
         }
+        setArcStatus(false);
 
         // Seq #44.
         removeAction(RequestArcInitiationAction.class);
