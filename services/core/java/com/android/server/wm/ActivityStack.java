@@ -2708,7 +2708,9 @@ class ActivityStack extends Task {
      */
     @Nullable
     private ActivityRecord getOccludingActivityAbove(ActivityRecord activity) {
-        return getActivity((ar) -> ar.occludesParent(), true /* traverseTopToBottom */, activity);
+        ActivityRecord top = getActivity((ar) -> ar.occludesParent(),
+                true /* traverseTopToBottom */, activity);
+        return top != activity ? top : null;
     }
 
     boolean willActivityBeVisible(IBinder token) {
