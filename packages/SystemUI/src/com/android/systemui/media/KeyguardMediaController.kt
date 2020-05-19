@@ -68,4 +68,3 @@ class KeyguardMediaController @Inject constructor(
         view?.visibility = if (shouldBeVisible) View.VISIBLE else View.GONE
     }
 }
-
