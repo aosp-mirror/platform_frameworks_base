@@ -720,7 +720,7 @@ public class AppsFilter {
                 return false;
             }
             if (callingSetting == null) {
-                Slog.w(TAG, "No setting found for non system uid " + callingUid);
+                Slog.wtf(TAG, "No setting found for non system uid " + callingUid);
                 return true;
             }
             final PackageSetting callingPkgSetting;
@@ -760,7 +760,7 @@ public class AppsFilter {
             final AndroidPackage targetPkg = targetPkgSetting.pkg;
             if (targetPkg == null) {
                 if (DEBUG_LOGGING) {
-                    Slog.w(TAG, "shouldFilterApplication: " + "targetPkg is null");
+                    Slog.wtf(TAG, "shouldFilterApplication: " + "targetPkg is null");
                 }
                 return true;
             }
