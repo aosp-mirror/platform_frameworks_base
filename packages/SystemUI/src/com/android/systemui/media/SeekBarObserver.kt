@@ -16,58 +16,41 @@
 
 package com.android.systemui.media
 
-import android.content.res.ColorStateList
-import android.graphics.Color
 import android.text.format.DateUtils
-import android.view.View
-import android.widget.SeekBar
-import android.widget.TextView
 import androidx.annotation.UiThread
 import androidx.lifecycle.Observer
-
-import com.android.systemui.R
 
 /**
  * Observer for changes from SeekBarViewModel.
  *
  * <p>Updates the seek bar views in response to changes to the model.
  */
-class SeekBarObserver(view: View) : Observer<SeekBarViewModel.Progress> {
-
-    private val seekBarView: SeekBar
-    private val elapsedTimeView: TextView
-    private val totalTimeView: TextView
-
-    init {
-        seekBarView = view.findViewById(R.id.media_progress_bar)
-        elapsedTimeView = view.findViewById(R.id.media_elapsed_time)
-        totalTimeView = view.findViewById(R.id.media_total_time)
-    }
+class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarViewModel.Progress> {
 
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
         if (!data.enabled) {
-            seekBarView.setEnabled(false)
-            seekBarView.getThumb().setAlpha(0)
-            seekBarView.setProgress(0)
-            elapsedTimeView.setText("")
-            totalTimeView.setText("")
+            holder.seekBar.setEnabled(false)
+            holder.seekBar.getThumb().setAlpha(0)
+            holder.seekBar.setProgress(0)
+            holder.elapsedTimeView.setText("")
+            holder.totalTimeView.setText("")
             return
         }
 
-        seekBarView.getThumb().setAlpha(if (data.seekAvailable) 255 else 0)
-        seekBarView.setEnabled(data.seekAvailable)
+        holder.seekBar.getThumb().setAlpha(if (data.seekAvailable) 255 else 0)
+        holder.seekBar.setEnabled(data.seekAvailable)
 
         data.elapsedTime?.let {
-            seekBarView.setProgress(it)
-            elapsedTimeView.setText(DateUtils.formatElapsedTime(
+            holder.seekBar.setProgress(it)
+            holder.elapsedTimeView.setText(DateUtils.formatElapsedTime(
                     it / DateUtils.SECOND_IN_MILLIS))
         }
 
         data.duration?.let {
-            seekBarView.setMax(it)
-            totalTimeView.setText(DateUtils.formatElapsedTime(
+            holder.seekBar.setMax(it)
+            holder.totalTimeView.setText(DateUtils.formatElapsedTime(
                     it / DateUtils.SECOND_IN_MILLIS))
         }
     }
