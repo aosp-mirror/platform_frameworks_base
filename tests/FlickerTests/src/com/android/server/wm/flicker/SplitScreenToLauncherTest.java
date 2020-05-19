@@ -21,12 +21,11 @@ import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.exitSplitScreen;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.isInSplitScreen;
 
-import android.support.test.uiautomator.UiDevice;
-
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import org.junit.AfterClass;
 import org.junit.FixMethodOrder;

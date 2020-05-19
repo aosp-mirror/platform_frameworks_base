@@ -21,9 +21,10 @@ import static com.android.server.wm.flicker.helpers.AutomationUtils.hasPipWindow
 import static org.junit.Assert.assertNotNull;
 
 import android.app.Instrumentation;
-import android.support.test.uiautomator.By;
-import android.support.test.uiautomator.UiDevice;
-import android.support.test.uiautomator.UiObject2;
+
+import androidx.test.uiautomator.By;
+import androidx.test.uiautomator.UiDevice;
+import androidx.test.uiautomator.UiObject2;
 
 public class PipAppHelper extends FlickerAppHelper {
 
