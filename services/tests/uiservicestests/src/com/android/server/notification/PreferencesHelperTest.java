@@ -81,6 +81,7 @@ import android.testing.TestableContentResolver;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Pair;
+import android.util.StatsEvent;
 import android.util.Xml;
 
 import androidx.test.InstrumentationRegistry;
@@ -88,6 +89,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
+
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -2994,6 +2996,31 @@ public class PreferencesHelperTest extends UiServiceTestCase {
 
         compareChannelsParentChild(parent, mHelper.getConversationNotificationChannel(
                 PKG_O, UID_O, parent.getId(), conversationId, false, false), conversationId);
+    }
+
+
+    @Test
+    public void testPullConversationNotificationChannel() {
+        String conversationId = "friend";
+
+        NotificationChannel parent =
+                new NotificationChannel("parent", "messages", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, parent, true, false);
+
+        String channelId = String.format(
+                CONVERSATION_CHANNEL_ID_FORMAT, parent.getId(), conversationId);
+        NotificationChannel friend = new NotificationChannel(channelId,
+                "messages", IMPORTANCE_DEFAULT);
+        friend.setConversationId(parent.getId(), conversationId);
+        mHelper.createNotificationChannel(PKG_O, UID_O, friend, true, false);
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mHelper.pullPackageChannelPreferencesStats(events);
+        boolean found = false;
+        for (StatsEvent event : events) {
+            // TODO(b/153195691): inspect the content once it is possible to do so
+            found = true;
+        }
+        assertTrue("conversation was not in the pull", found);
     }
 
     @Test
