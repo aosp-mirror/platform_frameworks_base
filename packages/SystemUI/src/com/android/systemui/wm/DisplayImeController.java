@@ -178,6 +178,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
         ValueAnimator mAnimation = null;
         int mRotation = Surface.ROTATION_0;
         boolean mImeShowing = false;
+        final Rect mImeFrame = new Rect();
 
         PerDisplay(int displayId, int initialRotation) {
             mDisplayId = displayId;
@@ -254,14 +255,19 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
-        private int imeTop(InsetsSource imeSource, float surfaceOffset) {
-            return imeSource.getFrame().top + (int) surfaceOffset;
+        private int imeTop(float surfaceOffset) {
+            return mImeFrame.top + (int) surfaceOffset;
         }
 
         private void startAnimation(final boolean show, final boolean forceRestart) {
             final InsetsSource imeSource = mInsetsState.getSource(InsetsState.ITYPE_IME);
             if (imeSource == null || mImeSourceControl == null) {
                 return;
+            }
+            // Set frame, but only if the new frame isn't empty -- this maintains continuity
+            final Rect newFrame = imeSource.getFrame();
+            if (newFrame.height() != 0) {
+                mImeFrame.set(newFrame);
             }
             mHandler.post(() -> {
                 if (DEBUG) {
@@ -284,7 +290,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 }
                 final float defaultY = mImeSourceControl.getSurfacePosition().y;
                 final float x = mImeSourceControl.getSurfacePosition().x;
-                final float hiddenY = defaultY + imeSource.getFrame().height();
+                final float hiddenY = defaultY + mImeFrame.height();
                 final float shownY = defaultY;
                 final float startY = show ? hiddenY : shownY;
                 final float endY = show ? shownY : hiddenY;
@@ -306,7 +312,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
                     float value = (float) animation.getAnimatedValue();
                     t.setPosition(mImeSourceControl.getLeash(), x, value);
-                    dispatchPositionChanged(mDisplayId, imeTop(imeSource, value), t);
+                    dispatchPositionChanged(mDisplayId, imeTop(value), t);
                     t.apply();
                     mTransactionPool.release(t);
                 });
@@ -319,11 +325,11 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                         t.setPosition(mImeSourceControl.getLeash(), x, startY);
                         if (DEBUG) {
                             Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
-                                    + imeTop(imeSource, hiddenY) + "->" + imeTop(imeSource, shownY)
+                                    + imeTop(hiddenY) + "->" + imeTop(shownY)
                                     + " showing:" + (mAnimationDirection == DIRECTION_SHOW));
                         }
-                        dispatchStartPositioning(mDisplayId, imeTop(imeSource, hiddenY),
-                                imeTop(imeSource, shownY), mAnimationDirection == DIRECTION_SHOW,
+                        dispatchStartPositioning(mDisplayId, imeTop(hiddenY),
+                                imeTop(shownY), mAnimationDirection == DIRECTION_SHOW,
                                 t);
                         if (mAnimationDirection == DIRECTION_SHOW) {
                             t.show(mImeSourceControl.getLeash());
