@@ -30,6 +30,7 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.text.format.Formatter;
 import android.util.Log;
+import android.view.Display;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -93,6 +94,9 @@ public class DozeTriggers implements DozeMachine.Part {
     private boolean mPulsePending;
 
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private boolean mWantProx;
+    private boolean mWantSensors;
+    private boolean mWantTouchScreenSensors;
 
     @VisibleForTesting
     public enum DozingUpdateUiEvent implements UiEventLogger.UiEventEnum {
@@ -383,24 +387,22 @@ public class DozeTriggers implements DozeMachine.Part {
                 break;
             case DOZE:
             case DOZE_AOD:
-                mDozeSensors.setProxListening(newState != DozeMachine.State.DOZE);
-                mDozeSensors.setListening(true);
-                mDozeSensors.setPaused(false);
+                mWantProx = newState != DozeMachine.State.DOZE;
+                mWantSensors = true;
+                mWantTouchScreenSensors = true;
                 if (newState == DozeMachine.State.DOZE_AOD && !sWakeDisplaySensorState) {
                     onWakeScreen(false, newState);
                 }
                 break;
             case DOZE_AOD_PAUSED:
             case DOZE_AOD_PAUSING:
-                mDozeSensors.setProxListening(true);
-                mDozeSensors.setPaused(true);
+                mWantProx = true;
                 break;
             case DOZE_PULSING:
             case DOZE_PULSING_BRIGHT:
             case DOZE_AOD_DOCKED:
-                mDozeSensors.setTouchscreenSensorsListening(false);
-                mDozeSensors.setProxListening(true);
-                mDozeSensors.setPaused(false);
+                mWantProx = true;
+                mWantTouchScreenSensors = false;
                 break;
             case DOZE_PULSE_DONE:
                 mDozeSensors.requestTemporaryDisable();
@@ -416,6 +418,19 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDozeSensors.setProxListening(false);
                 break;
             default:
+        }
+    }
+
+    @Override
+    public void onScreenState(int state) {
+        if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND
+                || state == Display.STATE_OFF) {
+            mDozeSensors.setProxListening(mWantProx);
+            mDozeSensors.setListening(mWantSensors);
+            mDozeSensors.setTouchscreenSensorsListening(mWantTouchScreenSensors);
+        } else {
+            mDozeSensors.setProxListening(false);
+            mDozeSensors.setListening(false);
         }
     }
 
