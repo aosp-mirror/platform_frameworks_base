@@ -440,6 +440,7 @@ message Atom {
             273 [(module) = "permissioncontroller"];
         EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
         AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
+        TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -9169,6 +9170,28 @@ message SdkExtensionStatus {
     optional int32 failed_call_symbol = 3;
 }
 
+/**
+ * Logs when a tune occurs through device's Frontend.
+ * This is atom ID 276.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/tv/tuner/Tuner.java
+ */
+message TvTunerStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        TUNING = 1; // Signal is tuned
+        LOCKED = 2;    // the signal is locked
+        NOT_LOCKED = 3; // the signal isn’t locked.
+        SIGNAL_LOST = 4; // the signal was locked, but is lost now.
+        SCANNING = 5; // the signal is scanned
+        SCAN_STOPPED = 6; // the scan is stopped.
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    //  new state
+    optional State state = 2;
+}
 /**
  * Logs when an app is frozen or unfrozen.
  *
