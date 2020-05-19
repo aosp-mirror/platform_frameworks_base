@@ -208,6 +208,7 @@ public final class UserTypeFactory {
         final Bundle restrictions = getDefaultSecondaryUserRestrictions();
         restrictions.putBoolean(UserManager.DISALLOW_CONFIG_WIFI, true);
         restrictions.putBoolean(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, true);
+        restrictions.putBoolean(UserManager.DISALLOW_CONFIG_CREDENTIALS, true);
         return restrictions;
     }
 
