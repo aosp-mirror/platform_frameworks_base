@@ -6045,6 +6045,12 @@ message PackageNotificationChannelPreferences {
     optional int32 user_locked_fields = 6;
     // Indicates if the channel was deleted by the app.
     optional bool is_deleted = 7;
+    // Indicates if the channel was marked as a conversation by the app.
+    optional bool is_conversation = 8;
+    // Indicates if the channel is a conversation that was demoted by the user.
+    optional bool is_demoted_conversation = 9;
+    // Indicates if the channel is a conversation that was marked as important by the user.
+    optional bool is_important_conversation = 10;
 }
 
 /**
