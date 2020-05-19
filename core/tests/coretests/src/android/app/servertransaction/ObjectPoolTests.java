@@ -63,7 +63,8 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleActivityConfigurationChangeItem() {
-        ActivityConfigurationChangeItem emptyItem = ActivityConfigurationChangeItem.obtain(null);
+        ActivityConfigurationChangeItem emptyItem =
+                ActivityConfigurationChangeItem.obtain(Configuration.EMPTY);
         ActivityConfigurationChangeItem item = ActivityConfigurationChangeItem.obtain(config());
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));
@@ -186,7 +187,7 @@ public class ObjectPoolTests {
 
     @Test
     public void testRecycleMoveToDisplayItem() {
-        MoveToDisplayItem emptyItem = MoveToDisplayItem.obtain(0, null);
+        MoveToDisplayItem emptyItem = MoveToDisplayItem.obtain(0, Configuration.EMPTY);
         MoveToDisplayItem item = MoveToDisplayItem.obtain(4, config());
         assertNotSame(item, emptyItem);
         assertFalse(item.equals(emptyItem));

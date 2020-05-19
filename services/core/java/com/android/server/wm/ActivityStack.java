@@ -382,6 +382,7 @@ class ActivityStack extends Task {
             return mBehindFullscreenActivity;
         }
 
+        /** Returns {@code true} to stop the outer loop and indicate the result is computed. */
         private boolean processActivity(ActivityRecord r, ActivityRecord topActivity) {
             if (mAboveTop) {
                 if (r == topActivity) {
@@ -397,7 +398,10 @@ class ActivityStack extends Task {
             }
 
             if (mHandlingOccluded) {
-                mHandleBehindFullscreenActivity.accept(r);
+                // Iterating through all occluded activities.
+                if (mBehindFullscreenActivity) {
+                    mHandleBehindFullscreenActivity.accept(r);
+                }
             } else if (r == mToCheck) {
                 return true;
             } else if (mBehindFullscreenActivity) {
@@ -1307,8 +1311,17 @@ class ActivityStack extends Task {
     /**
      * Make sure that all activities that need to be visible in the stack (that is, they
      * currently can be seen by the user) actually are and update their configuration.
+     * @param starting The top most activity in the task.
+     *                 The activity is either starting or resuming.
+     *                 Caller should ensure starting activity is visible.
+     * @param preserveWindows Flag indicating whether windows should be preserved when updating
+     *                        configuration in {@link mEnsureActivitiesVisibleHelper}.
+     * @param configChanges Parts of the configuration that changed for this activity for evaluating
+     *                      if the screen should be frozen as part of
+     *                      {@link mEnsureActivitiesVisibleHelper}.
+     *
      */
-    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
+    void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows) {
         ensureActivitiesVisible(starting, configChanges, preserveWindows, true /* notifyClients */);
     }
@@ -1317,9 +1330,19 @@ class ActivityStack extends Task {
      * Ensure visibility with an option to also update the configuration of visible activities.
      * @see #ensureActivitiesVisible(ActivityRecord, int, boolean)
      * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
+     * @param starting The top most activity in the task.
+     *                 The activity is either starting or resuming.
+     *                 Caller should ensure starting activity is visible.
+     * @param notifyClients Flag indicating whether the visibility updates should be sent to the
+     *                      clients in {@link mEnsureActivitiesVisibleHelper}.
+     * @param preserveWindows Flag indicating whether windows should be preserved when updating
+     *                        configuration in {@link mEnsureActivitiesVisibleHelper}.
+     * @param configChanges Parts of the configuration that changed for this activity for evaluating
+     *                      if the screen should be frozen as part of
+     *                      {@link mEnsureActivitiesVisibleHelper}.
      */
     // TODO: Should be re-worked based on the fact that each task as a stack in most cases.
-    void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
+    void ensureActivitiesVisible(@Nullable ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
         mTopActivityOccludesKeyguard = false;
         mTopDismissingKeyguardActivity = null;

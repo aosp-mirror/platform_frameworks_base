@@ -92,7 +92,8 @@ public class SmartReplyControllerTest extends SysuiTestCase {
                 mNotificationEntryManager, () -> mock(StatusBar.class),
                 mStatusBarStateController,
                 Handler.createAsync(Looper.myLooper()),
-                mRemoteInputUriController);
+                mRemoteInputUriController,
+                mock(ActionClickLogger.class));
         mRemoteInputManager.setUpWithCallback(mCallback, mDelegate);
         mNotification = new Notification.Builder(mContext, "")
                 .setSmallIcon(R.drawable.ic_person)

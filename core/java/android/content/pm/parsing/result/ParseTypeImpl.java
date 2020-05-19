@@ -65,6 +65,21 @@ public class ParseTypeImpl implements ParseInput, ParseResult<Object> {
     private Integer mTargetSdkVersion;
 
     /**
+     * Specifically for {@link PackageManager#getPackageArchiveInfo(String, int)} where
+     * {@link IPlatformCompat} cannot be used because the cross-package READ_COMPAT_CHANGE_CONFIG
+     * permission cannot be obtained.
+     */
+    public static ParseTypeImpl forParsingWithoutPlatformCompat() {
+        return new ParseTypeImpl((changeId, packageName, targetSdkVersion) -> {
+            int gateSdkVersion = DeferredError.getTargetSdkForChange(changeId);
+            if (gateSdkVersion == -1) {
+                return false;
+            }
+            return targetSdkVersion > gateSdkVersion;
+        });
+    }
+
+    /**
      * Assumes {@link Context#PLATFORM_COMPAT_SERVICE} is available to the caller. For use
      * with {@link android.content.pm.parsing.ApkLiteParseUtils} or similar where parsing is
      * done outside of {@link com.android.server.pm.PackageManagerService}.

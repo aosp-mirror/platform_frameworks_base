@@ -52,7 +52,6 @@ import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
@@ -570,6 +569,10 @@ public class AudioService extends IAudioService.Stub
     private int[] mAccessibilityServiceUids;
     private final Object mAccessibilityServiceUidsLock = new Object();
 
+    // Uid of the active input method service to check if caller is the one or not.
+    private int mInputMethodServiceUid = android.os.Process.INVALID_UID;
+    private final Object mInputMethodServiceUidLock = new Object();
+
     private int mEncodedSurroundMode;
     private String mEnabledSurroundFormats;
     private boolean mSurroundModeChanged;
@@ -1078,11 +1081,13 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
             updateAssistantUId(true);
-            updateCurrentImeUid(true);
             AudioSystem.setRttEnabled(mRttEnabled);
         }
         synchronized (mAccessibilityServiceUidsLock) {
             AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
+        }
+        synchronized (mInputMethodServiceUidLock) {
+            mAudioSystem.setCurrentImeUid(mInputMethodServiceUid);
         }
         synchronized (mHdmiClientLock) {
             if (mHdmiManager != null && mHdmiTvClient != null) {
@@ -1629,37 +1634,6 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
-    @GuardedBy("mSettingsLock")
-    private void updateCurrentImeUid(boolean forceUpdate) {
-        String imeId = Settings.Secure.getStringForUser(
-                mContentResolver,
-                Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.USER_CURRENT);
-        if (TextUtils.isEmpty(imeId)) {
-            Log.e(TAG, "updateCurrentImeUid() could not find current IME");
-            return;
-        }
-        ComponentName componentName = ComponentName.unflattenFromString(imeId);
-        if (componentName == null) {
-            Log.e(TAG, "updateCurrentImeUid() got invalid service name for "
-                    + Settings.Secure.DEFAULT_INPUT_METHOD + ": " + imeId);
-            return;
-        }
-        String packageName = componentName.getPackageName();
-        int currentUserId = LocalServices.getService(ActivityManagerInternal.class)
-                .getCurrentUserId();
-        int currentImeUid = LocalServices.getService(PackageManagerInternal.class)
-                .getPackageUidInternal(packageName, 0 /* flags */, currentUserId);
-        if (currentImeUid < 0) {
-            Log.e(TAG, "updateCurrentImeUid() could not find UID for package: " + packageName);
-            return;
-        }
-
-        if (currentImeUid != mCurrentImeUid || forceUpdate) {
-            mAudioSystem.setCurrentImeUid(currentImeUid);
-            mCurrentImeUid = currentImeUid;
-        }
-    }
-
     private void readPersistedSettings() {
         if (!mSystemServer.isPrivileged()) {
             return;
@@ -1707,7 +1681,6 @@ public class AudioService extends IAudioService.Stub
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
             updateAssistantUId(true);
-            updateCurrentImeUid(true);
             AudioSystem.setRttEnabled(mRttEnabled);
         }
 
@@ -3594,11 +3567,9 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void binderDied() {
-            int oldModeOwnerPid;
             int newModeOwnerPid = 0;
             synchronized (mDeviceBroker.mSetModeLock) {
                 Log.w(TAG, "setMode() client died");
-                oldModeOwnerPid = getModeOwnerPid();
                 int index = mSetModeDeathHandlers.indexOf(this);
                 if (index < 0) {
                     Log.w(TAG, "unregistered setMode() client died");
@@ -3608,9 +3579,7 @@ public class AudioService extends IAudioService.Stub
             }
             // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
             // SCO connections not started by the application changing the mode when pid changes
-            if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
-                mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
-            }
+            mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
         }
 
         public int getPid() {
@@ -3662,17 +3631,20 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        int oldModeOwnerPid;
         int newModeOwnerPid;
         synchronized (mDeviceBroker.mSetModeLock) {
             if (mode == AudioSystem.MODE_CURRENT) {
                 mode = mMode;
             }
-            oldModeOwnerPid = getModeOwnerPid();
+            int oldModeOwnerPid = getModeOwnerPid();
             // Do not allow changing mode if a call is active and the requester
-            // does not have permission to modify phone state or is not the mode owner.
-            if (((mMode == AudioSystem.MODE_IN_CALL)
-                    || (mMode == AudioSystem.MODE_IN_COMMUNICATION))
+            // does not have permission to modify phone state or is not the mode owner,
+            // unless returning to NORMAL mode (will not change current mode owner) or
+            // not changing mode in which case the mode owner will reflect the last
+            // requester of current mode
+            if (!((mode == mMode) || (mode == AudioSystem.MODE_NORMAL))
+                    && ((mMode == AudioSystem.MODE_IN_CALL)
+                        || (mMode == AudioSystem.MODE_IN_COMMUNICATION))
                     && !(hasModifyPhoneStatePermission || (oldModeOwnerPid == callingPid))) {
                 Log.w(TAG, "setMode(" + mode + ") from pid=" + callingPid
                         + ", uid=" + Binder.getCallingUid()
@@ -3685,9 +3657,7 @@ public class AudioService extends IAudioService.Stub
         }
         // when entering RINGTONE, IN_CALL or IN_COMMUNICATION mode, clear all
         // SCO connections not started by the application changing the mode when pid changes
-        if ((newModeOwnerPid != oldModeOwnerPid) && (newModeOwnerPid != 0)) {
-            mDeviceBroker.postDisconnectBluetoothSco(newModeOwnerPid);
-        }
+        mDeviceBroker.postSetModeOwnerPid(newModeOwnerPid);
     }
 
     // setModeInt() returns a valid PID if the audio mode was successfully set to
@@ -3964,23 +3934,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     /** @see AudioManager#setSpeakerphoneOn(boolean) */
-    public void setSpeakerphoneOn(boolean on){
+    public void setSpeakerphoneOn(IBinder cb, boolean on) {
         if (!checkAudioSettingsPermission("setSpeakerphoneOn()")) {
             return;
-        }
-
-        if (mContext.checkCallingOrSelfPermission(
-                android.Manifest.permission.MODIFY_PHONE_STATE)
-                != PackageManager.PERMISSION_GRANTED) {
-            synchronized (mSetModeDeathHandlers) {
-                for (SetModeDeathHandler h : mSetModeDeathHandlers) {
-                    if (h.getMode() == AudioSystem.MODE_IN_CALL) {
-                        Log.w(TAG, "getMode is call, Permission Denial: setSpeakerphoneOn from pid="
-                                + Binder.getCallingPid() + ", uid=" + Binder.getCallingUid());
-                        return;
-                    }
-                }
-            }
         }
 
         // for logging only
@@ -3989,7 +3945,7 @@ public class AudioService extends IAudioService.Stub
         final String eventSource = new StringBuilder("setSpeakerphoneOn(").append(on)
                 .append(") from u/pid:").append(uid).append("/")
                 .append(pid).toString();
-        final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(on, eventSource);
+        final boolean stateChanged = mDeviceBroker.setSpeakerphoneOn(cb, pid, on, eventSource);
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
                 + MediaMetrics.SEPARATOR + "setSpeakerphoneOn")
                 .setUid(uid)
@@ -6217,8 +6173,6 @@ public class AudioService extends IAudioService.Stub
 
             mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
                     Settings.Secure.VOICE_INTERACTION_SERVICE), false, this);
-            mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.DEFAULT_INPUT_METHOD), false, this);
         }
 
         @Override
@@ -6242,7 +6196,6 @@ public class AudioService extends IAudioService.Stub
                 updateEncodedSurroundOutput();
                 sendEnabledSurroundFormats(mContentResolver, mSurroundModeChanged);
                 updateAssistantUId(false);
-                updateCurrentImeUid(false);
             }
         }
 
@@ -7582,6 +7535,19 @@ public class AudioService extends IAudioService.Stub
                     }
                 }
                 AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public void setInputMethodServiceUid(int uid) {
+            synchronized (mInputMethodServiceUidLock) {
+                if (mInputMethodServiceUid != uid) {
+                    mAudioSystem.setCurrentImeUid(uid);
+                    mInputMethodServiceUid = uid;
+                }
             }
         }
     }

@@ -182,8 +182,8 @@ public:
     };
 
     void onStateChanged(const int64_t eventTimeNs, const int32_t atomId,
-                        const HashableDimensionKey& primaryKey, const int32_t oldState,
-                        const int32_t newState){};
+                        const HashableDimensionKey& primaryKey, const FieldValue& oldState,
+                        const FieldValue& newState){};
 
     // Output the metrics data to [protoOutput]. All metrics reports end with the same timestamp.
     // This method clears all the past buckets.
@@ -442,7 +442,7 @@ protected:
     bool mIsActive;
 
     // The slice_by_state atom ids defined in statsd_config.
-    std::vector<int32_t> mSlicedStateAtoms;
+    const std::vector<int32_t> mSlicedStateAtoms;
 
     // Maps atom ids and state values to group_ids (<atom_id, <value, group_id>>).
     const std::unordered_map<int32_t, std::unordered_map<int, int64_t>> mStateGroupMap;

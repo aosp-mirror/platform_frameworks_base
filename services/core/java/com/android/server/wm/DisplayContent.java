@@ -3317,7 +3317,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mInputMethodWindow.getDisplayId());
         }
         mInsetsStateController.getSourceProvider(ITYPE_IME).setWindow(win,
-                null /* frameProvider */, null /* imeFrameProvider */);
+                mDisplayPolicy.getImeSourceFrameProvider(), null /* imeFrameProvider */);
         computeImeTarget(true /* updateImeTarget */);
         updateImeControlTarget();
     }

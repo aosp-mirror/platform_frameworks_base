@@ -2221,7 +2221,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mBackgroundDrawable.setAlpha(0);
             float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
             ObjectAnimator alphaAnimator =
-                    ObjectAnimator.ofFloat(mContainer, "transitionAlpha", 0f, 1f);
+                    ObjectAnimator.ofFloat(mContainer, "alpha", 0f, 1f);
             alphaAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
             alphaAnimator.setDuration(183);
             alphaAnimator.addUpdateListener((animation) -> {
@@ -2234,8 +2234,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
             ObjectAnimator xAnimator =
                     ObjectAnimator.ofFloat(mContainer, "translationX", xOffset, 0f);
-            alphaAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
-            alphaAnimator.setDuration(350);
+            xAnimator.setInterpolator(Interpolators.LINEAR_OUT_SLOW_IN);
+            xAnimator.setDuration(350);
 
             AnimatorSet animatorSet = new AnimatorSet();
             animatorSet.playTogether(alphaAnimator, xAnimator);
@@ -2247,7 +2247,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             dismissWithAnimation(() -> {
                 mContainer.setTranslationX(0);
                 ObjectAnimator alphaAnimator =
-                        ObjectAnimator.ofFloat(mContainer, "transitionAlpha", 1f, 0f);
+                        ObjectAnimator.ofFloat(mContainer, "alpha", 1f, 0f);
                 alphaAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
                 alphaAnimator.setDuration(233);
                 alphaAnimator.addUpdateListener((animation) -> {
@@ -2261,8 +2261,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 float xOffset = mGlobalActionsLayout.getAnimationOffsetX();
                 ObjectAnimator xAnimator =
                         ObjectAnimator.ofFloat(mContainer, "translationX", 0f, xOffset);
-                alphaAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-                alphaAnimator.setDuration(350);
+                xAnimator.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
+                xAnimator.setDuration(350);
 
                 AnimatorSet animatorSet = new AnimatorSet();
                 animatorSet.playTogether(alphaAnimator, xAnimator);

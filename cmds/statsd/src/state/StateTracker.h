@@ -72,19 +72,19 @@ private:
     std::set<wp<StateListener>> mListeners;
 
     // Reset all state values in map to the given state.
-    void handleReset(const int64_t eventTimeNs, const int32_t newState);
+    void handleReset(const int64_t eventTimeNs, const FieldValue& newState);
 
     // Clears the state value mapped to the given primary key by setting it to kStateUnknown.
     void clearStateForPrimaryKey(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey);
 
     // Update the StateMap based on the received state value.
     void updateStateForPrimaryKey(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey,
-                                  const int32_t newState, const bool nested,
+                                  const FieldValue& newState, const bool nested,
                                   StateValueInfo* stateValueInfo);
 
     // Notify registered state listeners of state change.
     void notifyListeners(const int64_t eventTimeNs, const HashableDimensionKey& primaryKey,
-                         const int32_t oldState, const int32_t newState);
+                         const FieldValue& oldState, const FieldValue& newState);
 };
 
 bool getStateFieldValueFromLogEvent(const LogEvent& event, FieldValue* output);

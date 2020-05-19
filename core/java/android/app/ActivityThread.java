@@ -5902,6 +5902,12 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    /**
+     * Sets the supplied {@code overrideConfig} as pending for the {@code activityToken}. Calling
+     * this method prevents any calls to
+     * {@link #handleActivityConfigurationChanged(IBinder, Configuration, int, boolean)} from
+     * processing any configurations older than {@code overrideConfig}.
+     */
     @Override
     public void updatePendingActivityConfiguration(IBinder activityToken,
             Configuration overrideConfig) {
@@ -5918,13 +5924,22 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         synchronized (r) {
+            if (r.mPendingOverrideConfig != null
+                    && !r.mPendingOverrideConfig.isOtherSeqNewer(overrideConfig)) {
+                if (DEBUG_CONFIGURATION) {
+                    Slog.v(TAG, "Activity has newer configuration pending so drop this"
+                            + " transaction. overrideConfig=" + overrideConfig
+                            + " r.mPendingOverrideConfig=" + r.mPendingOverrideConfig);
+                }
+                return;
+            }
             r.mPendingOverrideConfig = overrideConfig;
         }
     }
 
     @Override
     public void handleActivityConfigurationChanged(IBinder activityToken,
-            Configuration overrideConfig, int displayId) {
+            @NonNull Configuration overrideConfig, int displayId) {
         handleActivityConfigurationChanged(activityToken, overrideConfig, displayId,
                 // This is the only place that uses alwaysReportChange=true. The entry point should
                 // be from ActivityConfigurationChangeItem or MoveToDisplayItem, so the server side
@@ -5935,15 +5950,18 @@ public final class ActivityThread extends ClientTransactionHandler {
     }
 
     /**
-     * Handle new activity configuration and/or move to a different display.
+     * Handle new activity configuration and/or move to a different display. This method is a noop
+     * if {@link #updatePendingActivityConfiguration(IBinder, Configuration)} has been called with
+     * a newer config than {@code overrideConfig}.
+     *
      * @param activityToken Target activity token.
      * @param overrideConfig Activity override config.
      * @param displayId Id of the display where activity was moved to, -1 if there was no move and
      *                  value didn't change.
      * @param alwaysReportChange If the configuration is changed, always report to activity.
      */
-    void handleActivityConfigurationChanged(IBinder activityToken, Configuration overrideConfig,
-            int displayId, boolean alwaysReportChange) {
+    void handleActivityConfigurationChanged(IBinder activityToken,
+            @NonNull Configuration overrideConfig, int displayId, boolean alwaysReportChange) {
         ActivityClientRecord r = mActivities.get(activityToken);
         // Check input params.
         if (r == null || r.activity == null) {
@@ -5954,9 +5972,13 @@ public final class ActivityThread extends ClientTransactionHandler {
                 && displayId != r.activity.getDisplayId();
 
         synchronized (r) {
-            if (r.mPendingOverrideConfig != null
-                    && !r.mPendingOverrideConfig.isOtherSeqNewer(overrideConfig)) {
-                overrideConfig = r.mPendingOverrideConfig;
+            if (overrideConfig.isOtherSeqNewer(r.mPendingOverrideConfig)) {
+                if (DEBUG_CONFIGURATION) {
+                    Slog.v(TAG, "Activity has newer configuration pending so drop this"
+                            + " transaction. overrideConfig=" + overrideConfig
+                            + " r.mPendingOverrideConfig=" + r.mPendingOverrideConfig);
+                }
+                return;
             }
             r.mPendingOverrideConfig = null;
         }

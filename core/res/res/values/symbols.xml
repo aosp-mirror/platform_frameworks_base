@@ -1200,7 +1200,7 @@
   <java-symbol type="string" name="location_changed_notification_title" />
   <java-symbol type="string" name="location_changed_notification_text" />
   <java-symbol type="string" name="personal_apps_suspension_title" />
-  <java-symbol type="string" name="personal_apps_suspension_tomorrow_text" />
+  <java-symbol type="string" name="personal_apps_suspension_soon_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
   <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
   <java-symbol type="string" name="notification_work_profile_content_description" />
@@ -3772,6 +3772,7 @@
   <java-symbol type="string" name="bluetooth_airplane_mode_toast" />
 
   <!-- For high refresh rate displays -->
+  <java-symbol type="integer" name="config_defaultRefreshRate" />
   <java-symbol type="integer" name="config_defaultPeakRefreshRate" />
   <java-symbol type="integer" name="config_defaultRefreshRateInZone" />
   <java-symbol type="array" name="config_brightnessThresholdsOfPeakRefreshRate" />

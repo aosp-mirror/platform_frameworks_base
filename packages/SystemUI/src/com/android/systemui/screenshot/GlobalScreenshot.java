@@ -56,6 +56,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
+import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MathUtils;
@@ -159,6 +160,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     static final String SCREENSHOT_URI_ID = "android:screenshot_uri_id";
     static final String EXTRA_CANCEL_NOTIFICATION = "android:screenshot_cancel_notification";
     static final String EXTRA_DISALLOW_ENTER_PIP = "android:screenshot_disallow_enter_pip";
+
+    // From WizardManagerHelper.java
+    private static final String SETTINGS_SECURE_USER_SETUP_COMPLETE = "user_setup_complete";
 
     private static final String TAG = "GlobalScreenshot";
 
@@ -460,6 +464,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             return;
         }
 
+        if (!isUserSetupComplete()) {
+            // User setup isn't complete, so we don't want to show any UI beyond a toast, as editing
+            // and sharing shouldn't be exposed to the user.
+            saveScreenshotAndToast(finisher);
+            return;
+        }
+
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
         mScreenBitmap.prepareToDraw();
@@ -546,6 +557,41 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     /**
+     * Save the bitmap but don't show the normal screenshot UI.. just a toast (or notification on
+     * failure).
+     */
+    private void saveScreenshotAndToast(Consumer<Uri> finisher) {
+        // Play the shutter sound to notify that we've taken a screenshot
+        mScreenshotHandler.post(() -> {
+            mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
+        });
+
+        saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
+            @Override
+            void onActionsReady(SavedImageData imageData) {
+                finisher.accept(imageData.uri);
+                if (imageData.uri == null) {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
+                    mNotificationsController.notifyScreenshotError(
+                            R.string.screenshot_failed_to_capture_text);
+                } else {
+                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
+
+                    mScreenshotHandler.post(() -> {
+                        Toast.makeText(mContext, R.string.screenshot_saved_title,
+                                Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }
+        });
+    }
+
+    private boolean isUserSetupComplete() {
+        return Settings.Secure.getInt(mContext.getContentResolver(),
+                SETTINGS_SECURE_USER_SETUP_COMPLETE, 0) == 1;
+    }
+
+    /**
      * Clears current screenshot
      */
     private void dismissScreenshot(String reason, boolean immediate) {
@@ -596,13 +642,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private void startAnimation(final Consumer<Uri> finisher, int w, int h,
             @Nullable Rect screenRect) {
         // If power save is on, show a toast so there is some visual indication that a
-        // screenshot
-        // has been taken.
-        PowerManager powerManager = (PowerManager) mContext.getSystemService(
-                Context.POWER_SERVICE);
+        // screenshot has been taken.
+        PowerManager powerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         if (powerManager.isPowerSaveMode()) {
-            Toast.makeText(mContext, R.string.screenshot_saved_title,
-                    Toast.LENGTH_SHORT).show();
+            Toast.makeText(mContext, R.string.screenshot_saved_title, Toast.LENGTH_SHORT).show();
         }
 
         mScreenshotAnimation = createScreenshotDropInAnimation(w, h, screenRect);
@@ -666,18 +709,23 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     private AnimatorSet createScreenshotDropInAnimation(int width, int height, Rect bounds) {
+        float screenWidth = mDisplayMetrics.widthPixels;
+        float screenHeight = mDisplayMetrics.heightPixels;
+
         int rotation = mContext.getDisplay().getRotation();
         float cornerScale;
         if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270) {
-            cornerScale = (mCornerSizeX / (float) height);
+            cornerScale = (mCornerSizeX /  screenHeight);
         } else {
-            cornerScale = (mCornerSizeX / (float) width);
+            cornerScale = (mCornerSizeX / screenWidth);
         }
+        float currentScale = width / screenWidth;
 
-        mScreenshotAnimatedView.setScaleX(1);
-        mScreenshotAnimatedView.setScaleY(1);
-        mScreenshotAnimatedView.setX(0);
-        mScreenshotAnimatedView.setY(0);
+        mScreenshotAnimatedView.setScaleX(currentScale);
+        mScreenshotAnimatedView.setScaleY(currentScale);
+
+        mScreenshotAnimatedView.setPivotX(0);
+        mScreenshotAnimatedView.setPivotY(0);
 
         mScreenshotAnimatedView.setImageBitmap(mScreenBitmap);
         mScreenshotPreview.setImageBitmap(mScreenBitmap);
@@ -698,12 +746,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         final PointF startPos = new PointF(bounds.centerX(), bounds.centerY());
         float finalX;
         if (mDirectionLTR) {
-            finalX = mScreenshotOffsetXPx + width * cornerScale / 2f;
+            finalX = mScreenshotOffsetXPx + screenWidth * cornerScale / 2f;
         } else {
-            finalX = width - mScreenshotOffsetXPx - width * cornerScale / 2f;
+            finalX = screenWidth - mScreenshotOffsetXPx - screenWidth * cornerScale / 2f;
         }
-        float finalY =
-                mDisplayMetrics.heightPixels - mScreenshotOffsetYPx - height * cornerScale / 2f;
+        float finalY = screenHeight - mScreenshotOffsetYPx - screenHeight * cornerScale / 2f;
         final PointF finalPos = new PointF(finalX, finalY);
 
         ValueAnimator toCorner = ValueAnimator.ofFloat(0, 1);
@@ -711,13 +758,12 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         float xPositionPct =
                 SCREENSHOT_TO_CORNER_X_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         float scalePct =
-                SCREENSHOT_TO_CORNER_SCALE_DURATION_MS
-                        / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
+                SCREENSHOT_TO_CORNER_SCALE_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         toCorner.addUpdateListener(animation -> {
             float t = animation.getAnimatedFraction();
             if (t < scalePct) {
                 float scale = MathUtils.lerp(
-                        1, cornerScale, mFastOutSlowIn.getInterpolation(t / scalePct));
+                        currentScale, cornerScale, mFastOutSlowIn.getInterpolation(t / scalePct));
                 mScreenshotAnimatedView.setScaleX(scale);
                 mScreenshotAnimatedView.setScaleY(scale);
             } else {
@@ -731,13 +777,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             if (t < xPositionPct) {
                 float xCenter = MathUtils.lerp(startPos.x, finalPos.x,
                         mFastOutSlowIn.getInterpolation(t / xPositionPct));
-                mScreenshotAnimatedView.setX(xCenter - width * currentScaleX / 2f);
+                mScreenshotAnimatedView.setX(xCenter - screenWidth * currentScaleX / 2f);
             } else {
-                mScreenshotAnimatedView.setX(finalPos.x - width * currentScaleX / 2f);
+                mScreenshotAnimatedView.setX(finalPos.x - screenWidth * currentScaleX / 2f);
             }
             float yCenter = MathUtils.lerp(startPos.y, finalPos.y,
                     mFastOutSlowIn.getInterpolation(t));
-            mScreenshotAnimatedView.setY(yCenter - height * currentScaleY / 2f);
+            mScreenshotAnimatedView.setY(yCenter - screenHeight * currentScaleY / 2f);
         });
 
         toCorner.addListener(new AnimatorListenerAdapter() {

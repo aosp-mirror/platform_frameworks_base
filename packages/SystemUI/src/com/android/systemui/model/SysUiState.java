@@ -39,7 +39,7 @@ import javax.inject.Singleton;
 public class SysUiState implements Dumpable {
 
     private static final String TAG = SysUiState.class.getSimpleName();
-    public static final boolean DEBUG = true;
+    public static final boolean DEBUG = false;
 
     private @QuickStepContract.SystemUiStateFlags int mFlags;
     private final List<SysUiStateCallback> mCallbacks = new ArrayList<>();

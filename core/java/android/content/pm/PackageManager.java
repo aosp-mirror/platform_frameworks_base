@@ -51,7 +51,9 @@ import android.content.pm.dex.ArtManager;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
 import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
+import android.content.pm.parsing.result.ParseInput;
 import android.content.pm.parsing.result.ParseResult;
+import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.graphics.Rect;
@@ -6061,7 +6063,8 @@ public abstract class PackageManager {
         boolean collectCertificates = (flags & PackageManager.GET_SIGNATURES) != 0
                 || (flags & PackageManager.GET_SIGNING_CERTIFICATES) != 0;
 
-        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefaultOneTime(
+        ParseInput input = ParseTypeImpl.forParsingWithoutPlatformCompat().reset();
+        ParseResult<ParsingPackage> result = ParsingPackageUtils.parseDefault(input,
                 new File(archiveFilePath), 0, collectCertificates);
         if (result.isError()) {
             return null;

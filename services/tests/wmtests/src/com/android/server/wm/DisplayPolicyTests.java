@@ -16,7 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.InsetsState.ITYPE_IME;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
+import static android.view.Surface.ROTATION_0;
 import static android.view.View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -56,7 +58,10 @@ import static org.mockito.Mockito.when;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.view.DisplayInfo;
+import android.view.InsetsSource;
 import android.view.InsetsState;
+import android.view.WindowInsets.Side;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
@@ -351,5 +356,37 @@ public class DisplayPolicyTests extends WindowTestsBase {
         mNotificationShadeWindow.mAttrs.privateFlags |= PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION;
         insetsPolicy.updateBarControlTarget(mAppWindow);
         assertNull(displayPolicy.mInputConsumer);
+    }
+
+    @Test
+    public void testImeMinimalSourceFrame() {
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.logicalWidth = 1000;
+        displayInfo.logicalHeight = 2000;
+        displayInfo.rotation = ROTATION_0;
+        mDisplayContent.mDisplayFrames = new DisplayFrames(mDisplayContent.getDisplayId(),
+                displayInfo, null /* displayCutout */);
+
+        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
+        mNavBarWindow.getControllableInsetProvider().setServerVisible(true);
+
+        mDisplayContent.setInputMethodWindowLocked(mImeWindow);
+        mImeWindow.mAttrs.setFitInsetsSides(Side.all() & ~Side.BOTTOM);
+        mImeWindow.getGivenContentInsetsLw().set(0, displayInfo.logicalHeight, 0, 0);
+        mImeWindow.getControllableInsetProvider().setServerVisible(true);
+
+        displayPolicy.beginLayoutLw(mDisplayContent.mDisplayFrames, 0 /* UI mode */);
+        displayPolicy.layoutWindowLw(mImeWindow, null, mDisplayContent.mDisplayFrames);
+
+        final InsetsState state = mDisplayContent.getInsetsStateController().getRawInsetsState();
+        final InsetsSource imeSource = state.peekSource(ITYPE_IME);
+        final InsetsSource navBarSource = state.peekSource(ITYPE_NAVIGATION_BAR);
+
+        assertNotNull(imeSource);
+        assertNotNull(navBarSource);
+        assertFalse(imeSource.getFrame().isEmpty());
+        assertFalse(navBarSource.getFrame().isEmpty());
+        assertTrue(imeSource.getFrame().contains(navBarSource.getFrame()));
     }
 }

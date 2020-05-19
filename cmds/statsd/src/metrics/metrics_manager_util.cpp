@@ -791,10 +791,19 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         }
         noReportMetricIds.insert(no_report_metric);
     }
+
+    const set<int> whitelistedAtomIds(config.whitelisted_atom_ids().begin(),
+                                      config.whitelisted_atom_ids().end());
     for (const auto& it : allMetricProducers) {
         // Register metrics to StateTrackers
         for (int atomId : it->getSlicedStateAtoms()) {
-            StateManager::getInstance().registerListener(atomId, it);
+            // Register listener for non-whitelisted atoms only. Using whitelisted atom as a sliced
+            // state atom is not allowed.
+            if (whitelistedAtomIds.find(atomId) == whitelistedAtomIds.end()) {
+                StateManager::getInstance().registerListener(atomId, it);
+            } else {
+                return false;
+            }
         }
     }
     return true;

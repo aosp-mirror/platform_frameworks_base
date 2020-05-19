@@ -44,6 +44,7 @@
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
@@ -59,7 +60,6 @@
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -4165,9 +4165,21 @@
      and a second time clipped to the fill level to indicate charge -->
     <bool name="config_batterymeterDualTone">false</bool>
 
-    <!-- The default peak refresh rate for a given device. Change this value if you want to allow
-         for higher refresh rates to be automatically used out of the box -->
-    <integer name="config_defaultPeakRefreshRate">60</integer>
+    <!-- The default refresh rate for a given device. Change this value to set a higher default
+         refresh rate. If the hardware composer on the device supports display modes with a higher
+         refresh rate than the default value specified here, the framework may use those higher
+         refresh rate modes if an app chooses one by setting preferredDisplayModeId or calling
+         setFrameRate().
+         If a non-zero value is set for config_defaultPeakRefreshRate, then
+         config_defaultRefreshRate may be set to 0, in which case the value set for
+         config_defaultPeakRefreshRate will act as the default frame rate. -->
+    <integer name="config_defaultRefreshRate">60</integer>
+
+    <!-- The default peak refresh rate for a given device. Change this value if you want to prevent
+         the framework from using higher refresh rates, even if display modes with higher refresh
+         rates are available from hardware composer. Only has an effect if the value is
+         non-zero. -->
+    <integer name="config_defaultPeakRefreshRate">0</integer>
 
     <!-- The display uses different gamma curves for different refresh rates. It's hard for panel
          vendor to tune the curves to have exact same brightness for different refresh rate. So

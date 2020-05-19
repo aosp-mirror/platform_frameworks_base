@@ -19,6 +19,7 @@ package android.app.servertransaction;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.annotation.NonNull;
 import android.app.ClientTransactionHandler;
 import android.content.res.Configuration;
 import android.os.IBinder;
@@ -37,6 +38,8 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
 
     @Override
     public void preExecute(android.app.ClientTransactionHandler client, IBinder token) {
+        // Notify the client of an upcoming change in the token configuration. This ensures that
+        // batches of config change items only process the newest configuration.
         client.updatePendingActivityConfiguration(token, mConfiguration);
     }
 
@@ -55,7 +58,11 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
     private ActivityConfigurationChangeItem() {}
 
     /** Obtain an instance initialized with provided params. */
-    public static ActivityConfigurationChangeItem obtain(Configuration config) {
+    public static ActivityConfigurationChangeItem obtain(@NonNull Configuration config) {
+        if (config == null) {
+            throw new IllegalArgumentException("Config must not be null.");
+        }
+
         ActivityConfigurationChangeItem instance =
                 ObjectPool.obtain(ActivityConfigurationChangeItem.class);
         if (instance == null) {
@@ -68,7 +75,7 @@ public class ActivityConfigurationChangeItem extends ClientTransactionItem {
 
     @Override
     public void recycle() {
-        mConfiguration = null;
+        mConfiguration = Configuration.EMPTY;
         ObjectPool.recycle(this);
     }
 
