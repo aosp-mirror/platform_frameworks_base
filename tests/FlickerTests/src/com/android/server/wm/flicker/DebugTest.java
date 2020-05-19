@@ -16,6 +16,7 @@
 
 package com.android.server.wm.flicker;
 
+import android.app.Instrumentation;
 import android.platform.helpers.IAppHelper;
 import android.util.Rational;
 import android.view.Surface;
@@ -114,8 +115,9 @@ public class DebugTest {
      */
     @Test
     public void resizeSplitScreen() {
-        ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        CommonTransitions.resizeSplitScreen(testApp, bottomApp, uiDevice, Surface.ROTATION_0,
+        Instrumentation instr = InstrumentationRegistry.getInstrumentation();
+        ImeAppHelper bottomApp = new ImeAppHelper(instr);
+        CommonTransitions.resizeSplitScreen(instr, testApp, bottomApp, uiDevice, Surface.ROTATION_0,
                 new Rational(1, 3), new Rational(2, 3))
                 .includeJankyRuns().build().run();
     }
