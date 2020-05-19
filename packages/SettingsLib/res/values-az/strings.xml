@@ -155,7 +155,7 @@
     <string name="launch_defaults_some" msgid="3631650616557252926">"Bəzi susmaya görələr təyin edilib"</string>
     <string name="launch_defaults_none" msgid="8049374306261262709">"Susmaya görələr təyin edilməyib."</string>
     <string name="tts_settings" msgid="8130616705989351312">"Mətndən-danışığa parametrləri"</string>
-    <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə çıxışı"</string>
+    <string name="tts_settings_title" msgid="7602210956640483039">"Mətndən-nitqə daxiletmə"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nitq diapazonu"</string>
     <string name="tts_default_rate_summary" msgid="3781937042151716987">"Mətnin səsləndirilmə sürəti"</string>
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"Pitç"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiv"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiv"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Bu dəyişikliyin tətbiq edilməsi üçün cihaz yenidən başladılmalıdır. İndi yenidən başladın və ya ləğv edin."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"İş <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

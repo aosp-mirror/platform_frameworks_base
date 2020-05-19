@@ -549,14 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"അതിഥിയെ ചേർക്കുക"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"അതിഥിയെ നീക്കം ചെയ്യുക"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"അതിഥി"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ഉപകരണത്തിന്റെ ഡിഫോൾട്ട് പ്രവർത്തനം"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"പ്രവർത്തനരഹിതമാക്കി"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ഈ മാറ്റം ബാധകമാകുന്നതിന് നിങ്ങളുടെ ഉപകരണം റീബൂട്ട് ചെയ്യേണ്ടതുണ്ട്. ഇപ്പോൾ റീബൂട്ട് ചെയ്യുകയോ റദ്ദാക്കുകയോ ചെയ്യുക."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"ഔദ്യോഗികം <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

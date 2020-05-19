@@ -168,7 +168,7 @@
     <string name="tts_play_example_summary" msgid="634044730710636383">"Atskaņot īsu runas sintēzes demonstrāciju"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalēt balss datus"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalēt runas sintēzei nepieciešamos balss datus"</string>
-    <string name="tts_engine_security_warning" msgid="3372432853837988146">"Lietojot šo runas sintēzes programmu, var tikt apkopots viss ierunātais teksts, tostarp tāda personīgā informācija kā paroles un kredītkaršu numuri. Tā ir no <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> programmas. Vai iespējot šīs runas sintēzes programmas lietošanu?"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"Lietojot šo runas sintēzes programmu, var tikt vākts viss ierunātais teksts, tostarp tāda personīgā informācija kā paroles un kredītkaršu numuri. Tā ir no <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> programmas. Vai iespējot šīs runas sintēzes programmas lietošanu?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Lai izmantotu teksta pārveidošanu runā šajā valodā, ir nepieciešams aktīvs tīkla savienojums."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Šis ir runas sintēzes piemērs."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Noklusējuma valodas statuss"</string>
@@ -554,6 +554,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Atspējots"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Iespējots"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Lai šīs izmaiņas tiktu piemērotas, nepieciešama ierīces atkārtota palaišana. Atkārtoti palaidiet to tūlīt vai atceliet izmaiņas."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Darbā: <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Выбраць профіль"</string>
     <string name="category_personal" msgid="6236798763159385225">"Асабісты"</string>
-    <string name="category_work" msgid="4014193632325996115">"Рабочы"</string>
+    <string name="category_work" msgid="4014193632325996115">"Працоўны"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Параметры распрацоўшчыка"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Уключыць параметры распрацоўшчыка"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Налада параметраў для распрацоўкі прыкладанняў"</string>
@@ -555,6 +555,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Выключана"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Уключана"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Перазагрузіце прыладу, каб прымяніць гэта змяненне. Перазагрузіце ці скасуйце."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (праца)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

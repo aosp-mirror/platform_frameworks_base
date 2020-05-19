@@ -433,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Bør holde indtil ca. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Indtil <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Enheden løber muligvis tør for batteri inden <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batteriet aflades muligvis inden <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Der er mindre end <xliff:g id="THRESHOLD">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Der er mere end <xliff:g id="TIME_REMAINING">%1$s</xliff:g> tilbage (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiveret"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiveret"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Din enhed skal genstartes for at denne enhed bliver anvendt. Genstart nu, eller annuller."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> – arbejde"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

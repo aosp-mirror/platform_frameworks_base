@@ -433,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"تقریباً <xliff:g id="TIME">%1$s</xliff:g> تک بیٹری چلے گی"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> تک"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> تک بیٹری ختم ہو سکتی ہے"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"‫<xliff:g id="TIME">%1$s</xliff:g> تک بیٹری ختم ہو سکتی ہے"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> سے کم باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> سے زیادہ باقی ہے (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -549,14 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"مہمان کو شامل کریں"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"مہمان کو ہٹائیں"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"مہمان"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"آلہ ڈیفالٹ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غیر فعال"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"فعال"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"اس تبدیلی کو لاگو کرنے کے ليے آپ کے آلہ کو ریبوٹ کرنا ضروری ہے۔ ابھی ریبوٹ کریں یا منسوخ کریں۔"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"دفتر <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

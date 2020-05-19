@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Stredná"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rýchla"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Veľmi rýchla"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Platnosť vypršala"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Vypršalo"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Odpojený"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Výber profilu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobné"</string>
-    <string name="category_work" msgid="4014193632325996115">"Práca"</string>
+    <string name="category_work" msgid="4014193632325996115">"Pracovné"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Pre vývojárov"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Povolenie možností vývojára"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Možnosti nastavenia vývoja aplikácií"</string>
@@ -508,7 +508,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"o <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trvanie"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vždy sa opýtať"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Dokiaľ túto funkciu nevypnete"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Dokým funkciu nevypnete"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Teraz"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Reproduktor telefónu"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Pri pripájaní sa vyskytol problém. Zariadenie vypnite a znova zapnite."</string>
@@ -555,6 +555,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Vypnuté"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Zapnuté"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Táto zmena sa uplatní až po reštartovaní zariadenia. Zariadenie reštartujte alebo zmenu zrušte."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Pracovná aplikácia <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>
