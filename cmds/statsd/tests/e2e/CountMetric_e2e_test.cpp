@@ -28,6 +28,92 @@ namespace statsd {
 #ifdef __ANDROID__
 
 /**
+ * Tests the initial condition and condition after the first log events for
+ * count metrics with either a combination condition or simple condition.
+ *
+ * Metrics should be initialized with condition kUnknown (given that the
+ * predicate is using the default InitialValue of UNKNOWN). The condition should
+ * be updated to either kFalse or kTrue if a condition event is logged for all
+ * children conditions.
+ */
+TEST(CountMetricE2eTest, TestInitialConditionChanges) {
+    // Initialize config.
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");     // LogEvent defaults to UID of root.
+    config.add_default_pull_packages("AID_ROOT");  // Fake puller is registered with root.
+
+    auto syncStartMatcher = CreateSyncStartAtomMatcher();
+    *config.add_atom_matcher() = syncStartMatcher;
+    *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = CreateBatteryStateNoneMatcher();
+    *config.add_atom_matcher() = CreateBatteryStateUsbMatcher();
+
+    auto screenOnPredicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = screenOnPredicate;
+
+    auto deviceUnpluggedPredicate = CreateDeviceUnpluggedPredicate();
+    *config.add_predicate() = deviceUnpluggedPredicate;
+
+    auto screenOnOnBatteryPredicate = config.add_predicate();
+    screenOnOnBatteryPredicate->set_id(StringToId("screenOnOnBatteryPredicate"));
+    screenOnOnBatteryPredicate->mutable_combination()->set_operation(LogicalOperation::AND);
+    addPredicateToPredicateCombination(screenOnPredicate, screenOnOnBatteryPredicate);
+    addPredicateToPredicateCombination(deviceUnpluggedPredicate, screenOnOnBatteryPredicate);
+
+    // CountSyncStartWhileScreenOnOnBattery (CombinationCondition)
+    CountMetric* countMetric1 = config.add_count_metric();
+    countMetric1->set_id(StringToId("CountSyncStartWhileScreenOnOnBattery"));
+    countMetric1->set_what(syncStartMatcher.id());
+    countMetric1->set_condition(screenOnOnBatteryPredicate->id());
+    countMetric1->set_bucket(FIVE_MINUTES);
+
+    // CountSyncStartWhileOnBattery (SimpleCondition)
+    CountMetric* countMetric2 = config.add_count_metric();
+    countMetric2->set_id(StringToId("CountSyncStartWhileOnBatterySliceScreen"));
+    countMetric2->set_what(syncStartMatcher.id());
+    countMetric2->set_condition(deviceUnpluggedPredicate.id());
+    countMetric2->set_bucket(FIVE_MINUTES);
+
+    const uint64_t bucketStartTimeNs = 10000000000;  // 0:10
+    const uint64_t bucketSizeNs =
+            TimeUnitToBucketSizeInMillis(config.count_metric(0).bucket()) * 1000000LL;
+    int uid = 12345;
+    int64_t cfgId = 98765;
+    ConfigKey cfgKey(uid, cfgId);
+    auto processor = CreateStatsLogProcessor(bucketStartTimeNs, bucketStartTimeNs, config, cfgKey);
+
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(2, metricsManager->mAllMetricProducers.size());
+
+    sp<MetricProducer> metricProducer1 = metricsManager->mAllMetricProducers[0];
+    sp<MetricProducer> metricProducer2 = metricsManager->mAllMetricProducers[1];
+
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer2->mCondition);
+
+    auto screenOnEvent =
+            CreateScreenStateChangedEvent(bucketStartTimeNs + 30, android::view::DISPLAY_STATE_ON);
+    processor->OnLogEvent(screenOnEvent.get());
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer2->mCondition);
+
+    auto pluggedUsbEvent = CreateBatteryStateChangedEvent(
+            bucketStartTimeNs + 50, BatteryPluggedStateEnum::BATTERY_PLUGGED_USB);
+    processor->OnLogEvent(pluggedUsbEvent.get());
+    EXPECT_EQ(ConditionState::kFalse, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kFalse, metricProducer2->mCondition);
+
+    auto pluggedNoneEvent = CreateBatteryStateChangedEvent(
+            bucketStartTimeNs + 70, BatteryPluggedStateEnum::BATTERY_PLUGGED_NONE);
+    processor->OnLogEvent(pluggedNoneEvent.get());
+    EXPECT_EQ(ConditionState::kTrue, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kTrue, metricProducer2->mCondition);
+}
+
+/**
 * Test a count metric that has one slice_by_state with no primary fields.
 *
 * Once the CountMetricProducer is initialized, it has one atom id in
@@ -85,7 +171,7 @@ TEST(CountMetricE2eTest, TestSlicedState) {
             x                x         x    x        x      x       (syncStartEvents)
           |                                       |                 (ScreenIsOnEvent)
                    |     |                                          (ScreenIsOffEvent)
-                                                        |           (ScreenUnknownEvent)
+                                                        |           (ScreenDozeEvent)
     */
     // Initialize log events - first bucket.
     std::vector<int> attributionUids1 = {123};
@@ -243,9 +329,8 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
     |-----------------------------|-----------------------------|--
       x   x     x       x    x   x      x         x         x       (syncStartEvents)
      -----------------------------------------------------------SCREEN_OFF events
-       |                                                            (ScreenStateUnknownEvent = 0)
              |                  |                                   (ScreenStateOffEvent = 1)
-                          |                                         (ScreenStateDozeEvent = 3)
+       |                  |                                         (ScreenStateDozeEvent = 3)
                                                 |                   (ScreenStateDozeSuspendEvent =
     4)
      -----------------------------------------------------------SCREEN_ON events
@@ -262,7 +347,7 @@ TEST(CountMetricE2eTest, TestSlicedStateWithMap) {
                                           attributionTags1, "sync_name"));  // 0:30
     events.push_back(CreateScreenStateChangedEvent(
             bucketStartTimeNs + 30 * NS_PER_SEC,
-            android::view::DisplayStateEnum::DISPLAY_STATE_UNKNOWN));  // 0:40
+            android::view::DisplayStateEnum::DISPLAY_STATE_DOZE));  // 0:40
     events.push_back(CreateSyncStartEvent(bucketStartTimeNs + 60 * NS_PER_SEC, attributionUids1,
                                           attributionTags1, "sync_name"));  // 1:10
     events.push_back(CreateScreenStateChangedEvent(
@@ -625,9 +710,8 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
       |------------------------|------------------------|--
         1  1    1     1    1  2     1        1         2   (AppCrashEvents)
        ---------------------------------------------------SCREEN_OFF events
-         |                                                 (ScreenUnknownEvent = 0)
              |                              |              (ScreenOffEvent = 1)
-                        |                                  (ScreenDozeEvent = 3)
+         |              |                                  (ScreenDozeEvent = 3)
        ---------------------------------------------------SCREEN_ON events
                    |                              |        (ScreenOnEvent = 2)
                                         |                  (ScreenOnSuspendEvent = 6)
@@ -660,7 +744,7 @@ TEST(CountMetricE2eTest, TestMultipleSlicedStates) {
             CreateAppCrashOccurredEvent(bucketStartTimeNs + 20 * NS_PER_SEC, 1 /*uid*/));  // 0:30
     events.push_back(CreateScreenStateChangedEvent(
             bucketStartTimeNs + 30 * NS_PER_SEC,
-            android::view::DisplayStateEnum::DISPLAY_STATE_UNKNOWN));  // 0:40
+            android::view::DisplayStateEnum::DISPLAY_STATE_DOZE));  // 0:40
     events.push_back(
             CreateAppCrashOccurredEvent(bucketStartTimeNs + 60 * NS_PER_SEC, 1 /*uid*/));  // 1:10
     events.push_back(CreateUidProcessStateChangedEvent(
