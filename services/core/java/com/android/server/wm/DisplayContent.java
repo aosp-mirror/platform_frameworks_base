@@ -499,8 +499,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     ActivityRecord mFixedRotationLaunchingApp;
 
-    FixedRotationAnimationController mFixedRotationAnimationController;
-
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
 
@@ -1530,11 +1528,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void startFixedRotationTransform(WindowToken token, int rotation) {
-        if (mFixedRotationAnimationController == null) {
-            mFixedRotationAnimationController = new FixedRotationAnimationController(
-                    this);
-        }
-        mFixedRotationAnimationController.hide(rotation);
         mTmpConfiguration.unset();
         final DisplayInfo info = computeScreenConfiguration(mTmpConfiguration, rotation);
         final WmDisplayCutout cutout = calculateDisplayCutoutForRotation(rotation);
@@ -1553,13 +1546,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         int rotation = rotationForActivityInDifferentOrientation(activityRecord);
         if (rotation != NO_ROTATION) {
             startFixedRotationTransform(activityRecord, rotation);
-        }
-    }
-
-    void finishFixedRotationAnimation() {
-        if (mFixedRotationAnimationController != null
-                && mFixedRotationAnimationController.show()) {
-            mFixedRotationAnimationController = null;
         }
     }
 
