@@ -300,22 +300,6 @@
                   android:excludeFromRecents="true"
                   android:exported="false" />
 
-        <!--
-        The following is used as a no-op/null home activity when
-        no other MAIN/HOME activity is present (e.g., in CSI).
-        -->
-        <activity android:name=".NullHome"
-                  android:excludeFromRecents="true"
-                  android:label=""
-                  android:screenOrientation="nosensor">
-            <!-- The priority here is set to be lower than that for Settings -->
-            <intent-filter android:priority="-1100">
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
         <receiver
             android:name=".BugreportReceiver"
             android:permission="android.permission.DUMP">
