@@ -53,7 +53,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     private final Lazy<GlobalActionsDialog> mGlobalActionsDialogLazy;
     private final KeyguardStateController mKeyguardStateController;
     private final DeviceProvisionedController mDeviceProvisionedController;
-    private final ExtensionController.Extension<GlobalActionsPanelPlugin> mPanelExtension;
+    private final ExtensionController.Extension<GlobalActionsPanelPlugin> mWalletPluginProvider;
     private final BlurUtils mBlurUtils;
     private final CommandQueue mCommandQueue;
     private GlobalActionsDialog mGlobalActionsDialog;
@@ -69,7 +69,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mCommandQueue = commandQueue;
         mBlurUtils = blurUtils;
         mCommandQueue.addCallback(this);
-        mPanelExtension = Dependency.get(ExtensionController.class)
+        mWalletPluginProvider = Dependency.get(ExtensionController.class)
                 .newExtension(GlobalActionsPanelPlugin.class)
                 .withPlugin(GlobalActionsPanelPlugin.class)
                 .build();
@@ -90,7 +90,7 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
         mGlobalActionsDialog = mGlobalActionsDialogLazy.get();
         mGlobalActionsDialog.showOrHideDialog(mKeyguardStateController.isShowing(),
                 mDeviceProvisionedController.isDeviceProvisioned(),
-                mPanelExtension.get());
+                mWalletPluginProvider.get());
         Dependency.get(KeyguardUpdateMonitor.class).requestFaceAuth();
     }
 
