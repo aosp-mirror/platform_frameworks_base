@@ -3319,7 +3319,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void resizeTask(int taskId, Rect bounds, int resizeMode) {
+    public boolean resizeTask(int taskId, Rect bounds, int resizeMode) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "resizeTask()");
         long ident = Binder.clearCallingIdentity();
         try {
@@ -3328,10 +3328,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
-                    return;
+                    return false;
                 }
                 if (!task.getWindowConfiguration().canResizeTask()) {
-                    throw new IllegalArgumentException("resizeTask not allowed on task=" + task);
+                    Slog.w(TAG, "resizeTask not allowed on task=" + task);
+                    return false;
                 }
 
                 // Reparent the task to the right stack if necessary
@@ -3339,7 +3340,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // After reparenting (which only resizes the task to the stack bounds), resize the
                 // task to the actual bounds provided
-                task.resize(bounds, resizeMode, preserveWindow);
+                return task.resize(bounds, resizeMode, preserveWindow);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
