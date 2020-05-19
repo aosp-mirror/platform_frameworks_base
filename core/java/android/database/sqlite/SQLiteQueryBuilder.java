@@ -626,7 +626,7 @@ public class SQLiteQueryBuilder {
                 Log.d(TAG, sql);
             }
         }
-        return db.executeSql(sql, sqlArgs);
+        return DatabaseUtils.executeInsert(db, sql, sqlArgs);
     }
 
     /**
@@ -702,7 +702,7 @@ public class SQLiteQueryBuilder {
                 Log.d(TAG, sql);
             }
         }
-        return db.executeSql(sql, sqlArgs);
+        return DatabaseUtils.executeUpdateDelete(db, sql, sqlArgs);
     }
 
     /**
@@ -762,7 +762,7 @@ public class SQLiteQueryBuilder {
                 Log.d(TAG, sql);
             }
         }
-        return db.executeSql(sql, sqlArgs);
+        return DatabaseUtils.executeUpdateDelete(db, sql, sqlArgs);
     }
 
     private void enforceStrictColumns(@Nullable String[] projection) {
