@@ -110,6 +110,7 @@ public class DozeSensors {
         mProxCallback = proxCallback;
         mResolver = mContext.getContentResolver();
         mCallback = callback;
+        mProximitySensor = proximitySensor;
 
         boolean alwaysOn = mConfig.alwaysOnEnabled(UserHandle.USER_CURRENT);
         mSensors = new TriggerSensor[] {
@@ -172,7 +173,6 @@ public class DozeSensors {
                         dozeLog),
         };
 
-        mProximitySensor = proximitySensor;
         setProxListening(false);  // Don't immediately start listening when we register.
         mProximitySensor.register(
                 proximityEvent -> {
