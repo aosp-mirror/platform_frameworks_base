@@ -1001,7 +1001,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         updateTheme();
 
         inflateStatusBarWindow();
-        mNotificationShadeWindowViewController.setService(this);
+        mNotificationShadeWindowViewController.setService(this, mNotificationShadeWindowController);
         mNotificationShadeWindowView.setOnTouchListener(getStatusBarWindowTouchListener());
 
         // TODO: Deal with the ugliness that comes from having some of the statusbar broken out

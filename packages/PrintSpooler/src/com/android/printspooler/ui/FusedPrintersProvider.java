@@ -231,11 +231,6 @@ public final class FusedPrintersProvider extends Loader<List<PrinterInfo>>
         // Add the new printers, i.e. what is left.
         printers.addAll(discoveredPrinters.values());
 
-        // Do nothing if the printer list is not changed.
-        if (Objects.equals(mPrinters, printers)) {
-            return;
-        }
-
         // Update the list of printers.
         mPrinters.clear();
         mPrinters.addAll(printers);

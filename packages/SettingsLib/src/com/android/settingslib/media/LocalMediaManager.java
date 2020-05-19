@@ -381,6 +381,15 @@ public class LocalMediaManager implements BluetoothCallback {
         return mInfoMediaManager.getActiveMediaSession();
     }
 
+    /**
+     * Gets the current package name.
+     *
+     * @return current package name
+     */
+    public String getPackageName() {
+        return mPackageName;
+    }
+
     private MediaDevice updateCurrentConnectedDevice() {
         synchronized (mMediaDevicesLock) {
             for (MediaDevice device : mMediaDevices) {

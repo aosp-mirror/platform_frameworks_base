@@ -97,6 +97,8 @@ private const val BUCKET_SIZE = 1000
 private const val THERMOSTAT_RANGE = DeviceTypes.TYPE_THERMOSTAT * BUCKET_SIZE
 
 private val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
+    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_OFF) to
+        Pair(R.color.control_default_foreground, R.color.control_default_background),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT) to
         Pair(R.color.thermo_heat_foreground, R.color.control_enabled_thermo_heat_background),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_COOL) to
@@ -108,13 +110,9 @@ private val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
 }
 
 private val deviceIconMap = mapOf<Int, IconState>(
-    THERMOSTAT_RANGE to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_OFF) to IconState(
         R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
+        R.drawable.ic_device_thermostat_off
     ),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT) to IconState(
         R.drawable.ic_device_thermostat_off,
@@ -130,7 +128,7 @@ private val deviceIconMap = mapOf<Int, IconState>(
     ),
     (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_ECO) to IconState(
         R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
+        R.drawable.ic_device_thermostat_off
     ),
     DeviceTypes.TYPE_THERMOSTAT to IconState(
         R.drawable.ic_device_thermostat_off,

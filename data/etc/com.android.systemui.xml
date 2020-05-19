@@ -16,6 +16,7 @@
   -->
 <permissions>
     <privapp-permissions package="com.android.systemui">
+        <permission name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
         <permission name="android.permission.BATTERY_STATS"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>

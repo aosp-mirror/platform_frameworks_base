@@ -39,7 +39,7 @@ class TemperatureControlBehavior : Behavior {
     override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
 
-        cvh.status.setText(control.getStatusText())
+        cvh.setStatusText(control.getStatusText())
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)

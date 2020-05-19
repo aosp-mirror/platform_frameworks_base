@@ -28,12 +28,14 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserManagerInternal;
 import android.util.ArraySet;
 import android.util.AtomicFile;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.LocalServices;
 import com.android.server.wm.nano.WindowManagerProtos.TaskSnapshotProto;
 
 import java.io.File;
@@ -72,6 +74,7 @@ class TaskSnapshotPersister {
     private final float mLowResScaleFactor;
     private boolean mEnableLowResSnapshots;
     private final boolean mUse16BitFormat;
+    private final UserManagerInternal mUserManagerInternal;
 
     /**
      * The list of ids of the tasks that have been persisted since {@link #removeObsoleteFiles} was
@@ -82,6 +85,8 @@ class TaskSnapshotPersister {
 
     TaskSnapshotPersister(WindowManagerService service, DirectoryResolver resolver) {
         mDirectoryResolver = resolver;
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
+
         final float highResTaskSnapshotScale = service.mContext.getResources().getFloat(
                 com.android.internal.R.dimen.config_highResTaskSnapshotScale);
         final float lowResTaskSnapshotScale = service.mContext.getResources().getFloat(
@@ -191,7 +196,7 @@ class TaskSnapshotPersister {
                     return;
                 }
             }
-            SystemClock.sleep(100);
+            SystemClock.sleep(DELAY_MS);
         }
     }
 
@@ -233,7 +238,7 @@ class TaskSnapshotPersister {
 
     private boolean createDirectory(int userId) {
         final File dir = getDirectory(userId);
-        return dir.exists() || dir.mkdirs();
+        return dir.exists() || dir.mkdir();
     }
 
     private void deleteSnapshot(int taskId, int userId) {
@@ -258,18 +263,26 @@ class TaskSnapshotPersister {
             android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);
             while (true) {
                 WriteQueueItem next;
+                boolean isReadyToWrite = false;
                 synchronized (mLock) {
                     if (mPaused) {
                         next = null;
                     } else {
                         next = mWriteQueue.poll();
                         if (next != null) {
-                            next.onDequeuedLocked();
+                            if (next.isReady()) {
+                                isReadyToWrite = true;
+                                next.onDequeuedLocked();
+                            } else {
+                                mWriteQueue.addLast(next);
+                            }
                         }
                     }
                 }
                 if (next != null) {
-                    next.write();
+                    if (isReadyToWrite) {
+                        next.write();
+                    }
                     SystemClock.sleep(DELAY_MS);
                 }
                 synchronized (mLock) {
@@ -289,6 +302,13 @@ class TaskSnapshotPersister {
     };
 
     private abstract class WriteQueueItem {
+        /**
+         * @return {@code true} if item is ready to have {@link WriteQueueItem#write} called
+         */
+        boolean isReady() {
+            return true;
+        }
+
         abstract void write();
 
         /**
@@ -325,6 +345,11 @@ class TaskSnapshotPersister {
         @Override
         void onDequeuedLocked() {
             mStoreQueueItems.remove(this);
+        }
+
+        @Override
+        boolean isReady() {
+            return mUserManagerInternal.isUserUnlocked(mUserId);
         }
 
         @Override

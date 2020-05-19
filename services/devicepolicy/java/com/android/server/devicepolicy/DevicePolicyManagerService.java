@@ -247,6 +247,7 @@ import android.stats.devicepolicy.DevicePolicyEnums;
 import android.telephony.TelephonyManager;
 import android.telephony.data.ApnSetting;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AtomicFile;
@@ -11965,10 +11966,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void showLocationSettingsChangedNotification(UserHandle user) {
+        Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        // Fill the component explicitly to prevent the PendingIntent from being intercepted
+        // and fired with crafted target. b/155183624
+        ActivityInfo targetInfo = intent.resolveActivityInfo(
+                mInjector.getPackageManager(user.getIdentifier()),
+                PackageManager.MATCH_SYSTEM_ONLY);
+        if (targetInfo != null) {
+            intent.setComponent(targetInfo.getComponentName());
+        } else {
+            Slog.wtf(LOG_TAG, "Failed to resolve intent for location settings");
+        }
+
         PendingIntent locationSettingsIntent = mInjector.pendingIntentGetActivityAsUser(mContext, 0,
-                new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK), PendingIntent.FLAG_UPDATE_CURRENT,
-                null, user);
+                intent, PendingIntent.FLAG_UPDATE_CURRENT, null, user);
         Notification notification = new Notification.Builder(mContext,
                 SystemNotificationChannels.DEVICE_ADMIN)
                 .setSmallIcon(R.drawable.ic_info_outline)
@@ -15994,31 +16006,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     private @PersonalAppsSuspensionReason int updatePersonalAppsSuspension(
             int profileUserId, boolean unlocked) {
         final boolean suspendedExplicitly;
-        final int deadlineState;
-        final String poPackage;
+        final boolean suspendedByTimeout;
         synchronized (getLockObject()) {
             final ActiveAdmin profileOwner = getProfileOwnerAdminLocked(profileUserId);
             if (profileOwner != null) {
-                deadlineState =
+                final int deadlineState =
                         updateProfileOffDeadlineLocked(profileUserId, profileOwner, unlocked);
                 suspendedExplicitly = profileOwner.mSuspendPersonalApps;
-                poPackage = profileOwner.info.getPackageName();
+                suspendedByTimeout = deadlineState == PROFILE_OFF_DEADLINE_REACHED;
+                Slog.d(LOG_TAG, String.format(
+                        "Personal apps suspended explicitly: %b, deadline state: %d",
+                        suspendedExplicitly, deadlineState));
+                final int notificationState =
+                        unlocked ? PROFILE_OFF_DEADLINE_DEFAULT : deadlineState;
+                updateProfileOffDeadlineNotificationLocked(
+                        profileUserId, profileOwner, notificationState);
             } else {
-                poPackage = null;
                 suspendedExplicitly = false;
-                deadlineState = PROFILE_OFF_DEADLINE_DEFAULT;
+                suspendedByTimeout = false;
             }
         }
 
-        Slog.d(LOG_TAG, String.format("Personal apps suspended explicitly: %b, deadline state: %d",
-                suspendedExplicitly, deadlineState));
-
-        if (poPackage != null) {
-            final int notificationState = unlocked ? PROFILE_OFF_DEADLINE_DEFAULT : deadlineState;
-            updateProfileOffDeadlineNotification(profileUserId, poPackage, notificationState);
-        }
-
-        final boolean suspendedByTimeout = deadlineState == PROFILE_OFF_DEADLINE_REACHED;
         final int parentUserId = getProfileParentId(profileUserId);
         suspendPersonalAppsInternal(parentUserId, suspendedExplicitly || suspendedByTimeout);
 
@@ -16130,9 +16138,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
-    private void updateProfileOffDeadlineNotification(
-            int profileUserId, String profileOwnerPackage, int notificationState) {
-
+    @GuardedBy("getLockObject()")
+    private void updateProfileOffDeadlineNotificationLocked(
+            int profileUserId, ActiveAdmin profileOwner, int notificationState) {
         if (notificationState == PROFILE_OFF_DEADLINE_DEFAULT) {
             mInjector.getNotificationManager().cancel(SystemMessage.NOTE_PERSONAL_APPS_SUSPENDED);
             return;
@@ -16150,11 +16158,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final Notification.Action turnProfileOnButton =
                 new Notification.Action.Builder(null /* icon */, buttonText, pendingIntent).build();
 
-        final String text = mContext.getString(
-                notificationState == PROFILE_OFF_DEADLINE_WARNING
-                ? R.string.personal_apps_suspension_tomorrow_text
-                : R.string.personal_apps_suspension_text);
-        final boolean ongoing = notificationState == PROFILE_OFF_DEADLINE_REACHED;
+        final String text;
+        final boolean ongoing;
+        if (notificationState == PROFILE_OFF_DEADLINE_WARNING) {
+            // Round to the closest integer number of days.
+            final int maxDays = (int)
+                    ((profileOwner.mProfileMaximumTimeOffMillis + MS_PER_DAY / 2) / MS_PER_DAY);
+            final String date = DateUtils.formatDateTime(
+                    mContext, profileOwner.mProfileOffDeadline, DateUtils.FORMAT_SHOW_DATE);
+            final String time = DateUtils.formatDateTime(
+                    mContext, profileOwner.mProfileOffDeadline, DateUtils.FORMAT_SHOW_TIME);
+            text = mContext.getString(
+                    R.string.personal_apps_suspension_soon_text, date, time, maxDays);
+            ongoing = false;
+        } else {
+            text = mContext.getString(R.string.personal_apps_suspension_text);
+            ongoing = true;
+        }
         final int color = mContext.getColor(R.color.personal_apps_suspension_notification_color);
         final Bundle extras = new Bundle();
         // TODO: Create a separate string for this.

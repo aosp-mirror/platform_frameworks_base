@@ -1200,7 +1200,7 @@
   <java-symbol type="string" name="location_changed_notification_title" />
   <java-symbol type="string" name="location_changed_notification_text" />
   <java-symbol type="string" name="personal_apps_suspension_title" />
-  <java-symbol type="string" name="personal_apps_suspension_tomorrow_text" />
+  <java-symbol type="string" name="personal_apps_suspension_soon_text" />
   <java-symbol type="string" name="personal_apps_suspension_text" />
   <java-symbol type="string" name="personal_apps_suspended_turn_profile_on" />
   <java-symbol type="string" name="notification_work_profile_content_description" />
