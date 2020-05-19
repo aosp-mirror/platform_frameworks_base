@@ -30,21 +30,22 @@ class SoundDecoder {
 public:
     SoundDecoder(SoundManager* soundManager, size_t threads);
     ~SoundDecoder();
-    void loadSound(int32_t soundID);
+    void loadSound(int32_t soundID) NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
     void quit();
 
 private:
-    void run(int32_t id);                       // The decode thread function.
+    // The decode thread function.
+    void run(int32_t id) NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
 
     SoundManager* const     mSoundManager;      // set in constructor, has own lock
     std::unique_ptr<ThreadPool> mThreadPool;    // set in constructor, has own lock
 
     std::mutex              mLock;
-    std::condition_variable mQueueSpaceAvailable;
-    std::condition_variable mQueueDataAvailable;
+    std::condition_variable mQueueSpaceAvailable GUARDED_BY(mLock);
+    std::condition_variable mQueueDataAvailable GUARDED_BY(mLock);
 
-    std::deque<int32_t>     mSoundIDs;            // GUARDED_BY(mLock);
-    bool                    mQuit = false;        // GUARDED_BY(mLock);
+    std::deque<int32_t>     mSoundIDs GUARDED_BY(mLock);
+    bool                    mQuit GUARDED_BY(mLock) = false;
 };
 
 } // end namespace android::soundpool
