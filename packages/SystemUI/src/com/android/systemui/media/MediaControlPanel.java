@@ -228,7 +228,7 @@ public class MediaControlPanel {
         mLayoutAnimationHelper = new LayoutAnimationHelper(motionView);
         GoneChildrenHideHelper.clipGoneChildrenOnLayout(motionView);
         mKeyFrames = motionView.getDefinedTransitions().get(0).getKeyFrameList();
-        mSeekBarObserver = new SeekBarObserver(motionView);
+        mSeekBarObserver = new SeekBarObserver(vh);
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
         SeekBar bar = vh.getSeekBar();
         bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());

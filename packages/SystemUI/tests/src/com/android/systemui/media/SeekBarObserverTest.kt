@@ -22,7 +22,6 @@ import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.test.filters.SmallTest
-import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -38,23 +37,21 @@ import org.mockito.Mockito.`when` as whenever
 public class SeekBarObserverTest : SysuiTestCase() {
 
     private lateinit var observer: SeekBarObserver
-    @Mock private lateinit var mockView: View
+    @Mock private lateinit var mockHolder: PlayerViewHolder
     private lateinit var seekBarView: SeekBar
     private lateinit var elapsedTimeView: TextView
     private lateinit var totalTimeView: TextView
 
     @Before
     fun setUp() {
-        mockView = mock(View::class.java)
+        mockHolder = mock(PlayerViewHolder::class.java)
         seekBarView = SeekBar(context)
         elapsedTimeView = TextView(context)
         totalTimeView = TextView(context)
-        whenever<SeekBar>(
-                mockView.findViewById(R.id.media_progress_bar)).thenReturn(seekBarView)
-        whenever<TextView>(
-                mockView.findViewById(R.id.media_elapsed_time)).thenReturn(elapsedTimeView)
-        whenever<TextView>(mockView.findViewById(R.id.media_total_time)).thenReturn(totalTimeView)
-        observer = SeekBarObserver(mockView)
+        whenever(mockHolder.seekBar).thenReturn(seekBarView)
+        whenever(mockHolder.elapsedTimeView).thenReturn(elapsedTimeView)
+        whenever(mockHolder.totalTimeView).thenReturn(totalTimeView)
+        observer = SeekBarObserver(mockHolder)
     }
 
     @Test
