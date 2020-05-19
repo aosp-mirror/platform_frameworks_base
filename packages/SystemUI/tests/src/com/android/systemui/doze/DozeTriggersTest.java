@@ -34,6 +34,7 @@ import android.os.Handler;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
@@ -131,6 +132,7 @@ public class DozeTriggersTest extends SysuiTestCase {
         when(mMachine.getState()).thenReturn(DozeMachine.State.DOZE);
 
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        mTriggers.onScreenState(Display.STATE_OFF);
         waitForSensorManager();
         verify(mSensors).requestTriggerSensor(any(), eq(mTapSensor));
 
@@ -139,6 +141,7 @@ public class DozeTriggersTest extends SysuiTestCase {
                 DozeMachine.State.DOZE_REQUEST_PULSE);
         mTriggers.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
                 DozeMachine.State.DOZE_PULSING);
+        mTriggers.onScreenState(Display.STATE_DOZE);
         waitForSensorManager();
         verify(mSensors).cancelTriggerSensor(any(), eq(mTapSensor));
 
@@ -151,10 +154,12 @@ public class DozeTriggersTest extends SysuiTestCase {
     @Test
     public void transitionToDockedAod_disablesTouchSensors() {
         mTriggers.transitionTo(DozeMachine.State.INITIALIZED, DozeMachine.State.DOZE);
+        mTriggers.onScreenState(Display.STATE_OFF);
         waitForSensorManager();
         verify(mSensors).requestTriggerSensor(any(), eq(mTapSensor));
 
         mTriggers.transitionTo(DozeMachine.State.DOZE, DozeMachine.State.DOZE_AOD_DOCKED);
+        mTriggers.onScreenState(Display.STATE_DOZE);
         waitForSensorManager();
 
         verify(mSensors).cancelTriggerSensor(any(), eq(mTapSensor));
