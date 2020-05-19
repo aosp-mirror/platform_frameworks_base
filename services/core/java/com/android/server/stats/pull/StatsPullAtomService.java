@@ -289,6 +289,7 @@ public class StatsPullAtomService extends SystemService {
     private StatsPullAtomCallbackImpl mStatsCallbackImpl;
 
     private int mAppOpsSamplingRate = 0;
+    private final ArraySet<Integer> mDangerousAppOpsList = new ArraySet<>();
 
     // Baselines that stores list of NetworkStats right after initializing, with associated
     // information. This is used to calculate difference when pulling
@@ -320,17 +321,10 @@ public class StatsPullAtomService extends SystemService {
             try {
                 switch (atomTag) {
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_WIFI,
-                                /*withFgbg=*/ false);
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_WIFI,
-                                /*withFgbg=*/ true);
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_CELLULAR,
-                                /*withFgbg=*/ false);
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_CELLULAR,
-                                /*withFgbg=*/ true);
+                        return pullDataBytesTransfer(atomTag, data);
                     case FrameworkStatsLog.BLUETOOTH_BYTES_TRANSFER:
                         return pullBluetoothBytesTransfer(atomTag, data);
                     case FrameworkStatsLog.KERNEL_WAKELOCK:
@@ -526,6 +520,25 @@ public class StatsPullAtomService extends SystemService {
         } catch (RemoteException e) {
             Slog.e(TAG, "failed to initialize healthHalWrapper");
         }
+
+        // Initialize list of AppOps related to DangerousPermissions
+        PackageManager pm = mContext.getPackageManager();
+        for (int op = 0; op < AppOpsManager._NUM_OP; op++) {
+            String perm = AppOpsManager.opToPermission(op);
+            if (perm == null) {
+                continue;
+            } else {
+                PermissionInfo permInfo;
+                try {
+                    permInfo = pm.getPermissionInfo(perm, 0);
+                    if (permInfo.getProtection() == PROTECTION_DANGEROUS) {
+                        mDangerousAppOpsList.add(op);
+                    }
+                } catch (PackageManager.NameNotFoundException exception) {
+                    continue;
+                }
+            }
+        }
     }
 
     void registerEventListeners() {
@@ -619,10 +632,14 @@ public class StatsPullAtomService extends SystemService {
             Slog.d(TAG, "Registering NetworkStats pullers with statsd");
         }
         // Initialize NetworkStats baselines.
-        mNetworkStatsBaselines.addAll(collectWifiBytesTransferSnapshot(/*withFgbg=*/ false));
-        mNetworkStatsBaselines.addAll(collectWifiBytesTransferSnapshot(/*withFgbg=*/ true));
-        mNetworkStatsBaselines.addAll(collectMobileBytesTransferSnapshot(/*withFgbg=*/ false));
-        mNetworkStatsBaselines.addAll(collectMobileBytesTransferSnapshot(/*withFgbg=*/ true));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
+        mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG));
 
         registerWifiBytesTransfer();
         registerWifiBytesTransferBackground();
@@ -780,36 +797,42 @@ public class StatsPullAtomService extends SystemService {
     }
 
     @NonNull
-    private List<NetworkStatsExt> collectWifiBytesTransferSnapshot(boolean withFgbg) {
+    private List<NetworkStatsExt> collectNetworkStatsSnapshotForAtom(int atomTag) {
+        switch(atomTag) {
+            case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_WIFI, /*withFgbg=*/false);
+            case  FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_WIFI, /*withFgbg=*/true);
+            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_CELLULAR, /*withFgbg=*/false);
+            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_CELLULAR, /*withFgbg=*/true);
+            default:
+                throw new IllegalArgumentException("Unknown atomTag " + atomTag);
+        }
+    }
+
+    // Get a snapshot of Uid NetworkStats. The snapshot contains NetworkStats with its associated
+    // information, and wrapped by a list since multiple NetworkStatsExt objects might be collected.
+    @NonNull
+    private List<NetworkStatsExt> collectUidNetworkStatsSnapshot(int transport, boolean withFgbg) {
         final List<NetworkStatsExt> ret = new ArrayList<>();
-        final NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
+        final NetworkTemplate template = (transport == TRANSPORT_CELLULAR
+                ? NetworkTemplate.buildTemplateMobileWithRatType(
+                        /*subscriptionId=*/null, NETWORK_TYPE_ALL)
+                : NetworkTemplate.buildTemplateWifiWildcard());
+
         final NetworkStats stats = getUidNetworkStatsSnapshot(template, withFgbg);
         if (stats != null) {
-            ret.add(new NetworkStatsExt(stats, TRANSPORT_WIFI, withFgbg));
+            ret.add(new NetworkStatsExt(stats, transport, withFgbg));
         }
         return ret;
     }
 
-    // Get a snapshot of mobile data usage. The snapshot contains NetworkStats with its associated
-    // information, and wrapped by a list since multiple NetworkStatsExt objects might be collected.
-    // TODO: Slice NetworkStats to multiple objects by RAT type or subscription.
-    @NonNull
-    private List<NetworkStatsExt> collectMobileBytesTransferSnapshot(boolean withFgbg) {
-        final List<NetworkStatsExt> ret = new ArrayList<>();
-        final NetworkTemplate template =
-                NetworkTemplate.buildTemplateMobileWithRatType(null, NETWORK_TYPE_ALL);
-        final NetworkStats stats = getUidNetworkStatsSnapshot(template, withFgbg);
-        if (stats != null) {
-            ret.add(new NetworkStatsExt(stats, TRANSPORT_CELLULAR, withFgbg));
-        }
-        return ret;
-    }
 
     private int pullDataBytesTransfer(
-            int atomTag, @NonNull List<StatsEvent> pulledData, int transport, boolean withFgbg) {
-        final List<NetworkStatsExt> current =
-                (transport == TRANSPORT_CELLULAR ? collectMobileBytesTransferSnapshot(withFgbg)
-                        : collectWifiBytesTransferSnapshot(withFgbg));
+            int atomTag, @NonNull List<StatsEvent> pulledData) {
+        final List<NetworkStatsExt> current = collectNetworkStatsSnapshotForAtom(atomTag);
 
         if (current == null) {
             Slog.e(TAG, "current snapshot is null for " + atomTag + ", return.");
@@ -824,7 +847,7 @@ public class StatsPullAtomService extends SystemService {
             // skip reporting anything since the snapshot is invalid.
             if (baseline == null) {
                 Slog.e(TAG, "baseline is null for " + atomTag + ", transport="
-                        + item.transport + " , withFgbg=" + withFgbg + ", return.");
+                        + item.transport + " , withFgbg=" + item.withFgbg + ", return.");
                 return StatsManager.PULL_SKIP;
             }
             final NetworkStatsExt diff = new NetworkStatsExt(item.stats.subtract(
@@ -3113,22 +3136,8 @@ public class StatsPullAtomService extends SystemService {
         e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
         e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
         e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
+        e.writeBoolean(mDangerousAppOpsList.contains(op.getOpCode()));
 
-        String perm = AppOpsManager.opToPermission(op.getOpCode());
-        if (perm == null) {
-            e.writeBoolean(false);
-        } else {
-            PermissionInfo permInfo;
-            try {
-                permInfo = mContext.getPackageManager().getPermissionInfo(
-                        perm,
-                        0);
-                e.writeBoolean(
-                        permInfo.getProtection() == PROTECTION_DANGEROUS);
-            } catch (PackageManager.NameNotFoundException exception) {
-                e.writeBoolean(false);
-            }
-        }
         if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
             e.writeInt(mAppOpsSamplingRate);
         }

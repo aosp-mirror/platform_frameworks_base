@@ -652,6 +652,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char voldDecryptBuf[PROPERTY_VALUE_MAX];
+    char perfettoHprofOptBuf[sizeof("-XX:PerfettoHprof=") + PROPERTY_VALUE_MAX];
     enum {
       kEMDefault,
       kEMIntPortable,
@@ -765,6 +766,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     //addOption("-verbose:jni");
     addOption("-verbose:gc");
     //addOption("-verbose:class");
+
+    // On Android, we always want to allow loading the PerfettoHprof plugin.
+    // Even with this option set, we will still only actually load the plugin
+    // if we are on a userdebug build or the app is debuggable or profileable.
+    // This is enforced in art/runtime/runtime.cc.
+    //
+    // We want to be able to disable this, because this does not work on host,
+    // and we do not want to enable it in tests.
+    parseRuntimeOption("dalvik.vm.perfetto_hprof", perfettoHprofOptBuf, "-XX:PerfettoHprof=",
+                       "true");
 
     if (primary_zygote) {
         addOption("-Xprimaryzygote");

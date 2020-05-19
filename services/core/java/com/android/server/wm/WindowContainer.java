@@ -2120,6 +2120,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return getBounds();
     }
 
+    /** Gets the position relative to parent for animation. */
+    void getAnimationPosition(Point outPosition) {
+        getRelativePosition(outPosition);
+    }
+
     /**
      * Applies the app transition animation according the given the layout properties in the
      * window hierarchy.
@@ -2178,9 +2183,9 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
         // Separate position and size for use in animators.
         mTmpRect.set(getAnimationBounds(appStackClipMode));
-        if (sHierarchicalAnimations) {
-            getRelativePosition(mTmpPoint);
-        } else {
+        getAnimationPosition(mTmpPoint);
+        if (!sHierarchicalAnimations) {
+            // Non-hierarchical animation uses position in global coordinates.
             mTmpPoint.set(mTmpRect.left, mTmpRect.top);
         }
         mTmpRect.offsetTo(0, 0);

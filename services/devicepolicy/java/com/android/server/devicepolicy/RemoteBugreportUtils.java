@@ -22,9 +22,12 @@ import android.app.PendingIntent;
 import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.content.pm.PackageManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.format.DateUtils;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -38,6 +41,7 @@ import java.lang.annotation.RetentionPolicy;
  */
 class RemoteBugreportUtils {
 
+    private static final String TAG = "RemoteBugreportUtils";
     static final int NOTIFICATION_ID = SystemMessage.NOTE_REMOTE_BUGREPORT;
 
     @Retention(RetentionPolicy.SOURCE)
@@ -60,6 +64,17 @@ class RemoteBugreportUtils {
         Intent dialogIntent = new Intent(Settings.ACTION_SHOW_REMOTE_BUGREPORT_DIALOG);
         dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         dialogIntent.putExtra(DevicePolicyManager.EXTRA_BUGREPORT_NOTIFICATION_TYPE, type);
+
+        // Fill the component explicitly to prevent the PendingIntent from being intercepted
+        // and fired with crafted target. b/155183624
+        ActivityInfo targetInfo = dialogIntent.resolveActivityInfo(
+                context.getPackageManager(), PackageManager.MATCH_SYSTEM_ONLY);
+        if (targetInfo != null) {
+            dialogIntent.setComponent(targetInfo.getComponentName());
+        } else {
+            Slog.wtf(TAG, "Failed to resolve intent for remote bugreport dialog");
+        }
+
         PendingIntent pendingDialogIntent = PendingIntent.getActivityAsUser(context, type,
                 dialogIntent, 0, null, UserHandle.CURRENT);
 

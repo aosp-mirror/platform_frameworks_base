@@ -95,7 +95,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
-                displayId, fromRotation, toRotation, t);
+                mPipTaskOrganizer.getLastReportedBounds(), displayId, fromRotation, toRotation, t);
         if (changed) {
             updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
@@ -293,7 +293,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             final boolean changed = mPipBoundsHandler.setShelfHeight(visible, height);
             if (changed) {
                 mTouchHandler.onShelfVisibilityChanged(visible, height);
-                updateMovementBounds(mPipBoundsHandler.getLastDestinationBounds(),
+                updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
                         false /* fromRotation */, false /* fromImeAdjustment */,
                         true /* fromShelfAdjustment */);
             }

@@ -44,6 +44,7 @@
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_camera</xliff:g></item>
@@ -59,7 +60,6 @@
         <item><xliff:g id="id">@string/status_bar_airplane</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_battery</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_sensors_off</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
     </string-array>
 
     <string translatable="false" name="status_bar_rotate">rotate</string>
@@ -3328,6 +3328,17 @@
 
     <!-- Controls the size of the back gesture inset. -->
     <dimen name="config_backGestureInset">0dp</dimen>
+
+    <!-- Array of values used in Gesture Navigation settings page to reduce/increase the back
+     gesture's inset size. These values will be multiplied into the default width, read from the
+     gesture navigation overlay package, in order to create 4 different sizes which are selectable
+     via a slider component. -->
+    <array name="config_backGestureInsetScales">
+        <item>0.75</item>
+        <item>1.00</item>
+        <item>1.33</item>
+        <item>1.66</item>
+    </array>
 
     <!-- Controls whether the navbar needs a scrim with
          {@link Window#setEnsuringNavigationBarContrastWhenTransparent}. -->
