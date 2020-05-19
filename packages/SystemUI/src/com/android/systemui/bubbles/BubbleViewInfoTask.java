@@ -37,7 +37,6 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.AsyncTask;
 import android.os.Parcelable;
-import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.Log;
@@ -75,7 +74,6 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
     private WeakReference<Context> mContext;
     private WeakReference<BubbleStackView> mStackView;
     private BubbleIconFactory mIconFactory;
-    private boolean mSkipInflation;
     private Callback mCallback;
 
     /**
@@ -86,20 +84,17 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
             Context context,
             BubbleStackView stackView,
             BubbleIconFactory factory,
-            boolean skipInflation,
             Callback c) {
         mBubble = b;
         mContext = new WeakReference<>(context);
         mStackView = new WeakReference<>(stackView);
         mIconFactory = factory;
-        mSkipInflation = skipInflation;
         mCallback = c;
     }
 
     @Override
     protected BubbleViewInfo doInBackground(Void... voids) {
-        return BubbleViewInfo.populate(mContext.get(), mStackView.get(), mIconFactory, mBubble,
-                mSkipInflation);
+        return BubbleViewInfo.populate(mContext.get(), mStackView.get(), mIconFactory, mBubble);
     }
 
     @Override
@@ -128,36 +123,11 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
         @Nullable
         static BubbleViewInfo populate(Context c, BubbleStackView stackView,
-                BubbleIconFactory iconFactory, Bubble b, boolean skipInflation) {
-            final NotificationEntry entry = b.getEntry();
-            if (entry == null) {
-                // populate from ShortcutInfo when NotificationEntry is not available
-                final ShortcutInfo s = b.getShortcutInfo();
-                return populate(c, stackView, iconFactory, skipInflation || b.isInflated(),
-                        s.getPackage(), s.getUserHandle(), s, null);
-            }
-            final StatusBarNotification sbn = entry.getSbn();
-            final String bubbleShortcutId =  entry.getBubbleMetadata().getShortcutId();
-            final ShortcutInfo si = bubbleShortcutId == null
-                    ? null : entry.getRanking().getShortcutInfo();
-            return populate(
-                    c, stackView, iconFactory, skipInflation || b.isInflated(),
-                    sbn.getPackageName(), sbn.getUser(), si, entry);
-        }
-
-        private static BubbleViewInfo populate(
-                @NonNull final Context c,
-                @NonNull final BubbleStackView stackView,
-                @NonNull final BubbleIconFactory iconFactory,
-                final boolean isInflated,
-                @NonNull final String packageName,
-                @NonNull final UserHandle user,
-                @Nullable final ShortcutInfo shortcutInfo,
-                @Nullable final NotificationEntry entry) {
+                BubbleIconFactory iconFactory, Bubble b) {
             BubbleViewInfo info = new BubbleViewInfo();
 
             // View inflation: only should do this once per bubble
-            if (!isInflated) {
+            if (!b.isInflated()) {
                 LayoutInflater inflater = LayoutInflater.from(c);
                 info.imageView = (BadgedImageView) inflater.inflate(
                         R.layout.bubble_view, stackView, false /* attachToRoot */);
@@ -167,8 +137,12 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 info.expandedView.setStackView(stackView);
             }
 
-            if (shortcutInfo != null) {
-                info.shortcutInfo = shortcutInfo;
+            StatusBarNotification sbn = b.getEntry().getSbn();
+            String packageName = sbn.getPackageName();
+
+            String bubbleShortcutId =  b.getEntry().getBubbleMetadata().getShortcutId();
+            if (bubbleShortcutId != null) {
+                info.shortcutInfo = b.getEntry().getRanking().getShortcutInfo();
             }
 
             // App name & app icon
@@ -187,7 +161,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                     info.appName = String.valueOf(pm.getApplicationLabel(appInfo));
                 }
                 appIcon = pm.getApplicationIcon(packageName);
-                badgedIcon = pm.getUserBadgedIcon(appIcon, user);
+                badgedIcon = pm.getUserBadgedIcon(appIcon, sbn.getUser());
             } catch (PackageManager.NameNotFoundException exception) {
                 // If we can't find package... don't think we should show the bubble.
                 Log.w(TAG, "Unable to find package: " + packageName);
@@ -196,7 +170,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
 
             // Badged bubble image
             Drawable bubbleDrawable = iconFactory.getBubbleDrawable(c, info.shortcutInfo,
-                    entry == null ? null : entry.getBubbleMetadata());
+                    b.getEntry().getBubbleMetadata());
             if (bubbleDrawable == null) {
                 // Default to app icon
                 bubbleDrawable = appIcon;
@@ -222,9 +196,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                     Color.WHITE, WHITE_SCRIM_ALPHA);
 
             // Flyout
-            if (entry != null) {
-                info.flyoutMessage = extractFlyoutMessage(c, entry);
-            }
+            info.flyoutMessage = extractFlyoutMessage(c, b.getEntry());
             return info;
         }
     }

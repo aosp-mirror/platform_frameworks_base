@@ -58,10 +58,8 @@ metalava_appsearch_docs_args =
 
 droidstubs {
     name: "framework-appsearch-stubs-srcs",
-    srcs: [
-        ":framework-annotations",
-        ":framework-appsearch-sources",
-    ],
+    srcs: [":framework-appsearch-sources"],
+    libs: ["framework-annotations-lib"],
     aidl: {
         include_dirs: ["frameworks/base/core/java"],
     },

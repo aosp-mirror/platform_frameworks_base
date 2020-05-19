@@ -82,7 +82,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 () -> mock(StatusBar.class),
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
-                mRemoteInputUriController);
+                mRemoteInputUriController,
+                mock(ActionClickLogger.class));
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
                 .setOpPkg(TEST_PACKAGE_NAME)
@@ -256,17 +257,26 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
 
     private class TestableNotificationRemoteInputManager extends NotificationRemoteInputManager {
 
-        TestableNotificationRemoteInputManager(Context context,
+        TestableNotificationRemoteInputManager(
+                Context context,
                 NotificationLockscreenUserManager lockscreenUserManager,
                 SmartReplyController smartReplyController,
                 NotificationEntryManager notificationEntryManager,
                 Lazy<StatusBar> statusBarLazy,
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
-                RemoteInputUriController remoteInputUriController) {
-            super(context, lockscreenUserManager, smartReplyController, notificationEntryManager,
-                    statusBarLazy, statusBarStateController, mainHandler,
-                    remoteInputUriController);
+                RemoteInputUriController remoteInputUriController,
+                ActionClickLogger actionClickLogger) {
+            super(
+                    context,
+                    lockscreenUserManager,
+                    smartReplyController,
+                    notificationEntryManager,
+                    statusBarLazy,
+                    statusBarStateController,
+                    mainHandler,
+                    remoteInputUriController,
+                    actionClickLogger);
         }
 
         public void setUpWithPresenterForTest(Callback callback,

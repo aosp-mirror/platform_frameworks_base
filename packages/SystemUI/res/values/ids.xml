@@ -169,5 +169,8 @@
     <item type="id" name="screen_recording_options" />
     <item type="id" name="screen_recording_dialog_source_text" />
     <item type="id" name="screen_recording_dialog_source_description" />
+
+    <item type="id" name="accessibility_action_controls_move_before" />
+    <item type="id" name="accessibility_action_controls_move_after" />
 </resources>
 

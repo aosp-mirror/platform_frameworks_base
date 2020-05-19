@@ -155,6 +155,7 @@
     <!-- Screen Recording -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT"/>
 
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
@@ -688,6 +689,7 @@
         </activity>
 
         <activity android:name=".controls.management.ControlsEditingActivity"
+                  android:label="@string/controls_menu_edit"
                   android:theme="@style/Theme.ControlsManagement"
                   android:excludeFromRecents="true"
                   android:noHistory="true"
@@ -766,7 +768,8 @@
         <provider
             android:name="com.android.keyguard.clock.ClockOptionsProvider"
             android:authorities="com.android.keyguard.clock"
-            android:exported="true"
+            android:enabled="false"
+            android:exported="false"
             android:grantUriPermissions="true">
         </provider>
 

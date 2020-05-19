@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static com.android.server.wm.ActivityStack.TAG_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
 
+import android.annotation.Nullable;
 import android.util.Slog;
 
 import com.android.internal.util.function.pooled.PooledConsumer;
@@ -42,6 +43,16 @@ class EnsureActivitiesVisibleHelper {
         mContiner = container;
     }
 
+    /**
+     * Update all attributes except {@link mContiner} to use in subsequent calculations.
+     *
+     * @param starting The activity that is being started
+     * @param configChanges Parts of the configuration that changed for this activity for evaluating
+     *                      if the screen should be frozen.
+     * @param preserveWindows Flag indicating whether windows should be preserved when updating.
+     * @param notifyClients Flag indicating whether the configuration and visibility changes shoulc
+     *                      be sent to the clients.
+     */
     void reset(ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
         mStarting = starting;
@@ -60,8 +71,17 @@ class EnsureActivitiesVisibleHelper {
      * Ensure visibility with an option to also update the configuration of visible activities.
      * @see ActivityStack#ensureActivitiesVisible(ActivityRecord, int, boolean)
      * @see RootWindowContainer#ensureActivitiesVisible(ActivityRecord, int, boolean)
+     * @param starting The top most activity in the task.
+     *                 The activity is either starting or resuming.
+     *                 Caller should ensure starting activity is visible.
+     *
+     * @param configChanges Parts of the configuration that changed for this activity for evaluating
+     *                      if the screen should be frozen.
+     * @param preserveWindows Flag indicating whether windows should be preserved when updating.
+     * @param notifyClients Flag indicating whether the configuration and visibility changes shoulc
+     *                      be sent to the clients.
      */
-    void process(ActivityRecord starting, int configChanges, boolean preserveWindows,
+    void process(@Nullable ActivityRecord starting, int configChanges, boolean preserveWindows,
             boolean notifyClients) {
         reset(starting, configChanges, preserveWindows, notifyClients);
 

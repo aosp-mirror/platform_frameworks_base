@@ -238,23 +238,12 @@ class WallpaperController {
         }
     }
 
-    private final boolean isWallpaperVisible(WindowState wallpaperTarget) {
-        final RecentsAnimationController recentsAnimationController =
-                mService.getRecentsAnimationController();
-        boolean isAnimatingWithRecentsComponent = recentsAnimationController != null
-                && recentsAnimationController.isWallpaperVisible(wallpaperTarget);
-        if (DEBUG_WALLPAPER) Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + ", obscured="
-                + (wallpaperTarget != null ? Boolean.toString(wallpaperTarget.mObscured) : "??")
-                + " animating=" + ((wallpaperTarget != null && wallpaperTarget.mActivityRecord != null)
-                ? wallpaperTarget.mActivityRecord.isAnimating(TRANSITION | PARENTS) : null)
-                + " prev=" + mPrevWallpaperTarget
-                + " recentsAnimationWallpaperVisible=" + isAnimatingWithRecentsComponent);
-        return (wallpaperTarget != null
-                && (!wallpaperTarget.mObscured
-                        || isAnimatingWithRecentsComponent
-                        || (wallpaperTarget.mActivityRecord != null
-                        && wallpaperTarget.mActivityRecord.isAnimating(TRANSITION | PARENTS))))
-                || mPrevWallpaperTarget != null;
+    private boolean isWallpaperVisible(WindowState wallpaperTarget) {
+        if (DEBUG_WALLPAPER) {
+            Slog.v(TAG, "Wallpaper vis: target " + wallpaperTarget + " prev="
+                    + mPrevWallpaperTarget);
+        }
+        return wallpaperTarget != null || mPrevWallpaperTarget != null;
     }
 
     boolean isWallpaperTargetAnimating() {

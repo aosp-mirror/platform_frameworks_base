@@ -63,6 +63,7 @@ struct Constants {
     static constexpr auto libDir = "lib"sv;
     static constexpr auto libSuffix = ".so"sv;
     static constexpr auto blockSize = 4096;
+    static constexpr auto systemPackage = "android"sv;
 };
 
 static const Constants& constants() {
@@ -377,7 +378,8 @@ void IncrementalService::onSystemReady() {
         std::lock_guard l(mLock);
         mounts.reserve(mMounts.size());
         for (auto&& [id, ifs] : mMounts) {
-            if (ifs->mountId == id) {
+            if (ifs->mountId == id &&
+                ifs->dataLoaderStub->params().packageName == Constants::systemPackage) {
                 mounts.push_back(ifs);
             }
         }

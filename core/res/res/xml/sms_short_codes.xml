@@ -39,7 +39,7 @@
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
 
-    <!-- Argentia: 5 digits, known short codes listed -->
+    <!-- Argentina: 5 digits, known short codes listed -->
     <shortcode country="ar" pattern="\\d{5}" free="11711|28291" />
 
     <!-- Armenia: 3-4 digits, emergency numbers 10[123] -->

@@ -226,9 +226,10 @@ public class StorageManager {
      * <p>
      * This intent should be launched using
      * {@link Activity#startActivityForResult(Intent, int)} so that the user
-     * knows which app is requesting to clear cache. The returned result will
-     * be {@link Activity#RESULT_OK} if the activity was launched and the user accepted to clear
-     * cache, or {@link Activity#RESULT_CANCELED} otherwise.
+     * knows which app is requesting to clear cache. The returned result will be:
+     * {@link Activity#RESULT_OK} if the activity was launched and all cache was cleared,
+     * {@link OsConstants#EIO} if an error occurred while clearing the cache or
+     * {@link Activity#RESULT_CANCELED} otherwise.
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_EXTERNAL_STORAGE)
     @SdkConstant(SdkConstant.SdkConstantType.ACTIVITY_INTENT_ACTION)

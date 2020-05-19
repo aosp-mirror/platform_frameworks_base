@@ -2306,6 +2306,7 @@ package android.os {
   }
 
   public class DeviceIdleManager {
+    method @RequiresPermission("android.permission.DEVICE_POWER") public void endIdle(@NonNull String);
     method @NonNull public String[] getSystemPowerWhitelist();
     method @NonNull public String[] getSystemPowerWhitelistExceptIdle();
   }
