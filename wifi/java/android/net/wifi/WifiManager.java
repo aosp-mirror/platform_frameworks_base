@@ -4124,14 +4124,11 @@ public class WifiManager {
     private void connectInternal(@Nullable WifiConfiguration config, int networkId,
             @Nullable ActionListener listener) {
         ActionListenerProxy listenerProxy = null;
-        Binder binder = null;
         if (listener != null) {
             listenerProxy = new ActionListenerProxy("connect", mLooper, listener);
-            binder = new Binder();
         }
         try {
-            mService.connect(config, networkId, binder, listenerProxy,
-                    listener == null ? 0 : listener.hashCode());
+            mService.connect(config, networkId, listenerProxy);
         } catch (RemoteException e) {
             if (listenerProxy != null) listenerProxy.onFailure(ERROR);
         } catch (SecurityException e) {
@@ -4222,14 +4219,11 @@ public class WifiManager {
     public void save(@NonNull WifiConfiguration config, @Nullable ActionListener listener) {
         if (config == null) throw new IllegalArgumentException("config cannot be null");
         ActionListenerProxy listenerProxy = null;
-        Binder binder = null;
         if (listener != null) {
             listenerProxy = new ActionListenerProxy("save", mLooper, listener);
-            binder = new Binder();
         }
         try {
-            mService.save(config, binder, listenerProxy,
-                    listener == null ? 0 : listener.hashCode());
+            mService.save(config, listenerProxy);
         } catch (RemoteException e) {
             if (listenerProxy != null) listenerProxy.onFailure(ERROR);
         } catch (SecurityException e) {
@@ -4259,14 +4253,11 @@ public class WifiManager {
     public void forget(int netId, @Nullable ActionListener listener) {
         if (netId < 0) throw new IllegalArgumentException("Network id cannot be negative");
         ActionListenerProxy listenerProxy = null;
-        Binder binder = null;
         if (listener != null) {
             listenerProxy = new ActionListenerProxy("forget", mLooper, listener);
-            binder = new Binder();
         }
         try {
-            mService.forget(netId, binder, listenerProxy,
-                    listener == null ? 0 : listener.hashCode());
+            mService.forget(netId, listenerProxy);
         } catch (RemoteException e) {
             if (listenerProxy != null) listenerProxy.onFailure(ERROR);
         } catch (SecurityException e) {
