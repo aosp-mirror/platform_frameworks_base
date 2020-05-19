@@ -28,7 +28,6 @@ import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -148,28 +147,6 @@ class RollbackStore {
         }
 
         return restoreInfos;
-    }
-
-    private static @NonNull JSONArray ceSnapshotInodesToJson(
-            @NonNull SparseLongArray ceSnapshotInodes) throws JSONException {
-        JSONArray array = new JSONArray();
-        for (int i = 0; i < ceSnapshotInodes.size(); i++) {
-            JSONObject entryJson = new JSONObject();
-            entryJson.put("userId", ceSnapshotInodes.keyAt(i));
-            entryJson.put("ceSnapshotInode", ceSnapshotInodes.valueAt(i));
-            array.put(entryJson);
-        }
-        return array;
-    }
-
-    private static @NonNull SparseLongArray ceSnapshotInodesFromJson(JSONArray json)
-            throws JSONException {
-        SparseLongArray ceSnapshotInodes = new SparseLongArray(json.length());
-        for (int i = 0; i < json.length(); i++) {
-            JSONObject entry = json.getJSONObject(i);
-            ceSnapshotInodes.append(entry.getInt("userId"), entry.getLong("ceSnapshotInode"));
-        }
-        return ceSnapshotInodes;
     }
 
     private static @NonNull JSONArray extensionVersionsToJson(
@@ -374,7 +351,6 @@ class RollbackStore {
 
         // Field is named 'installedUsers' for legacy reasons.
         json.put("installedUsers", fromIntList(snapshottedUsers));
-        json.put("ceSnapshotInodes", ceSnapshotInodesToJson(info.getCeSnapshotInodes()));
 
         json.put("rollbackDataPolicy", info.getRollbackDataPolicy());
 
@@ -398,8 +374,6 @@ class RollbackStore {
 
         // Field is named 'installedUsers' for legacy reasons.
         final List<Integer> snapshottedUsers = toIntList(json.getJSONArray("installedUsers"));
-        final SparseLongArray ceSnapshotInodes = ceSnapshotInodesFromJson(
-                json.getJSONArray("ceSnapshotInodes"));
 
         // Backward compatibility: no such field for old versions.
         final int rollbackDataPolicy = json.optInt("rollbackDataPolicy",
@@ -407,7 +381,7 @@ class RollbackStore {
 
         return new PackageRollbackInfo(versionRolledBackFrom, versionRolledBackTo,
                 pendingBackups, pendingRestores, isApex, isApkInApex, snapshottedUsers,
-                ceSnapshotInodes, rollbackDataPolicy);
+                rollbackDataPolicy);
     }
 
     private static JSONArray versionedPackagesToJson(List<VersionedPackage> packages)

@@ -32,7 +32,6 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
-import android.util.SparseLongArray;
 
 import com.android.server.pm.ApexManager;
 import com.android.server.pm.Installer;
@@ -74,8 +73,6 @@ public class AppDataRollbackHelperTest {
         assertEquals(10, (int) info.getPendingBackups().get(0));
         assertEquals(11, (int) info.getPendingBackups().get(1));
 
-        assertEquals(0, info.getCeSnapshotInodes().size());
-
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).snapshotAppData(
                 eq("com.foo.bar"), eq(10), eq(5), eq(Installer.FLAG_STORAGE_DE));
@@ -92,9 +89,6 @@ public class AppDataRollbackHelperTest {
         helper.snapshotAppData(7, info2, new int[]{10, 11});
         assertEquals(1, info2.getPendingBackups().size());
         assertEquals(11, (int) info2.getPendingBackups().get(0));
-
-        assertEquals(1, info2.getCeSnapshotInodes().size());
-        assertEquals(239L, info2.getCeSnapshotInodes().get(10));
 
         inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).snapshotAppData(
@@ -117,8 +111,7 @@ public class AppDataRollbackHelperTest {
             final int[] installedUsers) {
         return new PackageRollbackInfo(
                 new VersionedPackage(packageName, 2), new VersionedPackage(packageName, 1),
-                new ArrayList<>(), new ArrayList<>(), false, false, toList(installedUsers),
-                new SparseLongArray());
+                new ArrayList<>(), new ArrayList<>(), false, false, toList(installedUsers));
     }
 
     private static PackageRollbackInfo createPackageRollbackInfo(String packageName) {
@@ -206,20 +199,17 @@ public class AppDataRollbackHelperTest {
         AppDataRollbackHelper helper = new AppDataRollbackHelper(installer, mApexManager);
 
         PackageRollbackInfo info = createPackageRollbackInfo("com.foo.bar");
-        info.putCeSnapshotInode(11, 239L);
         helper.destroyAppDataSnapshot(5 /* rollbackId */, info, 10 /* userId */);
         helper.destroyAppDataSnapshot(5 /* rollbackId */, info, 11 /* userId */);
 
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).destroyAppDataSnapshot(
                 eq("com.foo.bar"), eq(10) /* userId */, eq(0L) /* ceSnapshotInode */,
-                eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE));
+                eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
         inOrder.verify(installer).destroyAppDataSnapshot(
-                eq("com.foo.bar"), eq(11) /* userId */, eq(239L) /* ceSnapshotInode */,
+                eq("com.foo.bar"), eq(11) /* userId */, eq(0L) /* ceSnapshotInode */,
                 eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
         inOrder.verifyNoMoreInteractions();
-
-        assertEquals(0, info.getCeSnapshotInodes().size());
     }
 
     @Test
@@ -243,7 +233,6 @@ public class AppDataRollbackHelperTest {
         // This one should be restored
         PackageRollbackInfo pendingRestore = createPackageRollbackInfo("com.abc",
                 new int[]{37, 73});
-        pendingRestore.putCeSnapshotInode(37, 1543L);
         pendingRestore.getPendingRestores().add(
                 new RestoreInfo(37 /* userId */, 57 /* appId*/, "seInfo"));
 
@@ -281,7 +270,6 @@ public class AppDataRollbackHelperTest {
         inOrder.verify(installer).snapshotAppData(eq("com.foo"), eq(37), eq(101),
                 eq(Installer.FLAG_STORAGE_CE));
         assertEquals(-1, pendingBackup.getPendingBackups().indexOf(37));
-        assertEquals(53, pendingBackup.getCeSnapshotInodes().get(37));
 
         // Check that restore was performed.
         assertTrue(helper.commitPendingBackupAndRestoreForUser(37, dataForRestore));
