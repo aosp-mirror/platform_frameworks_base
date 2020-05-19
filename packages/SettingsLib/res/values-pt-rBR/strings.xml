@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Média"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muito rápida"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirado"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirada"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconectado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
@@ -223,7 +223,7 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Falha na conexão"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Verifique se o <xliff:g id="DEVICE_NAME">%1$s</xliff:g> está conectado à rede correta"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Parear com o dispositivo"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de pareamento de Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de pareamento por Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Falha no pareamento"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Verifique se o dispositivo está conectado à mesma rede."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Parear dispositivo na rede Wi‑Fi fazendo a leitura do código QR"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções de certificação de Display sem fio"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de registro de Wi-Fi; mostrar conforme o RSSI do SSID no seletor de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo de bateria e melhora o desempenho da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Essa opção afeta o comportamento de ordem aleatória de MAC somente para o modo cliente.\nQuando esse modo é ativado, todas as redes que tiverem a ordem aleatória de MAC ativada poderão ter a ordem aleatória refeita durante a associação, dependendo de quando o cliente se desconectou da rede pela última vez. A ordem aleatória não será refeita se o dispositivo se reconectar em até quatro horas."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando esse modo está ativado, o endereço MAC do dispositivo pode mudar a cada vez que ele se conecta a uma rede com ordem aleatória de MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Limitada"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Ilimitada"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos de buffer de logger"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Exibir a caixa de diálogo \"App não responde\" para apps em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos de notificações"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Exibir aviso na tela quando um app posta notificação sem canal válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Usar atalhos para notificações de conversa"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Exigir que as notificações sejam apoiadas por um atalho de compartilhamento de longa duração para que elas possam aparecer na seção de conversa"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps em armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Qualificar apps para gravação em armazenamento externo, independentemente de valores de manifestos"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar atividades a serem redimensionáveis"</string>
@@ -551,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Convidado"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Padrão do dispositivo"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desativado"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ativado"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necessário reinicializar o dispositivo para que a mudança seja aplicada. Faça isso agora ou cancele."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"App <xliff:g id="APP_NAME">%s</xliff:g> de trabalho"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

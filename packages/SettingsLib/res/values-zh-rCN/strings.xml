@@ -225,7 +225,7 @@
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"与设备配对"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"WLAN 配对码"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"配对失败"</string>
-    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"确保设备已连接到同一网络。"</string>
+    <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"请确保设备已连接到同一网络。"</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"扫描二维码即可通过 WLAN 配对设备"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"正在配对设备…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"无法配对设备。可能是因为二维码不正确，或者设备未连接到同一网络。"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"显示无线显示认证选项"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"提升 WLAN 日志记录级别（在 WLAN 选择器中显示每个 SSID 的 RSSI）"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"降低耗电量以及改善网络性能"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"此切换开关仅会影响客户端模式的 MAC 地址随机分配行为。\n此模式开启后，系统可能会为已启用随机分配 MAC 地址功能的所有网络在关联期间重新随机分配 MAC 地址，具体取决于客户端上次断开网络连接的时间。如果设备在 4 小时或更短时间内重新连接到网络，系统便不会执行重新随机分配操作。"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"启用此模式后，每当此设备连接到已启用随机分配 MAC 地址功能的网络时，它的 MAC 地址就可能会发生更改。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"按流量计费"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"不按流量计费"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"日志记录器缓冲区大小"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"为后台应用显示“应用无响应”对话框"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"显示通知渠道警告"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"当应用未经有效渠道发布通知时，在屏幕上显示警告"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"强制执行会话通知快捷方式"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"要求通知必须有长期共享快捷方式支持，才能显示在会话部分中"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"强制允许将应用写入外部存储设备"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"允许将任何应用写入外部存储设备（无论清单值是什么）"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"强制将活动设为可调整大小"</string>
@@ -421,7 +419,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"红色弱视（红绿不分）"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"蓝色弱视（蓝黄不分）"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"借助颜色校正功能，您可以调整设备上的颜色显示方式"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"借助色彩校正功能，您可以调整设备上的颜色显示方式"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已被“<xliff:g id="TITLE">%1$s</xliff:g>”覆盖"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"大约还可使用 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"估计能用到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"直到<xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"电池电量可能在<xliff:g id="TIME">%1$s</xliff:g> 前耗尽"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"剩余电池续航时间不到 <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"剩余电池续航时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"剩余电池续航时间超过 <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"手机可能即将关机"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"平板电脑可能即将关机"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"设备可能即将关机"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"添加访客"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"移除访客"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"访客"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"设备默认设置"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已启用"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"设备必须重新启动才能应用此更改。您可以立即重新启动或取消。"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"工作资料中的<xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

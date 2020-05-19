@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Режим отладки при подключении к сети Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Ошибка"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Отладка по Wi-Fi"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы посмотреть и использовать доступные устройства, включите отладку по Wi-Fi"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Чтобы увидеть и использовать доступные устройства, включите отладку по Wi-Fi."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Подключить устройство с помощью QR-кода"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Подключение новых устройств с помощью сканера QR-кодов"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Подключить устройство с помощью кода подключения"</string>
@@ -223,7 +223,7 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Не удалось установить подключение"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Убедитесь, что устройство \"<xliff:g id="DEVICE_NAME">%1$s</xliff:g>\" подключено к нужной сети."</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Подключение к устройству"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения к сети Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Код подключения по сети Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Не удалось подключить устройство"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Устройство должно быть подключено к той же самой сети."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Подключение устройства через Wi‑Fi с использованием QR-кода"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Показывать параметры сертификации беспроводных мониторов"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Вести подробный журнал, показывать RSSI для каждого SSID при выборе сети"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Уменьшает расход заряда батареи и улучшает работу сети"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Эта настройка влияет на использование случайных MAC-адресов только в клиентском режиме.\nВо время подключения к любой сети происходит повторное создание случайного MAC-адреса в зависимости от того, когда клиент последний раз отключался от сети. Это не происходит, если соединение возобновляется через четыре часа или раньше."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Если этот режим активирован, MAC-адрес устройства может меняться при каждом подключении к сети, в которой возможно создание случайных MAC-адресов."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сеть с тарификацией трафика"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сеть без тарификации трафика"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Размер буфера журнала"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Уведомлять о том, что приложение, запущенное в фоновом режиме, не отвечает"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Показывать предупреждения канала передачи уведомлений"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Показывать предупреждение о новых уведомлениях приложения вне допустимого канала"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Принудительное использование ярлыков для уведомлений из чатов"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Обязательно дублировать уведомления с помощью долго отображаемых ярлыков, чтобы уведомления появлялись в разделе чатов"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Разрешить сохранение на внешние накопители"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Разрешить сохранение приложений на внешних накопителях (независимо от значений в манифесте)"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Изменение размера в многооконном режиме"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Заряда хватит примерно до <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"До <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Батарея может разрядиться к <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Осталось менее <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит менее чем на <xliff:g id="THRESHOLD">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Уровень заряда батареи: <xliff:g id="LEVEL">%2$s</xliff:g> (хватит более чем на <xliff:g id="TIME_REMAINING">%1$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Осталось более <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Телефон скоро выключится"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшет скоро выключится"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Устройство скоро выключится"</string>
@@ -557,4 +551,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Добавить аккаунт гостя"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Удалить аккаунт гостя"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Гость"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Вариант по умолчанию"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Отключено"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Включено"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Чтобы изменение вступило в силу, необходимо перезапустить устройство. Вы можете сделать это сейчас или позже."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Рабочее приложение \"<xliff:g id="APP_NAME">%s</xliff:g>\""</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

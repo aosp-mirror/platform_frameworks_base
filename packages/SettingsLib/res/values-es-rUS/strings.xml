@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Media"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muy rápida"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Vencido"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Vencida"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconectado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Configuraciones predeterminadas establecidas"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No hay configuraciones predeterminadas establecidas."</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"No se establecieron configuraciones predeterminadas"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Configuración de texto a voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Salida de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de voz"</string>
@@ -213,7 +213,7 @@
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver y usar los dispositivos disponibles, activa la depuración inalámbrica"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Vincular dispositivo mediante código QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Vincular dispositivos nuevos mediante escáner de código QR"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular dispositivo mediante código de sincroniz."</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Vincular dispositivo con código de sincronización"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Vincular dispositivos nuevos mediante código de seis dígitos"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos vinculados"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Conectado actualmente"</string>
@@ -223,8 +223,8 @@
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Error de conexión"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Asegúrate de que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> esté conectado a la red correcta."</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincular con dispositivo"</string>
-    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de sincroniz. de Wi‑Fi"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Error de sincronización"</string>
+    <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Código de vinculación de Wi‑Fi"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Error de vinculación"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Asegúrate de que el dispositivo esté conectado a la misma red."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Escanea un código QR para vincular el dispositivo mediante Wi‑Fi"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Vinculando dispositivo…"</string>
@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Conéctate a una red Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, debug, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Acceso directo para informes de errores"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Mostrar un botón en el menú de encendido para realizar un informe de errores"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Muestra un botón en el menú de encendido para realizar un informe de errores"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Permanecer activo"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"La pantalla nunca quedará inactiva mientras el dispositivo se esté cargando."</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Registro de Bluetooth HCI"</string>
@@ -284,8 +284,8 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opciones de certificación de pantalla inalámbrica"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar nivel de registro Wi-Fi; mostrar por SSID RSSI en el selector de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduce el consumo de batería y mejora el rendimiento de la red"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Esta activación afecta el comportamiento de aleatorización de MAC para el modo de cliente solamente.\nCuando este modo está activado, todas las redes que tienen aleatorización de MAC habilitada pueden volver a establecer de manera aleatoria sus direcciones MAC durante la asociación, según cuándo el cliente se desconectó por última vez de la red. El proceso volver a establecer de manera aleatoria no se produce si el dispositivo se vuelve a conectar en 4 horas o menos."</string>
-    <string name="wifi_metered_label" msgid="8737187690304098638">"Con uso medido"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Si este modo está habilitado, es posible que la dirección MAC del dispositivo cambie cada vez que se conecte a una red que tenga habilitada la aleatorización de MAC."</string>
+    <string name="wifi_metered_label" msgid="8737187690304098638">"De uso medido"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Sin tarifa plana"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamaños de búfer de Logger"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona el tamaño del Logger por búfer"</string>
@@ -331,7 +331,7 @@
     <string name="media_category" msgid="8122076702526144053">"Multimedia"</string>
     <string name="debug_monitoring_category" msgid="1597387133765424994">"Supervisión"</string>
     <string name="strict_mode" msgid="889864762140862437">"Modo estricto"</string>
-    <string name="strict_mode_summary" msgid="1838248687233554654">"Destello por op. de apps en la conversación principal"</string>
+    <string name="strict_mode_summary" msgid="1838248687233554654">"Destello por op. de apps en el subproceso principal"</string>
     <string name="pointer_location" msgid="7516929526199520173">"Ubicación del puntero"</string>
     <string name="pointer_location_summary" msgid="957120116989798464">"Superponer capa en pant. para mostrar puntos tocados"</string>
     <string name="show_touches" msgid="8437666942161289025">"Mostrar presiones"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar diálogo cuando las apps en segundo plano no responden"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Alertas de notificaciones"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Advertencia en pantalla cuando una app publica una notificación sin canal válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Acc. dir. notif. de conv."</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Notif. requieren acc. dir. permanente de uso comp."</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forzar permisos en almacenamiento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Cualquier app puede escribirse en un almacenamiento externo, sin importar los valores del manifiesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forzar actividades para que cambien de tamaño"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Debería durar aproximadamente hasta: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hasta <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Es posible que la batería se agote para las <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Tiempo restante: menos de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Tiempo restante: más de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tiempo restante: más de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Es posible que pronto se apague el teléfono"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Es posible que pronto se apague la tablet"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Es posible que pronto se apague el dispositivo"</string>
@@ -455,7 +449,7 @@
     <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> para completar la carga"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Desconocido"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Cargando"</string>
-    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Carga rápida"</string>
+    <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Cargando rápido"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Carga lenta"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"No se está cargando."</string>
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Conectado. No se puede cargar en este momento"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Agregar invitado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Quitar invitado"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invitado"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Predeterminado del dispositivo"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Inhabilitado"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Habilitado"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Debes reiniciar el dispositivo para que se aplique el cambio. Reinícialo ahora o cancela la acción."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> de trabajo"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

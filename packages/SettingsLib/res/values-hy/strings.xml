@@ -38,7 +38,7 @@
     <string name="saved_network" msgid="7143698034077223645">"Ով է պահել՝ <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="connected_via_network_scorer" msgid="7665725527352893558">"Ավտոմատ կերպով կապակցվել է %1$s-ի միջոցով"</string>
     <string name="connected_via_network_scorer_default" msgid="7973529709744526285">"Ավտոմատ կերպով միացել է ցանցի վարկանիշի ծառայության մատակարարի միջոցով"</string>
-    <string name="connected_via_passpoint" msgid="7735442932429075684">"Կապակցված է %1$s-ի միջոցով"</string>
+    <string name="connected_via_passpoint" msgid="7735442932429075684">"Միացված է %1$s-ի միջոցով"</string>
     <string name="connected_via_app" msgid="3532267661404276584">"Միացված է <xliff:g id="NAME">%1$s</xliff:g>-ի միջոցով"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"Հասանելի է %1$s-ի միջոցով"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Հպեք՝ գրանցվելու համար"</string>
@@ -99,7 +99,7 @@
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Միացված է հեռախոսի ձայնային տվյալներին"</string>
     <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Միացված է ֆայլերի փոխանցման սերվերին"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Միացված է քարտեզին"</string>
-    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Կապակցված է SAP-ին"</string>
+    <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Միացված է SAP-ին"</string>
     <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Ֆայլերը փոխանցող սերվերի հետ կապ չկա"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Միացված է մուտքային սարքին"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Միացված է սարքին` ինտերնետ մտնելու համար"</string>
@@ -278,13 +278,13 @@
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Ընտրեք մասնավոր DNS-ի ռեժիմը"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Անջատված է"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Ավտոմատ"</string>
-    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Մասնավոր DNS ծառայության մատակարարի խնամորդի անունը"</string>
+    <string name="private_dns_mode_provider" msgid="3619040641762557028">"Մասնավոր DNS մատակարարի սերվերը"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Մուտքագրեք DNS ծառայության մատակարարի խնամորդի անունը"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"Չհաջողվեց միանալ"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ցույց տալ անլար էկրանների հավաստագրման ընտրանքները"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Բարձրացնել մակարդակը, Wi‑Fi ընտրիչում ամեն մի SSID-ի համար ցույց տալ RSSI"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Նվազեցնում է մարտկոցի սպառումը և լավացնում ցանցի աշխատանքը"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Այս կարգավորումը միացնում է MAC հասցեների պատահական ընտրությունը միայն սպասառուի ռեժիմում։\nԵրբ այս ռեժիմն ակտիվացված է, բոլոր ցանցերը, որոնց համար միացված է MAC հասցեների պատահական ընտրությունը, կապակցման ժամանակ կարող են նորից պատահական MAC հասցե ընտրել՝ կախված այն բանից, թե երբ է սպասառուն վերջին անգամ անջատվել ցանցից։ Պատահական ընտրության կրկնությունը տեղի չի ունենում, եթե սարքը նորից է միանում ցանցին 4 ժամից պակաս ժամանակահատվածում։"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Երբ այս ռեժիմը միացված է, MAC հասցեն կարող է փոխվել ամեն անգամ, երբ սարքը միանա որևէ ցանցի, որում միացված է MAC հասցեների պատահական ընտրությունը։"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Վճարովի թրաֆիկ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Անսահմանափակ թրաֆիկ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Մատյանի բուֆերի չափերը"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ցուցադրել «Հավելվածը չի արձագանքում» պատուհանը ֆոնային հավելվածների համար"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ցուցադրել ծանուցումների ալիքի զգուշացումները"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Էկրանին ցուցադրվում է զգուշացում, երբ որևէ հավելված փակցնում է ծանուցում առանց վավեր ալիքի"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Միացնել զրույցների ծանուցումների դյուրանցումները"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Պահանջել, որ ծանուցումները պահվեն երկարաժամկետ հասանելիության դյուրանցումով՝ զրույցների բաժնում հայտնվելու համար"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Թույլատրել պահումն արտաքին կրիչներում"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Թույլ է տալիս ցանկացած հավելված պահել արտաքին սարքում՝ մանիֆեստի արժեքներից անկախ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Չափերի փոփոխում բազմապատուհան ռեժիմում"</string>
@@ -435,15 +433,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Մարտկոցի լիցքը կարող է սպառվել մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Լիցքը կարող է սպառվել մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից քիչ"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից քիչ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Մնացել է ավելի քան <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Մնացել է ավելի քան <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Հեռախոսը շուտով կանջատվի"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Պլանշետը շուտով կանջատվի"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Սարքը շուտով կանջատվի"</string>
@@ -458,7 +452,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Արագ լիցքավորում"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Դանդաղ լիցքավորում"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Չի լիցքավորվում"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Միացված է հոսանքի աղբյուրին, սակայն այս պահին չի կարող լիցքավորվել"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Միացված է հոսանքին, այս պահին չի կարող լիցքավորվել"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Լիցքավորված է"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="disabled" msgid="8017887509554714950">"Կասեցված է"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Ավելացնել հյուր"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Հեռացնել հյուրին"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Հյուր"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Կանխադրված տարբերակ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Անջատված է"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Միացված է"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Սարքն անհրաժեշտ է վերագործարկել, որպեսզի փոփոխությունը կիրառվի։ Վերագործարկեք հիմա կամ չեղարկեք փոփոխությունը։"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Աշխատանքային <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

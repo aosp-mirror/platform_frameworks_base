@@ -222,16 +222,16 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Fingerabdruck des Geräts: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Verbindung fehlgeschlagen"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Prüfe, ob <xliff:g id="DEVICE_NAME">%1$s</xliff:g> mit dem richtigen Netzwerk verbunden ist"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Mit einem Gerät koppeln"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Mit Gerät koppeln"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"WLAN-Kopplungscode"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Kopplung fehlgeschlagen"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Prüfe, ob das Gerät mit demselben Netzwerk verbunden ist."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Scanne einen QR-Code, um ein Gerät über WLAN zu koppeln"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Scanne einen QR-Code, um das Gerät über WLAN zu koppeln"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Gerät wird gekoppelt…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Das Gerät konnte nicht gekoppelt werden. Der QR-Code war nicht korrekt oder das Gerät ist nicht mit demselben Netzwerk verbunden."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-Adresse &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-Code scannen"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Scanne einen QR-Code, um ein Gerät über WLAN zu koppeln"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Scanne einen QR-Code, um das Gerät über WLAN zu koppeln"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Bitte stell eine WLAN-Verbindung her"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, Debug, Dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Verknüpfung zu Fehlerbericht"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"WLAN-Protokollierungsebene erhöhen, pro SSID RSSI in WiFi Picker anzeigen"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Verringert den Akkuverbrauch und verbessert die Netzwerkleistung"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Hiermit wird das Verhalten der MAC-Adressrandomisierung ausschließlich für den Clientmodus umgeschaltet.\nWenn dieser Modus aktiviert ist, werden bei allen Netzwerken, bei denen die MAC-Randomisierung aktiviert ist, die MAC-Adressen während der Verknüpfung abhängig davon, wann der Client zuletzt vom Netzwerk getrennt wurde, wieder randomisiert. Die erneute Randomisierung findet nicht statt, wenn die Verbindung des Geräts innerhalb von maximal 4 Stunden wiederhergestellt wird."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Wenn dieser Modus aktiviert ist, kann sich die MAC-Adresse dieses Geräts bei jeder Verbindung mit einem Netzwerk ändern, bei dem die MAC-Adressen randomisiert werden."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Kostenpflichtig"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Kostenlos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger-Puffergrößen"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Bei Abstürzen von Hintergrund-Apps \"App reagiert nicht\"-Dialog anzeigen"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Benachrichtigungskanal- Warnungen anzeigen"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Bei Benachrichtigungen ohne gültigen Kanal wird eine Warnung angezeigt"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Tastenkombination für Benachrichtigungen zur Unterhaltung erzwingen"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Benachrichtigungen müssen durch eine langlebige Tastenkombination zum Teilen unterstützt werden, um im Bereich der Unterhaltung zu erscheinen"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Sperrung des externen Speichers für alle Apps aufheben"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Jede App kann, ungeachtet der Manifestwerte, in den externen Speicher geschrieben werden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Aktivitätengröße darf immer angepasst werden"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Sollte etwa bis <xliff:g id="TIME">%1$s</xliff:g> reichen"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Bis <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Der Akku ist voraussichtlich um <xliff:g id="TIME">%1$s</xliff:g> leer"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Weniger als <xliff:g id="THRESHOLD">%1$s</xliff:g> verbleibend"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Weniger als <xliff:g id="THRESHOLD">%1$s</xliff:g> verbleibend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Mehr als <xliff:g id="TIME_REMAINING">%1$s</xliff:g> verbleibend"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Smartphone wird eventuell bald ausgeschaltet"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet wird eventuell bald ausgeschaltet"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Gerät wird eventuell bald ausgeschaltet"</string>
@@ -513,7 +507,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Dauer"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Bis zur Deaktivierung"</string>
-    <string name="time_unit_just_now" msgid="3006134267292728099">"gerade eben"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Gerade eben"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Smartphone-Lautsprecher"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Gast hinzufügen"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Gast entfernen"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gast"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Gerätestandard"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiviert"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiviert"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Damit diese Änderung übernommen wird, musst du dein Gerät neu starten. Du kannst es jetzt neu starten oder den Vorgang abbrechen."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (geschäftlich)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

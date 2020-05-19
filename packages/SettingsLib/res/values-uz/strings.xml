@@ -76,7 +76,7 @@
     <string name="bluetooth_connected_no_headset_battery_level" msgid="2661863370509206428">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (telefondan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_a2dp_battery_level" msgid="6499078454894324287">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (mediadan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_connected_no_headset_no_a2dp_battery_level" msgid="8477440576953067242">"<xliff:g id="ACTIVE_DEVICE">%2$s</xliff:g> ulandi (telefon yoki mediadan tashqari), batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Faol, batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_active_battery_level" msgid="3450745316700494425">"Faol, batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_battery_level_untethered" msgid="2706188607604205362">"Faol, L: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level" msgid="2893696778200201555">"Batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_untethered" msgid="4002282355111504349">"L: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, R: batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
@@ -129,8 +129,8 @@
     <string name="bluetooth_talkback_bluetooth" msgid="1143241359781999989">"Bluetooth"</string>
     <string name="bluetooth_hearingaid_left_pairing_message" msgid="8561855779703533591">"Chap eshitish apparati ulanmoqda…"</string>
     <string name="bluetooth_hearingaid_right_pairing_message" msgid="2655347721696331048">"O‘ng eshitish apparati ulanmoqda…"</string>
-    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Chap eshitish apparati – batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
-    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"O‘ng eshitish apparati – batariya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_left_battery_level" msgid="7375621694748104876">"Chap eshitish apparati, batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
+    <string name="bluetooth_hearingaid_right_battery_level" msgid="1850094448499089312">"O‘ng eshitish apparati, batareya quvvati: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="accessibility_wifi_off" msgid="1195445715254137155">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_no_wifi" msgid="5297119459491085771">"Wi-Fi o‘chiq."</string>
     <string name="accessibility_wifi_one_bar" msgid="6025652717281815212">"Wi-Fi: bitta ustun"</string>
@@ -148,12 +148,12 @@
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth modem"</string>
     <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Modem"</string>
     <string name="tether_settings_title_all" msgid="8910259483383010470">"Modem rejimi"</string>
-    <string name="managed_user_title" msgid="449081789742645723">"Barcha ishchi ilovalar"</string>
+    <string name="managed_user_title" msgid="449081789742645723">"Barcha ishga oid ilovalar"</string>
     <string name="user_guest" msgid="6939192779649870792">"Mehmon"</string>
     <string name="unknown" msgid="3544487229740637809">"Noma’lum"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Foydalanuvchi: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Ba’zi birlamchi sozlamalar o‘rnatilgan"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar o‘rnatilmagan"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Birlamchi sozlamalar belgilanmagan"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Nutq sintezi sozlamalari"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Nutq sintezi"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Nutq tezligi"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Simsiz monitorlarni sertifikatlash parametrini ko‘rsatish"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ulanishini tanlashda har bir SSID uchun jurnalda ko‘rsatilsin"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Batareya sarfini tejaydi va tarmoq samaradorligini oshiradi"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Bu sozlama faqat mijoz rejimida tasodifiy MAC manzillardan foydalanishga taʼsir qiladi.\nHar qanday tarmoqqa ulanishda mijoz oxirgi marta tarmoqdan qachon uzilganiga qarab tasodifiy MAC manzili qayta yaratiladi. Agar ulanish 4 soat yoki kamroq davom etsa, tasodifiy MAC manzili qayta yaratilmaydi."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Bu rejim yoqilganda qurilmaning MAC manzili tasodifiy MAC manzillar yaratish imkoniyati mavjud tarmoqqa har safar ulanganda almashishi mumkin."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Trafik hisoblanadigan tarmoq"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Trafik hisobi yuritilmaydigan tarmoq"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Jurnal buferi hajmi"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ilova javob bermayotgani haqida xabar qilish"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Xabarlar kanali ogohlantirishlarini ko‘rsatish"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Yaroqli kanalsiz yuborilgan yangi ilova xabarnomalari haqida ogohlantirishlarni ko‘rsatish"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Suhbat bildirishnomalari uchun yorliqlardan majburiy foydalanish"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Bildirishnoma suhbat qismida chiqishi uchun uzoq koʻrinadigan belgilar yordamida ularni nusxalash kerak"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tashqi xotira qurilmasidagi ilova dasturlariga majburiy ruxsat berish"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Manifest qiymatidan qat’i nazar istalgan ilovani tashqi xotiraga saqlash imkonini beradi"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Harakatlarni moslashuvchan o‘lchamga keltirish"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Taxminan <xliff:g id="TIME">%1$s</xliff:g> gacha davom etadi"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> gacha"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batareya quvvati tugash vaqti: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g>dan kam qoldi"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g>dan kam qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>dan koʻproq qoldi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g>dan koʻproq qoldi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon tez orada oʻchib qolishi mumkin"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Planshet tez orada oʻchib qolishi mumkin"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Qurilma tez orada oʻchib qolishi mumkin"</string>
@@ -451,8 +445,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Planshet tez orada oʻchib qolishi mumkin (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Qurilma tez orada oʻchib qolishi mumkin (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ichida toʻliq quvvat oladi"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> ichida toʻliq quvvat oladi"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ichida toʻladi"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="TIME">%2$s</xliff:g> ichida toʻladi"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Noma’lum"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Quvvat olmoqda"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Tezkor quvvat olmoqda"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Mehmon kiritish"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Mehmon rejimini olib tashlash"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Mehmon"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Qurilma standarti"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Yoqilmagan"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Yoniq"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Oʻzgarishlar qurilma oʻchib yonganda bajariladi. Hoziroq oʻchib yoqish yoki bekor qilish."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Ish <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

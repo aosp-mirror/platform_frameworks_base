@@ -205,7 +205,7 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"การตั้งค่าจุดเข้าใช้งานไม่สามารถใช้ได้สำหรับผู้ใช้รายนี้"</string>
     <string name="enable_adb" msgid="8072776357237289039">"การแก้ไขข้อบกพร่อง USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"ยกเลิกการให้สิทธิ์การแก้ปัญหา USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"เพิกถอนการให้สิทธิ์การแก้ไขข้อบกพร่อง USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"โหมดแก้ไขข้อบกพร่องเมื่อเชื่อมต่อ Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ข้อผิดพลาด"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"แสดงตัวเลือกสำหรับการรับรองการแสดงผล แบบไร้สาย"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"เพิ่มระดับการบันทึก Wi‑Fi แสดงต่อ SSID RSSI ในตัวเลือก Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ลดการเปลืองแบตเตอรี่และเพิ่มประสิทธิภาพเครือข่าย"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"การตั้งค่านี้ส่งผลต่อลักษณะการสุ่ม MAC ในโหมดไคลเอ็นต์เท่านั้น\nเมื่อเปิดใช้งานโหมดนี้ ทุกเครือข่ายที่มีการเปิดใช้การสุ่ม MAC อาจสุ่มที่อยู่ MAC ซ้ำในระหว่างการเชื่อมโยง ทั้งนี้ขึ้นอยู่กับว่าไคลเอ็นต์ยกเลิกการเชื่อมต่อกับเครือข่ายครั้งสุดท้ายเมื่อใด การสุ่มซ้ำจะไม่เกิดขึ้นหากอุปกรณ์เชื่อมต่ออีกครั้งภายในไม่เกิน 4 ชั่วโมง"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"เมื่อเปิดใช้โหมดนี้ ที่อยู่ MAC ของอุปกรณ์นี้อาจเปลี่ยนทุกครั้งที่เชื่อมต่อกับเครือข่ายที่มีการเปิดใช้การสุ่ม MAC"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ไม่มีการวัดปริมาณอินเทอร์เน็ต"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ขนาดบัฟเฟอร์ของตัวบันทึก"</string>
@@ -359,7 +359,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"การแสดงผล HWUI ตามโปรไฟล์"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"เปิดใช้เลเยอร์การแก้ไขข้อบกพร่อง GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"อนุญาตให้โหลดเลเยอร์การแก้ไขข้อบกพร่อง GPU สำหรับแอปแก้ไขข้อบกพร่อง"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"เปิดบันทึกเวนเดอร์เพิ่มเติม"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"เปิดการบันทึกเวนเดอร์แบบละเอียด"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"รวมบันทึกเวนเดอร์เพิ่มเติมเฉพาะอุปกรณ์ไว้ในรายงานข้อบกพร่อง ซึ่งอาจมีข้อมูลส่วนตัว ใช้แบตเตอรี่มากขึ้น และ/หรือใช้พื้นที่เก็บข้อมูลมากขึ้น"</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"อัตราการเคลื่อนไหวของหน้าต่าง"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"อัตราการเคลื่อนไหวของการเปลี่ยนภาพ"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"แสดงกล่องโต้ตอบ \"แอปไม่ตอบสนอง\" สำหรับแอปพื้นหลัง"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"แสดงคำเตือนจากช่องทางการแจ้งเตือน"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"แสดงคำเตือนบนหน้าจอเมื่อแอปโพสต์การแจ้งเตือนโดยไม่มีช่องทางที่ถูกต้อง"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"บังคับใช้ทางลัดสำหรับการแจ้งเตือนการสนทนา"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ต้องทำให้การแจ้งเตือนปรากฏในส่วนการสนทนาได้อีกถ้ามีการปิดไปโดยใช้ทางลัดการแชร์ที่แสดงอยู่ตลอด"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"บังคับให้แอปสามารถใช้ที่เก็บภายนอก"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"เขียนแอปในพื้นที่เก็บข้อมูลภายนอกได้ โดยไม่คำนึงถึงค่าไฟล์ Manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"บังคับให้กิจกรรมปรับขนาดได้"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"น่าจะใช้งานได้ถึงเวลาประมาณ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"จนถึง <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"แบตเตอรี่อาจหมดภายใน <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"เหลือน้อยกว่า <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"เหลือน้อยกว่า <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"เหลืออีกกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"เหลืออีกกว่า <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"โทรศัพท์อาจปิดเครื่องในไม่ช้า"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"แท็บเล็ตอาจปิดเครื่องในไม่ช้า"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"อุปกรณ์อาจปิดเครื่องในไม่ช้า"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"เพิ่มผู้เข้าร่วม"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"นำผู้เข้าร่วมออก"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ผู้ใช้ชั่วคราว"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ค่าเริ่มต้นของอุปกรณ์"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ปิดใช้"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"เปิดใช้"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"คุณต้องรีบูตอุปกรณ์เพื่อให้การเปลี่ยนแปลงนี้มีผล รีบูตเลยหรือยกเลิก"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> ในโปรไฟล์งาน"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

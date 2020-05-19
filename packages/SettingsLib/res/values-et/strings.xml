@@ -212,7 +212,7 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Juhtmevaba silumine"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Saadaolevate seadmete nägemiseks ja kasutamiseks lülitage sisse juhtmevaba silumine"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Seadme sidumine QR-koodiga"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Uute seadmete sidumine QR-koodi skanneriga"</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Uute seadmete sidumine QR-koodiskanneriga"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Seadme sidumine sidumiskoodiga"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Uute seadmete sidumine kuuekohalise koodiga"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Seotud seadmed"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Juhtmeta ekraaniühenduse sertifitseerimisvalikute kuvamine"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Suurenda WiFi logimistaset, kuva WiFi valijas SSID RSSI järgi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Aeglustab aku tühjenemist ja parandab võrgu toimivust"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"See lüliti mõjutab MAC-aadressi juhuslikustamise käitumist ainult kliendirežiimis.\nSelle režiimi aktiveerimisel võidakse seostamise ajal MAC-aadressid uuesti juhuslikustada kõigi võrkude jaoks, millel on MAC-aadressi juhuslikustamine lubatud, olenevalt sellest, millal klient viimati ühenduse võrguga katkestas. Uuesti juhuslikustamist ei toimu juhul, kui seade loob uuesti ühenduse kuni 4 tunni jooksul."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kui see režiim on lubatud, võidakse selle seadme MAC-aadressi muuta iga kord, kui see ühendatakse võrguga, milles on juhusliku MAC-aadressi määramine lubatud."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mahupõhine"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mittemahupõhine"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logija puhvri suurused"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Kuva taustarakenduste puhul dialoog Rakendus ei reageeri"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Kuva märguandekanali hoiatused"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Esitab ekraanil hoiatuse, kui rakendus postitab kehtiva kanalita märguande"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Otseteede jõustamine vestluste märguannete jaoks"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Nõutakse märguannete toetamist pikaajalise jagamise otseteega, et selle saaks vestluse jaotises kuvada"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Luba rakendused välises salvestusruumis"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Lubab mis tahes rakendusi kirjutada välisesse salvestusruumi manifesti väärtustest olenemata"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Muuda tegevuste suurused muudetavaks"</string>
@@ -421,7 +419,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaalia (punane-roheline)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaalia (sinine-kollane)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"Värvide korrigeerimine"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Värvikorrigeerimine võimaldab kohandada seadmes kuvatavaid värve"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"Värvide korrigeerimine võimaldab kohandada seadmes kuvatavaid värve"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"Alistas <xliff:g id="TITLE">%1$s</xliff:g>"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> – <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_remaining_duration_only" msgid="8264199158671531431">"Ligikaudu <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Peaks kestma kuni <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Kuni <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Aku võib tühjaks saada kell <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Vähem kui <xliff:g id="THRESHOLD">%1$s</xliff:g> jäänud"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Vähem kui <xliff:g id="THRESHOLD">%1$s</xliff:g> jäänud (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Rohkem kui <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Rohkem kui <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäänud"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon võib peagi välja lülituda"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tahvelarvuti võib peagi välja lülituda"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Seade võib peagi välja lülituda"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Lisa külaline"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Eemalda külaline"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Külaline"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Seadme vaikeseade"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Keelatud"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Lubatud"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Selle muudatuse rakendamiseks tuleb seade taaskäivitada. Taaskäivitage kohe või tühistage."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Töö: <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

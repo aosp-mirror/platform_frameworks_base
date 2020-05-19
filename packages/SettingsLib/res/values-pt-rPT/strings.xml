@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Média"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muito rápida"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirado"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirada"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desligado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"A desligar..."</string>
@@ -212,9 +212,9 @@
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Depuração sem fios"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Para ver e utilizar dispositivos disponíveis, ative a depuração sem fios."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Sincronize o dispositivo com o código QR"</string>
-    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Sincronize novos dispositivos com o leitor de códigos QR."</string>
+    <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Sincroniza novos dispositivos com o leitor de códigos QR."</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Sincronize dispositivo com código de sincronização"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sincronize novos dispositivos através do código de seis dígitos."</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Sincroniza novos dispositivos através do código de seis dígitos."</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Dispositivos sincronizados"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Atualmente ligado."</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Detalhes do dispositivo"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostrar opções da certificação de display sem fios"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumentar o nível de reg. de Wi-Fi, mostrar por RSSI de SSID no Selec. de Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduz o consumo rápido da bateria e melhora o desempenho da rede"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Este botão ativar/desativar afeta o comportamento da seleção aleatória do MAC apenas para o modo de cliente.\nQuando este modo está ativado, qualquer rede que tenha a seleção aleatória do MAC ativa pode fazer com que os seus endereços MAC sejam novamente selecionados de forma aleatória durante a associação, dependendo de quando o cliente se desligou da rede pela última vez. A nova seleção aleatória não ocorre se a ligação do dispositivo for restabelecida em 4 horas ou menos."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando este modo estiver ativado, o endereço MAC deste dispositivo pode mudar sempre que o mesmo estabelece ligação a uma rede que tenha a seleção aleatória do MAC ativada."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Acesso limitado"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Acesso ilimitado"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tamanhos da memória intermédia do registo"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostrar caixa de diálogo A aplicação não está a responder para aplicações em segundo plano"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostrar avisos do canal de notificações"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra um aviso no ecrã quando uma aplicação publica uma notificação sem o canal ser válido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Aplicar atalhos para notificações de conversas"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Solicitar cópia de seg. das notif. por atalho de partilha de longa duração p/ apresentação na secção de conversas"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forçar permissão de apps no armazenamento externo"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Torna qualquer aplicação elegível para ser gravada no armazenamento externo, independentemente dos valores do manifesto"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forçar as atividades a serem redimensionáveis"</string>
@@ -401,7 +399,7 @@
     <string name="inactive_apps_title" msgid="5372523625297212320">"Aplicações em espera"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Inativo. Toque para ativar/desativar."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Ativo. Toque para ativar/desativar."</string>
-    <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado do Modo de espera das aplicações:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"Estado do Modo de espera das apps:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Serviços em execução"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Ver e controlar os serviços actualmente em execução"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"Implementação WebView"</string>
@@ -508,7 +506,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"no(a) <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duração"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Perguntar sempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Até ser desativado"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Até desativar"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Agora mesmo"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altifalante do telemóvel"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problema ao ligar. Desligue e volte a ligar o dispositivo."</string>
@@ -551,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Adicionar convidado"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remover convidado"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Convidado"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Predefinição do dispositivo"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desativada"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ativada"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necessário reiniciar o dispositivo para aplicar esta alteração. Reinicie agora ou cancele."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> de trabalho"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>
