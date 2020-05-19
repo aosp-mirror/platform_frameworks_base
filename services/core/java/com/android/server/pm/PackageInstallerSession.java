@@ -1774,104 +1774,99 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             throw new PackageManagerException(INSTALL_FAILED_INTERNAL_ERROR, "Session not sealed");
         }
 
-        final IPackageInstallObserver2 localObserver;
-        if (isApexInstallation()) {
-            localObserver = null;
-        } else {
-            if (!params.isMultiPackage) {
-                Objects.requireNonNull(mPackageName);
-                Objects.requireNonNull(mSigningDetails);
-                Objects.requireNonNull(mResolvedBaseFile);
+        if (!params.isMultiPackage) {
+            Objects.requireNonNull(mPackageName);
+            Objects.requireNonNull(mSigningDetails);
+            Objects.requireNonNull(mResolvedBaseFile);
 
-                if (needToAskForPermissionsLocked()) {
-                    // User needs to confirm installation;
-                    // give installer an intent they can use to involve
-                    // user.
-                    final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
-                    intent.setPackage(mPm.getPackageInstallerPackageName());
-                    intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
+            if (needToAskForPermissionsLocked()) {
+                // User needs to confirm installation;
+                // give installer an intent they can use to involve
+                // user.
+                final Intent intent = new Intent(PackageInstaller.ACTION_CONFIRM_INSTALL);
+                intent.setPackage(mPm.getPackageInstallerPackageName());
+                intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
 
-                    sendOnUserActionRequired(mContext, mRemoteStatusReceiver, sessionId, intent);
+                sendOnUserActionRequired(mContext, mRemoteStatusReceiver, sessionId, intent);
 
-                    // Commit was keeping session marked as active until now; release
-                    // that extra refcount so session appears idle.
-                    closeInternal(false);
-                    return null;
-                }
-
-                // Inherit any packages and native libraries from existing install that
-                // haven't been overridden.
-                if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
-                    try {
-                        final List<File> fromFiles = mResolvedInheritedFiles;
-                        final File toDir = stageDir;
-
-                        if (LOGD) Slog.d(TAG, "Inherited files: " + mResolvedInheritedFiles);
-                        if (!mResolvedInheritedFiles.isEmpty() && mInheritedFilesBase == null) {
-                            throw new IllegalStateException("mInheritedFilesBase == null");
-                        }
-
-                        if (isLinkPossible(fromFiles, toDir)) {
-                            if (!mResolvedInstructionSets.isEmpty()) {
-                                final File oatDir = new File(toDir, "oat");
-                                createOatDirs(mResolvedInstructionSets, oatDir);
-                            }
-                            // pre-create lib dirs for linking if necessary
-                            if (!mResolvedNativeLibPaths.isEmpty()) {
-                                for (String libPath : mResolvedNativeLibPaths) {
-                                    // "/lib/arm64" -> ["lib", "arm64"]
-                                    final int splitIndex = libPath.lastIndexOf('/');
-                                    if (splitIndex < 0 || splitIndex >= libPath.length() - 1) {
-                                        Slog.e(TAG,
-                                                "Skipping native library creation for linking due"
-                                                        + " to invalid path: " + libPath);
-                                        continue;
-                                    }
-                                    final String libDirPath = libPath.substring(1, splitIndex);
-                                    final File libDir = new File(toDir, libDirPath);
-                                    if (!libDir.exists()) {
-                                        NativeLibraryHelper.createNativeLibrarySubdir(libDir);
-                                    }
-                                    final String archDirPath = libPath.substring(splitIndex + 1);
-                                    NativeLibraryHelper.createNativeLibrarySubdir(
-                                            new File(libDir, archDirPath));
-                                }
-                            }
-                            linkFiles(fromFiles, toDir, mInheritedFilesBase);
-                        } else {
-                            // TODO: this should delegate to DCS so the system process
-                            // avoids holding open FDs into containers.
-                            copyFiles(fromFiles, toDir);
-                        }
-                    } catch (IOException e) {
-                        throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
-                                "Failed to inherit existing install", e);
-                    }
-                }
-
-                // TODO: surface more granular state from dexopt
-                mInternalProgress = 0.5f;
-                computeProgressLocked(true);
-
-                extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
+                // Commit was keeping session marked as active until now; release
+                // that extra refcount so session appears idle.
+                closeInternal(false);
+                return null;
             }
 
-            // We've reached point of no return; call into PMS to install the stage.
-            // Regardless of success or failure we always destroy session.
-            localObserver = new IPackageInstallObserver2.Stub() {
-                @Override
-                public void onUserActionRequired(Intent intent) {
-                    throw new IllegalStateException();
-                }
+            // Inherit any packages and native libraries from existing install that
+            // haven't been overridden.
+            if (params.mode == SessionParams.MODE_INHERIT_EXISTING) {
+                try {
+                    final List<File> fromFiles = mResolvedInheritedFiles;
+                    final File toDir = stageDir;
 
-                @Override
-                public void onPackageInstalled(String basePackageName, int returnCode, String msg,
-                        Bundle extras) {
-                    destroyInternal();
-                    dispatchSessionFinished(returnCode, msg, extras);
+                    if (LOGD) Slog.d(TAG, "Inherited files: " + mResolvedInheritedFiles);
+                    if (!mResolvedInheritedFiles.isEmpty() && mInheritedFilesBase == null) {
+                        throw new IllegalStateException("mInheritedFilesBase == null");
+                    }
+
+                    if (isLinkPossible(fromFiles, toDir)) {
+                        if (!mResolvedInstructionSets.isEmpty()) {
+                            final File oatDir = new File(toDir, "oat");
+                            createOatDirs(mResolvedInstructionSets, oatDir);
+                        }
+                        // pre-create lib dirs for linking if necessary
+                        if (!mResolvedNativeLibPaths.isEmpty()) {
+                            for (String libPath : mResolvedNativeLibPaths) {
+                                // "/lib/arm64" -> ["lib", "arm64"]
+                                final int splitIndex = libPath.lastIndexOf('/');
+                                if (splitIndex < 0 || splitIndex >= libPath.length() - 1) {
+                                    Slog.e(TAG,
+                                            "Skipping native library creation for linking due"
+                                                    + " to invalid path: " + libPath);
+                                    continue;
+                                }
+                                final String libDirPath = libPath.substring(1, splitIndex);
+                                final File libDir = new File(toDir, libDirPath);
+                                if (!libDir.exists()) {
+                                    NativeLibraryHelper.createNativeLibrarySubdir(libDir);
+                                }
+                                final String archDirPath = libPath.substring(splitIndex + 1);
+                                NativeLibraryHelper.createNativeLibrarySubdir(
+                                        new File(libDir, archDirPath));
+                            }
+                        }
+                        linkFiles(fromFiles, toDir, mInheritedFilesBase);
+                    } else {
+                        // TODO: this should delegate to DCS so the system process
+                        // avoids holding open FDs into containers.
+                        copyFiles(fromFiles, toDir);
+                    }
+                } catch (IOException e) {
+                    throw new PackageManagerException(INSTALL_FAILED_INSUFFICIENT_STORAGE,
+                            "Failed to inherit existing install", e);
                 }
-            };
+            }
+
+            // TODO: surface more granular state from dexopt
+            mInternalProgress = 0.5f;
+            computeProgressLocked(true);
+
+            extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
         }
+
+        // We've reached point of no return; call into PMS to install the stage.
+        // Regardless of success or failure we always destroy session.
+        final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
+            @Override
+            public void onUserActionRequired(Intent intent) {
+                throw new IllegalStateException();
+            }
+
+            @Override
+            public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                    Bundle extras) {
+                destroyInternal();
+                dispatchSessionFinished(returnCode, msg, extras);
+            }
+        };
 
         final UserHandle user;
         if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
