@@ -18,13 +18,19 @@ package com.android.media.tv.remoteprovider;
 
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
+import android.annotation.SuppressAutoDoc;
 import android.content.Context;
 import android.media.tv.ITvRemoteProvider;
 import android.media.tv.ITvRemoteServiceInput;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.annotation.IntDef;
 import android.util.Log;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.LinkedList;
 import java.util.Objects;
 
@@ -42,6 +48,63 @@ import java.util.Objects;
 
 
 public abstract class TvRemoteProvider {
+
+    /** @hide */
+    @IntDef({
+         KeyEvent.KEYCODE_BUTTON_A,
+         KeyEvent.KEYCODE_BUTTON_B,
+         KeyEvent.KEYCODE_BUTTON_X,
+         KeyEvent.KEYCODE_BUTTON_Y,
+         KeyEvent.KEYCODE_BUTTON_L1,
+         KeyEvent.KEYCODE_BUTTON_L2,
+         KeyEvent.KEYCODE_BUTTON_R1,
+         KeyEvent.KEYCODE_BUTTON_R2,
+         KeyEvent.KEYCODE_BUTTON_SELECT,
+         KeyEvent.KEYCODE_BUTTON_START,
+         KeyEvent.KEYCODE_BUTTON_MODE,
+         KeyEvent.KEYCODE_BUTTON_THUMBL,
+         KeyEvent.KEYCODE_BUTTON_THUMBR,
+         KeyEvent.KEYCODE_DPAD_UP,
+         KeyEvent.KEYCODE_DPAD_DOWN,
+         KeyEvent.KEYCODE_DPAD_LEFT,
+         KeyEvent.KEYCODE_DPAD_RIGHT,
+         KeyEvent.KEYCODE_BUTTON_1,
+         KeyEvent.KEYCODE_BUTTON_2,
+         KeyEvent.KEYCODE_BUTTON_3,
+         KeyEvent.KEYCODE_BUTTON_4,
+         KeyEvent.KEYCODE_BUTTON_5,
+         KeyEvent.KEYCODE_BUTTON_6,
+         KeyEvent.KEYCODE_BUTTON_7,
+         KeyEvent.KEYCODE_BUTTON_8,
+         KeyEvent.KEYCODE_BUTTON_9,
+         KeyEvent.KEYCODE_BUTTON_10,
+         KeyEvent.KEYCODE_BUTTON_11,
+         KeyEvent.KEYCODE_BUTTON_12,
+         KeyEvent.KEYCODE_BUTTON_13,
+         KeyEvent.KEYCODE_BUTTON_14,
+         KeyEvent.KEYCODE_BUTTON_15,
+         KeyEvent.KEYCODE_BUTTON_16,
+         KeyEvent.KEYCODE_ASSIST,
+         KeyEvent.KEYCODE_VOICE_ASSIST,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GamepadKeyCode {
+    }
+
+    /** @hide */
+    @IntDef({
+         MotionEvent.AXIS_X,
+         MotionEvent.AXIS_Y,
+         MotionEvent.AXIS_Z,
+         MotionEvent.AXIS_RZ,
+         MotionEvent.AXIS_LTRIGGER,
+         MotionEvent.AXIS_RTRIGGER,
+         MotionEvent.AXIS_HAT_X,
+         MotionEvent.AXIS_HAT_Y,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface GamepadAxis {
+    }
 
     /**
      * The {@link Intent} that must be declared as handled by the service.
@@ -357,10 +420,13 @@ public abstract class TvRemoteProvider {
      *   <li> Assistant: ASSIST, VOICE_ASSIST
      * </ul>
      *
-     * @param token   identifier for the device
+     * @param token   identifier for the device. This value must never be null.
      * @param keyCode the gamepad key that was pressed (like BUTTON_A)
+     *
      */
-    public void sendGamepadKeyDown(@NonNull IBinder token, int keyCode) throws RuntimeException {
+    @SuppressAutoDoc
+    public void sendGamepadKeyDown(@NonNull IBinder token, @GamepadKeyCode int keyCode)
+            throws RuntimeException {
         Objects.requireNonNull(token);
         if (DEBUG_KEYS) {
             Log.d(TAG, "sendGamepadKeyDown() token: " + token);
@@ -378,10 +444,12 @@ public abstract class TvRemoteProvider {
      *
      * @see sendGamepadKeyDown for supported key codes.
      *
-     * @param token identifier for the device
+     * @param token identifier for the device. This value mus never be null.
      * @param keyCode the gamepad key that was pressed
      */
-    public void sendGamepadKeyUp(@NonNull IBinder token, int keyCode) throws RuntimeException {
+    @SuppressAutoDoc
+    public void sendGamepadKeyUp(@NonNull IBinder token, @GamepadKeyCode int keyCode)
+            throws RuntimeException {
         Objects.requireNonNull(token);
         if (DEBUG_KEYS) {
             Log.d(TAG, "sendGamepadKeyUp() token: " + token);
@@ -406,13 +474,14 @@ public abstract class TvRemoteProvider {
      * For non-trigger axes, the range of acceptable values is [-1, 1]. The trigger axes support
      * values [0, 1].
      *
-     * @param token identifier for the device
+     * @param token identifier for the device. This value must never be null.
      * @param axis  MotionEvent axis
      * @param value the value to send
      */
+    @SuppressAutoDoc
     public void sendGamepadAxisValue(
-            @NonNull IBinder token, int axis, @FloatRange(from = -1.0f, to = 1.0f) float value)
-            throws RuntimeException {
+            @NonNull IBinder token, @GamepadAxis int axis,
+            @FloatRange(from = -1.0f, to = 1.0f) float value) throws RuntimeException {
         Objects.requireNonNull(token);
         if (DEBUG_KEYS) {
             Log.d(TAG, "sendGamepadAxisValue() token: " + token);
