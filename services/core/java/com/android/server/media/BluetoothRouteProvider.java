@@ -169,7 +169,9 @@ class BluetoothRouteProvider {
         for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()) {
             if (device.isConnected()) {
                 BluetoothRouteInfo newBtRoute = createBluetoothRoute(device);
-                mBluetoothRoutes.put(device.getAddress(), newBtRoute);
+                if (newBtRoute.connectedProfiles.size() > 0) {
+                    mBluetoothRoutes.put(device.getAddress(), newBtRoute);
+                }
             }
         }
     }
@@ -233,22 +235,32 @@ class BluetoothRouteProvider {
     private BluetoothRouteInfo createBluetoothRoute(BluetoothDevice device) {
         BluetoothRouteInfo newBtRoute = new BluetoothRouteInfo();
         newBtRoute.btDevice = device;
-        // Current / Max volume will be set when connected.
+        // Current volume will be set when connected.
         // TODO: Is there any BT device which has fixed volume?
         String deviceName = device.getName();
         if (TextUtils.isEmpty(deviceName)) {
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
         }
+        int type = MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
+        newBtRoute.connectedProfiles = new SparseBooleanArray();
+        if (mA2dpProfile != null && mA2dpProfile.getConnectedDevices().contains(device)) {
+            newBtRoute.connectedProfiles.put(BluetoothProfile.A2DP, true);
+        }
+        if (mHearingAidProfile != null
+                && mHearingAidProfile.getConnectedDevices().contains(device)) {
+            newBtRoute.connectedProfiles.put(BluetoothProfile.HEARING_AID, true);
+            type = MediaRoute2Info.TYPE_HEARING_AID;
+        }
+
         newBtRoute.route = new MediaRoute2Info.Builder(device.getAddress(), deviceName)
                 .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())
-                .setType(MediaRoute2Info.TYPE_BLUETOOTH_A2DP)
+                .setType(type)
                 .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
                 .build();
-        newBtRoute.connectedProfiles = new SparseBooleanArray();
         return newBtRoute;
     }
 
@@ -316,7 +328,6 @@ class BluetoothRouteProvider {
                     btRoute = createBluetoothRoute(device);
                     mBluetoothRoutes.put(device.getAddress(), btRoute);
                 }
-                btRoute.connectedProfiles.put(profile, true);
                 if (activeDevices.contains(device)) {
                     mSelectedRoute = btRoute;
                     setRouteConnectionState(mSelectedRoute,
@@ -378,18 +389,11 @@ class BluetoothRouteProvider {
                     BluetoothDevice.ERROR);
             BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
             if (bondState == BluetoothDevice.BOND_BONDED && btRoute == null) {
-                //TODO: The type of the new route is A2DP even when it's HEARING_AID.
-                // We may determine the type of route when create the route.
                 btRoute = createBluetoothRoute(device);
-                if (mA2dpProfile != null && mA2dpProfile.getConnectedDevices().contains(device)) {
-                    btRoute.connectedProfiles.put(BluetoothProfile.A2DP, true);
+                if (btRoute.connectedProfiles.size() > 0) {
+                    mBluetoothRoutes.put(device.getAddress(), btRoute);
+                    notifyBluetoothRoutesUpdated();
                 }
-                if (mHearingAidProfile != null
-                        && mHearingAidProfile.getConnectedDevices().contains(device)) {
-                    btRoute.connectedProfiles.put(BluetoothProfile.HEARING_AID, true);
-                }
-                mBluetoothRoutes.put(device.getAddress(), btRoute);
-                notifyBluetoothRoutesUpdated();
             } else if (bondState == BluetoothDevice.BOND_NONE
                     && mBluetoothRoutes.remove(device.getAddress()) != null) {
                 notifyBluetoothRoutesUpdated();
@@ -430,9 +434,10 @@ class BluetoothRouteProvider {
             if (state == BluetoothProfile.STATE_CONNECTED) {
                 if (btRoute == null) {
                     btRoute = createBluetoothRoute(device);
-                    mBluetoothRoutes.put(device.getAddress(), btRoute);
-                    btRoute.connectedProfiles.put(profile, true);
-                    notifyBluetoothRoutesUpdated();
+                    if (btRoute.connectedProfiles.size() > 0) {
+                        mBluetoothRoutes.put(device.getAddress(), btRoute);
+                        notifyBluetoothRoutesUpdated();
+                    }
                 } else {
                     btRoute.connectedProfiles.put(profile, true);
                 }

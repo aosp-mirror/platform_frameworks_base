@@ -60,6 +60,17 @@ class PlayerViewHolder private constructor(itemView: View) {
     val action3 = itemView.requireViewById<ImageButton>(R.id.action3)
     val action4 = itemView.requireViewById<ImageButton>(R.id.action4)
 
+    init {
+        (background.background as IlluminationDrawable).let {
+            it.setupTouch(seamless, player)
+            it.setupTouch(action0, player)
+            it.setupTouch(action1, player)
+            it.setupTouch(action2, player)
+            it.setupTouch(action3, player)
+            it.setupTouch(action4, player)
+        }
+    }
+
     fun getAction(id: Int): ImageButton {
         return when (id) {
             R.id.action0 -> action0

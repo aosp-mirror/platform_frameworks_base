@@ -23,6 +23,7 @@ import android.service.controls.Control
 import android.service.controls.templates.ControlTemplate
 
 import com.android.systemui.R
+import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MIN_LEVEL
 
 /**
@@ -37,7 +38,6 @@ class TouchBehavior : Behavior {
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        cvh.applyRenderInfo(false /* enabled */, 0 /* offset */, false /* animated */)
 
         cvh.layout.setOnClickListener(View.OnClickListener() {
             cvh.controlActionCoordinator.touch(cvh, template.getTemplateId(), control)
@@ -46,13 +46,14 @@ class TouchBehavior : Behavior {
 
     override fun bind(cws: ControlWithState, colorOffset: Int) {
         this.control = cws.control!!
-        cvh.status.setText(control.getStatusText())
+        cvh.setStatusText(control.getStatusText())
         template = control.getControlTemplate()
 
         val ld = cvh.layout.getBackground() as LayerDrawable
         clipLayer = ld.findDrawableByLayerId(R.id.clip_layer)
-        clipLayer.setLevel(MIN_LEVEL)
 
-        cvh.applyRenderInfo(false, colorOffset)
+        val enabled = if (colorOffset > 0) true else false
+        clipLayer.setLevel(if (enabled) MAX_LEVEL else MIN_LEVEL)
+        cvh.applyRenderInfo(enabled, colorOffset)
     }
 }

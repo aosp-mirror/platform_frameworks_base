@@ -173,12 +173,12 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.DeviceIdleManager;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.IDeviceIdleController;
 import android.os.IInterface;
 import android.os.Looper;
 import android.os.Message;
@@ -414,7 +414,7 @@ public class NotificationManagerService extends SystemService {
     private AlarmManager mAlarmManager;
     private ICompanionDeviceManager mCompanionManager;
     private AccessibilityManager mAccessibilityManager;
-    private IDeviceIdleController mDeviceIdleController;
+    private DeviceIdleManager mDeviceIdleManager;
     private IUriGrantsManager mUgm;
     private UriGrantsManagerInternal mUgmInternal;
     private RoleObserver mRoleObserver;
@@ -1888,8 +1888,7 @@ public class NotificationManagerService extends SystemService {
         mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
         mCompanionManager = companionManager;
         mActivityManager = activityManager;
-        mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+        mDeviceIdleManager = getContext().getSystemService(DeviceIdleManager.class);
         mDpm = dpm;
         mUm = userManager;
         mPlatformCompat = IPlatformCompat.Stub.asInterface(
@@ -2361,11 +2360,8 @@ public class NotificationManagerService extends SystemService {
     }
 
     private void exitIdle() {
-        try {
-            if (mDeviceIdleController != null) {
-                mDeviceIdleController.exitIdle("notification interaction");
-            }
-        } catch (RemoteException e) {
+        if (mDeviceIdleManager != null) {
+            mDeviceIdleManager.endIdle("notification interaction");
         }
     }
 

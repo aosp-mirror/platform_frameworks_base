@@ -48,6 +48,8 @@ class AllModel(
 
     private var modified = false
 
+    override val moveHelper = null
+
     override val favorites: List<ControlInfo>
         get() = favoriteIds.mapNotNull { id ->
             val control = controls.firstOrNull { it.control.controlId == id }?.control

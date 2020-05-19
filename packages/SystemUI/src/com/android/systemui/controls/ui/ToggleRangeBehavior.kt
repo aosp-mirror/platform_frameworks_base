@@ -31,7 +31,6 @@ import android.service.controls.templates.TemperatureControlTemplate
 import android.service.controls.templates.ToggleRangeTemplate
 import android.util.Log
 import android.util.MathUtils
-import android.util.TypedValue
 import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
@@ -39,7 +38,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.accessibility.AccessibilityEvent
 import android.view.accessibility.AccessibilityNodeInfo
-import android.widget.TextView
 import com.android.systemui.Interpolators
 import com.android.systemui.R
 import com.android.systemui.controls.ui.ControlViewHolder.Companion.MAX_LEVEL
@@ -57,7 +55,6 @@ class ToggleRangeBehavior : Behavior {
     lateinit var control: Control
     lateinit var cvh: ControlViewHolder
     lateinit var rangeTemplate: RangeTemplate
-    lateinit var status: TextView
     lateinit var context: Context
     var currentStatusText: CharSequence = ""
     var currentRangeValue: String = ""
@@ -71,10 +68,7 @@ class ToggleRangeBehavior : Behavior {
 
     override fun initialize(cvh: ControlViewHolder) {
         this.cvh = cvh
-        status = cvh.status
-        context = status.getContext()
-
-        cvh.applyRenderInfo(false /* enabled */, colorOffset, false /* animated */)
+        context = cvh.context
 
         val gestureListener = ToggleRangeGestureListener(cvh.layout)
         val gestureDetector = GestureDetector(context, gestureListener)
@@ -131,7 +125,6 @@ class ToggleRangeBehavior : Behavior {
         this.colorOffset = colorOffset
 
         currentStatusText = control.getStatusText()
-        status.setText(currentStatusText)
 
         // ControlViewHolder sets a long click listener, but we want to handle touch in
         // here instead, otherwise we'll have state conflicts.
@@ -222,7 +215,7 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun beginUpdateRange() {
-        status.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
+        cvh.setStatusTextSize(context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
     }
 
@@ -261,14 +254,13 @@ class ToggleRangeBehavior : Behavior {
             val newValue = levelToRangeValue(newLevel)
             currentRangeValue = format(rangeTemplate.getFormatString().toString(),
                     DEFAULT_FORMAT, newValue)
-            val text = if (isDragging) {
-                currentRangeValue
+            if (isDragging) {
+                cvh.setStatusText(currentRangeValue, /* immediately */ true)
             } else {
-                "$currentStatusText $currentRangeValue"
+                cvh.setStatusText("$currentStatusText $currentRangeValue")
             }
-            status.setText(text)
         } else {
-            status.setText(currentStatusText)
+            cvh.setStatusText(currentStatusText)
         }
     }
 
@@ -296,9 +288,9 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun endUpdateRange() {
-        status.setTextSize(TypedValue.COMPLEX_UNIT_PX, context.getResources()
+        cvh.setStatusTextSize(context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_normal).toFloat())
-        status.setText("$currentStatusText $currentRangeValue")
+        cvh.setStatusText("$currentStatusText $currentRangeValue", /* immediately */ true)
         cvh.action(FloatAction(rangeTemplate.getTemplateId(),
             findNearestStep(levelToRangeValue(clipLayer.getLevel()))))
     }

@@ -92,6 +92,9 @@ public class PropertyAnimator {
         AnimatorListenerAdapter listener = properties.getAnimationFinishListener(property);
         if (currentValue.equals(newEndValue)) {
             // Skip the animation!
+            if (previousAnimator != null) {
+                previousAnimator.cancel();
+            }
             if (listener != null) {
                 listener.onAnimationEnd(null);
             }

@@ -385,6 +385,9 @@ public abstract class PackageManager {
      * <p>
      * Note: this flag may cause less information about currently installed
      * applications to be returned.
+     * <p>
+     * Note: use of this flag requires the android.permission.QUERY_ALL_PACKAGES
+     * permission to see uninstalled packages.
      */
     public static final int MATCH_UNINSTALLED_PACKAGES = 0x00002000;
 

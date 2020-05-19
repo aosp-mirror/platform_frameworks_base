@@ -84,8 +84,9 @@ public class ComposeShader extends Shader {
         mPorterDuffMode = nativeMode;
     }
 
+    /** @hide */
     @Override
-    long createNativeInstance(long nativeMatrix) {
+    protected long createNativeInstance(long nativeMatrix) {
         mNativeInstanceShaderA = mShaderA.getNativeInstance();
         mNativeInstanceShaderB = mShaderB.getNativeInstance();
         return nativeCreate(nativeMatrix,
