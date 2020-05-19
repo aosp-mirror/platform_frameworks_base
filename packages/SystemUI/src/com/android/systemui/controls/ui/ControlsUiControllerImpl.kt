@@ -59,6 +59,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.statusbar.phone.ShadeController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
@@ -79,7 +80,8 @@ class ControlsUiControllerImpl @Inject constructor (
     @Main val sharedPreferences: SharedPreferences,
     val controlActionCoordinator: ControlActionCoordinator,
     private val activityStarter: ActivityStarter,
-    private val keyguardStateController: KeyguardStateController
+    private val keyguardStateController: KeyguardStateController,
+    private val shadeController: ShadeController
 ) : ControlsUiController {
 
     companion object {
@@ -254,14 +256,11 @@ class ControlsUiControllerImpl @Inject constructor (
         intent.putExtra(ControlsUiController.EXTRA_ANIMATE, true)
         dismissGlobalActions.run()
 
-        if (!keyguardStateController.isUnlocked()) {
-            activityStarter.dismissKeyguardThenExecute({
-                context.startActivity(intent)
-                true
-            }, null, true)
-        } else {
+        activityStarter.dismissKeyguardThenExecute({
+            shadeController.collapsePanel(false)
             context.startActivity(intent)
-        }
+            true
+        }, null, true)
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
