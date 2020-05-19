@@ -3181,7 +3181,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            final int cachedSystemApps = PackageParser.sCachedPackageReadCount.get();
+            final int cachedSystemApps = PackageCacher.sCachedPackageReadCount.get();
 
             // Remove any shared userIDs that have no associated packages
             mSettings.pruneSharedUsersLPw();
@@ -3315,7 +3315,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // This must be done last to ensure all stubs are replaced or disabled.
                 installSystemStubPackages(stubSystemApps, scanFlags);
 
-                final int cachedNonSystemApps = PackageParser.sCachedPackageReadCount.get()
+                final int cachedNonSystemApps = PackageCacher.sCachedPackageReadCount.get()
                                 - cachedSystemApps;
 
                 final long dataScanTime = SystemClock.uptimeMillis() - systemScanTime - startTime;
