@@ -5607,10 +5607,7 @@ public final class Settings {
                             userId);
                 } else if (packageSetting.sharedUser == null && !isUpgradeToR) {
                     Slog.w(TAG, "Missing permission state for package: " + packageName);
-                    generateFallbackPermissionsStateLpr(
-                            packageSetting.pkg.getRequestedPermissions(),
-                            packageSetting.pkg.getTargetSdkVersion(),
-                            packageSetting.getPermissionsState(), userId);
+                    packageSetting.getPermissionsState().setMissing(true, userId);
                 }
             }
 
@@ -5628,22 +5625,7 @@ public final class Settings {
                             userId);
                 } else if (!isUpgradeToR) {
                     Slog.w(TAG, "Missing permission state for shared user: " + sharedUserName);
-                    ArraySet<String> requestedPermissions = new ArraySet<>();
-                    int targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-                    int sharedUserPackagesSize = sharedUserSetting.packages.size();
-                    for (int packagesI = 0; packagesI < sharedUserPackagesSize; packagesI++) {
-                        PackageSetting packageSetting = sharedUserSetting.packages.valueAt(
-                                packagesI);
-                        if (packageSetting == null || packageSetting.pkg == null
-                                || !packageSetting.getInstalled(userId)) {
-                            continue;
-                        }
-                        AndroidPackage pkg = packageSetting.pkg;
-                        requestedPermissions.addAll(pkg.getRequestedPermissions());
-                        targetSdkVersion = Math.min(targetSdkVersion, pkg.getTargetSdkVersion());
-                    }
-                    generateFallbackPermissionsStateLpr(requestedPermissions, targetSdkVersion,
-                            sharedUserSetting.getPermissionsState(), userId);
+                    sharedUserSetting.getPermissionsState().setMissing(true, userId);
                 }
             }
         }
@@ -5671,30 +5653,6 @@ public final class Settings {
                 } else {
                     permissionsState.updatePermissionFlags(basePermission, userId,
                             PackageManager.MASK_PERMISSION_FLAGS_ALL, flags);
-                }
-            }
-        }
-
-        private void generateFallbackPermissionsStateLpr(
-                @NonNull Collection<String> requestedPermissions, int targetSdkVersion,
-                @NonNull PermissionsState permissionsState, @UserIdInt int userId) {
-            for (String permissionName : requestedPermissions) {
-                BasePermission permission = mPermissions.getPermission(permissionName);
-                if (Objects.equals(permission.getSourcePackageName(), PLATFORM_PACKAGE_NAME)
-                        && permission.isRuntime() && !permission.isRemoved()) {
-                    if (permission.isHardOrSoftRestricted() || permission.isImmutablyRestricted()) {
-                        permissionsState.updatePermissionFlags(permission, userId,
-                                PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT,
-                                PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT);
-                    }
-                    if (targetSdkVersion < Build.VERSION_CODES.M) {
-                        permissionsState.updatePermissionFlags(permission, userId,
-                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
-                                        | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
-                                PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
-                                        | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT);
-                        permissionsState.grantRuntimePermission(permission, userId);
-                    }
                 }
             }
         }
