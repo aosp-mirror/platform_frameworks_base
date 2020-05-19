@@ -108,6 +108,7 @@ public class PhoneConstants {
     public static final int PIN_RESULT_SUCCESS = 0;
     public static final int PIN_PASSWORD_INCORRECT = 1;
     public static final int PIN_GENERAL_FAILURE = 2;
+    public static final int PIN_OPERATION_ABORTED = 3;
 
     /**
      * Return codes for <code>enableApnType()</code>
