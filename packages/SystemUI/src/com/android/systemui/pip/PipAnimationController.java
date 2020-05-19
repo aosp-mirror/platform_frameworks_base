@@ -170,9 +170,9 @@ public class PipAnimationController {
         private final @AnimationType int mAnimationType;
         private final Rect mDestinationBounds = new Rect();
 
-        private T mStartValue;
+        protected T mCurrentValue;
+        protected T mStartValue;
         private T mEndValue;
-        private T mCurrentValue;
         private PipAnimationCallback mPipAnimationCallback;
         private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
                 mSurfaceControlTransactionFactory;
@@ -288,7 +288,6 @@ public class PipAnimationController {
          */
         void updateEndValue(T endValue) {
             mEndValue = endValue;
-            mStartValue = mCurrentValue;
         }
 
         SurfaceControl.Transaction newSurfaceControlTransaction() {
@@ -336,6 +335,12 @@ public class PipAnimationController {
                             .round(tx, leash, shouldApplyCornerRadius());
                     tx.show(leash);
                     tx.apply();
+                }
+
+                @Override
+                void updateEndValue(Float endValue) {
+                    super.updateEndValue(endValue);
+                    mStartValue = mCurrentValue;
                 }
             };
         }
@@ -391,6 +396,14 @@ public class PipAnimationController {
                     // WindowContainerTransaction in task organizer
                     getSurfaceTransactionHelper().resetScale(tx, leash, getDestinationBounds())
                             .crop(tx, leash, getDestinationBounds());
+                }
+
+                @Override
+                void updateEndValue(Rect endValue) {
+                    super.updateEndValue(endValue);
+                    if (mStartValue != null && mCurrentValue != null) {
+                        mStartValue.set(mCurrentValue);
+                    }
                 }
             };
         }
