@@ -83,7 +83,6 @@ import android.net.wifi.WifiManager.SoftApCallback;
 import android.net.wifi.WifiManager.SuggestionConnectionStatusListener;
 import android.net.wifi.WifiManager.TrafficStateCallback;
 import android.net.wifi.WifiManager.WifiConnectedNetworkScorer;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -1992,8 +1991,7 @@ public class WifiManagerTest {
 
         ArgumentCaptor<IActionListener> binderListenerCaptor =
                 ArgumentCaptor.forClass(IActionListener.class);
-        verify(mWifiService).connect(eq(null), eq(TEST_NETWORK_ID), any(Binder.class),
-                binderListenerCaptor.capture(), anyInt());
+        verify(mWifiService).connect(eq(null), eq(TEST_NETWORK_ID), binderListenerCaptor.capture());
         assertNotNull(binderListenerCaptor.getValue());
 
         // Trigger on success.
@@ -2013,8 +2011,7 @@ public class WifiManagerTest {
     @Test
     public void testConnectWithListenerHandleSecurityException() throws Exception {
         doThrow(new SecurityException()).when(mWifiService)
-                .connect(eq(null), anyInt(), any(IBinder.class),
-                        any(IActionListener.class), anyInt());
+                .connect(eq(null), anyInt(), any(IActionListener.class));
         ActionListener externalListener = mock(ActionListener.class);
         mWifiManager.connect(TEST_NETWORK_ID, externalListener);
 
@@ -2028,8 +2025,7 @@ public class WifiManagerTest {
     @Test
     public void testConnectWithListenerHandleRemoteException() throws Exception {
         doThrow(new RemoteException()).when(mWifiService)
-                .connect(eq(null), anyInt(), any(IBinder.class),
-                        any(IActionListener.class), anyInt());
+                .connect(eq(null), anyInt(), any(IActionListener.class));
         ActionListener externalListener = mock(ActionListener.class);
         mWifiManager.connect(TEST_NETWORK_ID, externalListener);
 
@@ -2045,8 +2041,7 @@ public class WifiManagerTest {
         WifiConfiguration configuration = new WifiConfiguration();
         mWifiManager.connect(configuration, null);
 
-        verify(mWifiService).connect(configuration, WifiConfiguration.INVALID_NETWORK_ID, null,
-                null, 0);
+        verify(mWifiService).connect(configuration, WifiConfiguration.INVALID_NETWORK_ID, null);
     }
 
     /**
