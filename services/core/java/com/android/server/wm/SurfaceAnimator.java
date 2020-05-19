@@ -489,12 +489,6 @@ class SurfaceAnimator {
     static final int ANIMATION_TYPE_INSETS_CONTROL = 1 << 5;
 
     /**
-     * Animation when a fixed rotation transform is applied to a window token.
-     * @hide
-     */
-    static final int ANIMATION_TYPE_FIXED_TRANSFORM = 1 << 6;
-
-    /**
      * Bitmask to include all animation types. This is NOT an {@link AnimationType}
      * @hide
      */
@@ -511,8 +505,7 @@ class SurfaceAnimator {
             ANIMATION_TYPE_DIMMER,
             ANIMATION_TYPE_RECENTS,
             ANIMATION_TYPE_WINDOW_ANIMATION,
-            ANIMATION_TYPE_INSETS_CONTROL,
-            ANIMATION_TYPE_FIXED_TRANSFORM
+            ANIMATION_TYPE_INSETS_CONTROL
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface AnimationType {}
