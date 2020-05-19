@@ -1936,6 +1936,9 @@ public class PreferencesHelper implements RankingConfig {
                     event.writeInt(channel.getImportance());
                     event.writeInt(channel.getUserLockedFields());
                     event.writeBoolean(channel.isDeleted());
+                    event.writeBoolean(channel.getConversationId() != null);
+                    event.writeBoolean(channel.isDemoted());
+                    event.writeBoolean(channel.isImportantConversation());
                     events.add(event.build());
                 }
             }
