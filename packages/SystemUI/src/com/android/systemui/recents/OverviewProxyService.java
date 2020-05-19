@@ -842,7 +842,26 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 Log.e(TAG_OPS, "Failed to get overview proxy for assistant visibility.");
             }
         } catch (RemoteException e) {
-            Log.e(TAG_OPS, "Failed to call onAssistantVisibilityChanged()", e);
+            Log.e(TAG_OPS, "Failed to call notifyAssistantVisibilityChanged()", e);
+        }
+    }
+
+    /**
+     * Notifies the Launcher of split screen size changes
+     * @param secondaryWindowBounds Bounds of the secondary window including the insets
+     * @param secondaryWindowInsets stable insets received by the secondary window
+     */
+    public void notifySplitScreenBoundsChanged(
+            Rect secondaryWindowBounds, Rect secondaryWindowInsets) {
+        try {
+            if (mOverviewProxy != null) {
+                mOverviewProxy.onSplitScreenSecondaryBoundsChanged(
+                        secondaryWindowBounds, secondaryWindowInsets);
+            } else {
+                Log.e(TAG_OPS, "Failed to get overview proxy for split screen bounds.");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG_OPS, "Failed to call onSplitScreenSecondaryBoundsChanged()", e);
         }
     }
 
