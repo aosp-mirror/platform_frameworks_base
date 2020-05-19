@@ -321,6 +321,21 @@ final public class MediaMuxer {
     @UnsupportedAppUsage
     private long mNativeObject;
 
+    private String convertMuxerStateCodeToString(int aState) {
+        switch (aState) {
+            case MUXER_STATE_UNINITIALIZED:
+                return "UNINITIALIZED";
+            case MUXER_STATE_INITIALIZED:
+                return "INITIALIZED";
+            case MUXER_STATE_STARTED:
+                return "STARTED";
+            case MUXER_STATE_STOPPED:
+                return "STOPPED";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
     /**
      * Constructor.
      * Creates a media muxer that writes to the specified path.
@@ -397,7 +412,7 @@ final public class MediaMuxer {
             nativeSetOrientationHint(mNativeObject, degrees);
         } else {
             throw new IllegalStateException("Can't set rotation degrees due" +
-                    " to wrong state.");
+                    " to wrong state(" + convertMuxerStateCodeToString(mState) + ")");
         }
     }
 
@@ -432,7 +447,8 @@ final public class MediaMuxer {
         if (mState == MUXER_STATE_INITIALIZED && mNativeObject != 0) {
             nativeSetLocation(mNativeObject, latitudex10000, longitudex10000);
         } else {
-            throw new IllegalStateException("Can't set location due to wrong state.");
+            throw new IllegalStateException("Can't set location due to wrong state("
+                                             + convertMuxerStateCodeToString(mState) + ")");
         }
     }
 
@@ -451,7 +467,8 @@ final public class MediaMuxer {
             nativeStart(mNativeObject);
             mState = MUXER_STATE_STARTED;
         } else {
-            throw new IllegalStateException("Can't start due to wrong state.");
+            throw new IllegalStateException("Can't start due to wrong state("
+                                             + convertMuxerStateCodeToString(mState) + ")");
         }
     }
 
@@ -462,10 +479,16 @@ final public class MediaMuxer {
      */
     public void stop() {
         if (mState == MUXER_STATE_STARTED) {
-            nativeStop(mNativeObject);
-            mState = MUXER_STATE_STOPPED;
+            try {
+                nativeStop(mNativeObject);
+            } catch (Exception e) {
+                throw e;
+            } finally {
+                mState = MUXER_STATE_STOPPED;
+            }
         } else {
-            throw new IllegalStateException("Can't stop due to wrong state.");
+            throw new IllegalStateException("Can't stop due to wrong state("
+                                             + convertMuxerStateCodeToString(mState) + ")");
         }
     }
 
