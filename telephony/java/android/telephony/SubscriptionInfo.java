@@ -837,20 +837,20 @@ public class SubscriptionInfo implements Parcelable {
                 + " carrierId=" + mCarrierId + " displayName=" + mDisplayName
                 + " carrierName=" + mCarrierName + " nameSource=" + mNameSource
                 + " iconTint=" + mIconTint
-                + " mNumber=" + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mNumber)
-                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc " + mMcc
-                + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
-                + " nativeAccessRules " + Arrays.toString(mNativeAccessRules)
+                + " number=" + Rlog.pii(TelephonyUtils.IS_DEBUGGABLE, mNumber)
+                + " dataRoaming=" + mDataRoaming + " iconBitmap=" + mIconBitmap + " mcc=" + mMcc
+                + " mnc=" + mMnc + " countryIso=" + mCountryIso + " isEmbedded=" + mIsEmbedded
+                + " nativeAccessRules=" + Arrays.toString(mNativeAccessRules)
                 + " cardString=" + cardStringToPrint + " cardId=" + mCardId
-                + " isOpportunistic=" + mIsOpportunistic + " mGroupUUID=" + mGroupUUID
-                + " mIsGroupDisabled=" + mIsGroupDisabled
+                + " isOpportunistic=" + mIsOpportunistic + " groupUUID=" + mGroupUUID
+                + " isGroupDisabled=" + mIsGroupDisabled
                 + " profileClass=" + mProfileClass
                 + " ehplmns=" + Arrays.toString(mEhplmns)
                 + " hplmns=" + Arrays.toString(mHplmns)
                 + " subscriptionType=" + mSubscriptionType
-                + " mGroupOwner=" + mGroupOwner
+                + " groupOwner=" + mGroupOwner
                 + " carrierConfigAccessRules=" + Arrays.toString(mCarrierConfigAccessRules)
-                + " mAreUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled + "}";
+                + " areUiccApplicationsEnabled=" + mAreUiccApplicationsEnabled + "}";
     }
 
     @Override
