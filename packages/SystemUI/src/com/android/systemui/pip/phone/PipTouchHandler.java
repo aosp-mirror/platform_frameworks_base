@@ -431,13 +431,21 @@ public class PipTouchHandler {
             } else {
                 final float offsetBufferPx = BOTTOM_OFFSET_BUFFER_DP
                         * mContext.getResources().getDisplayMetrics().density;
-                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL && willResizeMenu()
+                final boolean isExpanded = mMenuState == MENU_STATE_FULL && willResizeMenu();
+                final Rect toMovementBounds = isExpanded
                         ? new Rect(expandedMovementBounds)
                         : new Rect(normalMovementBounds);
                 final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
                 final int toBottom = toMovementBounds.bottom < toMovementBounds.top
                         ? toMovementBounds.bottom
                         : toMovementBounds.bottom - extraOffset;
+
+                if (isExpanded) {
+                    curBounds.set(mExpandedBounds);
+                    mSnapAlgorithm.applySnapFraction(curBounds, toMovementBounds,
+                            mSavedSnapFraction);
+                }
+
                 if ((Math.min(prevBottom, toBottom) - offsetBufferPx) <= curBounds.top
                         && curBounds.top <= (Math.max(prevBottom, toBottom) + offsetBufferPx)) {
                     mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
