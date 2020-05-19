@@ -363,9 +363,10 @@ public class RcsUceAdapter {
     /**
      * Change the user’s setting for whether or not UCE is enabled for the associated subscription.
      * <p>
-     * If an application Requires UCE, they may launch an Activity using the Intent
+     * If an application Requires UCE, they will launch an Activity using the Intent
      * {@link ImsRcsManager#ACTION_SHOW_CAPABILITY_DISCOVERY_OPT_IN}, which will ask the user if
-     * they wish to enable this feature.
+     * they wish to enable this feature. This setting should only be enabled after the user has
+     * opted-in to capability exchange.
      * <p>
      * Note: This setting does not affect whether or not the device publishes its service
      * capabilities if the subscription supports presence publication.
