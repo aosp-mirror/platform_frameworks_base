@@ -54,6 +54,12 @@ import java.util.stream.Collectors;
 public final class MediaRouter2Manager {
     private static final String TAG = "MR2Manager";
     private static final Object sLock = new Object();
+    /**
+     * The request ID for requests not asked by this instance.
+     * Shouldn't be used for a valid request.
+     * @hide
+     */
+    public static final int REQUEST_ID_NONE = 0;
     /** @hide */
     @VisibleForTesting
     public static final int TRANSFER_TIMEOUT_MS = 30_000;
@@ -480,7 +486,6 @@ public final class MediaRouter2Manager {
             notifyTransferFailed(matchingRequest.mOldSessionInfo, requestedRoute);
             return;
         }
-        releaseSession(matchingRequest.mOldSessionInfo);
         notifyTransferred(matchingRequest.mOldSessionInfo, sessionInfo);
     }
 
@@ -777,7 +782,7 @@ public final class MediaRouter2Manager {
         if (client != null) {
             try {
                 mMediaRouterService.requestCreateSessionWithManager(
-                        client, requestId, oldSession.getClientPackageName(), route);
+                        client, requestId, oldSession, route);
             } catch (RemoteException ex) {
                 Log.e(TAG, "requestCreateSession: Failed to send a request", ex);
             }
