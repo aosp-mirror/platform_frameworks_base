@@ -346,12 +346,15 @@ public class SoundTriggerService extends SystemService {
             sEventLogger.log(new SoundTriggerLogger.StringEvent("deleteSoundModel(): id = "
                     + soundModelId));
 
-            // Unload the model if it is loaded.
-            mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
-            mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
+            if (isInitialized()) {
+                // Unload the model if it is loaded.
+                mSoundTriggerHelper.unloadGenericSoundModel(soundModelId.getUuid());
 
-            // Stop recognition if it is started.
-            mSoundModelStatTracker.onStop(soundModelId.getUuid());
+                // Stop tracking recognition if it is started.
+                mSoundModelStatTracker.onStop(soundModelId.getUuid());
+            }
+
+            mDbHelper.deleteGenericSoundModel(soundModelId.getUuid());
         }
 
         @Override
