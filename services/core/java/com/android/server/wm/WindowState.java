@@ -54,12 +54,14 @@ import static android.view.WindowManager.LayoutParams.MATCH_PARENT;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_LAYOUT_CHILD_WINDOW_IN_PARENT_FRAME;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_WILL_NOT_REPLACE_ON_RELAUNCH;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE;
 import static android.view.WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVERLAY;
@@ -83,6 +85,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIORITY_PHONE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_SEARCH_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_SECURE_SYSTEM_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_ADDITIONAL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
@@ -918,6 +921,23 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mInputWindowHandle = new InputWindowHandle(
                 mActivityRecord != null ? mActivityRecord.mInputApplicationHandle : null,
                     getDisplayId());
+
+        //  Check private trusted overlay flag and window type to set trustedOverlay variable of
+        //  input window handle.
+        mInputWindowHandle.trustedOverlay =
+                (mAttrs.privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0
+                && mOwnerCanAddInternalSystemWindow;
+        mInputWindowHandle.trustedOverlay |=
+                mAttrs.type == TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY
+                || mAttrs.type == TYPE_INPUT_METHOD || mAttrs.type == TYPE_INPUT_METHOD_DIALOG
+                || mAttrs.type == TYPE_MAGNIFICATION_OVERLAY || mAttrs.type == TYPE_STATUS_BAR
+                || mAttrs.type == TYPE_NOTIFICATION_SHADE
+                || mAttrs.type == TYPE_NAVIGATION_BAR
+                || mAttrs.type == TYPE_NAVIGATION_BAR_PANEL
+                || mAttrs.type == TYPE_SECURE_SYSTEM_OVERLAY
+                || mAttrs.type == TYPE_DOCK_DIVIDER
+                || mAttrs.type == TYPE_ACCESSIBILITY_OVERLAY
+                || mAttrs.type == TYPE_INPUT_CONSUMER;
 
         // Make sure we initial all fields before adding to parentWindow, to prevent exception
         // during onDisplayChanged.
