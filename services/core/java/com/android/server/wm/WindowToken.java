@@ -642,9 +642,6 @@ class WindowToken extends WindowContainer<WindowState> {
         final int originalRotation = getWindowConfiguration().getRotation();
         onConfigurationChanged(parent.getConfiguration());
         onCancelFixedRotationTransform(originalRotation);
-        if (mDisplayContent.mFixedRotationAnimationController != null) {
-            mDisplayContent.mFixedRotationAnimationController.cancel();
-        }
     }
 
     /**
