@@ -44,7 +44,7 @@
               android:layout_height="wrap_content"
               android:textAppearance="?attr/textAppearanceSmall"
               android:textColor="?attr/textColorPrimary"
-              android:textSize="14sp"
+              android:textSize="12sp"
               android:gravity="top|center_horizontal"
               android:lines="1"
               android:ellipsize="end" />
