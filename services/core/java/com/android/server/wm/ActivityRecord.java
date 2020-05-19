@@ -3593,7 +3593,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
-            WindowContainer boundary) {
+            ActivityRecord boundary) {
         return callback.test(this) ? this : null;
     }
 
