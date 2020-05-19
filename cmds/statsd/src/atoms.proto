@@ -447,7 +447,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10083
+    // Next: 10084
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -540,6 +540,8 @@ message Atom {
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
         DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
+        BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
+                10083 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -9815,4 +9817,26 @@ message AudioPowerUsageDataReported {
         RECORD_TYPE = 7;  // other recording
     }
     optional AudioType type = 4;
+}
+
+/**
+  * Pulls bytes transferred over WiFi and mobile networks sliced by uid, is_metered, and tag.
+  *
+  * Pulled from:
+  *   StatsPullAtomService, which uses NetworkStatsService to query NetworkStats.
+  */
+message BytesTransferByTagAndMetered {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional bool is_metered = 2;
+
+    optional int32 tag = 3;
+
+    optional int64 rx_bytes = 4;
+
+    optional int64 rx_packets = 5;
+
+    optional int64 tx_bytes = 6;
+
+    optional int64 tx_packets = 7;
 }
