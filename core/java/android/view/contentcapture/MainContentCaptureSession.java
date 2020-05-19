@@ -273,6 +273,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
         } else {
             mState = resultCode;
             mDisabled.set(false);
+            // Flush any pending data immediately as buffering forced until now.
+            flushIfNeeded(FLUSH_REASON_SESSION_CONNECTED);
         }
         if (sVerbose) {
             Log.v(TAG, "handleSessionStarted() result: id=" + mId + " resultCode=" + resultCode
