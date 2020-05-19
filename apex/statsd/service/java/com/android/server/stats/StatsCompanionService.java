@@ -662,13 +662,18 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             return;
         }
 
+        // Cleann up from previous statsd - cancel any alarms that had been set. Do this here
+        // instead of in binder death because statsd can come back and set different alarms, or not
+        // want to set an alarm when it had been set. This guarantees that when we get a new statsd,
+        // we cancel any alarms before it is able to set them.
+        cancelAnomalyAlarm();
+        cancelPullingAlarm();
+        cancelAlarmForSubscriberTriggering();
+
         if (DEBUG) Log.d(TAG, "Saying hi to statsd");
         mStatsManagerService.statsdReady(statsd);
         try {
             statsd.statsCompanionReady();
-
-            cancelAnomalyAlarm();
-            cancelPullingAlarm();
 
             BroadcastReceiver appUpdateReceiver = new AppUpdateReceiver();
             BroadcastReceiver userUpdateReceiver = new UserUpdateReceiver();
