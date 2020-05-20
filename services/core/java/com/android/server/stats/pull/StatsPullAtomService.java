@@ -321,17 +321,10 @@ public class StatsPullAtomService extends SystemService {
             try {
                 switch (atomTag) {
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_WIFI,
-                                /*withFgbg=*/ false);
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_WIFI,
-                                /*withFgbg=*/ true);
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_CELLULAR,
-                                /*withFgbg=*/ false);
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
-                        return pullDataBytesTransfer(atomTag, data, TRANSPORT_CELLULAR,
-                                /*withFgbg=*/ true);
+                        return pullDataBytesTransfer(atomTag, data);
                     case FrameworkStatsLog.BLUETOOTH_BYTES_TRANSFER:
                         return pullBluetoothBytesTransfer(atomTag, data);
                     case FrameworkStatsLog.KERNEL_WAKELOCK:
@@ -639,10 +632,14 @@ public class StatsPullAtomService extends SystemService {
             Slog.d(TAG, "Registering NetworkStats pullers with statsd");
         }
         // Initialize NetworkStats baselines.
-        mNetworkStatsBaselines.addAll(collectWifiBytesTransferSnapshot(/*withFgbg=*/ false));
-        mNetworkStatsBaselines.addAll(collectWifiBytesTransferSnapshot(/*withFgbg=*/ true));
-        mNetworkStatsBaselines.addAll(collectMobileBytesTransferSnapshot(/*withFgbg=*/ false));
-        mNetworkStatsBaselines.addAll(collectMobileBytesTransferSnapshot(/*withFgbg=*/ true));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG));
+        mNetworkStatsBaselines.addAll(
+                collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
+        mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG));
 
         registerWifiBytesTransfer();
         registerWifiBytesTransferBackground();
@@ -800,36 +797,42 @@ public class StatsPullAtomService extends SystemService {
     }
 
     @NonNull
-    private List<NetworkStatsExt> collectWifiBytesTransferSnapshot(boolean withFgbg) {
+    private List<NetworkStatsExt> collectNetworkStatsSnapshotForAtom(int atomTag) {
+        switch(atomTag) {
+            case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_WIFI, /*withFgbg=*/false);
+            case  FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_WIFI, /*withFgbg=*/true);
+            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_CELLULAR, /*withFgbg=*/false);
+            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
+                return collectUidNetworkStatsSnapshot(TRANSPORT_CELLULAR, /*withFgbg=*/true);
+            default:
+                throw new IllegalArgumentException("Unknown atomTag " + atomTag);
+        }
+    }
+
+    // Get a snapshot of Uid NetworkStats. The snapshot contains NetworkStats with its associated
+    // information, and wrapped by a list since multiple NetworkStatsExt objects might be collected.
+    @NonNull
+    private List<NetworkStatsExt> collectUidNetworkStatsSnapshot(int transport, boolean withFgbg) {
         final List<NetworkStatsExt> ret = new ArrayList<>();
-        final NetworkTemplate template = NetworkTemplate.buildTemplateWifiWildcard();
+        final NetworkTemplate template = (transport == TRANSPORT_CELLULAR
+                ? NetworkTemplate.buildTemplateMobileWithRatType(
+                        /*subscriptionId=*/null, NETWORK_TYPE_ALL)
+                : NetworkTemplate.buildTemplateWifiWildcard());
+
         final NetworkStats stats = getUidNetworkStatsSnapshot(template, withFgbg);
         if (stats != null) {
-            ret.add(new NetworkStatsExt(stats, TRANSPORT_WIFI, withFgbg));
+            ret.add(new NetworkStatsExt(stats, transport, withFgbg));
         }
         return ret;
     }
 
-    // Get a snapshot of mobile data usage. The snapshot contains NetworkStats with its associated
-    // information, and wrapped by a list since multiple NetworkStatsExt objects might be collected.
-    // TODO: Slice NetworkStats to multiple objects by RAT type or subscription.
-    @NonNull
-    private List<NetworkStatsExt> collectMobileBytesTransferSnapshot(boolean withFgbg) {
-        final List<NetworkStatsExt> ret = new ArrayList<>();
-        final NetworkTemplate template =
-                NetworkTemplate.buildTemplateMobileWithRatType(null, NETWORK_TYPE_ALL);
-        final NetworkStats stats = getUidNetworkStatsSnapshot(template, withFgbg);
-        if (stats != null) {
-            ret.add(new NetworkStatsExt(stats, TRANSPORT_CELLULAR, withFgbg));
-        }
-        return ret;
-    }
 
     private int pullDataBytesTransfer(
-            int atomTag, @NonNull List<StatsEvent> pulledData, int transport, boolean withFgbg) {
-        final List<NetworkStatsExt> current =
-                (transport == TRANSPORT_CELLULAR ? collectMobileBytesTransferSnapshot(withFgbg)
-                        : collectWifiBytesTransferSnapshot(withFgbg));
+            int atomTag, @NonNull List<StatsEvent> pulledData) {
+        final List<NetworkStatsExt> current = collectNetworkStatsSnapshotForAtom(atomTag);
 
         if (current == null) {
             Slog.e(TAG, "current snapshot is null for " + atomTag + ", return.");
@@ -844,7 +847,7 @@ public class StatsPullAtomService extends SystemService {
             // skip reporting anything since the snapshot is invalid.
             if (baseline == null) {
                 Slog.e(TAG, "baseline is null for " + atomTag + ", transport="
-                        + item.transport + " , withFgbg=" + withFgbg + ", return.");
+                        + item.transport + " , withFgbg=" + item.withFgbg + ", return.");
                 return StatsManager.PULL_SKIP;
             }
             final NetworkStatsExt diff = new NetworkStatsExt(item.stats.subtract(

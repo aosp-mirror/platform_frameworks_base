@@ -424,20 +424,28 @@ public class PipTouchHandler {
 
         // If this is from an IME or shelf adjustment, then we should move the PiP so that it is not
         // occluded by the IME or shelf.
-        if (fromImeAdjustment || fromShelfAdjustment || fromDisplayRotationChanged) {
+        if (fromImeAdjustment || fromShelfAdjustment) {
             if (mTouchState.isUserInteracting()) {
                 // Defer the update of the current movement bounds until after the user finishes
                 // touching the screen
             } else {
                 final float offsetBufferPx = BOTTOM_OFFSET_BUFFER_DP
                         * mContext.getResources().getDisplayMetrics().density;
-                final Rect toMovementBounds = mMenuState == MENU_STATE_FULL && willResizeMenu()
+                final boolean isExpanded = mMenuState == MENU_STATE_FULL && willResizeMenu();
+                final Rect toMovementBounds = isExpanded
                         ? new Rect(expandedMovementBounds)
                         : new Rect(normalMovementBounds);
                 final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
                 final int toBottom = toMovementBounds.bottom < toMovementBounds.top
                         ? toMovementBounds.bottom
                         : toMovementBounds.bottom - extraOffset;
+
+                if (isExpanded) {
+                    curBounds.set(mExpandedBounds);
+                    mSnapAlgorithm.applySnapFraction(curBounds, toMovementBounds,
+                            mSavedSnapFraction);
+                }
+
                 if ((Math.min(prevBottom, toBottom) - offsetBufferPx) <= curBounds.top
                         && curBounds.top <= (Math.max(prevBottom, toBottom) + offsetBufferPx)) {
                     mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
