@@ -113,6 +113,7 @@ public class BiometricService extends SystemService {
     private static final int MSG_ON_AUTHENTICATION_TIMED_OUT = 11;
     private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
     private static final int MSG_ON_SYSTEM_EVENT = 13;
+    private static final int MSG_CLIENT_DIED = 14;
 
     /**
      * Authentication either just called and we have not transitioned to the CALLED state, or
@@ -151,8 +152,13 @@ public class BiometricService extends SystemService {
      * Device credential in AuthController is showing
      */
     static final int STATE_SHOWING_DEVICE_CREDENTIAL = 8;
+    /**
+     * The client binder died, and sensors were authenticating at the time. Cancel has been
+     * requested and we're waiting for the HAL(s) to send ERROR_CANCELED.
+     */
+    static final int STATE_CLIENT_DIED_CANCELLING = 9;
 
-    final class AuthSession {
+    final class AuthSession implements IBinder.DeathRecipient {
         // Map of Authenticator/Cookie pairs. We expect to receive the cookies back from
         // <Biometric>Services before we can start authenticating. Pairs that have been returned
         // are moved to mModalitiesMatched.
@@ -211,7 +217,14 @@ public class BiometricService extends SystemService {
             mCallingUserId = callingUserId;
             mModality = modality;
             mRequireConfirmation = requireConfirmation;
+
             Slog.d(TAG, "New AuthSession, mSysUiSessionId: " + mSysUiSessionId);
+
+            try {
+                mClientReceiver.asBinder().linkToDeath(this, 0 /* flags */);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to link to death");
+            }
         }
 
         boolean isCrypto() {
@@ -230,6 +243,12 @@ public class BiometricService extends SystemService {
 
         boolean isAllowDeviceCredential() {
             return Utils.isCredentialRequested(mBundle);
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.e(TAG, "Binder died, sysUiSessionId: " + mSysUiSessionId);
+            mHandler.obtainMessage(MSG_CLIENT_DIED).sendToTarget();
         }
     }
 
@@ -367,6 +386,11 @@ public class BiometricService extends SystemService {
 
                 case MSG_ON_SYSTEM_EVENT: {
                     handleOnSystemEvent((int) msg.obj);
+                    break;
+                }
+
+                case MSG_CLIENT_DIED: {
+                    handleClientDied();
                     break;
                 }
 
@@ -1391,6 +1415,7 @@ public class BiometricService extends SystemService {
     }
 
     private void handleOnError(int cookie, int modality, int error, int vendorCode) {
+
         Slog.d(TAG, "handleOnError: " + error + " cookie: " + cookie);
         // Errors can either be from the current auth session or the pending auth session.
         // The pending auth session may receive errors such as ERROR_LOCKOUT before
@@ -1431,6 +1456,9 @@ public class BiometricService extends SystemService {
                 } else if (mCurrentAuthSession.mState == STATE_SHOWING_DEVICE_CREDENTIAL) {
                     Slog.d(TAG, "Biometric canceled, ignoring from state: "
                             + mCurrentAuthSession.mState);
+                } else if (mCurrentAuthSession.mState == STATE_CLIENT_DIED_CANCELLING) {
+                    mStatusBarService.hideAuthenticationDialog();
+                    mCurrentAuthSession = null;
                 } else {
                     Slog.e(TAG, "Impossible session error state: "
                             + mCurrentAuthSession.mState);
@@ -1619,6 +1647,36 @@ public class BiometricService extends SystemService {
             mCurrentAuthSession.mClientReceiver.onSystemEvent(event);
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException", e);
+        }
+    }
+
+    private void handleClientDied() {
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        Slog.e(TAG, "SysUiSessionId: " + mCurrentAuthSession.mSysUiSessionId
+                + " State: " + mCurrentAuthSession.mState);
+
+        try {
+            // Check if any sensors are authenticating. If so, need to cancel them. When
+            // ERROR_CANCELED is received from the HAL, we hide the dialog and cleanup the session.
+            if (mCurrentAuthSession.mState == STATE_AUTH_STARTED) {
+                mCurrentAuthSession.mState = STATE_CLIENT_DIED_CANCELLING;
+                cancelInternal(mCurrentAuthSession.mToken,
+                        mCurrentAuthSession.mOpPackageName,
+                        mCurrentAuthSession.mCallingUid,
+                        mCurrentAuthSession.mCallingPid,
+                        mCurrentAuthSession.mCallingUserId,
+                        false /* fromClient */);
+            } else {
+                // If the sensors are not authenticating, set the auth session to null.
+                mStatusBarService.hideAuthenticationDialog();
+                mCurrentAuthSession = null;
+            }
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception: " + e);
         }
     }
 
@@ -1822,11 +1880,11 @@ public class BiometricService extends SystemService {
 
     void cancelInternal(IBinder token, String opPackageName, int callingUid, int callingPid,
             int callingUserId, boolean fromClient) {
-
         if (mCurrentAuthSession == null) {
             Slog.w(TAG, "Skipping cancelInternal");
             return;
-        } else if (mCurrentAuthSession.mState != STATE_AUTH_STARTED) {
+        } else if (mCurrentAuthSession.mState != STATE_AUTH_STARTED
+                && mCurrentAuthSession.mState != STATE_CLIENT_DIED_CANCELLING) {
             Slog.w(TAG, "Skipping cancelInternal, state: " + mCurrentAuthSession.mState);
             return;
         }
