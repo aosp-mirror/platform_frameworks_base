@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Das Gerät konnte nicht gekoppelt werden. Der QR-Code war nicht korrekt oder das Gerät ist nicht mit demselben Netzwerk verbunden."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP-Adresse &amp; Port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"QR-Code scannen"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Scanne einen QR-Code, um ein Gerät über WLAN zu koppeln"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Scanne einen QR-Code, um das Gerät über WLAN zu koppeln"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Bitte stell eine WLAN-Verbindung her"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"ADB, Debug, Dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Verknüpfung zu Fehlerbericht"</string>
@@ -507,7 +507,7 @@
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Dauer"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Jedes Mal fragen"</string>
     <string name="zen_mode_forever" msgid="3339224497605461291">"Bis zur Deaktivierung"</string>
-    <string name="time_unit_just_now" msgid="3006134267292728099">"gerade eben"</string>
+    <string name="time_unit_just_now" msgid="3006134267292728099">"Gerade eben"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Smartphone-Lautsprecher"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Verbindung kann nicht hergestellt werden. Schalte das Gerät aus &amp; und wieder ein."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Netzbetriebenes Audiogerät"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Deaktiviert"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiviert"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Damit diese Änderung übernommen wird, musst du dein Gerät neu starten. Du kannst es jetzt neu starten oder den Vorgang abbrechen."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (geschäftlich)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

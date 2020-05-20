@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Dilumpuhkan"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Didayakan"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Peranti anda mesti dibut semula supaya perubahan ini berlaku. But semula sekarang atau batalkan."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Kerja <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

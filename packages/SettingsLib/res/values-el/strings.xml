@@ -194,8 +194,8 @@
     <item msgid="581904787661470707">"Ταχύτατη"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Επιλογή προφίλ"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Προσωπικό"</string>
-    <string name="category_work" msgid="4014193632325996115">"Εργασία"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Προσωπικός"</string>
+    <string name="category_work" msgid="4014193632325996115">"Εργασίας"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Επιλογές για προγραμματιστές"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Ενεργοποίηση επιλογών για προγραμματιστές"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ορισμός επιλογών για ανάπτυξη εφαρμογής"</string>
@@ -554,4 +554,6 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ενεργή"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Για να εφαρμοστεί αυτή η αλλαγή, θα πρέπει να επανεκκινήσετε τη συσκευή σας. Επανεκκίνηση τώρα ή ακύρωση."</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Εργασία <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Ya Kibinafsi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
+    <string name="category_work" msgid="4014193632325996115">"Ya Kazini"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Weka chaguo kwa ajili ya maendeleo ya programu"</string>
@@ -485,7 +485,7 @@
     <string name="ims_reg_title" msgid="8197592958123671062">"Hali ya usajili wa IMS"</string>
     <string name="ims_reg_status_registered" msgid="884916398194885457">"Imesajiliwa"</string>
     <string name="ims_reg_status_not_registered" msgid="2989287366045704694">"Haijasajiliwa"</string>
-    <string name="status_unavailable" msgid="5279036186589861608">"Haipatikani"</string>
+    <string name="status_unavailable" msgid="5279036186589861608">"Hamna"</string>
     <string name="wifi_status_mac_randomized" msgid="466382542497832189">"Imechagua anwani ya MAC kwa nasibu"</string>
     <plurals name="wifi_tether_connected_summary" formatted="false" msgid="6317236306047306139">
       <item quantity="other">Imeunganisha vifaa %1$d</item>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Imezimwa"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Imewashwa"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Ni lazima uwashe tena kifaa chako ili mabadiliko haya yatekelezwe. Washa tena sasa au ughairi."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Ya kazini <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>
