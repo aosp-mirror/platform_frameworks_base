@@ -53,6 +53,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.MediaDeviceManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -218,7 +219,8 @@ public class NotificationMediaManager implements Dumpable {
             KeyguardBypassController keyguardBypassController,
             @Main DelayableExecutor mainExecutor,
             DeviceConfigProxy deviceConfig,
-            MediaDataManager mediaDataManager) {
+            MediaDataManager mediaDataManager,
+            MediaDeviceManager mediaDeviceManager) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
@@ -239,11 +241,13 @@ public class NotificationMediaManager implements Dumpable {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
                 mediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
+                mediaDeviceManager.onNotificationAdded(entry.getKey(), entry.getSbn());
             }
 
             @Override
             public void onPreEntryUpdated(NotificationEntry entry) {
                 mediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
+                mediaDeviceManager.onNotificationAdded(entry.getKey(), entry.getSbn());
             }
 
             @Override
@@ -264,6 +268,7 @@ public class NotificationMediaManager implements Dumpable {
                     int reason) {
                 onNotificationRemoved(entry.getKey());
                 mediaDataManager.onNotificationRemoved(entry.getKey());
+                mediaDeviceManager.onNotificationRemoved(entry.getKey());
             }
         });
 
