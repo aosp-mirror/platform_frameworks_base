@@ -369,6 +369,13 @@ public final class KeyChain {
      * {@link Activity#RESULT_OK} will be returned if a credential was
      * successfully installed, otherwise {@link
      * Activity#RESULT_CANCELED} will be returned.
+     *
+     * <p>Starting from {@link android.os.Build.VERSION_CODES#R}, the intent returned by this
+     * method cannot be used for installing CA certificates. Since CA certificates can only be
+     * installed via Settings, the app should provide the user with a file containing the
+     * CA certificate. One way to do this would be to use the {@link android.provider.MediaStore}
+     * API to write the certificate to the {@link android.provider.MediaStore.Downloads}
+     * collection.
      */
     @NonNull
     public static Intent createInstallIntent() {
