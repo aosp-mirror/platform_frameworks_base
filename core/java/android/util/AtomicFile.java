@@ -227,11 +227,8 @@ public class AtomicFile {
             }
         }
 
-        if (mNewName.exists()) {
-            if (!mNewName.delete()) {
-                Log.e(LOG_TAG, "Failed to delete outdated new file " + mNewName);
-            }
-        }
+        // Don't delete mNewName here - it was okay to call openRead() between startWrite() and
+        // finishWrite(), and we have to keep supporting it.
         return new FileInputStream(mBaseName);
     }
 
