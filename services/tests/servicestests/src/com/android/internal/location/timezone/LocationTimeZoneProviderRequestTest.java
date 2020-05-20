@@ -18,32 +18,15 @@ package com.android.internal.location.timezone;
 
 import static android.location.timezone.ParcelableTestSupport.assertRoundTripParcelable;
 
-import android.os.WorkSource;
-
 import org.junit.Test;
 
 public class LocationTimeZoneProviderRequestTest {
-
-    private static final WorkSource ARBITRARY_WORK_SOURCE = new WorkSource(123);
-
-    @Test(expected = RuntimeException.class)
-    public void testSetInvalidWorkSource() {
-        new LocationTimeZoneProviderRequest.Builder().setWorkSource(null);
-    }
-
-    @Test(expected = RuntimeException.class)
-    public void testWorkSourceRequired() {
-        new LocationTimeZoneProviderRequest.Builder()
-                .setReportLocationTimeZone(true)
-                .build();
-    }
 
     @Test
     public void testParcelable() {
         LocationTimeZoneProviderRequest.Builder builder =
                 new LocationTimeZoneProviderRequest.Builder()
-                        .setReportLocationTimeZone(true)
-                        .setWorkSource(ARBITRARY_WORK_SOURCE);
+                        .setReportLocationTimeZone(true);
         assertRoundTripParcelable(builder.build());
 
         builder.setReportLocationTimeZone(false);
