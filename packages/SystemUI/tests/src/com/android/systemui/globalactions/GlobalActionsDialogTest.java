@@ -16,9 +16,13 @@
 
 package com.android.systemui.globalactions;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static junit.framework.Assert.assertEquals;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -30,6 +34,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
@@ -40,9 +45,12 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.util.FeatureFlagUtils;
 import android.view.IWindowManager;
+import android.view.View;
+import android.widget.FrameLayout;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.colorextraction.ColorExtractor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.statusbar.IStatusBarService;
@@ -56,7 +64,7 @@ import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions;
-import com.android.systemui.statusbar.BlurUtils;
+import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -98,7 +106,6 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private NotificationShadeDepthController mDepthController;
     @Mock private SysuiColorExtractor mColorExtractor;
     @Mock private IStatusBarService mStatusBarService;
-    @Mock private BlurUtils mBlurUtils;
     @Mock private NotificationShadeWindowController mNotificationShadeWindowController;
     @Mock private ControlsUiController mControlsUiController;
     @Mock private IWindowManager mWindowManager;
@@ -109,6 +116,8 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     @Mock private RingerModeTracker mRingerModeTracker;
     @Mock private RingerModeLiveData mRingerModeLiveData;
     @Mock private SysUiState mSysUiState;
+    @Mock GlobalActionsPanelPlugin mWalletPlugin;
+    @Mock GlobalActionsPanelPlugin.PanelViewController mWalletController;
     @Mock private Handler mHandler;
 
     private TestableLooper mTestableLooper;
@@ -143,7 +152,6 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mDepthController,
                 mColorExtractor,
                 mStatusBarService,
-                mBlurUtils,
                 mNotificationShadeWindowController,
                 mControlsUiController,
                 mWindowManager,
@@ -156,6 +164,11 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 mHandler
         );
         mGlobalActionsDialog.setZeroDialogPressDelayForTesting();
+
+        ColorExtractor.GradientColors backdropColors = new ColorExtractor.GradientColors();
+        backdropColors.setMainColor(Color.BLACK);
+        when(mColorExtractor.getNeutralColors()).thenReturn(backdropColors);
+        when(mSysUiState.setFlag(anyInt(), anyBoolean())).thenReturn(mSysUiState);
     }
 
     @Test
@@ -276,5 +289,66 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
         assertEquals(3, mGlobalActionsDialog.mItems.size());
         assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+    }
+
+    @Test
+    public void testShouldShowLockScreenMessage() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        mGlobalActionsDialog.mDialog = null;
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+        mGlobalActionsDialog.mShowLockScreenCardsAndControls = false;
+        setupDefaultActions();
+        when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
+        when(mWalletController.getPanelContent()).thenReturn(new FrameLayout(mContext));
+
+        mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
+
+        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        assertThat(dialog).isNotNull();
+        assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.VISIBLE);
+    }
+
+    @Test
+    public void testShouldNotShowLockScreenMessage_whenWalletOrControlsShownOnLockScreen() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        mGlobalActionsDialog.mDialog = null;
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+        mGlobalActionsDialog.mShowLockScreenCardsAndControls = true;
+        setupDefaultActions();
+        when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
+        when(mWalletController.getPanelContent()).thenReturn(new FrameLayout(mContext));
+
+        mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
+
+        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        assertThat(dialog).isNotNull();
+        assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    @Test
+    public void testShouldNotShowLockScreenMessage_whenControlsAndWalletBothDisabled() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        mGlobalActionsDialog.mDialog = null;
+        when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+        mGlobalActionsDialog.mShowLockScreenCardsAndControls = true;
+        setupDefaultActions();
+        when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
+        when(mWalletController.getPanelContent()).thenReturn(null);
+        when(mControlsUiController.getAvailable()).thenReturn(false);
+
+        mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
+
+        GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
+        assertThat(dialog).isNotNull();
+        assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
+    }
+
+    private void setupDefaultActions() {
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
     }
 }
