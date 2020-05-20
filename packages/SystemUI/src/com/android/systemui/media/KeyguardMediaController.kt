@@ -18,6 +18,7 @@ package com.android.systemui.media
 
 import android.view.View
 import com.android.systemui.plugins.statusbar.StatusBarStateController
+import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
@@ -33,7 +34,8 @@ import javax.inject.Singleton
 class KeyguardMediaController @Inject constructor(
     private val mediaHost: MediaHost,
     private val bypassController: KeyguardBypassController,
-    private val statusBarStateController: SysuiStatusBarStateController
+    private val statusBarStateController: SysuiStatusBarStateController,
+    private val notifLockscreenUserManager: NotificationLockscreenUserManager
 ) {
 
     init {
@@ -61,10 +63,12 @@ class KeyguardMediaController @Inject constructor(
     }
 
     private fun updateVisibility() {
-        val shouldBeVisible = mediaHost.visible
-                && !bypassController.bypassEnabled
-                && (statusBarStateController.state == StatusBarState.KEYGUARD ||
-                        statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER)
+        val keyguardOrUserSwitcher = (statusBarStateController.state == StatusBarState.KEYGUARD ||
+                statusBarStateController.state == StatusBarState.FULLSCREEN_USER_SWITCHER)
+        val shouldBeVisible = mediaHost.visible &&
+                !bypassController.bypassEnabled &&
+                keyguardOrUserSwitcher &&
+                notifLockscreenUserManager.shouldShowLockscreenNotifications()
         view?.visibility = if (shouldBeVisible) View.VISIBLE else View.GONE
     }
 }
