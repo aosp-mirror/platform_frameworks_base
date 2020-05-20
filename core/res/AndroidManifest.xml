@@ -5495,7 +5495,7 @@
         </service>
 
         <service android:name="com.android.server.pm.PackageManagerShellCommandDataLoader"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.LOAD_DATA" />
             </intent-filter>

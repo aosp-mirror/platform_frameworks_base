@@ -524,7 +524,7 @@ public class ResolverListAdapter extends BaseAdapter {
         if (view == null) {
             view = createView(parent);
         }
-        onBindView(view, getItem(position));
+        onBindView(view, getItem(position), position);
         return view;
     }
 
@@ -541,10 +541,10 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     public final void bindView(int position, View view) {
-        onBindView(view, getItem(position));
+        onBindView(view, getItem(position), position);
     }
 
-    protected void onBindView(View view, TargetInfo info) {
+    protected void onBindView(View view, TargetInfo info, int position) {
         final ViewHolder holder = (ViewHolder) view.getTag();
         if (info == null) {
             holder.icon.setImageDrawable(

@@ -238,8 +238,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     @Override
-    protected void onBindView(View view, TargetInfo info) {
-        super.onBindView(view, info);
+    protected void onBindView(View view, TargetInfo info, int position) {
+        super.onBindView(view, info, position);
+        if (info == null) return;
 
         // If target is loading, show a special placeholder shape in the label, make unclickable
         final ViewHolder holder = (ViewHolder) view.getTag();
@@ -257,10 +258,15 @@ public class ChooserListAdapter extends ResolverListAdapter {
             holder.itemView.setBackground(holder.defaultItemViewBackground);
         }
 
-        // If the target is grouped show an indicator
         if (info instanceof MultiDisplayResolveInfo) {
+            // If the target is grouped show an indicator
             Drawable bkg = mContext.getDrawable(R.drawable.chooser_group_background);
             holder.text.setPaddingRelative(0, 0, bkg.getIntrinsicWidth() /* end */, 0);
+            holder.text.setBackground(bkg);
+        } else if (info.isPinned() && getPositionTargetType(position) == TARGET_STANDARD) {
+            // If the target is pinned and in the suggested row show a pinned indicator
+            Drawable bkg = mContext.getDrawable(R.drawable.chooser_pinned_background);
+            holder.text.setPaddingRelative(bkg.getIntrinsicWidth() /* start */, 0, 0, 0);
             holder.text.setBackground(bkg);
         } else {
             holder.text.setBackground(null);

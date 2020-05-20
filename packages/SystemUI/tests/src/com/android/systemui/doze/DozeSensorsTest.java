@@ -18,11 +18,11 @@ package com.android.systemui.doze;
 
 import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
 
+import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -83,10 +83,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     @Mock
     private DozeLog mDozeLog;
     @Mock
-    private Sensor mProximitySensor;
-    @Mock
-    private ProximitySensor mMockProxSensor;
-
+    private ProximitySensor mProximitySensor;
     private SensorManagerPlugin.SensorEventListener mWakeLockScreenListener;
     private TestableLooper mTestableLooper;
     private DozeSensors mDozeSensors;
@@ -97,7 +94,6 @@ public class DozeSensorsTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         when(mAmbientDisplayConfiguration.getWakeLockScreenDebounce()).thenReturn(5000L);
         when(mAmbientDisplayConfiguration.alwaysOnEnabled(anyInt())).thenReturn(true);
-        when(mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)).thenReturn(mProximitySensor);
         doAnswer(invocation -> {
             ((Runnable) invocation.getArgument(0)).run();
             return null;
@@ -107,10 +103,9 @@ public class DozeSensorsTest extends SysuiTestCase {
 
     @Test
     public void testRegisterProx() {
-        // We should not register with the sensor manager initially.
-        verify(mMockProxSensor).pause();
+        assertFalse(mProximitySensor.isRegistered());
         mDozeSensors.setProxListening(true);
-        verify(mMockProxSensor).resume();
+        verify(mProximitySensor).resume();
     }
 
     @Test
@@ -148,21 +143,6 @@ public class DozeSensorsTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSetPaused_doesntPause_sensors() {
-        verify(mSensorManager, never()).registerListener(any(), any(Sensor.class), anyInt());
-        mDozeSensors.setListening(true);
-        verify(mTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor);
-        mDozeSensors.setPaused(true);
-        verify(mTriggerSensor).setListening(eq(true));
-
-        clearInvocations(mTriggerSensor);
-        mDozeSensors.setListening(false);
-        verify(mTriggerSensor).setListening(eq(false));
-    }
-
-    @Test
     public void testDestroy() {
         mDozeSensors.destroy();
 
@@ -174,7 +154,7 @@ public class DozeSensorsTest extends SysuiTestCase {
         TestableDozeSensors() {
             super(getContext(), mAlarmManager, mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
-                    mMockProxSensor);
+                    mProximitySensor);
             for (TriggerSensor sensor : mSensors) {
                 if (sensor instanceof PluginSensor
                         && ((PluginSensor) sensor).mPluginSensor.getType()
