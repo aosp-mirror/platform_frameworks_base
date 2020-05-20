@@ -71,6 +71,7 @@ public class AuthSessionTest {
     @Mock private IStatusBarService mStatusBarService;
     @Mock private IBiometricSysuiReceiver mSysuiReceiver;
     @Mock private KeyStore mKeyStore;
+    @Mock private AuthSession.ClientDeathReceiver mClientDeathReceiver;
 
     private Random mRandom;
     private IBinder mToken;
@@ -81,6 +82,7 @@ public class AuthSessionTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        when(mClientReceiver.asBinder()).thenReturn(mock(Binder.class));
         mRandom = new Random();
         mToken = new Binder();
         mSensors = new ArrayList<>();
@@ -195,8 +197,8 @@ public class AuthSessionTest {
                 checkDevicePolicyManager);
 
         return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
-                mRandom, preAuthInfo, mToken, operationId, userId, mSensorReceiver,
-                mClientReceiver, TEST_PACKAGE, promptInfo, callingUid,
+                mRandom, mClientDeathReceiver, preAuthInfo, mToken, operationId, userId,
+                mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo, callingUid,
                 callingPid, callingUserId, false /* debugEnabled */);
     }
 
