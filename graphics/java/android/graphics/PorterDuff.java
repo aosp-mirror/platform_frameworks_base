@@ -30,8 +30,6 @@ public class PorterDuff {
     /**
      * {@usesMathJax}
      *
-     * <h3>Porter-Duff</h3>
-     *
      * <p>The name of the parent class is an homage to the work of Thomas Porter and
      * Tom Duff, presented in their seminal 1984 paper titled "Compositing Digital Images".
      * In this paper, the authors describe 12 compositing operators that govern how to
