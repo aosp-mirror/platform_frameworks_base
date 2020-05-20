@@ -18,6 +18,8 @@ package com.android.systemui.media
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.GradientDrawable
+import android.graphics.drawable.RippleDrawable
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
@@ -104,7 +106,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
         activityStarter = mock(ActivityStarter::class.java)
 
-        player = MediaControlPanel(context, null, fgExecutor, bgExecutor, activityStarter)
+        player = MediaControlPanel(context, fgExecutor, bgExecutor, activityStarter)
 
         // Mock out a view holder for the player to attach to.
         holder = mock(PlayerViewHolder::class.java)
@@ -129,6 +131,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
         artistText = TextView(context)
         whenever(holder.artistText).thenReturn(artistText)
         seamless = FrameLayout(context)
+        val seamlessBackground = mock(RippleDrawable::class.java)
+        seamless.setBackground(seamlessBackground)
+        whenever(seamlessBackground.getDrawable(0)).thenReturn(mock(GradientDrawable::class.java))
         whenever(holder.seamless).thenReturn(seamless)
         seamlessIcon = ImageView(context)
         whenever(holder.seamlessIcon).thenReturn(seamlessIcon)
@@ -176,7 +181,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindWhenUnattached() {
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, null, null)
+                emptyList(), PACKAGE, null, null, MediaDeviceData(null, DEVICE_NAME))
         player.bind(state)
         assertThat(player.isPlaying()).isFalse()
     }
@@ -185,7 +190,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindText() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null)
+                emptyList(), PACKAGE, session.getSessionToken(), null,
+                MediaDeviceData(null, DEVICE_NAME))
         player.bind(state)
         assertThat(appName.getText()).isEqualTo(APP)
         assertThat(titleText.getText()).isEqualTo(TITLE)
@@ -196,7 +202,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindBackgroundColor() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null)
+                emptyList(), PACKAGE, session.getSessionToken(), null,
+                MediaDeviceData(null, DEVICE_NAME))
         player.bind(state)
         assertThat(background.getBackgroundTintList()).isEqualTo(ColorStateList.valueOf(BG_COLOR))
     }
