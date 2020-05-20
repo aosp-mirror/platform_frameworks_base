@@ -26,7 +26,6 @@ import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_INST
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_SYSTEM_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
-import static android.os.storage.StorageManager.PROP_LEGACY_OP_STICKY;
 
 import static java.lang.Integer.min;
 
@@ -37,12 +36,16 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
-import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
+import android.provider.DeviceConfig;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
+
+import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * The behavior of soft restricted permissions is different for each permission. This class collects
@@ -65,8 +68,8 @@ public abstract class SoftRestrictedPermissionPolicy {
                 }
             };
 
-    private static final boolean isLegacyStorageAppOpStickyGlobal = SystemProperties.getBoolean(
-            PROP_LEGACY_OP_STICKY, /*defaultValue*/true);
+    private static final HashSet<String> sForcedScopedStorageAppWhitelist = new HashSet<>(
+            Arrays.asList(getForcedScopedStorageAppWhitelist()));
 
     /**
      * TargetSDK is per package. To make sure two apps int the same shared UID do not fight over
@@ -141,12 +144,13 @@ public abstract class SoftRestrictedPermissionPolicy {
                     shouldPreserveLegacyExternalStorage = pkg.hasPreserveLegacyExternalStorage()
                             && smInternal.hasLegacyExternalStorage(appInfo.uid);
                     targetSDK = getMinimumTargetSDK(context, appInfo, user);
-                    // LEGACY_STORAGE op is normally sticky for apps targetig <= Q.
-                    // However, this device can be configured to make it non-sticky.
-                    boolean isLegacyAppOpSticky = isLegacyStorageAppOpStickyGlobal
-                            && targetSDK <= Build.VERSION_CODES.Q;
+
                     shouldApplyRestriction = (flags & FLAG_PERMISSION_APPLY_RESTRICTION) != 0
-                            || (!isLegacyAppOpSticky && !shouldPreserveLegacyExternalStorage);
+                            || (targetSDK > Build.VERSION_CODES.Q
+                            && !shouldPreserveLegacyExternalStorage)
+                            // If the device is configured to force this app into scoped storage,
+                            // then we should apply the restriction
+                            || sForcedScopedStorageAppWhitelist.contains(appInfo.packageName);
                 } else {
                     isWhiteListed = false;
                     shouldApplyRestriction = false;
@@ -243,6 +247,15 @@ public abstract class SoftRestrictedPermissionPolicy {
             }
         }
         return false;
+    }
+
+    private static String[] getForcedScopedStorageAppWhitelist() {
+        final String rawList = DeviceConfig.getString(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
+                StorageManager.PROP_FORCED_SCOPED_STORAGE_WHITELIST, /*defaultValue*/"");
+        if (rawList == null || rawList.equals("")) {
+            return new String[0];
+        }
+        return rawList.split(",");
     }
 
     /**
