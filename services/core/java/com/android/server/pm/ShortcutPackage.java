@@ -31,8 +31,10 @@ import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.AtomicFile;
 import android.util.Log;
 import android.util.Slog;
+import android.util.Xml;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
@@ -43,15 +45,21 @@ import com.android.server.pm.ShortcutService.DumpFilter;
 import com.android.server.pm.ShortcutService.ShortcutOperation;
 import com.android.server.pm.ShortcutService.Stats;
 
+import libcore.io.IoUtils;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -1714,6 +1722,53 @@ class ShortcutPackage extends ShortcutPackageItem {
         }
 
         out.endTag(null, TAG_SHORTCUT);
+    }
+
+    public static ShortcutPackage loadFromFile(ShortcutService s, ShortcutUser shortcutUser,
+            File path, boolean fromBackup) {
+
+        final AtomicFile file = new AtomicFile(path);
+        final FileInputStream in;
+        try {
+            in = file.openRead();
+        } catch (FileNotFoundException e) {
+            if (ShortcutService.DEBUG) {
+                Slog.d(TAG, "Not found " + path);
+            }
+            return null;
+        }
+
+        try {
+            final BufferedInputStream bis = new BufferedInputStream(in);
+
+            ShortcutPackage ret = null;
+            XmlPullParser parser = Xml.newPullParser();
+            parser.setInput(bis, StandardCharsets.UTF_8.name());
+
+            int type;
+            while ((type = parser.next()) != XmlPullParser.END_DOCUMENT) {
+                if (type != XmlPullParser.START_TAG) {
+                    continue;
+                }
+                final int depth = parser.getDepth();
+
+                final String tag = parser.getName();
+                if (ShortcutService.DEBUG_LOAD) {
+                    Slog.d(TAG, String.format("depth=%d type=%d name=%s", depth, type, tag));
+                }
+                if ((depth == 1) && TAG_ROOT.equals(tag)) {
+                    ret = loadFromXml(s, shortcutUser, parser, fromBackup);
+                    continue;
+                }
+                ShortcutService.throwForInvalidTag(depth, tag);
+            }
+            return ret;
+        } catch (IOException | XmlPullParserException e) {
+            Slog.e(TAG, "Failed to read file " + file.getBaseFile(), e);
+            return null;
+        } finally {
+            IoUtils.closeQuietly(in);
+        }
     }
 
     public static ShortcutPackage loadFromXml(ShortcutService s, ShortcutUser shortcutUser,
