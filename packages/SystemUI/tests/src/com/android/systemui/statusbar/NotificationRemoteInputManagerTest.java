@@ -62,6 +62,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
     @Mock private ExpandableNotificationRow mRow;
     @Mock private StatusBarStateController mStateController;
     @Mock private RemoteInputUriController mRemoteInputUriController;
+    @Mock private NotificationClickNotifier mClickNotifier;
 
     // Dependency mocks:
     @Mock private NotificationEntryManager mEntryManager;
@@ -83,6 +84,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 mStateController,
                 Handler.createAsync(Looper.myLooper()),
                 mRemoteInputUriController,
+                mClickNotifier,
                 mock(ActionClickLogger.class));
         mEntry = new NotificationEntryBuilder()
                 .setPkg(TEST_PACKAGE_NAME)
@@ -266,6 +268,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                 StatusBarStateController statusBarStateController,
                 Handler mainHandler,
                 RemoteInputUriController remoteInputUriController,
+                NotificationClickNotifier clickNotifier,
                 ActionClickLogger actionClickLogger) {
             super(
                     context,
@@ -276,6 +279,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
                     statusBarStateController,
                     mainHandler,
                     remoteInputUriController,
+                    clickNotifier,
                     actionClickLogger);
         }
 

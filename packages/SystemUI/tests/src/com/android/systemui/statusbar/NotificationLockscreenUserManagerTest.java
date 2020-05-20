@@ -52,7 +52,6 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -86,7 +85,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     @Mock
     private DevicePolicyManager mDevicePolicyManager;
     @Mock
-    private IStatusBarService mIStatusBarService;
+    private NotificationClickNotifier mClickNotifier;
     @Mock
     private KeyguardManager mKeyguardManager;
     @Mock
@@ -397,7 +396,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
             extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
             super(context, mBroadcastDispatcher, mDevicePolicyManager, mUserManager,
-                    mIStatusBarService, NotificationLockscreenUserManagerTest.this.mKeyguardManager,
+                    mClickNotifier, NotificationLockscreenUserManagerTest.this.mKeyguardManager,
                     mStatusBarStateController, Handler.createAsync(Looper.myLooper()),
                     mDeviceProvisionedController, mKeyguardStateController);
         }
