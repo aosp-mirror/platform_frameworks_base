@@ -277,7 +277,8 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         mView = (DividerView)
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
         DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
-        mView.injectDependencies(mWindowManager, mDividerState, this, mSplits, mSplitLayout);
+        mView.injectDependencies(mWindowManager, mDividerState, this, mSplits, mSplitLayout,
+                mImePositionProcessor);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
         mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
         final int size = dctx.getResources().getDimensionPixelSize(

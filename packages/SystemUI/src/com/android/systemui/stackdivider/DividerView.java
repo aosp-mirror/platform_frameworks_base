@@ -143,6 +143,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     private VelocityTracker mVelocityTracker;
     private FlingAnimationUtils mFlingAnimationUtils;
     private SplitDisplayLayout mSplitLayout;
+    private DividerImeController mImeController;
     private DividerCallbacks mCallback;
     private final AnimationHandler mAnimationHandler = new AnimationHandler();
 
@@ -358,12 +359,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
     }
 
     public void injectDependencies(DividerWindowManager windowManager, DividerState dividerState,
-            DividerCallbacks callback, SplitScreenTaskOrganizer tiles, SplitDisplayLayout sdl) {
+            DividerCallbacks callback, SplitScreenTaskOrganizer tiles, SplitDisplayLayout sdl,
+            DividerImeController imeController) {
         mWindowManager = windowManager;
         mState = dividerState;
         mCallback = callback;
         mTiles = tiles;
         mSplitLayout = sdl;
+        mImeController = imeController;
 
         if (mState.mRatioPositionBeforeMinimized == 0) {
             // Set the middle target as the initial state
@@ -403,6 +406,7 @@ public class DividerView extends FrameLayout implements OnTouchListener,
             } else {
                 t.show(sc);
             }
+            mImeController.setDimsHidden(t, hidden);
             t.apply();
             mTiles.releaseTransaction(t);
         });
