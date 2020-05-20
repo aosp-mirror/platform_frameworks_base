@@ -21,6 +21,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.provider.Settings.ACTION_PICTURE_IN_PICTURE_SETTINGS;
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_CONTROLS;
 import static android.view.accessibility.AccessibilityManager.FLAG_CONTENT_ICONS;
+import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ACTIONS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_ALLOW_TIMEOUT;
@@ -68,6 +69,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.view.accessibility.AccessibilityManager;
+import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -220,6 +222,29 @@ public class PipMenuActivity extends Activity {
 
         // Hide without an animation.
         getWindow().setExitTransition(null);
+
+        initAccessibility();
+    }
+
+    private void initAccessibility() {
+        getWindow().getDecorView().setAccessibilityDelegate(new View.AccessibilityDelegate() {
+            @Override
+            public void onInitializeAccessibilityNodeInfo(View host, AccessibilityNodeInfo info) {
+                super.onInitializeAccessibilityNodeInfo(host, info);
+                String label = getResources().getString(R.string.pip_menu_title);
+                info.addAction(new AccessibilityNodeInfo.AccessibilityAction(ACTION_CLICK, label));
+            }
+
+            @Override
+            public boolean performAccessibilityAction(View host, int action, Bundle args) {
+                if (action == ACTION_CLICK && mMenuState == MENU_STATE_CLOSE) {
+                    Message m = Message.obtain();
+                    m.what = PipMenuActivityController.MESSAGE_SHOW_MENU;
+                    sendMessage(m, "Could not notify controller to show PIP menu");
+                }
+                return super.performAccessibilityAction(host, action, args);
+            }
+        });
     }
 
     @Override
