@@ -89,35 +89,36 @@ class ControlsControllerImpl @Inject constructor (
             contentResolver, CONTROLS_AVAILABLE, DEFAULT_ENABLED, currentUserId) != 0
         private set
 
-    private var file = Environment.buildPath(
-        context.filesDir,
-        ControlsFavoritePersistenceWrapper.FILE_NAME
-    )
-    private var auxiliaryFile = Environment.buildPath(
-        context.filesDir,
-        AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME
-    )
-    private val persistenceWrapper = optionalWrapper.orElseGet {
-        ControlsFavoritePersistenceWrapper(
-            file,
-            executor,
-            BackupManager(context)
+    private val persistenceWrapper: ControlsFavoritePersistenceWrapper
+    @VisibleForTesting
+    internal var auxiliaryPersistenceWrapper: AuxiliaryPersistenceWrapper
+
+    init {
+        val userStructure = UserStructure(context, currentUser)
+
+        persistenceWrapper = optionalWrapper.orElseGet {
+            ControlsFavoritePersistenceWrapper(
+                    userStructure.file,
+                    executor,
+                    BackupManager(userStructure.userContext)
+            )
+        }
+
+        auxiliaryPersistenceWrapper = AuxiliaryPersistenceWrapper(
+                userStructure.auxiliaryFile,
+                executor
         )
     }
-
-    @VisibleForTesting
-    internal var auxiliaryPersistenceWrapper = AuxiliaryPersistenceWrapper(auxiliaryFile, executor)
 
     private fun setValuesForUser(newUser: UserHandle) {
         Log.d(TAG, "Changing to user: $newUser")
         currentUser = newUser
-        val userContext = context.createContextAsUser(currentUser, 0)
-        file = Environment.buildPath(
-                userContext.filesDir, ControlsFavoritePersistenceWrapper.FILE_NAME)
-        auxiliaryFile = Environment.buildPath(
-            userContext.filesDir, AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME)
-        persistenceWrapper.changeFileAndBackupManager(file, BackupManager(userContext))
-        auxiliaryPersistenceWrapper.changeFile(auxiliaryFile)
+        val userStructure = UserStructure(context, currentUser)
+        persistenceWrapper.changeFileAndBackupManager(
+                userStructure.file,
+                BackupManager(userStructure.userContext)
+        )
+        auxiliaryPersistenceWrapper.changeFile(userStructure.auxiliaryFile)
         available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
                 DEFAULT_ENABLED, newUser.identifier) != 0
         resetFavorites(available)
@@ -562,6 +563,20 @@ class ControlsControllerImpl @Inject constructor (
         }
         pw.println(bindingController.toString())
     }
+}
+
+class UserStructure(context: Context, user: UserHandle) {
+    val userContext = context.createContextAsUser(user, 0)
+
+    val file = Environment.buildPath(
+            context.filesDir,
+            ControlsFavoritePersistenceWrapper.FILE_NAME
+    )
+
+    val auxiliaryFile = Environment.buildPath(
+            context.filesDir,
+            AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME
+    )
 }
 
 /**
