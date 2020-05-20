@@ -625,7 +625,10 @@ public class AppWidgetHostView extends FrameLayout {
                     }
                 }
                 defaultView = inflater.inflate(layoutId, this, false);
-                defaultView.setOnClickListener(this::onDefaultViewClicked);
+                if (!(defaultView instanceof AdapterView)) {
+                    // AdapterView does not support onClickListener
+                    defaultView.setOnClickListener(this::onDefaultViewClicked);
+                }
             } else {
                 Log.w(TAG, "can't inflate defaultView because mInfo is missing");
             }

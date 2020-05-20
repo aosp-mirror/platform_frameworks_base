@@ -141,7 +141,7 @@ public class LocalMediaManagerTest {
         when(currentDevice.getId()).thenReturn(TEST_CURRENT_DEVICE_ID);
 
         mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.connectDevice(device);
+        assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
 
         verify(currentDevice).disconnect();
         verify(device).connect();
@@ -154,7 +154,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mCurrentConnectedDevice = mInfoMediaDevice1;
 
         mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.connectDevice(mInfoMediaDevice2);
+        assertThat(mLocalMediaManager.connectDevice(mInfoMediaDevice2)).isTrue();
 
         assertThat(mInfoMediaDevice2.getState()).isEqualTo(LocalMediaManager.MediaDeviceState
                 .STATE_CONNECTING);
@@ -167,7 +167,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.mCurrentConnectedDevice = mInfoMediaDevice1;
 
         mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.connectDevice(mInfoMediaDevice1);
+        assertThat(mLocalMediaManager.connectDevice(mInfoMediaDevice1)).isFalse();
 
         assertThat(mInfoMediaDevice1.getState()).isNotEqualTo(LocalMediaManager.MediaDeviceState
                 .STATE_CONNECTING);
@@ -185,7 +185,7 @@ public class LocalMediaManagerTest {
         when(cachedDevice.isBusy()).thenReturn(false);
 
         mLocalMediaManager.registerCallback(mCallback);
-        mLocalMediaManager.connectDevice(device);
+        assertThat(mLocalMediaManager.connectDevice(device)).isTrue();
 
         verify(cachedDevice).connect();
     }

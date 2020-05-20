@@ -790,6 +790,9 @@
     <!-- Accessibility text describing sensors off active. [CHAR LIMIT=NONE] -->
     <string name="accessibility_sensors_off_active">Sensors off active</string>
 
+    <!-- Accessibility text describing that media is playing. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_media_active">Media is active</string>
+
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
 
