@@ -851,6 +851,14 @@ interface ITelephony {
     IImsRcsFeature getRcsFeatureAndListen(int slotId, in IImsServiceFeatureCallback callback);
 
     /**
+     * Unregister a callback that was previously registered through
+     * {@link #getMmTelFeatureAndListen} or {@link #getRcsFeatureAndListen}. This should always be
+     * called when the callback is no longer being used.
+     */
+    void unregisterImsFeatureCallback(int slotId, int featureType,
+            in IImsServiceFeatureCallback callback);
+
+    /**
     * Returns the IImsRegistration associated with the slot and feature specified.
     */
     IImsRegistration getImsRegistration(int slotId, int feature);
