@@ -7395,6 +7395,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Unregister a IImsServiceFeatureCallback previously associated with an ImsFeature through
+     * {@link #getImsMmTelFeatureAndListen(int, IImsServiceFeatureCallback)} or
+     * {@link #getImsRcsFeatureAndListen(int, IImsServiceFeatureCallback)}.
+     * @param slotIndex The SIM slot associated with the callback.
+     * @param featureType The {@link android.telephony.ims.feature.ImsFeature.FeatureType}
+     *                    associated with the callback.
+     * @param callback The callback to be unregistered.
+     * @hide
+     */
+    public void unregisterImsFeatureCallback(int slotIndex, int featureType,
+            IImsServiceFeatureCallback callback) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.unregisterImsFeatureCallback(slotIndex, featureType, callback);
+            }
+        } catch (RemoteException e) {
+            Rlog.e(TAG, "unregisterImsFeatureCallback, RemoteException: "
+                    + e.getMessage());
+        }
+    }
+
+    /**
      * @return the {@IImsRegistration} interface that corresponds with the slot index and feature.
      * @param slotIndex The SIM slot corresponding to the ImsService ImsRegistration is active for.
      * @param feature An integer indicating the feature that we wish to get the ImsRegistration for.
