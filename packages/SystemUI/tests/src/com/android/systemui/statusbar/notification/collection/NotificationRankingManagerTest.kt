@@ -38,9 +38,11 @@ import com.android.systemui.statusbar.notification.people.PeopleNotificationIden
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier.Companion.TYPE_PERSON
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.BUCKET_ALERTING
+import com.android.systemui.statusbar.notification.stack.BUCKET_FOREGROUND_SERVICE
 import com.android.systemui.statusbar.notification.stack.BUCKET_SILENT
 import com.android.systemui.statusbar.phone.NotificationGroupManager
 import com.android.systemui.statusbar.policy.HeadsUpManager
+import com.google.common.truth.Truth.assertThat
 import dagger.Lazy
 import junit.framework.Assert.assertEquals
 import org.junit.Before
@@ -351,6 +353,58 @@ class NotificationRankingManagerTest : SysuiTestCase() {
 
         // THEN the initialization time for the entry is reset
         assertEquals(false, e.hasFinishedInitialization())
+    }
+
+    @Test
+    fun testSort_colorizedForegroundService() {
+        whenever(sectionsManager.isFilteringEnabled()).thenReturn(true)
+
+        val a = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(
+                        Notification.Builder(mContext, "test")
+                                .build())
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val b = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_DEFAULT) // high priority
+                .setPkg("pkg2")
+                .setOpPkg("pkg2")
+                .setTag("tag")
+                .setNotification(mock(Notification::class.java).also { notif ->
+                    whenever(notif.isForegroundService).thenReturn(true)
+                    whenever(notif.isColorized).thenReturn(true)
+                })
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.getUser())
+                .setOverrideGroupKey("")
+                .build()
+
+        val cN = Notification.Builder(mContext, "test")
+                .setStyle(Notification.MessagingStyle(""))
+                .build()
+        val c = NotificationEntryBuilder()
+                .setImportance(IMPORTANCE_HIGH)
+                .setPkg("pkg")
+                .setOpPkg("pkg")
+                .setTag("tag")
+                .setNotification(cN)
+                .setChannel(NotificationChannel("test", "", IMPORTANCE_DEFAULT))
+                .setUser(mContext.user)
+                .setOverrideGroupKey("")
+                .build()
+        whenever(personNotificationIdentifier.getPeopleNotificationType(a.sbn, a.ranking))
+                .thenReturn(TYPE_IMPORTANT_PERSON)
+
+        assertThat(rankingManager.updateRanking(null, listOf(a, b, c), "test"))
+                .containsExactly(b, c, a)
+        assertThat(b.bucket).isEqualTo(BUCKET_FOREGROUND_SERVICE)
     }
 
     internal class TestableNotificationRankingManager(
