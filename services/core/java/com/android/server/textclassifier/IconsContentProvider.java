@@ -25,6 +25,7 @@ import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelFileDescriptor.AutoCloseOutputStream;
+import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -51,7 +52,7 @@ public final class IconsContentProvider extends ContentProvider {
         try {
             final ResourceInfo res = IconsUriHelper.getInstance().getResourceInfo(uri);
             final Drawable drawable = Icon.createWithResource(res.packageName, res.id)
-                    .loadDrawable(getContext());
+                    .loadDrawableAsUser(getContext(), UserHandle.getCallingUserId());
             final byte[] data = getBitmapData(drawable);
             final ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
             final ParcelFileDescriptor readSide = pipe[0];
