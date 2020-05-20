@@ -209,4 +209,4 @@ class LogBuffer(
 }
 
 private const val TAG = "LogBuffer"
-private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.S", Locale.US)
+private val DATE_FORMAT = SimpleDateFormat("MM-dd HH:mm:ss.SSS", Locale.US)
