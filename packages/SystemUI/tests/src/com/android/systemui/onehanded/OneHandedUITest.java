@@ -106,6 +106,14 @@ public class OneHandedUITest extends OneHandedTestCase {
     }
 
     @Test
+    public void tesSettingsObserver_updateTapAppToExit() {
+        Settings.Secure.putInt(mContext.getContentResolver(),
+                Settings.Secure.TAPS_APP_TO_EXIT, 1);
+
+        verify(mMockOneHandedManagerImpl, times(1)).setTaskChangeToExit(true);
+    }
+
+    @Test
     public void tesSettingsObserver_updateEnabled() {
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ONE_HANDED_MODE_ENABLED, 1);
