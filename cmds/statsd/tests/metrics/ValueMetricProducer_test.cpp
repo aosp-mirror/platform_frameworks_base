@@ -1115,13 +1115,21 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     EXPECT_EQ(false, curInterval.hasValue);
     assertPastBucketValuesSingleKey(valueProducer->mPastBuckets, {12}, {bucketSizeNs},
                                     {bucket2StartTimeNs}, {bucket3StartTimeNs});
+    // The 1st bucket is dropped because of no data
     // The 3rd bucket is dropped due to multiple buckets being skipped.
-    ASSERT_EQ(1, valueProducer->mSkippedBuckets.size());
-    EXPECT_EQ(bucket3StartTimeNs, valueProducer->mSkippedBuckets[0].bucketStartTimeNs);
-    EXPECT_EQ(bucket4StartTimeNs, valueProducer->mSkippedBuckets[0].bucketEndTimeNs);
+    ASSERT_EQ(2, valueProducer->mSkippedBuckets.size());
+
+    EXPECT_EQ(bucketStartTimeNs, valueProducer->mSkippedBuckets[0].bucketStartTimeNs);
+    EXPECT_EQ(bucket2StartTimeNs, valueProducer->mSkippedBuckets[0].bucketEndTimeNs);
     ASSERT_EQ(1, valueProducer->mSkippedBuckets[0].dropEvents.size());
-    EXPECT_EQ(MULTIPLE_BUCKETS_SKIPPED, valueProducer->mSkippedBuckets[0].dropEvents[0].reason);
-    EXPECT_EQ(bucket6StartTimeNs, valueProducer->mSkippedBuckets[0].dropEvents[0].dropTimeNs);
+    EXPECT_EQ(NO_DATA, valueProducer->mSkippedBuckets[0].dropEvents[0].reason);
+    EXPECT_EQ(bucket2StartTimeNs, valueProducer->mSkippedBuckets[0].dropEvents[0].dropTimeNs);
+
+    EXPECT_EQ(bucket3StartTimeNs, valueProducer->mSkippedBuckets[1].bucketStartTimeNs);
+    EXPECT_EQ(bucket4StartTimeNs, valueProducer->mSkippedBuckets[1].bucketEndTimeNs);
+    ASSERT_EQ(1, valueProducer->mSkippedBuckets[1].dropEvents.size());
+    EXPECT_EQ(MULTIPLE_BUCKETS_SKIPPED, valueProducer->mSkippedBuckets[1].dropEvents[0].reason);
+    EXPECT_EQ(bucket6StartTimeNs, valueProducer->mSkippedBuckets[1].dropEvents[0].dropTimeNs);
 }
 
 /*
@@ -2214,7 +2222,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenGuardRailHit) {
     valueProducer->mCondition = ConditionState::kFalse;
 
     valueProducer->onConditionChanged(true, bucketStartTimeNs + 2);
-    EXPECT_EQ(true, valueProducer->mCurrentBucketIsInvalid);
+    EXPECT_EQ(true, valueProducer->mCurrentBucketIsSkipped);
     ASSERT_EQ(0UL, valueProducer->mCurrentSlicedBucket.size());
     ASSERT_EQ(0UL, valueProducer->mSkippedBuckets.size());
 
@@ -3464,16 +3472,18 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenMultipleBucketsSki
     // Condition change event that skips forward by three buckets.
     valueProducer->onConditionChanged(false, bucket4StartTimeNs + 10);
 
+    int64_t dumpTimeNs = bucket4StartTimeNs + 1000;
+
     // Check dump report.
     ProtoOutputStream output;
     std::set<string> strSet;
-    valueProducer->onDumpReport(bucket4StartTimeNs + 1000, true /* include recent buckets */, true,
+    valueProducer->onDumpReport(dumpTimeNs, true /* include current buckets */, true,
                                 NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
     ASSERT_EQ(0, report.value_metrics().data_size());
-    ASSERT_EQ(1, report.value_metrics().skipped_size());
+    ASSERT_EQ(2, report.value_metrics().skipped_size());
 
     EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
@@ -3484,6 +3494,19 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenMultipleBucketsSki
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
     EXPECT_EQ(BucketDropReason::MULTIPLE_BUCKETS_SKIPPED, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(bucket4StartTimeNs + 10), dropEvent.drop_time_millis());
+
+    // This bucket is skipped because a dumpReport with include current buckets is called.
+    // This creates a new bucket from bucket4StartTimeNs to dumpTimeNs in which we have no data
+    // since the condition is false for the entire bucket interval.
+    EXPECT_EQ(NanoToMillis(bucket4StartTimeNs),
+              report.value_metrics().skipped(1).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(dumpTimeNs),
+              report.value_metrics().skipped(1).end_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().skipped(1).drop_event_size());
+
+    dropEvent = report.value_metrics().skipped(1).drop_event(0);
+    EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(dumpTimeNs), dropEvent.drop_time_millis());
 }
 
 /*
@@ -3542,6 +3565,41 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenBucketTooSmall) {
     EXPECT_EQ(BucketDropReason::BUCKET_TOO_SMALL, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
 }
+
+/*
+ * Test that NO_DATA dump reason is logged when a flushed bucket contains no data.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenDataUnavailable) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 10000000000; // 10 seconds
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include current bucket */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(0, report.value_metrics().data_size());
+    ASSERT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
+}
+
 
 /*
  * Test multiple bucket drop events in the same bucket.
