@@ -1415,11 +1415,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     ActivityRecord getActivity(Predicate<ActivityRecord> callback, boolean traverseTopToBottom,
-            WindowContainer boundary) {
+            ActivityRecord boundary) {
         if (traverseTopToBottom) {
             for (int i = mChildren.size() - 1; i >= 0; --i) {
                 final WindowContainer wc = mChildren.get(i);
-                if (wc == boundary) return null;
+                // TODO(b/156986561): Improve the correctness of the boundary check.
+                if (wc == boundary) return boundary;
 
                 final ActivityRecord r = wc.getActivity(callback, traverseTopToBottom, boundary);
                 if (r != null) {
@@ -1430,7 +1431,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             final int count = mChildren.size();
             for (int i = 0; i < count; i++) {
                 final WindowContainer wc = mChildren.get(i);
-                if (wc == boundary) return null;
+                // TODO(b/156986561): Improve the correctness of the boundary check.
+                if (wc == boundary) return boundary;
 
                 final ActivityRecord r = wc.getActivity(callback, traverseTopToBottom, boundary);
                 if (r != null) {

@@ -18,7 +18,6 @@ package com.android.systemui.controls.ui
 
 import android.app.ActivityView
 import android.app.Dialog
-import android.content.ComponentName
 import android.content.Intent
 import android.provider.Settings
 import android.view.View
@@ -58,17 +57,13 @@ class DetailDialog(
             launchIntent.putExtra(EXTRA_USE_PANEL, true)
 
             // Apply flags to make behaviour match documentLaunchMode=always.
-            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
             launchIntent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
 
             view.startActivity(launchIntent)
         }
 
         override fun onActivityViewDestroyed(view: ActivityView) {}
-
-        override fun onTaskCreated(taskId: Int, componentName: ComponentName) {}
-
-        override fun onTaskRemovalStarted(taskId: Int) {}
     }
 
     init {

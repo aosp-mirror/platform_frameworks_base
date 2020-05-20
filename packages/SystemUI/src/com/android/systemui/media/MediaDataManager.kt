@@ -65,7 +65,7 @@ class MediaDataManager @Inject constructor(
     private val context: Context,
     private val mediaControllerFactory: MediaControllerFactory,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExcecutor: Executor
+    @Main private val foregroundExecutor: Executor
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
@@ -201,7 +201,7 @@ class MediaDataManager @Inject constructor(
             }
         }
 
-        foregroundExcecutor.execute {
+        foregroundExecutor.execute {
             onMediaDataLoaded(key, MediaData(true, bgColor, app, smallIconDrawable, artist, song,
                     artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
                     notif.contentIntent))
@@ -288,7 +288,7 @@ class MediaDataManager @Inject constructor(
     /**
      * Are there any media notifications active?
      */
-    fun hasActiveMedia() = mediaEntries.size > 0
+    fun hasActiveMedia() = mediaEntries.isNotEmpty()
 
     fun hasAnyMedia(): Boolean {
         // TODO: implement this when we implemented resumption

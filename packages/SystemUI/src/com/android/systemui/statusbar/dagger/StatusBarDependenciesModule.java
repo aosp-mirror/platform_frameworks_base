@@ -47,6 +47,7 @@ import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.RemoteInputUriController;
 import com.android.systemui.tracing.ProtoTracer;
 import com.android.systemui.util.DeviceConfigProxy;
+import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import java.util.concurrent.Executor;
 
@@ -98,7 +99,7 @@ public interface StatusBarDependenciesModule {
             NotificationEntryManager notificationEntryManager,
             MediaArtworkProcessor mediaArtworkProcessor,
             KeyguardBypassController keyguardBypassController,
-            @Main Executor mainExecutor,
+            @Main DelayableExecutor mainExecutor,
             DeviceConfigProxy deviceConfigProxy,
             MediaDataManager mediaDataManager) {
         return new NotificationMediaManager(
