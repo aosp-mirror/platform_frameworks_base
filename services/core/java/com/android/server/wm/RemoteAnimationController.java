@@ -387,9 +387,11 @@ class RemoteAnimationController implements DeathRecipient {
         int getMode() {
             final DisplayContent dc = mWindowContainer.getDisplayContent();
             final ActivityRecord topActivity = mWindowContainer.getTopMostActivity();
+            // Note that opening/closing transitions are per-activity while changing transitions
+            // are per-task.
             if (dc.mOpeningApps.contains(topActivity)) {
                 return RemoteAnimationTarget.MODE_OPENING;
-            } else if (dc.mChangingContainers.contains(topActivity)) {
+            } else if (dc.mChangingContainers.contains(mWindowContainer)) {
                 return RemoteAnimationTarget.MODE_CHANGING;
             } else {
                 return RemoteAnimationTarget.MODE_CLOSING;
