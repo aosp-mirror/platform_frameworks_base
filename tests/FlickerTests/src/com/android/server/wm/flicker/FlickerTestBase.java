@@ -16,17 +16,15 @@
 
 package com.android.server.wm.flicker;
 
-import static androidx.test.InstrumentationRegistry.getInstrumentation;
-
 import static com.android.server.wm.flicker.helpers.AutomationUtils.setDefaultWait;
 
 import static com.google.common.truth.Truth.assertWithMessage;
 
-import android.os.Bundle;
 import android.platform.helpers.IAppHelper;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.uiautomator.UiDevice;
 import android.util.Log;
+
+import androidx.test.InstrumentationRegistry;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.server.wm.flicker.TransitionRunner.TransitionResult;
 
@@ -62,7 +60,6 @@ public abstract class FlickerTestBase {
 
     @Before
     public void setUp() {
-        InstrumentationRegistry.registerInstance(getInstrumentation(), new Bundle());
         mUiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
     }
 
