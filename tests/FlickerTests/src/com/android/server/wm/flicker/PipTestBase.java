@@ -19,10 +19,9 @@ package com.android.server.wm.flicker;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.closePipWindow;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.hasPipWindow;
 
-import android.support.test.uiautomator.UiDevice;
-
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+import androidx.test.uiautomator.UiDevice;
 
 import com.android.server.wm.flicker.helpers.PipAppHelper;
 
