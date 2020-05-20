@@ -85,7 +85,8 @@ public class ForegroundServiceControllerTest extends SysuiTestCase {
         mFsc = new ForegroundServiceController(
                 mEntryManager, mAppOpsController, mMainHandler);
         mListener = new ForegroundServiceNotificationListener(
-                mContext, mFsc, mEntryManager, mNotifPipeline, mClock);
+                mContext, mFsc, mEntryManager, mNotifPipeline,
+                mock(ForegroundServiceLifetimeExtender.class), mClock);
         ArgumentCaptor<NotificationEntryListener> entryListenerCaptor =
                 ArgumentCaptor.forClass(NotificationEntryListener.class);
         verify(mEntryManager).addNotificationEntryListener(
