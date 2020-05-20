@@ -44,6 +44,7 @@ import android.hardware.SystemSensorManager;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.display.DisplayManagerInternal.DisplayPowerRequest;
+import android.hardware.power.Boost;
 import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.BatteryManager;
@@ -321,7 +322,7 @@ public final class PowerManagerService extends SystemService
     private long mLastUserActivityTime;
     private long mLastUserActivityTimeNoChangeLights;
 
-    // Timestamp of last time power mode was set to interactive.
+    // Timestamp of last time power boost interaction was sent.
     private long mLastInteractivePowerHintTime;
 
     // Timestamp of the last screen brightness boost.
@@ -1589,7 +1590,7 @@ public final class PowerManagerService extends SystemService
         Trace.traceBegin(Trace.TRACE_TAG_POWER, "userActivity");
         try {
             if (eventTime > mLastInteractivePowerHintTime) {
-                setPowerModeInternal(Mode.INTERACTIVE, false);
+                setPowerBoostInternal(Boost.INTERACTION, 0);
                 mLastInteractivePowerHintTime = eventTime;
             }
 
