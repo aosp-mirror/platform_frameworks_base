@@ -2107,19 +2107,16 @@ public class MediaSessionService extends SystemService implements Monitor {
                     public void run() {
                         final String callingOpPackageName;
                         final int callingUid;
-                        final int callingPid;
                         if (asSystemService) {
                             callingOpPackageName = mContext.getOpPackageName();
                             callingUid = Process.myUid();
-                            callingPid = Process.myPid();
                         } else {
                             callingOpPackageName = opPackageName;
                             callingUid = uid;
-                            callingPid = pid;
                         }
                         try {
                             mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(suggestedStream,
-                                    direction, flags, callingOpPackageName, callingUid, callingPid);
+                                    direction, flags, callingOpPackageName, callingUid);
                         } catch (SecurityException | IllegalArgumentException e) {
                             Log.e(TAG, "Cannot adjust volume: direction=" + direction
                                     + ", suggestedStream=" + suggestedStream + ", flags=" + flags

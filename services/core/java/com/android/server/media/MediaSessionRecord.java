@@ -328,7 +328,7 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                 public void run() {
                     try {
                         mAudioManagerInternal.setStreamVolumeForUid(stream, volumeValue, flags,
-                                opPackageName, uid, pid);
+                                opPackageName, uid);
                     } catch (IllegalArgumentException | SecurityException e) {
                         Log.e(TAG, "Cannot set volume: stream=" + stream + ", value=" + volumeValue
                                 + ", flags=" + flags, e);
@@ -501,15 +501,12 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
         // Must use opPackageName for adjusting volumes with UID.
         final String opPackageName;
         final int uid;
-        final int pid;
         if (asSystemService) {
             opPackageName = mContext.getOpPackageName();
             uid = Process.SYSTEM_UID;
-            pid = Process.myPid();
         } else {
             opPackageName = callingOpPackageName;
             uid = callingUid;
-            pid = callingPid;
         }
         mHandler.post(new Runnable() {
             @Override
@@ -518,15 +515,15 @@ public class MediaSessionRecord implements IBinder.DeathRecipient, MediaSessionR
                     if (useSuggested) {
                         if (AudioSystem.isStreamActive(stream, 0)) {
                             mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(stream,
-                                    direction, flags, opPackageName, uid, pid);
+                                    direction, flags, opPackageName, uid);
                         } else {
                             mAudioManagerInternal.adjustSuggestedStreamVolumeForUid(
                                     AudioManager.USE_DEFAULT_STREAM_TYPE, direction,
-                                    flags | previousFlagPlaySound, opPackageName, uid, pid);
+                                    flags | previousFlagPlaySound, opPackageName, uid);
                         }
                     } else {
                         mAudioManagerInternal.adjustStreamVolumeForUid(stream, direction, flags,
-                                opPackageName, uid, pid);
+                                opPackageName, uid);
                     }
                 } catch (IllegalArgumentException | SecurityException e) {
                     Log.e(TAG, "Cannot adjust volume: direction=" + direction + ", stream="
