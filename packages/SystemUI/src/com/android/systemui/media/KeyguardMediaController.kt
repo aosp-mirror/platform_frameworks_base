@@ -45,6 +45,7 @@ class KeyguardMediaController @Inject constructor(
             }
         })
     }
+
     private var view: MediaHeaderView? = null
 
     /**
