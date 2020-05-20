@@ -82,7 +82,9 @@ enum BucketDropReason {
     DIMENSION_GUARDRAIL_REACHED = 6,
     MULTIPLE_BUCKETS_SKIPPED = 7,
     // Not an invalid bucket case, but the bucket is dropped.
-    BUCKET_TOO_SMALL = 8
+    BUCKET_TOO_SMALL = 8,
+    // Not an invalid bucket case, but the bucket is skipped.
+    NO_DATA = 9
 };
 
 struct Activation {
