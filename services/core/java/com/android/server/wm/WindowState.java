@@ -5731,16 +5731,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
-        if (!isVisible()) {
+        boolean willSync = setPendingListener(waitingListener, waitingId);
+        if (!willSync) {
             return false;
         }
-        mWaitingListener = waitingListener;
-        mWaitingSyncId = waitingId;
-        mUsingBLASTSyncTransaction = true;
 
         mLocalSyncId = mBLASTSyncEngine.startSyncSet(this);
         addChildrenToSyncSet(mLocalSyncId);
 
+        // In the WindowContainer implementation we immediately mark ready
+        // since a generic WindowContainer only needs to wait for its
+        // children to finish and is immediately ready from its own
+        // perspective but at the WindowState level we need to wait for ourselves
+        // to draw even if the children draw first our don't need to sync, so we omit
+        // the set ready call until later in finishDrawing()
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
             BLAST_TIMEOUT_DURATION);
