@@ -116,10 +116,7 @@ public class AtomicFile {
         mStartTime = startTime;
 
         if (mLegacyBackupName.exists()) {
-            if (!mLegacyBackupName.renameTo(mBaseName)) {
-                Log.e(LOG_TAG, "Failed to rename legacy backup file " + mLegacyBackupName
-                        + " to base file " + mBaseName);
-            }
+            rename(mLegacyBackupName, mBaseName);
         }
 
         try {
@@ -157,9 +154,7 @@ public class AtomicFile {
         } catch (IOException e) {
             Log.e(LOG_TAG, "Failed to close file output stream", e);
         }
-        if (!mNewName.renameTo(mBaseName)) {
-            Log.e(LOG_TAG, "Failed to rename new file " + mNewName + " to base file " + mBaseName);
-        }
+        rename(mNewName, mBaseName);
         if (mCommitTag != null) {
             com.android.internal.logging.EventLogTags.writeCommitSysConfigFile(
                     mCommitTag, SystemClock.uptimeMillis() - mStartTime);
@@ -221,10 +216,7 @@ public class AtomicFile {
      */
     public FileInputStream openRead() throws FileNotFoundException {
         if (mLegacyBackupName.exists()) {
-            if (!mLegacyBackupName.renameTo(mBaseName)) {
-                Log.e(LOG_TAG, "Failed to rename legacy backup file " + mLegacyBackupName
-                        + " to base file " + mBaseName);
-            }
+            rename(mLegacyBackupName, mBaseName);
         }
 
         // It was okay to call openRead() between startWrite() and finishWrite() for the first time
@@ -309,6 +301,23 @@ public class AtomicFile {
             throw ExceptionUtils.propagate(t);
         } finally {
             IoUtils.closeQuietly(out);
+        }
+    }
+
+    private static void rename(File source, File target) {
+        // We used to delete the target file before rename, but that isn't atomic, and the rename()
+        // syscall should atomically replace the target file. However in the case where the target
+        // file is a directory, a simple rename() won't work. We need to delete the file in this
+        // case because there are callers who erroneously called mBaseName.mkdirs() (instead of
+        // mBaseName.getParentFile().mkdirs()) before creating the AtomicFile, and it worked
+        // regardless, so this deletion became some kind of API.
+        if (target.isDirectory()) {
+            if (!target.delete()) {
+                Log.e(LOG_TAG, "Failed to delete file which is a directory " + target);
+            }
+        }
+        if (!source.renameTo(target)) {
+            Log.e(LOG_TAG, "Failed to rename " + source + " to " + target);
         }
     }
 }
