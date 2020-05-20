@@ -23,7 +23,6 @@ import android.content.pm.ConfigurationInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.InstrumentationInfo
 import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.content.pm.PackageParser
 import android.content.pm.PackageUserState
 import android.content.pm.PermissionInfo
@@ -38,7 +37,6 @@ import com.android.server.pm.parsing.pkg.AndroidPackage
 import com.android.server.pm.pkg.PackageStateUnserialized
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
-import org.junit.After
 import org.junit.BeforeClass
 import org.mockito.Mockito
 import org.mockito.Mockito.anyInt
@@ -49,7 +47,7 @@ open class AndroidPackageParsingTestBase {
 
     companion object {
 
-        private const val VERIFY_ALL_APKS = true
+        private const val VERIFY_ALL_APKS = false
 
         /** For auditing memory usage differences */
         private const val DUMP_HPROF_TO_EXTERNAL = false
@@ -93,21 +91,25 @@ open class AndroidPackageParsingTestBase {
 
         lateinit var newPackages: List<AndroidPackage>
 
-        private val thrownInSetUp = mutableListOf<Throwable>()
-
         @Suppress("ConstantConditionIf")
         @JvmStatic
         @BeforeClass
         fun setUpPackages() {
             this.oldPackages = apks.mapNotNull {
-                tryOrNull {
+                try {
                     packageParser.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                } catch (ignored: Exception) {
+                    // Parsing issues will be caught by SystemPartitionParseTest
+                    null
                 }
             }
 
             this.newPackages = apks.mapNotNull {
-                tryOrNull {
+                try {
                     packageParser2.parsePackage(it, PackageParser.PARSE_IS_SYSTEM_DIR, false)
+                } catch (ignored: Exception) {
+                    // Parsing issues will be caught by SystemPartitionParseTest
+                    null
                 }
             }
 
@@ -144,41 +146,6 @@ open class AndroidPackageParsingTestBase {
             this.pkg = aPkg
             whenever(pkgState) { PackageStateUnserialized() }
         }
-
-        private fun <T> tryOrNull(block: () -> T) = try {
-            block()
-        } catch (e: PackageParser.PackageParserException) {
-            if (e.error != PackageManager.INSTALL_PARSE_FAILED_SKIPPED) {
-                thrownInSetUp.add(e)
-            }
-            null
-        } catch (t: Throwable) {
-            thrownInSetUp.add(t)
-            null
-        }
-    }
-
-    @After
-    fun verifySetUpPackages() {
-        if (thrownInSetUp.isEmpty()) return
-        val exception = AssertionError("setUpPackages failed with ${thrownInSetUp.size} errors:\n" +
-                thrownInSetUp.joinToString(separator = "\n") { it.message.orEmpty() })
-
-        /*
-            Testing infrastructure doesn't currently support errors thrown in @AfterClass,
-            so instead it's thrown here. But to avoid throwing a massive repeated stack for every
-            test method, only throw on the first method run in the class, clearing the list so that
-            subsequent methods can run without failing. Doing this in @After lets true method
-            failures propagate, as those should throw before this does.
-
-            This will cause the failure to be attached to a different method depending on run order,
-            which could make comparisons difficult. So if a failure points here, it's worth
-            checking failures for all methods in all subclasses.
-
-            TODO: When infrastructure supports @AfterClass errors, move this
-        */
-        thrownInSetUp.clear()
-        throw exception
     }
 
     // The following methods dump an exact set of fields from the object to compare, because
@@ -285,7 +252,8 @@ open class AndroidPackageParsingTestBase {
             secondaryCpuAbi=${this.secondaryCpuAbi}
             secondaryNativeLibraryDir=${this.secondaryNativeLibraryDir}
             sourceDir=${this.sourceDir}
-            splitDependencies=${this.splitDependencies.sequence().map { it.first to it.second?.contentToString() }.joinToString()}
+            splitDependencies=${this.splitDependencies.sequence()
+            .map { it.first to it.second?.contentToString() }.joinToString()}
             splitNames=${this.splitNames?.contentToString()}
             splitPublicSourceDirs=${this.splitPublicSourceDirs?.contentToString()}
             splitSourceDirs=${this.splitSourceDirs?.contentToString()}
@@ -348,7 +316,9 @@ open class AndroidPackageParsingTestBase {
             initOrder=${this.initOrder}
             isSyncable=${this.isSyncable}
             multiprocess=${this.multiprocess}
-            pathPermissions=${this.pathPermissions?.joinToString { "readPermission=${it.readPermission}\nwritePermission=${it.writePermission}" }}
+            pathPermissions=${this.pathPermissions?.joinToString {
+        "readPermission=${it.readPermission}\nwritePermission=${it.writePermission}"
+    }}
             readPermission=${this.readPermission}
             uriPermissionPatterns=${this.uriPermissionPatterns?.contentToString()}
             writePermission=${this.writePermission}
@@ -370,7 +340,9 @@ open class AndroidPackageParsingTestBase {
             compileSdkVersionCodename=${this.compileSdkVersionCodename}
             configPreferences=${this.configPreferences?.joinToString { it.dumpToString() }}
             coreApp=${this.coreApp}
-            featureGroups=${this.featureGroups?.joinToString { it.features?.joinToString { featureInfo -> featureInfo.dumpToString() }.orEmpty() }}
+            featureGroups=${this.featureGroups?.joinToString {
+        it.features?.joinToString { featureInfo -> featureInfo.dumpToString() }.orEmpty()
+    }}
             firstInstallTime=${this.firstInstallTime}
             gids=${gids?.contentToString()}
             installLocation=${this.installLocation}
@@ -396,7 +368,8 @@ open class AndroidPackageParsingTestBase {
             sharedUserId=${this.sharedUserId}
             sharedUserLabel=${this.sharedUserLabel}
             signatures=${this.signatures?.joinToString { it.toCharsString() }}
-            signingInfo=${this.signingInfo?.signingCertificateHistory?.joinToString { it.toCharsString() }.orEmpty()}
+            signingInfo=${this.signingInfo?.signingCertificateHistory
+            ?.joinToString { it.toCharsString() }.orEmpty()}
             splitNames=${this.splitNames?.contentToString()}
             splitRevisionCodes=${this.splitRevisionCodes?.contentToString()}
             targetOverlayableName=${this.targetOverlayableName}
