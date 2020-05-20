@@ -758,6 +758,28 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    public void testBLASTCallbackNoDoubleAdd() {
+        final ActivityStack stackController1 = createStack();
+        final Task task = createTask(stackController1);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final WindowState w = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window");
+        makeWindowVisible(w);
+
+        BLASTSyncEngine bse = new BLASTSyncEngine();
+
+        BLASTSyncEngine.TransactionReadyListener transactionListener =
+                mock(BLASTSyncEngine.TransactionReadyListener.class);
+
+        int id = bse.startSyncSet(transactionListener);
+        assertTrue(bse.addToSyncSet(id, w));
+        assertFalse(bse.addToSyncSet(id, w));
+
+        // Clean-up
+        bse.setReady(id);
+    }
+
+
+    @Test
     public void testBLASTCallbackWithInvisibleWindow() {
         final ActivityStack stackController1 = createStack();
         final Task task = createTask(stackController1);
