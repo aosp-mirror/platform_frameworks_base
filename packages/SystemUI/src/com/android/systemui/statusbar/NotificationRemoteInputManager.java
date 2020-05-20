@@ -124,6 +124,7 @@ public class NotificationRemoteInputManager implements Dumpable {
     private final KeyguardManager mKeyguardManager;
     private final StatusBarStateController mStatusBarStateController;
     private final RemoteInputUriController mRemoteInputUriController;
+    private final NotificationClickNotifier mClickNotifier;
 
     protected RemoteInputController mRemoteInputController;
     protected NotificationLifetimeExtender.NotificationSafeToRemoveCallback
@@ -215,11 +216,7 @@ public class NotificationRemoteInputManager implements Dumpable {
                             mEntryManager.getActiveNotificationUnfiltered(key));
             final NotificationVisibility nv =
                     NotificationVisibility.obtain(key, rank, count, true, location);
-            try {
-                mBarService.onNotificationActionClick(key, buttonIndex, action, nv, false);
-            } catch (RemoteException e) {
-                // Ignore
-            }
+            mClickNotifier.onNotificationActionClick(key, buttonIndex, action, nv, false);
         }
 
         private NotificationEntry getNotificationForParent(ViewParent parent) {
@@ -276,6 +273,7 @@ public class NotificationRemoteInputManager implements Dumpable {
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
+            NotificationClickNotifier clickNotifier,
             ActionClickLogger logger) {
         mContext = context;
         mLockscreenUserManager = lockscreenUserManager;
@@ -291,6 +289,7 @@ public class NotificationRemoteInputManager implements Dumpable {
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
         mStatusBarStateController = statusBarStateController;
         mRemoteInputUriController = remoteInputUriController;
+        mClickNotifier = clickNotifier;
 
         notificationEntryManager.addNotificationEntryListener(new NotificationEntryListener() {
             @Override
