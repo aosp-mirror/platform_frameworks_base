@@ -64,6 +64,7 @@ import com.android.systemui.statusbar.policy.SmartReplyView;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 
 /**
  * A frame layout containing the actual payload of the notification, including the contracted,
@@ -518,9 +519,12 @@ public class NotificationContentView extends FrameLayout {
     protected void onVisibilityChanged(View changedView, int visibility) {
         super.onVisibilityChanged(changedView, visibility);
         updateVisibility();
-        if (visibility != VISIBLE) {
+        if (visibility != VISIBLE && !mOnContentViewInactiveListeners.isEmpty()) {
             // View is no longer visible so all content views are inactive.
-            for (Runnable r : mOnContentViewInactiveListeners.values()) {
+            // Clone list as runnables may modify the list of listeners
+            ArrayList<Runnable> listeners = new ArrayList<>(
+                    mOnContentViewInactiveListeners.values());
+            for (Runnable r : listeners) {
                 r.run();
             }
             mOnContentViewInactiveListeners.clear();
