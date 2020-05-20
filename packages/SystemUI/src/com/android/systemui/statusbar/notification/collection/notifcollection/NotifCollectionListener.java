@@ -77,7 +77,7 @@ public interface NotifCollectionListener {
      * the entry during this call. Instead, use {@link #onEntryRemoved} which will be called before
      * deletion.
      */
-    default void onEntryCleanUp(NotificationEntry entry) {
+    default void onEntryCleanUp(@NonNull NotificationEntry entry) {
     }
 
     /**
