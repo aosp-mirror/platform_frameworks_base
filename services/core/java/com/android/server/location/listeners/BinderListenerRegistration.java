@@ -22,17 +22,26 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 
-import com.android.internal.util.Preconditions;
-
 /**
  * A registration that works with IBinder keys, and registers a DeathListener to automatically
- * remove the registration if the binder dies.
+ * remove the registration if the binder dies. The key for this registration must either be an
+ * {@link IBinder} or a {@link BinderKey}.
  *
  * @param <TRequest>  request type
  * @param <TListener> listener type
  */
 public abstract class BinderListenerRegistration<TRequest, TListener> extends
         RemovableListenerRegistration<TRequest, TListener> implements Binder.DeathRecipient {
+
+    /**
+     * Interface to allowed binder retrieval when keys are not themselves IBinder.
+     */
+    public interface BinderKey {
+        /**
+         * Returns the binder associated with this key.
+         */
+        IBinder getBinder();
+    }
 
     protected BinderListenerRegistration(@Nullable TRequest request, CallerIdentity callerIdentity,
             TListener listener) {
@@ -43,24 +52,22 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
      * May be overridden in place of {@link #onRegister(Object)}. Should return true if registration
      * is successful, and false otherwise.
      */
-    protected boolean onBinderRegister(IBinder key) {
+    protected boolean onBinderRegister(Object key) {
         return true;
     }
 
     /**
      * May be overridden in place of {@link #onUnregister()}.
      */
-    protected void onBinderUnregister(IBinder key) {}
+    protected void onBinderUnregister(Object key) {}
 
     @Override
     protected final boolean onRemovableRegister(Object key) {
-        Preconditions.checkArgument(key instanceof IBinder);
-        IBinder binderKey = (IBinder) key;
-
+        IBinder binder = getBinderFromKey(key);
         try {
-            binderKey.linkToDeath(this, 0);
-            if (!onBinderRegister(binderKey)) {
-                binderKey.unlinkToDeath(this, 0);
+            binder.linkToDeath(this, 0);
+            if (!onBinderRegister(key)) {
+                binder.unlinkToDeath(this, 0);
                 return false;
             }
             return true;
@@ -71,13 +78,23 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
 
     @Override
     protected final void onRemovableUnregister(Object key) {
-        IBinder binderKey = (IBinder) key;
-        onBinderUnregister(binderKey);
-        binderKey.unlinkToDeath(this, 0);
+        IBinder binder = getBinderFromKey(key);
+        onBinderUnregister(key);
+        binder.unlinkToDeath(this, 0);
     }
 
     @Override
     public void binderDied() {
         remove();
+    }
+
+    private IBinder getBinderFromKey(Object key) {
+        if (key instanceof IBinder) {
+            return (IBinder) key;
+        } else if (key instanceof BinderKey) {
+            return ((BinderKey) key).getBinder();
+        } else {
+            throw new IllegalArgumentException("key must be IBinder or BinderKey");
+        }
     }
 }

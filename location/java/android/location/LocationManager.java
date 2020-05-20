@@ -1661,51 +1661,33 @@ public class LocationManager {
     }
 
     /**
-     * Set a proximity alert for the location given by the position
-     * (latitude, longitude) and the given radius.
+     * Sets a proximity alert for the location given by the position (latitude, longitude) and the
+     * given radius.
      *
-     * <p> When the device
-     * detects that it has entered or exited the area surrounding the
-     * location, the given PendingIntent will be used to create an Intent
-     * to be fired.
+     * <p>When the device detects that it has entered or exited the area surrounding the location,
+     * the given PendingIntent will be fired.
      *
-     * <p> The fired Intent will have a boolean extra added with key
-     * {@link #KEY_PROXIMITY_ENTERING}. If the value is true, the device is
-     * entering the proximity region; if false, it is exiting.
+     * <p>The fired intent will have a boolean extra added with key {@link #KEY_PROXIMITY_ENTERING}.
+     * If the value is true, the device is entering the proximity region; if false, it is exiting.
      *
-     * <p> Due to the approximate nature of position estimation, if the
-     * device passes through the given area briefly, it is possible
-     * that no Intent will be fired.  Similarly, an Intent could be
-     * fired if the device passes very close to the given area but
-     * does not actually enter it.
-     *
-     * <p> After the number of milliseconds given by the expiration
-     * parameter, the location manager will delete this proximity
-     * alert and no longer monitor it.  A value of -1 indicates that
-     * there should be no expiration time.
-     *
-     * <p> Internally, this method uses both {@link #NETWORK_PROVIDER}
-     * and {@link #GPS_PROVIDER}.
+     * <p>Due to the approximate nature of position estimation, if the device passes through the
+     * given area briefly, it is possible that no Intent will be fired. Similarly, an intent could
+     * be fired if the device passes very close to the given area but does not actually enter it.
      *
      * <p>Before API version 17, this method could be used with
      * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} or
-     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}.
-     * From API version 17 and onwards, this method requires
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION}. From API version 17 and onwards,
+     * this method requires {@link android.Manifest.permission#ACCESS_FINE_LOCATION} permission.
      *
-     * @param latitude the latitude of the central point of the
-     * alert region
-     * @param longitude the longitude of the central point of the
-     * alert region
-     * @param radius the radius of the central point of the
-     * alert region, in meters
-     * @param expiration time for this proximity alert, in milliseconds,
-     * or -1 to indicate no expiration
-     * @param intent a PendingIntent that will be used to generate an Intent to
-     * fire when entry to or exit from the alert region is detected
-     *
+     * @param latitude   the latitude of the central point of the alert region
+     * @param longitude  the longitude of the central point of the alert region
+     * @param radius     the radius of the central point of the alert region in meters
+     * @param expiration expiration realtime for this proximity alert in milliseconds, or -1 to
+     *                   indicate no expiration
+     * @param intent     a {@link PendingIntent} that will sent when entry to or exit from the alert
+     *                   region is detected
      * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
-     * permission is not present
+     *                           permission is not present
      */
     @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
     public void addProximityAlert(double latitude, double longitude, float radius, long expiration,
@@ -1717,10 +1699,9 @@ public class LocationManager {
         }
         if (expiration < 0) expiration = Long.MAX_VALUE;
 
-        Geofence fence = Geofence.createCircle(latitude, longitude, radius);
-        LocationRequest request = new LocationRequest().setExpireIn(expiration);
         try {
-            mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
+            Geofence fence = Geofence.createCircle(latitude, longitude, radius, expiration);
+            mService.requestGeofence(fence, intent, mContext.getPackageName(),
                     mContext.getAttributionTag());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -1745,126 +1726,9 @@ public class LocationManager {
      */
     public void removeProximityAlert(@NonNull PendingIntent intent) {
         Preconditions.checkArgument(intent != null, "invalid null pending intent");
-        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
-            Preconditions.checkArgument(intent.isTargetedToPackage(),
-                    "pending intent must be targeted to a package");
-        }
 
         try {
-            mService.removeGeofence(null, intent, mContext.getPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Add a geofence with the specified LocationRequest quality of service.
-     *
-     * <p> When the device
-     * detects that it has entered or exited the area surrounding the
-     * location, the given PendingIntent will be used to create an Intent
-     * to be fired.
-     *
-     * <p> The fired Intent will have a boolean extra added with key
-     * {@link #KEY_PROXIMITY_ENTERING}. If the value is true, the device is
-     * entering the proximity region; if false, it is exiting.
-     *
-     * <p> The geofence engine fuses results from all location providers to
-     * provide the best balance between accuracy and power. Applications
-     * can choose the quality of service required using the
-     * {@link LocationRequest} object. If it is null then a default,
-     * low power geo-fencing implementation is used. It is possible to cross
-     * a geo-fence without notification, but the system will do its best
-     * to detect, using {@link LocationRequest} as a hint to trade-off
-     * accuracy and power.
-     *
-     * <p> The power required by the geofence engine can depend on many factors,
-     * such as quality and interval requested in {@link LocationRequest},
-     * distance to nearest geofence and current device velocity.
-     *
-     * @param request quality of service required, null for default low power
-     * @param fence a geographical description of the geofence area
-     * @param intent pending intent to receive geofence updates
-     *
-     * @throws IllegalArgumentException if fence is null
-     * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
-     * permission is not present
-     *
-     * @hide
-     */
-    @RequiresPermission(anyOf = {ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION})
-    public void addGeofence(
-            @NonNull LocationRequest request,
-            @NonNull Geofence fence,
-            @NonNull PendingIntent intent) {
-        Preconditions.checkArgument(request != null, "invalid null location request");
-        Preconditions.checkArgument(fence != null, "invalid null geofence");
-        Preconditions.checkArgument(intent != null, "invalid null pending intent");
-        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
-            Preconditions.checkArgument(intent.isTargetedToPackage(),
-                    "pending intent must be targeted to a package");
-        }
-
-        try {
-            mService.requestGeofence(request, fence, intent, mContext.getPackageName(),
-                    mContext.getAttributionTag());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Remove a single geofence.
-     *
-     * <p>This removes only the specified geofence associated with the
-     * specified pending intent. All other geofences remain unchanged.
-     *
-     * @param fence a geofence previously passed to {@link #addGeofence}
-     * @param intent a pending intent previously passed to {@link #addGeofence}
-     *
-     * @throws IllegalArgumentException if fence is null
-     * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
-     * permission is not present
-     *
-     * @hide
-     */
-    public void removeGeofence(@NonNull Geofence fence, @NonNull PendingIntent intent) {
-        Preconditions.checkArgument(fence != null, "invalid null geofence");
-        Preconditions.checkArgument(intent != null, "invalid null pending intent");
-        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
-            Preconditions.checkArgument(intent.isTargetedToPackage(),
-                    "pending intent must be targeted to a package");
-        }
-
-        try {
-            mService.removeGeofence(fence, intent, mContext.getPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Remove all geofences registered to the specified pending intent.
-     *
-     * @param intent a pending intent previously passed to {@link #addGeofence}
-     *
-     * @throws IllegalArgumentException if intent is null
-     * @throws SecurityException if {@link android.Manifest.permission#ACCESS_FINE_LOCATION}
-     * permission is not present
-     *
-     * @hide
-     */
-    public void removeAllGeofences(@NonNull PendingIntent intent) {
-        Preconditions.checkArgument(intent != null, "invalid null pending intent");
-        if (Compatibility.isChangeEnabled(TARGETED_PENDING_INTENT)) {
-            Preconditions.checkArgument(intent.isTargetedToPackage(),
-                    "pending intent must be targeted to a package");
-        }
-
-        try {
-            mService.removeGeofence(null, intent, mContext.getPackageName());
+            mService.removeGeofence(intent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
