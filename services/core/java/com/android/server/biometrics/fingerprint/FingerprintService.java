@@ -71,7 +71,6 @@ import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.Constants;
-import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
@@ -318,23 +317,6 @@ public class FingerprintService extends BiometricServiceBase {
                 }
             };
             removeInternal(client);
-        }
-
-        @Override // Binder call
-        public void enumerate(final IBinder token, final int userId,
-                final IFingerprintServiceReceiver receiver) {
-            checkPermission(MANAGE_FINGERPRINT);
-
-            final boolean restricted = isRestricted();
-            final EnumerateClient client = new EnumerateClient(getContext(), getConstants(),
-                    mDaemonWrapper, token, new ServiceListenerImpl(receiver), userId,
-                    userId, restricted, getContext().getOpPackageName()) {
-                @Override
-                protected int statsModality() {
-                    return FingerprintService.this.statsModality();
-                }
-            };
-            enumerateInternal(client);
         }
 
         @Override
