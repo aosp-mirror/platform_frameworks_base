@@ -84,11 +84,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     @Override
     public void binderDied() {
-        super.binderDied();
-        // When the binder dies, we should stop the client. This probably belongs in
-        // ClientMonitor's binderDied(), but testing all the cases would be tricky.
-        // AuthenticationClient is the most user-visible case.
-        stop(false /* initiatedByClient */);
+        final boolean clearListener = !isBiometricPrompt();
+        binderDiedInternal(clearListener);
     }
 
     @Override
