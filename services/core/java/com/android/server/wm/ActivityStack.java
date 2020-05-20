@@ -2613,6 +2613,9 @@ class ActivityStack extends Task {
             mRootWindowContainer.ensureVisibilityAndConfig(null /* starting */,
                     getDisplay().mDisplayId, false /* markFrozenIfConfigChanged */,
                     false /* deferResume */);
+            // Usually resuming a top activity triggers the next app transition, but nothing's got
+            // resumed in this case, so we need to execute it explicitly.
+            getDisplay().mDisplayContent.executeAppTransition();
         } else {
             mRootWindowContainer.resumeFocusedStacksTopActivities();
         }
