@@ -28,6 +28,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 import com.android.systemui.statusbar.phone.BiometricUnlockController
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import org.junit.Before
@@ -67,6 +68,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var shadeAnimation: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var globalActionsSpring: NotificationShadeDepthController.DepthAnimation
     @Mock private lateinit var brightnessSpring: NotificationShadeDepthController.DepthAnimation
+    @Mock private lateinit var dozeParameters: DozeParameters
     @JvmField @Rule val mockitoRule = MockitoJUnit.rule()
 
     private lateinit var statusBarStateListener: StatusBarStateController.StateListener
@@ -87,7 +89,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         notificationShadeDepthController = NotificationShadeDepthController(
                 statusBarStateController, blurUtils, biometricUnlockController,
                 keyguardStateController, choreographer, wallpaperManager,
-                notificationShadeWindowController, dumpManager)
+                notificationShadeWindowController, dozeParameters, dumpManager)
         notificationShadeDepthController.shadeSpring = shadeSpring
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
