@@ -266,6 +266,18 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
                 mLastSecondaryDim * invProg + progress * mTargetSecondaryDim);
     }
 
+    void setDimsHidden(SurfaceControl.Transaction t, boolean hidden) {
+        final DividerView view = getView();
+        if (hidden) {
+            view.setResizeDimLayer(t, true /* primary */, 0.f /* alpha */);
+            view.setResizeDimLayer(t, false /* primary */, 0.f /* alpha */);
+        } else {
+            updateDimTargets();
+            view.setResizeDimLayer(t, true /* primary */, mTargetPrimaryDim);
+            view.setResizeDimLayer(t, false /* primary */, mTargetSecondaryDim);
+        }
+    }
+
     private void onEnd(boolean cancelled, SurfaceControl.Transaction t) {
         if (!cancelled) {
             onProgress(1.f, t);
