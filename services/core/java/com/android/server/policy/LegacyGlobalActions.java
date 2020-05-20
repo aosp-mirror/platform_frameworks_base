@@ -339,7 +339,7 @@ class LegacyGlobalActions implements DialogInterface.OnDismissListener, DialogIn
         });
         dialog.getWindow().setType(WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
         // Don't acquire soft keyboard focus, to avoid destroying state when capturing bugreports
-        mDialog.getWindow().setFlags(FLAG_ALT_FOCUSABLE_IM, FLAG_ALT_FOCUSABLE_IM);
+        dialog.getWindow().setFlags(FLAG_ALT_FOCUSABLE_IM, FLAG_ALT_FOCUSABLE_IM);
 
         dialog.setOnDismissListener(this);
 
