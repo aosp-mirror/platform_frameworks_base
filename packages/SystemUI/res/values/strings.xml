@@ -212,6 +212,13 @@
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="default">Unlock your phone for more options</string>
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="tablet">Unlock your tablet for more options</string>
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="device">Unlock your device for more options</string>
+
     <!-- text to show in place of RemoteInput images when they cannot be shown.
          [CHAR LIMIT=50] -->
     <string name="remote_input_image_insertion_text">sent an image</string>
