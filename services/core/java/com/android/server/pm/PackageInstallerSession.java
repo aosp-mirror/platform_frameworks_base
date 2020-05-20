@@ -2822,8 +2822,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNAVAILABLE: {
                             // Don't fail or commit the session. Allow caller to commit again.
-                            sendPendingStreaming(mContext, mRemoteStatusReceiver, sessionId,
-                                    "DataLoader unavailable");
+                            sendPendingStreaming("DataLoader unavailable");
                             break;
                         }
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
@@ -2835,8 +2834,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 } catch (RemoteException e) {
                     // In case of streaming failure we don't want to fail or commit the session.
                     // Just return from this method and allow caller to commit again.
-                    sendPendingStreaming(mContext, mRemoteStatusReceiver, sessionId,
-                            e.getMessage());
+                    sendPendingStreaming(e.getMessage());
                 }
             }
         };
@@ -3196,8 +3194,17 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
-    private static void sendPendingStreaming(Context context, IntentSender target, int sessionId,
-            @Nullable String cause) {
+    private void sendPendingStreaming(@Nullable String cause) {
+        final IntentSender statusReceiver;
+        synchronized (mLock) {
+            statusReceiver = mRemoteStatusReceiver;
+        }
+
+        if (statusReceiver == null) {
+            Slog.e(TAG, "Missing receiver for pending streaming status.");
+            return;
+        }
+
         final Intent intent = new Intent();
         intent.putExtra(PackageInstaller.EXTRA_SESSION_ID, sessionId);
         intent.putExtra(PackageInstaller.EXTRA_STATUS, PackageInstaller.STATUS_PENDING_STREAMING);
@@ -3208,7 +3215,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             intent.putExtra(PackageInstaller.EXTRA_STATUS_MESSAGE, "Staging Image Not Ready");
         }
         try {
-            target.sendIntent(context, 0, intent, null, null);
+            statusReceiver.sendIntent(mContext, 0, intent, null, null);
         } catch (IntentSender.SendIntentException ignored) {
         }
     }
