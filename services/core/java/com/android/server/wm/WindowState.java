@@ -2262,7 +2262,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHasSurface = hasSurface;
     }
 
+    /**
+     * Checks whether one of the Windows in a Display embedded in this Window can be an IME target.
+     */
+    private boolean canWindowInEmbeddedDisplayBeImeTarget() {
+        final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
+        for (int i = embeddedDisplayContentsSize - 1; i >= 0; i--) {
+            final DisplayContent edc = mEmbeddedDisplayContents.valueAt(i);
+            if (edc.forAllWindows(WindowState::canBeImeTarget, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean canBeImeTarget() {
+        // If any of the embedded windows can be the IME target, this window will be the final IME
+        // target. This is because embedded windows are on a different display in WM so it would
+        // cause confusion trying to set the IME to a window on a different display. Instead, just
+        // make the host window the IME target.
+        if (canWindowInEmbeddedDisplayBeImeTarget()) {
+            return true;
+        }
+
         if (mIsImWindow) {
             // IME windows can't be IME targets. IME targets are required to be below the IME
             // windows and that wouldn't be possible if the IME window is its own target...silly.

@@ -270,6 +270,26 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testCanWindowWithEmbeddedDisplayBeImeTarget() {
+        final WindowState appWindow = createWindow(null, TYPE_APPLICATION, "appWindow");
+        final WindowState imeWindow = createWindow(null, TYPE_INPUT_METHOD, "imeWindow");
+
+        imeWindow.setHasSurface(true);
+        appWindow.setHasSurface(true);
+
+        appWindow.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
+        assertFalse(appWindow.canBeImeTarget());
+
+        DisplayContent secondDisplay = createNewDisplay();
+        final WindowState embeddedWindow = createWindow(null, TYPE_APPLICATION, secondDisplay,
+                "embeddedWindow");
+        appWindow.addEmbeddedDisplayContent(secondDisplay);
+        embeddedWindow.setHasSurface(true);
+        embeddedWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
+        assertTrue(appWindow.canBeImeTarget());
+    }
+
+    @Test
     public void testGetWindow() {
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         final WindowState mediaChild = createWindow(root, TYPE_APPLICATION_MEDIA, "mediaChild");
