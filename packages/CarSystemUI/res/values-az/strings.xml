@@ -26,4 +26,8 @@
     <string name="car_new_user" msgid="6637442369728092473">"Yeni İstifadəçi"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"Yeni istifadəçi əlavə etdiyinizdə həmin şəxs öz yerini təyin etməlidir."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"İstənilən istifadəçi digər bütün istifadəçilər üçün tətbiqləri güncəlləyə bilər."</string>
+    <!-- no translation found for car_loading_profile (4507385037552574474) -->
+    <skip />
+    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
+    <skip />
 </resources>
