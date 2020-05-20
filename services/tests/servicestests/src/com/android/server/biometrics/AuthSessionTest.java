@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.ITrustManager;
+import android.content.Context;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.IBiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -63,6 +64,7 @@ public class AuthSessionTest {
 
     private static final String TEST_PACKAGE = "test_package";
 
+    @Mock private Context mContext;
     @Mock private ITrustManager mTrustManager;
     @Mock private DevicePolicyManager mDevicePolicyManager;
     @Mock private BiometricService.SettingObserver mSettingObserver;
@@ -196,7 +198,7 @@ public class AuthSessionTest {
         final PreAuthInfo preAuthInfo = createPreAuthInfo(sensors, userId, promptInfo,
                 checkDevicePolicyManager);
 
-        return new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore,
+        return new AuthSession(mContext, mStatusBarService, mSysuiReceiver, mKeyStore,
                 mRandom, mClientDeathReceiver, preAuthInfo, mToken, operationId, userId,
                 mSensorReceiver, mClientReceiver, TEST_PACKAGE, promptInfo, callingUid,
                 callingPid, callingUserId, false /* debugEnabled */);

@@ -41,6 +41,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public static final int LOCKOUT_TIMED = 1;
     public static final int LOCKOUT_PERMANENT = 2;
 
+    private final boolean mIsStrongBiometric;
     private final boolean mRequireConfirmation;
     private final Surface mSurface;
 
@@ -68,21 +69,15 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     public abstract boolean wasUserDetected();
 
-    public abstract boolean isStrongBiometric();
-
-    /**
-     * @return The sensor's unique ID as configured by the framework. See {@link AuthSession}
-     */
-    public abstract int getSensorId();
-
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            BiometricServiceBase.ServiceListener listener, int targetUserId, int groupId, long opId,
+            ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation,
-            Surface surface) {
+            Surface surface, int sensorId, boolean isStrongBiometric) {
         super(context, constants, daemon, token, listener, targetUserId, groupId,
-                restricted, owner, cookie);
+                restricted, owner, cookie, sensorId);
         mOpId = opId;
+        mIsStrongBiometric = isStrongBiometric;
         mRequireConfirmation = requireConfirmation;
         mSurface = surface;
     }
@@ -139,7 +134,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
                 getTargetUserId(), isBiometricPrompt());
 
-        final BiometricServiceBase.ServiceListener listener = getListener();
+        final ClientMonitorCallbackConverter listener = getListener();
 
         mMetricsLogger.action(mConstants.actionBiometricAuth(), authenticated);
         boolean result = false;
@@ -171,9 +166,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
                 if (isBiometricPrompt() && listener != null) {
                     // BiometricService will add the token to keystore
-                    listener.onAuthenticationSucceededInternal(getSensorId(), byteToken);
+                    listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
+                            getTargetUserId(), mIsStrongBiometric);
                 } else if (!isBiometricPrompt() && listener != null) {
-                    if (isStrongBiometric()) {
+                    if (mIsStrongBiometric) {
                         KeyStore.getInstance().addAuthToken(byteToken);
                     } else {
                         Slog.d(getLogTag(), "Skipping addAuthToken");
@@ -183,9 +179,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
                         // Explicitly have if/else here to make it super obvious in case the code is
                         // touched in the future.
                         if (!getIsRestricted()) {
-                            listener.onAuthenticationSucceeded(identifier, getTargetUserId());
+                            listener.onAuthenticationSucceeded(getSensorId(), identifier, byteToken,
+                                    getTargetUserId(), mIsStrongBiometric);
                         } else {
-                            listener.onAuthenticationSucceeded(null, getTargetUserId());
+                            listener.onAuthenticationSucceeded(getSensorId(), null /* identifier */,
+                                    byteToken, getTargetUserId(), mIsStrongBiometric);
                         }
                     } catch (RemoteException e) {
                         Slog.e(getLogTag(), "Remote exception", e);
@@ -215,11 +213,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     // janky UI on Keyguard/BiometricPrompt since "authentication failed"
                     // will show briefly and be replaced by "device locked out" message.
                     if (listener != null) {
-                        if (isBiometricPrompt()) {
-                            listener.onAuthenticationFailedInternal(getSensorId());
-                        } else {
-                            listener.onAuthenticationFailed();
-                        }
+                        listener.onAuthenticationFailed(getSensorId());
                     }
                 }
                 result = lockoutMode != LOCKOUT_NONE; // in a lockout mode

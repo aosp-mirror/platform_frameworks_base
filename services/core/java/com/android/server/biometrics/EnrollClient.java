@@ -44,11 +44,11 @@ public abstract class EnrollClient extends ClientMonitor {
 
     public EnrollClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            BiometricServiceBase.ServiceListener listener, int userId, int groupId,
+            ClientMonitorCallbackConverter listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
-            final int[] disabledFeatures, int timeoutSec, Surface surface) {
+            final int[] disabledFeatures, int timeoutSec, Surface surface, int sensorId) {
         super(context, constants, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */);
+                owner, 0 /* cookie */, sensorId);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
@@ -84,7 +84,7 @@ public abstract class EnrollClient extends ClientMonitor {
         }
         mMetricsLogger.action(mConstants.actionBiometricEnroll());
         try {
-            final BiometricServiceBase.ServiceListener listener = getListener();
+            final ClientMonitorCallbackConverter listener = getListener();
             if (listener != null) {
                 listener.onEnrollResult(identifier, remaining);
             }
