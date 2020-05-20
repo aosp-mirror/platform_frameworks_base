@@ -115,6 +115,8 @@ public class BiometricServiceTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        resetReceivers();
+
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         when(mContext.getResources()).thenReturn(mResources);
         when(mContext.getSystemService(Context.DEVICE_POLICY_SERVICE))
@@ -144,6 +146,74 @@ public class BiometricServiceTest {
         };
 
         when(mInjector.getConfiguration(any())).thenReturn(config);
+    }
+
+    @Test
+    public void testClientBinderDied_whenPaused() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                true /* requireConfirmation */, null /* authenticators */);
+        waitForIdle();
+        verify(mReceiver1.asBinder()).linkToDeath(eq(mBiometricService.mCurrentAuthSession),
+                anyInt());
+
+        mBiometricService.mInternalReceiver.onError(
+                getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
+                BiometricConstants.BIOMETRIC_ERROR_TIMEOUT,
+                0 /* vendorCode */);
+        waitForIdle();
+
+        assertEquals(BiometricService.STATE_AUTH_PAUSED,
+                mBiometricService.mCurrentAuthSession.mState);
+
+        mBiometricService.mCurrentAuthSession.binderDied();
+        waitForIdle();
+
+        assertNull(mBiometricService.mCurrentAuthSession);
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void testClientBinderDied_whenAuthenticating() throws Exception {
+        setupAuthForOnly(BiometricAuthenticator.TYPE_FACE, Authenticators.BIOMETRIC_STRONG);
+
+        invokeAuthenticateAndStart(mBiometricService.mImpl, mReceiver1,
+                true /* requireConfirmation */, null /* authenticators */);
+        waitForIdle();
+        verify(mReceiver1.asBinder()).linkToDeath(eq(mBiometricService.mCurrentAuthSession),
+                anyInt());
+
+        assertEquals(BiometricService.STATE_AUTH_STARTED,
+                mBiometricService.mCurrentAuthSession.mState);
+        mBiometricService.mCurrentAuthSession.binderDied();
+        waitForIdle();
+
+        assertNotNull(mBiometricService.mCurrentAuthSession);
+        verify(mBiometricService.mStatusBarService, never()).hideAuthenticationDialog();
+        assertEquals(BiometricService.STATE_CLIENT_DIED_CANCELLING,
+                mBiometricService.mCurrentAuthSession.mState);
+
+        verify(mBiometricService.mAuthenticators.get(0).impl).cancelAuthenticationFromService(
+                any(),
+                any(),
+                anyInt(),
+                anyInt(),
+                anyInt(),
+                eq(false) /* fromClient */);
+
+        // Simulate ERROR_CANCELED received from HAL
+        mBiometricService.mInternalReceiver.onError(
+                getCookieForCurrentSession(mBiometricService.mCurrentAuthSession),
+                BiometricAuthenticator.TYPE_FACE,
+                BiometricConstants.BIOMETRIC_ERROR_CANCELED,
+                0 /* vendorCode */);
+        waitForIdle();
+        verify(mBiometricService.mStatusBarService).hideAuthenticationDialog();
+        verify(mReceiver1, never()).onError(anyInt(), anyInt(), anyInt());
+        assertNull(mBiometricService.mCurrentAuthSession);
     }
 
     @Test
@@ -311,7 +381,7 @@ public class BiometricServiceTest {
                 eq(0 /* vendorCode */));
 
         // Enrolled, not disabled in settings, user requires confirmation in settings
-        resetReceiver();
+        resetReceivers();
         when(mBiometricService.mSettingObserver.getFaceEnabledForApps(anyInt())).thenReturn(true);
         when(mBiometricService.mSettingObserver.getFaceAlwaysRequireConfirmation(anyInt()))
                 .thenReturn(true);
@@ -332,7 +402,7 @@ public class BiometricServiceTest {
                 anyInt() /* callingUserId */);
 
         // Enrolled, not disabled in settings, user doesn't require confirmation in settings
-        resetReceiver();
+        resetReceivers();
         when(mBiometricService.mSettingObserver.getFaceAlwaysRequireConfirmation(anyInt()))
                 .thenReturn(false);
         invokeAuthenticate(mBiometricService.mImpl, mReceiver1, false /* requireConfirmation */,
@@ -1198,7 +1268,7 @@ public class BiometricServiceTest {
                 eq(0) /* vendorCode */);
 
         // Request for weak auth works
-        resetReceiver();
+        resetReceivers();
         authenticators = Authenticators.BIOMETRIC_WEAK;
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
@@ -1217,7 +1287,7 @@ public class BiometricServiceTest {
                 anyInt() /* sysUiSessionId */);
 
         // Requesting strong and credential, when credential is setup
-        resetReceiver();
+        resetReceivers();
         authenticators = Authenticators.BIOMETRIC_STRONG | Authenticators.DEVICE_CREDENTIAL;
         when(mTrustManager.isDeviceSecure(anyInt())).thenReturn(true);
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
@@ -1244,7 +1314,7 @@ public class BiometricServiceTest {
             }
         }
 
-        resetReceiver();
+        resetReceivers();
         authenticators = Authenticators.BIOMETRIC_STRONG;
         assertEquals(BiometricManager.BIOMETRIC_SUCCESS,
                 invokeCanAuthenticate(mBiometricService, authenticators));
@@ -1449,9 +1519,12 @@ public class BiometricServiceTest {
         }
     }
 
-    private void resetReceiver() {
+    private void resetReceivers() {
         mReceiver1 = mock(IBiometricServiceReceiver.class);
         mReceiver2 = mock(IBiometricServiceReceiver.class);
+
+        when(mReceiver1.asBinder()).thenReturn(mock(Binder.class));
+        when(mReceiver2.asBinder()).thenReturn(mock(Binder.class));
     }
 
     private void resetStatusBar() {
