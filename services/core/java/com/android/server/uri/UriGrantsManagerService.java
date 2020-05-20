@@ -114,7 +114,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private static final String TAG = "UriGrantsManagerService";
     // Maximum number of persisted Uri grants a package is allowed
     private static final int MAX_PERSISTED_URI_GRANTS = 128;
-    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = true;
+    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = false;
 
     private final Object mLock = new Object();
     private final H mH;
