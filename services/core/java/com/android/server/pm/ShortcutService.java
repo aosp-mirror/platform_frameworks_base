@@ -1849,6 +1849,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             fillInDefaultActivity(newShortcuts);
 
@@ -1915,6 +1916,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             // For update, don't fill in the default activity.  Having null activity means
             // "don't update the activity" here.
@@ -2013,6 +2015,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             fillInDefaultActivity(newShortcuts);
 
