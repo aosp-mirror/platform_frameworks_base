@@ -254,7 +254,6 @@ droidstubs {
 java_defaults {
     name: "android_defaults_stubs_current",
     libs: [ "stub-annotations" ],
-    static_libs: [ "private-stub-annotations-jar" ],
     errorprone: {
         javacflags: [
             "-XepDisableAllChecks",
@@ -270,18 +269,21 @@ java_defaults {
 java_library_static {
     name: "android_stubs_current",
     srcs: [ ":api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
     name: "android_system_stubs_current",
     srcs: [ ":system-api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
     name: "android_test_stubs_current",
     srcs: [ ":test-api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
