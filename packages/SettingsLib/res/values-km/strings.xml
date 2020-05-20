@@ -445,8 +445,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"ថេប្លេត​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"ឧបករណ៍​អាចនឹង​បិទក្នុង​ពេលបន្តិច​ទៀត (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើប​ត្រូវសាក"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​ត្រូវសាក"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> ទៀតទើបសាកថ្មពេញ"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> ទៀតទើប​សាកថ្មពេញ"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"មិន​ស្គាល់"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"កំពុងបញ្ចូល​ថ្ម"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"កំពុងសាកថ្មយ៉ាងឆាប់រហ័ស"</string>
@@ -537,7 +537,7 @@
     <string name="user_setup_dialog_message" msgid="269931619868102841">"សូម​ប្រាកដ​ថា​​អ្នក​ប្រើ​ប្រាស់នេះ​អាច​យក​​ឧបករណ៍ ​និង​រៀបចំ​​ទំហំ​ផ្ទុករបស់​គេបាន"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"រៀបចំ​ប្រវត្តិរូប​ឥឡូវ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"រៀបចំ​ឥឡូវ"</string>
-    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"កុំអាល"</string>
+    <string name="user_setup_button_setup_later" msgid="8712980133555493516">"កុំទាន់"</string>
     <string name="user_add_user_type_title" msgid="551279664052914497">"បន្ថែម"</string>
     <string name="user_new_user_name" msgid="60979820612818840">"អ្នក​ប្រើថ្មី"</string>
     <string name="user_new_profile_name" msgid="2405500423304678841">"ប្រវត្តិរូប​ថ្មី"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"បានបិទ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ទើប​ការផ្លាស់ប្ដូរ​នេះ​ត្រូវបានអនុវត្ត​។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> សម្រាប់ការងារ"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

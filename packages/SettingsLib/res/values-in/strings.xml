@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Pilih profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Pribadi"</string>
-    <string name="category_work" msgid="4014193632325996115">"Kantor"</string>
+    <string name="category_work" msgid="4014193632325996115">"Kerja"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opsi developer"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktifkan opsi developer"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Menyetel opsi untuk pengembangan apl"</string>
@@ -433,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Akan bertahan kira-kira sampai pukul <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Akan bertahan kira-kira sampai pukul <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hingga <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterai mungkin habis pada <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterai mungkin habis pada pukul <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Tersisa kurang dari <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Tersisa kurang dari <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Tersisa lebih dari <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Nonaktif"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktif"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Perangkat Anda harus di-reboot agar perubahan ini diterapkan. Reboot sekarang atau batalkan."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> kerja"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

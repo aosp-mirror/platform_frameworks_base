@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"اختيار ملف شخصي"</string>
     <string name="category_personal" msgid="6236798763159385225">"شخصي"</string>
-    <string name="category_work" msgid="4014193632325996115">"العمل"</string>
+    <string name="category_work" msgid="4014193632325996115">"للعمل"</string>
     <string name="development_settings_title" msgid="140296922921597393">"خيارات مطور البرامج"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"تفعيل خيارات المطورين"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"تعيين خيارات تطوير التطبيق"</string>
@@ -279,7 +279,7 @@
     <string name="private_dns_mode_off" msgid="7065962499349997041">"غير مفعّل"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"تلقائي"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"اسم مضيف مزوّد \"نظام أسماء النطاقات الخاص\""</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"يُرجى إدخال اسم مضيف \"مزوّد نظام أسماء النطاقات\""</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"‏يُرجى إدخال اسم مضيف DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="8356259467861515108">"تعذّر الاتصال"</string>
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"عرض خيارات شهادة عرض شاشة لاسلكي"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"‏زيادة مستوى تسجيل Wi-Fi، وعرض لكل SSID RSSI في منتقي Wi-Fi"</string>
@@ -318,10 +318,10 @@
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏التحقق من HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏تعيين سلوك التحقق من HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"تصحيح الأخطاء"</string>
-    <string name="debug_app" msgid="8903350241392391766">"تحديد التطبيق لتصحيحه"</string>
+    <string name="debug_app" msgid="8903350241392391766">"اختيار التطبيق لتصحيحه"</string>
     <string name="debug_app_not_set" msgid="1934083001283807188">"لم يتم تعيين تطبيق لتصحيحه"</string>
     <string name="debug_app_set" msgid="6599535090477753651">"تطبيق التصحيح: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
-    <string name="select_application" msgid="2543228890535466325">"تحديد تطبيق"</string>
+    <string name="select_application" msgid="2543228890535466325">"اختيار تطبيق"</string>
     <string name="no_application" msgid="9038334538870247690">"لا شيء"</string>
     <string name="wait_for_debugger" msgid="7461199843335409809">"انتظار برنامج التصحيح"</string>
     <string name="wait_for_debugger_summary" msgid="6846330006113363286">"ينتظر التطبيق قيد التصحيح انضمام برنامج التصحيح قبل التنفيذ"</string>
@@ -557,6 +557,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غير مفعّل"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"مفعّل"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"يجب إعادة تشغيل جهازك ليتم تطبيق هذا التغيير. يمكنك إعادة التشغيل الآن أو إلغاء التغيير."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> المخصّص للعمل"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

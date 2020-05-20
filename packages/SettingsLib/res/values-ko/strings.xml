@@ -495,7 +495,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"켜기"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"중요 알림만 허용"</string>
@@ -530,7 +530,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"내 계정의 앱 및 콘텐츠에 대한 액세스를 제한할 수 있습니다."</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"사용자"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"제한된 프로필"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"새 사용자를 추가할까요?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"신규 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"추가 사용자를 만들어 다른 사용자와 기기를 공유할 수 있습니다. 각 사용자는 앱, 배경화면 등으로 맞춤설정할 수 있는 자신만의 공간을 갖게 됩니다. 또한 모든 사용자에게 영향을 미치는 Wi‑Fi와 같은 기기 설정도 조정할 수 있습니다.\n\n추가된 신규 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자가 앱을 업데이트할 수 있으며, 업데이트는 다른 사용자에게도 적용됩니다. 접근성 설정 및 서비스는 신규 사용자에게 이전되지 않을 수도 있습니다."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"지금 사용자를 설정하시겠습니까?"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"변경사항을 적용하려면 기기를 재부팅해야 합니다. 지금 재부팅하거나 취소하세요."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"직장용 <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Tuntematon"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Käyttäjä: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Joitakin oletuksia on asetettu"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Oletuksia ei asetettu"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Ei oletuksia valittuina"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Tekstistä puheeksi -asetukset"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Tekstistä puheeksi -toisto"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Puheen nopeus"</string>
@@ -397,7 +397,7 @@
     <item msgid="1282170165150762976">"Digitaaliselle sisällölle parhaiten sopivat värit"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Valmiustilasovellukset"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ei käytössä. Ota käyttöön koskettamalla."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ei päällä. Ota käyttöön koskettamalla."</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktiivinen. Vaihda koskettamalla."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Sovelluksen valmiusluokka: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Käynnissä olevat palvelut"</string>
@@ -533,8 +533,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Lisätäänkö uusi käyttäjä?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Voit jakaa tämän laitteen muiden kanssa luomalla lisää käyttäjiä. Kullakin käyttäjällä on oma tilansa, jota he voivat muokata esimerkiksi omilla sovelluksilla ja taustakuvilla. Käyttäjät voivat myös muokata laiteasetuksia, kuten Wi‑Fi-asetuksia, jotka vaikuttavat laitteen kaikkiin käyttäjiin.\n\nKun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää muiden käyttäjien sovelluksia. Esteettömyysominaisuuksia tai ‑palveluita ei välttämättä siirretä uudelle käyttäjälle."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Määritetäänkö käyttäjän asetukset nyt?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi vastaanottaa laitteen ja määrittää oman tilansa."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Lisätäänkö käyttäjä nyt?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi ottaa laitteen nyt ja määrittää oman tilansa."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Määritetäänkö profiilin asetukset nyt?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Määritä nyt"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ei nyt"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Ei käytössä"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Käytössä"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Laitteesi on käynnistettävä uudelleen, jotta muutos tulee voimaan. Käynnistä uudelleen nyt tai peruuta."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (työ)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

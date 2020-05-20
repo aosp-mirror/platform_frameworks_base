@@ -468,7 +468,7 @@
     <string name="charge_length_format" msgid="6941645744588690932">"<xliff:g id="ID_1">%1$s</xliff:g> પહેલાં"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"<xliff:g id="ID_1">%1$s</xliff:g> બાકી"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"નાનું"</string>
-    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ડિફોલ્ટ"</string>
+    <string name="screen_zoom_summary_default" msgid="1888865694033865408">"ડિફૉલ્ટ"</string>
     <string name="screen_zoom_summary_large" msgid="4706951482598978984">"મોટું"</string>
     <string name="screen_zoom_summary_very_large" msgid="7317423942896999029">"વધુ મોટું"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="1438045624562358554">"સૌથી મોટું"</string>
@@ -534,7 +534,7 @@
     <string name="user_add_user_message_long" msgid="1527434966294733380">"તમે વધારાના વપરાશકર્તાઓ બનાવીને અન્ય લોકો સાથે આ ડિવાઇસને શેર કરી શકો છો. દરેક વપરાશકર્તા પાસે તેમની પોતાની સ્પેસ છે, જેને તેઓ ઍપ, વૉલપેપર, વગેરે સાથે કસ્ટમાઇઝ કરી શકે છે. વપરાશકર્તાઓ પ્રત્યેક વ્યક્તિને અસર કરતી હોય તેવી ડિવાઇસ સેટિંગ જેમ કે વાઇ-ફાઇને પણ સમાયોજિત કરી શકે છે.\n\nજ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમની સ્પેસ સેટ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા અન્ય બધા વપરાશકર્તાઓ માટે ઍપને અપડેટ કરી શકે છે. નવા વપરાશકર્તાને ઍક્સેસિબિલિટી સેટિંગ અને સેવાઓ ટ્રાન્સફર ન પણ થાય."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"જ્યારે તમે કોઈ નવા વપરાશકર્તાને ઉમેરો છો, ત્યારે તે વ્યક્તિને તેમનું સ્થાન સેટ અપ કરવાની જરૂર પડે છે.\n\nકોઈપણ વપરાશકર્તા બધા અન્ય વપરાશકર્તાઓ માટે એપ્લિકેશન્સને અપડેટ કરી શકે છે."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"અત્યારે જ વપરાશકર્તાને સેટ અપ કરીએ?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"ખાતરી કરો કે વ્યક્તિ ઉપકરણ લેવા અને તેમના સ્થાનનું સેટ અપ કરવા માટે ઉપલબ્ધ છે"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"ખાતરી કરો કે વ્યક્તિ ડિવાઇસ લેવા અને તેમના સ્થાનનું સેટ અપ કરવા માટે ઉપલબ્ધ છે"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"હવે પ્રોફાઇલ સેટ કરીએ?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"હવે સેટ કરો"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"હમણાં નહીં"</string>
@@ -549,14 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"અતિથિ ઉમેરો"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"અતિથિને કાઢી નાખો"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"અતિથિ"</string>
-    <!-- no translation found for cached_apps_freezer_device_default (2616594131750144342) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_disabled (4816382260660472042) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_enabled (8866703500183051546) -->
-    <skip />
-    <!-- no translation found for cached_apps_freezer_reboot_dialog_text (695330563489230096) -->
-    <skip />
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ડિવાઇસ ડિફૉલ્ટ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"બંધ છે"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ચાલુ છે"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"આ ફેરફારને લાગુ કરવા માટે તમારા ડિવાઇસને રીબૂટ કરવાની જરૂર છે. હમણાં જ રીબૂટ કરો કે રદ કરો."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"ઑફિસ <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>
