@@ -35,11 +35,11 @@ import javax.inject.Inject;
  * all other services.
  */
 public class SystemUIAuxiliaryDumpService extends Service {
-    private final DumpManager mDumpManager;
+    private final DumpHandler mDumpHandler;
 
     @Inject
-    public SystemUIAuxiliaryDumpService(DumpManager dumpManager) {
-        mDumpManager = dumpManager;
+    public SystemUIAuxiliaryDumpService(DumpHandler dumpHandler) {
+        mDumpHandler = dumpHandler;
     }
 
     @Override
@@ -50,9 +50,9 @@ public class SystemUIAuxiliaryDumpService extends Service {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         // Simulate the NORMAL priority arg being passed to us
-        mDumpManager.dump(
+        mDumpHandler.dump(
                 fd,
                 pw,
-                new String[] { DumpManager.PRIORITY_ARG, DumpManager.PRIORITY_ARG_NORMAL });
+                new String[] { DumpHandler.PRIORITY_ARG, DumpHandler.PRIORITY_ARG_NORMAL });
     }
 }

@@ -36,8 +36,9 @@ public class FakeSystemClock implements SystemClock {
     private long mElapsedRealtime = 10000;
     private long mCurrentThreadTimeMillis = 10000;
 
-    private final List<ClockTickListener> mListeners = new ArrayList<>();
+    private long mCurrentTimeMillis = 1555555500000L;
 
+    private final List<ClockTickListener> mListeners = new ArrayList<>();
     @Override
     public long uptimeMillis() {
         return mUptimeMillis;
@@ -58,8 +59,17 @@ public class FakeSystemClock implements SystemClock {
         return mCurrentThreadTimeMillis;
     }
 
+    @Override
+    public long currentTimeMillis() {
+        return mCurrentTimeMillis;
+    }
+
     public void setUptimeMillis(long uptime) {
         advanceTime(uptime - mUptimeMillis);
+    }
+
+    public void setCurrentTimeMillis(long millis) {
+        mCurrentTimeMillis = millis;
     }
 
     public void advanceTime(long uptime) {
@@ -74,6 +84,7 @@ public class FakeSystemClock implements SystemClock {
         if (uptime > 0 || sleepTime > 0) {
             mUptimeMillis += uptime;
             mElapsedRealtime += uptime + sleepTime;
+            mCurrentTimeMillis += uptime + sleepTime;
 
             mCurrentThreadTimeMillis += Math.ceil(uptime * 0.5);
 
