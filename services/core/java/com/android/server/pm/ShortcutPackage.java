@@ -27,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
+import android.graphics.drawable.Icon;
 import android.os.PersistableBundle;
 import android.text.format.Formatter;
 import android.util.ArrayMap;
@@ -253,6 +254,28 @@ class ShortcutPackage extends ShortcutPackageItem {
             boolean ignoreInvisible) {
         for (int i = shortcuts.size() - 1; i >= 0; i--) {
             ensureNotImmutable(shortcuts.get(i).getId(), ignoreInvisible);
+        }
+    }
+
+    public void ensureNoBitmapIconIfShortcutIsLongLived(@NonNull List<ShortcutInfo> shortcuts) {
+        for (int i = shortcuts.size() - 1; i >= 0; i--) {
+            final ShortcutInfo si = shortcuts.get(i);
+            if (!si.isLongLived()) {
+                continue;
+            }
+            final Icon icon = si.getIcon();
+            if (icon != null && icon.getType() != Icon.TYPE_BITMAP
+                    && icon.getType() == Icon.TYPE_ADAPTIVE_BITMAP) {
+                continue;
+            }
+            if (icon == null && !si.hasIconFile()) {
+                continue;
+            }
+
+            // TODO: Throw IllegalArgumentException instead.
+            Slog.e(TAG, "Invalid icon type in shortcut " + si.getId() + ". Bitmaps are not allowed"
+                    + " in long-lived shortcuts. Use Resource icons, or Uri-based icons instead.");
+            return;  // Do not spam and return early.
         }
     }
 
