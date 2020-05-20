@@ -5983,6 +5983,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_ADD
                 new AnimationFilter()
+                        .animateAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
@@ -5991,6 +5992,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 // ANIMATION_TYPE_REMOVE
                 new AnimationFilter()
+                        .animateAlpha()
                         .animateHeight()
                         .animateTopInset()
                         .animateY()
