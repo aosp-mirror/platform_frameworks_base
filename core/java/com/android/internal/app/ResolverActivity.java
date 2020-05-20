@@ -1662,6 +1662,13 @@ public class ResolverActivity extends Activity implements
                     resetButtonBar();
                     resetCheckedItem();
                 });
+        mMultiProfilePagerAdapter.setOnSwitchOnWorkSelectedListener(
+                () -> {
+                    final View workTab = tabHost.getTabWidget().getChildAt(1);
+                    workTab.setFocusable(true);
+                    workTab.setFocusableInTouchMode(true);
+                    workTab.requestFocus();
+                });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
 
