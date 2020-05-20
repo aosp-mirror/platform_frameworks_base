@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/global_actions_container"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -43,39 +44,50 @@
     </LinearLayout>
   </com.android.systemui.globalactions.GlobalActionsFlatLayout>
 
+  <androidx.constraintlayout.widget.ConstraintLayout
+      android:id="@+id/global_actions_lock_message_container"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:visibility="gone">
+    <TextView
+        android:id="@+id/global_actions_lock_message"
+        style="@style/TextAppearance.Control.Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/global_actions_side_margin"
+        android:drawablePadding="12dp"
+        android:gravity="center"
+        android:text="@string/global_action_lock_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.35"/>
+  </androidx.constraintlayout.widget.ConstraintLayout>
+
   <com.android.systemui.globalactions.MinHeightScrollView
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:orientation="vertical"
-      android:scrollbars="none"
-  >
+      android:scrollbars="none">
+
     <LinearLayout
         android:id="@+id/global_actions_grid_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipChildren="false"
         android:orientation="vertical"
-        android:clipToPadding="false"
-    >
-      <LinearLayout
-          android:id="@+id/global_actions_panel"
+        android:clipToPadding="false">
+
+      <FrameLayout
+          android:id="@+id/global_actions_wallet"
           android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="vertical"
-      >
-        <FrameLayout
-            android:id="@+id/global_actions_panel_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-        />
-      </LinearLayout>
+          android:layout_height="wrap_content"/>
 
       <LinearLayout
           android:id="@+id/global_actions_controls"
           android:layout_width="match_parent"
           android:layout_height="wrap_content"
-          android:orientation="vertical"
-      />
+          android:orientation="vertical"/>
+
     </LinearLayout>
   </com.android.systemui.globalactions.MinHeightScrollView>
 </LinearLayout>
