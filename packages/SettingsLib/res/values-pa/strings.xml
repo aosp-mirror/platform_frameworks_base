@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"ਅਗਿਆਤ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"ਵਰਤੋਂਕਾਰ: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"ਕੁਝ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਕੀਤੇ"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"ਕੋਈ ਡਿਫੌਲਟਸ ਸੈਟ ਨਹੀਂ ਕੀਤੇ"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"ਕੋਈ ਪੂਰਵ-ਨਿਰਧਾਰਤ ਸੈੱਟ ਨਹੀਂ ਕੀਤੇ"</string>
     <string name="tts_settings" msgid="8130616705989351312">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਸੈਟਿੰਗਾਂ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"ਲਿਖਤ ਤੋਂ ਬੋਲੀ ਆਊਟਪੁੱਟ"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"ਬੋਲਣ ਦੀ ਗਤੀ"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ਵਾਇਰਲੈੱਸ ਡਿਸਪਲੇ ਪ੍ਰਮਾਣੀਕਰਨ ਲਈ ਚੋਣਾਂ ਪ੍ਰਦਰਸ਼ਿਤ ਕਰੋ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ਵਾਈ‑ਫਾਈ ਲੌਗਿੰਗ ਪੱਧਰ ਵਧਾਓ, ਵਾਈ‑ਫਾਈ Picker ਵਿੱਚ ਪ੍ਰਤੀ SSID RSSI ਦਿਖਾਓ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਘਟਾ ਕੇ ਨੈੱਟਵਰਕ ਕਾਰਗੁਜ਼ਾਰੀ ਨੂੰ ਬਿਹਤਰ ਬਣਾਉਂਦਾ ਹੈ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ਇਹ ਟੌਗਲ ਸਿਰਫ਼ ਕਲਾਇੰਟ ਮੋਡ ਲਈ MAC ਦੇ ਬੇਤਰਤੀਬਵਾਰ ਵਿਵਹਾਰ \'ਤੇ ਅਸਰ ਪਾਉਂਦਾ ਹੈ।\nਜਦੋਂ ਇਸ ਮੋਡ ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਜਿਹੜੇ ਵੀ ਨੈੱਟਵਰਕਾਂ ਵਿੱਚ MAC ਬੇਤਰਤੀਬਵਾਰ ਚਾਲੂ ਹੈ ਉਹਨਾਂ ਦੇ MAC ਪਤਿਆਂ ਦਾ ਸਾਂਝੇਦਾਰੀ ਦੌਰਾਨ ਮੁੜ-ਬੇਤਰਤੀਬੀਕਰਨ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ, ਜੋ ਕਲਾਇੰਟ ਦੇ ਪਿਛਲੀ ਵਾਰ ਨੈੱਟਵਰਕ ਤੋਂ ਡਿਸਕਨੈਕਟ ਹੋਣ \'ਤੇ ਨਿਰਭਰ ਕਰਦਾ ਹੈ। ਜੇ ਡੀਵਾਈਸ 4 ਘੰਟੇ ਜਾਂ ਘੱਟ ਸਮੇਂ ਵਿੱਚ ਮੁੜ-ਕਨੈਕਟ ਹੋ ਜਾਂਦਾ ਹੈ, ਤਾਂ ਮੁੜ-ਬੇਤਰਤੀਬਵਾਰ ਨਹੀਂ ਹੋਵੇਗਾ।"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ਜਦੋਂ ਇਹ ਮੋਡ ਚਾਲੂ ਹੁੰਦਾ ਹੈ, ਤਾਂ ਇਸ ਡੀਵਾਈਸ ਦਾ MAC ਪਤਾ ਹਰ ਵਾਰ ਬਦਲ ਸਕਦਾ ਹੈ ਜਦੋਂ ਇਹ ਕਿਸੇ ਅਜਿਹੇ ਨੈੱਟਵਰਕ ਨਾਲ ਕਨੈਕਟ ਹੁੰਦਾ ਹੈ ਜਿਸ ਵਿੱਚ MAC ਦਾ ਬੇਤਰਤੀਬੀਕਰਨ ਚਾਲੂ ਹੁੰਦਾ ਹੈ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ਗੈਰ-ਮੀਟਰਬੱਧ ਕੀਤਾ ਗਿਆ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ਲੌਗਰ ਬਫ਼ਰ ਆਕਾਰ"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ਬੈਕਗ੍ਰਾਊਂਡ ਐਪਾਂ ਲਈ \'ਐਪ ਪ੍ਰਤਿਕਿਰਿਆ ਨਹੀਂ ਦੇ ਰਹੀ ਹੈ\' ਵਿੰਡੋ ਦਿਖਾਓ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ਸੂਚਨਾ ਚੈਨਲ ਚਿਤਾਵਨੀਆਂ ਦਿਖਾਓ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ਐਪ ਵੱਲੋਂ ਵੈਧ ਚੈਨਲ ਤੋਂ ਬਿਨਾਂ ਸੂਚਨਾ ਪੋਸਟ ਕਰਨ \'ਤੇ ਸਕ੍ਰੀਨ \'ਤੇ ਚਿਤਾਵਨੀ ਦਿਖਾਉਂਦੀ ਹੈ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ਗੱਲਬਾਤ ਸੰਬੰਧੀ ਸੂਚਨਾਵਾਂ ਲਈ ਸ਼ਾਰਟਕੱਟ ਲਾਗੂ ਕਰੋ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਵਿੱਚ ਦਿਸਣ ਲਈ ਚਿਰਸਥਾਈ ਸਾਂਝਾਕਰਨ ਸ਼ਾਰਟਕੱਟ ਨਾਲ ਸੂਚਨਾਵਾਂ ਦਾ ਬੈਕਅੱਪ ਲੈਣਾ ਲੋੜੀਂਦਾ ਹੈ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ਐਪਾਂ ਨੂੰ ਜ਼ਬਰਦਸਤੀ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਆਗਿਆ ਦਿਓ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ਮੈਨੀਫੈਸਟ ਮੁੱਲਾਂ ਦੀ ਪਰਵਾਹ ਕੀਤੇ ਬਿਨਾਂ, ਕਿਸੇ ਵੀ ਐਪ ਨੂੰ ਬਾਹਰੀ ਸਟੋਰੇਜ \'ਤੇ ਲਿਖਣ ਦੇ ਯੋਗ ਬਣਾਉਂਦੀ ਹੈ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ਮੁੜ-ਆਕਾਰ ਬਦਲਣ ਲਈ ਸਰਗਰਮੀਆਂ \'ਤੇ ਜ਼ੋਰ ਦਿਓ"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"ਲਗਭਗ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਚੱਲੇਗੀ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ਬੈਟਰੀ <xliff:g id="TIME">%1$s</xliff:g> ਤੱਕ ਖਤਮ ਹੋ ਸਕਦੀ ਹੈ"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਬਾਕੀ"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> ਤੋਂ ਘੱਟ ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਤੋਂ ਵੱਧ ਬਾਕੀ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> ਤੋਂ ਵੱਧ ਬਾਕੀ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"ਫ਼ੋਨ ਛੇਤੀ ਹੀ ਬੰਦ ਹੋ ਸਕਦਾ ਹੈ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ਟੈਬਲੈੱਟ ਛੇਤੀ ਹੀ ਬੰਦ ਹੋ ਸਕਦਾ ਹੈ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"ਡੀਵਾਈਸ ਛੇਤੀ ਹੀ ਬੰਦ ਹੋ ਸਕਦਾ ਹੈ"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"ਮਹਿਮਾਨ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ਮਹਿਮਾਨ ਹਟਾਓ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ਮਹਿਮਾਨ"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਡੀਵਾਈਸ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ਇਸ ਤਬਦੀਲੀ ਨੂੰ ਲਾਗੂ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨੂੰ ਰੀਬੂਟ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੈ। ਹੁਣੇ ਰੀਬੂਟ ਕਰੋ ਜਾਂ ਰੱਦ ਕਰੋ।"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"ਕੰਮ <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

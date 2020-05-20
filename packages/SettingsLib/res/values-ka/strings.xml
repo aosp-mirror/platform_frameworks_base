@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"უსადენო ეკრანის სერტიფიცირების ვარიანტების ჩვენება"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-ს აღრიცხვის დონის გაზრდა, Wi‑Fi ამომრჩეველში ყოველ SSID RSSI-ზე ჩვენება"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ამცირებს ბატარეის ხარჯვას და აუმჯობესებს ქსელის მუშაობას"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ეს გადასართავი მხოლოდ კლიენტის რეჟიმში მოქმედებს MAC მისამართის შემთხვევითობაზე.\nამ რეჟიმის გააქტიურების შემთხვევაში, ნებისმიერმა ქსელმა, რომლისთვისაც MAC მისამართის შემთხვევითობა ჩართულია, შეიძლება ხელახლა მოახდინოს MAC მისამართთა შემთხვევითობის განხორციელება დაკავშირებისას, იმის გათვალისწინებით, თუ როდის გაწყვიტა კლიენტმა ბოლოს ქსელთან კავშირი. შემთხვევითობა აღარ განმეორდება, თუ ეს მოწყობილობა ქსელს 4 საათის ფარგლებში ან უფრო ნაკლებ დროში დაუკავშირდება."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"როდესაც ეს რეჟიმი ჩართულია, მოწყობილობის MAC მისამართი შეიძლება შეიცვალოს ისეთ ქსელთან ყოველ დაკავშირებაზე, რომელსაც ჩართული აქვს MAC მისამართის შემთხვევითობა."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ლიმიტირებული"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"არალიმიტირებული"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ჟურნალიზაციის ბუფერის ზომები"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"„აპი არ რეაგირებს“ შეტყობინების ჩვენება, როცა ფონური აპლიკაცია არ პასუხობს"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"შეტყობინებათა არხის გაფრთხილებების ჩვენება"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ეკრანზე აჩვენებს გაფრთხილებას, როცა აპი შეტყობინებას სწორი არხის გარეშე განათავსებს"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"მალსახმობების მოთხოვნა მიმოწერის შეტყობინებებისთვის"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"მოითხოვეთ, შეტყობინებები ეყრდნობოდეს ხანგრძლივად არსებულ გაზიარების მალსახმობებს მიმოწერის სექციაში გამოსაჩენად"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"აპების დაშვება გარე მეხსიერებაში"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"აპები ჩაიწერება გარე მეხსიერებაზე აღწერის ფაილების მნიშვნელობების მიუხედავად"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ზომაცვლადი აქტივობების იძულება"</string>
@@ -435,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"უნდა იმუშაოს დაახლოებით <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)-მდე"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"უნდა იმუშაოს დაახლოებით <xliff:g id="TIME">%1$s</xliff:g>-მდე"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g>-მდე"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ბატარეა შესაძლოა ამოიწუროს <xliff:g id="TIME">%1$s</xliff:g>-ისთვის"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ბატარეა შესაძლოა ამოიწუროს <xliff:g id="TIME">%1$s</xliff:g>-მდე"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"დარჩა <xliff:g id="THRESHOLD">%1$s</xliff:g>-ზე ნაკლები"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"დარჩა <xliff:g id="THRESHOLD">%1$s</xliff:g>-ზე ნაკლები (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"დარჩა <xliff:g id="TIME_REMAINING">%1$s</xliff:g>-ზე მეტი (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -551,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"სტუმრის დამატება"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"სტუმრის ამოშლა"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"სტუმარი"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"მოწყობილობის ნაგულისხმევი"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"გათიშული"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ჩართული"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ამ ცვლილების ასამოქმედებლად თქვენი მოწყობილობა უნდა გადაიტვირთოს. გადატვირთეთ ახლავე ან გააუქმეთ."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"სამსახურის <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

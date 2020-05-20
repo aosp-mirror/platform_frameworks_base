@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi-Fi 接続時にデバッグモード"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"エラー"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"ワイヤレス デバッグ"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグをオンにしてください"</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"利用可能なデバイスを確認して使用するには、ワイヤレス デバッグを ON にしてください"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR コードによるデバイスのペア設定"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR コードスキャナを使って新しいデバイスをペア設定します"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"ペア設定コードによるデバイスのペア設定"</string>
@@ -235,7 +235,7 @@
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Wi-Fi ネットワークに接続してください"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, デバッグ, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"バグレポートのショートカット"</string>
-    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"電源メニューにバグレポートを取得するボタンを表示する"</string>
+    <string name="bugreport_in_power_summary" msgid="1885529649381831775">"電源ボタン メニューにバグレポートを取得するボタンを表示する"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"スリープモードにしない"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"充電中に画面をスリープにしない"</string>
     <string name="bt_hci_snoop_log" msgid="7291287955649081448">"Bluetooth HCI スヌープログ"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ワイヤレス ディスプレイ認証のオプションを表示"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi ログレベルを上げて、Wi-Fi 選択ツールで SSID RSSI ごとに表示します"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"電池の消耗が軽減され、ネットワーク パフォーマンスが改善されます"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"この切り替えは、クライアント モードの MAC のランダム化動作にのみ影響します。\nこのモードがアクティブの場合、MAC のランダム化が有効になっているすべてのネットワークで、クライアントがネットワークから最後に切断されたタイミングに応じて、関連付けの際に MAC アドレスが再ランダム化されることがあります。再ランダム化は、デバイスが 4 時間以内に再接続された場合は行われません。"</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"このモードが有効な場合、このデバイスは、MAC アドレスのランダム化が有効なネットワークに接続するたびに MAC アドレスが変わる可能性があります。"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"従量制"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"定額制"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ログバッファのサイズ"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"バックグラウンド アプリが応答しない場合にダイアログを表示"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"通知チャネルの警告を表示"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"アプリから有効なチャネルのない通知が投稿されたときに画面上に警告を表示します"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"会話通知用のショートカット"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"会話セクションに表示されるように、通知が長期の共有ショートカットに対応することを要件とします"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"外部ストレージへのアプリの書き込みを許可"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"マニフェストの値に関係なく、すべてのアプリを外部ストレージに書き込めるようになります"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"アクティビティをサイズ変更可能にする"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"電池が切れる推定時刻: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> まで"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"<xliff:g id="TIME">%1$s</xliff:g> 頃に電池がなくなります"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"残り時間: <xliff:g id="THRESHOLD">%1$s</xliff:g>未満"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"残り時間: <xliff:g id="THRESHOLD">%1$s</xliff:g>（<xliff:g id="LEVEL">%2$s</xliff:g>）未満"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"残り時間: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>（<xliff:g id="LEVEL">%2$s</xliff:g>）以上"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"残り時間: <xliff:g id="TIME_REMAINING">%1$s</xliff:g>以上"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"スマートフォンの電源がもうすぐ切れます"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"タブレットの電源がもうすぐ切れます"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"デバイスの電源がもうすぐ切れます"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"ゲストを追加"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ゲストを削除"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ゲスト"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"デバイスのデフォルト"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"無効"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"有効"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"この変更を適用するには、デバイスの再起動が必要です。今すぐ再起動してください。キャンセルすることもできます。"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"仕事の<xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

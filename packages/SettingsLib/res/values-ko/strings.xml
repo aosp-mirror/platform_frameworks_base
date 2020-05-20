@@ -210,7 +210,7 @@
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Wi‑Fi가 연결되었을 때 디버그 모드 사용"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"오류"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"무선 디버깅"</string>
-    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"사용 가능한 기기를 보고 사용하려면 무선 디버깅을 사용 설정하세요."</string>
+    <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"사용 가능한 기기를 확인하고 사용하려면 무선 디버깅을 사용 설정하세요."</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"QR 코드로 기기 페어링"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"QR 코드 스캐너를 사용하여 새 기기 페어링"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"페어링 코드로 기기 페어링"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"무선 디스플레이 인증서 옵션 표시"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi 로깅 수준을 높이고, Wi‑Fi 선택도구에서 SSID RSSI당 값을 표시"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"배터리 소모를 줄이고 네트워크 성능 개선"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"이 전환은 클라이언트 모드의 MAC 무작위 순서 지정 방식에만 영향을 줍니다.\n이 모드를 활성화하면 네트워크와 클라이언트 연결이 끊긴 마지막 시점에 따라 MAC 무작위 순서 지정이 사용 설정된 네트워크에서 연결 중에 MAC 주소를 다시 무작위 순서로 지정할 수 있습니다. 기기가 4시간 이내에 재연결된 경우 무작위 순서 지정이 다시 발생하지 않습니다."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"이 모드를 사용 설정하면 기기가 MAC 주소 무작위 지정이 설정된 네트워크에 연결될 때마다 기기의 MAC 주소가 변경될 수 있습니다."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"종량제 네트워크"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"무제한 네트워크"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"로거 버퍼 크기"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"백그라운드 앱과 관련해 앱 응답 없음 대화상자 표시"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"알림 채널 경고 표시"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"앱에서 유효한 채널 없이 알림을 게시하면 화면에 경고 표시"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"대화 알림에 단축키 적용"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"알림이 대화 섹션에 표시되려면 오래 지속되는 공유 단축키의 지원을 받도록 요구"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"외부에서 앱 강제 허용"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"매니페스트 값과 관계없이 모든 앱이 외부 저장소에 작성되도록 허용"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"활동의 크기가 조정 가능하도록 설정"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"대략 <xliff:g id="TIME">%1$s</xliff:g>까지 사용 가능"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g>까지"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"예상 배터리 종료 시간: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> 미만 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음(<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> 이상 남음"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"휴대전화가 곧 종료될 수 있음"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"태블릿이 곧 종료될 수 있음"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"기기가 곧 종료될 수 있음"</string>
@@ -501,7 +495,7 @@
     <string name="accessibility_manual_zen_less_time" msgid="6828877595848229965">"시간 줄이기"</string>
     <string name="cancel" msgid="5665114069455378395">"취소"</string>
     <string name="okay" msgid="949938843324579502">"확인"</string>
-    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"켜기"</string>
+    <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"사용 설정"</string>
     <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"방해 금지 모드 사용 설정"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"사용 안함"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"중요 알림만 허용"</string>
@@ -536,7 +530,7 @@
     <string name="user_add_profile_item_summary" msgid="5418602404308968028">"내 계정의 앱 및 콘텐츠에 대한 액세스를 제한할 수 있습니다."</string>
     <string name="user_add_user_item_title" msgid="2394272381086965029">"사용자"</string>
     <string name="user_add_profile_item_title" msgid="3111051717414643029">"제한된 프로필"</string>
-    <string name="user_add_user_title" msgid="5457079143694924885">"새 사용자를 추가할까요?"</string>
+    <string name="user_add_user_title" msgid="5457079143694924885">"신규 사용자를 추가할까요?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"추가 사용자를 만들어 다른 사용자와 기기를 공유할 수 있습니다. 각 사용자는 앱, 배경화면 등으로 맞춤설정할 수 있는 자신만의 공간을 갖게 됩니다. 또한 모든 사용자에게 영향을 미치는 Wi‑Fi와 같은 기기 설정도 조정할 수 있습니다.\n\n추가된 신규 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자가 앱을 업데이트할 수 있으며, 업데이트는 다른 사용자에게도 적용됩니다. 접근성 설정 및 서비스는 신규 사용자에게 이전되지 않을 수도 있습니다."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"추가된 새로운 사용자는 자신의 공간을 설정해야 합니다.\n\n모든 사용자는 다른 사용자들을 위하여 앱을 업데이트할 수 있습니다."</string>
     <string name="user_setup_dialog_title" msgid="8037342066381939995">"지금 사용자를 설정하시겠습니까?"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"게스트 추가"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"게스트 삭제"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"게스트"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"기기 기본값"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"사용 중지됨"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"사용 설정됨"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"변경사항을 적용하려면 기기를 재부팅해야 합니다. 지금 재부팅하거나 취소하세요."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"직장용 <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

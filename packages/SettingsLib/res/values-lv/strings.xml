@@ -168,7 +168,7 @@
     <string name="tts_play_example_summary" msgid="634044730710636383">"Atskaņot īsu runas sintēzes demonstrāciju"</string>
     <string name="tts_install_data_title" msgid="1829942496472751703">"Instalēt balss datus"</string>
     <string name="tts_install_data_summary" msgid="3608874324992243851">"Instalēt runas sintēzei nepieciešamos balss datus"</string>
-    <string name="tts_engine_security_warning" msgid="3372432853837988146">"Lietojot šo runas sintēzes programmu, var tikt apkopots viss ierunātais teksts, tostarp tāda personīgā informācija kā paroles un kredītkaršu numuri. Tā ir no <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> programmas. Vai iespējot šīs runas sintēzes programmas lietošanu?"</string>
+    <string name="tts_engine_security_warning" msgid="3372432853837988146">"Lietojot šo runas sintēzes programmu, var tikt vākts viss ierunātais teksts, tostarp tāda personīgā informācija kā paroles un kredītkaršu numuri. Tā ir no <xliff:g id="TTS_PLUGIN_ENGINE_NAME">%s</xliff:g> programmas. Vai iespējot šīs runas sintēzes programmas lietošanu?"</string>
     <string name="tts_engine_network_required" msgid="8722087649733906851">"Lai izmantotu teksta pārveidošanu runā šajā valodā, ir nepieciešams aktīvs tīkla savienojums."</string>
     <string name="tts_default_sample_string" msgid="6388016028292967973">"Šis ir runas sintēzes piemērs."</string>
     <string name="tts_status_title" msgid="8190784181389278640">"Noklusējuma valodas statuss"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Rādīt bezvadu attēlošanas sertifikācijas iespējas"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Palieliniet Wi‑Fi reģistrēšanas līmeni; rādīt katram SSID RSSI Wi‑Fi atlasītājā."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Samazina akumulatora izlādi un uzlabo tīkla veiktspēju"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Šis slēdzis ietekmē MAC adrešu nejaušas izveides darbību tikai klienta režīmā.\nJa šis režīms ir aktivizēts, visos tīklos, kuros MAC adrešu nejauša izveide ir iespējota, saistīšanas laikā MAC adreses var tikt atkārtoti nejauši izveidotas atkarībā no tā, kad klients pēdējoreiz pārtrauca savienojumu ar tīklu. Atkārtota nejauša izveide netiek veikta, ja ierīces savienojums tiek atjaunots ne vairāk kā 4 stundu laikā."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Ja šis režīms ir iespējots, šīs ierīces MAC adrese var mainīties ikreiz, kad ierīcē tiek izveidots savienojums ar tīklu, kurā ir iespējota MAC adrešu nejauša izveide."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Maksas"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bezmaksas"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Reģistrētāja buferu lielumi"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Rādīt fona lietotņu dialoglodziņu Lietotne nereaģē"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Paziņojumu kanāla brīdinājumi"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Brīdinājums ekrānā, kad lietotne publicē paziņojumu, nenorādot derīgu kanālu"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Ieviest saīsnes sarunu paziņojumiem"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Pieprasīt izmantot paziņojumiem ilgstošas darbības kopīgošanas saīsni rādīšanai sarunu sadaļā"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Lietotņu piespiedu atļaušana ārējā krātuvē"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Ļauj jebkuru lietotni ierakstīt ārējā krātuvē neatkarīgi no manifesta vērtības."</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Pielāgot darbības"</string>
@@ -552,4 +550,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Pievienot viesi"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Noņemt viesi"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Viesis"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Ierīces noklusējums"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Atspējots"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Iespējots"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Lai šīs izmaiņas tiktu piemērotas, nepieciešama ierīces atkārtota palaišana. Atkārtoti palaidiet to tūlīt vai atceliet izmaiņas."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Darbā: <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

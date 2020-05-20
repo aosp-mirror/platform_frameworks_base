@@ -222,7 +222,7 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Empremta digital del dispositiu: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"No s\'ha pogut connectar"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Assegura\'t que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> estigui connectat a la xarxa correcta"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincular amb el dispositiu"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincula amb el dispositiu"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Codi de vinculació Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"No s\'ha pogut vincular"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Assegura\'t que el dispositiu estigui connectat a la mateixa xarxa."</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra les opcions per a la certificació de pantalla sense fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Augmenta nivell de registre Wi‑Fi, mostra\'l per SSID RSSI al selector de Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Redueix el consum de bateria i millora el rendiment de la xarxa"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Aquest commutador afecta el comportament de l\'aleatorització d\'adreces MAC només en el mode client.\nQuan aquest mode està activat, és possible que les adreces MAC de les xarxes que tinguin activada l’aleatorització es tornin a ordenar de manera aleatòria durant l’associació, en funció de l\'última vegada que el client s\'ha desconnectat de la xarxa. Les adreces no es tornen a ordenar de manera aleatòria si el dispositiu es torna a connectar abans de 4 hores."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quan aquest mode està activat, és possible que l’adreça MAC d’aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la mem. intermèdia del registrador"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostra el quadre de diàleg L\'aplicació no respon per a aplicacions en segon pla"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avisos del canal de notificacions"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Mostra un avís en pantalla quan una aplicació publica una notificació sense un canal vàlid"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Aplica dreceres per a notificacions de converses"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Requereix que les notificacions tinguin una drecera permanent de compartició perquè apareguin a la secció de converses"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Força permetre aplicacions de manera externa"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Permet que qualsevol aplicació es pugui escriure en un dispositiu d’emmagatzematge extern, independentment dels valors definits"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Força l\'ajust de la mida de les activitats"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Hauria de durar aproximadament fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fins a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"És possible que la bateria s\'esgoti a les <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Temps restant inferior a <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Temps restant superior a <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Temps restant superior a <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"És possible que el telèfon s\'apagui aviat"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"És possible que la tauleta s\'apagui aviat"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"És possible que el dispositiu s\'apagui aviat"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Afegeix un convidat"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Suprimeix el convidat"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Convidat"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Opció predeter. del dispositiu"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desactivat"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activat"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Has de reiniciar el teu dispositiu perquè s\'apliquin els canvis. Reinicia\'l ara o cancel·la."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> de la feina"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

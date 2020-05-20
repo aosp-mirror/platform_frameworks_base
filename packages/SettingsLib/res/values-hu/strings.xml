@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Vezeték nélküli kijelző tanúsítványával kapcsolatos lehetőségek megjelenítése"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi‑Fi-naplózási szint növelése, RSSI/SSID megjelenítése a Wi‑Fi-választóban"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Csökkenti az akkumulátorhasználatot, és javítja a hálózat teljesítményét"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Kizárólag ügyfélmód esetében be- vagy kikapcsolja a MAC-címet randomizáló viselkedést.\nHa a mód aktív, az olyan hálózatokon, amelyeken engedélyezve van a MAC-címek randomizálása, a társítás során újra megtörténhet a randomizálás, attól függően, hogy az ügyfél mikor bontotta utoljára a kapcsolatot a hálózattal. Az ismételt randomizálás nem következik be, ha az eszköz négy órán belül újracsatlakozik."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Ha ez a mód be van kapcsolva, akkor ennek az eszköznek a MAC-címe minden alkalommal módosulhat, amikor olyan hálózathoz csatlakozik, amelyen engedélyezve van a MAC-címek randomizálása."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Forgalomkorlátos"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Nem forgalomkorlátos"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Naplózási puffer mérete"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Az Alkalmazás nem válaszol ablak megjelenítése a háttérben futó alkalmazásoknál"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Értesítő csatorna figyelmeztetései"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Figyelmeztet, ha egy alkalmazás érvényes csatorna nélkül küld értesítést"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Gyorsparancsok kényszerítése beszélgetésértesítésekhez"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Megköveteli, hogy az értesítéseket hosszú életű megosztási gyorsparancs támogassa, hogy megjelenhessenek a beszélgetési szakaszban"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Külső tárhely alkalmazásainak engedélyezése"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Lehetővé teszi bármely alkalmazás külső tárhelyre való írását a jegyzékértékektől függetlenül"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Tevékenységek átméretezésének kényszerítése"</string>
@@ -435,15 +433,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Eddig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Az akkumulátor lemerülhet a következő időpontig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Az akkumulátor lemerülhet: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Több mint <xliff:g id="TIME_REMAINING">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Több mint <xliff:g id="TIME_REMAINING">%1$s</xliff:g> van hátra"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Előfordulhat, hogy a telefon hamarosan kikapcsol"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Előfordulhat, hogy a táblagép hamarosan kikapcsol"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Előfordulhat, hogy az eszköz hamarosan kikapcsol"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Vendég hozzáadása"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Vendég munkamenet eltávolítása"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Vendég"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Alapértelmezett"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Letiltva"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Engedélyezve"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Az eszközt újra kell indítani, hogy a módosítás megtörténjen. Indítsa újra most, vagy vesse el a módosítást."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Munkahelyi <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

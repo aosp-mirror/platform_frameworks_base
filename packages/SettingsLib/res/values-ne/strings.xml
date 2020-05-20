@@ -251,8 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"ताररहित प्रदर्शन प्रमाणीकरण"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Wi-Fi वर्बोज लग सक्षम पार्नुहोस्"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Wi‑Fi स्क्यान थ्रोटलिङ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization (5437378364995776979) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Wi‑Fi द्वारा परिष्कृत MAC ठेगाना बदल्ने सुविधा"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"मोबाइल डेटा सधैँ सक्रिय राख्नुहोस्"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"टेदरिङको लागि हार्डवेयरको प्रवेग"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"नामकरण नगरिएका ब्लुटुथ यन्त्रहरू देखाउनुहोस्"</string>
@@ -285,8 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ताररहित प्रदर्शन प्रमाणीकरणका लागि विकल्पहरू देखाउनुहोस्"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Wi-Fi लग स्तर बढाउनुहोस्, Wi-Fi चयनकर्तामा प्रति SSID RSSI देखाइन्छ"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ब्याट्रीको खपत कम गरी नेटवर्कको कार्यसम्पादनमा सुधार गर्दछ"</string>
-    <!-- no translation found for wifi_enhanced_mac_randomization_summary (7925425746373704991) -->
-    <skip />
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"यो मोड अन गरिएका बेला यो यन्त्र MAC ठेगाना बदल्ने सुविधा अन गरिएको कुनै इन्टरनेटसँग जति पटक कनेक्ट हुन्छ त्यति नै पटक यस यन्त्रको MAC ठेगाना पनि परिवर्तन हुन सक्छ।"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"सशुल्क वाइफाइ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"मिटर नगरिएको"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लगर बफर आकारहरू"</string>
@@ -375,10 +373,8 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"पृष्ठभूमिका एपहरूको संवादको प्रतिक्रिया नदिइरहेका एपहरू प्रदर्शन गर्नुहोस्"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना च्यानलका चेतावनी देखाउनुहोस्"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"अनुप्रयोगले कुनै मान्य च्यानल बिना सूचना पोस्ट गर्दा स्क्रिनमा चेतावनी देखाउँछ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"कुराकानी नामक स्थानमा मान्य सर्टकटसँग पनि लिंक गरिएका सूचनाहरू मात्र देखाइयोस्"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"कुराकानी नामक स्थानमा सूचनाहरू देखिन सकून् भन्नाका खातिर ती सूचनामा सधैँ सक्रिय रहने (long-lived) सेयरिङ सर्टकट समावेश भएको हुनु पर्छ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"बाह्यमा बल प्रयोगको अनुमति प्राप्त एपहरू"</string>
-    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि अनुप्रयोगलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
+    <string name="force_allow_on_external_summary" msgid="8525425782530728238">"म्यानिफेेस्टका मानहरूको ख्याल नगरी कुनै पनि एपलाई बाह्य भण्डारणमा लेख्न सकिने खाले बनाउँछ"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"आकार बदल्न योग्य हुने बनाउन गतिविधिहरूलाई बाध्यात्मक बनाउनुहोस्।"</string>
     <string name="force_resizable_activities_summary" msgid="2490382056981583062">"म्यानिफेेस्ट मानहरूको ख्याल नगरी, बहु-विन्डोको लागि सबै रिसाइज गर्न सकिने गतिविधिहरू बनाउनुहोस्।"</string>
     <string name="enable_freeform_support" msgid="7599125687603914253">"फ्रिफर्म विन्डोहरू सक्रिय गर्नुहोस्"</string>
@@ -403,7 +399,7 @@
     <string name="inactive_apps_title" msgid="5372523625297212320">"स्ट्यान्डबाई एपहरू"</string>
     <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"निष्क्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
     <string name="inactive_app_active_summary" msgid="8047630990208722344">"सक्रिय। टगल गर्न ट्याप गर्नुहोस्।"</string>
-    <string name="standby_bucket_summary" msgid="5128193447550429600">"अनुप्रयोगको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
+    <string name="standby_bucket_summary" msgid="5128193447550429600">"एपको स्ट्यान्डबाई अवस्था:<xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"चलिरहेका सेवाहरू"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"हाल चालु भइरहेका सेवाहरू हेर्नुहोस् र नियन्त्रण गर्नुहोस्"</string>
     <string name="select_webview_provider_title" msgid="3917815648099445503">"WebView कार्यान्वयन"</string>
@@ -432,20 +428,16 @@
     <string name="power_discharging_duration_enhanced" msgid="1800465736237672323">"तपाईंको प्रयोगको आधारमा लगभग <xliff:g id="TIME_REMAINING">%1$s</xliff:g> बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <!-- no translation found for power_remaining_duration_only_short (7438846066602840588) -->
     <skip />
-    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
-    <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्नु पर्छ"</string>
+    <string name="power_discharge_by_enhanced" msgid="563438403581662942">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="3268796172652988877">"तपाईंको प्रयोगका आधारमा लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ"</string>
+    <string name="power_discharge_by" msgid="4113180890060388350">"ब्याट्री लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="92545648425937000">"लगभग <xliff:g id="TIME">%1$s</xliff:g> सम्म टिक्छ"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> सम्म"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"ब्याट्री <xliff:g id="TIME">%1$s</xliff:g> बजेसम्ममा सकिन सक्छ"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> भन्दा कम समय बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी छ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> भन्दा बढी समय बाँकी छ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"फोन चाँडै बन्द हुन सक्छ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"ट्याब्लेट चाँडै बन्द हुन सक्छ"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"यन्त्र चाँडै बन्द हुन सक्छ"</string>
@@ -557,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"अतिथि थप्नुहोस्"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"अतिथि हटाउनुहोस्"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"अतिथि"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"पूर्वनिर्धारित यन्त्र"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"असक्षम पारिएको छ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सक्षम पारिएको छ"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"यो परिवर्तन लागू गर्न तपाईंको यन्त्र अनिवार्य रूपमा रिबुट गर्नु पर्छ। अहिले रिबुट गर्नुहोस् वा रद्द गर्नुहोस्।"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"कार्यालयको प्रोफाइल <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

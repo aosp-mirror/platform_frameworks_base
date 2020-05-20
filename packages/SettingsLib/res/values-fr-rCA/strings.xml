@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Sélectionnez un profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personnel"</string>
-    <string name="category_work" msgid="4014193632325996115">"Travail"</string>
+    <string name="category_work" msgid="4014193632325996115">"Professionnel"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Options pour les concepteurs"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Activer les options pour les concepteurs"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Définir les options pour le développement de l\'application"</string>
@@ -218,7 +218,7 @@
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Appareils associés"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Actuellement connecté"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Renseignements sur l\'appareil"</string>
-    <string name="adb_device_forget" msgid="193072400783068417">"Oublier"</string>
+    <string name="adb_device_forget" msgid="193072400783068417">"Supprimer"</string>
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Empreinte digitale d\'appareil : <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"Échec de la connexion"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Vérifiez que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> est connecté au bon réseau"</string>
@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association de l\'appareil Soit le code QR est incorrect, soit l\'appareil n\'est pas connecté au même réseau."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresse IP et port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Numériser le code QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associer un appareil par Wi-Fi en numérisant un code QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associer l\'appareil par Wi-Fi en numérisant un code QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Veuillez vous connecter à un réseau Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, concepteur"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci de rapport de bogue"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification d\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler davantage les données Wi-Fi, afficher par SSID RSSI dans sélect. Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit l\'utilisation de la pile et améliore les performances réseau"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ce commutateur a un impact sur le comportement de sélection aléatoire des adresses MAC pour le mode client uniquement.\nLorsque ce mode est activé, l\'association pourrait forcer la réorganisation de manière aléatoire des adresses MAC pour les réseaux sur lesquels la sélection aléatoire des adresses MAC est activée, en fonction de la dernière fois que le client s\'est déconnecté du réseau. La réorganisation de manière aléatoire des adresses MAC ne se produit pas si l\'appareil se reconnecte d\'ici quatre heures ou moins."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse MAC de cet appareil pourrait changer chaque fois qu\'il se connecter à un réseau sur lequel la sélection aléatoire des adresses MAC est activée."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non mesuré"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des mémoires tampons d\'enregistreur"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afficher le message « L\'application ne répond plus » pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Affich. avertiss. canal notification"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher avertiss. à l\'écran quand une app présente une notific. sans canal valide"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Appliquer les raccourcis pour les notifications de conversation"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Exiger le soutien des notifications par un raccourci de partage longue durée pour qu\'elles s\'affichent dans la section des conversations"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autor. d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Rend possible l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer les activités à être redimensionnables"</string>
@@ -435,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Jusqu\'à <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La pile risque d\'être épuisée à <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La pile risque d\'être épuisée d\'ici <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Il reste plus de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -498,7 +496,7 @@
     <string name="cancel" msgid="5665114069455378395">"Annuler"</string>
     <string name="okay" msgid="949938843324579502">"OK"</string>
     <string name="zen_mode_enable_dialog_turn_on" msgid="6418297231575050426">"Activer"</string>
-    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer la fonction « Ne pas déranger »"</string>
+    <string name="zen_mode_settings_turn_on_dialog_title" msgid="2760567063190790696">"Activer le mode Ne pas déranger"</string>
     <string name="zen_mode_settings_summary_off" msgid="3832876036123504076">"Jamais"</string>
     <string name="zen_interruption_level_priority" msgid="5392140786447823299">"Priorités seulement"</string>
     <string name="zen_mode_and_condition" msgid="8877086090066332516">"<xliff:g id="ZEN_MODE">%1$s</xliff:g>. <xliff:g id="EXIT_CONDITION">%2$s</xliff:g>"</string>
@@ -551,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Ajouter un invité"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Supprimer l\'invité"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invité"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Valeur par défaut de l\'appareil"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Désactivé"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activé"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Votre appareil doit être redémarré pour que ce changement prenne effet. Redémarrez-le maintenant ou annulez la modification."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (travail)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

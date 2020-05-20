@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Media"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Veloce"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Molto veloce"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Scaduto"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Scaduta"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Disconnesso"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione..."</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Scegli profilo"</string>
     <string name="category_personal" msgid="6236798763159385225">"Personali"</string>
-    <string name="category_work" msgid="4014193632325996115">"Lavoro"</string>
+    <string name="category_work" msgid="4014193632325996115">"Di lavoro"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opzioni sviluppatore"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Attiva Opzioni sviluppatore"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Imposta opzioni per lo sviluppo di applicazioni"</string>
@@ -207,11 +207,11 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Modalità debug quando è connesso tramite USB"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Revoca autorizzazioni debug USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Debug wireless"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modalità Debug quando il Wi-Fi è connesso"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modalità debug quando il Wi-Fi è connesso"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Errore"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Debug wireless"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Per trovare e utilizzare i dispositivi disponibili, attiva il debug wireless"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Accoppia il dispositivo con il codice QR"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Accoppia dispositivo con codice QR"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Accoppia i nuovi dispositivi utilizzando lo scanner di codici QR"</string>
     <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Accoppia dispositivo con codice di accoppiamento"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Accoppia i nuovi dispositivi utilizzando un codice di sei cifre"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Mostra opzioni per la certificazione display wireless"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Aumenta livello di logging Wi-Fi, mostra SSID RSSI nel selettore Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Riduce il consumo della batteria e migliora le prestazioni della rete"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Questa opzione influenza il comportamento della randomizzazione MAC solo nella modalità client.\nQuando questa modalità è attiva, durante l\'associazione gli indirizzi MAC di tutte le reti con randomizzazione MAC abilitata potrebbero essere nuovamente sottoposti a randomizzazione, a seconda di quando il client è stato disconnesso l\'ultima volta dalla rete. La randomizzazione non viene eseguita nuovamente se il dispositivo si riconnette entro quattro ore."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Quando questa modalità è attiva, l\'indirizzo MAC del dispositivo potrebbe cambiare ogni volta che si connette a una rete con randomizzazione MAC attivata."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"A consumo"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non a consumo"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Dimensioni buffer logger"</string>
@@ -359,7 +359,7 @@
     <string name="track_frame_time" msgid="522674651937771106">"Rendering HWUI profilo"</string>
     <string name="enable_gpu_debug_layers" msgid="4986675516188740397">"Attiva livelli debug GPU"</string>
     <string name="enable_gpu_debug_layers_summary" msgid="4921521407377170481">"Consenti caricamento livelli debug GPU per app di debug"</string>
-    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Attiva reg. dettagl. fornitori"</string>
+    <string name="enable_verbose_vendor_logging" msgid="1196698788267682072">"Attiva log dettagliati fornitori"</string>
     <string name="enable_verbose_vendor_logging_summary" msgid="5426292185780393708">"Includi log aggiuntivi di fornitori relativi a un dispositivo specifico nelle segnalazioni di bug che potrebbero contenere informazioni private, causare un maggior consumo della batteria e/o utilizzare più spazio di archiviazione."</string>
     <string name="window_animation_scale_title" msgid="5236381298376812508">"Scala animazione finestra"</string>
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Scala animazione transizione"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Mostra finestra di dialogo ANR per app in background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Mostra avvisi canale di notifica"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Viene mostrato un avviso sullo schermo quando un\'app pubblica una notifica senza un canale valido"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Applica scorciatoie per notifiche delle conversazioni"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Richiedi il supporto di una scorciatoia di condivisione di lunga durata per la visualizzazione delle notifiche nella sezione delle conversazioni"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forza autorizzazione app su memoria esterna"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Consente l\'installazione di qualsiasi app su memoria esterna, indipendentemente dai valori manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Imponi formato modificabile alle attività"</string>
@@ -435,15 +433,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ora stimata esaurimento batteria: <xliff:g id="TIME">%1$s</xliff:g> circa"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Fino alle ore <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batteria potrebbe esaurirsi entro <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batteria potrebbe esaurirsi entro le <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Carica residua: meno di <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Tempo residuo: più di <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Il telefono potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Il tablet potrebbe spegnersi a breve"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Il dispositivo potrebbe spegnersi a breve"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Aggiungi ospite"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Rimuovi ospite"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Ospite"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Predefinito dispositivo"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Non attivo"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Attivo"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Devi riavviare il dispositivo per applicare questa modifica. Riavvia ora o annulla."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"App <xliff:g id="APP_NAME">%s</xliff:g> di lavoro"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

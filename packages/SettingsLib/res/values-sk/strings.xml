@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Stredná"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rýchla"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Veľmi rýchla"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Platnosť vypršala"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Vypršalo"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Odpojený"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prebieha odpájanie..."</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Výber profilu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobné"</string>
-    <string name="category_work" msgid="4014193632325996115">"Práca"</string>
+    <string name="category_work" msgid="4014193632325996115">"Pracovné"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Pre vývojárov"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Povolenie možností vývojára"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Možnosti nastavenia vývoja aplikácií"</string>
@@ -211,9 +211,9 @@
     <string name="adb_wireless_error" msgid="721958772149779856">"Chyba"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Bezdrôtové ladenie"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Ak chcete zobraziť a používať dostupné zariadenia, zapnite bezdrôtové ladenie"</string>
-    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Spárovať zariadenie pomocou QR kódu"</string>
+    <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Spárovať zariadenie QR kódom"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Spárujte nové zariadenia pomocou skenera QR kódov"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Spárovať zariadenie pomocou párovacieho kódu"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Spárovať zariadenie párovacím kódom"</string>
     <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Spárujte nové zariadenia pomocou šesťmiestneho kódu"</string>
     <string name="adb_paired_devices_title" msgid="5268997341526217362">"Spárované zariadenia"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Aktuálne pripojené"</string>
@@ -226,15 +226,15 @@
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Párovací kód siete Wi-Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Párovanie zlyhalo"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Skontrolujte, či je zariadenie pripojené k rovnakej sieti."</string>
-    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Spárujte zariadenie cez sieť Wi-Fi naskenovaním QR kódu"</string>
+    <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Spárujte zariadenie cez Wi-Fi naskenovaním QR kódu"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Páruje sa zariadenie…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Zariadenie sa nepodarilo spárovať. Buď bol QR kód nesprávny, alebo zariadenie nie je pripojené k rovnakej sieti."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresa IP a port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Naskenujte QR kód"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Spárujte zariadenie cez sieť Wi-Fi naskenovaním QR kódu"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Spárujte zariadenie cez Wi-Fi naskenovaním QR kódu"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Pripojte sa k sieti Wi‑Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, ladenie, dev"</string>
-    <string name="bugreport_in_power" msgid="8664089072534638709">"Skratka hlásenia chyby"</string>
+    <string name="bugreport_in_power" msgid="8664089072534638709">"Odkaz na hlásenie chyby"</string>
     <string name="bugreport_in_power_summary" msgid="1885529649381831775">"Zobraziť v hlavnej ponuke tlačidlo na vytvorenie hlásenia chyby"</string>
     <string name="keep_screen_on" msgid="1187161672348797558">"Nevypínať obrazovku"</string>
     <string name="keep_screen_on_summary" msgid="1510731514101925829">"Obrazovka sa pri nabíjaní neprepne do režimu spánku"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Zobraziť možnosti certifikácie bezdrôtového zobrazenia"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zvýšiť úroveň denníkov Wi‑Fi, zobrazovať podľa SSID RSSI pri výbere siete Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Znižuje používanie batérie a zlepšuje výkon siete"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Tento prepínač ovplyvňuje správanie randomizácie adresy MAC len pre režim klienta.\nKeď je tento režim aktivovaný, všetky siete s povolenou randomizáciou adresy MAC môžu mať svoje adresy MAC počas spájania opätovne randomizované v závislosti od toho, kedy sa klient od siete naposledy odpojil. Opätovná randomizácia nenastane, ak sa zariadenie znova pripojí do štyroch hodín."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Keď je tento režim aktivovaný, adresa MAC tohto zariadenia sa môže pri každom pripojení k sieti s aktivovanou randomizáciou adries MAC zmeniť."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Merané"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez merania dát"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Vyrovnávacia pamäť nástroja denníkov"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Zobrazovať dialógové okno „Aplikácia nereaguje“ pre aplikácie na pozadí"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Zobraziť hlásenia kanála upozornení"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Zobrazuje varovné hlásenie na obrazovke, keď aplikácia zverejní upozornenie bez platného kanála"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Vynútiť skratky pre upozornenia na konverzácie"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Vyžadovať zastúpenie upozornení dlhodobou skratkou na zdieľanie, aby sa zobrazili v sekcii konverzácie"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Vynútiť povolenie aplikácií na externom úložisku"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Umožňuje zapísať akúkoľvek aplikáciu do externého úložiska bez ohľadu na hodnoty v manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Vynútiť možnosť zmeny veľkosti aktivít"</string>
@@ -435,15 +433,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Vydrží asi do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batéria sa môže do <xliff:g id="TIME">%1$s</xliff:g> minúť"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batéria sa môže do <xliff:g id="TIME">%1$s</xliff:g> vybiť"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Zostáva menej ako <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Zostáva menej ako <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Zostáva viac ako <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Zostáva viac ako <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefón sa môže čoskoro vypnúť"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet sa môže čoskoro vypnúť"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Zariadenie sa môže čoskoro vypnúť"</string>
@@ -514,7 +508,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"o <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Trvanie"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Vždy sa opýtať"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Dokiaľ túto funkciu nevypnete"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Dokým funkciu nevypnete"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Teraz"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Reproduktor telefónu"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Pri pripájaní sa vyskytol problém. Zariadenie vypnite a znova zapnite."</string>
@@ -557,4 +551,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Pridať hosťa"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Odobrať hosťa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Hosť"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Predvol. nastavenie zariadenia"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Vypnuté"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Zapnuté"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Táto zmena sa uplatní až po reštartovaní zariadenia. Zariadenie reštartujte alebo zmenu zrušte."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Pracovná aplikácia <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

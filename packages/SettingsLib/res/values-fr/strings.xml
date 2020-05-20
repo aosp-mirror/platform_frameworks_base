@@ -231,7 +231,7 @@
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Échec de l\'association à l\'appareil. Le code QR est incorrect, ou l\'appareil n\'est pas connecté au même réseau."</string>
     <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"Adresse IP et port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scanner un code QR"</string>
-    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associer l\'appareil via le Wi‑Fi à l\'aide d\'un code QR"</string>
+    <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Associez l\'appareil via le Wi‑Fi à l\'aide d\'un code QR"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Connectez-vous à un réseau Wi-Fi"</string>
     <string name="keywords_adb_wireless" msgid="6507505581882171240">"adb, débogage, dev"</string>
     <string name="bugreport_in_power" msgid="8664089072534638709">"Raccourci vers rapport de bug"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Afficher les options pour la certification de l\'affichage sans fil"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Détailler les infos Wi-Fi, afficher par RSSI de SSID dans l\'outil de sélection Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Réduit la décharge de la batterie et améliore les performances du réseau"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ce paramètre modifie uniquement le changement aléatoire de l\'adresse MAC en mode client.\nSi ce mode est activé, les réseaux pour lesquels le changement aléatoire d\'adresse MAC est activé peuvent faire l\'objet de nouveaux changements aléatoires d\'adresse lors des associations, en fonction du temps écoulé depuis la dernière fois que le client s\'est déconnecté du réseau. Aucun changement aléatoire d\'adresse n\'a lieu si un appareil se connecte à nouveau après un délai inférieur à quatre heures."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Lorsque ce mode est activé, l\'adresse e-mail MAC de cet appareil peut changer lors de chaque connexion à un réseau pour lequel le changement aléatoire d\'adresse MAC est activé."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Facturé à l\'usage"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Non facturé à l\'usage"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Tailles des tampons de l\'enregistreur"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Afficher la boîte de dialogue \"L\'application ne répond plus\" pour les applications en arrière-plan"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Afficher les avertissements liés aux canaux de notification"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Afficher un avertissement lorsqu\'une application publie une notification sans canal valide"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Utiliser des raccourcis pour les notifications des conversations"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Exiger la sauvegarde des notifications via un raccourci de partage permanent pour qu\'elles s\'affichent dans la section des conversations"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Forcer l\'autorisation d\'applis sur stockage externe"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Autoriser l\'enregistrement de toute application sur un espace de stockage externe, indépendamment des valeurs du fichier manifeste"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Forcer le redimensionnement des activités"</string>
@@ -435,15 +433,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Devrait durer jusqu\'à environ <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Jusqu\'à <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batterie risque d\'être épuisée à <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"La batterie risque d\'être épuisée d\'ici <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Il reste moins de <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Il reste plus de <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Il reste plus de <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Le téléphone va bientôt s\'éteindre"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"La tablette va bientôt s\'éteindre"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"L\'appareil va bientôt s\'éteindre"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Ajouter un invité"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Supprimer l\'invité"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Invité"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Appareil par défaut"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Désactivé"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activé"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Vous devez redémarrer l\'appareil pour que cette modification soit appliquée. Redémarrez maintenant ou annulez l\'opération."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (travail)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>
