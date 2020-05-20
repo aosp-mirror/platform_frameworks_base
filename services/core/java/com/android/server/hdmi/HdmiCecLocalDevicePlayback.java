@@ -163,12 +163,13 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
         if (mIsActiveSource) {
             mService.sendCecCommand(HdmiCecMessageBuilder.buildInactiveSource(
-                mAddress, mService.getPhysicalAddress()));
+                    mAddress, mService.getPhysicalAddress()));
         }
+        boolean wasActiveSource = mIsActiveSource;
         // Invalidate the internal active source record when goes to standby
         // This set will also update mIsActiveSource
         mService.setActiveSource(Constants.ADDR_INVALID, Constants.INVALID_PHYSICAL_ADDRESS);
-        if (initiatedByCec || !mAutoTvOff) {
+        if (initiatedByCec || !mAutoTvOff || !wasActiveSource) {
             return;
         }
         switch (standbyAction) {
