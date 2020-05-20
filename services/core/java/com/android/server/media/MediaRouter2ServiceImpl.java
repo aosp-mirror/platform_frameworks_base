@@ -808,14 +808,11 @@ class MediaRouter2ServiceImpl {
                 userRecord.mHandler, manager));
 
         for (RouterRecord routerRecord : userRecord.mRouterRecords) {
-            // TODO: Do not use notifyPreferredFeaturesChangedToManagers since it updates all
-            // managers. Instead, Notify only to the manager that is currently being registered.
-
             // TODO: UserRecord <-> routerRecord, why do they reference each other?
             // How about removing mUserRecord from routerRecord?
             routerRecord.mUserRecord.mHandler.sendMessage(
-                    obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
-                        routerRecord.mUserRecord.mHandler, routerRecord));
+                    obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManager,
+                        routerRecord.mUserRecord.mHandler, routerRecord, manager));
         }
     }
 
@@ -1925,6 +1922,17 @@ class MediaRouter2ServiceImpl {
                     Slog.w(TAG, "notifySessionInfosChangedToManagers: "
                             + "failed to notify. Manager probably died.", ex);
                 }
+            }
+        }
+
+        private void notifyPreferredFeaturesChangedToManager(@NonNull RouterRecord routerRecord,
+                @NonNull IMediaRouter2Manager manager) {
+            try {
+                manager.notifyPreferredFeaturesChanged(routerRecord.mPackageName,
+                        routerRecord.mDiscoveryPreference.getPreferredFeatures());
+            } catch (RemoteException ex) {
+                Slog.w(TAG, "Failed to notify preferred features changed."
+                        + " Manager probably died.", ex);
             }
         }
 
