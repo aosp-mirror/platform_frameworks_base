@@ -390,11 +390,11 @@ public class NotifCollection implements Dumpable {
         if (entry == null) {
             // A new notification!
             entry = new NotificationEntry(sbn, ranking, SystemClock.uptimeMillis());
+            mEventQueue.add(new InitEntryEvent(entry));
             mEventQueue.add(new BindEntryEvent(entry, sbn));
             mNotificationSet.put(sbn.getKey(), entry);
 
             mLogger.logNotifPosted(sbn.getKey());
-            mEventQueue.add(new InitEntryEvent(entry));
             mEventQueue.add(new EntryAddedEvent(entry));
 
         } else {

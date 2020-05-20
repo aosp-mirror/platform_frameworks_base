@@ -210,6 +210,28 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testAddNotification_noDuplicateEntriesCreated() {
+        // GIVEN a notification has been added
+        mEntryManager.addNotification(mSbn, mRankingMap);
+
+        // WHEN the same notification is added multiple times before the previous entry (with
+        // the same key) didn't finish inflating
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        mEntryManager.addNotification(mSbn, mRankingMap);
+        mEntryManager.addNotification(mSbn, mRankingMap);
+
+        // THEN getAllNotifs() only contains exactly one notification with this key
+        int count = 0;
+        for (NotificationEntry entry : mEntryManager.getAllNotifs()) {
+            if (entry.getKey().equals(mSbn.getKey())) {
+                count++;
+            }
+        }
+        assertEquals("Should only be one entry with key=" + mSbn.getKey() + " in mAllNotifs. "
+                        + "Instead there are " + count, 1, count);
+    }
+
+    @Test
     public void testAddNotification_setsUserSentiment() {
         mEntryManager.addNotification(mSbn, mRankingMap);
 
