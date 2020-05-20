@@ -1531,7 +1531,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
 
-    ActivityStack getRootTask() {
+    @Nullable ActivityStack getRootTask() {
         final Task task = getTask();
         if (task != null) {
             return (ActivityStack) task.getRootTask();
@@ -2549,7 +2549,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final Task task = getTask();
             if (task != null) {
                 task.getDimBounds(mTmpRect);
-            } else {
+            } else if (getRootTask() != null) {
                 getRootTask().getDimBounds(mTmpRect);
             }
         }
