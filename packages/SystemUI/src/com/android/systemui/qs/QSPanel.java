@@ -361,9 +361,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mHost != null) {
             mHost.removeCallback(this);
         }
+        if (mTileLayout != null) {
+            mTileLayout.setListening(false);
+        }
         for (TileRecord record : mRecords) {
             record.tile.removeCallbacks();
         }
+        mRecords.clear();
         if (mBrightnessMirrorController != null) {
             mBrightnessMirrorController.removeCallback(this);
         }
