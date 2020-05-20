@@ -440,6 +440,7 @@ message Atom {
             273 [(module) = "permissioncontroller"];
         EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
         AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
+        TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -447,7 +448,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10083
+    // Next: 10084
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -540,6 +541,8 @@ message Atom {
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
         DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
+        BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
+                10083 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -6042,6 +6045,12 @@ message PackageNotificationChannelPreferences {
     optional int32 user_locked_fields = 6;
     // Indicates if the channel was deleted by the app.
     optional bool is_deleted = 7;
+    // Indicates if the channel was marked as a conversation by the app.
+    optional bool is_conversation = 8;
+    // Indicates if the channel is a conversation that was demoted by the user.
+    optional bool is_demoted_conversation = 9;
+    // Indicates if the channel is a conversation that was marked as important by the user.
+    optional bool is_important_conversation = 10;
 }
 
 /**
@@ -9181,6 +9190,28 @@ message SdkExtensionStatus {
 }
 
 /**
+ * Logs when a tune occurs through device's Frontend.
+ * This is atom ID 276.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/tv/tuner/Tuner.java
+ */
+message TvTunerStateChanged {
+    enum State {
+        UNKNOWN = 0;
+        TUNING = 1; // Signal is tuned
+        LOCKED = 2;    // the signal is locked
+        NOT_LOCKED = 3; // the signal isn’t locked.
+        SIGNAL_LOST = 4; // the signal was locked, but is lost now.
+        SCANNING = 5; // the signal is scanned
+        SCAN_STOPPED = 6; // the scan is stopped.
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    //  new state
+    optional State state = 2;
+}
+/**
  * Logs when an app is frozen or unfrozen.
  *
  * Logged from:
@@ -9815,4 +9846,26 @@ message AudioPowerUsageDataReported {
         RECORD_TYPE = 7;  // other recording
     }
     optional AudioType type = 4;
+}
+
+/**
+  * Pulls bytes transferred over WiFi and mobile networks sliced by uid, is_metered, and tag.
+  *
+  * Pulled from:
+  *   StatsPullAtomService, which uses NetworkStatsService to query NetworkStats.
+  */
+message BytesTransferByTagAndMetered {
+    optional int32 uid = 1 [(is_uid) = true];
+
+    optional bool is_metered = 2;
+
+    optional int32 tag = 3;
+
+    optional int64 rx_bytes = 4;
+
+    optional int64 rx_packets = 5;
+
+    optional int64 tx_bytes = 6;
+
+    optional int64 tx_packets = 7;
 }

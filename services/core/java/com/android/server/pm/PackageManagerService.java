@@ -3183,7 +3183,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            final int cachedSystemApps = PackageParser.sCachedPackageReadCount.get();
+            final int cachedSystemApps = PackageCacher.sCachedPackageReadCount.get();
 
             // Remove any shared userIDs that have no associated packages
             mSettings.pruneSharedUsersLPw();
@@ -3317,7 +3317,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // This must be done last to ensure all stubs are replaced or disabled.
                 installSystemStubPackages(stubSystemApps, scanFlags);
 
-                final int cachedNonSystemApps = PackageParser.sCachedPackageReadCount.get()
+                final int cachedNonSystemApps = PackageCacher.sCachedPackageReadCount.get()
                                 - cachedSystemApps;
 
                 final long dataScanTime = SystemClock.uptimeMillis() - systemScanTime - startTime;
@@ -13228,7 +13228,9 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private void enforceCanSetPackagesSuspendedAsUser(String callingPackage, int callingUid,
             int userId, String callingMethod) {
-        if (callingUid == Process.ROOT_UID || callingUid == Process.SYSTEM_UID) {
+        if (callingUid == Process.ROOT_UID
+                // Need to compare app-id to allow system dialogs access on secondary users
+                || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return;
         }
 

@@ -37,6 +37,7 @@ public final class PinResult implements Parcelable {
             PIN_RESULT_TYPE_SUCCESS,
             PIN_RESULT_TYPE_INCORRECT,
             PIN_RESULT_TYPE_FAILURE,
+            PIN_RESULT_TYPE_ABORTED,
     })
     public @interface PinResultType {}
 
@@ -54,6 +55,11 @@ public final class PinResult implements Parcelable {
      * Indicates that the pin attempt was a failure.
      */
     public static final int PIN_RESULT_TYPE_FAILURE = PhoneConstants.PIN_GENERAL_FAILURE;
+
+    /**
+     * Indicates that the pin attempt was aborted.
+     */
+    public static final int PIN_RESULT_TYPE_ABORTED = PhoneConstants.PIN_OPERATION_ABORTED;
 
     private static final PinResult sFailedResult =
             new PinResult(PinResult.PIN_RESULT_TYPE_FAILURE, -1);

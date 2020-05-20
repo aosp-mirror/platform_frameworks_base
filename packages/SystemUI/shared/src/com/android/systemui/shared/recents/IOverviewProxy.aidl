@@ -16,6 +16,7 @@
 
 package com.android.systemui.shared.recents;
 
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -69,4 +70,9 @@ oneway interface IOverviewProxy {
      * Sent when some system ui state changes.
      */
     void onSystemUiStateChanged(int stateFlags) = 16;
+
+    /**
+     * Sent when the split screen is resized
+     */
+    void onSplitScreenSecondaryBoundsChanged(in Rect bounds, in Rect insets) = 17;
 }

@@ -45,7 +45,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.TextUtils;
-import android.util.Log;
+import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
@@ -58,7 +58,8 @@ import java.util.Objects;
 // TODO: check thread safety. We may need to use lock to protect variables.
 class SystemMediaRoute2Provider extends MediaRoute2Provider {
     private static final String TAG = "MR2SystemProvider";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    // TODO(b/156996903): Revert it when releasing the framework.
+    private static final boolean DEBUG = true;
 
     static final String DEFAULT_ROUTE_ID = "DEFAULT_ROUTE";
     static final String DEVICE_ROUTE_ID = "DEVICE_ROUTE";
@@ -269,7 +270,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
                 builder.addRoute(route);
             }
         }
-        setProviderState(builder.build());
+        MediaRoute2ProviderInfo providerInfo = builder.build();
+        setProviderState(providerInfo);
+        if (DEBUG) {
+            Slog.d(TAG, "Updating system provider info : " + providerInfo);
+        }
     }
 
     /**
@@ -327,6 +332,9 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             if (Objects.equals(oldSessionInfo, newSessionInfo)) {
                 return false;
             } else {
+                if (DEBUG) {
+                    Slog.d(TAG, "Updating system routing session info : " + newSessionInfo);
+                }
                 mSessionInfos.clear();
                 mSessionInfos.add(newSessionInfo);
                 mDefaultSessionInfo = new RoutingSessionInfo.Builder(

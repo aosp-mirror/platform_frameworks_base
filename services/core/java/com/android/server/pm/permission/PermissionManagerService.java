@@ -124,6 +124,7 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.os.RoSystemProperties;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
@@ -154,6 +155,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -421,6 +423,10 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) {
+            return;
+        }
+
         mContext.getSystemService(PermissionControllerManager.class).dump(fd, args);
     }
 
@@ -2473,12 +2479,59 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         }
 
         final PermissionsState permissionsState = ps.getPermissionsState();
-        PermissionsState origPermissions = permissionsState;
 
         final int[] currentUserIds = UserManagerService.getInstance().getUserIds();
 
         boolean runtimePermissionsRevoked = false;
         int[] updatedUserIds = EMPTY_INT_ARRAY;
+
+        for (int userId : currentUserIds) {
+            if (permissionsState.isMissing(userId)) {
+                Collection<String> requestedPermissions;
+                int targetSdkVersion;
+                if (!ps.isSharedUser()) {
+                    requestedPermissions = pkg.getRequestedPermissions();
+                    targetSdkVersion = pkg.getTargetSdkVersion();
+                } else {
+                    requestedPermissions = new ArraySet<>();
+                    targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
+                    List<AndroidPackage> packages = ps.getSharedUser().getPackages();
+                    int packagesSize = packages.size();
+                    for (int i = 0; i < packagesSize; i++) {
+                        AndroidPackage sharedUserPackage = packages.get(i);
+                        requestedPermissions.addAll(sharedUserPackage.getRequestedPermissions());
+                        targetSdkVersion = Math.min(targetSdkVersion,
+                                sharedUserPackage.getTargetSdkVersion());
+                    }
+                }
+
+                for (String permissionName : requestedPermissions) {
+                    BasePermission permission = mSettings.getPermission(permissionName);
+                    if (Objects.equals(permission.getSourcePackageName(), PLATFORM_PACKAGE_NAME)
+                            && permission.isRuntime() && !permission.isRemoved()) {
+                        if (permission.isHardOrSoftRestricted()
+                                || permission.isImmutablyRestricted()) {
+                            permissionsState.updatePermissionFlags(permission, userId,
+                                    PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT,
+                                    PackageManager.FLAG_PERMISSION_RESTRICTION_UPGRADE_EXEMPT);
+                        }
+                        if (targetSdkVersion < Build.VERSION_CODES.M) {
+                            permissionsState.updatePermissionFlags(permission, userId,
+                                    PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                                            | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT,
+                                    PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED
+                                            | PackageManager.FLAG_PERMISSION_REVOKED_COMPAT);
+                            permissionsState.grantRuntimePermission(permission, userId);
+                        }
+                    }
+                }
+
+                permissionsState.setMissing(false, userId);
+                updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
+            }
+        }
+
+        PermissionsState origPermissions = permissionsState;
 
         boolean changedInstallPermission = false;
 
