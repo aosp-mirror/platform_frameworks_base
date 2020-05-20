@@ -147,6 +147,7 @@ public class MediaControlPanel {
         if (mSeekBarObserver != null) {
             mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
         }
+        mSeekBarViewModel.onDestroy();
     }
 
     private void loadDimens() {
