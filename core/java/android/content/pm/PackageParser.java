@@ -127,7 +127,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Parser for package files (APKs) on disk. This supports apps packaged either
@@ -238,11 +237,6 @@ public class PackageParser {
     }
 
     public static final boolean LOG_UNSAFE_BROADCASTS = false;
-
-    /**
-     * Total number of packages that were read from the cache.  We use it only for logging.
-     */
-    public static final AtomicInteger sCachedPackageReadCount = new AtomicInteger();
 
     // Set of broadcast actions that are safe for manifest receivers
     public static final Set<String> SAFE_BROADCASTS = new ArraySet<>();

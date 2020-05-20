@@ -26,8 +26,8 @@ class MediaHost @Inject constructor(
     /**
      * Get the current Media state. This also updates the location on screen
      */
-    val currentState : MediaState
-        get () {
+    val currentState: MediaState
+        get() {
             hostView.getLocationOnScreen(tmpLocationOnScreen)
             var left = tmpLocationOnScreen[0] + hostView.paddingLeft
             var top = tmpLocationOnScreen[1] + hostView.paddingTop
@@ -37,11 +37,11 @@ class MediaHost @Inject constructor(
             // the above could return negative widths, which is wrong
             if (right < left) {
                 left = 0
-                right = 0;
+                right = 0
             }
             if (bottom < top) {
                 bottom = 0
-                top = 0;
+                top = 0
             }
             state.boundsOnScreen.set(left, top, right, bottom)
             return state
@@ -64,7 +64,7 @@ class MediaHost @Inject constructor(
      *                 transitions.
      */
     fun init(@MediaLocation location: Int) {
-        this.location = location;
+        this.location = location
         hostView = mediaHierarchyManager.register(this)
         hostView.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View?) {
@@ -95,7 +95,7 @@ class MediaHost @Inject constructor(
         override var showsOnlyActiveMedia: Boolean = false
         override val boundsOnScreen: Rect = Rect()
 
-        override fun copy() : MediaState {
+        override fun copy(): MediaState {
             val mediaHostState = MediaHostState()
             mediaHostState.expansion = expansion
             mediaHostState.showsOnlyActiveMedia = showsOnlyActiveMedia
@@ -104,7 +104,7 @@ class MediaHost @Inject constructor(
             return mediaHostState
         }
 
-        override fun interpolate(other: MediaState, amount: Float) : MediaState {
+        override fun interpolate(other: MediaState, amount: Float): MediaState {
             val result = MediaHostState()
             result.expansion = MathUtils.lerp(expansion, other.expansion, amount)
             val left = MathUtils.lerp(boundsOnScreen.left.toFloat(),
@@ -121,10 +121,10 @@ class MediaHost @Inject constructor(
                 if (other is MediaHostState) {
                     result.measurementInput = other.measurementInput
                 }
-            }  else {
+            } else {
                 result.measurementInput
             }
-            return  result
+            return result
         }
 
         override fun getMeasuringInput(input: MeasurementInput): MediaMeasurementInput {
@@ -138,8 +138,8 @@ interface MediaState {
     var expansion: Float
     var showsOnlyActiveMedia: Boolean
     val boundsOnScreen: Rect
-    fun copy() : MediaState
-    fun interpolate(other: MediaState, amount: Float) : MediaState
+    fun copy(): MediaState
+    fun interpolate(other: MediaState, amount: Float): MediaState
     fun getMeasuringInput(input: MeasurementInput): MediaMeasurementInput
 }
 /**
@@ -147,7 +147,8 @@ interface MediaState {
  */
 data class MediaMeasurementInput(
     private val viewInput: MeasurementInput,
-    val expansion: Float) : MeasurementInput by viewInput {
+    val expansion: Float
+) : MeasurementInput by viewInput {
 
     override fun sameAs(input: MeasurementInput?): Boolean {
         if (!(input is MediaMeasurementInput)) {
@@ -156,4 +157,3 @@ data class MediaMeasurementInput(
         return width == input.width && expansion == input.expansion
     }
 }
-

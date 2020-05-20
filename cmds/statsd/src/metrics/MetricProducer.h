@@ -459,6 +459,7 @@ protected:
     FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithMap);
     FRIEND_TEST(CountMetricE2eTest, TestMultipleSlicedStates);
     FRIEND_TEST(CountMetricE2eTest, TestSlicedStateWithPrimaryFields);
+    FRIEND_TEST(CountMetricE2eTest, TestInitialConditionChanges);
 
     FRIEND_TEST(DurationMetricE2eTest, TestOneBucket);
     FRIEND_TEST(DurationMetricE2eTest, TestTwoBuckets);
@@ -488,6 +489,7 @@ protected:
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
+    FRIEND_TEST(ValueMetricE2eTest, TestInitialConditionChanges);
 };
 
 }  // namespace statsd

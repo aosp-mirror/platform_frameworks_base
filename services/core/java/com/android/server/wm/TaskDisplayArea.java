@@ -1461,16 +1461,23 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return mChildren.get(index);
     }
 
+    @Nullable
+    ActivityStack getOrCreateRootHomeTask() {
+        return getOrCreateRootHomeTask(false /* onTop */);
+    }
+
     /**
      * Returns the existing home stack or creates and returns a new one if it should exist for the
      * display.
+     * @param onTop Only be used when there is no existing home stack. If true the home stack will
+     *              be created at the top of the display, else at the bottom.
      */
     @Nullable
-    ActivityStack getOrCreateRootHomeTask() {
+    ActivityStack getOrCreateRootHomeTask(boolean onTop) {
         ActivityStack homeTask = getRootHomeTask();
         if (homeTask == null && mDisplayContent.supportsSystemDecorations()
                 && !mDisplayContent.isUntrustedVirtualDisplay()) {
-            homeTask = createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, false /* onTop */);
+            homeTask = createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, onTop);
         }
         return homeTask;
     }

@@ -21,5 +21,5 @@
           android:width="12dp"
           android:height="12dp"
           android:start="4dp"
-          android:end="4dp" />
+          android:end="0dp" />
 </layer-list>
