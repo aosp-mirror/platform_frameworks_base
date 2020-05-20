@@ -47,6 +47,7 @@ import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.text.SpannableString;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -151,8 +152,11 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 NotificationChannel.DEFAULT_CHANNEL_ID, TEST_CHANNEL_NAME,
                 IMPORTANCE_LOW);
         mDefaultNotificationChannelSet.add(mDefaultNotificationChannel);
+        Notification n = new Notification.Builder(mContext, mNotificationChannel.getId())
+                .setContentTitle(new SpannableString("title"))
+                .build();
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
-                new Notification(), UserHandle.CURRENT, null, 0);
+                n, UserHandle.CURRENT, null, 0);
         mEntry = new NotificationEntryBuilder().setSbn(mSbn).build();
     }
 
@@ -173,6 +177,23 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         final TextView textView = mInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
         assertEquals(VISIBLE, mInfo.findViewById(R.id.header).getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_SetsName() {
+        mInfo.bindNotification(
+                mMockPackageManager,
+                mMockINotificationManager,
+                mChannelEditorDialogController,
+                TEST_PACKAGE_NAME,
+                mNotificationChannel,
+                mNotificationChannelSet,
+                mEntry,
+                null,
+                true,
+                false);
+        final TextView textView = mInfo.findViewById(R.id.name);
+        assertTrue(textView.getText().toString().contains("title"));
     }
 
     @Test
