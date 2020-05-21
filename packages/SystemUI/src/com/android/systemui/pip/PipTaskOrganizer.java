@@ -426,7 +426,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
         final PictureInPictureParams newParams = info.pictureInPictureParams;
-        if (!applyPictureInPictureParams(newParams)) {
+        if (newParams == null || !applyPictureInPictureParams(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
             return;
         }
