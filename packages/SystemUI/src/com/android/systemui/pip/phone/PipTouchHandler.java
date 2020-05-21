@@ -197,6 +197,7 @@ public class PipTouchHandler {
             if (topPipActivity.first != null) {
                 MetricsLoggerWrapper.logPictureInPictureDismissByTap(mContext, topPipActivity);
             }
+            mTouchState.removeDoubleTapTimeoutCallback();
             mMotionHelper.dismissPip();
         }
 
@@ -297,7 +298,7 @@ public class PipTouchHandler {
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
                 mHandler.post(() -> {
-                    mMotionHelper.animateDismiss(0, 0, null);
+                    mMotionHelper.animateDismiss();
                     hideDismissTarget();
                 });
 
