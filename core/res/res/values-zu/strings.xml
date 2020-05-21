@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Ukuphrinta kukhutshazwe nge-<xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Vula iphrofayela yakho yomsebenzi"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Izinhlelo zakho zokusebenza zomuntu siqu zivinjelwe kuze kube yilapho uvula iphrofayela yakho yomsebenzi"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Izinhlelo zakho zokusebenza zomuntu siqu zizovinjelwa kusasa"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Izinhlelo zokusebenza zomuntu siqu zizovinjelwa ngomhla ka-<xliff:g id="DATE">%1$s</xliff:g> ngo-<xliff:g id="TIME">%2$s</xliff:g>. Iphrofayela yakho yomsebenzi ingahlala ivaliwe izinsuku ezingaphezu kwezi-<xliff:g id="NUMBER">%3$d</xliff:g>."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Vula iphrofayela yomsebenzi"</string>
     <string name="me" msgid="6207584824693813140">"Mina"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Okukhethwa kukho kwethebhulethi"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Ivumela uhlelo lwakho lokusebenza ukuthi lilungise iqoqo lakho lesithombe."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"funda izindawo kusukela kuqoqo lakho lemidiya"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Ivumela uhlelo lokusebenza ukuthi lifunde izindawo kusukela kuqoqo lakho lemidiya."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Qinisekisa ukuthi unguwe"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Qinisekisa ukuthi nguwe"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"I-Biometric hardware ayitholakali"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Ukufakazela ubuqiniso kukhanseliwe"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Akwaziwa"</string>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Iyahlola <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Ukubuyekeza okuqukethwe kwamanje"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Okusha <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"I-<xliff:g id="NAME">%s</xliff:g> ayisebenzi"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Thepha ukuze usethe"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Kungase kudingeke ukuthi ufomethe kabusha idivayisi. Thepha ukuze ukhiphe."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Ukuze kudluliselwe izithombe nemidiya"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Inkinga ngo-<xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"I-<xliff:g id="NAME">%s</xliff:g> ayisebenzi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Thepha ukuze ulungise"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> yonakele. Khetha ukulungisa."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Kungase kudingeke ukuthi ufomethe kabusha idivayisi. Thepha ukuze ukhiphe."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Akusekelwe <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"I-<xliff:g id="NAME">%s</xliff:g> ayisebenzi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Le divayisi ayisekeli le <xliff:g id="NAME">%s</xliff:g>. Thepha ukuze usethe ngefomethi esekelwayo."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Le divayisi ayisekeli le <xliff:g id="NAME">%s</xliff:g>. Khetha ukuze usethe ngefomethi esekelwayo."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Le divayisi ayisekeli le <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Kungase kudingeke ukuthi ufomethe kabusha idivayisi"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"I-<xliff:g id="NAME">%s</xliff:g> isuswe ngokungalindelekile"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Khipha imidiya ngaphambi kokususa ukuze ugweme ukulahlekelwa okuqukethwe"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> ususiwe"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Uvula izici zokufinyelela?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ukubambela phansi bobabili okhiye bevolumu amasekhondi ambalwa kuvula izici zokufinyelela. Lokhu kungashintsha indlela idivayisi yakho esebenza ngayo.\n\nIzici zamanje:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nUngashintsha izici ezikhethiwe Kuzilungiselelo &gt; Ukufinyeleleka."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Uvula i-TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ukubambela phansi bobabili okhiye bevolumu amasekhondi ambalwa kuvula i-TalkBack, isifundi sesikrini esiwusizo kubantu abayizimpumputhe noma abanamehlo aluvindi. I-TalkBack ikushintsha ngokuphelele ukusebenza kwedivayisi yakho.\n\nUngashintshela lesi sinqamuleli kwesinye isici Kuzilungiselelo &gt; Ukufinyeleleka."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Vula i-<xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ukubambela phansi bobabili okhiye bevolumu amasekhondi ambalwa kuvula i-<xliff:g id="SERVICE">%1$s</xliff:g>, eyisici sokufinyelela Lokhu kungashintsha indlela idivayisi yakho esebenza ngayo.\n\nUngashintshela lesi sinqamuleli kwesinye isici Kuzilungiselelo &gt; Ukufinyeleleka."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Vula"</string>

@@ -206,7 +206,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Tlač zakázala aplikácia <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Zapnite svoj pracovný profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše osobné aplikácie sú zablokované, dokým nezapnete svoj pracovný profil"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Vaše osobné aplikácie budú zajtra zablokované"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Zapnúť pracovný profil"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabletu"</string>
@@ -542,7 +543,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Umožňuje aplikácii upravovať zbierku fotiek."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"čítať polohy zo zbierky médií"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Umožňuje aplikácii čítať polohy zo zbierky médií."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Overte, že ste to vy"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Overenie, že ste to vy"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrický hardvér nie je k dispozícii"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Overenie bolo zrušené"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nerozpoznané"</string>
@@ -550,7 +551,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nie je nastavený PIN, vzor ani heslo"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Podarilo sa rozpoznať iba časť odtlačku prsta. Skúste to znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Odtlačok prsta sa nepodarilo spracovať. Skúste to znova."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Snímač odtlačkov prstov je špinavý. Vyčistite ho a skúste to znova."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Očistite senzor odtlačkov prstov a skúste to znova."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Pohli ste prstom príliš rýchlo. Skúste to znova."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Pohli ste prstom príliš pomaly. Skúste to znova."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1381,17 +1382,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Kontroluje sa <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Kontrola aktuálneho obsahu"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nové médium <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Klepnutím médium nastavte"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Zariadenie možno bude potrebné preformátovať. Klepnutím ho vysuniete."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Na prenos fotiek a médií"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problém s médiom <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Problém odstránite klepnutím"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Médium <xliff:g id="NAME">%s</xliff:g> je poškodené. Vyberte ho a vyriešte problém."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Zariadenie možno bude potrebné preformátovať. Klepnutím ho vysuniete."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepodporované úložisko <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Toto zariadenie nepodporuje úložisko <xliff:g id="NAME">%s</xliff:g>. Klepnutím ho nastavíte v podporovanom formáte."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Toto zariadenie nepodporuje médium <xliff:g id="NAME">%s</xliff:g>. Vyberte ho a nastavte v podporovanom formáte."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Zariadenie nepodporuje toto médium <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Zariadenie možno bude potrebné preformátovať"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Úl. <xliff:g id="NAME">%s</xliff:g> bolo neočakávane odobraté"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Pred odobratím médium najskôr odpojte, aby ste zabránili strate obsahu"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Médium <xliff:g id="NAME">%s</xliff:g> bolo odobraté"</string>
@@ -1669,8 +1673,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Chcete zapnúť funkcie dostupnosti?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Pridržaním oboch klávesov hlasitosti na niekoľko sekúnd zapnete funkcie dostupnosti. Môže sa tým zmeniť spôsob fungovania vášho zariadenia.\n\nAktuálne funkcie:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVybrané funkcie môžete zmeniť v časti Nastavenia &gt; Dostupnosť."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Chcete zapnúť TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Pridržaním oboch klávesov hlasitosti na niekoľko sekúnd zapnete čítačku obrazovky TalkBack, ktorá pomáha nevidomým alebo slabozrakým. TalkBack úplne zmení spôsob fungovania vášho zariadenia.\n\nTúto skratku môžete zmeniť na inú funkciu v časti Nastavenia &gt; Dostupnosť."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Chcete zapnúť <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Pridržaním oboch klávesov hlasitosti na niekoľko sekúnd zapnete funkciu dostupnosti <xliff:g id="SERVICE">%1$s</xliff:g>. Môže sa tým zmeniť spôsob fungovania vášho zariadenia.\n\nTúto skratku môžete zmeniť na inú funkciu v časti Nastavenia &gt; Dostupnosť."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Zapnúť"</string>
@@ -1895,7 +1897,7 @@
     </plurals>
     <string name="zen_mode_until" msgid="2250286190237669079">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"Do <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (ďalší budík)"</string>
-    <string name="zen_mode_forever" msgid="740585666364912448">"Dokiaľ túto funkciu nevypnete"</string>
+    <string name="zen_mode_forever" msgid="740585666364912448">"Dokým funkciu nevypnete"</string>
     <string name="zen_mode_forever_dnd" msgid="3423201955704180067">"Dokiaľ nevypnete režim bez vyrušení"</string>
     <string name="zen_mode_rule_name_combination" msgid="7174598364351313725">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="8009920446193610996">"Zbaliť"</string>
@@ -1946,7 +1948,7 @@
     <string name="search_language_hint" msgid="7004225294308793583">"Zadajte názov jazyka"</string>
     <string name="language_picker_section_suggested" msgid="6556199184638990447">"Navrhované"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"Všetky jazyky"</string>
-    <string name="region_picker_section_all" msgid="756441309928774155">"Všetky regióny"</string>
+    <string name="region_picker_section_all" msgid="756441309928774155">"Všetky oblasti"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"Vyhľadávanie"</string>
     <string name="app_suspended_title" msgid="888873445010322650">"Aplikácia nie je k dispozícii"</string>
     <string name="app_suspended_default_message" msgid="6451215678552004172">"Aplikácia <xliff:g id="APP_NAME_0">%1$s</xliff:g> nie je momentálne k dispozícii. Spravuje to aplikácia <xliff:g id="APP_NAME_1">%2$s</xliff:g>."</string>

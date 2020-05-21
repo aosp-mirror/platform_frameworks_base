@@ -94,7 +94,7 @@
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS सन्देशहरू"</string>
     <string name="notification_channel_voice_mail" msgid="8457433203106654172">"भ्वाइस मेल सन्देशहरू"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"Wi-Fi कल"</string>
-    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को स्थिति"</string>
+    <string name="notification_channel_sim" msgid="5098802350325677490">"SIM को अवस्था"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"उच्च प्राथमिकता रहेको SIM को स्थिति"</string>
     <string name="peerTtyModeFull" msgid="337553730440832160">"सहकर्मी अनुरोध गरियो। TTY मोड पूर्ण"</string>
     <string name="peerTtyModeHco" msgid="5626377160840915617">"सहकर्मी अनुरोध गरियो। TTY मोड HCO"</string>
@@ -202,7 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ले छाप्ने कार्यलाई असक्षम पार्यो।"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"आफ्नो कार्य प्रोफाइल सक्रिय गर्नुहोस्"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"तपाईंले आफ्नो कार्य प्रोफाइल सक्रिय नगरुन्जेल तपाईंका व्यक्तिगत अनुप्रयोगहरूलाई रोक लगाइन्छ"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"तपाईंका व्यक्तिगत अनुप्रयोगहरूलाई भोलि रोक लगाइने छ"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"कार्यसम्बन्धी प्रोफाइल सक्रिय गर्नुहोस्"</string>
     <string name="me" msgid="6207584824693813140">"मलाई"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ट्याब्लेट विकल्पहरू"</string>
@@ -536,7 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"यसले एपलाई तपाईंको तस्बिरको सङ्ग्रह परिमार्जन गर्न दिन्छ।"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"आफ्नो मिडियाको सङ्ग्रहका स्थानहरू पढ्नुहोस्‌"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"यसले एपलाई तपाईंको मिडिया सङ्ग्रहका स्थानहरू पढ्न दिन्छ।"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"यो तपाईं नै हो भन्ने पुष्टि गर्नुहोस्"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"यो व्यक्ति तपाईं नै हो भन्ने प्रमाणित गर्नुहोस्"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"बायोमेट्रिक हार्डवेयर उपलब्ध छैन"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"प्रमाणीकरण रद्द गरियो"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"पहिचान भएन"</string>
@@ -1347,17 +1348,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"जाँच गर्दै <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"हालको सामग्री समीक्षा गर्दै"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"नयाँ <xliff:g id="NAME">%s</xliff:g> पत्ता लाग्यो"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"सेटअप गर्न ट्याप गर्नुहोस्"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"तपाईंले यो यन्त्र पुनः फर्म्याट गर्नु पर्ने हुन सक्छ। यो यन्त्र हटाउन ट्याप गर्नुहोस्।"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"तस्बिरहरू र मिडिया स्थानान्तरणका लागि"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> मा समस्या देखियो"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"समस्या समाधान गर्न ट्याप गर्नुहोस्"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> बिग्रेको छ। समाधान गर्न चयन गर्नुहोस्।"</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"तपाईंले यो यन्त्र पुनः फर्म्याट गर्नु पर्ने हुन सक्छ। यो यन्त्र हटाउन ट्याप गर्नुहोस्।"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"असमर्थित <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ले काम गरिरहेको छैन"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"यस यन्त्रले यस <xliff:g id="NAME">%s</xliff:g> लाई समर्थन गर्दैन। एक समर्थित ढाँचामा सेटअप गर्न ट्याप गर्नुहोस्।"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"यो यन्त्रले यस <xliff:g id="NAME">%s</xliff:g> लाई समर्थन गर्दैन। एक समर्थित ढाँचामा सेटअप गर्न चयन गर्नुहोस्।"</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"यो यन्त्रमा यो <xliff:g id="NAME">%s</xliff:g> चल्दैन।"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"तपाईंले यो यन्त्र पुनः फर्म्याट गर्नु पर्ने हुन सक्छ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> अप्रत्याशित रूपमा निकालियो"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"सामग्री गुम्न नदिनका लागि मिडिया हटाउनुअघि त्यसलाई इजेक्ट गर्नुहोस्"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> हटाइयो"</string>
@@ -1631,8 +1635,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"पहुँचसम्बन्धी सुविधाहरू सक्रिय गर्ने हो?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुले पहुँचसम्बन्धी सुविधाहरू सक्रिय गर्छ। यसले तपाईंको यन्त्रले काम गर्ने तरिका परिवर्तन गर्न सक्छ।\n\nहालका सुविधाहरू:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतपाईं सेटिङ &gt; पहुँचमा गएर चयन गरिएका सुविधाहरू परिवर्तन गर्न सक्नुहुन्छ।"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack सक्रिय गर्ने हो?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुले TalkBack सक्रिय गर्छ। यो दृष्टिविहीन वा दृष्टि कमजोर भएका मान्छेहरूका लागि उपयोगी हुने एउटा स्क्रिन रिडर हो। TalkBack ले तपाईंको यन्त्रले काम गर्ने तरिका पूर्णतया परिवर्तन गर्छ।\n\nतपाईं सेटिङ &gt; पहुँचमा गई यो सर्टकटमार्फत अर्को सुविधा खुल्ने बनाउन सक्नुहुन्छ।"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्ने हो?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुले <xliff:g id="SERVICE">%1$s</xliff:g> नामक पहुँचसम्बन्धी सुविधा  सक्रिय गर्छ। यसले तपाईंको यन्त्रले काम गर्ने तरिका परिवर्तन गर्न सक्छ।\n\nतपाईं सेटिङ &gt; पहुँचमा गई यो सर्टकटमार्फत अर्को सुविधा खुल्ने बनाउन सक्नुहुन्छ।"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"सक्रिय गरियोस्"</string>
