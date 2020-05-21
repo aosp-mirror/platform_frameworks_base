@@ -29,6 +29,7 @@ import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_CON
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_DISMISS_FRACTION;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_MENU_STATE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_SHOW_MENU_WITH_DELAY;
+import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_SHOW_RESIZE_HANDLE;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_STACK_BOUNDS;
 import static com.android.systemui.pip.phone.PipMenuActivityController.EXTRA_WILL_RESIZE_MENU;
 import static com.android.systemui.pip.phone.PipMenuActivityController.MENU_STATE_CLOSE;
@@ -119,6 +120,7 @@ public class PipMenuActivity extends Activity {
     private LinearLayout mActionsGroup;
     private View mSettingsButton;
     private View mDismissButton;
+    private View mResizeHandle;
     private int mBetweenActionPaddingLand;
 
     private AnimatorSet mMenuContainerAnimator;
@@ -142,7 +144,8 @@ public class PipMenuActivity extends Activity {
                             data.getParcelable(EXTRA_STACK_BOUNDS),
                             data.getBoolean(EXTRA_ALLOW_TIMEOUT),
                             data.getBoolean(EXTRA_WILL_RESIZE_MENU),
-                            data.getBoolean(EXTRA_SHOW_MENU_WITH_DELAY));
+                            data.getBoolean(EXTRA_SHOW_MENU_WITH_DELAY),
+                            data.getBoolean(EXTRA_SHOW_RESIZE_HANDLE));
                     break;
                 }
                 case MESSAGE_POKE_MENU:
@@ -212,6 +215,8 @@ public class PipMenuActivity extends Activity {
                 expandPip();
             }
         });
+        mResizeHandle = findViewById(R.id.resize_handle);
+        mResizeHandle.setAlpha(0);
         mActionsGroup = findViewById(R.id.actions_group);
         mBetweenActionPaddingLand = getResources().getDimensionPixelSize(
                 R.dimen.pip_between_action_padding_land);
@@ -342,7 +347,7 @@ public class PipMenuActivity extends Activity {
     }
 
     private void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean resizeMenuOnShow, boolean withDelay) {
+            boolean resizeMenuOnShow, boolean withDelay, boolean showResizeHandle) {
         mAllowMenuTimeout = allowMenuTimeout;
         if (mMenuState != menuState) {
             // Disallow touches if the menu needs to resize while showing, and we are transitioning
@@ -363,10 +368,14 @@ public class PipMenuActivity extends Activity {
                     mSettingsButton.getAlpha(), 1f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 1f);
+            ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
+                    mResizeHandle.getAlpha(), menuState == MENU_STATE_CLOSE && showResizeHandle
+                            ? 1f : 0f);
             if (menuState == MENU_STATE_FULL) {
-                mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim);
+                mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,
+                        resizeAnim);
             } else {
-                mMenuContainerAnimator.playTogether(dismissAnim);
+                mMenuContainerAnimator.playTogether(dismissAnim, resizeAnim);
             }
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_IN);
             mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
@@ -418,7 +427,9 @@ public class PipMenuActivity extends Activity {
                     mSettingsButton.getAlpha(), 0f);
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 0f);
-            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim);
+            ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
+                    mResizeHandle.getAlpha(), 0f);
+            mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim, resizeAnim);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
             mMenuContainerAnimator.setDuration(animate ? MENU_FADE_DURATION : 0);
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
@@ -463,7 +474,9 @@ public class PipMenuActivity extends Activity {
             boolean allowMenuTimeout = intent.getBooleanExtra(EXTRA_ALLOW_TIMEOUT, true);
             boolean willResizeMenu = intent.getBooleanExtra(EXTRA_WILL_RESIZE_MENU, false);
             boolean withDelay = intent.getBooleanExtra(EXTRA_SHOW_MENU_WITH_DELAY, false);
-            showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay);
+            boolean showResizeHandle = intent.getBooleanExtra(EXTRA_SHOW_RESIZE_HANDLE, false);
+            showMenu(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
+                    showResizeHandle);
         }
     }
 
