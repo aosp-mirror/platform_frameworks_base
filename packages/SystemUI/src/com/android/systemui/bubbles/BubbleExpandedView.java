@@ -250,6 +250,7 @@ public class BubbleExpandedView extends LinearLayout {
 
         mPointerDrawable = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, true /* pointUp */));
+        mPointerDrawable.setTint(Color.WHITE);
         mPointerView.setBackground(mPointerDrawable);
         mPointerView.setVisibility(INVISIBLE);
 
@@ -311,14 +312,10 @@ public class BubbleExpandedView extends LinearLayout {
 
     void applyThemeAttrs() {
         final TypedArray ta = mContext.obtainStyledAttributes(
-                new int[] {
-                        android.R.attr.colorBackgroundFloating,
-                        android.R.attr.dialogCornerRadius});
-        int bgColor = ta.getColor(0, Color.WHITE);
-        float cornerRadius = ta.getDimensionPixelSize(1, 0);
+                new int[] {android.R.attr.dialogCornerRadius});
+        float cornerRadius = ta.getDimensionPixelSize(0, 0);
         ta.recycle();
 
-        mPointerDrawable.setTint(bgColor);
         if (mActivityView != null && ScreenDecorationsUtils.supportsRoundedCornersOnWindows(
                 mContext.getResources())) {
             mActivityView.setCornerRadius(cornerRadius);
