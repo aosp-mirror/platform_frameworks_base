@@ -51,6 +51,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.database.ContentObserver;
@@ -2934,11 +2935,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     public class AccessibilityDisplayListener implements DisplayManager.DisplayListener {
         private final DisplayManager mDisplayManager;
         private final ArrayList<Display> mDisplaysList = new ArrayList<>();
+        private int mSystemUiUid = 0;
 
         AccessibilityDisplayListener(Context context, MainHandler handler) {
             mDisplayManager = (DisplayManager) context.getSystemService(Context.DISPLAY_SERVICE);
             mDisplayManager.registerDisplayListener(this, handler);
             initializeDisplayList();
+
+            final PackageManagerInternal pm =
+                    LocalServices.getService(PackageManagerInternal.class);
+            if (pm != null) {
+                mSystemUiUid = pm.getPackageUid(pm.getSystemUiServiceComponent().getPackageName(),
+                        PackageManager.MATCH_SYSTEM_ONLY, mCurrentUserId);
+            }
         }
 
         ArrayList<Display> getValidDisplayList() {
@@ -3034,8 +3043,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
             // Private virtual displays are created by the ap and is not allowed to access by other
             // aps. We assume we could ignore them.
+            // The exceptional case is for bubbles. Because the bubbles use the activityView, and
+            // the virtual display of the activityView is private, so if the owner UID of the
+            // private virtual display is the one of system ui which creates the virtual display of
+            // bubbles, then this private virtual display should track the windows.
             if (display.getType() == Display.TYPE_VIRTUAL
-                    && (display.getFlags() & Display.FLAG_PRIVATE) != 0) {
+                    && (display.getFlags() & Display.FLAG_PRIVATE) != 0
+                    && display.getOwnerUid() != mSystemUiUid) {
                 return false;
             }
             return true;
