@@ -34,6 +34,7 @@ import android.hardware.camera2.legacy.LegacyMetadataMapper;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.CameraIdAndSessionConfiguration;
 import android.hardware.camera2.utils.ConcurrentCameraIdCombination;
+import android.hardware.display.DisplayManager;
 import android.os.Binder;
 import android.os.DeadObjectException;
 import android.os.Handler;
@@ -47,7 +48,6 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Size;
 import android.view.Display;
-import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -349,19 +349,22 @@ public final class CameraManager {
         Size ret = new Size(0, 0);
 
         try {
-            WindowManager windowManager =
-                    (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
-            Display display = windowManager.getDefaultDisplay();
+            DisplayManager displayManager =
+                    (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+            Display display = displayManager.getDisplay(Display.DEFAULT_DISPLAY);
+            if (display != null) {
+                int width = display.getWidth();
+                int height = display.getHeight();
 
-            int width = display.getWidth();
-            int height = display.getHeight();
+                if (height > width) {
+                    height = width;
+                    width = display.getHeight();
+                }
 
-            if (height > width) {
-                height = width;
-                width = display.getHeight();
+                ret = new Size(width, height);
+            } else {
+                Log.e(TAG, "Invalid default display!");
             }
-
-            ret = new Size(width, height);
         } catch (Exception e) {
             Log.e(TAG, "getDisplaySize Failed. " + e.toString());
         }
