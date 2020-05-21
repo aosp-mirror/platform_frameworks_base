@@ -758,6 +758,7 @@
         <!-- used to override dark/light theming -->
         <item name="*android:colorBackgroundFloating">@color/GM2_grey_800</item>
         <item name="*android:colorPopupBackground">@color/GM2_grey_800</item>
+        <item name="*android:dialogCornerRadius">8dp</item>
     </style>
 
     <style name="TextAppearance.ControlSetup">
