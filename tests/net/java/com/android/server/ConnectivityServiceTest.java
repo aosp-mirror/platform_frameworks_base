@@ -5486,6 +5486,8 @@ public class ConnectivityServiceTest {
         assertFalse(nc.hasTransport(TRANSPORT_WIFI));
         // For safety reasons a VPN without underlying networks is considered metered.
         assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_METERED));
+        // A VPN without underlying networks is not suspended.
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         // Connect cell and use it as an underlying network.
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
