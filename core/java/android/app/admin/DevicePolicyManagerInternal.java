@@ -217,4 +217,9 @@ public abstract class DevicePolicyManagerInternal {
      */
     public abstract void broadcastIntentToCrossProfileManifestReceiversAsUser(Intent intent,
             UserHandle parentHandle, boolean requiresPermission);
+
+    /**
+     * Returns the profile owner component for the given user, or {@code null} if there is not one.
+     */
+    public abstract ComponentName getProfileOwnerAsUser(int userHandle);
 }
