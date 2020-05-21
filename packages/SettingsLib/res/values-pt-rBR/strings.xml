@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Média"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muito rápida"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirado"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Expirada"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconectado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
@@ -554,4 +554,6 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Ativado"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"É necessário reinicializar o dispositivo para que a mudança seja aplicada. Faça isso agora ou cancele."</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"App <xliff:g id="APP_NAME">%s</xliff:g> de trabalho"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

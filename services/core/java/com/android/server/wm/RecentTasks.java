@@ -1387,9 +1387,7 @@ class RecentTasks {
         return false;
     }
 
-    /**
-     * @return whether the given task can be trimmed even if it is outside the visible range.
-     */
+    /** @return whether the given task can be trimmed even if it is outside the visible range. */
     protected boolean isTrimmable(Task task) {
         final ActivityStack stack = task.getStack();
 
@@ -1404,9 +1402,13 @@ class RecentTasks {
             return false;
         }
 
+        final ActivityStack rootHomeTask = stack.getDisplayArea().getRootHomeTask();
+        // Home stack does not exist. Don't trim the task.
+        if (rootHomeTask == null) {
+            return false;
+        }
         // Trim tasks that are behind the home task.
-        final TaskDisplayArea taskDisplayArea = stack.getDisplayArea();
-        return task.compareTo(taskDisplayArea.getRootHomeTask()) < 0;
+        return task.compareTo(rootHomeTask) < 0;
     }
 
     /** Remove the tasks that user may not be able to return. */

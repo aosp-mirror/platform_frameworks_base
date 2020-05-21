@@ -61,6 +61,7 @@ import androidx.annotation.NonNull;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.notification.collection.coalescer.CoalescedEvent;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
@@ -126,6 +127,7 @@ public class NotifCollection implements Dumpable {
     private final IStatusBarService mStatusBarService;
     private final FeatureFlags mFeatureFlags;
     private final NotifCollectionLogger mLogger;
+    private final LogBufferEulogizer mEulogizer;
 
     private final Map<String, NotificationEntry> mNotificationSet = new ArrayMap<>();
     private final Collection<NotificationEntry> mReadOnlyNotificationSet =
@@ -146,10 +148,12 @@ public class NotifCollection implements Dumpable {
             IStatusBarService statusBarService,
             DumpManager dumpManager,
             FeatureFlags featureFlags,
-            NotifCollectionLogger logger) {
+            NotifCollectionLogger logger,
+            LogBufferEulogizer logBufferEulogizer) {
         Assert.isMainThread();
         mStatusBarService = statusBarService;
         mLogger = logger;
+        mEulogizer = logBufferEulogizer;
         dumpManager.registerDumpable(TAG, this);
         mFeatureFlags = featureFlags;
     }
@@ -223,7 +227,8 @@ public class NotifCollection implements Dumpable {
 
             requireNonNull(stats);
             if (entry != mNotificationSet.get(entry.getKey())) {
-                throw new IllegalStateException("Invalid entry: " + entry.getKey());
+                throw mEulogizer.record(
+                        new IllegalStateException("Invalid entry: " + entry.getKey()));
             }
 
             if (entry.getDismissState() == DISMISSED) {
@@ -367,8 +372,11 @@ public class NotifCollection implements Dumpable {
 
         final NotificationEntry entry = mNotificationSet.get(sbn.getKey());
         if (entry == null) {
-            throw new IllegalStateException("No notification to remove with key " + sbn.getKey());
+            throw mEulogizer.record(
+                    new IllegalStateException("No notification to remove with key "
+                            + sbn.getKey()));
         }
+
         entry.mCancellationReason = reason;
         tryRemoveNotification(entry);
         applyRanking(rankingMap);
@@ -390,11 +398,11 @@ public class NotifCollection implements Dumpable {
         if (entry == null) {
             // A new notification!
             entry = new NotificationEntry(sbn, ranking, SystemClock.uptimeMillis());
+            mEventQueue.add(new InitEntryEvent(entry));
             mEventQueue.add(new BindEntryEvent(entry, sbn));
             mNotificationSet.put(sbn.getKey(), entry);
 
             mLogger.logNotifPosted(sbn.getKey());
-            mEventQueue.add(new InitEntryEvent(entry));
             mEventQueue.add(new EntryAddedEvent(entry));
 
         } else {
@@ -426,12 +434,15 @@ public class NotifCollection implements Dumpable {
      */
     private boolean tryRemoveNotification(NotificationEntry entry) {
         if (mNotificationSet.get(entry.getKey()) != entry) {
-            throw new IllegalStateException("No notification to remove with key " + entry.getKey());
+            throw mEulogizer.record(
+                    new IllegalStateException("No notification to remove with key "
+                            + entry.getKey()));
         }
 
         if (!isCanceled(entry)) {
-            throw new IllegalStateException("Cannot remove notification " + entry.getKey()
-                        + ": has not been marked for removal");
+            throw mEulogizer.record(
+                    new IllegalStateException("Cannot remove notification " + entry.getKey()
+                            + ": has not been marked for removal"));
         }
 
         if (isDismissedByUser(entry)) {
@@ -501,11 +512,11 @@ public class NotifCollection implements Dumpable {
         checkForReentrantCall();
 
         if (!entry.mLifetimeExtenders.remove(extender)) {
-            throw new IllegalStateException(
+            throw mEulogizer.record(new IllegalStateException(
                     String.format(
                             "Cannot end lifetime extension for extender \"%s\" (%s)",
                             extender.getName(),
-                            extender));
+                            extender)));
         }
 
         mLogger.logLifetimeExtensionEnded(
@@ -581,11 +592,11 @@ public class NotifCollection implements Dumpable {
         checkForReentrantCall();
 
         if (!entry.mDismissInterceptors.remove(interceptor)) {
-            throw new IllegalStateException(
+            throw mEulogizer.record(new IllegalStateException(
                     String.format(
                             "Cannot end dismiss interceptor for interceptor \"%s\" (%s)",
                             interceptor.getName(),
-                            interceptor));
+                            interceptor)));
         }
 
         if (!isDismissIntercepted(entry)) {
@@ -608,7 +619,7 @@ public class NotifCollection implements Dumpable {
 
     private void checkForReentrantCall() {
         if (mAmDispatchingToOtherCode) {
-            throw new IllegalStateException("Reentrant call detected");
+            throw mEulogizer.record(new IllegalStateException("Reentrant call detected"));
         }
     }
 

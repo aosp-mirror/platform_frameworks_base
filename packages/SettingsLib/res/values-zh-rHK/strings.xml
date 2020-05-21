@@ -222,7 +222,7 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"裝置指紋：<xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"連線失敗"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"請確認<xliff:g id="DEVICE_NAME">%1$s</xliff:g> 已連線至相同的網絡。"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"與裝置配對"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"配對裝置"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi-Fi 配對碼"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"配對失敗"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"請確認裝置已連線至相同的網絡。"</string>
@@ -452,7 +452,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"正在快速充電"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"正在慢速充電"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"非充電中"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已插入電源插座，但目前無法充電"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"已連接電源插頭，但目前無法充電"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"電量已滿"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"已由管理員停用"</string>
     <string name="disabled" msgid="8017887509554714950">"已停用"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"已停用"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已啟用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"您的裝置必須重新開機，才能套用此變更。請立即重新開機或取消。"</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"工作設定檔入面嘅「<xliff:g id="APP_NAME">%s</xliff:g>」"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

@@ -42,7 +42,7 @@
     <string name="connected_via_app" msgid="3532267661404276584">"<xliff:g id="NAME">%1$s</xliff:g> арқылы жалғанған"</string>
     <string name="available_via_passpoint" msgid="1716000261192603682">"%1$s арқылы қолжетімді"</string>
     <string name="tap_to_sign_up" msgid="5356397741063740395">"Тіркелу үшін түртіңіз."</string>
-    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Интернетпен байланыс жоқ."</string>
+    <string name="wifi_connected_no_internet" msgid="5087420713443350646">"Интернетпен байланыс жоқ"</string>
     <string name="private_dns_broken" msgid="1984159464346556931">"Жеке DNS серверіне кіру мүмкін емес."</string>
     <string name="wifi_limited_connection" msgid="1184778285475204682">"Шектеулі байланыс"</string>
     <string name="wifi_status_no_internet" msgid="3799933875988829048">"Интернетпен байланыс жоқ"</string>
@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Орташа"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Жылдам"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Өте жылдам"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Мерзімі өтті."</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Мерзімі өтті"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Ажыратылған"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Ажыратылуда…"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Өшірулі"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Қосулы"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Бұл өзгеріс күшіне енуі үшін, құрылғыны қайта жүктеу керек. Қазір қайта жүктеңіз не бас тартыңыз."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (жұмыс)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>
