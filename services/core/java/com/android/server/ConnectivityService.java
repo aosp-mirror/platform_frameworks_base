@@ -3087,23 +3087,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
         @Override
         public void notifyDataStallSuspected(DataStallReportParcelable p) {
-            final PersistableBundle extras = new PersistableBundle();
-            switch (p.detectionMethod) {
-                case DETECTION_METHOD_DNS_EVENTS:
-                    extras.putInt(KEY_DNS_CONSECUTIVE_TIMEOUTS, p.dnsConsecutiveTimeouts);
-                    break;
-                case DETECTION_METHOD_TCP_METRICS:
-                    extras.putInt(KEY_TCP_PACKET_FAIL_RATE, p.tcpPacketFailRate);
-                    extras.putInt(KEY_TCP_METRICS_COLLECTION_PERIOD_MILLIS,
-                            p.tcpMetricsCollectionPeriodMillis);
-                    break;
-                default:
-                    log("Unknown data stall detection method, ignoring: " + p.detectionMethod);
-                    return;
-            }
-
-            proxyDataStallToConnectivityDiagnosticsHandler(
-                    p.detectionMethod, mNetId, p.timestampMillis, extras);
+            ConnectivityService.this.notifyDataStallSuspected(p, mNetId);
         }
 
         @Override
@@ -3117,11 +3101,31 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
     }
 
-    private void proxyDataStallToConnectivityDiagnosticsHandler(int detectionMethod, int netId,
-            long timestampMillis, @NonNull PersistableBundle extras) {
+    private void notifyDataStallSuspected(DataStallReportParcelable p, int netId) {
+        final PersistableBundle extras = new PersistableBundle();
+        switch (p.detectionMethod) {
+            case DETECTION_METHOD_DNS_EVENTS:
+                extras.putInt(KEY_DNS_CONSECUTIVE_TIMEOUTS, p.dnsConsecutiveTimeouts);
+                break;
+            case DETECTION_METHOD_TCP_METRICS:
+                extras.putInt(KEY_TCP_PACKET_FAIL_RATE, p.tcpPacketFailRate);
+                extras.putInt(KEY_TCP_METRICS_COLLECTION_PERIOD_MILLIS,
+                        p.tcpMetricsCollectionPeriodMillis);
+                break;
+            default:
+                // TODO(b/156294356): update for new data stall detection methods
+                log("Unknown data stall detection method, ignoring: " + p.detectionMethod);
+                return;
+        }
+
+        notifyDataStallSuspected(p.detectionMethod, netId, p.timestampMillis, extras);
+    }
+
+    private void notifyDataStallSuspected(int detectionMethod, int netId, long timestampMillis,
+            @NonNull PersistableBundle extras) {
         final Message msg = mConnectivityDiagnosticsHandler.obtainMessage(
-                    ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED,
-                    detectionMethod, netId, timestampMillis);
+                ConnectivityDiagnosticsHandler.EVENT_DATA_STALL_SUSPECTED, detectionMethod, netId,
+                timestampMillis);
         msg.setData(new Bundle(extras));
 
         // NetworkStateTrackerHandler currently doesn't take any actions based on data
@@ -8185,7 +8189,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 + "creators");
         }
 
-        proxyDataStallToConnectivityDiagnosticsHandler(
-                detectionMethod, network.netId, timestampMillis, extras);
+        notifyDataStallSuspected(detectionMethod, network.netId, timestampMillis, extras);
     }
 }
