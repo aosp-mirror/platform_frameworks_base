@@ -27,17 +27,18 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.ChooserActivity;
+import com.android.server.people.data.AppUsageStatsData;
 import com.android.server.people.data.DataManager;
 import com.android.server.people.data.Event;
 
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /** Ranking scorer for Sharesheet targets. */
 class SharesheetModelScorer {
@@ -50,8 +51,8 @@ class SharesheetModelScorer {
     private static final float RECENCY_SCORE_SUBSEQUENT_DECAY = 0.02F;
     private static final long ONE_MONTH_WINDOW = TimeUnit.DAYS.toMillis(30);
     private static final long FOREGROUND_APP_PROMO_TIME_WINDOW = TimeUnit.MINUTES.toMillis(10);
+    private static final float USAGE_STATS_CHOOSER_SCORE_INITIAL_DECAY = 0.9F;
     private static final float FREQUENTLY_USED_APP_SCORE_INITIAL_DECAY = 0.3F;
-    private static final float FREQUENTLY_USED_APP_SCORE_DECAY = 0.9F;
     @VisibleForTesting
     static final float FOREGROUND_APP_WEIGHT = 0F;
     @VisibleForTesting
@@ -192,14 +193,16 @@ class SharesheetModelScorer {
             targetsList.add(index, shareTarget);
         }
         promoteForegroundApp(shareTargetMap, dataManager, callingUserId);
-        promoteFrequentlyUsedApps(shareTargetMap, targetsLimit, dataManager, callingUserId);
+        promoteMostChosenAndFrequentlyUsedApps(shareTargetMap, targetsLimit, dataManager,
+                callingUserId);
     }
 
     /**
-     * Promotes frequently used sharing apps, if recommended apps based on sharing history have not
-     * reached the limit (e.g. user did not share any content in last couple weeks)
+     * Promotes frequently chosen sharing apps and frequently used sharing apps as per
+     * UsageStatsManager, if recommended apps based on sharing history have not reached the limit
+     * (e.g. user did not share any content in last couple weeks)
      */
-    private static void promoteFrequentlyUsedApps(
+    private static void promoteMostChosenAndFrequentlyUsedApps(
             Map<String, List<ShareTargetPredictor.ShareTarget>> shareTargetMap, int targetsLimit,
             @NonNull DataManager dataManager, @UserIdInt int callingUserId) {
         int validPredictionNum = 0;
@@ -217,39 +220,50 @@ class SharesheetModelScorer {
             return;
         }
         long now = System.currentTimeMillis();
-        Map<String, Integer> appLaunchCountsMap = dataManager.queryAppLaunchCount(
-                callingUserId, now - ONE_MONTH_WINDOW, now, shareTargetMap.keySet());
-        List<Pair<String, Integer>> appLaunchCounts = new ArrayList<>();
-        minValidScore *= FREQUENTLY_USED_APP_SCORE_INITIAL_DECAY;
-        for (Map.Entry<String, Integer> entry : appLaunchCountsMap.entrySet()) {
-            if (entry.getValue() > 0) {
-                appLaunchCounts.add(new Pair(entry.getKey(), entry.getValue()));
+        Map<String, AppUsageStatsData> appStatsMap =
+                dataManager.queryAppUsageStats(
+                        callingUserId, now - ONE_MONTH_WINDOW, now, shareTargetMap.keySet());
+        // Promotes frequently chosen sharing apps as per UsageStatsManager.
+        minValidScore = promoteApp(shareTargetMap, appStatsMap, AppUsageStatsData::getChosenCount,
+                USAGE_STATS_CHOOSER_SCORE_INITIAL_DECAY * minValidScore, minValidScore);
+        // Promotes frequently used sharing apps as per UsageStatsManager.
+        promoteApp(shareTargetMap, appStatsMap, AppUsageStatsData::getLaunchCount,
+                FREQUENTLY_USED_APP_SCORE_INITIAL_DECAY * minValidScore, minValidScore);
+    }
+
+    private static float promoteApp(
+            Map<String, List<ShareTargetPredictor.ShareTarget>> shareTargetMap,
+            Map<String, AppUsageStatsData> appStatsMap,
+            Function<AppUsageStatsData, Integer> countFunc, float baseScore, float minValidScore) {
+        int maxCount = 0;
+        for (AppUsageStatsData data : appStatsMap.values()) {
+            maxCount = Math.max(maxCount, countFunc.apply(data));
+        }
+        if (maxCount > 0) {
+            for (Map.Entry<String, AppUsageStatsData> entry : appStatsMap.entrySet()) {
+                if (!shareTargetMap.containsKey(entry.getKey())) {
+                    continue;
+                }
+                ShareTargetPredictor.ShareTarget target = shareTargetMap.get(entry.getKey()).get(0);
+                if (target.getScore() > 0f) {
+                    continue;
+                }
+                float curScore = baseScore * countFunc.apply(entry.getValue()) / maxCount;
+                target.setScore(curScore);
+                if (curScore > 0) {
+                    minValidScore = Math.min(minValidScore, curScore);
+                }
+                if (DEBUG) {
+                    Slog.d(TAG, String.format(
+                            "SharesheetModel: promote as per AppUsageStats packageName: %s, "
+                                    + "className: %s, total:%.2f",
+                            target.getAppTarget().getPackageName(),
+                            target.getAppTarget().getClassName(),
+                            target.getScore()));
+                }
             }
         }
-        Collections.sort(appLaunchCounts, (p1, p2) -> -Integer.compare(p1.second, p2.second));
-        for (Pair<String, Integer> entry : appLaunchCounts) {
-            if (!shareTargetMap.containsKey(entry.first)) {
-                continue;
-            }
-            ShareTargetPredictor.ShareTarget target = shareTargetMap.get(entry.first).get(0);
-            if (target.getScore() > 0f) {
-                continue;
-            }
-            target.setScore(minValidScore);
-            minValidScore *= FREQUENTLY_USED_APP_SCORE_DECAY;
-            if (DEBUG) {
-                Slog.d(TAG, String.format(
-                        "SharesheetModel: promoteFrequentUsedApps packageName: %s, className: %s,"
-                                + " total:%.2f",
-                        target.getAppTarget().getPackageName(),
-                        target.getAppTarget().getClassName(),
-                        target.getScore()));
-            }
-            validPredictionNum++;
-            if (validPredictionNum == targetsLimit) {
-                return;
-            }
-        }
+        return minValidScore;
     }
 
     /**

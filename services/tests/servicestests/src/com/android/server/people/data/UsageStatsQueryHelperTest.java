@@ -34,6 +34,7 @@ import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.Context;
 import android.content.LocusId;
+import android.util.ArrayMap;
 
 import androidx.test.InstrumentationRegistry;
 
@@ -196,39 +197,42 @@ public final class UsageStatsQueryHelperTest {
     }
 
     @Test
-    public void testQueryAppLaunchCount() {
-
-        UsageStats packageStats1 = createUsageStats(PKG_NAME_1, 2);
-        UsageStats packageStats2 = createUsageStats(PKG_NAME_1, 3);
-        UsageStats packageStats3 = createUsageStats(PKG_NAME_2, 1);
+    public void testQueryAppUsageStats() {
+        UsageStats packageStats1 = createUsageStats(PKG_NAME_1, 2, createDummyChooserCounts());
+        UsageStats packageStats2 = createUsageStats(PKG_NAME_1, 3, null);
+        UsageStats packageStats3 = createUsageStats(PKG_NAME_2, 1, createDummyChooserCounts());
         when(mUsageStatsManagerInternal.queryUsageStatsForUser(anyInt(), anyInt(), anyLong(),
                 anyLong(), anyBoolean())).thenReturn(
                 List.of(packageStats1, packageStats2, packageStats3));
 
-        Map<String, Integer> appLaunchCounts = mHelper.queryAppLaunchCount(USER_ID_PRIMARY, 90_000L,
-                200_000L, Set.of(PKG_NAME_1, PKG_NAME_2));
+        Map<String, AppUsageStatsData> appLaunchChooserCountCounts =
+                mHelper.queryAppUsageStats(USER_ID_PRIMARY, 90_000L,
+                        200_000L, Set.of(PKG_NAME_1, PKG_NAME_2));
 
-        assertEquals(2, appLaunchCounts.size());
-        assertEquals(5, (long) appLaunchCounts.get(PKG_NAME_1));
-        assertEquals(1, (long) appLaunchCounts.get(PKG_NAME_2));
+        assertEquals(2, appLaunchChooserCountCounts.size());
+        assertEquals(4, (long) appLaunchChooserCountCounts.get(PKG_NAME_1).getChosenCount());
+        assertEquals(5, (long) appLaunchChooserCountCounts.get(PKG_NAME_1).getLaunchCount());
+        assertEquals(4, (long) appLaunchChooserCountCounts.get(PKG_NAME_2).getChosenCount());
+        assertEquals(1, (long) appLaunchChooserCountCounts.get(PKG_NAME_2).getLaunchCount());
     }
 
     @Test
-    public void testQueryAppLaunchCount_packageNameFiltered() {
-
-        UsageStats packageStats1 = createUsageStats(PKG_NAME_1, 2);
-        UsageStats packageStats2 = createUsageStats(PKG_NAME_1, 3);
-        UsageStats packageStats3 = createUsageStats(PKG_NAME_2, 1);
+    public void testQueryAppUsageStats_packageNameFiltered() {
+        UsageStats packageStats1 = createUsageStats(PKG_NAME_1, 2, createDummyChooserCounts());
+        UsageStats packageStats2 = createUsageStats(PKG_NAME_1, 3, createDummyChooserCounts());
+        UsageStats packageStats3 = createUsageStats(PKG_NAME_2, 1, null);
         when(mUsageStatsManagerInternal.queryUsageStatsForUser(anyInt(), anyInt(), anyLong(),
                 anyLong(), anyBoolean())).thenReturn(
                 List.of(packageStats1, packageStats2, packageStats3));
 
-        Map<String, Integer> appLaunchCounts = mHelper.queryAppLaunchCount(USER_ID_PRIMARY, 90_000L,
-                200_000L,
-                Set.of(PKG_NAME_1));
+        Map<String, AppUsageStatsData> appLaunchChooserCountCounts =
+                mHelper.queryAppUsageStats(USER_ID_PRIMARY, 90_000L,
+                        200_000L,
+                        Set.of(PKG_NAME_1));
 
-        assertEquals(1, appLaunchCounts.size());
-        assertEquals(5, (long) appLaunchCounts.get(PKG_NAME_1));
+        assertEquals(1, appLaunchChooserCountCounts.size());
+        assertEquals(8, (long) appLaunchChooserCountCounts.get(PKG_NAME_1).getChosenCount());
+        assertEquals(5, (long) appLaunchChooserCountCounts.get(PKG_NAME_1).getLaunchCount());
     }
 
     private void addUsageEvents(UsageEvents.Event... events) {
@@ -237,11 +241,25 @@ public final class UsageStatsQueryHelperTest {
                 anyInt())).thenReturn(usageEvents);
     }
 
-    private static UsageStats createUsageStats(String packageName, int launchCount) {
+    private static UsageStats createUsageStats(String packageName, int launchCount,
+            ArrayMap<String, ArrayMap<String, Integer>> chooserCounts) {
         UsageStats packageStats = new UsageStats();
         packageStats.mPackageName = packageName;
         packageStats.mAppLaunchCount = launchCount;
+        packageStats.mChooserCounts = chooserCounts;
         return packageStats;
+    }
+
+    private static ArrayMap<String, ArrayMap<String, Integer>> createDummyChooserCounts() {
+        ArrayMap<String, ArrayMap<String, Integer>> chooserCounts = new ArrayMap<>();
+        ArrayMap<String, Integer> counts1 = new ArrayMap<>();
+        counts1.put("text", 2);
+        counts1.put("image", 1);
+        chooserCounts.put("intent1", counts1);
+        ArrayMap<String, Integer> counts2 = new ArrayMap<>();
+        counts2.put("video", 1);
+        chooserCounts.put("intent2", counts2);
+        return chooserCounts;
     }
 
     private static <T> void addLocalServiceMock(Class<T> clazz, T mock) {
