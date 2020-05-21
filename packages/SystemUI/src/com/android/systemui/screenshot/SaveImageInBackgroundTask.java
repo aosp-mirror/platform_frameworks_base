@@ -331,7 +331,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         int requestCode = mContext.getUserId();
 
         // Create a edit action
-        PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
+        PendingIntent editAction = PendingIntent.getBroadcast(context, requestCode,
                 new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
                         .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, editIntent)
                         .putExtra(GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION,
@@ -341,7 +341,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_EDIT)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
+                PendingIntent.FLAG_CANCEL_CURRENT);
         Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
                 Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
                 r.getString(com.android.internal.R.string.screenshot_edit), editAction);
