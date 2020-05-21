@@ -17,21 +17,25 @@
 
 package com.android.internal.app;
 
+import static android.content.Context.ACTIVITY_SERVICE;
+
+import static com.android.internal.app.ResolverListAdapter.ResolveInfoPresentationGetter;
+
+import android.app.ActivityManager;
 import android.app.AlertDialog.Builder;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.ComponentName;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.UserHandle;
-import android.provider.Settings;
 
 import com.android.internal.R;
 import com.android.internal.app.chooser.DisplayResolveInfo;
+import com.android.internal.app.chooser.TargetInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,94 +45,53 @@ import java.util.List;
  */
 public class ResolverTargetActionsDialogFragment extends DialogFragment
         implements DialogInterface.OnClickListener {
-    private static final String NAME_KEY = "componentName";
-    private static final String TITLE_KEY = "title";
-    private static final String PINNED_KEY = "pinned";
-    private static final String USER_ID_KEY = "userId";
-
-    // Sync with R.array.resolver_target_actions_* resources
-    private static final int TOGGLE_PIN_INDEX = 0;
-    private static final int APP_INFO_INDEX = 1;
 
     private List<DisplayResolveInfo> mTargetInfos = new ArrayList<>();
-    private List<CharSequence> mLabels = new ArrayList<>();
-    private boolean[] mPinned;
+    private UserHandle mUserHandle;
 
     public ResolverTargetActionsDialogFragment() {
     }
 
-    public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name,
-            boolean pinned, UserHandle userHandle) {
-        Bundle args = new Bundle();
-        args.putCharSequence(TITLE_KEY, title);
-        args.putParcelable(NAME_KEY, name);
-        args.putBoolean(PINNED_KEY, pinned);
-        args.putParcelable(USER_ID_KEY, userHandle);
-        setArguments(args);
-    }
-
-    public ResolverTargetActionsDialogFragment(CharSequence title, ComponentName name,
-            List<DisplayResolveInfo> targets, List<CharSequence> labels, UserHandle userHandle) {
-        Bundle args = new Bundle();
-        args.putCharSequence(TITLE_KEY, title);
-        args.putParcelable(NAME_KEY, name);
-        args.putParcelable(USER_ID_KEY, userHandle);
+    public ResolverTargetActionsDialogFragment(List<DisplayResolveInfo> targets,
+            UserHandle userHandle) {
+        mUserHandle = userHandle;
         mTargetInfos = targets;
-        mLabels = labels;
-        setArguments(args);
     }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final Bundle args = getArguments();
-        final int itemRes = args.getBoolean(PINNED_KEY, false)
-                ? R.array.resolver_target_actions_unpin
-                : R.array.resolver_target_actions_pin;
-        String[] defaultActions = getResources().getStringArray(itemRes);
-        CharSequence[] items;
+        final PackageManager pm = getContext().getPackageManager();
 
-        if (mTargetInfos == null || mTargetInfos.size() < 2) {
-            items = defaultActions;
-        } else {
-            // Pin item for each sub-item
-            items = new CharSequence[mTargetInfos.size() + 1];
-            for (int i = 0; i < mTargetInfos.size(); i++) {
-                items[i] = mTargetInfos.get(i).isPinned()
-                         ? getResources().getString(R.string.unpin_specific_target, mLabels.get(i))
-                         : getResources().getString(R.string.pin_specific_target, mLabels.get(i));
-            }
-            // "App info"
-            items[mTargetInfos.size()] = defaultActions[1];
+        // Pin item for each sub-item
+        CharSequence[] items = new CharSequence[mTargetInfos.size()];
+        for (int i = 0; i < mTargetInfos.size(); i++) {
+            final TargetInfo ti = mTargetInfos.get(i);
+            final CharSequence label = ti.getResolveInfo().loadLabel(pm);
+            items[i] = ti.isPinned()
+                     ? getResources().getString(R.string.unpin_specific_target, label)
+                     : getResources().getString(R.string.pin_specific_target, label);
         }
 
+        // Use the matching application icon and label for the title, any TargetInfo will do
+        final ActivityManager am = (ActivityManager) getContext()
+                .getSystemService(ACTIVITY_SERVICE);
+        final int iconDpi = am.getLauncherLargeIconDensity();
+        final ResolveInfoPresentationGetter pg = new ResolveInfoPresentationGetter(getContext(),
+                iconDpi, mTargetInfos.get(0).getResolveInfo());
 
         return new Builder(getContext())
+                .setTitle(pg.getLabel())
+                .setIcon(pg.getIcon(mUserHandle))
                 .setCancelable(true)
                 .setItems(items, this)
-                .setTitle(args.getCharSequence(TITLE_KEY))
                 .create();
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        final Bundle args = getArguments();
-        ComponentName name = args.getParcelable(NAME_KEY);
-        if (which == 0 || (mTargetInfos.size() > 0 && which < mTargetInfos.size())) {
-            if (mTargetInfos == null || mTargetInfos.size() == 0) {
-                pinComponent(name);
-            } else {
-                pinComponent(mTargetInfos.get(which).getResolvedComponentName());
-            }
-            // Force the chooser to requery and resort things
-            ((ChooserActivity) getActivity()).handlePackagesChanged();
-        } else {
-            // Last item in dialog is App Info
-            Intent in = new Intent().setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                    .setData(Uri.fromParts("package", name.getPackageName(), null))
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT);
-            UserHandle userHandle = args.getParcelable(USER_ID_KEY);
-            getActivity().startActivityAsUser(in, userHandle);
-        }
+        pinComponent(mTargetInfos.get(which).getResolvedComponentName());
+        ((ChooserActivity) getActivity()).handlePackagesChanged();
         dismiss();
     }
 
