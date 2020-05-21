@@ -38,6 +38,7 @@ import androidx.annotation.VisibleForTesting;
 import com.android.systemui.BootCompleteCache;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
@@ -64,16 +65,16 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
 
     private boolean mAreActiveLocationRequests;
 
-    private ArrayList<LocationChangeCallback> mSettingsChangeCallbacks =
-            new ArrayList<LocationChangeCallback>();
-    private final H mHandler = new H();
+    private final H mHandler;
 
     @Inject
-    public LocationControllerImpl(Context context, @Background Looper bgLooper,
-            BroadcastDispatcher broadcastDispatcher, BootCompleteCache bootCompleteCache) {
+    public LocationControllerImpl(Context context, @Main Looper mainLooper,
+            @Background Looper bgLooper, BroadcastDispatcher broadcastDispatcher,
+            BootCompleteCache bootCompleteCache) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mBootCompleteCache = bootCompleteCache;
+        mHandler = new H(mainLooper);
 
         // Register to listen for changes in location settings.
         IntentFilter filter = new IntentFilter();
@@ -94,12 +95,12 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
      * Add a callback to listen for changes in location settings.
      */
     public void addCallback(LocationChangeCallback cb) {
-        mSettingsChangeCallbacks.add(cb);
+        mHandler.obtainMessage(H.MSG_ADD_CALLBACK, cb).sendToTarget();
         mHandler.sendEmptyMessage(H.MSG_LOCATION_SETTINGS_CHANGED);
     }
 
     public void removeCallback(LocationChangeCallback cb) {
-        mSettingsChangeCallbacks.remove(cb);
+        mHandler.obtainMessage(H.MSG_REMOVE_CALLBACK, cb).sendToTarget();
     }
 
     /**
@@ -208,6 +209,14 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
     private final class H extends Handler {
         private static final int MSG_LOCATION_SETTINGS_CHANGED = 1;
         private static final int MSG_LOCATION_ACTIVE_CHANGED = 2;
+        private static final int MSG_ADD_CALLBACK = 3;
+        private static final int MSG_REMOVE_CALLBACK = 4;
+
+        private ArrayList<LocationChangeCallback> mSettingsChangeCallbacks = new ArrayList<>();
+
+        H(Looper looper) {
+            super(looper);
+        }
 
         @Override
         public void handleMessage(Message msg) {
@@ -218,6 +227,13 @@ public class LocationControllerImpl extends BroadcastReceiver implements Locatio
                 case MSG_LOCATION_ACTIVE_CHANGED:
                     locationActiveChanged();
                     break;
+                case MSG_ADD_CALLBACK:
+                    mSettingsChangeCallbacks.add((LocationChangeCallback) msg.obj);
+                    break;
+                case MSG_REMOVE_CALLBACK:
+                    mSettingsChangeCallbacks.remove((LocationChangeCallback) msg.obj);
+                    break;
+
             }
         }
 
