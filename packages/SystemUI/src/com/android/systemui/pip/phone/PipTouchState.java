@@ -318,6 +318,14 @@ public class PipTouchState {
         return -1;
     }
 
+    /**
+     * Removes the timeout callback if it's in queue.
+     */
+    public void removeDoubleTapTimeoutCallback() {
+        mIsWaitingForDoubleTap = false;
+        mHandler.removeCallbacks(mDoubleTapTimeoutCallback);
+    }
+
     void addMovementToVelocityTracker(MotionEvent event) {
         if (mVelocityTracker == null) {
             return;
