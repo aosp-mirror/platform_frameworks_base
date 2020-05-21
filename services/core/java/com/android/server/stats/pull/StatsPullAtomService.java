@@ -32,6 +32,7 @@ import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
 import static android.util.MathUtils.abs;
 import static android.util.MathUtils.constrain;
 
+import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_TRUNCATE_TIMESTAMP;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
@@ -775,7 +776,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -955,7 +956,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -968,7 +969,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -981,7 +982,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -994,7 +995,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1064,7 +1065,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1095,7 +1096,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1126,7 +1127,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1156,7 +1157,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1189,7 +1190,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1217,7 +1218,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1243,7 +1244,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1295,7 +1296,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1333,7 +1334,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 /* metadata */ null,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1365,7 +1366,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1384,7 +1385,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1406,7 +1407,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1450,7 +1451,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1505,7 +1506,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1567,7 +1568,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1590,7 +1591,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1610,7 +1611,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1637,7 +1638,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1675,7 +1676,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1715,7 +1716,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1759,7 +1760,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1794,7 +1795,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1837,7 +1838,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1903,7 +1904,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1944,7 +1945,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -1988,7 +1989,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2092,7 +2093,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2102,7 +2103,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2160,7 +2161,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2170,7 +2171,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2246,7 +2247,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2280,7 +2281,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 /* PullAtomMetadata */ null,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2307,7 +2308,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2343,7 +2344,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2437,7 +2438,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2457,7 +2458,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2488,7 +2489,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2524,7 +2525,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2575,7 +2576,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 metadata,
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2613,7 +2614,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2640,7 +2641,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2699,7 +2700,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2792,7 +2793,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2819,7 +2820,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2869,7 +2870,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2925,7 +2926,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2979,7 +2980,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -2989,7 +2990,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3022,7 +3023,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3227,7 +3228,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3271,7 +3272,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3281,7 +3282,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3291,7 +3292,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3301,7 +3302,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3311,7 +3312,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3321,7 +3322,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3371,7 +3372,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
@@ -3408,7 +3409,7 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager.setPullAtomCallback(
                 tagId,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(),
+                DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
     }
