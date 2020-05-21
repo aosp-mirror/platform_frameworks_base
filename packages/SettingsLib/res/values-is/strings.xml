@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Miðlungshratt"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Hratt"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Mjög hratt"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Útrunninn"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Útrunnin"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Aftengt"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Aftengist…"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Sýna valkosti fyrir vottun þráðlausra skjáa"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Auka skráningarstig Wi-Fi, sýna RSSI fyrir hvert SSID í Wi-Fi vali"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Dregur úr rafhlöðunotkun og eykur netafköst"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Þessi rofi hefur eingöngu áhrif á slembival MAC-vistfanga fyrir biðlarastillingu.\nÞegar þessi stilling er virk geta öll netkerfi sem eru með slembival MAC-vistfanga virkt látið slembiraða MAC-vistföngum aftur við tengingu, allt eftir því hvenær biðlarinn aftengdist netinu síðast. Endurslembiröðun á sér ekki stað ef tækið tengist aftur innan fjögurra klukkustunda."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Þegar kveikt er á þessari stillingu gæti MAC-vistfang þessa tækis breyst í hvert sinn sem það tengist neti sem er með kveikt á slembivali MAC-vistfanga."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Mæld notkun"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Notkun ekki mæld"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Annálsritastærðir biðminna"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Sýna „Forrit svarar ekki“ fyrir bakgrunnsforrit"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Sýna viðvaranir tilkynningarásar"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Birtir viðvörun á skjánum þegar forrit birtir tilkynningu án gildrar rásar"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Þvinga flýtileiðir fyrir tilkynningar um samtöl"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Krefjast þess að flýtileiðir séu studdar af langvarandi deilingarflýtileið fyrir birtingu í samtalshluta"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Þvinga fram leyfi forrita í ytri geymslu"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Gerir öll forrit skrifanleg í ytra geymslurými, óháð gildum í upplýsingaskrá"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Þvinga breytanlega stærð virkni"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Ætti að endast til u.þ.b. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Til klukkan <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Rafhlaðan gæti tæmst kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Minna en <xliff:g id="THRESHOLD">%1$s</xliff:g> eftir"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Minna en <xliff:g id="THRESHOLD">%1$s</xliff:g> eftir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Meira en <xliff:g id="TIME_REMAINING">%1$s</xliff:g> eftir (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Meira en <xliff:g id="TIME_REMAINING">%1$s</xliff:g> eftir"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Síminn gæti slökkt á sér fljótlega"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Spjaldtölvan gæti slökkt á sér fljótlega"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Tækið gæti slökkt á sér fljótlega"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Bæta gesti við"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Fjarlægja gest"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gestur"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Sjálfgefin stilling tækis"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Slökkt"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Virkt"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Endurræsa þarf tækið til að þessi breyting taki gildi. Endurræstu núna eða hættu við."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> í vinnu"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

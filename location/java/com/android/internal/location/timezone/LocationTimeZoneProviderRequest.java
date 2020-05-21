@@ -19,16 +19,18 @@ package com.android.internal.location.timezone;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.WorkSource;
 
 import java.util.Objects;
 
 /**
- * An request passed to a location time zone provider to configure it.
+ * A request passed to a location time zone provider to configure it.
  *
  * @hide
  */
 public final class LocationTimeZoneProviderRequest implements Parcelable {
+
+    public static final LocationTimeZoneProviderRequest EMPTY_REQUEST =
+            new LocationTimeZoneProviderRequest(false);
 
     public static final Creator<LocationTimeZoneProviderRequest> CREATOR =
             new Creator<LocationTimeZoneProviderRequest>() {
@@ -45,21 +47,13 @@ public final class LocationTimeZoneProviderRequest implements Parcelable {
 
     /** Location time zone reporting is requested (true) */
     private final boolean mReportLocationTimeZone;
-    /** The WorkSource for power attribution. */
-    @NonNull private final WorkSource mWorkSource;
 
-    private LocationTimeZoneProviderRequest(boolean reportLocationTimeZone, WorkSource workSource) {
+    private LocationTimeZoneProviderRequest(boolean reportLocationTimeZone) {
         mReportLocationTimeZone = reportLocationTimeZone;
-        mWorkSource = Objects.requireNonNull(workSource);
     }
 
     public boolean getReportLocationTimeZone() {
         return mReportLocationTimeZone;
-    }
-
-    @NonNull
-    public WorkSource getWorkSource() {
-        return mWorkSource;
     }
 
     @Override
@@ -70,14 +64,12 @@ public final class LocationTimeZoneProviderRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeInt(mReportLocationTimeZone ? 1 : 0);
-        parcel.writeParcelable(mWorkSource, 0);
     }
 
     static LocationTimeZoneProviderRequest createFromParcel(Parcel in) {
         ClassLoader classLoader = LocationTimeZoneProviderRequest.class.getClassLoader();
         return new Builder()
                 .setReportLocationTimeZone(in.readInt() == 1)
-                .setWorkSource(in.readParcelable(classLoader))
                 .build();
     }
 
@@ -90,13 +82,12 @@ public final class LocationTimeZoneProviderRequest implements Parcelable {
             return false;
         }
         LocationTimeZoneProviderRequest that = (LocationTimeZoneProviderRequest) o;
-        return mReportLocationTimeZone == that.mReportLocationTimeZone
-                && mWorkSource.equals(that.mWorkSource);
+        return mReportLocationTimeZone == that.mReportLocationTimeZone;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mReportLocationTimeZone, mWorkSource);
+        return Objects.hash(mReportLocationTimeZone);
     }
 
     @Override
@@ -108,8 +99,6 @@ public final class LocationTimeZoneProviderRequest implements Parcelable {
         } else {
             s.append("OFF");
         }
-        s.append(",");
-        s.append("workSource=").append(mWorkSource);
         s.append(']');
         return s.toString();
     }
@@ -118,7 +107,6 @@ public final class LocationTimeZoneProviderRequest implements Parcelable {
     public static final class Builder {
 
         private boolean mReportLocationTimeZone;
-        private WorkSource mWorkSource;
 
         /**
          * Sets the property that enables / disables the provider. This is set to {@code false} by
@@ -129,19 +117,10 @@ public final class LocationTimeZoneProviderRequest implements Parcelable {
             return this;
         }
 
-        /**
-         * Sets the {@link WorkSource} to attribute the power usage to.
-         */
-        public Builder setWorkSource(@NonNull WorkSource workSource) {
-            mWorkSource = Objects.requireNonNull(workSource);
-            return this;
-        }
-
         /** Builds the {@link LocationTimeZoneProviderRequest} instance. */
         @NonNull
         public LocationTimeZoneProviderRequest build() {
-            return new LocationTimeZoneProviderRequest(this.mReportLocationTimeZone,
-                    this.mWorkSource);
+            return new LocationTimeZoneProviderRequest(this.mReportLocationTimeZone);
         }
     }
 }

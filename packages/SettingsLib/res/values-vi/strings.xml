@@ -205,9 +205,9 @@
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Cài đặt tên điểm truy cập không khả dụng cho người dùng này"</string>
     <string name="enable_adb" msgid="8072776357237289039">"Gỡ lỗi qua USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Bật chế độ gỡ lỗi khi kết nối USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Thu hồi ủy quyền gỡ lỗi USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Thu hồi các lượt ủy quyền gỡ lỗi qua USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Gỡ lỗi qua Wi-Fi"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Chế độ gỡ lỗi khi có kết nối Wi-Fi"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Bật chế độ gỡ lỗi khi có kết nối Wi-Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Lỗi"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Gỡ lỗi qua Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Để xem và sử dụng các thiết bị có sẵn, hãy bật tính năng gỡ lỗi qua Wi-Fi"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Hiển thị tùy chọn chứng nhận hiển thị không dây"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tăng mức ghi nhật ký Wi‑Fi, hiển thị mỗi SSID RSSI trong bộ chọn Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Giảm hao pin và cải thiện hiệu suất mạng"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Thao tác bật/tắt này chỉ ảnh hưởng đến hành vi tạo địa chỉ MAC ngẫu nhiên ở chế độ máy khách.\nKhi bạn kích hoạt chế độ này, tất cả các mạng đã bật tính năng tạo địa chỉ MAC ngẫu nhiên có thể tạo lại địa chỉ MAC ngẫu nhiên của chúng trong quá trình liên kết, tùy thuộc vào lần gần đây nhất máy khách ngắt kết nối với mạng. Các mạng này sẽ không thể tạo ngẫu nhiên lại nếu thiết bị kết nối lại trong vòng 4 giờ."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Khi bật chế độ này, địa chỉ MAC của thiết bị này có thể thay đổi mỗi lần thiết bị kết nối với mạng đã bật tính năng sử dụng địa chỉ MAC ngẫu nhiên."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Đo lượng dữ liệu"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Không đo lượng dữ liệu"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Kích thước bộ đệm của trình ghi nhật ký"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Hiện hộp thoại Ứng dụng không phản hồi cho các ứng dụng nền"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Hiện cảnh báo kênh thông báo"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Hiện cảnh báo trên màn hình khi ứng dụng đăng thông báo mà không có kênh hợp lệ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Áp dụng lối tắt cho thông báo của cuộc trò chuyện"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Để xuất hiện trong phần cuộc trò chuyện, thông báo phải có sự hỗ trợ của lối tắt chia sẻ lâu dài"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Buộc cho phép các ứng dụng trên bộ nhớ ngoài"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Cho phép ghi mọi ứng dụng đủ điều kiện vào bộ nhớ ngoài, bất kể giá trị tệp kê khai là gì"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Buộc các hoạt động có thể thay đổi kích thước"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Pin sẽ hết vào khoảng <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Cho đến <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Điện thoại có thể hết pin vào <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Còn chưa đến <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Còn chưa đến <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Còn hơn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Còn hơn <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Điện thoại có thể sắp tắt"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Máy tính bảng có thể sắp tắt"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Thiết bị có thể sắp tắt"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Thêm khách"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Xóa phiên khách"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Khách"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Cài đặt mặc định của thiết bị"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Đã tắt"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Đã bật"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Bạn phải khởi động lại thiết bị để áp dụng sự thay đổi này. Hãy khởi động lại ngay hoặc hủy."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> dành cho công việc"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

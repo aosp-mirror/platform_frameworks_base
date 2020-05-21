@@ -145,15 +145,16 @@ public class LocalMediaManager implements BluetoothCallback {
     /**
      * Connect the MediaDevice to transfer media
      * @param connectDevice the MediaDevice
+     * @return {@code true} if successfully call, otherwise return {@code false}
      */
-    public void connectDevice(MediaDevice connectDevice) {
+    public boolean connectDevice(MediaDevice connectDevice) {
         MediaDevice device = null;
         synchronized (mMediaDevicesLock) {
             device = getMediaDeviceById(mMediaDevices, connectDevice.getId());
         }
         if (device == null) {
             Log.w(TAG, "connectDevice() connectDevice not in the list!");
-            return;
+            return false;
         }
         if (device instanceof BluetoothMediaDevice) {
             final CachedBluetoothDevice cachedDevice =
@@ -162,13 +163,13 @@ public class LocalMediaManager implements BluetoothCallback {
                 mOnTransferBluetoothDevice = connectDevice;
                 device.setState(MediaDeviceState.STATE_CONNECTING);
                 cachedDevice.connect();
-                return;
+                return true;
             }
         }
 
         if (device == mCurrentConnectedDevice) {
             Log.d(TAG, "connectDevice() this device all ready connected! : " + device.getName());
-            return;
+            return false;
         }
 
         if (mCurrentConnectedDevice != null) {
@@ -181,6 +182,7 @@ public class LocalMediaManager implements BluetoothCallback {
         } else {
             device.connect();
         }
+        return true;
     }
 
     void dispatchSelectedDeviceStateChanged(MediaDevice device, @MediaDeviceState int state) {

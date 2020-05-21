@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Невядома"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Карыстальнiк: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Усталяваны некаторыя стандартныя налады"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Параметры па змаўчанні не ўсталяваныя"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Стандартныя налады не зададзены"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Налады Text-to-speech"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Сінтэз маўлення"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Хуткасць маўлення"</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Выбраць профіль"</string>
     <string name="category_personal" msgid="6236798763159385225">"Асабісты"</string>
-    <string name="category_work" msgid="4014193632325996115">"Рабочы"</string>
+    <string name="category_work" msgid="4014193632325996115">"Працоўны"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Параметры распрацоўшчыка"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Уключыць параметры распрацоўшчыка"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Налада параметраў для распрацоўкі прыкладанняў"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Паказаць опцыі сертыфікацыі бесправаднога экрана"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Пры выбары сеткі Wi-Fi указваць у журнале RSSI для кожнага SSID"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Зніжае расход зараду акумулятара і павышае прадукцыйнасць мабільных сетак"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Гэты пераключальнік уплывае на рандамізацыю MAC-адрасоў толькі ў кліенцкім рэжыме.\nКалі гэты рэжым актываваны, ва ўсіх сетках з уключанай рандамізацыяй MAC-адрасоў падчас прывязвання можа выконвацца паўторная рандамізацыя ў залежнасці ад таго, калі кліент адключаўся ад сеткі ў апошні раз. Паўторная рандамізацыя не выконваецца, калі прылада зноў падключаецца да сеткі менш чым праз 4 гадзіны."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Калі ўключаны гэты рэжым, MAC-адрас гэтай прылады можа змяняцца падчас кожнага падключэння да сеткі з актыўнай рандамізацыяй MAC-адрасоў."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Сетка з улікам трафіка"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Сетка без уліку трафіка"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Памеры буфера журнала"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Паведамляць аб тым, што праграма не адказвае"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Паказваць папярэджанні канала апавяшчэннаў"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Паказвае папярэджанне на экране, калі праграма публікуе апавяшчэнне без сапраўднага канала"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Выкарыстоўваць ярлыкі для апавяшчэнняў з размоў"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Каб апавяшчэнні паяўляліся ў раздзеле размоў, абавязкова дубліраваць іх з дапамогай ярлыкоў з працяглым паказам"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Прымусова дазволіць праграмы на вонкавым сховішчы"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Робіць любую праграму даступнай для запісу на вонкавае сховішча, незалежна ад значэнняў маніфеста"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Зрабіць вокны дзеянняў даступнымі для змены памеру"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Зараду хопіць прыблізна да <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Да <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Акумулятар разрадзіцца ў <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Засталося менш за <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Засталося менш за <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Засталося больш за <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Засталося больш за <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Тэлефон у хуткім часе выключыцца"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Планшэт у хуткім часе выключыцца"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Прылада ў хуткім часе выключыцца"</string>
@@ -557,4 +551,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Дадаць госця"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Выдаліць госця"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Госць"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Стандартная прылада"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Выключана"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Уключана"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Перазагрузіце прыладу, каб прымяніць гэта змяненне. Перазагрузіце ці скасуйце."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (праца)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

@@ -203,9 +203,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"ຜູ່​ໃຊ້​ນີ້​ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ VPN ໄດ້"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"​ຜູ່​ໃຊ້​ນີ້​ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ການ​ປ່ອຍ​ສັນ​ຍານ​ໄດ້"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"ຜູ່​ໃຊ້​ນີ້ບໍ່​ສາ​ມາດ​ຕັ້ງ​ຄ່າ​ຊື່​ເອດ​ເຊ​ສ​ພອຍ​​​​ໄ​ດ້"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"ການດີບັ໊ກຜ່ານ USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"ການດີບັກຜ່ານ USB"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"ເປີດໃຊ້ໂໝດດີບັ໊ກເມື່ອເຊື່ອມຕໍ່ USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"ຖອດຖອນການອະນຸຍາດການດີບັ໊ກຜ່ານ USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"ຖອດຖອນການອະນຸຍາດການດີບັກຜ່ານ USB"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"ການດີບັກໄຮ້ສາຍ"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"ໂໝດດີບັກເມື່ອເຊື່ອມຕໍ່ Wi‑Fi"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"ຜິດພາດ"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"ສະແດງໂຕເລືອກສຳລັບການສະແດງການຮັບຮອງລະບົບໄຮ້ສາຍ"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"ເພີ່ມ​ລະ​ດັບ​ການ​ເກັບ​ປະ​ຫວັດ Wi‑Fi, ສະ​ແດງ​ຕໍ່ SSID RSSI ​ໃນ​ Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"ຫຼຸດການໃຊ້ແບັດເຕີຣີ ແລະ ປັບປຸງປະສິດທິພາບເຄືອຂ່າຍ"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"ການເປີດ/ປິດນີ້ຈະມີຜົນກັບພຶດຕິກຳການສຸ່ມ MAC ສຳລັບໂໝດລູກຂ່າຍເທົ່ານັ້ນ.\nເມື່ອເປີດໃຊ້ໂໝດນີ້, ເຄືອຂ່າຍໃດກໍຕາມທີ່ເປີດການນຳໃຊ້ການສຸ່ມ MAC ອາດສຸ່ມທີ່ຢູ່ MAC ຂອງເຂົາເຈົ້າຄືນໃໝ່ໃນລະຫວ່າງການເຊື່ອມໂຍງ, ຂຶ້ນກັບວ່າລູກຂ່າຍຕັດການເຊື່ອມຕໍ່ຈາກເຄືອຂ່າຍຫຼ້າສຸດຕອນໃດ. ການສຸ່ມໃໝ່ຈະບໍ່ເກີດຂຶ້ນຫາກອຸປະກອນເຊື່ອມຕໍ່ຄືນໃໝ່ພາຍໃນ 4 ຊົ່ວໂມງ ຫຼື ໜ້ອຍກວ່ານັ້ນ."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"ຫາກເປີດການນຳໃຊ້ໂໝດນີ້, ທີ່ຢູ່ MAC ຂອງອຸປະກອນນີ້ອາດມີການປ່ຽນແປງໃນແຕ່ລະເທື່ອທີ່ມັນເຊື່ອມຕໍ່ຫາເຄືອຂ່າຍໃດໜຶ່ງທີ່ເປີດການນຳໃຊ້ການສຸ່ມ MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"ມີການວັດແທກ"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"ບໍ່ໄດ້ວັດແທກ"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"ຂະໜາດບັບເຟີຕົວບັນທຶກ"</string>
@@ -300,11 +300,11 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"ເປີດ​ນຳ​ໃຊ້​ການກວດ​ສອບ​ຄຸນ​ສົມ​ບັດ​ມຸມມອງ"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"ເປີດໃຊ້ອິນເຕີເນັດມືຖືໄວ້ຕະຫຼອດ, ເຖິງແມ່ນວ່າ Wi-Fi ຈະເຮັດວຽກຢູ່ກໍຕາມ (ສຳລັບການສະຫຼັບເຄືອຂ່າຍແບບໄວ)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"ເປີດໃຊ້ການເລັ່ງຄວາມໄວດ້ວຍຮາດແວຫາກວ່າສາມາດໃຊ້ໄດ້"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"ອະນຸຍາດໃຫ້ດີບັ໊ກຜ່ານ USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"ການດີບັ໊ກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"ອະນຸຍາດໃຫ້ດີບັກຜ່ານ USB?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"ການດີບັກຜ່ານ USB ແມ່ນມີຈຸດປະສົງເພື່ອການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບຯໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະອ່ານຂໍ້ມູນການບັນທຶກ."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"ອະນຸຍາດການດີບັກໄຮ້ສາຍບໍ?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"ການດີບັກໄຮ້ສາຍແມ່ນມີຈຸດປະສົງສຳລັບການພັດທະນາເທົ່ານັ້ນ. ມັນສາມາດໃຊ້ເພື່ອສຳເນົາຂໍ້ມູນລະຫວ່າງຄອມພິວເຕີ ແລະ ອຸປະກອນຂອງທ່ານ, ຕິດຕັ້ງແອັບໂດຍບໍ່ຜ່ານການແຈ້ງເຕືອນ ແລະ ອ່ານຂໍ້ມູນບັນທຶກ."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"ຖອດຖອນການເຂົ້າເຖິງການດີບັ໊ກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"ຖອດຖອນການເຂົ້າເຖິງການດີບັກຜ່ານ USB ຈາກຄອມພິວເຕີທຸກເຄື່ອງ ທີ່ທ່ານເຄີຍອະນຸຍາດກ່ອນໜ້ານີ້?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"ອະນຸຍາດການຕັ້ງຄ່າສຳລັບນັກພັດທະນາ?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"ການ​ຕັ້ງຄ່າ​ເຫຼົ່ານີ້​ແມ່ນ​ມີ​ຈຸດປະສົງ​ເພື່ອ​ການ​ພັດທະນາ​ເທົ່ານັ້ນ. ພວກ​ມັນ​ສາມາດ​ເຮັດ​ໃຫ້​ອຸປະກອນ ແລະ​ແອັບພລິເຄຊັນ​ຂອງ​ທ່ານ​ຢຸດ​ເຮັດ​ວຽກ ຫຼື​ເຮັດ​ວຽກ​ຜິດປົກກະຕິ​ໄດ້."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"ຢືນຢັນແອັບຜ່ານທາງ USB"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"ສະແດງກ່ອງຂໍ້ຄວາມບໍ່ຕອບສະໜອງແອັບສຳລັບແອັບພື້ນຫຼັງ"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"ສະແດງຄຳເຕືອນຊ່ອງການແຈ້ງເຕືອນ"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ສະແດງຄຳເຕືອນໃນໜ້າຈໍເມື່ອແອັບໂພສການແຈ້ງເຕືອນໂດຍບໍ່ມີຊ່ອງທີ່ຖືກຕ້ອງ"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"ບັງຄັບໃຊ້ທາງລັດສຳລັບການແຈ້ງເຕືອນການສົນທະນາ"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ຕ້ອງໃຊ້ການແຈ້ງເຕືອນເພື່ອຮັບການສະໜັບສະໜຸນໂດຍທາງລັດການແບ່ງປັນທີ່ຢູ່ດົນເພື່ອໃຫ້ປາກົດໃນພາກສ່ວນການສົນທະນາ"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ບັງຄັບອະນຸຍາດແອັບ​ຢູ່​ພາຍນອກ"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"ເຮັດໃຫ້ທຸກແອັບມີສິດໄດ້ຮັບການຂຽນໃສ່ພື້ນທີ່ຈັດເກັບຂໍ້ມູນພາຍນອກ, ໂດຍບໍ່ຄຳນຶງເຖິງຄ່າ manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"ບັງ​ຄັງ​ໃຫ້​ການ​ເຄື່ອນ​ໄຫວ​ປ່ຽນ​ຂະ​ໜາດ​ໄດ້"</string>
@@ -551,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"ເພີ່ມແຂກ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ລຶບແຂກອອກ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ແຂກ"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ຄ່າເລີ່ມຕົ້ນອຸປະກອນ"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ປິດການນຳໃຊ້ແລ້ວ"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ເປີດການນຳໃຊ້ແລ້ວ"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ທ່ານຕ້ອງປິດເປີດອຸປະກອນຄືນໃໝ່ເພື່ອນຳໃຊ້ການປ່ຽນແປງນີ້. ປິດເປີດໃໝ່ດຽວນີ້ ຫຼື ຍົກເລີກ."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"​ບ່ອນ​ເຮັດ​ວຽກ <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

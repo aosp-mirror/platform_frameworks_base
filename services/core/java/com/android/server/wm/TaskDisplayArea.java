@@ -195,7 +195,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return mChildren.indexOf(stack);
     }
 
-    ActivityStack getRootHomeTask() {
+    @Nullable ActivityStack getRootHomeTask() {
         return mRootHomeTask;
     }
 

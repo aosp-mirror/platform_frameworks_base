@@ -143,11 +143,11 @@
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Uklonjene aplikacije"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Uklonjene aplikacije i korisnici"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Ažuriranja sistema"</string>
-    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB Internet povezivanje"</string>
+    <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB privezivanje"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Prenosni hotspot"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"Bluetooth privezivanje"</string>
-    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Povezivanje sa internetom"</string>
-    <string name="tether_settings_title_all" msgid="8910259483383010470">"Povezivanje i prenosni hotspot"</string>
+    <string name="tether_settings_title_usb_bluetooth" msgid="1727111807207577322">"Privezivanje"</string>
+    <string name="tether_settings_title_all" msgid="8910259483383010470">"Privezivanje i prenosni hotspot"</string>
     <string name="managed_user_title" msgid="449081789742645723">"Sve radne aplikacije"</string>
     <string name="user_guest" msgid="6939192779649870792">"Gost"</string>
     <string name="unknown" msgid="3544487229740637809">"Nepoznato"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za sertifikaciju bežičnog ekrana"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećava nivo evidentiranja za Wi‑Fi. Prikaz po SSID RSSI-u u biraču Wi‑Fi mreže"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava učinak mreže"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ovaj prekidač utiče na ponašanje nasumičnog razvrstavanja MAC adresa samo za režim klijenta.\nKada se ovaj režim aktivira, za mreže na kojima je omogućeno nasumično razvrstavanje MAC adresa može da dođe do ponovnog nasumičnog razvrstavanja MAC adresa tokom povezivanja, u zavisnosti od toga kada se klijent pre toga isključio sa mreže. Do ponovnog nasumičnog razvrstavanja ne dolazi ako se uređaj ponovo poveže za 4 sata ili manje."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kada je ovaj režim omogućen, MAC adresa ovog uređaja može da se promeni svaki put kada se poveže sa mrežom na kojoj je omogućeno nasumično razvrstavanje MAC adresa."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Sa ograničenjem"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Bez ograničenja"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine bafera podataka u programu za evidentiranje"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaži dijalog Aplikacija ne reaguje za aplikacije u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikazuj upozorenja zbog kanala za obaveštenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikazuje upozorenje na ekranu kada aplikacija postavi obaveštenje bez važećeg kanala"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Primenjuj prečice za obaveštenja o konverzacijama"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Zahteva da obaveštenja imaju i dugoročnu prečicu za deljenje kako bi se pojavljivala u odeljku za konverzacije"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Prinudno dozvoli aplikacije u spoljnoj"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Omogućava upisivanje svih aplikacija u spoljnu memoriju, bez obzira na vrednosti manifesta"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Prinudno omogući promenu veličine aktivnosti"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Trajaće približno do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterija će se možda isprazniti do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Još manje od <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Još manje od <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Još više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Još više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon će se uskoro isključiti"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet će se uskoro isključiti"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Uređaj će se uskoro isključiti"</string>
@@ -556,4 +550,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Podrazumevano za uređaj"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Onemogućeno"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogućeno"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Morate da restartujete uređaj da bi se ova promena primenila. Restartujte ga odmah ili otkažite."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> za posao"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

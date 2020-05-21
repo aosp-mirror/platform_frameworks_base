@@ -183,19 +183,19 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Återställ tonhöjden för tal"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Återställ tonhöjden för talad text till standardinställningen."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Mycket långsamt"</item>
-    <item msgid="1815382991399815061">"Långsamt"</item>
-    <item msgid="3075292553049300105">"Normalt"</item>
-    <item msgid="1158955023692670059">"Snabbt"</item>
+    <item msgid="9004239613505400644">"Mycket långsam"</item>
+    <item msgid="1815382991399815061">"Långsam"</item>
+    <item msgid="3075292553049300105">"Normal"</item>
+    <item msgid="1158955023692670059">"Snabb"</item>
     <item msgid="5664310435707146591">"Snabbare"</item>
-    <item msgid="5491266922147715962">"Mycket snabbt"</item>
-    <item msgid="7659240015901486196">"Supersnabbt"</item>
-    <item msgid="7147051179282410945">"Turbosnabbt"</item>
+    <item msgid="5491266922147715962">"Mycket snabb"</item>
+    <item msgid="7659240015901486196">"Supersnabb"</item>
+    <item msgid="7147051179282410945">"Turbosnabb"</item>
     <item msgid="581904787661470707">"Snabbast"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Personligt"</string>
-    <string name="category_work" msgid="4014193632325996115">"Arbetet"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
+    <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Utvecklaralternativ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivera utvecklaralternativ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ange alternativ för apputveckling"</string>
@@ -213,9 +213,9 @@
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktivera trådlös felsökning om du vill se tillgängliga enheter"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parkoppla enheten med en QR-kod"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Parkoppla nya enheter med QR-kodsläsare"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Koppla enheten med en kopplingskod"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Koppla nya enheter med en sexsiffrig kod"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Kopplade enheter"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Parkoppla enheten med en parkopplingskod"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Parkoppla nya enheter med en sexsiffrig kod"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Parkopplade enheter"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Anslutna just nu"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Enhetsinformation"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Glöm"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Visa certifieringsalternativ för Wi-Fi-skärmdelning"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Öka loggningsnivån för Wi-Fi, visa per SSID RSSI i Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Sänker batteriförbrukningen och förbättrar nätverksprestandan"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Detta läge påverkar endast MAC-slumpgenereringens beteende för klientläget.\nNär läget aktiveras kan alla nätverk som har MAC-slumpgenerering aktiverat få sina adresser slumpgenererade på nytt under kopplingen, beroende på när klienten senast kopplade från nätverket. Det sker ingen ny slumpgenerering om enheten återansluter inom fyra timmar."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"När det här läget är aktiverat kan enhetens MAC-adress ändras varje gång den ansluts till ett nätverk där slumpgenerering av MAC-adress har aktiverats."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Med datapriser"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Utan datapriser"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Buffertstorlekar för logg"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Visa dialogrutan om att appen inte svarar för bakgrundsappar"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Visa varningar om aviseringskanal"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Visa varningar på skärmen när en app lägger upp en avisering utan en giltig kanal"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Kräv genvägar för konversationsaviseringar"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Kräv att aviseringar har en långlivad delningsgenväg för att få visas i konversationsavsnittet"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Tillåt appar i externt lagringsutrymme"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Allar appar kan skrivas till extern lagring, oavsett manifestvärden"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Framtvinga storleksanpassning för aktiviteter"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Bör räcka ungefär till klockan <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Till kl. <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Batteriet kan ta slut klockan <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Mindre än <xliff:g id="THRESHOLD">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Mer än <xliff:g id="TIME_REMAINING">%1$s</xliff:g> återstår"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefonen kanske stängs av snart"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Surfplattan kanske stängs av snart"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Enheten kanske stängs av snart"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Lägg till gäst"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ta bort gäst"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gäst"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Enhetens standardinställning"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Inaktiverat"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiverat"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten måste startas om för att ändringen ska börja gälla. Starta om nu eller avbryt."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> för arbetet"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

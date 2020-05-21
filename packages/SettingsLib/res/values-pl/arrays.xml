@@ -29,7 +29,7 @@
     <item msgid="4613015005934755724">"Połączono"</item>
     <item msgid="3763530049995655072">"Zawieszona"</item>
     <item msgid="7852381437933824454">"Trwa rozłączanie..."</item>
-    <item msgid="5046795712175415059">"Rozłączona"</item>
+    <item msgid="5046795712175415059">"Rozłączono"</item>
     <item msgid="2473654476624070462">"Niepowodzenie"</item>
     <item msgid="9146847076036105115">"Zablokowana"</item>
     <item msgid="4543924085816294893">"Tymczasowo, by uniknąć połączenia o niskiej jakości"</item>
@@ -43,7 +43,7 @@
     <item msgid="1043944043827424501">"Połączono z siecią <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Zawieszona"</item>
     <item msgid="1175040558087735707">"Trwa rozłączanie z siecią <xliff:g id="NETWORK_NAME">%1$s</xliff:g>..."</item>
-    <item msgid="699832486578171722">"Rozłączona"</item>
+    <item msgid="699832486578171722">"Rozłączono"</item>
     <item msgid="522383512264986901">"Niepowodzenie"</item>
     <item msgid="3602596701217484364">"Zablokowana"</item>
     <item msgid="1999413958589971747">"Tymczasowo, by uniknąć połączenia o niskiej jakości"</item>

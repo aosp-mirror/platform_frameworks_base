@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Tunjukkan pilihan untuk pensijilan paparan wayarles"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Tingkatkan tahap pengelogan Wi-Fi, tunjuk setiap SSID RSSI dalam Pemilih Wi-Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Mengurangkan penyusutan bateri &amp; meningkatkan prestasi rangkaian"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Togol ini melibatkan gelagat perawakan MAC untuk mod pelanggan sahaja.\nApabila mod ini diaktifkan, alamat MAC bagi mana-mana rangkaian yang telah mendayakan perawakan MAC mungkin dirawakkan semula semasa perkaitan, bergantung pada kali terakhir pelanggan diputuskan sambungan daripada rangkaian. Perawakan semula tidak berlaku jika peranti menyambung semula dalam tempoh 4 jam atau kurang."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Apabila mod ini didayakan, alamat MAC peranti ini mungkin berubah setiap kali peranti bersambung kepada rangkaian yang telah mendayakan perawakan MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Bermeter"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Tidak bermeter"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Saiz penimbal pengelog"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Paparkan dialog Apl Tiada Respons untuk apl latar belakang"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Papar amaran saluran pemberitahuan"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Memaparkan amaran pada skrin apabila apl menyiarkan pemberitahuan tanpa saluran sah"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Kuat kuasakan pintasan utk pemberitahuan perbualan"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Perlukan pemberitahuan disokong oleh pintasan perkongsian hayat panjang untuk muncul dalam bahagian perbualan"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Benarkan apl secara paksa pada storan luaran"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Menjadikan sebarang apl layak ditulis ke storan luaran, tanpa mengambil kira nilai manifes"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Paksa aktiviti supaya boleh diubah saiz"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Seharusnya boleh digunakan hingga kira-kira <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hingga <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateri mungkin habis menjelang <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Kurang daripada <xliff:g id="THRESHOLD">%1$s</xliff:g> lagi"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Kurang daripada <xliff:g id="THRESHOLD">%1$s</xliff:g> lagi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Lebih daripada <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Lebih daripada <xliff:g id="TIME_REMAINING">%1$s</xliff:g> lagi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon mungkin ditutup tidak lama lagi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet mungkin ditutup tidak lama lagi"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Peranti mungkin ditutup tidak lama lagi"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Tambah tetamu"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alih keluar tetamu"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Tetamu"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Lalai peranti"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Dilumpuhkan"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Didayakan"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Peranti anda mesti dibut semula supaya perubahan ini berlaku. But semula sekarang atau batalkan."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Kerja <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

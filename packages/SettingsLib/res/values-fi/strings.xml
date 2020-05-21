@@ -24,7 +24,7 @@
     <string name="wifi_security_none" msgid="7392696451280611452">"Ei mitään"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Tallennettu"</string>
     <string name="wifi_disconnected" msgid="7054450256284661757">"Yhteys katkaistu"</string>
-    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Pois käytöstä"</string>
+    <string name="wifi_disabled_generic" msgid="2651916945380294607">"Pois päältä"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"IP-kokoonpanovirhe"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Ei yhteyttä – verkko huonolaatuinen"</string>
     <string name="wifi_disabled_wifi_failure" msgid="8819554899148331100">"Wi-Fi-yhteysvirhe"</string>
@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Tuntematon"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Käyttäjä: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Joitakin oletuksia on asetettu"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"Oletuksia ei asetettu."</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Ei oletuksia valittuina"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Tekstistä puheeksi -asetukset"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Tekstistä puheeksi -toisto"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Puheen nopeus"</string>
@@ -276,7 +276,7 @@
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Striimaus: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Yksityinen DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Valitse yksityinen DNS-tila"</string>
-    <string name="private_dns_mode_off" msgid="7065962499349997041">"Pois käytöstä"</string>
+    <string name="private_dns_mode_off" msgid="7065962499349997041">"Pois päältä"</string>
     <string name="private_dns_mode_opportunistic" msgid="1947864819060442354">"Automaattinen"</string>
     <string name="private_dns_mode_provider" msgid="3619040641762557028">"Yksityisen DNS-tarjoajan isäntänimi"</string>
     <string name="private_dns_mode_provider_hostname_hint" msgid="6564868953748514595">"Anna isäntänimi tai DNS-tarjoaja"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Näytä langattoman näytön sertifiointiin liittyvät asetukset."</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Lisää Wi‑Fin lokikirjaustasoa, näytä SSID RSSI -kohtaisesti Wi‑Fi-valitsimessa."</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Vähentää virrankulutusta ja parantaa verkon toimintaa"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Tämä vaihto vaikuttaa MAC-satunnaistamistoimintaan vain asiakastilassa.\nTämän tilan ollessa aktivoituna niiden verkkojen, joissa MAC-satunnaistaminen on käytössä, MAC-osoitteet voidaan satunnaistaa uudelleen yhdistämisen aikana riippuen siitä, milloin asiakas katkaisi viimeksi yhteyden verkkoon. Uudelleensatunnaistamista ei tapahdu, jos laite yhdistetään uudelleen enintään neljän tunnin sisällä."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kun tämä tila on päällä, laitteen MAC-osoite voi muuttua aina, kun laite yhdistää verkkoon, jossa MAC-satunnaistaminen on käytössä."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Maksullinen"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Maksuton"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Lokipuskurien koot"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Näytä taustalla olevien sovellusten Sovellus ei vastaa ‑valintaikkunat."</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Näytä ilmoituskanavan varoitukset"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Näyttää varoituksen, kun sovellus julkaisee ilmoituksen ilman kelvollista kanavaa."</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Pakota pikanäppäimet keskusteluilmoituksissa"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Vaadi ilmoitusten tukemista pitkäaikaisella jakopikanäppäimellä, jotta ne näkyvät keskusteluosiossa"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Salli aina ulkoinen tallennus"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Mahdollistaa sovelluksen tietojen tallentamisen ulkoiseen tallennustilaan luetteloarvoista riippumatta."</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Pakota kaikki toiminnot hyväksymään koon muutos"</string>
@@ -399,8 +397,8 @@
     <item msgid="1282170165150762976">"Digitaaliselle sisällölle parhaiten sopivat värit"</item>
   </string-array>
     <string name="inactive_apps_title" msgid="5372523625297212320">"Valmiustilasovellukset"</string>
-    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ei käytössä. Ota käyttöön koskettamalla."</string>
-    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Käytössä. Poista käytöstä koskettamalla."</string>
+    <string name="inactive_app_inactive_summary" msgid="3161222402614236260">"Ei päällä. Ota käyttöön koskettamalla."</string>
+    <string name="inactive_app_active_summary" msgid="8047630990208722344">"Aktiivinen. Vaihda koskettamalla."</string>
     <string name="standby_bucket_summary" msgid="5128193447550429600">"Sovelluksen valmiusluokka: <xliff:g id="BUCKET"> %s</xliff:g>"</string>
     <string name="runningservices_settings_title" msgid="6460099290493086515">"Käynnissä olevat palvelut"</string>
     <string name="runningservices_settings_summary" msgid="1046080643262665743">"Tarkastele ja hallitse käynnissä olevia palveluita."</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Varaus loppuu noin <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> saakka"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Akku voi loppua <xliff:g id="TIME">%1$s</xliff:g> mennessä"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Alle <xliff:g id="THRESHOLD">%1$s</xliff:g> jäljellä"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Alle <xliff:g id="THRESHOLD">%1$s</xliff:g> jäljellä (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Yli <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäljellä (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Yli <xliff:g id="TIME_REMAINING">%1$s</xliff:g> jäljellä"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Puhelin voi sammua pian"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tabletti voi sammua pian"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Laite voi sammua pian"</string>
@@ -461,7 +455,7 @@
     <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Kytketty virtalähteeseen, lataaminen ei onnistu"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Täynnä"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Järjestelmänvalvoja hallinnoi tätä asetusta."</string>
-    <string name="disabled" msgid="8017887509554714950">"Pois käytöstä"</string>
+    <string name="disabled" msgid="8017887509554714950">"Pois päältä"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Sallittu"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Ei sallittu"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Tuntemattomien sovellusten asentaminen"</string>
@@ -539,8 +533,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Lisätäänkö uusi käyttäjä?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Voit jakaa tämän laitteen muiden kanssa luomalla lisää käyttäjiä. Kullakin käyttäjällä on oma tilansa, jota he voivat muokata esimerkiksi omilla sovelluksilla ja taustakuvilla. Käyttäjät voivat myös muokata laiteasetuksia, kuten Wi‑Fi-asetuksia, jotka vaikuttavat laitteen kaikkiin käyttäjiin.\n\nKun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää muiden käyttäjien sovelluksia. Esteettömyysominaisuuksia tai ‑palveluita ei välttämättä siirretä uudelle käyttäjälle."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kun lisäät uuden käyttäjän, hänen tulee määrittää oman tilansa asetukset.\n\nKaikki käyttäjät voivat päivittää sovelluksia muille käyttäjille."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Määritetäänkö käyttäjän asetukset nyt?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi vastaanottaa laitteen ja määrittää oman tilansa."</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Lisätäänkö käyttäjä nyt?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Varmista, että käyttäjä voi ottaa laitteen nyt ja määrittää oman tilansa."</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Määritetäänkö profiilin asetukset nyt?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Määritä nyt"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ei nyt"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Lisää vieras"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Poista vieras"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Vieras"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Laitteen oletusasetus"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Ei käytössä"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Käytössä"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Laitteesi on käynnistettävä uudelleen, jotta muutos tulee voimaan. Käynnistä uudelleen nyt tai peruuta."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (työ)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

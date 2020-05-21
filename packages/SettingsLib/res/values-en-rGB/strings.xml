@@ -229,7 +229,7 @@
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Pair device over Wi‑Fi by scanning a QR code"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Pairing device…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Failed to pair the device. Either the QR code was incorrect, or the device is not connected to the same network."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address &amp; port"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address and port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR code"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Pair device over Wi‑Fi by scanning a QR code"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Please connect to a Wi‑Fi network"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Show options for wireless display certification"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Increase Wi‑Fi logging level, show per SSID RSSI in Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Reduces battery drain and improves network performance"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"This toggle affects MAC randomisation behaviour for client mode only.\nWhen this mode is activated, any networks that have MAC randomisation enabled may have their MAC addresses re‑randomised during association, depending on when the client last disconnected from the network. Re‑randomisation does not occur if the device reconnects in four hours or less."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"When this mode is enabled, this device’s MAC address may change each time that it connects to a network that has MAC randomisation enabled."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Metered"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Unmetered"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Logger buffer sizes"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Display App Not Responding dialogue for background apps"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Show notification channel warnings"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Displays on-screen warning when an app posts a notification without a valid channel"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Enforce shortcuts for conversation notifications"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Require notifications to be backed by a long-lived sharing shortcut in order to appear in the conversation section"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Force allow apps on external"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Makes any app eligible to be written to external storage, regardless of manifest values"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Force activities to be resizeable"</string>
@@ -551,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Add guest"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Remove guest"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Guest"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Device default"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Disabled"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Work <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

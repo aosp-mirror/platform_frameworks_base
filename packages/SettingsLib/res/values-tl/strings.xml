@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Ipakita ang mga opsyon para sa certification ng wireless display"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Pataasin ang antas ng Wi‑Fi logging, ipakita sa bawat SSID RSSI sa Wi‑Fi Picker"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Binabawasan ang pagkaubos ng baterya at pinapahusay ang performance ng network"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Nakakaapekto ang toggle na ito sa pag-kilos ng pag-randomize ng MAC para lang sa client mode.\nKapag na-activate ang mode na ito, baka ma-randomize ulit ang MAC address ng anumang network na naka-enable ang pag-randomize sa MAC habang nagaganap ang pag-uugnay, depende kung kailan huling nadiskonekta ang client sa network. Hindi nangyayari ang pag-randomize ulit kung kumonekta ulit ang device sa loob ng 4 na oras o mas maaga."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kapag naka-enable ang mode na ito, puwedeng magbago ang MAC address ng device na ito sa tuwing kokonekta ito sa isang network na may naka-enable na MAC randomization."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Nakametro"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Hindi Nakametro"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Mga laki ng buffer ng Logger"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Ipakita ang dialog na Hindi Tumutugon ang App para sa mga app sa background"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Ipakita ang mga babala sa notification channel"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Nagpapakita ng babala sa screen kapag nag-post ang app ng notification nang walang wastong channel"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Magpatupad ng mga shortcut para sa mga notification ng pag-uusap"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Ipa-back up ang mga notification gamit ang long-lived na shortcut sa pagbabahagi para lumabas sa seksyong pag-uusap"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Puwersahang payagan ang mga app sa external"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Ginagawang kwalipikado ang anumang app na mailagay sa external na storage, anuman ang mga value ng manifest"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Sapilitang gawing resizable ang mga aktibidad"</string>
@@ -435,15 +433,11 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Tatagal dapat nang hanggang humigit-kumulang <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Tatagal hanggang mga <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Hanggang <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Posibleng maubos ang baterya sa loob ng <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baka maubos ang baterya sa loob ng <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Wala nang <xliff:g id="THRESHOLD">%1$s</xliff:g> ang natitira"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Wala nang <xliff:g id="THRESHOLD">%1$s</xliff:g> ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Mahigit <xliff:g id="TIME_REMAINING">%1$s</xliff:g> pa ang natitira (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Mahigit <xliff:g id="TIME_REMAINING">%1$s</xliff:g> pa ang natitira"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Baka mag-shut down na ang telepono"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Baka mag-shut down na ang tablet"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Baka mag-shut down na ang device"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Magdagdag ng bisita"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Alisin ang bisita"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Bisita"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Default ng device"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Naka-disable"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Na-enable"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Dapat i-reboot ang iyong device para mailapat ang pagbabagong ito. Mag-reboot ngayon o kanselahin."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> sa Trabaho"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

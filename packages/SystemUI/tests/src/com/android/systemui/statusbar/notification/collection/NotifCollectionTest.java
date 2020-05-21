@@ -34,6 +34,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
@@ -65,6 +66,7 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.dump.DumpManager;
+import com.android.systemui.dump.LogBufferEulogizer;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.NoManSimulator.NotifEvent;
@@ -100,11 +102,13 @@ import java.util.Map;
 public class NotifCollectionTest extends SysuiTestCase {
 
     @Mock private IStatusBarService mStatusBarService;
+    @Mock private FeatureFlags mFeatureFlags;
     @Mock private NotifCollectionLogger mLogger;
+    @Mock private LogBufferEulogizer mEulogizer;
+
     @Mock private GroupCoalescer mGroupCoalescer;
     @Spy private RecordingCollectionListener mCollectionListener;
     @Mock private CollectionReadyForBuildListener mBuildListener;
-    @Mock private FeatureFlags mFeatureFlags;
 
     @Spy private RecordingLifetimeExtender mExtender1 = new RecordingLifetimeExtender("Extender1");
     @Spy private RecordingLifetimeExtender mExtender2 = new RecordingLifetimeExtender("Extender2");
@@ -136,13 +140,16 @@ public class NotifCollectionTest extends SysuiTestCase {
         when(mFeatureFlags.isNewNotifPipelineRenderingEnabled()).thenReturn(true);
         when(mFeatureFlags.isNewNotifPipelineEnabled()).thenReturn(true);
 
+        when(mEulogizer.record(any(Exception.class))).thenAnswer(i -> i.getArguments()[0]);
+
         mListenerInOrder = inOrder(mCollectionListener);
 
         mCollection = new NotifCollection(
                 mStatusBarService,
                 mock(DumpManager.class),
                 mFeatureFlags,
-                mLogger);
+                mLogger,
+                mEulogizer);
         mCollection.attach(mGroupCoalescer);
         mCollection.addCollectionListener(mCollectionListener);
         mCollection.setBuildListener(mBuildListener);

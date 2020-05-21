@@ -24,10 +24,12 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
+import com.android.systemui.media.MediaDeviceManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.ActionClickLogger;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.MediaArtworkProcessor;
+import com.android.systemui.statusbar.NotificationClickNotifier;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -76,6 +78,7 @@ public interface StatusBarDependenciesModule {
             StatusBarStateController statusBarStateController,
             Handler mainHandler,
             RemoteInputUriController remoteInputUriController,
+            NotificationClickNotifier clickNotifier,
             ActionClickLogger actionClickLogger) {
         return new NotificationRemoteInputManager(
                 context,
@@ -86,6 +89,7 @@ public interface StatusBarDependenciesModule {
                 statusBarStateController,
                 mainHandler,
                 remoteInputUriController,
+                clickNotifier,
                 actionClickLogger);
     }
 
@@ -101,7 +105,8 @@ public interface StatusBarDependenciesModule {
             KeyguardBypassController keyguardBypassController,
             @Main DelayableExecutor mainExecutor,
             DeviceConfigProxy deviceConfigProxy,
-            MediaDataManager mediaDataManager) {
+            MediaDataManager mediaDataManager,
+            MediaDeviceManager mediaDeviceManager) {
         return new NotificationMediaManager(
                 context,
                 statusBarLazy,
@@ -111,7 +116,8 @@ public interface StatusBarDependenciesModule {
                 keyguardBypassController,
                 mainExecutor,
                 deviceConfigProxy,
-                mediaDataManager);
+                mediaDataManager,
+                mediaDeviceManager);
     }
 
     /** */
@@ -129,8 +135,10 @@ public interface StatusBarDependenciesModule {
     @Singleton
     @Provides
     static SmartReplyController provideSmartReplyController(
-            NotificationEntryManager entryManager, IStatusBarService statusBarService) {
-        return new SmartReplyController(entryManager, statusBarService);
+            NotificationEntryManager entryManager,
+            IStatusBarService statusBarService,
+            NotificationClickNotifier clickNotifier) {
+        return new SmartReplyController(entryManager, statusBarService, clickNotifier);
     }
 
     /** */

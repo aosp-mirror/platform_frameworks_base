@@ -161,7 +161,7 @@
     <string name="tts_default_pitch_title" msgid="6988592215554485479">"पिच"</string>
     <string name="tts_default_pitch_summary" msgid="9132719475281551884">"कृत्रिम बोली के लहजे को प्रभावित करता है"</string>
     <string name="tts_default_lang_title" msgid="4698933575028098940">"भाषा"</string>
-    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्‍टम भाषा का उपयोग करें"</string>
+    <string name="tts_lang_use_system" msgid="6312945299804012406">"सिस्‍टम की भाषा का इस्तेमाल करें"</string>
     <string name="tts_lang_not_selected" msgid="7927823081096056147">"भाषा नहीं चुनी गई है"</string>
     <string name="tts_default_lang_summary" msgid="9042620014800063470">"बोले गए लेख के लिए भाषा-विशिष्ट ध्‍वनि सेट करता है"</string>
     <string name="tts_play_example_title" msgid="1599468547216481684">"एक उदाहरण सुनें"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"वायरलेस डिसप्ले सर्टिफ़िकेशन के विकल्प दिखाएं"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"वाई-फ़ाई लॉगिंग का स्तर बढ़ाएं, वाई-फ़ाई पिकर में प्रति SSID RSSI दिखाएं"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"बैटरी की खपत कम और नेटवर्क की परफ़ॉर्मेंस बेहतर होती है"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"इस टॉगल से सिर्फ़ क्लाइंट मोड में, वाई-फ़ाई नेटवर्क से जुड़ते समय मैक पते को बदलने की सुविधा पर असर पड़ता है.\nजब इस मोड को चालू किया जाता है, तब ऐसे किसी भी नेटवर्क का मैक पता फिर से बदला जा सकता है जिन पर मैक पते को बदलने की सुविधा चालू होती है. ऐसा तभी होता है, जब वे नेटवर्क जुड़े हों. यह इस पर भी निर्भर करता है कि क्लाइंट ने उसे नेटवर्क से कब डिसकनेक्ट किया था. अगर डिवाइस चार घंटे या उससे कम में, फिर से कनेक्ट होता है, तो मैक पते को दोबारा बदला नहीं जा सकता."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"जब यह मोड चालू होता है, तब नेटवर्क से कनेक्ट होने पर हर बार इस डिवाइस का मैक पता बदल सकता है. ऐसा तब होता है, जब डिवाइस किसी ऐसे नेटवर्क से जुड़ता है जिस पर मैक पते को बिना किसी तय नियम के बदलने की सुविधा चालू होती है."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"डेटा इस्तेमाल करने की सीमा तय की गई है"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"डेटा इस्तेमाल करने की सीमा तय नहीं की गई है"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"लॉगर बफ़र आकार"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"बैकग्राउंड में चलने वाले ऐप्लिकेशन के लिए, यह ऐप्लिकेशन नहीं चल रहा मैसेज दिखाएं"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"सूचना चैनल चेतावनी दिखाएं"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"ऐप्लिकेशन, मान्य चैनल के बिना सूचना पोस्ट करे तो स्क्रीन पर चेतावनी दिखाएं"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"सिर्फ़ वही सूचनाएं दिखाएं जो बातचीत सेक्शन में सही शॉर्टकट के साथ भी लिंक हैं"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"ज़रूरी सूचनाओं के लिए ऐसा शेयरिंग शॉर्टकट होना चाहिए जो हमेशा (long-lived) मौजूद रहे, ताकि सूचनाओं को बातचीत वाले सेक्शन में देखा जा सके"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"ऐप्लिकेशन को बाहरी मेमोरी पर ही चलाएं"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"इससे कोई भी ऐप्लिकेशन बाहरी मेमोरी में रखने लायक बन जाता है चाहे उसकी मेनिफ़ेस्ट वैल्यू कुछ भी हो"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"विंडो के हिसाब से गतिविधियों का आकार बदल दें"</string>
@@ -420,7 +418,7 @@
     <string name="daltonizer_mode_deuteranomaly" msgid="3507284319584683963">"लाल-हरे रंग की पहचान न कर पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"लाल रंग पहचान न पाना (लाल-हरा)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"नीला रंग पहचान न पाना (नीला-पीला)"</string>
-    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग सुधार"</string>
+    <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"रंग में सुधार करने की सुविधा"</string>
     <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1284746051652993443">"रंग में सुधार करने की सुविधा, आपके डिवाइस पर दिखने वाले रंगों में बदलाव करने में मदद करती है"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> के द्वारा ओवरराइड किया गया"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"बैटरी करीब <xliff:g id="TIME">%1$s</xliff:g> तक चलेगी"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"<xliff:g id="TIME">%1$s</xliff:g> तक"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"बैटरी <xliff:g id="TIME">%1$s</xliff:g> तक खत्म हो जाएगी"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"<xliff:g id="THRESHOLD">%1$s</xliff:g> से कम बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> से ज़्यादा चलने लायक बैटरी बची है"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"फ़ोन जल्द ही बंद हो सकता है"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"टैबलेट जल्द ही बंद हो सकता है"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"डिवाइस जल्द ही बंद हो सकता है"</string>
@@ -555,4 +549,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"मेहमान जोड़ें"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"मेहमान हटाएं"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"मेहमान"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"डिवाइस की डिफ़ॉल्ट सेटिंग"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"बंद है"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"चालू है"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"बदली गई सेटिंग को लागू करने के लिए, अपने डिवाइस को फिर से चालू करें. डिवाइस को फिर से चालू करें या रद्द करें."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"ऑफ़िस वाला <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

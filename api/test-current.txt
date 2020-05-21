@@ -2684,7 +2684,6 @@ package android.os {
     method public static android.os.VibrationEffect get(int, boolean);
     method @Nullable public static android.os.VibrationEffect get(android.net.Uri, android.content.Context);
     method public abstract long getDuration();
-    method protected static int scale(int, float, int);
     field public static final int EFFECT_POP = 4; // 0x4
     field public static final int EFFECT_STRENGTH_LIGHT = 0; // 0x0
     field public static final int EFFECT_STRENGTH_MEDIUM = 1; // 0x1
@@ -2699,8 +2698,6 @@ package android.os {
     ctor public VibrationEffect.OneShot(long, int);
     method public int getAmplitude();
     method public long getDuration();
-    method public android.os.VibrationEffect.OneShot scale(float, int);
-    method public void validate();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.OneShot> CREATOR;
   }
@@ -2713,7 +2710,6 @@ package android.os {
     method public int getId();
     method public void setEffectStrength(int);
     method public boolean shouldFallback();
-    method public void validate();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Prebaked> CREATOR;
   }
@@ -2725,8 +2721,6 @@ package android.os {
     method public long getDuration();
     method public int getRepeatIndex();
     method public long[] getTimings();
-    method public android.os.VibrationEffect.Waveform scale(float, int);
-    method public void validate();
     method public void writeToParcel(android.os.Parcel, int);
     field @NonNull public static final android.os.Parcelable.Creator<android.os.VibrationEffect.Waveform> CREATOR;
   }
@@ -3701,6 +3695,7 @@ package android.telecom {
     method @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public int getCurrentTtyMode();
     method @Nullable @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE) public String getDefaultDialerPackage(@NonNull android.os.UserHandle);
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public boolean isInEmergencyCall();
+    method @RequiresPermission(anyOf={android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, android.Manifest.permission.READ_PHONE_STATE}) public boolean isRinging();
     method @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE) public void setUserSelectedOutgoingPhoneAccount(@Nullable android.telecom.PhoneAccountHandle);
     field public static final int TTY_MODE_FULL = 1; // 0x1
     field public static final int TTY_MODE_HCO = 2; // 0x2

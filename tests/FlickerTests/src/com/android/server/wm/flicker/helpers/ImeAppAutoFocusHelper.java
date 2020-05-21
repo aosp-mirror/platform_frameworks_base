@@ -17,7 +17,8 @@
 package com.android.server.wm.flicker.helpers;
 
 import android.app.Instrumentation;
-import android.support.test.uiautomator.UiDevice;
+
+import androidx.test.uiautomator.UiDevice;
 
 public class ImeAppAutoFocusHelper extends ImeAppHelper {
 

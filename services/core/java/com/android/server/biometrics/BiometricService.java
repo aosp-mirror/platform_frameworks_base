@@ -89,6 +89,7 @@ public class BiometricService extends SystemService {
     private static final int MSG_ON_AUTHENTICATION_TIMED_OUT = 11;
     private static final int MSG_ON_DEVICE_CREDENTIAL_PRESSED = 12;
     private static final int MSG_ON_SYSTEM_EVENT = 13;
+    private static final int MSG_CLIENT_DIED = 14;
 
     private final Injector mInjector;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -212,6 +213,11 @@ public class BiometricService extends SystemService {
 
                 case MSG_ON_SYSTEM_EVENT: {
                     handleOnSystemEvent((int) msg.obj);
+                    break;
+                }
+
+                case MSG_CLIENT_DIED: {
+                    handleClientDied();
                     break;
                 }
 
@@ -447,11 +453,13 @@ public class BiometricService extends SystemService {
         }
     };
 
+    private final AuthSession.ClientDeathReceiver mClientDeathReceiver = () -> {
+        mHandler.sendEmptyMessage(MSG_CLIENT_DIED);
+    };
 
     /**
-     * This is just a pass-through service that wraps Fingerprint, Iris, Face services. This service
-     * should not carry any state. The reality is we need to keep a tiny amount of state so that
-     * cancelAuthentication() can go to the right place.
+     * Implementation of the BiometricPrompt/BiometricManager APIs. Handles client requests,
+     * sensor arbitration, threading, etc.
      */
     private final class BiometricServiceWrapper extends IBiometricService.Stub {
         @Override // Binder call
@@ -962,6 +970,19 @@ public class BiometricService extends SystemService {
         mCurrentAuthSession.onSystemEvent(event);
     }
 
+    private void handleClientDied() {
+        if (mCurrentAuthSession == null) {
+            Slog.e(TAG, "Auth session null");
+            return;
+        }
+
+        Slog.e(TAG, "Session: " + mCurrentAuthSession);
+        final boolean finished = mCurrentAuthSession.onClientDied();
+        if (finished) {
+            mCurrentAuthSession = null;
+        }
+    }
+
     /**
      * Invoked when each service has notified that its client is ready to be started. When
      * all biometrics are ready, this invokes the SystemUI dialog through StatusBar.
@@ -1043,8 +1064,9 @@ public class BiometricService extends SystemService {
 
         final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
         mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, mRandom,
-                preAuthInfo, token, operationId, userId, mBiometricSensorReceiver, receiver,
-                opPackageName, promptInfo, callingUid, callingPid, callingUserId, debugEnabled);
+                mClientDeathReceiver, preAuthInfo, token, operationId, userId,
+                mBiometricSensorReceiver, receiver, opPackageName, promptInfo, callingUid,
+                callingPid, callingUserId, debugEnabled);
         try {
             mCurrentAuthSession.goToInitialState();
         } catch (RemoteException e) {

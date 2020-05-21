@@ -23,7 +23,7 @@
     <string name="wifi_fail_to_scan" msgid="2333336097603822490">"Nie można wyszukać sieci."</string>
     <string name="wifi_security_none" msgid="7392696451280611452">"Brak"</string>
     <string name="wifi_remembered" msgid="3266709779723179188">"Zapisana"</string>
-    <string name="wifi_disconnected" msgid="7054450256284661757">"Rozłączona"</string>
+    <string name="wifi_disconnected" msgid="7054450256284661757">"Rozłączono"</string>
     <string name="wifi_disabled_generic" msgid="2651916945380294607">"Wyłączona"</string>
     <string name="wifi_disabled_network_failure" msgid="2660396183242399585">"Błąd konfiguracji IP"</string>
     <string name="wifi_disabled_by_recommendation_provider" msgid="1302938248432705534">"Brak połączenia z powodu słabego sygnału sieci"</string>
@@ -63,7 +63,7 @@
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Bardzo szybka"</string>
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Ważność wygasła"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
-    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączona"</string>
+    <string name="bluetooth_disconnected" msgid="7739366554710388701">"Rozłączono"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Rozłączanie..."</string>
     <string name="bluetooth_connecting" msgid="5871702668260192755">"Łączenie..."</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"Połączono – <xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g>"</string>
@@ -195,7 +195,7 @@
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Wybierz profil"</string>
     <string name="category_personal" msgid="6236798763159385225">"Osobiste"</string>
-    <string name="category_work" msgid="4014193632325996115">"Praca"</string>
+    <string name="category_work" msgid="4014193632325996115">"Służbowe"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Opcje programistyczne"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Włącz opcje dla programistów"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ustaw opcje związane z programowaniem aplikacji."</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Pokaż opcje certyfikacji wyświetlacza bezprzewodowego"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Zwiększ poziom rejestrowania Wi‑Fi, pokazuj według RSSI SSID w selektorze Wi‑Fi"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Zmniejsza zużycie baterii i zwiększa wydajność sieci"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ten przełącznik wpływa na zachowanie randomizacji MAC tylko w przypadku trybu klienta.\nKiedy ten tryb jest aktywny, adresy MAC dowolnej sieci, która ma włączoną randomizację MAC, podczas powiązywania mogą zostać poddane ponownej randomizacji, w zależności od tego, kiedy klient ostatni raz rozłączył się z siecią. Ponowna randomizacja nie zachodzi, jeśli urządzenie połączy się ponownie w ciągu 4 lub mniejszej liczby godzin."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kiedy ten tryb jest włączony, to adres MAC tego urządzenia może zmieniać się za każdym razem, kiedy urządzenie połączy się z siecią, która ma włączoną opcję randomizacji MAC."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"Użycie danych jest mierzone"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Użycie danych nie jest mierzone"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Rozmiary bufora rejestratora"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Wyświetlaj okno Aplikacja nie odpowiada dla aplikacji w tle"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Pokaż ostrzeżenia kanału powiadomień"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Wyświetla ostrzeżenie, gdy aplikacja publikuje powiadomienie bez prawidłowego kanału"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Wymuszaj skróty do powiadomień o rozmowie"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Wymagaj używania długoterminowych skrótów do udostępniania powiadomień, które pojawiałyby się w sekcji rozmowy"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Wymuś zezwalanie na aplikacje w pamięci zewnętrznej"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Pozwala na zapis aplikacji w pamięci zewnętrznej niezależnie od wartości w pliku manifestu"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Wymuś zmianę rozmiaru okien aktywności"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Powinno wystarczyć do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Bateria może się wyczerpać do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Pozostało mniej niż <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Pozostało mniej niż <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Pozostało mniej niż <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Pozostało mniej niż <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Wkrótce telefon może się wyłączyć"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet może się wkrótce wyłączyć"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Urządzenie może się wkrótce wyłączyć"</string>
@@ -557,4 +551,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gościa"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Usuń gościa"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gość"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Ustawienie domyślne urządzenia"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Wyłączono"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Włączono"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Wprowadzenie zmiany wymaga ponownego uruchomienia urządzenia. Uruchom ponownie teraz lub anuluj."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> (do pracy)"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

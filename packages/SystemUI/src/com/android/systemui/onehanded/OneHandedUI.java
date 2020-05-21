@@ -103,10 +103,15 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
     private final ContentObserver mTaskChangeExitObserver = new ContentObserver(mMainHandler) {
         @Override
         public void onChange(boolean selfChange) {
-            OneHandedEvents.writeEvent(OneHandedSettingsUtil.getSettingsTapsAppToExit(
-                    mContext.getContentResolver())
+            final boolean enabled = OneHandedSettingsUtil.getSettingsTapsAppToExit(
+                    mContext.getContentResolver());
+            OneHandedEvents.writeEvent(enabled
                     ? OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_ON
                     : OneHandedEvents.EVENT_ONE_HANDED_SETTINGS_APP_TAPS_EXIT_OFF);
+
+            if (mOneHandedManager != null) {
+                mOneHandedManager.setTaskChangeToExit(enabled);
+            }
         }
     };
 

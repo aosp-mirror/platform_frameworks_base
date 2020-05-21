@@ -106,7 +106,7 @@ public final class LocationTimeZoneEvent implements Parcelable {
     }
 
     /**
-     * Gets the time zone IDs of this result. Contains zero or more IDs for a successful lookup.
+     * Gets the time zone IDs of this event. Contains zero or more IDs for a successful lookup.
      * The value is undefined for an unsuccessful lookup. See also {@link #getEventType()}.
      */
     @NonNull

@@ -42,6 +42,7 @@
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_media</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
@@ -96,6 +97,7 @@
     <string translatable="false" name="status_bar_airplane">airplane</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
+    <string translatable="false" name="status_bar_media">media</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window

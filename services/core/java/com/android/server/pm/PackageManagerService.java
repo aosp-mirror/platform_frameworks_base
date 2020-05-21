@@ -8611,7 +8611,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         // Shared lib filtering done in generateApplicationInfoFromSettingsLPw
                         // and already converts to externally visible package name
                         ai = generateApplicationInfoFromSettingsLPw(ps.name,
-                                callingUid, effectiveFlags, userId);
+                                effectiveFlags, callingUid, userId);
                     }
                     if (ai != null) {
                         list.add(ai);
@@ -14813,35 +14813,27 @@ public class PackageManagerService extends IPackageManager.Stub
          * on the install location.
          */
         public void handleStartCopy() {
-            int ret = PackageManager.INSTALL_SUCCEEDED;
+            PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                    origin.resolvedPath, installFlags, packageAbiOverride);
 
-            // If we're already staged, we've firmly committed to an install location
+            final boolean ephemeral = (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+            if (DEBUG_INSTANT && ephemeral) {
+                Slog.v(TAG, "pkgLite for install: " + pkgLite);
+            }
+
             if (origin.staged) {
+                // If we're already staged, we've firmly committed to an install location
                 if (origin.file != null) {
                     installFlags |= PackageManager.INSTALL_INTERNAL;
                 } else {
                     throw new IllegalStateException("Invalid stage location");
                 }
-            }
-
-            final boolean onInt = (installFlags & PackageManager.INSTALL_INTERNAL) != 0;
-            final boolean ephemeral = (installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
-            PackageInfoLite pkgLite = null;
-
-
-            pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
-                    origin.resolvedPath, installFlags, packageAbiOverride);
-
-            if (DEBUG_INSTANT && ephemeral) {
-                Slog.v(TAG, "pkgLite for install: " + pkgLite);
-            }
-
-            /*
-             * If we have too little free space, try to free cache
-             * before giving up.
-             */
-            if (!origin.staged && pkgLite.recommendedInstallLocation
+            } else if (pkgLite.recommendedInstallLocation
                     == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                /*
+                 * If we are not staged and have too little free space, try to free cache
+                 * before giving up.
+                 */
                 // TODO: focus freeing disk space on the target device
                 final StorageManager storage = StorageManager.from(mContext);
                 final long lowThreshold = storage.getStorageLowBytes(
@@ -14871,76 +14863,69 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
+            int ret = PackageManager.INSTALL_SUCCEEDED;
+            int loc = pkgLite.recommendedInstallLocation;
+            if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION) {
+                ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
+            } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS) {
+                ret = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
+            } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
+                ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
+            } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
+                ret = PackageManager.INSTALL_FAILED_INVALID_APK;
+            } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
+                ret = PackageManager.INSTALL_FAILED_INVALID_URI;
+            } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
+                ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
+            } else {
+                // Override with defaults if needed.
+                loc = installLocationPolicy(pkgLite);
 
-            if (ret == PackageManager.INSTALL_SUCCEEDED) {
-                int loc = pkgLite.recommendedInstallLocation;
-                if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_LOCATION) {
-                    ret = PackageManager.INSTALL_FAILED_INVALID_INSTALL_LOCATION;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_ALREADY_EXISTS) {
-                    ret = PackageManager.INSTALL_FAILED_ALREADY_EXISTS;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_INSUFFICIENT_STORAGE) {
-                    ret = PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_APK) {
-                    ret = PackageManager.INSTALL_FAILED_INVALID_APK;
-                } else if (loc == PackageHelper.RECOMMEND_FAILED_INVALID_URI) {
-                    ret = PackageManager.INSTALL_FAILED_INVALID_URI;
-                } else if (loc == PackageHelper.RECOMMEND_MEDIA_UNAVAILABLE) {
-                    ret = PackageManager.INSTALL_FAILED_MEDIA_UNAVAILABLE;
-                } else {
-                    // Override with defaults if needed.
-                    loc = installLocationPolicy(pkgLite);
-                    if (loc == PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE) {
-                        ret = PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
-                    } else if (loc == PackageHelper.RECOMMEND_FAILED_WRONG_INSTALLED_VERSION) {
-                        ret = PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
-                    } else if (!onInt) {
-                        // Override install location with flags
-                        if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
-                            // Set the flag to install on external media.
-                            installFlags &= ~PackageManager.INSTALL_INTERNAL;
-                        } else if (loc == PackageHelper.RECOMMEND_INSTALL_EPHEMERAL) {
-                            if (DEBUG_INSTANT) {
-                                Slog.v(TAG, "...setting INSTALL_EPHEMERAL install flag");
-                            }
-                            installFlags |= PackageManager.INSTALL_INSTANT_APP;
-                            installFlags &= ~PackageManager.INSTALL_INTERNAL;
-                        } else {
-                            // Make sure the flag for installing on external
-                            // media is unset
-                            installFlags |= PackageManager.INSTALL_INTERNAL;
-                        }
+                final boolean onInt = (installFlags & PackageManager.INSTALL_INTERNAL) != 0;
+
+                if (loc == PackageHelper.RECOMMEND_FAILED_VERSION_DOWNGRADE) {
+                    ret = PackageManager.INSTALL_FAILED_VERSION_DOWNGRADE;
+                } else if (loc == PackageHelper.RECOMMEND_FAILED_WRONG_INSTALLED_VERSION) {
+                    ret = PackageManager.INSTALL_FAILED_WRONG_INSTALLED_VERSION;
+                } else if (!onInt) {
+                    // Override install location with flags
+                    if (loc == PackageHelper.RECOMMEND_INSTALL_EXTERNAL) {
+                        // Set the flag to install on external media.
+                        installFlags &= ~PackageManager.INSTALL_INTERNAL;
+                    } else {
+                        // Make sure the flag for installing on external
+                        // media is unset
+                        installFlags |= PackageManager.INSTALL_INTERNAL;
                     }
                 }
             }
 
-            final InstallArgs args = createInstallArgs(this);
             mVerificationCompleted = true;
             mIntegrityVerificationCompleted = true;
             mEnableRollbackCompleted = true;
-            mArgs = args;
 
-            if (ret == PackageManager.INSTALL_SUCCEEDED) {
+            // Now that installFlags is finalized, we can create an immutable InstallArgs
+            mArgs = createInstallArgs(this);
+
+            // Perform package verification and enable rollback (unless we are simply moving the
+            // package).
+            if (ret == PackageManager.INSTALL_SUCCEEDED && !origin.existing) {
                 final int verificationId = mPendingVerificationToken++;
 
-                // Perform package verification (unless we are simply moving the package).
-                if (!origin.existing) {
-                    PackageVerificationState verificationState =
-                            new PackageVerificationState(this);
-                    mPendingVerification.append(verificationId, verificationState);
+                PackageVerificationState verificationState =
+                        new PackageVerificationState(this);
+                mPendingVerification.append(verificationId, verificationState);
 
-                    sendIntegrityVerificationRequest(verificationId, pkgLite, verificationState);
-                    ret = sendPackageVerificationRequest(
-                            verificationId, pkgLite, verificationState);
+                sendIntegrityVerificationRequest(verificationId, pkgLite, verificationState);
+                ret = sendPackageVerificationRequest(
+                        verificationId, pkgLite, verificationState);
 
-                    // If both verifications are skipped, we should remove the state.
-                    if (verificationState.areAllVerificationsComplete()) {
-                        mPendingVerification.remove(verificationId);
-                    }
+                // If both verifications are skipped, we should remove the state.
+                if (verificationState.areAllVerificationsComplete()) {
+                    mPendingVerification.remove(verificationId);
                 }
 
-
                 if ((installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
-                    // TODO(ruhler) b/112431924: Don't do this in case of 'move'?
                     final int enableRollbackToken = mPendingEnableRollbackToken++;
                     Trace.asyncTraceBegin(
                             TRACE_TAG_PACKAGE_MANAGER, "enable_rollback", enableRollbackToken);

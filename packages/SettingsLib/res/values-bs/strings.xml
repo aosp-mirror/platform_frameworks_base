@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Srednja brzina"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Brzo"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Veoma brzo"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Istekao"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Isteklo"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g> / <xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Isključen"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Prekidanje veze…"</string>
@@ -284,7 +284,7 @@
     <string name="wifi_display_certification_summary" msgid="8111151348106907513">"Prikaz opcija za certifikaciju bežičnog prikaza"</string>
     <string name="wifi_verbose_logging_summary" msgid="4993823188807767892">"Povećani nivo zapisnika za WiFi. Prikaz po SSID RSSI-ju u Biraču WiFi-ja"</string>
     <string name="wifi_scan_throttling_summary" msgid="2577105472017362814">"Smanjuje potrošnju baterije i poboljšava performanse mreže"</string>
-    <string name="wifi_enhanced_mac_randomization_summary" msgid="7925425746373704991">"Ovo aktiviranje/deaktiviranje utiče na ponašanje nasumičnog odabira MAC adrese isključivo za način rada klijenta.\nKada je taj način aktiviran, na svakoj mreži na kojoj je omogućen nasumični odabir MAC adrese može doći do ponovnog nasumičnog odabira MAC adrese za vrijeme povezivanja, u zavisnosti od toga kada je posljednji put prekinuta povezanost klijenta s mrežom. Do ponovnog nasumičnog odabira ne dolazi ako se uređaj ponovo poveže u roku od 4 sata ili ranije."</string>
+    <string name="wifi_enhanced_mac_randomization_summary" msgid="1210663439867489931">"Kada je omogućen ovaj način rada, MAC adresa ovog uređaja se može promijeniti svaki put kada se poveže na mrežu koja ima omogućen nasumični odabir MAC adresa."</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"S naplatom"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"Mreža bez naplate"</string>
     <string name="select_logd_size_title" msgid="1604578195914595173">"Veličine međumemorije zapisnika"</string>
@@ -373,8 +373,6 @@
     <string name="show_all_anrs_summary" msgid="8562788834431971392">"Prikaz dijaloga \"Aplikacija ne reagira\" za aplikacije pokrenute u pozadini"</string>
     <string name="show_notification_channel_warnings" msgid="3448282400127597331">"Prikaži upozorenja kanala obavještenja"</string>
     <string name="show_notification_channel_warnings_summary" msgid="68031143745094339">"Prikaz upozorenja na ekranu kada aplikacija pošalje obavještenje bez važećeg kanala"</string>
-    <string name="enforce_shortcuts_for_conversations" msgid="7040735163945040763">"Primijeni prečice za obavještenja o razgovorima"</string>
-    <string name="enforce_shortcuts_for_conversations_summary" msgid="1860168037282467862">"Traži da obavještenja imaju dugotrajnu prečicu za dijeljenje radi prikaza u odjeljku za razgovore"</string>
     <string name="force_allow_on_external" msgid="9187902444231637880">"Nametni aplikacije na vanjskoj pohrani"</string>
     <string name="force_allow_on_external_summary" msgid="8525425782530728238">"Omogućava upisivanje svih aplikacija u vanjsku pohranu, bez obzira na prikazane vrijednosti"</string>
     <string name="force_resizable_activities" msgid="7143612144399959606">"Nametni aktivnostima mijenjanje veličina"</string>
@@ -436,14 +434,10 @@
     <string name="power_discharge_by_only" msgid="92545648425937000">"Trebala bi trajati otprilike do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Do <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Baterija bi se mogla isprazniti do <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <!-- no translation found for power_remaining_less_than_duration_only (8956656616031395152) -->
-    <skip />
-    <!-- no translation found for power_remaining_less_than_duration (318215464914990578) -->
-    <skip />
-    <!-- no translation found for power_remaining_more_than_subtext (446388082266121894) -->
-    <skip />
-    <!-- no translation found for power_remaining_only_more_than_subtext (4873750633368888062) -->
-    <skip />
+    <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Preostalo je manje od <xliff:g id="THRESHOLD">%1$s</xliff:g>"</string>
+    <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Preostalo je manje od <xliff:g id="THRESHOLD">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Preostalo je više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Preostalo je više od <xliff:g id="TIME_REMAINING">%1$s</xliff:g>"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="default" msgid="137330009791560774">"Telefon će se uskoro isključiti"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="tablet" msgid="145489081521468132">"Tablet će se uskoro isključiti"</string>
     <string name="power_remaining_duration_only_shutdown_imminent" product="device" msgid="1070562682853942350">"Uređaj će se uskoro isključiti"</string>
@@ -458,7 +452,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo punjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Sporo punjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Priključen, trenutno se ne može puniti"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Priključeno, trenutno se ne može puniti"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pod kontrolom administratora"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
@@ -556,4 +550,11 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"Dodaj gosta"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"Ukloni gosta"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"Gost"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Zadana postavka uređaja"</string>
+    <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Onemogućeno"</string>
+    <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogućeno"</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Morate ponovo pokrenuti uređaj da se ova promjena primijeni. Ponovo pokrenite odmah ili otkažite."</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Poslovna aplikacija <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>
