@@ -128,7 +128,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
-    public final void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
+    public void dumpDebug(ProtoOutputStream proto, long fieldId, int logLevel) {
         final long token = proto.start(fieldId);
         super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
         proto.write(NAME, mName);
@@ -263,7 +263,7 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     /**
-     * Top-most DisplayArea under DisplayContent.
+     * Root of the display area hierarchy.
      */
     public static class Root extends DisplayArea<DisplayArea> {
         Root(WindowManagerService wms) {
