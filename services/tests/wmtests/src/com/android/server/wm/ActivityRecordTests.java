@@ -1405,14 +1405,14 @@ public class ActivityRecordTests extends ActivityTestsBase {
         mActivity.setVisibility(true);
 
         display.rotateInDifferentOrientationIfNeeded(mActivity);
-        display.mFixedRotationLaunchingApp = mActivity;
+        display.setFixedRotationLaunchingAppUnchecked(mActivity);
         displayRotation.updateRotationUnchecked(true /* forceUpdate */);
 
         assertTrue(displayRotation.isRotatingSeamlessly());
 
         // The launching rotated app should not be cleared when waiting for remote rotation.
         display.continueUpdateOrientationForDiffOrienLaunchingApp();
-        assertNotNull(display.mFixedRotationLaunchingApp);
+        assertNotNull(display.getFixedRotationLaunchingApp());
 
         // Simulate the rotation has been updated to previous one, e.g. sensor updates before the
         // remote rotation is completed.
@@ -1438,10 +1438,10 @@ public class ActivityRecordTests extends ActivityTestsBase {
         displayRotation.updateRotationUnchecked(true /* forceUpdate */);
         doReturn(false).when(displayRotation).isWaitingForRemoteRotation();
         clearInvocations(mActivity);
-        display.mFixedRotationLaunchingApp = mActivity;
+        display.setFixedRotationLaunchingAppUnchecked(mActivity);
         display.sendNewConfiguration();
 
-        assertNull(display.mFixedRotationLaunchingApp);
+        assertNull(display.getFixedRotationLaunchingApp());
         assertFalse(mActivity.hasFixedRotationTransform());
     }
 
@@ -1497,7 +1497,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
         // rotation should be applied when creating snapshot surface if the display rotation may be
         // changed according to the activity orientation.
         assertTrue(mActivity.hasFixedRotationTransform());
-        assertEquals(mActivity, mActivity.mDisplayContent.mFixedRotationLaunchingApp);
+        assertEquals(mActivity, mActivity.mDisplayContent.getFixedRotationLaunchingApp());
     }
 
     /**

@@ -140,6 +140,12 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
             public void onDisplayRemoved(int displayId) {
                 removed.add(displayId);
             }
+
+            @Override
+            public void onFixedRotationStarted(int displayId, int newRotation) {}
+
+            @Override
+            public void onFixedRotationFinished(int displayId) {}
         };
         mService.mWindowManager.registerDisplayWindowListener(listener);
         // Check that existing displays call added
