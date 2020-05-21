@@ -17,6 +17,7 @@
 package android.util;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -45,11 +46,14 @@ public class AtomicFileTest {
     private static final String BASE_NAME = "base";
     private static final String NEW_NAME = BASE_NAME + ".new";
     private static final String LEGACY_BACKUP_NAME = BASE_NAME + ".bak";
+    // The string isn't actually used, but we just need a different identifier.
+    private static final String BASE_NAME_DIRECTORY = BASE_NAME + ".dir";
 
     private enum WriteAction {
         FINISH,
         FAIL,
-        ABORT
+        ABORT,
+        READ_FINISH
     }
 
     private static final byte[] BASE_BYTES = "base".getBytes(StandardCharsets.UTF_8);
@@ -82,6 +86,7 @@ public class AtomicFileTest {
     @Parameterized.Parameters(name = "{0}")
     public static Object[][] data() {
         return new Object[][] {
+                // Standard tests.
                 { "none + none = none", null, null, null },
                 { "none + finish = new", null, WriteAction.FINISH, NEW_BYTES },
                 { "none + fail = none", null, WriteAction.FAIL, null },
@@ -140,6 +145,50 @@ public class AtomicFileTest {
                 { "base & new & bak + abort = bak",
                         new String[] { BASE_NAME, NEW_NAME, LEGACY_BACKUP_NAME }, WriteAction.ABORT,
                         LEGACY_BACKUP_BYTES },
+                // Compatibility when there is a directory in the place of base file, by replacing
+                // no base with base.dir.
+                { "base.dir + none = none", new String[] { BASE_NAME_DIRECTORY }, null, null },
+                { "base.dir + finish = new", new String[] { BASE_NAME_DIRECTORY },
+                        WriteAction.FINISH, NEW_BYTES },
+                { "base.dir + fail = none", new String[] { BASE_NAME_DIRECTORY }, WriteAction.FAIL,
+                        null },
+                { "base.dir + abort = none", new String[] { BASE_NAME_DIRECTORY },
+                        WriteAction.ABORT, null },
+                { "base.dir & new + none = none", new String[] { BASE_NAME_DIRECTORY, NEW_NAME },
+                        null, null },
+                { "base.dir & new + finish = new", new String[] { BASE_NAME_DIRECTORY, NEW_NAME },
+                        WriteAction.FINISH, NEW_BYTES },
+                { "base.dir & new + fail = none", new String[] { BASE_NAME_DIRECTORY, NEW_NAME },
+                        WriteAction.FAIL, null },
+                { "base.dir & new + abort = none", new String[] { BASE_NAME_DIRECTORY, NEW_NAME },
+                        WriteAction.ABORT, null },
+                { "base.dir & bak + none = bak",
+                        new String[] { BASE_NAME_DIRECTORY, LEGACY_BACKUP_NAME }, null,
+                        LEGACY_BACKUP_BYTES },
+                { "base.dir & bak + finish = new",
+                        new String[] { BASE_NAME_DIRECTORY, LEGACY_BACKUP_NAME },
+                        WriteAction.FINISH, NEW_BYTES },
+                { "base.dir & bak + fail = bak",
+                        new String[] { BASE_NAME_DIRECTORY, LEGACY_BACKUP_NAME }, WriteAction.FAIL,
+                        LEGACY_BACKUP_BYTES },
+                { "base.dir & bak + abort = bak",
+                        new String[] { BASE_NAME_DIRECTORY, LEGACY_BACKUP_NAME }, WriteAction.ABORT,
+                        LEGACY_BACKUP_BYTES },
+                { "base.dir & new & bak + none = bak",
+                        new String[] { BASE_NAME_DIRECTORY, NEW_NAME, LEGACY_BACKUP_NAME }, null,
+                        LEGACY_BACKUP_BYTES },
+                { "base.dir & new & bak + finish = new",
+                        new String[] { BASE_NAME_DIRECTORY, NEW_NAME, LEGACY_BACKUP_NAME },
+                        WriteAction.FINISH, NEW_BYTES },
+                { "base.dir & new & bak + fail = bak",
+                        new String[] { BASE_NAME_DIRECTORY, NEW_NAME, LEGACY_BACKUP_NAME },
+                        WriteAction.FAIL, LEGACY_BACKUP_BYTES },
+                { "base.dir & new & bak + abort = bak",
+                        new String[] { BASE_NAME_DIRECTORY, NEW_NAME, LEGACY_BACKUP_NAME },
+                        WriteAction.ABORT, LEGACY_BACKUP_BYTES },
+                // Compatibility when openRead() is called between startWrite() and finishWrite() -
+                // the write should still succeed if it's the first write.
+                { "none + read & finish = new", null, WriteAction.READ_FINISH, NEW_BYTES },
         };
     }
 
@@ -165,6 +214,9 @@ public class AtomicFileTest {
                     case LEGACY_BACKUP_NAME:
                         writeBytes(mLegacyBackupFile, LEGACY_BACKUP_BYTES);
                         break;
+                    case BASE_NAME_DIRECTORY:
+                        assertTrue(mBaseFile.mkdir());
+                        break;
                     default:
                         throw new AssertionError(fileName);
                 }
@@ -185,6 +237,11 @@ public class AtomicFileTest {
                     case ABORT:
                         // Neither finishing nor failing is called upon abort.
                         break;
+                    case READ_FINISH:
+                        // We are only using this action when there is no base file.
+                        assertThrows(FileNotFoundException.class, atomicFile::openRead);
+                        atomicFile.finishWrite(outputStream);
+                        break;
                     default:
                         throw new AssertionError(mWriteAction);
                 }
@@ -196,7 +253,7 @@ public class AtomicFileTest {
                 assertArrayEquals(mExpectedBytes, readAllBytes(inputStream));
             }
         } else {
-            assertThrows(FileNotFoundException.class, () -> atomicFile.openRead());
+            assertThrows(FileNotFoundException.class, atomicFile::openRead);
         }
     }
 
