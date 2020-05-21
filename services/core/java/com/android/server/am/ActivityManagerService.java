@@ -299,6 +299,7 @@ import android.util.PrintWriterPrinter;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
+import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -818,6 +819,46 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return false;
             }
             return doRemoveInternal(app);
+        }
+    }
+
+    /**
+     * While starting activity, WindowManager posts a runnable to DisplayThread to updateOomAdj.
+     * The latency of the thread switch could cause client app failure when the app is checking
+     * {@link #isUidActive} before updateOomAdj is done.
+     *
+     * Use PendingStartActivityUids to save uid after WindowManager start activity and before
+     * updateOomAdj is done.
+     *
+     * <p>NOTE: This object is protected by its own lock, NOT the global activity manager lock!
+     */
+    final PendingStartActivityUids mPendingStartActivityUidsLocked = new PendingStartActivityUids();
+    final class PendingStartActivityUids {
+        // Key is uid, value is SystemClock.elapsedRealtime() when the key is added.
+        private final SparseLongArray mPendingUids = new SparseLongArray();
+
+        void add(int uid) {
+            if (mPendingUids.indexOfKey(uid) < 0) {
+                mPendingUids.put(uid, SystemClock.elapsedRealtime());
+            }
+        }
+
+        void delete(int uid) {
+            if (mPendingUids.indexOfKey(uid) >= 0) {
+                long delay = SystemClock.elapsedRealtime() - mPendingUids.get(uid);
+                if (delay >= 1000) {
+                    Slog.wtf(TAG,
+                            "PendingStartActivityUids startActivity to updateOomAdj delay:"
+                            + delay + "ms,"
+                            + " uid:" + uid
+                            + " packageName:" + Settings.getPackageNameForUid(mContext, uid));
+                }
+                mPendingUids.delete(uid);
+            }
+        }
+
+        boolean isPendingTopUid(int uid) {
+            return mPendingUids.indexOfKey(uid) >= 0;
         }
     }
 
@@ -8791,7 +8832,18 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "isUidActive");
         }
         synchronized (this) {
-            return isUidActiveLocked(uid);
+            if (isUidActiveLocked(uid)) {
+                return true;
+            }
+        }
+
+        if (mInternal.isPendingTopUid(uid)) {
+            Slog.wtf(TAG, "PendingStartActivityUids isUidActive false but"
+                    + " isPendingTopUid true, uid:" + uid
+                    + " callingPackage:" + callingPackage);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -19736,6 +19788,25 @@ public class ActivityManagerService extends IActivityManager.Stub
         public boolean isDeviceOwner(int uid) {
             synchronized (ActivityManagerService.this) {
                 return uid >= 0 && mDeviceOwnerUid == uid;
+            }
+        }
+
+        @Override
+        public void updatePendingTopUid(int uid, boolean pending) {
+            synchronized (mPendingStartActivityUidsLocked) {
+                if (pending) {
+                    mPendingStartActivityUidsLocked.add(uid);
+                } else {
+                    mPendingStartActivityUidsLocked.delete(uid);
+                }
+            }
+
+        }
+
+        @Override
+        public boolean isPendingTopUid(int uid) {
+            synchronized (mPendingStartActivityUidsLocked) {
+                return mPendingStartActivityUidsLocked.isPendingTopUid(uid);
             }
         }
     }
