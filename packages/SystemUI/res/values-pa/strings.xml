@@ -1027,6 +1027,13 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ।</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"ਹਟਾਇਆ ਗਿਆ"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ, ਸਥਾਨ <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ਮਨਪਸੰਦ ਵਿੱਚੋਂ ਹਟਾਇਆ ਗਿਆ"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ਮਨਪਸੰਦ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ਮਨਪਸੰਦ ਵਿੱਚੋਂ ਹਟਾਓ"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> ਸਥਾਨ \'ਤੇ ਲਿਜਾਓ"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ਕੰਟਰੋਲ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ਪਹੁੰਚ ਕਰਨ ਲਈ ਪਾਵਰ ਮੀਨੂ ਤੋਂ ਕੰਟਰੋਲ ਚੁਣੋ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>

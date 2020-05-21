@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> नियंत्रणे जोडली.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> नियंत्रण जोडले.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"काढून टाकले"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"आवडले"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"आवडले, स्थान <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"नावडले"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"आवडते"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"नावडते"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> स्थानावर हलवा"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"नियंत्रणे"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"पॉवर मेनूमधून अ‍ॅक्सेस करण्यासाठी नियंत्रणे निवडा"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
