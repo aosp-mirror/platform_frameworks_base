@@ -1027,6 +1027,13 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g>টি কন্ট্রোল যোগ করা হয়েছে।</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g>টি কন্ট্রোল যোগ করা হয়েছে।</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"সরানো হয়েছে"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"পছন্দসই হিসেবে চিহ্নিত করেছেন"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"পছন্দসই হিসেবে চিহ্নিত করেছেন, অবস্থান <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"পছন্দসই থেকে সরিয়ে দিয়েছেন"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"পছন্দসই"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"পছন্দসই থেকে সরান"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> অবস্থানে সরান"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"নিয়ন্ত্রণ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"যেসব কন্ট্রোল অ্যাক্সেস করতে চান সেগুলি পাওয়ার মেনু থেকে বেছে নিন"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"কন্ট্রোলগুলিকে আবার সাজানোর জন্য ধরে রেখে টেনে আনুন"</string>
