@@ -220,7 +220,7 @@
                     android:clickable="false"
                     android:focusable="false"
                     android:ellipsize="end"
-                    android:maxLines="2"
+                    android:maxLines="3"
                     android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
             </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
@@ -272,7 +272,7 @@
                     android:clickable="false"
                     android:focusable="false"
                     android:ellipsize="end"
-                    android:maxLines="2"
+                    android:maxLines="3"
                     android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
             </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
@@ -321,11 +321,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/notification_importance_button_description_top_margin"
                     android:visibility="gone"
-                    android:text="@string/notification_channel_summary_low"
+                    android:text="@string/notification_conversation_summary_low"
                     android:clickable="false"
                     android:focusable="false"
                     android:ellipsize="end"
-                    android:maxLines="2"
+                    android:maxLines="3"
                     android:textAppearance="@style/TextAppearance.NotificationImportanceDetail"/>
             </com.android.systemui.statusbar.notification.row.ButtonLinearLayout>
 
