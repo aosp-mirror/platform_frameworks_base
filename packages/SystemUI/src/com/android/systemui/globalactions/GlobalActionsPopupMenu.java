@@ -100,11 +100,12 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
                 int w = child.getMeasuredWidth();
                 maxWidth = Math.max(w, maxWidth);
             }
-            int width = Math.max(maxWidth, (int) (parentWidth * 0.5) - 2 * mMenuHorizontalPadding);
+            int width = Math.max(maxWidth, (int) (parentWidth * 0.5) - 2 * mMenuHorizontalPadding)
+                    + 2 * mMenuHorizontalPadding;
             listView.setPadding(mMenuHorizontalPadding, mMenuVerticalPadding,
                     mMenuHorizontalPadding, mMenuVerticalPadding);
 
-            setWidth(width + 2 * mMenuHorizontalPadding);
+            setWidth(width);
             setHorizontalOffset(getAnchorView().getWidth() - mGlobalActionsSidePadding - width);
         }
 
