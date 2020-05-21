@@ -416,6 +416,31 @@ public class InfoMediaManagerTest {
     }
 
     @Test
+    public void getDeselectableMediaDevice_packageNameIsNull_returnFalse() {
+        mInfoMediaManager.mPackageName = null;
+
+        assertThat(mInfoMediaManager.getDeselectableMediaDevice()).isEmpty();
+    }
+
+    @Test
+    public void getDeselectableMediaDevice_checkList() {
+        final List<RoutingSessionInfo> routingSessionInfos = new ArrayList<>();
+        final RoutingSessionInfo info = mock(RoutingSessionInfo.class);
+        routingSessionInfos.add(info);
+        final List<MediaRoute2Info> mediaRoute2Infos = new ArrayList<>();
+        final MediaRoute2Info mediaRoute2Info = mock(MediaRoute2Info.class);
+        mediaRoute2Infos.add(mediaRoute2Info);
+        mShadowRouter2Manager.setRoutingSessions(routingSessionInfos);
+        mShadowRouter2Manager.setDeselectableRoutes(mediaRoute2Infos);
+        when(mediaRoute2Info.getName()).thenReturn(TEST_NAME);
+
+        final List<MediaDevice> mediaDevices = mInfoMediaManager.getDeselectableMediaDevice();
+
+        assertThat(mediaDevices.size()).isEqualTo(1);
+        assertThat(mediaDevices.get(0).getName()).isEqualTo(TEST_NAME);
+    }
+
+    @Test
     public void adjustSessionVolume_routingSessionInfoIsNull_noCrash() {
         mInfoMediaManager.adjustSessionVolume(null, 10);
     }
