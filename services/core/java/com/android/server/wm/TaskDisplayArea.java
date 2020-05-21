@@ -1275,14 +1275,10 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             return true;
         }
 
-        final int displayWindowingMode = getWindowingMode();
         if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
                 || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
             return supportsSplitScreen
-                    && WindowConfiguration.supportSplitScreenWindowingMode(activityType)
-                    // Freeform windows and split-screen windows don't mix well, so prevent
-                    // split windowing modes on freeform displays.
-                    && displayWindowingMode != WINDOWING_MODE_FREEFORM;
+                    && WindowConfiguration.supportSplitScreenWindowingMode(activityType);
         }
 
         if (!supportsFreeform && windowingMode == WINDOWING_MODE_FREEFORM) {
