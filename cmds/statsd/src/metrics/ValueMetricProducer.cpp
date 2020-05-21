@@ -989,8 +989,20 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
 
     if (mCurrentBucketIsSkipped) {
         mCurrentSkippedBucket.bucketStartTimeNs = mCurrentBucketStartTimeNs;
-        mCurrentSkippedBucket.bucketEndTimeNs = bucketEndTime;
+        // Fill in the gap if we skipped multiple buckets.
+        mCurrentSkippedBucket.bucketEndTimeNs =
+                numBucketsForward > 1 ? nextBucketStartTimeNs : bucketEndTime;
         mSkippedBuckets.emplace_back(mCurrentSkippedBucket);
+    }
+
+    // This means that the current bucket was not flushed before a forced bucket split.
+    if (bucketEndTime < nextBucketStartTimeNs && numBucketsForward <= 1) {
+        SkippedBucket bucketInGap;
+        bucketInGap.bucketStartTimeNs = bucketEndTime;
+        bucketInGap.bucketEndTimeNs = nextBucketStartTimeNs;
+        bucketInGap.dropEvents.emplace_back(
+                buildDropEvent(eventTimeNs, BucketDropReason::NO_DATA));
+        mSkippedBuckets.emplace_back(bucketInGap);
     }
 
     appendToFullBucket(eventTimeNs, fullBucketEndTimeNs);
