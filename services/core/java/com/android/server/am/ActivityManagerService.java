@@ -337,7 +337,6 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
-import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AlarmManagerInternal;
 import com.android.server.AttributeCache;
 import com.android.server.DeviceIdleInternal;
@@ -18832,39 +18831,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkContentProviderUriPermission(Uri uri, int userId,
                 int callingUid, int modeFlags) {
-            final Object wmLock = mActivityTaskManager.getGlobalLock();
-            if (Thread.currentThread().holdsLock(wmLock)
-                    && !Thread.currentThread().holdsLock(ActivityManagerService.this)) {
-                // We can find ourselves needing to check Uri permissions while already holding the
-                // WM lock, which means reaching back here for the AM lock would cause an inversion.
-                // The WM team has requested that we use the strategy below instead of shifting
-                // where Uri grants are calculated.
-                synchronized (wmLock) {
-                    final int[] result = new int[1];
-                    final Message msg = PooledLambda.obtainMessage(
-                            LocalService::checkContentProviderUriPermission,
-                            this, uri, userId, callingUid, modeFlags, wmLock, result);
-                    mHandler.sendMessage(msg);
-                    try {
-                        wmLock.wait();
-                    } catch (InterruptedException ignore) {
+            // We can find ourselves needing to check Uri permissions while
+            // already holding the WM lock, which means reaching back here for
+            // the AM lock would cause an inversion. The WM team has requested
+            // that we use the strategy below instead of shifting where Uri
+            // grants are calculated.
 
-                    }
-                    return result[0];
-                }
-            } else {
+            // Since we could also arrive here while holding the AM lock, we
+            // can't always delegate the call through the handler, and we need
+            // to delicately dance between the deadlocks.
+            if (Thread.currentThread().holdsLock(ActivityManagerService.this)) {
                 return ActivityManagerService.this.checkContentProviderUriPermission(uri,
                         userId, callingUid, modeFlags);
-            }
-        }
-
-        void checkContentProviderUriPermission(
-                Uri uri, int userId, int callingUid, int modeFlags, Object wmLock, int[] result) {
-            synchronized (ActivityManagerService.this) {
-                synchronized (wmLock) {
-                    result[0] = ActivityManagerService.this.checkContentProviderUriPermission(
-                                    uri, userId, callingUid, modeFlags);
-                    wmLock.notify();
+            } else {
+                final CompletableFuture<Integer> res = new CompletableFuture<>();
+                mHandler.post(() -> {
+                    res.complete(ActivityManagerService.this.checkContentProviderUriPermission(uri,
+                            userId, callingUid, modeFlags));
+                });
+                try {
+                    return res.get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new RuntimeException(e);
                 }
             }
         }
