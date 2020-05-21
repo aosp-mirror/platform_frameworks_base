@@ -7973,6 +7973,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         final int userHandle = UserHandle.getCallingUserId();
         boolean requireAutoTimeChanged = false;
         synchronized (getLockObject()) {
+            if (isManagedProfile(userHandle)) {
+                throw new SecurityException("Managed profile cannot set auto time required");
+            }
             ActiveAdmin admin = getActiveAdminForCallerLocked(who,
                     DeviceAdminInfo.USES_POLICY_PROFILE_OWNER);
             if (admin.requireAutoTime != required) {
