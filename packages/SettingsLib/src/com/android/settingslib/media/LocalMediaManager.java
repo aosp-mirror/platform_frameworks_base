@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2ProviderService.REASON_UNKNOWN_ERROR;
+
 import android.app.Notification;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -448,6 +450,8 @@ public class LocalMediaManager implements BluetoothCallback {
             if (mOnTransferBluetoothDevice != null && mOnTransferBluetoothDevice.isConnected()) {
                 connectDevice(mOnTransferBluetoothDevice);
                 mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_CONNECTED);
+                dispatchSelectedDeviceStateChanged(mOnTransferBluetoothDevice,
+                        MediaDeviceState.STATE_CONNECTED);
                 mOnTransferBluetoothDevice = null;
             }
         }
@@ -626,6 +630,7 @@ public class LocalMediaManager implements BluetoothCallback {
                 // Failed to connect
                 mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_DISCONNECTED);
                 mOnTransferBluetoothDevice = null;
+                dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
             }
             dispatchDeviceAttributesChanged();
         }
