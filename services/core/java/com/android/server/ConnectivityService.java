@@ -7134,6 +7134,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
             networkAgent.networkCapabilities.addCapability(NET_CAPABILITY_FOREGROUND);
 
             if (!createNativeNetwork(networkAgent)) return;
+            if (networkAgent.isVPN()) {
+                // Initialize the VPN capabilities to their starting values according to the
+                // underlying networks. This will avoid a spurious callback to
+                // onCapabilitiesUpdated being sent in updateAllVpnCapabilities below as
+                // the VPN would switch from its default, blank capabilities to those
+                // that reflect the capabilities of its underlying networks.
+                updateAllVpnsCapabilities();
+            }
             networkAgent.created = true;
         }
 
