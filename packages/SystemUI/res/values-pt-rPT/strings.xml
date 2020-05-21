@@ -709,11 +709,11 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Silencioso"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"Alertar"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Balão"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ajuda-o a focar-se sem som ou vibração."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Chama a sua atenção com som ou vibração."</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Ajuda-o a concentrar-se sem som ou vibração"</string>
+    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Chama a sua atenção com som ou vibração"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Chama a sua atenção com som ou vibração. As conversas da app <xliff:g id="APP_NAME">%1$s</xliff:g> aparecem como um balão por predefinição."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantém a sua atenção com um atalho flutuante para este conteúdo."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece na parte superior da secção de conversas e surge como um balão."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Aparece na parte superior da secção de conversas e surge como um balão"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Definições"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"A app <xliff:g id="APP_NAME">%1$s</xliff:g> não suporta definições específicas de conversas."</string>
@@ -1026,6 +1026,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> controlos adicionados.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> controlo adicionado.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Removido"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Adicionado aos favoritos"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Adicionados aos favoritos, posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Removido dos favoritos"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"adicionar aos favoritos"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"remover dos favoritos"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Mover para a posição <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controlos"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Escolha os controlos a que pretende aceder a partir do menu ligar/desligar."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos."</string>

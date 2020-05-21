@@ -1026,6 +1026,13 @@
       <item quantity="other">Đã thêm <xliff:g id="NUMBER_1">%s</xliff:g> tùy chọn điều khiển.</item>
       <item quantity="one">Đã thêm <xliff:g id="NUMBER_0">%s</xliff:g> tùy chọn điều khiển.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Đã xóa"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Được yêu thích"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Được yêu thích, vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Không được yêu thích"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"đánh dấu là yêu thích"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"bỏ yêu thích"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Di chuyển tới vị trí số <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Các tùy chọn điều khiển"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chọn các tùy chọn điều khiển để truy cập từ trình đơn nguồn"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Giữ và kéo để sắp xếp lại các tùy chọn điều khiển"</string>

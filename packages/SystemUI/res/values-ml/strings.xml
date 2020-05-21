@@ -1026,6 +1026,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> നിയന്ത്രണങ്ങൾ ചേർത്തു.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> നിയന്ത്രണം ചേർത്തു.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"നീക്കം ചെയ്‌തു"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"പ്രിയപ്പെട്ടതാക്കി"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"പ്രിയപ്പെട്ടതാക്കി, സ്ഥാനം <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"പ്രിയപ്പെട്ടതല്ലാതാക്കി"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"പ്രിയപ്പെട്ടതാക്കുക"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"പ്രിയപ്പെട്ടതല്ലാതാക്കുക"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>-ാം സ്ഥാനത്തേയ്ക്ക് നീക്കുക"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"നിയന്ത്രണങ്ങൾ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"പവർ മെനുവിൽ നിന്ന് ആക്സസ് ചെയ്യേണ്ട നിയന്ത്രണങ്ങൾ തിരഞ്ഞെടുക്കുക"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"നിയന്ത്രണങ്ങൾ പുനഃക്രമീകരിക്കാൻ പിടിച്ച് വലിച്ചിടുക"</string>
