@@ -577,7 +577,7 @@ public class DisplayRotation {
     boolean shouldRotateSeamlessly(int oldRotation, int newRotation, boolean forceUpdate) {
         // Display doesn't need to be frozen because application has been started in correct
         // rotation already, so the rest of the windows can use seamless rotation.
-        if (mDisplayContent.mFixedRotationLaunchingApp != null) {
+        if (mDisplayContent.getFixedRotationLaunchingApp() != null) {
             return true;
         }
 
