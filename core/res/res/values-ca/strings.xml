@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"El dispositiu està gestionat"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"La teva organització gestiona aquest dispositiu i és possible que supervisi el trànsit de xarxa. Toca per obtenir més informació."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Les aplicacions poden accedir a la teva ubicació"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Contacta amb l\'administrador de TI per obtenir més informació"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Contacta amb l\'administrador de TI per a més informació"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detector de país"</string>
     <string name="location_service" msgid="2439187616018455546">"Servei d\'ubicació"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Servei GNSS"</string>
@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha desactivat la impressió."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa el perfil de treball"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Les teves aplicacions personals estan bloquejades fins que activis el perfil de treball"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Les aplicacions personals es bloquejaran demà"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Les aplicacions personals es bloquejaran el dia <xliff:g id="DATE">%1$s</xliff:g> a les <xliff:g id="TIME">%2$s</xliff:g>. El teu perfil de treball no pots estar desactivat més de: <xliff:g id="NUMBER">%3$d</xliff:g> dies."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Activa el perfil de treball"</string>
     <string name="me" msgid="6207584824693813140">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcions de la tauleta"</string>
@@ -1297,7 +1297,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"No cal cap permís"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"pot ser que comporti càrrecs"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"D\'acord"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"S\'està carregant el dispositiu per USB"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Carregant el dispositiu per USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"S\'està carregant el dispositiu connectat per USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"S\'ha activat la transferència de fitxers per USB"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"S\'ha activat el mode PTP per USB"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"S\'està comprovant el suport (<xliff:g id="NAME">%s</xliff:g>)…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"S\'està revisant el contingut actual"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Suport extern nou (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toca per configurar"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"És possible que hagis de reformatar el dispositiu. Toca per expulsar."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Per transferir fotos i fitxers multimèdia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problema amb el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toca per solucionar el problema"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"La unitat següent està malmesa: <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per solucionar-ho."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"És possible que hagis de reformatar el dispositiu. Toca per expulsar."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> no és compatible"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> no funciona"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"El dispositiu no admet <xliff:g id="NAME">%s</xliff:g>. Toca per configurar-la en un format compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Aquest dispositiu no admet <xliff:g id="NAME">%s</xliff:g>. Selecciona-la per configurar-la en un format compatible."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"El dispositiu no admet <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"És possible que hagis de reformatar el dispositiu"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"S\'ha extret <xliff:g id="NAME">%s</xliff:g> de manera inesperada"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Expulsa el suport extern abans d\'extreure\'l per evitar perdre\'n el contingut"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"S\'ha suprimit el suport (<xliff:g id="NAME">%s</xliff:g>)"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Vols activar les funcions d\'accessibilitat?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Si mantens premudes les dues tecles de volum durant uns segons, s\'activaran les funcions d\'accessibilitat. Això podria canviar el funcionament del teu dispositiu.\n\nFuncions actuals:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPots canviar les funcions seleccionades a Configuració &gt; Accessibilitat."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Vols activar TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Si mantens premudes les dues tecles de volum durant uns segons, s\'activarà TalkBack, un lector de pantalla que pot ajudar persones invidents o amb visió reduïda. TalkBack canvia completament el funcionament del teu dispositiu.\n\nPots canviar la funció d\'aquesta drecera a Configuració &gt; Accessibilitat."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Vols activar <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Si mantens premudes les dues tecles de volum durant uns segons, la funció d\'accessibilitat <xliff:g id="SERVICE">%1$s</xliff:g> s\'activarà. Això podria canviar el funcionament del teu dispositiu.\n\nPots canviar la funció d\'aquesta drecera a Configuració &gt; Accessibilitat."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activa"</string>

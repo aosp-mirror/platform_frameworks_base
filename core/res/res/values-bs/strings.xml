@@ -205,7 +205,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Uključite radni profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše lične aplikacije će biti blokirane dok ne uključite radni profil"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Vaše lične aplikacije će se blokirati sutra"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Lične aplikacije će biti blokirane <xliff:g id="DATE">%1$s</xliff:g> u <xliff:g id="TIME">%2$s</xliff:g>. Vaš radni profil ne može ostati isključen duže od <xliff:g id="NUMBER">%3$d</xliff:g> dana."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Uključi radni profil"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije tableta"</string>
@@ -547,11 +547,11 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autentifikacija je otkazana"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nije postavljen PIN, uzorak niti lozinka"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Greška pri autentifikaciji"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelomični otisak prsta. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Otkriven je djelimični otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Obrada otiska prsta nije uspjela. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Senzor za otisak prsta je prljav. Očistite ga i pokušajte ponovo."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Prst je uklonjen prebrzo. Pokušajte ponovo."</string>
-    <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Prst je uklonjen presporo. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Prebrzo ste pomjerili prst. Pokušajte ponovo."</string>
+    <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Presporo ste pomjerili prst. Pokušajte ponovo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_authenticated" msgid="2024862866860283100">"Otisak prsta je potvrđen"</string>
@@ -776,7 +776,7 @@
     <string name="emailTypeCustom" msgid="1809435350482181786">"Prilagođeno"</string>
     <string name="emailTypeHome" msgid="1597116303154775999">"Privatna"</string>
     <string name="emailTypeWork" msgid="2020095414401882111">"Posao"</string>
-    <string name="emailTypeOther" msgid="5131130857030897465">"Ostalo"</string>
+    <string name="emailTypeOther" msgid="5131130857030897465">"Drugo"</string>
     <string name="emailTypeMobile" msgid="787155077375364230">"Mobilni"</string>
     <string name="postalTypeCustom" msgid="5645590470242939129">"Prilagođeno"</string>
     <string name="postalTypeHome" msgid="7562272480949727912">"Kućna adresa"</string>
@@ -1365,17 +1365,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Provjeravanje medija <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Pregledanje trenutnog sadržaja"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Novi medij <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ne funkcionira"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dodirnite za postavke"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Možda ćete morati ponovo formatirati uređaj. Dodirnite da izbacite."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prebacivanje slika i medijskih fajlova"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem s medijem <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ne funkcionira"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dodirnite da popravite"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Uređaj <xliff:g id="NAME">%s</xliff:g> je oštećen. Odaberite za popravak."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Možda ćete morati ponovo formatirati uređaj. Dodirnite da izbacite."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Uređaj <xliff:g id="NAME">%s</xliff:g> nije podržan"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ne funkcionira"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da biste ga postavili u podržanom formatu."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da ga postavite u podržanom formatu."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Ovaj uređaj ne podržava uređaj <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Možda ćete morati ponovo formatirati uređaj"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Neočekivano uklonjen uređaj <xliff:g id="NAME">%s</xliff:g>"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Izbacite medij prije uklanjanja da izbjegnete gubitak sadržaja"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Medij <xliff:g id="NAME">%s</xliff:g> je uklonjen"</string>
@@ -1648,8 +1651,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Uključiti funkcije pristupačnosti?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ako nekoliko sekundi držite pritisnute obje tipke za jačinu zvuka, uključit ćete funkcije pristupačnosti. Ovo može uticati na način rada uređaja.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nOdabrane funkcije možete izmijeniti u odjeljku Postavke &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Uključiti Talkback?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ako nekoliko sekundi držite pritisnute obje tipke za jačinu zvuka uključit ćete Talkback, čitač ekrana koji je od pomoći slijepim ili slabovidim osobama. Talkback u potpunosti mijenja način rada uređaja.\n\nOvu prečicu možete zamijeniti drugom funkcijom u odjeljku Postavke &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Uključiti <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ako nekoliko sekundi držite pritisnute obje tipke za jačinu zvuka, uključit ćete funkciju pristupačnosti <xliff:g id="SERVICE">%1$s</xliff:g>. Ovo može promijeniti način rada uređaja.\n\nOvu prečicu možete zamijeniti drugom funkcijom u odjeljku Postavke &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Uključi"</string>

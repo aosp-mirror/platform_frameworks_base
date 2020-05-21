@@ -191,8 +191,8 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Ադմինիստրատորը տրամադրել է սարքը անձնական օգտագործման համար"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Սարքը կառավարվում է"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ձեր կազմակերպությունը կառավարում է այս սարքը և կարող է վերահսկել ցանցի թրաֆիկը: Հպեք՝ մանրամասները դիտելու համար:"</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"Հավելվածներին կարող են հասանելի լինել ձեր գտնվելու վայրի մասին տվյալները"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Ավելին իմանալու համար դիմեք ձեր ՏՏ ադմինիստրատորին։"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Հավելվածներին հասանելի է ձեր տեղադրությունը"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Մանրամասներն իմացեք ՏՏ ադմինիստրատորից"</string>
     <string name="country_detector" msgid="7023275114706088854">"Երկրի որոշում"</string>
     <string name="location_service" msgid="2439187616018455546">"Տեղորոշման ծառայություն"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS ծառայություն"</string>
@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Տպումն անջատված է <xliff:g id="OWNER_APP">%s</xliff:g> հավելվածի կողմից։"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Միացրեք աշխատանքային պորֆիլը"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Անձնական հավելվածներն արգելափակված կլինեն, մինչև չմիացնեք ձեր աշխատանքային պրոֆիլը"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Ձեր անձնական հավելվածները վաղը կարգելափակվեն"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Անձնական հավելվածները <xliff:g id="DATE">%1$s</xliff:g>-ին ժամը <xliff:g id="TIME">%2$s</xliff:g> կարգելափակվեն։ Ձեր աշխատանքային պրոֆիլը չի կարող <xliff:g id="NUMBER">%3$d</xliff:g> օրից ավել անջատված մնալ։"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Միացնել աշխատանքային պրոֆիլը"</string>
     <string name="me" msgid="6207584824693813140">"Իմ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Պլանշետի ընտրանքները"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի ստուգում…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Բովանդակության ստուգում"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Նոր հիշասարք (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Հպեք՝ կարգավորելու համար"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Լուսանկարներ և մեդիա ֆայլեր տեղափոխելու համար"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> հիշասարքի հետ կապված խնդիր կա"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Հպեք՝ շտկելու համար"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>-ը վնասված է: Ընտրեք՝ շտկելու համար:"</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը։ Հպեք՝ հեռացնելու համար։"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Չապահովվող <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>ը չի աշխատում"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Հպեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Այս սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>-ը: Ընտրեք՝ աջակցվող ձևաչափով կարգավորելու համար:"</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Սարքը չի աջակցում այս <xliff:g id="NAME">%s</xliff:g>ը։"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Կարող է պահանջվել, որ նորից ֆորմատավորեք սարքը"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>-ը հեռացվել է առանց անջատելու"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Տվյալներ չկորցնելու համար կրիչը հեռացնելուց առաջ անջատեք այն"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> հիշասարքը հեռացվել է"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Միացնե՞լ հատուկ գործառույթները"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք հատուկ գործառույթները։ Դրա արդյունքում սարքի աշխատաեղանակը կարող է փոխվել։\n\nԸնթացիկ գործառույթներ՝\n<xliff:g id="SERVICE">%1$s</xliff:g>\nԸնտրված գործառույթները փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Միացնե՞լ TalkBack-ը"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք TalkBack-ը, որը էկրանի ընթերցիչ է։ Այն օգտակար է կույր և տեսողական խնդիրներ ունեցող մարդկանց համար։ TalkBack-ն ամբողջությամբ կփոխի սարքի աշխատաեղանակը։\n\nԱյս դյուրանցումը մեկ այլ գործառույթով փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Միացնե՞լ <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ձայնի կարգավորման երկու կոճակները մի քանի վայրկյան սեղմած պահելով կմիացնեք <xliff:g id="SERVICE">%1$s</xliff:g> ծառայությունը, որը հատուկ գործառույթ է։ Դրա արդյունքում սարքի աշխատաեղանակը կարող է փոխվել։\n\nԱյս դյուրանցումը մեկ այլ գործառույթով փոխելու համար անցեք Կարգավորումներ &gt; Հատուկ գործառույթներ։"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Միացնել"</string>
@@ -2048,8 +2049,8 @@
     <string name="as_app_forced_to_restricted_bucket" msgid="8233871289353898964">"<xliff:g id="PACKAGE_NAME">%1$s</xliff:g> փաթեթը գցվեց ՍԱՀՄԱՆԱՓԱԿՎԱԾ զամբյուղի մեջ"</string>
     <string name="conversation_single_line_name_display" msgid="8958948312915255999">"<xliff:g id="SENDER_NAME">%1$s</xliff:g>՝"</string>
     <string name="conversation_single_line_image_placeholder" msgid="6983271082911936900">"օգտատերը պատկեր է ուղարկել"</string>
-    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Նամակագրություն"</string>
-    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Խմբային նամակագրություն"</string>
+    <string name="conversation_title_fallback_one_to_one" msgid="1980753619726908614">"Զրույց"</string>
+    <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"Խմբային զրույց"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"Անձնական"</string>
     <string name="resolver_work_tab" msgid="2690019516263167035">"Աշխատանքային"</string>
