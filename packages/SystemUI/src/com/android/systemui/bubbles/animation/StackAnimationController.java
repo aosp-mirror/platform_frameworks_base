@@ -691,12 +691,22 @@ public class StackAnimationController extends
                 PhysicsAnimationLayout.getReadablePropertyName(property),
                 finalPosition));
 
+        // Whether we're springing towards the touch location, rather than to a position on the
+        // sides of the screen.
+        final boolean isSpringingTowardsTouch = mSpringToTouchOnNextMotionEvent;
+
         StackPositionProperty firstBubbleProperty = new StackPositionProperty(property);
         SpringAnimation springAnimation =
                 new SpringAnimation(this, firstBubbleProperty)
                         .setSpring(spring)
                         .addEndListener((dynamicAnimation, b, v, v1) -> {
-                            mRestingStackPosition.set(mStackPosition);
+                            if (!isSpringingTowardsTouch) {
+                                // If we're springing towards the touch position, don't save the
+                                // resting position - the touch location is not a valid resting
+                                // position. We'll set this when the stack springs to the left or
+                                // right side of the screen after the touch gesture ends.
+                                mRestingStackPosition.set(mStackPosition);
+                            }
 
                             if (after != null) {
                                 for (Runnable callback : after) {
