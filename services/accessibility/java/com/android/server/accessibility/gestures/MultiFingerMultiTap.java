@@ -197,6 +197,7 @@ class MultiFingerMultiTap extends GestureMatcher {
         if (getState() == STATE_GESTURE_STARTED || getState() == STATE_CLEAR) {
             // Needs more fingers lifted within the tap timeout
             // after reaching the target number of fingers are down.
+            cancelAfterTapTimeout(event, rawEvent, policyFlags);
         } else {
             cancelGesture(event, rawEvent, policyFlags);
         }
