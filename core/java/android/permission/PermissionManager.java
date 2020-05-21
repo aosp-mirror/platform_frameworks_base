@@ -333,7 +333,7 @@ public final class PermissionManager {
 
     /**
      * Gets the list of packages that have permissions that specified
-     * {@code allowDontAutoRevokePermissions=true} in their
+     * {@code autoRevokePermissions=disallowed} in their
      * {@code application} manifest declaration.
      *
      * @return the list of packages for current user
