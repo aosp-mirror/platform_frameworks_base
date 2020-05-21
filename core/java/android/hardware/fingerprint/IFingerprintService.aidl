@@ -84,12 +84,6 @@ interface IFingerprintService {
     // Determine if a user has at least one enrolled fingerprint
     boolean hasEnrolledFingerprints(int groupId, String opPackageName);
 
-    // Gets the number of hardware devices
-    // int getHardwareDeviceCount();
-
-    // Gets the unique device id for hardware enumerated at i
-    // long getHardwareDevice(int i);
-
     // Gets the authenticator ID for fingerprint
     long getAuthenticatorId();
 
@@ -101,9 +95,6 @@ interface IFingerprintService {
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);
-
-    // Enumerate all fingerprints
-    void enumerate(IBinder token, int userId, IFingerprintServiceReceiver receiver);
 
     // Check if a client request is currently being handled
     boolean isClientActive();
