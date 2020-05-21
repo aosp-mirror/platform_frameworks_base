@@ -5945,17 +5945,6 @@ public class DevicePolicyManager {
     }
 
     /**
-     * Determine whether or not creating a guest user has been disabled for the device
-     *
-     * @hide
-     */
-    public boolean getGuestUserDisabled(@Nullable ComponentName admin) {
-        // Currently guest users can always be created if multi-user is enabled
-        // TODO introduce a policy for guest user creation
-        return false;
-    }
-
-    /**
      * Called by a device/profile owner to set whether the screen capture is disabled. Disabling
      * screen capture also prevents the content from being shown on display devices that do not have
      * a secure video output. See {@link android.view.Display#FLAG_SECURE} for more details about
