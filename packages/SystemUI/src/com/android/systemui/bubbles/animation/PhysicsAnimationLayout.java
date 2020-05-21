@@ -767,6 +767,10 @@ public class PhysicsAnimationLayout extends FrameLayout {
                 int targetAnimDuration,
                 TimeInterpolator targetAnimInterpolator,
                 Runnable... pathAnimEndActions) {
+            if (mPathAnimator != null) {
+                mPathAnimator.cancel();
+            }
+
             mPathAnimator = ObjectAnimator.ofFloat(
                     this, mCurrentPointOnPathXProperty, mCurrentPointOnPathYProperty, path);
 
