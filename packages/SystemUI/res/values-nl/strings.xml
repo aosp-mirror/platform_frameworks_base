@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> bedieningselementen toegevoegd.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> bedieningselement toegevoegd.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Verwijderd"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Gemarkeerd als favoriet"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Gemarkeerd als favoriet, positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Verwijderd als favoriet"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"als favoriet markeren"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het aan/uit-menu wilt kunnen gebruiken"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
