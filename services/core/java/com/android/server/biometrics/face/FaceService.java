@@ -68,7 +68,6 @@ import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
 import com.android.server.biometrics.Constants;
-import com.android.server.biometrics.EnumerateClient;
 import com.android.server.biometrics.RemovalClient;
 
 import org.json.JSONArray;
@@ -517,23 +516,6 @@ public class FaceService extends BiometricServiceBase {
                 }
             };
             removeInternal(client);
-        }
-
-        @Override
-        public void enumerate(final IBinder token, final int userId,
-                final IFaceServiceReceiver receiver) {
-            checkPermission(MANAGE_BIOMETRIC);
-
-            final boolean restricted = isRestricted();
-            final EnumerateClient client = new EnumerateClient(getContext(), getConstants(),
-                    mDaemonWrapper, token, new ServiceListenerImpl(receiver), userId,
-                    userId, restricted, getContext().getOpPackageName()) {
-                @Override
-                protected int statsModality() {
-                    return FaceService.this.statsModality();
-                }
-            };
-            enumerateInternal(client);
         }
 
         @Override
