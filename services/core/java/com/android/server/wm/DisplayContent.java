@@ -256,16 +256,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Most surfaces will be a child of this window. There are some special layers and windows
      * which are always on top of others and omitted from Screen-Magnification, for example the
      * strict mode flash or the magnification overlay itself. Those layers will be children of
-     * {@link #mOverlayContainers} where mWindowContainers contains everything else.
+     * {@link #mOverlayLayer} where mWindowContainers contains everything else.
      */
      // TODO(b/156425461) we don't need this extra layer between DisplayContent and DisplayArea.Root
     private final WindowContainers mWindowContainers =
             new WindowContainers("mWindowContainers", mWmService);
 
-    // Contains some special windows which are always on top of others and omitted from
-    // Screen-Magnification, for example the WindowMagnification windows.
-    private final NonAppWindowContainers mOverlayContainers =
-            new NonAppWindowContainers("mOverlayContainers", mWmService);
+    /**
+     * We organize all top-level Surfaces into the following layer.
+     * It contains a few Surfaces which are always on top of others, and omitted from
+     * Screen-Magnification, for example the strict mode flash or the fullscreen magnification
+     * overlay.
+     */
+    private SurfaceControl mOverlayLayer;
 
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
@@ -971,16 +974,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 .setOpaque(true)
                 .setContainerLayer();
         mSurfaceControl = b.setName("Root").setContainerLayer().build();
+        mOverlayLayer = b.setName("Display Overlays").setParent(mSurfaceControl).build();
 
         getPendingTransaction()
                 .setLayer(mSurfaceControl, 0)
                 .setLayerStack(mSurfaceControl, mDisplayId)
-                .show(mSurfaceControl);
+                .show(mSurfaceControl)
+                .setLayer(mOverlayLayer, Integer.MAX_VALUE)
+                .show(mOverlayLayer);
         getPendingTransaction().apply();
 
         // These are the only direct children we should ever have and they are permanent.
         super.addChild(mWindowContainers, null);
-        super.addChild(mOverlayContainers, null);
 
         mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
                 mWmService, this, mRootDisplayArea, mImeWindowsContainers);
@@ -2679,6 +2684,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPointerEventDispatcher.dispose();
             setRotationAnimation(null);
             mWmService.mAnimator.removeDisplayLocked(mDisplayId);
+            mOverlayLayer.release();
             mInputMonitor.onDisplayRemoved();
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
         } finally {
@@ -4309,62 +4315,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Window container class that contains all containers on this display that are not related to
-     * Apps. E.g. status bar.
-     */
-    private class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
-
-        private final String mName;
-        private final Dimmer mDimmer = new Dimmer(this);
-        private final Rect mTmpDimBoundsRect = new Rect();
-
-        NonAppWindowContainers(String name, WindowManagerService service) {
-            super(service);
-            mName = name;
-        }
-
-        @Override
-        boolean hasActivity() {
-            // I am a non-app-window-container :P
-            return false;
-        }
-
-        @Override
-        int getOrientation(int candidate) {
-            ProtoLog.w(WM_DEBUG_ORIENTATION, "NonAppWindowContainer cannot set orientation: %s",
-                    this);
-            return SCREEN_ORIENTATION_UNSET;
-        }
-
-        @Override
-        String getName() {
-            return mName;
-        }
-
-        @Override
-        Dimmer getDimmer() {
-            return mDimmer;
-        }
-
-        @Override
-        void prepareSurfaces() {
-            mDimmer.resetDimStates();
-            super.prepareSurfaces();
-            getBounds(mTmpDimBoundsRect);
-
-            if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
-                scheduleAnimation();
-            }
-        }
-
-        @Override
-        boolean shouldMagnify() {
-            // Omitted from Screen-Magnification
-            return false;
-        }
-    }
-
-    /**
      * Container for IME windows.
      *
      * This has some special behaviors:
@@ -4461,7 +4411,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Reparents the given surface to {@link #mOverlayContainers}' SurfaceControl.
+     * Reparents the given surface to {@link #mOverlayLayer} SurfaceControl.
      */
     void reparentToOverlay(Transaction transaction, SurfaceControl surface) {
         transaction.reparent(surface, getOverlayLayer());
@@ -4519,8 +4469,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     void assignChildLayers(SurfaceControl.Transaction t) {
         mWindowContainers.assignLayer(t, 0);
-        mOverlayContainers.assignLayer(t, 1);
-
         mWindowContainers.assignChildLayers(t);
     }
 
@@ -4797,7 +4745,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     SurfaceControl getOverlayLayer() {
-        return mOverlayContainers.getSurfaceControl();
+        return mOverlayLayer;
     }
 
     /**
