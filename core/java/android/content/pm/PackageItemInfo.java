@@ -24,6 +24,7 @@ import static android.text.TextUtils.makeSafeForPresentation;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.app.ActivityThread;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -194,7 +195,7 @@ public class PackageItemInfo {
      * item does not have a label, its name is returned.
      */
     public @NonNull CharSequence loadLabel(@NonNull PackageManager pm) {
-        if (sForceSafeLabels) {
+        if (sForceSafeLabels && !Objects.equals(packageName, ActivityThread.currentPackageName())) {
             return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_STRING_FLAG_TRIM
                     | SAFE_STRING_FLAG_FIRST_LINE);
         } else {
