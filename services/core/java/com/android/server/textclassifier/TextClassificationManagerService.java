@@ -74,7 +74,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Queue;
-import java.util.stream.Collectors;
 
 /**
  * A manager for TextClassifier services.
@@ -1047,18 +1046,26 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         private static void rewriteTextClassificationIcons(Bundle result) {
             final TextClassification classification = TextClassifierService.getResponse(result);
             boolean rewrite = false;
-            for (RemoteAction action : classification.getActions()) {
-                rewrite |= shouldRewriteIcon(action);
+            final List<RemoteAction> actions = classification.getActions();
+            final int size = actions.size();
+            final List<RemoteAction> validActions = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                final RemoteAction action = actions.get(i);
+                final RemoteAction validAction;
+                if (shouldRewriteIcon(action)) {
+                    rewrite = true;
+                    validAction = validAction(action);
+                } else {
+                    validAction = action;
+                }
+                validActions.add(validAction);
             }
             if (rewrite) {
                 TextClassifierService.putResponse(
                         result,
                         classification.toBuilder()
                                 .clearActions()
-                                .addActions(classification.getActions()
-                                        .stream()
-                                        .map(action -> validAction(action))
-                                        .collect(Collectors.toList()))
+                                .addActions(validActions)
                                 .build());
             }
         }
@@ -1066,29 +1073,30 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         private static void rewriteConversationActionsIcons(Bundle result) {
             final ConversationActions convActions = TextClassifierService.getResponse(result);
             boolean rewrite = false;
-            for (ConversationAction convAction : convActions.getConversationActions()) {
-                rewrite |= shouldRewriteIcon(convAction.getAction());
+            final List<ConversationAction> origConvActions = convActions.getConversationActions();
+            final int size = origConvActions.size();
+            final List<ConversationAction> validConvActions = new ArrayList<>(size);
+            for (int i = 0; i < size; i++) {
+                final ConversationAction convAction = origConvActions.get(i);
+                final ConversationAction validConvAction;
+                if (shouldRewriteIcon(convAction.getAction())) {
+                    rewrite = true;
+                    validConvAction = convAction.toBuilder()
+                            .setAction(validAction(convAction.getAction()))
+                            .build();
+                } else {
+                    validConvAction = convAction;
+                }
+                validConvActions.add(validConvAction);
             }
             if (rewrite) {
                 TextClassifierService.putResponse(
                         result,
-                        new ConversationActions(
-                                convActions.getConversationActions()
-                                        .stream()
-                                        .map(convAction -> convAction.toBuilder()
-                                                .setAction(validAction(convAction.getAction()))
-                                                .build())
-                                        .collect(Collectors.toList()),
-                                convActions.getId()));
+                        new ConversationActions(validConvActions, convActions.getId()));
             }
         }
 
-        @Nullable
-        private static RemoteAction validAction(@Nullable RemoteAction action) {
-            if (!shouldRewriteIcon(action)) {
-                return action;
-            }
-
+        private static RemoteAction validAction(RemoteAction action) {
             final RemoteAction newAction = new RemoteAction(
                     changeIcon(action.getIcon()),
                     action.getTitle(),
