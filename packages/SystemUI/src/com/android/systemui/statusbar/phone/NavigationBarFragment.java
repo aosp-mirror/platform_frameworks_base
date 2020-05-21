@@ -305,14 +305,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
-    private TaskStackChangeListener mTasksFrozenListener = new TaskStackChangeListener() {
-        @Override
-        public void onRecentTaskListFrozenChanged(boolean frozen) {
-            mFrozenTasks = frozen;
-            orientSecondaryHomeHandle();
-        }
-    };
-
     private NavigationBarTransitions.DarkIntensityListener mOrientationHandleIntensityListener =
             new NavigationBarTransitions.DarkIntensityListener() {
                 @Override
@@ -510,7 +502,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
 
         initSecondaryHomeHandleForRotation();
-        ActivityManagerWrapper.getInstance().registerTaskStackListener(mTasksFrozenListener);
     }
 
     @Override
@@ -527,7 +518,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         mOverviewProxyService.removeCallback(mOverviewProxyListener);
         mBroadcastDispatcher.unregisterReceiver(mBroadcastReceiver);
-        ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTasksFrozenListener);
         if (mOrientationHandle != null) {
             resetSecondaryHandle();
             getContext().getSystemService(DisplayManager.class).unregisterDisplayListener(this);
@@ -594,7 +584,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             return;
         }
 
-        if (!mFrozenTasks) {
+        if (mStartingQuickSwitchRotation == -1) {
             resetSecondaryHandle();
         } else {
             int deltaRotation = deltaRotation(mCurrentRotation, mStartingQuickSwitchRotation);
