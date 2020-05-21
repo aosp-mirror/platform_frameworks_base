@@ -16,19 +16,14 @@
 
 package com.android.server.policy;
 
-import static android.Manifest.permission.READ_PHONE_STATE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_AUTO_REVOKED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKED_COMPAT;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED;
-import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
-import static android.content.pm.PackageManager.MATCH_ALL;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -366,43 +361,9 @@ public final class PermissionPolicyService extends SystemService {
         // Force synchronization as permissions might have changed
         synchronizePermissionsAndAppOpsForUser(userId);
 
-        restoreReadPhoneStatePermissions(userId);
-
         // Tell observers we are initialized for this user.
         if (callback != null) {
             callback.onInitialized(userId);
-        }
-    }
-
-    /**
-     * Ensure READ_PHONE_STATE user sensitive flags are assigned properly
-     * TODO ntmyren: Remove once propagated, and state is repaired
-     */
-    private void restoreReadPhoneStatePermissions(int userId) {
-        PackageManager pm = getContext().getPackageManager();
-        List<PackageInfo> packageInfos = pm.getInstalledPackagesAsUser(
-                MATCH_ALL | GET_PERMISSIONS, userId);
-        for (int i = packageInfos.size() - 1; i >= 0; i--) {
-            PackageInfo pI = packageInfos.get(i);
-            if (pI.requestedPermissions == null) {
-                continue;
-            }
-
-            UserHandle user = UserHandle.getUserHandleForUid(pI.applicationInfo.uid);
-            for (int j = pI.requestedPermissions.length - 1; j >= 0; j--) {
-                if (pI.requestedPermissions[j].equals(READ_PHONE_STATE)) {
-                    int flags = pm.getPermissionFlags(READ_PHONE_STATE, pI.packageName, user);
-                    // If the app is auto revoked for read phone state, and is only user sensitive
-                    // when granted, clear auto revoked flag.
-                    if ((flags & FLAG_PERMISSION_AUTO_REVOKED) != 0
-                            && (flags & FLAG_PERMISSION_USER_SENSITIVE_WHEN_GRANTED) != 0
-                            && (flags & FLAG_PERMISSION_USER_SENSITIVE_WHEN_DENIED) == 0) {
-                        pm.updatePermissionFlags(READ_PHONE_STATE, pI.packageName,
-                                FLAG_PERMISSION_AUTO_REVOKED, 0, user);
-                    }
-                    break;
-                }
-            }
         }
     }
 
