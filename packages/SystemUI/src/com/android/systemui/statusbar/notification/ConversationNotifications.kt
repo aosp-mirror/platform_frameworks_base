@@ -45,8 +45,8 @@ class ConversationNotificationProcessor @Inject constructor(
                     Notification.MessagingStyle.CONVERSATION_TYPE_NORMAL
         entry.ranking.shortcutInfo?.let { shortcutInfo ->
             messagingStyle.shortcutIcon = launcherApps.getShortcutIcon(shortcutInfo)
-            shortcutInfo.shortLabel?.let { shortLabel ->
-                messagingStyle.conversationTitle = shortLabel
+            shortcutInfo.label?.let { label ->
+                messagingStyle.conversationTitle = label
             }
         }
         messagingStyle.unreadMessageCount =
