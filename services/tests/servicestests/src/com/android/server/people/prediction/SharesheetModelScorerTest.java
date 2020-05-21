@@ -31,6 +31,7 @@ import android.app.usage.UsageEvents;
 import android.os.UserHandle;
 import android.util.Range;
 
+import com.android.server.people.data.AppUsageStatsData;
 import com.android.server.people.data.DataManager;
 import com.android.server.people.data.Event;
 import com.android.server.people.data.EventHistory;
@@ -257,6 +258,39 @@ public final class SharesheetModelScorerTest {
     }
 
     @Test
+    public void testComputeScoreForAppShare_promoteFrequentlyChosenApps() {
+        when(mEventHistory1.getEventIndex(anySet())).thenReturn(mEventIndex1);
+        when(mEventHistory2.getEventIndex(anySet())).thenReturn(mEventIndex2);
+        when(mEventHistory3.getEventIndex(anySet())).thenReturn(mEventIndex3);
+        when(mEventHistory4.getEventIndex(anySet())).thenReturn(mEventIndex4);
+        when(mEventHistory5.getEventIndex(anySet())).thenReturn(mEventIndex5);
+        when(mEventHistory1.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex6);
+        when(mEventHistory2.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex7);
+        when(mEventHistory3.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex8);
+        when(mEventHistory4.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex9);
+        when(mEventHistory5.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex10);
+        when(mDataManager.queryAppUsageStats(anyInt(), anyLong(), anyLong(), anySet()))
+                .thenReturn(
+                        Map.of(PACKAGE_1, new AppUsageStatsData(1, 0),
+                                PACKAGE_2, new AppUsageStatsData(2, 0),
+                                PACKAGE_3, new AppUsageStatsData(3, 0)));
+
+        SharesheetModelScorer.computeScoreForAppShare(
+                List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
+                        mShareTarget6),
+                Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
+
+        verify(mDataManager, times(1)).queryAppUsageStats(anyInt(), anyLong(), anyLong(),
+                anySet());
+        assertEquals(0.9f, mShareTarget5.getScore(), DELTA);
+        assertEquals(0.6f, mShareTarget3.getScore(), DELTA);
+        assertEquals(0.3f, mShareTarget1.getScore(), DELTA);
+        assertEquals(0f, mShareTarget2.getScore(), DELTA);
+        assertEquals(0f, mShareTarget4.getScore(), DELTA);
+        assertEquals(0f, mShareTarget6.getScore(), DELTA);
+    }
+
+    @Test
     public void testComputeScoreForAppShare_promoteFrequentlyUsedApps() {
         when(mEventHistory1.getEventIndex(anySet())).thenReturn(mEventIndex1);
         when(mEventHistory2.getEventIndex(anySet())).thenReturn(mEventIndex2);
@@ -268,22 +302,22 @@ public final class SharesheetModelScorerTest {
         when(mEventHistory3.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex8);
         when(mEventHistory4.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex9);
         when(mEventHistory5.getEventIndex(Event.TYPE_SHARE_TEXT)).thenReturn(mEventIndex10);
-        when(mDataManager.queryAppLaunchCount(anyInt(), anyLong(), anyLong(), anySet()))
+        when(mDataManager.queryAppUsageStats(anyInt(), anyLong(), anyLong(), anySet()))
                 .thenReturn(
-                        Map.of(PACKAGE_1, 1,
-                                PACKAGE_2, 2,
-                                PACKAGE_3, 3));
+                        Map.of(PACKAGE_1, new AppUsageStatsData(0, 1),
+                                PACKAGE_2, new AppUsageStatsData(0, 2),
+                                PACKAGE_3, new AppUsageStatsData(1, 0)));
 
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
                 Event.TYPE_SHARE_TEXT, 20, NOW, mDataManager, USER_ID);
 
-        verify(mDataManager, times(1)).queryAppLaunchCount(anyInt(), anyLong(), anyLong(),
+        verify(mDataManager, times(1)).queryAppUsageStats(anyInt(), anyLong(), anyLong(),
                 anySet());
-        assertEquals(0.3f, mShareTarget5.getScore(), DELTA);
+        assertEquals(0.9f, mShareTarget5.getScore(), DELTA);
         assertEquals(0.27f, mShareTarget3.getScore(), DELTA);
-        assertEquals(0.243f, mShareTarget1.getScore(), DELTA);
+        assertEquals(0.135f, mShareTarget1.getScore(), DELTA);
         assertEquals(0f, mShareTarget2.getScore(), DELTA);
         assertEquals(0f, mShareTarget4.getScore(), DELTA);
         assertEquals(0f, mShareTarget6.getScore(), DELTA);
@@ -306,18 +340,19 @@ public final class SharesheetModelScorerTest {
         when(mEventIndex3.getMostRecentActiveTimeSlot()).thenReturn(FIVE_DAYS_AGO);
         when(mEventIndex4.getMostRecentActiveTimeSlot()).thenReturn(EIGHT_DAYS_AGO);
         when(mEventIndex5.getMostRecentActiveTimeSlot()).thenReturn(null);
-        when(mDataManager.queryAppLaunchCount(anyInt(), anyLong(), anyLong(), anySet()))
+        when(mDataManager.queryAppUsageStats(anyInt(), anyLong(), anyLong(), anySet()))
                 .thenReturn(
-                        Map.of(PACKAGE_1, 1,
-                                PACKAGE_2, 2,
-                                PACKAGE_3, 3));
+                        Map.of(PACKAGE_1, new AppUsageStatsData(0, 1),
+                                PACKAGE_2, new AppUsageStatsData(0, 2),
+                                PACKAGE_3, new AppUsageStatsData(1, 0)));
 
         SharesheetModelScorer.computeScoreForAppShare(
                 List.of(mShareTarget1, mShareTarget2, mShareTarget3, mShareTarget4, mShareTarget5,
                         mShareTarget6),
                 Event.TYPE_SHARE_TEXT, 4, NOW, mDataManager, USER_ID);
 
-        verify(mDataManager, never()).queryAppLaunchCount(anyInt(), anyLong(), anyLong(), anySet());
+        verify(mDataManager, never()).queryAppUsageStats(anyInt(), anyLong(), anyLong(),
+                anySet());
         assertEquals(0.4f, mShareTarget1.getScore(), DELTA);
         assertEquals(0.35f, mShareTarget2.getScore(), DELTA);
         assertEquals(0.33f, mShareTarget3.getScore(), DELTA);
