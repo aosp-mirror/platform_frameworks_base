@@ -709,7 +709,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Mode silencieux"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"Alertes"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bulle"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Vous aider à vous concentrer, sans son ni vibration."</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Vous aide à vous concentrer, sans son ni vibration."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Attire votre attention à l\'aide de sons et de vibrations."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Attire votre attention à l\'aide de sons et de vibrations. Conversations des bulles de <xliff:g id="APP_NAME">%1$s</xliff:g> par défaut."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Garde votre attention à l\'aide d\'un raccourci flottant vers ce contenu."</string>
@@ -1010,7 +1010,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"La navigation système a été mise à jour. Pour apporter des modifications, accédez au menu Paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez au menu Paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Veille"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aff. dans le haut de la section des conversations"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Afficher dans le haut de la section des conversations"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Afficher la photo de profil sur l\'écran verrouillé"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Sous forme de bulle flottante, par-dessus les applis"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompre le mode Ne pas déranger"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> commande ajoutée.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> commandes ajoutées.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Supprimé"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ajouté aux favoris"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ajouté aux favoris, en position <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Supprimé des favoris"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ajouter aux favoris"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"supprimer des favoris"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Déplacer l\'élément à la position <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Commandes"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Sélectionnez les commandes auxquelles vous souhaitez accéder à partir du menu de l\'interrupteur"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Maintenez le doigt sur l\'écran, puis glissez-le pour réorganiser les commandes"</string>
