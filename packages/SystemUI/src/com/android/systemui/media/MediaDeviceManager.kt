@@ -16,8 +16,12 @@
 
 package com.android.systemui.media
 
+import android.app.Notification
 import android.content.Context
 import android.service.notification.StatusBarNotification
+import android.media.MediaRouter2Manager
+import android.media.session.MediaSession
+import android.media.session.MediaController
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.dagger.qualifiers.Main
@@ -32,6 +36,7 @@ import javax.inject.Singleton
 class MediaDeviceManager @Inject constructor(
     private val context: Context,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
+    private val mr2manager: MediaRouter2Manager,
     private val featureFlag: MediaFeatureFlag,
     @Main private val fgExecutor: Executor
 ) {
@@ -52,7 +57,10 @@ class MediaDeviceManager @Inject constructor(
         if (featureFlag.enabled && isMediaNotification(sbn)) {
             var tok = entries[key]
             if (tok == null) {
-                tok = Token(key, localMediaManagerFactory.create(sbn.packageName))
+                val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
+                        as MediaSession.Token?
+                val controller = MediaController(context, token)
+                tok = Token(key, controller, localMediaManagerFactory.create(sbn.packageName))
                 entries[key] = tok
                 tok.start()
             }
@@ -72,7 +80,8 @@ class MediaDeviceManager @Inject constructor(
     }
 
     private fun processDevice(key: String, device: MediaDevice?) {
-        val data = MediaDeviceData(device?.icon, device?.name)
+        val enabled = device != null
+        val data = MediaDeviceData(enabled, device?.icon, device?.name)
         listeners.forEach {
             it.onMediaDeviceChanged(key, data)
         }
@@ -87,11 +96,13 @@ class MediaDeviceManager @Inject constructor(
 
     private inner class Token(
         val key: String,
+        val controller: MediaController,
         val localMediaManager: LocalMediaManager
     ) : LocalMediaManager.DeviceCallback {
+        private var started = false
         private var current: MediaDevice? = null
             set(value) {
-                if (value != field) {
+                if (!started || value != field) {
                     field = value
                     processDevice(key, value)
                 }
@@ -99,19 +110,28 @@ class MediaDeviceManager @Inject constructor(
         fun start() {
             localMediaManager.registerCallback(this)
             localMediaManager.startScan()
-            current = localMediaManager.getCurrentConnectedDevice()
+            updateCurrent()
+            started = true
         }
         fun stop() {
+            started = false
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
         }
         override fun onDeviceListUpdate(devices: List<MediaDevice>?) = fgExecutor.execute {
-            current = localMediaManager.getCurrentConnectedDevice()
+            updateCurrent()
         }
         override fun onSelectedDeviceStateChanged(device: MediaDevice, state: Int) {
             fgExecutor.execute {
-                current = device
+                updateCurrent()
             }
+        }
+        private fun updateCurrent() {
+            val device = localMediaManager.getCurrentConnectedDevice()
+            val route = mr2manager.getRoutingSessionForMediaController(controller)
+            // If we get a null route, then don't trust the device. Just set to null to disable the
+            // output switcher chip.
+            current = if (route != null) device else null
         }
     }
 }
