@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.WindowManager;
@@ -32,6 +31,8 @@ import com.android.systemui.R;
 /**
  * Customized widget for use in the GlobalActionsDialog. Ensures common positioning and user
  * interactions.
+ *
+ * It should be created with a {@link Context} with the right theme
  */
 public class GlobalActionsPopupMenu extends ListPopupWindow {
     private Context mContext;
@@ -42,15 +43,17 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
     private ListAdapter mAdapter;
 
     public GlobalActionsPopupMenu(@NonNull Context context, boolean isDropDownMode) {
-        super(new ContextThemeWrapper(context, R.style.Control_ListPopupWindow));
+        super(context);
         mContext = context;
+        Resources res = mContext.getResources();
+        setBackgroundDrawable(
+                res.getDrawable(R.drawable.rounded_bg_full, context.getTheme()));
         mIsDropDownMode = isDropDownMode;
 
         // required to show above the global actions dialog
         setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         setModal(true);
 
-        Resources res = mContext.getResources();
         mGlobalActionsSidePadding = res.getDimensionPixelSize(R.dimen.global_actions_side_margin);
         if (!isDropDownMode) {
             mMenuVerticalPadding = res.getDimensionPixelSize(R.dimen.control_menu_vertical_padding);

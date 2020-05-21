@@ -2050,7 +2050,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private ListPopupWindow createPowerOverflowPopup() {
             ListPopupWindow popup = new GlobalActionsPopupMenu(
-                    mContext, false /* isDropDownMode */);
+                    new ContextThemeWrapper(
+                        mContext,
+                        com.android.systemui.R.style.Control_ListPopupWindow
+                    ), false /* isDropDownMode */);
             View overflowButton =
                     findViewById(com.android.systemui.R.id.global_actions_overflow_button);
             popup.setAnchorView(overflowButton);
