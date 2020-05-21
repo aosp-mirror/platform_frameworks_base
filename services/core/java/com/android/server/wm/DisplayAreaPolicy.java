@@ -16,10 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR_PANEL;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import android.content.res.Resources;
 import android.text.TextUtils;
@@ -89,6 +91,11 @@ public abstract class DisplayAreaPolicy {
     public abstract void addWindow(WindowToken token);
 
     /**
+     * Gets the set of {@link DisplayArea} that are created for the given feature to apply to.
+     */
+    public abstract List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId);
+
+    /**
      * @return the number of task display areas on the display.
      */
     public int getTaskDisplayAreaCount() {
@@ -113,6 +120,11 @@ public abstract class DisplayAreaPolicy {
             final List<TaskDisplayArea> tdaList = new ArrayList<>();
             tdaList.add(defaultTaskDisplayArea);
             return new DisplayAreaPolicyBuilder()
+                    .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
+                            "WindowedMagnification", FEATURE_WINDOWED_MAGNIFICATION)
+                            .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                            .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                            .build())
                     .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
                             "OneHanded", FEATURE_ONE_HANDED)
                             .all()
