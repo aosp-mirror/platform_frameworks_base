@@ -19,10 +19,10 @@ package com.android.server.job.controllers;
 import static com.android.server.job.JobSchedulerService.DEBUG;
 
 import android.content.Context;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.StateChangedListener;

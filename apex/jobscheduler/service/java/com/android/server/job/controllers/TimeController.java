@@ -31,6 +31,7 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Slog;
@@ -38,7 +39,6 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.StateControllerProto;
@@ -498,7 +498,7 @@ public final class TimeController extends StateController {
             pw.println();
             pw.println("TimeController:");
             pw.increaseIndent();
-            pw.printPair(KEY_USE_NON_WAKEUP_ALARM_FOR_DELAY,
+            pw.print(KEY_USE_NON_WAKEUP_ALARM_FOR_DELAY,
                     USE_NON_WAKEUP_ALARM_FOR_DELAY).println();
             pw.decreaseIndent();
         }
