@@ -368,6 +368,38 @@ public class Preconditions {
     }
 
     /**
+     * Ensures that the argument floating point value is within the inclusive range.
+     *
+     * <p>While this can be used to range check against +/- infinity, note that all NaN numbers
+     * will always be out of range.</p>
+     *
+     * @param value a floating point value
+     * @param lower the lower endpoint of the inclusive range
+     * @param upper the upper endpoint of the inclusive range
+     * @param valueName the name of the argument to use if the check fails
+     *
+     * @return the validated floating point value
+     *
+     * @throws IllegalArgumentException if {@code value} was not within the range
+     */
+    public static double checkArgumentInRange(double value, double lower, double upper,
+            String valueName) {
+        if (Double.isNaN(value)) {
+            throw new IllegalArgumentException(valueName + " must not be NaN");
+        } else if (value < lower) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "%s is out of range of [%f, %f] (too low)", valueName, lower, upper));
+        } else if (value > upper) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "%s is out of range of [%f, %f] (too high)", valueName, lower, upper));
+        }
+
+        return value;
+    }
+
+    /**
      * Ensures that the argument int value is within the inclusive range.
      *
      * @param value a int value

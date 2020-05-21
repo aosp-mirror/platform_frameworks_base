@@ -68,8 +68,8 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         @Override
-        protected void remove(Object key) {
-            removeRegistration(key, this);
+        protected GnssListenerMultiplexer<TRequest, TListener, TMergedRequest> getOwner() {
+            return GnssListenerMultiplexer.this;
         }
 
         /**
@@ -84,7 +84,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         @Override
-        protected boolean onBinderRegister(IBinder key) {
+        protected boolean onBinderRegister(Object key) {
             mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
             mForeground = mAppForegroundHelper.isAppForeground(getIdentity().uid);
             return true;
