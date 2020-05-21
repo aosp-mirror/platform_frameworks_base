@@ -6557,7 +6557,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(si.getPackage()).thenReturn(PKG_P);
         when(si.getId()).thenReturn("convo");
         when(si.getUserId()).thenReturn(USER_SYSTEM);
-        when(si.getShortLabel()).thenReturn("Hello");
+        when(si.getLabel()).thenReturn("Hello");
         when(si.isLongLived()).thenReturn(true);
         when(si.isEnabled()).thenReturn(true);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
@@ -6591,7 +6591,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(si.getPackage()).thenReturn(PKG_P);
         when(si.getId()).thenReturn("convo");
         when(si.getUserId()).thenReturn(USER_SYSTEM);
-        when(si.getShortLabel()).thenReturn("Hello");
+        when(si.getLabel()).thenReturn("Hello");
         when(si.isLongLived()).thenReturn(false);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(Arrays.asList(si));
 
