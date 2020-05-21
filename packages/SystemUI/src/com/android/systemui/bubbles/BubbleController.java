@@ -606,8 +606,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
             mStackView.setUnbubbleConversationCallback(notificationEntry ->
                     onUserChangedBubble(notificationEntry, false /* shouldBubble */));
-            // Lazy load overflow bubbles from disk
-            loadOverflowBubblesFromDisk();
         }
 
         addToWindowManagerMaybe();
@@ -1112,6 +1110,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void applyUpdate(BubbleData.Update update) {
+            // Lazy load overflow bubbles from disk
+            loadOverflowBubblesFromDisk();
             // Update bubbles in overflow.
             if (mOverflowCallback != null) {
                 mOverflowCallback.run();

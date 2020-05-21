@@ -15,7 +15,6 @@
  */
 package com.android.systemui.bubbles;
 
-
 import static android.app.Notification.FLAG_BUBBLE;
 import static android.os.AsyncTask.Status.FINISHED;
 import static android.view.Display.INVALID_DISPLAY;
@@ -106,34 +105,14 @@ class Bubble implements BubbleViewProvider {
     private int mFlags;
 
     /**
-     * Generate a unique identifier for this bubble based on given {@link NotificationEntry}. If
-     * {@link ShortcutInfo} was found in the notification entry, the identifier would be generated
-     * from {@link ShortcutInfo} instead. See also {@link #key(ShortcutInfo)}.
-     */
-    @NonNull
-    public static String key(@NonNull final NotificationEntry entry) {
-        final ShortcutInfo shortcutInfo = entry.getRanking().getShortcutInfo();
-        if (shortcutInfo != null) return key(shortcutInfo);
-        return entry.getKey();
-    }
-
-    /**
-     * Generate a unique identifier for this bubble based on given {@link ShortcutInfo}.
-     * See also {@link #key(NotificationEntry)}.
-     */
-    @NonNull
-    public static String key(@NonNull final ShortcutInfo shortcutInfo) {
-        return shortcutInfo.getUserId() + "|" + shortcutInfo.getPackage() + "|"
-                + shortcutInfo.getId();
-    }
-
-    /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
-    Bubble(ShortcutInfo shortcutInfo) {
+    Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(shortcutInfo);
         mShortcutInfo = shortcutInfo;
-        mKey = key(shortcutInfo);
+        mKey = key;
         mFlags = 0;
     }
 
@@ -142,7 +121,7 @@ class Bubble implements BubbleViewProvider {
     Bubble(NotificationEntry e,
             BubbleController.NotificationSuppressionChangedListener listener) {
         mEntry = e;
-        mKey = key(e);
+        mKey = e.getKey();
         mLastUpdated = e.getSbn().getPostTime();
         mSuppressionListener = listener;
         mFlags = e.getSbn().getNotification().flags;

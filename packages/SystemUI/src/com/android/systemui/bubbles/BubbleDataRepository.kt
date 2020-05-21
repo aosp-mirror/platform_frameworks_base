@@ -77,7 +77,7 @@ internal class BubbleDataRepository @Inject constructor(
             var shortcutId = b.shortcutInfo?.id
             if (shortcutId == null) shortcutId = b.entry?.bubbleMetadata?.shortcutId
             if (shortcutId == null) return@mapNotNull null
-            BubbleEntity(userId, b.packageName, shortcutId)
+            BubbleEntity(userId, b.packageName, shortcutId, b.key)
         }
     }
 
@@ -133,17 +133,17 @@ internal class BubbleDataRepository @Inject constructor(
         val shortcutKeys = entities.map { ShortcutKey(it.userId, it.packageName) }.toSet()
         /**
          * Retrieve shortcuts with given userId/packageName combination, then construct a mapping
-         * between BubbleEntity and ShortcutInfo.
+         * from the userId/packageName pair to a list of associated ShortcutInfo.
          * e.g.
          * {
-         *     BubbleEntity(0, "com.example.messenger", "id-0") ->
+         *     ShortcutKey(0, "com.example.messenger") -> [
          *         ShortcutInfo(userId=0, pkg="com.example.messenger", id="id-0"),
-         *     BubbleEntity(0, "com.example.messenger", "id-2") ->
-         *         ShortcutInfo(userId=0, pkg="com.example.messenger", id="id-2"),
-         *     BubbleEntity(10, "com.example.chat", "id-1") ->
+         *         ShortcutInfo(userId=0, pkg="com.example.messenger", id="id-2")
+         *     ]
+         *     ShortcutKey(10, "com.example.chat") -> [
          *         ShortcutInfo(userId=10, pkg="com.example.chat", id="id-1"),
-         *     BubbleEntity(10, "com.example.chat", "id-3") ->
          *         ShortcutInfo(userId=10, pkg="com.example.chat", id="id-3")
+         *     ]
          * }
          */
         val shortcutMap = shortcutKeys.flatMap { key ->
@@ -151,11 +151,15 @@ internal class BubbleDataRepository @Inject constructor(
                     LauncherApps.ShortcutQuery()
                             .setPackage(key.pkg)
                             .setQueryFlags(SHORTCUT_QUERY_FLAG), UserHandle.of(key.userId))
-                    ?.map { BubbleEntity(key.userId, key.pkg, it.id) to it } ?: emptyList()
-        }.toMap()
+                    ?: emptyList()
+        }.groupBy { ShortcutKey(it.userId, it.`package`) }
         // For each entity loaded from xml, find the corresponding ShortcutInfo then convert them
         // into Bubble.
-        val bubbles = entities.mapNotNull { entity -> shortcutMap[entity]?.let { Bubble(it) } }
+        val bubbles = entities.mapNotNull { entity ->
+            shortcutMap[ShortcutKey(entity.userId, entity.packageName)]
+                    ?.first { shortcutInfo -> entity.shortcutId == shortcutInfo.id }
+                    ?.let { shortcutInfo -> Bubble(entity.key, shortcutInfo) }
+        }
         uiScope.launch { cb(bubbles) }
     }
 
