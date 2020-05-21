@@ -107,6 +107,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private var popup: ListPopupWindow? = null
     private var hidden = true
     private lateinit var dismissGlobalActions: Runnable
+    private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
 
     override val available: Boolean
         get() = controlsController.get().available
@@ -283,7 +284,10 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ImageView>(R.id.controls_more)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = GlobalActionsPopupMenu(context, false /* isDropDownMode */).apply {
+                popup = GlobalActionsPopupMenu(
+                        popupThemedContext,
+                        false /* isDropDownMode */
+                ).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
@@ -380,13 +384,12 @@ class ControlsUiControllerImpl @Inject constructor (
         val anchor = parent.requireViewById<ViewGroup>(R.id.controls_header)
         anchor.setOnClickListener(object : View.OnClickListener {
             override fun onClick(v: View) {
-                popup = GlobalActionsPopupMenu(context, true /* isDropDownMode */).apply {
+                popup = GlobalActionsPopupMenu(
+                        popupThemedContext,
+                        true /* isDropDownMode */
+                ).apply {
                     setAnchorView(anchor)
                     setAdapter(adapter)
-                    val theme = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
-                        .getTheme()
-                    setBackgroundDrawable(
-                        context.resources.getDrawable(R.drawable.rounded_bg_full, theme))
 
                     setOnItemClickListener(object : AdapterView.OnItemClickListener {
                         override fun onItemClick(
