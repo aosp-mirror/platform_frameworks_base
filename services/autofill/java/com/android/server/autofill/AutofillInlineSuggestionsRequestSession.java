@@ -191,6 +191,16 @@ final class AutofillInlineSuggestionsRequestSession {
     }
 
     /**
+     * Clear the locally cached inline fill UI, but don't clear the suggestion in IME.
+     *
+     * See also {@link AutofillInlineSessionController#resetInlineFillUiLocked()}
+     */
+    @GuardedBy("mLock")
+    void resetInlineFillUiLocked() {
+        mInlineFillUi = null;
+    }
+
+    /**
      * Optionally sends inline response to the IME, depending on the current state.
      */
     @GuardedBy("mLock")
