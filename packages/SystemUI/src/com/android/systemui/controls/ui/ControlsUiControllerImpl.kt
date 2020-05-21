@@ -368,7 +368,7 @@ class ControlsUiControllerImpl @Inject constructor (
         val spinner = parent.requireViewById<TextView>(R.id.app_or_structure_spinner).apply {
             setText(selectionItem.getTitle())
             // override the default color on the dropdown drawable
-            (getBackground() as LayerDrawable).getDrawable(1)
+            (getBackground() as LayerDrawable).getDrawable(0)
                 .setTint(context.resources.getColor(R.color.control_spinner_dropdown, null))
         }
 
