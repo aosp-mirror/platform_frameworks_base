@@ -107,6 +107,12 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
     }
 
     @Override
+    boolean needsZBoost() {
+        // Z Boost should only happen at or below the ActivityStack level.
+        return false;
+    }
+
+    @Override
     boolean fillsParent() {
         return true;
     }
