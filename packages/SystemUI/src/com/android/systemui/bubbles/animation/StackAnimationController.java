@@ -16,10 +16,12 @@
 
 package com.android.systemui.bubbles.animation;
 
+import android.content.ContentResolver;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowInsets;
@@ -79,8 +81,7 @@ public class StackAnimationController extends
      * screen, we want less friction horizontally so that the stack has a better chance of making it
      * to the side without needing a spring.
      */
-    private static final float FLING_FRICTION_X = 2.2f;
-    private static final float FLING_FRICTION_Y = 2.2f;
+    private static final float FLING_FRICTION = 2.2f;
 
     /**
      * Values to use for the stack spring animation used to spring the stack to its final position
@@ -352,18 +353,26 @@ public class StackAnimationController extends
             return destinationRelativeX;
         }
 
+        final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
+        final float stiffness = Settings.Secure.getFloat(contentResolver, "bubble_stiffness",
+                SPRING_AFTER_FLING_STIFFNESS /* default */);
+        final float dampingRatio = Settings.Secure.getFloat(contentResolver, "bubble_damping",
+                SPRING_AFTER_FLING_DAMPING_RATIO);
+        final float friction = Settings.Secure.getFloat(contentResolver, "bubble_friction",
+                FLING_FRICTION);
+
         // Minimum velocity required for the stack to make it to the targeted side of the screen,
         // taking friction into account (4.2f is the number that friction scalars are multiplied by
         // in DynamicAnimation.DragForce). This is an estimate - it could possibly be slightly off,
         // but the SpringAnimation at the end will ensure that it reaches the destination X
         // regardless.
         final float minimumVelocityToReachEdge =
-                (destinationRelativeX - x) * (FLING_FRICTION_X * 4.2f);
+                (destinationRelativeX - x) * (friction * 4.2f);
 
         final float estimatedY = PhysicsAnimator.estimateFlingEndValue(
                 mStackPosition.y, velY,
                 new PhysicsAnimator.FlingConfig(
-                        FLING_FRICTION_Y, stackBounds.top, stackBounds.bottom));
+                        friction, stackBounds.top, stackBounds.bottom));
 
         notifyFloatingCoordinatorStackAnimatingTo(destinationRelativeX, estimatedY);
 
@@ -373,22 +382,24 @@ public class StackAnimationController extends
                 ? Math.min(minimumVelocityToReachEdge, velX)
                 : Math.max(minimumVelocityToReachEdge, velX);
 
+
+
         flingThenSpringFirstBubbleWithStackFollowing(
                 DynamicAnimation.TRANSLATION_X,
                 startXVelocity,
-                FLING_FRICTION_X,
+                friction,
                 new SpringForce()
-                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
-                        .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
+                        .setStiffness(stiffness)
+                        .setDampingRatio(dampingRatio),
                 destinationRelativeX);
 
         flingThenSpringFirstBubbleWithStackFollowing(
                 DynamicAnimation.TRANSLATION_Y,
                 velY,
-                FLING_FRICTION_Y,
+                friction,
                 new SpringForce()
-                        .setStiffness(SPRING_AFTER_FLING_STIFFNESS)
-                        .setDampingRatio(SPRING_AFTER_FLING_DAMPING_RATIO),
+                        .setStiffness(stiffness)
+                        .setDampingRatio(dampingRatio),
                 /* destination */ null);
 
         // If we're flinging now, there's no more touch event to catch up to.
@@ -736,9 +747,15 @@ public class StackAnimationController extends
 
     @Override
     SpringForce getSpringForce(DynamicAnimation.ViewProperty property, View view) {
+        final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
+        final float stiffness = Settings.Secure.getFloat(contentResolver, "bubble_stiffness",
+                mIsMovingFromFlinging ? FLING_FOLLOW_STIFFNESS : DEFAULT_STIFFNESS /* default */);
+        final float dampingRatio = Settings.Secure.getFloat(contentResolver, "bubble_damping",
+                DEFAULT_BOUNCINESS);
+
         return new SpringForce()
-                .setDampingRatio(DEFAULT_BOUNCINESS)
-                .setStiffness(mIsMovingFromFlinging ? FLING_FOLLOW_STIFFNESS : DEFAULT_STIFFNESS);
+                .setDampingRatio(dampingRatio)
+                .setStiffness(stiffness);
     }
 
     @Override
@@ -987,6 +1004,21 @@ public class StackAnimationController extends
             mMagnetizedStack.setHapticsEnabled(true);
             mMagnetizedStack.setFlingToTargetMinVelocity(FLING_TO_DISMISS_MIN_VELOCITY);
         }
+
+        final ContentResolver contentResolver = mLayout.getContext().getContentResolver();
+        final float minVelocity = Settings.Secure.getFloat(contentResolver,
+                "bubble_dismiss_fling_min_velocity",
+                mMagnetizedStack.getFlingToTargetMinVelocity() /* default */);
+        final float maxVelocity = Settings.Secure.getFloat(contentResolver,
+                "bubble_dismiss_stick_max_velocity",
+                mMagnetizedStack.getStickToTargetMaxVelocity() /* default */);
+        final float targetWidth = Settings.Secure.getFloat(contentResolver,
+                "bubble_dismiss_target_width_percent",
+                mMagnetizedStack.getFlingToTargetWidthPercent() /* default */);
+
+        mMagnetizedStack.setFlingToTargetMinVelocity(minVelocity);
+        mMagnetizedStack.setStickToTargetMaxVelocity(maxVelocity);
+        mMagnetizedStack.setFlingToTargetWidthPercent(targetWidth);
 
         return mMagnetizedStack;
     }
