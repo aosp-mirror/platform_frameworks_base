@@ -127,6 +127,22 @@ final class AutofillInlineSessionController {
     }
 
     /**
+     * Clear the locally cached inline fill UI, but don't clear the suggestion in the IME.
+     *
+     * <p>This is called to invalid the locally cached inline suggestions so we don't resend them
+     * to the IME, while assuming that the IME will clean up suggestion on their own when the input
+     * connection is finished. We don't send an empty response to IME so that it doesn't cause UI
+     * flicker on the IME side if it arrives before the input view is finished on the IME.
+     */
+    @GuardedBy("mLock")
+    void resetInlineFillUiLocked() {
+        mInlineFillUi = null;
+        if (mSession != null) {
+            mSession.resetInlineFillUiLocked();
+        }
+    }
+
+    /**
      * Updates the inline fill UI with the filter text. It'll send updated inline suggestions to
      * the IME.
      */
