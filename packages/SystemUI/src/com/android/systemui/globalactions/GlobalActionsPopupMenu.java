@@ -89,15 +89,19 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
             // width should be between [.5, .9] of screen
             int parentWidth = res.getSystem().getDisplayMetrics().widthPixels;
             int widthSpec = MeasureSpec.makeMeasureSpec(
-                    (int) (parentWidth * 0.9), MeasureSpec.AT_MOST);
-            View child = mAdapter.getView(0, null, listView);
-            child.measure(widthSpec, MeasureSpec.UNSPECIFIED);
-            int width = Math.max(child.getMeasuredWidth(), (int) (parentWidth * 0.5));
-
+                    (int) (parentWidth * 0.9) - 2 * mMenuHorizontalPadding, MeasureSpec.AT_MOST);
+            int maxWidth = 0;
+            for (int i = 0; i < mAdapter.getCount(); i++) {
+                View child = mAdapter.getView(i, null, listView);
+                child.measure(widthSpec, MeasureSpec.UNSPECIFIED);
+                int w = child.getMeasuredWidth();
+                maxWidth = Math.max(w, maxWidth);
+            }
+            int width = Math.max(maxWidth, (int) (parentWidth * 0.5) - 2 * mMenuHorizontalPadding);
             listView.setPadding(mMenuHorizontalPadding, mMenuVerticalPadding,
                     mMenuHorizontalPadding, mMenuVerticalPadding);
 
-            setWidth(width);
+            setWidth(width + 2 * mMenuHorizontalPadding);
             setHorizontalOffset(getAnchorView().getWidth() - mGlobalActionsSidePadding - width);
         }
 
