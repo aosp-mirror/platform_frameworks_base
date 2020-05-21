@@ -40,6 +40,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +67,7 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
                     public int getAsInt() {
                         return mLayout.getChildCount();
                     }
-                }));
+                }, Mockito.mock(Runnable.class)));
         mLayout.setActiveController(mStackController);
         addOneMoreThanBubbleLimitBubbles();
         mStackOffset = mLayout.getResources().getDimensionPixelSize(R.dimen.bubble_stack_offset);
@@ -303,8 +304,9 @@ public class StackAnimationControllerTest extends PhysicsAnimationLayoutTestCase
     private class TestableStackController extends StackAnimationController {
         TestableStackController(
                 FloatingContentCoordinator floatingContentCoordinator,
-                IntSupplier bubbleCountSupplier) {
-            super(floatingContentCoordinator, bubbleCountSupplier);
+                IntSupplier bubbleCountSupplier,
+                Runnable onBubbleAnimatedOutAction) {
+            super(floatingContentCoordinator, bubbleCountSupplier, onBubbleAnimatedOutAction);
         }
 
         @Override
