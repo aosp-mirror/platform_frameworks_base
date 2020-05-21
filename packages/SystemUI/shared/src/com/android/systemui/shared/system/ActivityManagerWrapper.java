@@ -51,6 +51,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -77,6 +78,9 @@ public class ActivityManagerWrapper {
     // Should match the values in PhoneWindowManager
     public static final String CLOSE_SYSTEM_WINDOWS_REASON_RECENTS = "recentapps";
     public static final String CLOSE_SYSTEM_WINDOWS_REASON_HOME_KEY = "homekey";
+
+    // Should match the value in AssistManager
+    private static final String INVOCATION_TIME_MS_KEY = "invocation_time_ms";
 
     private final PackageManager mPackageManager;
     private final BackgroundExecutor mBackgroundExecutor;
@@ -511,6 +515,8 @@ public class ActivityManagerWrapper {
         if (service == null) {
             return false;
         }
+        args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
+
         try {
             return service.showSessionFromSession(token, args, flags);
         } catch (RemoteException e) {
