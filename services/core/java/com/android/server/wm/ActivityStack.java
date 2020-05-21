@@ -943,19 +943,7 @@ class ActivityStack extends Task {
         // task's ordering. However, we still need to move 'task' to back. The intention is that
         // this ends up behind the home-task so that it is made invisible; so, if the home task
         // is not a child of this, reparent 'task' to the back of the home task's actual parent.
-        final ActivityStack home = displayArea.getOrCreateRootHomeTask();
-        final WindowContainer homeParent = home.getParent();
-        final Task homeParentTask = homeParent != null ? homeParent.asTask() : null;
-        if (homeParentTask == null) {
-            ((ActivityStack) task).reparent(displayArea, false /* onTop */);
-        } else if (homeParentTask == this) {
-            // Apparently reparent early-outs if same stack, so we have to explicitly reorder.
-            positionChildAtBottom(task);
-        } else {
-            task.reparent((ActivityStack) homeParentTask, false /* toTop */,
-                    REPARENT_LEAVE_STACK_IN_PLACE, false /* animate */, false /* deferResume */,
-                    "moveToBack");
-        }
+        displayArea.positionTaskBehindHome((ActivityStack) task);
     }
 
     // TODO: Should each user have there own stacks?
