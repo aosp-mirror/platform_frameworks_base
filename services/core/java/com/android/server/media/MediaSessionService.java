@@ -342,13 +342,10 @@ public class MediaSessionService extends SystemService implements Monitor {
         updateUser();
     }
 
-    // Called when the user with the userId is removed.
     @Override
-    public void onStopUser(int userId) {
-        if (DEBUG) Log.d(TAG, "onStopUser: " + userId);
+    public void onCleanupUser(int userId) {
+        if (DEBUG) Log.d(TAG, "onCleanupUser: " + userId);
         synchronized (mLock) {
-            // TODO: Also handle removing user in updateUser() because adding/switching user is
-            //       handled in updateUser().
             FullUserRecord user = getFullUserRecordLocked(userId);
             if (user != null) {
                 if (user.mFullUserId == userId) {
