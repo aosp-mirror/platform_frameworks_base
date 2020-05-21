@@ -47,6 +47,7 @@ data class MediaAction(
 
 /** State of the media device. */
 data class MediaDeviceData(
+    val enabled: Boolean,
     val icon: Drawable?,
     val name: String?
 )
