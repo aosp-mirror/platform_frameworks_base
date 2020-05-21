@@ -7723,14 +7723,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void syncInputTransactions() {
-        waitForAnimationsToComplete();
+        long token = Binder.clearCallingIdentity();
+        try {
+            waitForAnimationsToComplete();
 
-        synchronized (mGlobalLock) {
-            mWindowPlacerLocked.performSurfacePlacementIfScheduled();
-            mRoot.forAllDisplays(displayContent ->
+            synchronized (mGlobalLock) {
+                mWindowPlacerLocked.performSurfacePlacementIfScheduled();
+                mRoot.forAllDisplays(displayContent ->
                     displayContent.getInputMonitor().updateInputWindowsImmediately());
+            }
+            new SurfaceControl.Transaction().syncInputWindows().apply(true);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
-        new SurfaceControl.Transaction().syncInputWindows().apply(true);
     }
 
     private void waitForAnimationsToComplete() {
