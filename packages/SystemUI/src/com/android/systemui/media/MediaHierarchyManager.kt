@@ -27,6 +27,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroupOverlay
 import com.android.systemui.Interpolators
+import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
 import com.android.systemui.statusbar.StatusBarState
@@ -49,7 +50,8 @@ class MediaHierarchyManager @Inject constructor(
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
     private val mediaViewManager: MediaViewManager,
-    private val notifLockscreenUserManager: NotificationLockscreenUserManager
+    private val notifLockscreenUserManager: NotificationLockscreenUserManager,
+    wakefulnessLifecycle: WakefulnessLifecycle
 ) {
     /**
      * The root overlay of the hierarchy. This is where the media notification is attached to
@@ -137,6 +139,40 @@ class MediaHierarchyManager @Inject constructor(
             }
         }
 
+    /**
+     * Are location changes currently blocked?
+     */
+    private val blockLocationChanges: Boolean
+        get() {
+            return goingToSleep || dozeAnimationRunning
+        }
+
+    /**
+     * Are we currently going to sleep
+     */
+    private var goingToSleep: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                if (!value) {
+                    updateDesiredLocation()
+                }
+            }
+        }
+
+    /**
+     * Is the doze animation currently Running
+     */
+    private var dozeAnimationRunning: Boolean = false
+        private set(value) {
+            if (field != value) {
+                field = value
+                if (!value) {
+                    updateDesiredLocation()
+                }
+            }
+        }
+
     init {
         statusBarStateController.addCallback(object : StatusBarStateController.StateListener {
             override fun onStatePreChange(oldState: Int, newState: Int) {
@@ -148,6 +184,34 @@ class MediaHierarchyManager @Inject constructor(
 
             override fun onStateChanged(newState: Int) {
                 updateTargetState()
+            }
+
+            override fun onDozeAmountChanged(linear: Float, eased: Float) {
+                dozeAnimationRunning = linear != 0.0f && linear != 1.0f
+            }
+
+            override fun onDozingChanged(isDozing: Boolean) {
+                if (!isDozing) {
+                    dozeAnimationRunning = false
+                }
+            }
+        })
+
+        wakefulnessLifecycle.addObserver(object : WakefulnessLifecycle.Observer {
+            override fun onFinishedGoingToSleep() {
+                goingToSleep = false
+            }
+
+            override fun onStartedGoingToSleep() {
+                goingToSleep = true
+            }
+
+            override fun onFinishedWakingUp() {
+                goingToSleep = false
+            }
+
+            override fun onStartedWakingUp() {
+                goingToSleep = false
             }
         })
     }
@@ -428,6 +492,10 @@ class MediaHierarchyManager @Inject constructor(
 
     @MediaLocation
     private fun calculateLocation(): Int {
+        if (blockLocationChanges) {
+            // Keep the current location until we're allowed to again
+            return desiredLocation
+        }
         val onLockscreen = (!bypassController.bypassEnabled &&
                 (statusbarState == StatusBarState.KEYGUARD ||
                         statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
