@@ -6710,11 +6710,11 @@ message NetworkDnsEventReported {
  * Logs when a data stall event occurs.
  *
  * Log from:
- *     frameworks/base/services/core/java/com/android/server/connectivity/NetworkMonitor.java
+ *     packages/modules/NetworkStack/src/com/android/server/connectivity/NetworkMonitor.java
  */
 message DataStallEvent {
     // Data stall evaluation type.
-    // See frameworks/base/services/core/java/com/android/server/connectivity/NetworkMonitor.java
+    // See packages/modules/NetworkStack/src/com/android/server/connectivity/NetworkMonitor.java
     // Refer to the definition of DATA_STALL_EVALUATION_TYPE_*.
     optional int32 evaluation_type = 1;
     // See definition in data_stall_event.proto.
@@ -6727,6 +6727,10 @@ message DataStallEvent {
     optional com.android.server.connectivity.CellularData cell_info = 5 [(log_mode) = MODE_BYTES];
     // See definition in data_stall_event.proto.
     optional com.android.server.connectivity.DnsEvent dns_event = 6 [(log_mode) = MODE_BYTES];
+    // The tcp packets fail rate from the latest tcp polling.
+    optional int32 tcp_fail_rate = 7;
+    // Number of packets sent since the last received packet.
+    optional int32 tcp_sent_since_last_recv = 8;
 }
 
 /*
