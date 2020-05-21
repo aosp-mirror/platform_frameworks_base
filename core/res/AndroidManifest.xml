@@ -2436,7 +2436,7 @@
 
     <!-- Allows interaction across profiles in the same profile group. -->
     <permission android:name="android.permission.INTERACT_ACROSS_PROFILES"
-        android:protectionLevel="signature|appop|documenter|wellbeing" />
+        android:protectionLevel="signature|appop" />
 
     <!-- Allows configuring apps to have the INTERACT_ACROSS_PROFILES permission so that they can
          interact across profiles in the same profile group.
