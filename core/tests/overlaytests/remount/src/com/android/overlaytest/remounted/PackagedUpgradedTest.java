@@ -47,6 +47,7 @@ public class PackagedUpgradedTest extends OverlayRemountedTestBase {
     @Test
     public void testTargetRelocated() throws Exception {
         final String targetOverlaid = resourceName(TARGET_PACKAGE, "bool", "target_overlaid");
+        final String targetReference = resourceName(TARGET_PACKAGE, "bool", "target_reference");
         final String originalPath = "/product/app/OverlayTarget.apk";
 
         mPreparer.pushResourceFile(TARGET_APK, originalPath)
@@ -54,6 +55,7 @@ public class PackagedUpgradedTest extends OverlayRemountedTestBase {
                 .installResourceApk(OVERLAY_APK, OVERLAY_PACKAGE)
                 .setOverlayEnabled(OVERLAY_PACKAGE, true);
 
+        assertResource(targetReference, "@" + 0x7f010000 + " -> true");
         assertResource(targetOverlaid, "true");
 
         mPreparer.remount();
@@ -61,6 +63,7 @@ public class PackagedUpgradedTest extends OverlayRemountedTestBase {
         mPreparer.pushResourceFile(TARGET_UPGRADE_APK, "/product/app/OverlayTarget2.apk")
                 .reboot();
 
+        assertResource(targetReference, "@" + 0x7f0100ff + " -> true");
         assertResource(targetOverlaid, "true");
     }
 }
