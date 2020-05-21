@@ -30,7 +30,6 @@ import android.content.IntentSender;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewParent;
 
@@ -49,8 +48,6 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -58,8 +55,7 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class StatusBarRemoteInputCallback implements Callback, Callbacks,
-        StatusBarStateController.StateListener, KeyguardStateController.Callback {
-    private static final String TAG = StatusBarRemoteInputCallback.class.getSimpleName();
+        StatusBarStateController.StateListener {
 
     private final KeyguardStateController mKeyguardStateController;
     private final SysuiStatusBarStateController mStatusBarStateController;
@@ -78,7 +74,6 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
     private int mDisabled2;
     protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
     private Handler mMainHandler = new Handler();
-    private final AtomicReference<Intent> mPendingConfirmCredentialIntent = new AtomicReference();
 
     /**
      */
@@ -107,9 +102,6 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         mActionClickLogger = clickLogger;
         mActivityIntentHelper = new ActivityIntentHelper(mContext);
         mGroupManager = groupManager;
-        // Listen to onKeyguardShowingChanged in case a managed profile needs to be unlocked
-        // once the primary profile's keyguard is no longer shown.
-        mKeyguardStateController.addCallback(this);
     }
 
     @Override
@@ -213,39 +205,12 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         // Clear pending remote view, as we do not want to trigger pending remote input view when
         // it's called by other code
         mPendingWorkRemoteInputView = null;
-
-        final Intent newIntent = createConfirmDeviceCredentialIntent(
-                userId, intendSender, notificationKey);
-        if (newIntent == null) {
-            Log.w(TAG, String.format("Cannot create intent to unlock user %d", userId));
-            return false;
-        }
-
-        mPendingConfirmCredentialIntent.set(newIntent);
-
-        // If the Keyguard is currently showing, starting the ConfirmDeviceCredentialActivity
-        // would cause it to pause, not letting the user actually unlock the managed profile.
-        // Instead, wait until we receive a callback indicating it is no longer showing and
-        // then start the pending intent.
-        if (mKeyguardStateController.isShowing()) {
-            // Do nothing, since the callback will get the pending intent and start it.
-            Log.w(TAG, String.format("Keyguard is showing, waiting until it's not"));
-        } else {
-            startPendingConfirmDeviceCredentialIntent();
-        }
-
-        return true;
-    }
-
-    private Intent createConfirmDeviceCredentialIntent(
-            int userId, IntentSender intendSender, String notificationKey) {
+        // Begin old BaseStatusBar.startWorkChallengeIfNecessary.
         final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
                 null, userId);
-
         if (newIntent == null) {
-            return null;
+            return false;
         }
-
         final Intent callBackIntent = new Intent(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);
         callBackIntent.putExtra(Intent.EXTRA_INTENT, intendSender);
         callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
@@ -261,40 +226,14 @@ public class StatusBarRemoteInputCallback implements Callback, Callbacks,
         newIntent.putExtra(
                 Intent.EXTRA_INTENT,
                 callBackPendingIntent.getIntentSender());
-
-        return newIntent;
-    }
-
-    private void startPendingConfirmDeviceCredentialIntent() {
-        final Intent pendingIntent = mPendingConfirmCredentialIntent.getAndSet(null);
-        if (pendingIntent == null) {
-            return;
-        }
-
         try {
-            if (mKeyguardStateController.isShowing()) {
-                Log.w(TAG, "Keyguard is showing while starting confirm device credential intent.");
-            }
-            ActivityManager.getService().startConfirmDeviceCredentialIntent(pendingIntent,
+            ActivityManager.getService().startConfirmDeviceCredentialIntent(newIntent,
                     null /*options*/);
         } catch (RemoteException ex) {
             // ignore
         }
-    }
-
-    @Override
-    public void onKeyguardShowingChanged() {
-        if (mKeyguardStateController.isShowing()) {
-            // In order to avoid jarring UX where/ the managed profile challenge is shown and
-            // immediately dismissed, do not attempt to start the confirm device credential
-            // activity if the keyguard is still showing.
-            if (mPendingConfirmCredentialIntent.get() != null) {
-                Log.w(TAG, "There's a pending unlock intent but keyguard is still showing, abort.");
-            }
-            return;
-        }
-
-        startPendingConfirmDeviceCredentialIntent();
+        return true;
+        // End old BaseStatusBar.startWorkChallengeIfNecessary.
     }
 
     @Override
