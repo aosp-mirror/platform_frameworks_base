@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Ծանուցումները գալիս են ձայնով կամ թրթռոցով։"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Ծանուցումները գալիս են ձայնով կամ թրթռոցով։ <xliff:g id="APP_NAME">%1$s</xliff:g>-ի զրույցներն ըստ կանխադրման հայտնվում են ամպիկների տեսքով։"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Լողացող դյուրանցման միջոցով ձեր ուշադրությունն է գրավում բովանդակության նկատմամբ"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Ցուցադրվում է «Խոսակցություններ» բաժնում և հայտնվում է ամպիկի տեսքով։"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Ցուցադրվում է զրույցների ցանկի վերևում և հայտնվում է ամպիկի տեսքով։"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Կարգավորումներ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Կարևոր"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը չի աջակցում զրույցի կարգավորումները"</string>
@@ -740,9 +740,9 @@
     <string name="notification_app_settings" msgid="8963648463858039377">"Կարգավորել"</string>
     <string name="notification_done" msgid="6215117625922713976">"Պատրաստ է"</string>
     <string name="inline_undo" msgid="9026953267645116526">"Հետարկել"</string>
-    <string name="demote" msgid="6225813324237153980">"Նշել այս ծանուցումը որպես ոչ խոսակցություն"</string>
-    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Կարևոր խոսակցություն"</string>
-    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Ոչ կարևոր խոսակցություն"</string>
+    <string name="demote" msgid="6225813324237153980">"Նշել այս ծանուցումը որպես ոչ զրույց"</string>
+    <string name="notification_conversation_favorite" msgid="1905240206975921907">"Կարևոր զրույց"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Ոչ կարևոր զրույց"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Լռեցված"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Միացնել ծանուցումների ձայնը"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Ցուցադրել ամպիկը"</string>
@@ -1000,7 +1000,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Տեղափոխել ներքև՝ ձախ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Տեղափոխել ներքև՝ աջ"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"Փակել"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Խոսակցությունը չցուցադրել ամպիկի տեսքով"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Զրույցը չցուցադրել ամպիկի տեսքով"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Զրուցել ամպիկների միջոցով"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Նոր խոսակցությունները կհայտնվեն լողացող պատկերակների կամ ամպիկների տեսքով։ Հպեք՝ ամպիկը բացելու համար։ Քաշեք՝ այն տեղափոխելու համար։"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Ամպիկների կարգավորումներ"</string>
@@ -1010,10 +1010,10 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Համակարգի նավիգացիան թարմացվեց: Փոփոխություններ անելու համար անցեք կարգավորումներ:"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Թարմացրեք համակարգի նավիգացիան կարգավորումներում"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Սպասման ռեժիմ"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Ցուցադրվում են «Խոսակցություններ» բաժնի վերևում"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ցուցադրում են պրոֆիլի նկարը կողպէկրանին"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Ցուցադրել զրույցների ցանկի վերևում"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ցուցադրել պրոֆիլի նկարը կողպէկրանին"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Հայտնվում են որպես լողացող ամպիկ հավելվածների վրայից"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ընդհատում են «Չանհանգստացնել» ռեժիմը"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ընդհատել «Չանհանգստացնել» ռեժիմը"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Եղավ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Խոշորացման պատուհանի վրադրում"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Խոշորացման պատուհան"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="one">Ավելացվեց կառավարման <xliff:g id="NUMBER_1">%s</xliff:g> տարր։</item>
       <item quantity="other">Ավելացվեց կառավարման <xliff:g id="NUMBER_1">%s</xliff:g> տարր։</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Հեռացված է"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ավելացված է ընտրանիում"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ավելացված է ընտրանիում, դիրքը՝ <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Հեռացված է ընտրանուց"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ընտրանիում ավելացնելու համար"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ընտրանուց հեռացնելու համար"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Տեղափոխել դիրք <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Կառավարման տարրեր"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Ընտրեք կառավարման տարրերը՝ դրանք սնուցման ընտրացանկից բացելու համար"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Պահեք և քաշեք՝ կառավարման տարրերը վերադասավորելու համար"</string>

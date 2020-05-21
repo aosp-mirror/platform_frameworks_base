@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> Steuerelemente hinzugefügt.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> Steuerelement hinzugefügt.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Entfernt"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Zu Favoriten hinzugefügt"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Zu Favoriten hinzugefügt, Position <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Aus Favoriten entfernt"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"Zum Hinzufügen zu Favoriten"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Zum Entfernen aus Favoriten"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Auf Position <xliff:g id="NUMBER">%d</xliff:g> verschieben"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Steuerelemente"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Karten auswählen, auf die man über das Ein-/Aus-Menü zugreifen kann"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zum Verschieben von Steuerelementen halten und ziehen"</string>
