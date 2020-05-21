@@ -431,7 +431,13 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         data.createDeleteAction = false;
 
         if (mSaveInBgTask != null) {
-            mSaveInBgTask.ignoreResult();
+            // just log success/failure for the pre-existing screenshot
+            mSaveInBgTask.setActionsReadyListener(new ActionsReadyListener() {
+                @Override
+                void onActionsReady(SavedImageData imageData) {
+                    logSuccessOnActionsReady(imageData);
+                }
+            });
         }
 
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data);
@@ -637,6 +643,52 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     /**
+     * Sets up the action shade and its entrance animation, once we get the screenshot URI.
+     */
+    private void showUiOnActionsReady(SavedImageData imageData) {
+        logSuccessOnActionsReady(imageData);
+        if (imageData.uri != null) {
+            mScreenshotHandler.post(() -> {
+                if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
+                    mScreenshotAnimation.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            createScreenshotActionsShadeAnimation(imageData).start();
+                        }
+                    });
+                } else {
+                    createScreenshotActionsShadeAnimation(imageData).start();
+                }
+
+                AccessibilityManager accessibilityManager = (AccessibilityManager)
+                        mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+                long timeoutMs = accessibilityManager.getRecommendedTimeoutMillis(
+                        SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
+                        AccessibilityManager.FLAG_CONTENT_CONTROLS);
+
+                mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
+                mScreenshotHandler.sendMessageDelayed(
+                        mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
+                        timeoutMs);
+            });
+        }
+    }
+
+    /**
+     * Logs success/failure of the screenshot saving task, and shows an error if it failed.
+     */
+    private void logSuccessOnActionsReady(SavedImageData imageData) {
+        if (imageData.uri == null) {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
+            mNotificationsController.notifyScreenshotError(
+                    R.string.screenshot_failed_to_capture_text);
+        } else {
+            mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
+        }
+    }
+
+    /**
      * Starts the animation after taking the screenshot
      */
     private void startAnimation(final Consumer<Uri> finisher, int w, int h,
@@ -651,43 +703,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotAnimation = createScreenshotDropInAnimation(w, h, screenRect);
 
         saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
-            @Override
-            void onActionsReady(SavedImageData imageData) {
-                finisher.accept(imageData.uri);
-                if (imageData.uri == null) {
-                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_NOT_SAVED);
-                    mNotificationsController.notifyScreenshotError(
-                            R.string.screenshot_failed_to_capture_text);
-                } else {
-                    mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_SAVED);
-                    mScreenshotHandler.post(() -> {
-                        if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
-                            mScreenshotAnimation.addListener(
-                                    new AnimatorListenerAdapter() {
-                                        @Override
-                                        public void onAnimationEnd(Animator animation) {
-                                            super.onAnimationEnd(animation);
-                                            createScreenshotActionsShadeAnimation(imageData)
-                                                    .start();
-                                        }
-                                    });
-                        } else {
-                            createScreenshotActionsShadeAnimation(imageData).start();
-                        }
-                        AccessibilityManager accessibilityManager = (AccessibilityManager)
-                                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-                        long timeoutMs = accessibilityManager.getRecommendedTimeoutMillis(
-                                SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
-                                AccessibilityManager.FLAG_CONTENT_CONTROLS);
-
-                        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
-                        mScreenshotHandler.sendMessageDelayed(
-                                mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
-                                timeoutMs);
-                    });
-                }
-            }
-        });
+                    @Override
+                    void onActionsReady(SavedImageData imageData) {
+                        showUiOnActionsReady(imageData);
+                    }
+                });
         mScreenshotHandler.post(() -> {
             if (!mScreenshotLayout.isAttachedToWindow()) {
                 mWindowManager.addView(mScreenshotLayout, mWindowLayoutParams);
