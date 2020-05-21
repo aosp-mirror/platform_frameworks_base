@@ -245,8 +245,18 @@ public class AtomicFile {
             rename(mLegacyBackupName, mBaseName);
         }
 
-        // Don't delete mNewName here - it was okay to call openRead() between startWrite() and
-        // finishWrite(), and we have to keep supporting it.
+        // It was okay to call openRead() between startWrite() and finishWrite() for the first time
+        // (because there is no backup file), where openRead() would open the file being written,
+        // which makes no sense, but finishWrite() would still persist the write properly. For all
+        // subsequent writes, if openRead() was called in between, it would see a backup file and
+        // delete the file being written, the same behavior as our new implementation. So we only
+        // need a special case for the first write, and don't delete the new file in this case so
+        // that finishWrite() can still work.
+        if (mNewName.exists() && mBaseName.exists()) {
+            if (!mNewName.delete()) {
+                Log.e(LOG_TAG, "Failed to delete outdated new file " + mNewName);
+            }
+        }
         return new FileInputStream(mBaseName);
     }
 
