@@ -49,7 +49,8 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     private static final String TAG = "MediaDevice";
 
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE,
+    @IntDef({MediaDeviceType.TYPE_UNKNOWN,
+            MediaDeviceType.TYPE_USB_C_AUDIO_DEVICE,
             MediaDeviceType.TYPE_3POINT5_MM_AUDIO_DEVICE,
             MediaDeviceType.TYPE_FAST_PAIR_BLUETOOTH_DEVICE,
             MediaDeviceType.TYPE_BLUETOOTH_DEVICE,
@@ -57,6 +58,7 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
             MediaDeviceType.TYPE_CAST_GROUP_DEVICE,
             MediaDeviceType.TYPE_PHONE_DEVICE})
     public @interface MediaDeviceType {
+        int TYPE_UNKNOWN = 0;
         int TYPE_USB_C_AUDIO_DEVICE = 1;
         int TYPE_3POINT5_MM_AUDIO_DEVICE = 2;
         int TYPE_FAST_PAIR_BLUETOOTH_DEVICE = 3;
