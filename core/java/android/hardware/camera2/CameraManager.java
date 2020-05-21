@@ -138,9 +138,24 @@ public final class CameraManager {
      * client camera application. Using these camera devices concurrently by two different
      * applications is not guaranteed to be supported, however.</p>
      *
+     * <p>For concurrent operation, in chronological order :
+     * - Applications must first close any open cameras that have sessions configured, using
+     *   {@link CameraDevice#close}.
+     * - All camera devices intended to be operated concurrently, must be opened using
+     *   {@link #openCamera}, before configuring sessions on any of the camera devices.</p>
+     *
      * <p>Each device in a combination, is guaranteed to support stream combinations which may be
      * obtained by querying {@link #getCameraCharacteristics} for the key
      * {@link android.hardware.camera2.CameraCharacteristics#SCALER_MANDATORY_CONCURRENT_STREAM_COMBINATIONS}.</p>
+     *
+     * <p>For concurrent operation, if a camera device has a non null zoom ratio range as specified
+     * by
+     * {@link android.hardware.camera2.CameraCharacteristics#CONTROL_ZOOM_RATIO_RANGE},
+     * its complete zoom ratio range may not apply. Applications can use
+     * {@link android.hardware.camera2.CaptureRequest#CONTROL_ZOOM_RATIO} >=1 and  <=
+     * {@link android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_MAX_DIGITAL_ZOOM}
+     * during concurrent operation.
+     * <p>
      *
      * <p>The set of combinations may include camera devices that may be in use by other camera API
      * clients.</p>
