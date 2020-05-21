@@ -709,7 +709,7 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"ស្ងាត់"</string>
     <string name="notification_alert_title" msgid="7629202599338071971">"បញ្ចេញ​សំឡេង"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ពពុះ"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"ជួយឱ្យ​អ្នក​ផ្តោតអារម្មណ៍ ដោយមិនឮសំឡេង ឬ​ការញ័រ។"</string>
+    <string name="notification_channel_summary_low" msgid="7300447764759926720">"ជួយឱ្យ​អ្នក​ផ្តោតអារម្មណ៍ ដោយមិនឮសំឡេង ឬ​ញ័រ។"</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"ធ្វើឱ្យ​អ្នក​ចាប់អារម្មណ៍​តាមរយៈ​សំឡេង ឬ​ការញ័រ។"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"ធ្វើឱ្យ​អ្នក​ចាប់អារម្មណ៍​តាមរយៈ​សំឡេង ឬ​ការញ័រ។ ការសន្ទនា​ពី​ពពុះ <xliff:g id="APP_NAME">%1$s</xliff:g> តាម​លំនាំដើម​។"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ធ្វើឱ្យអ្នក​ចាប់អារម្មណ៍​ដោយប្រើ​ផ្លូវកាត់​អណ្ដែត​សម្រាប់ខ្លឹមសារនេះ។"</string>
@@ -1026,6 +1026,13 @@
       <item quantity="other">បានបញ្ចូល​ការគ្រប់គ្រង <xliff:g id="NUMBER_1">%s</xliff:g>។</item>
       <item quantity="one">បានបញ្ចូល​ការគ្រប់គ្រង <xliff:g id="NUMBER_0">%s</xliff:g>។</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"បានដកចេញ"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"បានដាក់ជា​សំណព្វ"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"បានដាក់ជា​សំណព្វ ទីតាំង​ទី <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"បានដកចេញ​ពី​សំណព្វ"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ដាក់ជា​សំណព្វ"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ដកចេញ​ពី​សំណព្វ"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"ផ្លាស់ទី​ទៅតាំងទី <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ការគ្រប់គ្រង"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ជ្រើសរើស​ការគ្រប់គ្រង ដើម្បី​ចូលប្រើ​ពីម៉ឺនុយ​ថាមពល"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ការគ្រប់គ្រង​ឡើងវិញ"</string>

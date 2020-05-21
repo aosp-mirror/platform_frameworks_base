@@ -1026,6 +1026,13 @@
       <item quantity="other">U shtuan <xliff:g id="NUMBER_1">%s</xliff:g> kontrolle.</item>
       <item quantity="one">U shtua <xliff:g id="NUMBER_0">%s</xliff:g> kontroll.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"E hequr"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"E shtuar te të preferuarat"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"E shtuar te të preferuarat, pozicioni <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"E hequr nga të preferuarat"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ta shënosh si të preferuar"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ta heqësh nga të preferuarat"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Zhvendose te pozicioni <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrollet"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Zgjidh kontrollet për të pasur qasje nga menyja e energjisë"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje të shtypur dhe zvarrit për të risistemuar kontrollet"</string>

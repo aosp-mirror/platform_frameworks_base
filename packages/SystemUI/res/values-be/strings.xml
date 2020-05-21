@@ -699,7 +699,7 @@
     <string name="notification_channel_unsilenced" msgid="94878840742161152">"Гэтыя апавяшчэнні будуць паказвацца з гукам"</string>
     <string name="inline_blocking_helper" msgid="2891486013649543452">"Звычайна вы адхіляеце гэтыя апавяшчэнні. \nПаказваць іх?"</string>
     <string name="inline_done_button" msgid="6043094985588909584">"Гатова"</string>
-    <string name="inline_ok_button" msgid="603075490581280343">"Ужыць"</string>
+    <string name="inline_ok_button" msgid="603075490581280343">"Прымяніць"</string>
     <string name="inline_keep_showing" msgid="8736001253507073497">"Працягваць паказваць гэтыя апавяшчэнні?"</string>
     <string name="inline_stop_button" msgid="2453460935438696090">"Спыніць апавяшчэнні"</string>
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Дастаўляць бязгучна"</string>
@@ -1021,9 +1021,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Перайдзіце ў Налады, каб абнавіць параметры навігацыі ў сістэме"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Рэжым чакання"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Паказваюцца ўверсе раздзела размоў"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Паказваюць выяву профілю на экране блакіроўкі"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Паказваюць відарыс профілю на экране блакіроўкі"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Паказваюцца як рухомыя апавяшчэнні паверх праграм"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Не распаўсюджваюцца на рэжым \"Не турбаваць\""</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Паказваюцца ў рэжыме \"Не турбаваць\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Зразумела"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Акно павелічэння"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Налады акна павелічэння"</string>
@@ -1038,6 +1038,13 @@
       <item quantity="many">Дададзена <xliff:g id="NUMBER_1">%s</xliff:g> элементаў кіравання.</item>
       <item quantity="other">Дададзена <xliff:g id="NUMBER_1">%s</xliff:g> элемента кіравання.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Выдалена"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Дададзена ў абранае"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Дададзена ў абранае, пазіцыя <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Выдалена з абранага"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"у абранае"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"выдаліць з абранага"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Перамясціць у пазіцыю <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Сродкі кіравання"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберыце элементы кіравання, да якіх вы хочаце мець доступ з меню сілкавання"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Каб змяніць парадак элементаў кіравання, утрымлівайце і перацягвайце іх"</string>

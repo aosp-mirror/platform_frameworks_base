@@ -592,7 +592,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"Nastavenia zvuku"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"Rozbaliť"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"Zbaliť"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automaticky pridávať titulky k médiám"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"Automatické titulkovanie médií"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"Zavrieť tip pre titulky"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"Prekrytie titulkov"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"povoliť"</string>
@@ -1038,6 +1038,13 @@
       <item quantity="other">Bolo pridaných <xliff:g id="NUMBER_1">%s</xliff:g> ovládacích prvkov.</item>
       <item quantity="one">Bol pridaný <xliff:g id="NUMBER_0">%s</xliff:g> ovládací prvok.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Odstránené"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Pridané medzi obľúbené"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Pridané medzi obľúbené, pozícia <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Odstránené z obľúbených"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"pridáte medzi obľúbené"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"odstránite z obľúbených"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Presunúť na pozíciu <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Ovládacie prvky"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Vyberte si ovládacie prvky, ku ktorým chcete mať prístup v ponuke vypínača"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládacie prvky môžete usporiadať pridržaním a presunutím"</string>
