@@ -39,6 +39,7 @@ import android.content.res.Resources;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
+import android.media.MediaRouter2Manager;
 import android.net.ConnectivityManager;
 import android.net.NetworkScoreManager;
 import android.net.wifi.WifiManager;
@@ -208,6 +209,11 @@ public class SystemServicesModule {
     static LocalBluetoothManager provideLocalBluetoothController(Context context,
             @Background Handler bgHandler) {
         return LocalBluetoothManager.create(context, bgHandler, UserHandle.ALL);
+    }
+
+    @Provides
+    static MediaRouter2Manager provideMediaRouter2Manager(Context context) {
+        return MediaRouter2Manager.getInstance(context);
     }
 
     @Provides
