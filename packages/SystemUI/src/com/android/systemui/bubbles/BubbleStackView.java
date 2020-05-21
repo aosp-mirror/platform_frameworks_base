@@ -879,7 +879,7 @@ public class BubbleStackView extends FrameLayout
                 }
             }
 
-            return false;
+            return true;
         });
     }
 
