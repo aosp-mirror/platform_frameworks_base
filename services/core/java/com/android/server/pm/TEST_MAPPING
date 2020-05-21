@@ -118,6 +118,9 @@
         },
         {
           "include-filter": "com.android.server.pm.UserSystemPackageInstallerTest"
+        },
+        {
+          "include-filter": "com.android.server.pm.parsing.SystemPartitionParseTest"
         }
       ]
     }
