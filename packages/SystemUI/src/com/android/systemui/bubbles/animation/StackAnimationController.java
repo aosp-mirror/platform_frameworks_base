@@ -74,6 +74,10 @@ public class StackAnimationController extends
     private static final int FLING_FOLLOW_STIFFNESS = 20000;
     public static final float DEFAULT_BOUNCINESS = 0.9f;
 
+    private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
+            new PhysicsAnimator.SpringConfig(
+                    ANIMATE_IN_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+
     /**
      * Friction applied to fling animations. Since the stack must land on one of the sides of the
      * screen, we want less friction horizontally so that the stack has a better chance of making it
@@ -248,12 +252,19 @@ public class StackAnimationController extends
     /** Returns the number of 'real' bubbles (excluding the overflow bubble). */
     private IntSupplier mBubbleCountSupplier;
 
+    /**
+     * Callback to run whenever any bubble is animated out. The BubbleStackView will check if the
+     * end of this animation means we have no bubbles left, and notify the BubbleController.
+     */
+    private Runnable mOnBubbleAnimatedOutAction;
+
     public StackAnimationController(
             FloatingContentCoordinator floatingContentCoordinator,
-            IntSupplier bubbleCountSupplier) {
+            IntSupplier bubbleCountSupplier,
+            Runnable onBubbleAnimatedOutAction) {
         mFloatingContentCoordinator = floatingContentCoordinator;
         mBubbleCountSupplier = bubbleCountSupplier;
-
+        mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
     }
 
     /**
@@ -448,6 +459,10 @@ public class StackAnimationController extends
             float friction,
             SpringForce spring,
             Float finalPosition) {
+        if (!isActiveController()) {
+            return;
+        }
+
         Log.d(TAG, String.format("Flinging %s.",
                 PhysicsAnimationLayout.getReadablePropertyName(property)));
 
@@ -652,8 +667,8 @@ public class StackAnimationController extends
     public void animateStackDismissal(float translationYBy, Runnable after) {
         animationsForChildrenFromIndex(0, (index, animation) ->
                 animation
-                        .scaleX(0.5f)
-                        .scaleY(0.5f)
+                        .scaleX(0f)
+                        .scaleY(0f)
                         .alpha(0f)
                         .translationY(
                                 mLayout.getChildAt(index).getTranslationY() + translationYBy)
@@ -668,7 +683,7 @@ public class StackAnimationController extends
             DynamicAnimation.ViewProperty property, SpringForce spring,
             float vel, float finalPosition, @Nullable Runnable... after) {
 
-        if (mLayout.getChildCount() == 0) {
+        if (mLayout.getChildCount() == 0 || !isActiveController()) {
             return;
         }
 
@@ -760,13 +775,11 @@ public class StackAnimationController extends
 
     @Override
     void onChildRemoved(View child, int index, Runnable finishRemoval) {
-        // Animate the removing view in the opposite direction of the stack.
-        final float xOffset = getOffsetForChainedPropertyAnimation(DynamicAnimation.TRANSLATION_X);
-        animationForChild(child)
-                .alpha(0f, finishRemoval /* after */)
-                .scaleX(ANIMATE_IN_STARTING_SCALE)
-                .scaleY(ANIMATE_IN_STARTING_SCALE)
-                .translationX(mStackPosition.x - (-xOffset * ANIMATE_TRANSLATION_FACTOR))
+        PhysicsAnimator.getInstance(child)
+                .spring(DynamicAnimation.ALPHA, 0f)
+                .spring(DynamicAnimation.SCALE_X, 0f, mAnimateOutSpringConfig)
+                .spring(DynamicAnimation.SCALE_Y, 0f, mAnimateOutSpringConfig)
+                .withEndActions(finishRemoval, mOnBubbleAnimatedOutAction)
                 .start();
 
         // If there are other bubbles, pull them into the correct position.

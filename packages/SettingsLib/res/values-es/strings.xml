@@ -61,7 +61,7 @@
     <string name="speed_label_medium" msgid="9078405312828606976">"Media"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Rápida"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Muy rápida"</string>
-    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Caducado"</string>
+    <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Caducada"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Desconectado"</string>
     <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Desconectando…"</string>
@@ -506,7 +506,7 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"Fecha: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Duración"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Preguntar siempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que se desactive"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Hasta que lo desactives"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"justo ahora"</string>
     <string name="media_transfer_this_device_name" msgid="2716555073132169240">"Altavoz del teléfono"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"No se ha podido conectar; reinicia el dispositivo"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Inhabilitado"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Habilitado"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Es necesario reiniciar tu dispositivo para que se apliquen los cambios. Reiniciar ahora o cancelar."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> de trabajo"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

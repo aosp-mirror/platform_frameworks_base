@@ -183,19 +183,19 @@
     <string name="tts_reset_speech_pitch_title" msgid="7149398585468413246">"Återställ tonhöjden för tal"</string>
     <string name="tts_reset_speech_pitch_summary" msgid="6822904157021406449">"Återställ tonhöjden för talad text till standardinställningen."</string>
   <string-array name="tts_rate_entries">
-    <item msgid="9004239613505400644">"Mycket långsamt"</item>
-    <item msgid="1815382991399815061">"Långsamt"</item>
-    <item msgid="3075292553049300105">"Normalt"</item>
-    <item msgid="1158955023692670059">"Snabbt"</item>
+    <item msgid="9004239613505400644">"Mycket långsam"</item>
+    <item msgid="1815382991399815061">"Långsam"</item>
+    <item msgid="3075292553049300105">"Normal"</item>
+    <item msgid="1158955023692670059">"Snabb"</item>
     <item msgid="5664310435707146591">"Snabbare"</item>
-    <item msgid="5491266922147715962">"Mycket snabbt"</item>
-    <item msgid="7659240015901486196">"Supersnabbt"</item>
-    <item msgid="7147051179282410945">"Turbosnabbt"</item>
+    <item msgid="5491266922147715962">"Mycket snabb"</item>
+    <item msgid="7659240015901486196">"Supersnabb"</item>
+    <item msgid="7147051179282410945">"Turbosnabb"</item>
     <item msgid="581904787661470707">"Snabbast"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Personligt"</string>
-    <string name="category_work" msgid="4014193632325996115">"Arbetet"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
+    <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Utvecklaralternativ"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Aktivera utvecklaralternativ"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Ange alternativ för apputveckling"</string>
@@ -213,9 +213,9 @@
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Aktivera trådlös felsökning om du vill se tillgängliga enheter"</string>
     <string name="adb_pair_method_qrcode_title" msgid="6982904096137468634">"Parkoppla enheten med en QR-kod"</string>
     <string name="adb_pair_method_qrcode_summary" msgid="7130694277228970888">"Parkoppla nya enheter med QR-kodsläsare"</string>
-    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Koppla enheten med en kopplingskod"</string>
-    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Koppla nya enheter med en sexsiffrig kod"</string>
-    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Kopplade enheter"</string>
+    <string name="adb_pair_method_code_title" msgid="1122590300445142904">"Parkoppla enheten med en parkopplingskod"</string>
+    <string name="adb_pair_method_code_summary" msgid="6370414511333685185">"Parkoppla nya enheter med en sexsiffrig kod"</string>
+    <string name="adb_paired_devices_title" msgid="5268997341526217362">"Parkopplade enheter"</string>
     <string name="adb_wireless_device_connected_summary" msgid="3039660790249148713">"Anslutna just nu"</string>
     <string name="adb_wireless_device_details_title" msgid="7129369670526565786">"Enhetsinformation"</string>
     <string name="adb_device_forget" msgid="193072400783068417">"Glöm"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Inaktiverat"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiverat"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Enheten måste startas om för att ändringen ska börja gälla. Starta om nu eller avbryt."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> för arbetet"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

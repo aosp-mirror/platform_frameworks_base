@@ -452,7 +452,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Brzo punjenje"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Sporo punjenje"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Ne puni se"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Priključen, trenutno se ne može puniti"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Priključeno, trenutno se ne može puniti"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Puna"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Pod kontrolom administratora"</string>
     <string name="disabled" msgid="8017887509554714950">"Onemogućeno"</string>
@@ -554,5 +554,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Onemogućeno"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogućeno"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Morate ponovo pokrenuti uređaj da se ova promjena primijeni. Ponovo pokrenite odmah ili otkažite."</string>
-    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> za posao"</string>
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Poslovna aplikacija <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

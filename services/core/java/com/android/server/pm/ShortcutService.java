@@ -169,7 +169,7 @@ public class ShortcutService extends IShortcutService.Stub {
     static final int DEFAULT_MAX_UPDATES_PER_INTERVAL = 10;
 
     @VisibleForTesting
-    static final int DEFAULT_MAX_SHORTCUTS_PER_APP = 10;
+    static final int DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY = 15;
 
     @VisibleForTesting
     static final int DEFAULT_MAX_ICON_DIMENSION_DP = 96;
@@ -730,7 +730,7 @@ public class ShortcutService extends IShortcutService.Stub {
                 ConfigConstants.KEY_MAX_UPDATES_PER_INTERVAL, DEFAULT_MAX_UPDATES_PER_INTERVAL));
 
         mMaxShortcuts = Math.max(0, (int) parser.getLong(
-                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_APP));
+                ConfigConstants.KEY_MAX_SHORTCUTS, DEFAULT_MAX_SHORTCUTS_PER_ACTIVITY));
 
         final int iconDimensionDp = Math.max(1, injectIsLowRamDevice()
                 ? (int) parser.getLong(
@@ -1849,6 +1849,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             fillInDefaultActivity(newShortcuts);
 
@@ -1915,6 +1916,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             // For update, don't fill in the default activity.  Having null activity means
             // "don't update the activity" here.
@@ -2013,6 +2015,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             fillInDefaultActivity(newShortcuts);
 
@@ -3103,15 +3106,15 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
 
                     if (doCache) {
-                        if (si.isDynamic() && si.isLongLived()) {
+                        if (si.isLongLived()) {
                             si.addFlags(ShortcutInfo.FLAG_CACHED);
                             if (changedShortcuts == null) {
                                 changedShortcuts = new ArrayList<>(1);
                             }
                             changedShortcuts.add(si);
                         } else {
-                            Log.w(TAG, "Only dynamic long lived shortcuts can get cached. Ignoring"
-                                    + "shortcut " + si.getId());
+                            Log.w(TAG, "Only long lived shortcuts can get cached. Ignoring id "
+                                    + si.getId());
                         }
                     } else {
                         ShortcutInfo removed = null;

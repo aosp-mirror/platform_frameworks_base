@@ -222,7 +222,7 @@
     <string name="adb_device_fingerprint_title_format" msgid="291504822917843701">"Empremta digital del dispositiu: <xliff:g id="FINGERPRINT_PARAM">%1$s</xliff:g>"</string>
     <string name="adb_wireless_connection_failed_title" msgid="664211177427438438">"No s\'ha pogut connectar"</string>
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"Assegura\'t que <xliff:g id="DEVICE_NAME">%1$s</xliff:g> estigui connectat a la xarxa correcta"</string>
-    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincular amb el dispositiu"</string>
+    <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Vincula amb el dispositiu"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Codi de vinculació Wi‑Fi"</string>
     <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"No s\'ha pogut vincular"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Assegura\'t que el dispositiu estigui connectat a la mateixa xarxa."</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Desactivat"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Activat"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Has de reiniciar el teu dispositiu perquè s\'apliquin els canvis. Reinicia\'l ara o cancel·la."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> de la feina"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

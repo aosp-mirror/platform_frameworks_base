@@ -25,6 +25,7 @@ import static android.app.blob.XmlTags.TAG_SESSIONS;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AWARE;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
+import static android.os.UserHandle.USER_CURRENT;
 import static android.os.UserHandle.USER_NULL;
 
 import static com.android.server.blob.BlobStoreConfig.LOGV;
@@ -46,6 +47,8 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.blob.BlobHandle;
 import android.app.blob.BlobInfo;
 import android.app.blob.IBlobStoreManager;
@@ -1378,7 +1381,14 @@ public class BlobStoreManagerService extends SystemService {
                         + "queryBlobsForUser()");
             }
 
-            return queryBlobsForUserInternal(userId);
+            final int resolvedUserId = userId == USER_CURRENT
+                    ? ActivityManager.getCurrentUser() : userId;
+            // Don't allow any other special user ids apart from USER_CURRENT
+            final ActivityManagerInternal amInternal = LocalServices.getService(
+                    ActivityManagerInternal.class);
+            amInternal.ensureNotSpecialUser(resolvedUserId);
+
+            return queryBlobsForUserInternal(resolvedUserId);
         }
 
         @Override
@@ -1479,12 +1489,13 @@ public class BlobStoreManagerService extends SystemService {
         private static final int FLAG_DUMP_CONFIG = 1 << 2;
 
         private int mSelectedSectionFlags;
-        private boolean mDumpFull;
+        private boolean mDumpUnredacted;
         private final ArrayList<String> mDumpPackages = new ArrayList<>();
         private final ArrayList<Integer> mDumpUids = new ArrayList<>();
         private final ArrayList<Integer> mDumpUserIds = new ArrayList<>();
         private final ArrayList<Long> mDumpBlobIds = new ArrayList<>();
         private boolean mDumpHelp;
+        private boolean mDumpAll;
 
         public boolean shouldDumpSession(String packageName, int uid, long blobId) {
             if (!CollectionUtils.isEmpty(mDumpPackages)
@@ -1503,7 +1514,7 @@ public class BlobStoreManagerService extends SystemService {
         }
 
         public boolean shouldDumpAllSections() {
-            return mSelectedSectionFlags == 0;
+            return mDumpAll || (mSelectedSectionFlags == 0);
         }
 
         public void allowDumpSessions() {
@@ -1545,7 +1556,7 @@ public class BlobStoreManagerService extends SystemService {
         }
 
         public boolean shouldDumpFull() {
-            return mDumpFull;
+            return mDumpUnredacted;
         }
 
         public boolean shouldDumpUser(int userId) {
@@ -1567,10 +1578,12 @@ public class BlobStoreManagerService extends SystemService {
 
             for (int i = 0; i < args.length; ++i) {
                 final String opt = args[i];
-                if ("--full".equals(opt) || "-f".equals(opt)) {
+                if ("--all".equals(opt) || "-a".equals(opt)) {
+                    dumpArgs.mDumpAll = true;
+                } else if ("--unredacted".equals(opt) || "-u".equals(opt)) {
                     final int callingUid = Binder.getCallingUid();
                     if (callingUid == Process.SHELL_UID || callingUid == Process.ROOT_UID) {
-                        dumpArgs.mDumpFull = true;
+                        dumpArgs.mDumpUnredacted = true;
                     }
                 } else if ("--sessions".equals(opt)) {
                     dumpArgs.allowDumpSessions();
@@ -1580,7 +1593,7 @@ public class BlobStoreManagerService extends SystemService {
                     dumpArgs.allowDumpConfig();
                 } else if ("--package".equals(opt) || "-p".equals(opt)) {
                     dumpArgs.mDumpPackages.add(getStringArgRequired(args, ++i, "packageName"));
-                } else if ("--uid".equals(opt) || "-u".equals(opt)) {
+                } else if ("--uid".equals(opt)) {
                     dumpArgs.mDumpUids.add(getIntArgRequired(args, ++i, "uid"));
                 } else if ("--user".equals(opt)) {
                     dumpArgs.mDumpUserIds.add(getIntArgRequired(args, ++i, "userId"));

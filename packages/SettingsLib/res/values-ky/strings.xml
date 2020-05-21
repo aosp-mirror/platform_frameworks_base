@@ -224,7 +224,7 @@
     <string name="adb_wireless_connection_failed_message" msgid="9213896700171602073">"<xliff:g id="DEVICE_NAME">%1$s</xliff:g> туура тармакка туташып турганын текшериңиз"</string>
     <string name="adb_pairing_device_dialog_title" msgid="7141739231018530210">"Түзмөктү жупташтыруу"</string>
     <string name="adb_pairing_device_dialog_pairing_code_label" msgid="3639239786669722731">"Wi‑Fi жупташтыруучу коду"</string>
-    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Жупташтырылган жок"</string>
+    <string name="adb_pairing_device_dialog_failed_title" msgid="3426758947882091735">"Туташкан жок"</string>
     <string name="adb_pairing_device_dialog_failed_msg" msgid="6611097519661997148">"Түзмөк бир тармакка туташып турушу керек."</string>
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"QR кодун скандап, түзмөктү Wi‑Fi аркылуу жупташтырыңыз"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Түзмөк жупташтырылууда…"</string>
@@ -302,7 +302,7 @@
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Мүмкүнчүлүккө жараша, модем режиминде аппарат тезирээк иштей баштайт"</string>
     <string name="adb_warning_title" msgid="7708653449506485728">"USB аркылуу жөндөөгө уруксат бересизби?"</string>
     <string name="adb_warning_message" msgid="8145270656419669221">"USB-жөндөө - өндүрүү максатында гана  түзүлгөн. Аны компүтериңиз менен түзмөгүңүздүн ортосунда берилиштерди алмашуу, түзмөгүңүзгө колдонмолорду эскертүүсүз орнотуу жана лог берилиштерин окуу үчүн колдонсоңуз болот."</string>
-    <string name="adbwifi_warning_title" msgid="727104571653031865">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат берилсинби?"</string>
+    <string name="adbwifi_warning_title" msgid="727104571653031865">"Мүчүлүштүктөрдү Wi-Fi аркылуу оңдоого уруксат бересизби?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Мүчүлүштүктөрдү Wi-Fi аркылуу аныктоо – өндүрүү максатында гана түзүлгөн. Аны компьютериңиз менен түзмөгүңүздүн ортосунда маалыматты алмашуу, колдонмолорду түзмөгүңүзгө эскертүүсүз орнотуу жана маалыматтар таржымалын окуу үчүн колдонсоңуз болот."</string>
     <string name="adb_keys_warning_message" msgid="2968555274488101220">"Сиз мурун USB жөндөөлөрүнө уруксат берген бардык компүтерлердин жеткиси жокко чыгарылсынбы?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Жөндөөлөрдү өзгөртүү"</string>
@@ -445,8 +445,8 @@
     <string name="power_remaining_duration_shutdown_imminent" product="tablet" msgid="7703677921000858479">"Планшет бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Түзмөк бир аздан кийин өчүп калышы мүмкүн (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
-    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> кийин кубатталат"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> кийин кубатталат"</string>
+    <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> кийин толук кубатталып бүтөт"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> кийин толук кубатталып бүтөт"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"Белгисиз"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Кубатталууда"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Ыкчам кубатталууда"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Өчүк"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Күйүк"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Бул өзгөртүүнү колдонуу үчүн түзмөктү өчүрүп күйгүзүңүз. Азыр өчүрүп күйгүзүңүз же жокко чыгарыңыз."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Жумуш <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

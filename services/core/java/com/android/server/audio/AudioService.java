@@ -4706,8 +4706,8 @@ public class AudioService extends IAudioService.Stub
     protected void initMinStreamVolumeWithoutModifyAudioSettings() {
         int idx;
         int deviceForAlarm = AudioSystem.DEVICE_OUT_SPEAKER_SAFE;
-        if (AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_ALARM,
-                MIN_STREAM_VOLUME[AudioSystem.STREAM_ALARM], deviceForAlarm) == Float.NaN) {
+        if (Float.isNaN(AudioSystem.getStreamVolumeDB(AudioSystem.STREAM_ALARM,
+                MIN_STREAM_VOLUME[AudioSystem.STREAM_ALARM], deviceForAlarm))) {
             deviceForAlarm = AudioSystem.DEVICE_OUT_SPEAKER;
         }
         for (idx = MAX_STREAM_VOLUME[AudioSystem.STREAM_ALARM];

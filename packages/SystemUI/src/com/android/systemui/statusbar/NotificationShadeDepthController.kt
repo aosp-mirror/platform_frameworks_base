@@ -37,6 +37,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator
 import com.android.systemui.statusbar.phone.BiometricUnlockController
 import com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK
+import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController
 import com.android.systemui.statusbar.phone.PanelExpansionListener
 import com.android.systemui.statusbar.phone.ScrimController
@@ -60,6 +61,7 @@ class NotificationShadeDepthController @Inject constructor(
     private val choreographer: Choreographer,
     private val wallpaperManager: WallpaperManager,
     private val notificationShadeWindowController: NotificationShadeWindowController,
+    private val dozeParameters: DozeParameters,
     dumpManager: DumpManager
 ) : PanelExpansionListener, Dumpable {
     companion object {
@@ -206,9 +208,12 @@ class NotificationShadeDepthController @Inject constructor(
 
             keyguardAnimator?.cancel()
             keyguardAnimator = ValueAnimator.ofFloat(1f, 0f).apply {
-                duration = keyguardStateController.keyguardFadingAwayDuration
+                // keyguardStateController.keyguardFadingAwayDuration might be zero when unlock by
+                // fingerprint due to there is no window container, see AppTransition#goodToGo.
+                // We use DozeParameters.wallpaperFadeOutDuration as an alternative.
+                duration = dozeParameters.wallpaperFadeOutDuration
                 startDelay = keyguardStateController.keyguardFadingAwayDelay
-                interpolator = Interpolators.DECELERATE_QUINT
+                interpolator = Interpolators.FAST_OUT_SLOW_IN
                 addUpdateListener { animation: ValueAnimator ->
                     wakeAndUnlockBlurRadius =
                             blurUtils.blurRadiusOfRatio(animation.animatedValue as Float)

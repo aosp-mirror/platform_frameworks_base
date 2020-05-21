@@ -433,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Nagyjából eddig bírja: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Eddig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Az akkumulátor lemerülhet a következő időpontig: <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Az akkumulátor lemerülhet: <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Kevesebb mint <xliff:g id="THRESHOLD">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Több mint <xliff:g id="TIME_REMAINING">%1$s</xliff:g> van hátra (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Letiltva"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Engedélyezve"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Az eszközt újra kell indítani, hogy a módosítás megtörténjen. Indítsa újra most, vagy vesse el a módosítást."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Munkahelyi <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>
