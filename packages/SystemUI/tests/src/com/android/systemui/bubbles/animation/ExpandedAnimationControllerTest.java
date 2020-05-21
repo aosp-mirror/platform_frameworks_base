@@ -49,11 +49,13 @@ public class ExpandedAnimationControllerTest extends PhysicsAnimationLayoutTestC
     private int mOrientation = Configuration.ORIENTATION_PORTRAIT;
     private float mLauncherGridDiff = 30f;
 
+    private Runnable mOnBubbleAnimatedOutAction = Mockito.mock(Runnable.class);
+
     @Spy
     private ExpandedAnimationController mExpandedController =
             new ExpandedAnimationController(
                     new Point(mDisplayWidth, mDisplayHeight) /* displaySize */,
-                    mExpandedViewPadding, mOrientation);
+                    mExpandedViewPadding, mOrientation, mOnBubbleAnimatedOutAction);
 
     private int mStackOffset;
     private float mBubblePaddingTop;
