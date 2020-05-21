@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> көзөмөл кошулду.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> көзөмөл кошулду.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Өчүрүлдү"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Сүйүктүүлөргө кошулду"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Сүйүктүүлөргө <xliff:g id="NUMBER">%d</xliff:g>-позицияга кошулду"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Сүйүктүүлөрдөн чыгарылды"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"сүйүктүүлөргө кошуу"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"сүйүктүүлөрдөн чыгаруу"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>-позицияга жылдыруу"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Башкаруу элементтери"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Күйгүзүү/өчүрүү баскычынын менюсу үчүн көзөмөлдөрдү тандаңыз"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Башкаруу элементтеринин иретин өзгөртүү үчүн кармап туруп, сүйрөңүз"</string>
