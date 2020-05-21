@@ -9673,6 +9673,9 @@ message UserLifecycleEventOccurred {
         SWITCH_USER = 1; // Indicates that this is a user switch event
         START_USER = 2; // Indicates that this is a user start event
         CREATE_USER = 3; // Indicates that this is a user create event
+        USER_RUNNING_LOCKED = 4; // Indicates that user is running in locked state
+        UNLOCKING_USER = 5; // Indicates that this is a user unlocking event
+        UNLOCKED_USER = 6; // Indicates that this is a user unlocked event
     }
     optional Event event = 3;
 
