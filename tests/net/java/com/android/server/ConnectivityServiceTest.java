@@ -5387,8 +5387,6 @@ public class ConnectivityServiceTest {
 
         // Even though the VPN is unvalidated, it becomes the default network for our app.
         callback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
-        // TODO: this looks like a spurious callback.
-        callback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, vpnNetworkAgent);
         callback.assertNoCallback();
 
         assertTrue(vpnNetworkAgent.getScore() > mEthernetNetworkAgent.getScore());
