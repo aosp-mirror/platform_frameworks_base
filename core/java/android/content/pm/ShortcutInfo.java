@@ -1450,6 +1450,21 @@ public final class ShortcutInfo implements Parcelable {
         return mText;
     }
 
+    /**
+     * Returns the {@link #getLongLabel()} if it's populated, and if not, the
+     * {@link #getShortLabel()}.
+     * @hide
+     */
+    @Nullable
+    public CharSequence getLabel() {
+        CharSequence label = getLongLabel();
+        if (TextUtils.isEmpty(label)) {
+            label = getShortLabel();
+        }
+
+        return label;
+    }
+
     /** @hide */
     public int getLongLabelResourceId() {
         return mTextResId;
