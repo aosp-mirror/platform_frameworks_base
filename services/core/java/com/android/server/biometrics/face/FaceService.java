@@ -772,7 +772,7 @@ public class FaceService extends BiometricServiceBase {
         public void onError(int error, int vendorCode, int cookie)
                 throws RemoteException {
             if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onError(cookie, TYPE_FACE, error, vendorCode);
+                getWrapperReceiver().onError(getSensorId(), cookie, error, vendorCode);
             }
         }
     }

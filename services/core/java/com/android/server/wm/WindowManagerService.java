@@ -59,6 +59,7 @@ import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHA
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
 import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
@@ -8026,7 +8027,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * views.
      */
     void grantInputChannel(int callingUid, int callingPid, int displayId, SurfaceControl surface,
-            IWindow window, IBinder hostInputToken, int flags, int type,
+            IWindow window, IBinder hostInputToken, int flags, int privateFlags, int type,
             InputChannel outInputChannel) {
         final InputApplicationHandle applicationHandle;
         final String name;
@@ -8042,7 +8043,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(clientChannel.getToken(), callingUid, callingPid, displayId, surface,
-                name, applicationHandle, flags, type, null /* region */);
+                name, applicationHandle, flags, privateFlags, type, null /* region */);
 
         clientChannel.transferTo(outInputChannel);
         clientChannel.dispose();
@@ -8050,7 +8051,8 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private void updateInputChannel(IBinder channelToken, int callingUid, int callingPid,
             int displayId, SurfaceControl surface, String name,
-            InputApplicationHandle applicationHandle, int flags, int type, Region region) {
+            InputApplicationHandle applicationHandle, int flags, int privateFlags, int type,
+            Region region) {
         InputWindowHandle h = new InputWindowHandle(applicationHandle, displayId);
         h.token = channelToken;
         h.name = name;
@@ -8078,6 +8080,9 @@ public class WindowManagerService extends IWindowManager.Stub
             h.setTouchableRegionCrop(surface);
         }
 
+        //  Check private trusted overlay flag to set trustedOverlay field of input window handle.
+        h.trustedOverlay = (privateFlags & PRIVATE_FLAG_TRUSTED_OVERLAY) != 0;
+
         SurfaceControl.Transaction t = mTransactionFactory.get();
         t.setInputWindowInfo(surface, h);
         t.apply();
@@ -8091,7 +8096,7 @@ public class WindowManagerService extends IWindowManager.Stub
      * is undefined.
      */
     void updateInputChannel(IBinder channelToken, int displayId, SurfaceControl surface,
-            int flags, Region region) {
+            int flags, int privateFlags, Region region) {
         final InputApplicationHandle applicationHandle;
         final String name;
         final EmbeddedWindowController.EmbeddedWindow win;
@@ -8106,7 +8111,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateInputChannel(channelToken, win.mOwnerUid, win.mOwnerPid, displayId, surface, name,
-                applicationHandle, flags, win.mWindowType, region);
+                applicationHandle, flags, privateFlags, win.mWindowType, region);
     }
 
     /** Return whether layer tracing is enabled */

@@ -1861,6 +1861,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             fillInDefaultActivity(newShortcuts);
 
@@ -1927,6 +1928,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             // For update, don't fill in the default activity.  Having null activity means
             // "don't update the activity" here.
@@ -2025,6 +2027,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final ShortcutPackage ps = getPackageShortcutsForPublisherLocked(packageName, userId);
 
             ps.ensureImmutableShortcutsNotIncluded(newShortcuts, /*ignoreInvisible=*/ true);
+            ps.ensureNoBitmapIconIfShortcutIsLongLived(newShortcuts);
 
             fillInDefaultActivity(newShortcuts);
 
@@ -3115,15 +3118,15 @@ public class ShortcutService extends IShortcutService.Stub {
                     }
 
                     if (doCache) {
-                        if (si.isDynamic() && si.isLongLived()) {
+                        if (si.isLongLived()) {
                             si.addFlags(ShortcutInfo.FLAG_CACHED);
                             if (changedShortcuts == null) {
                                 changedShortcuts = new ArrayList<>(1);
                             }
                             changedShortcuts.add(si);
                         } else {
-                            Log.w(TAG, "Only dynamic long lived shortcuts can get cached. Ignoring"
-                                    + "shortcut " + si.getId());
+                            Log.w(TAG, "Only long lived shortcuts can get cached. Ignoring id "
+                                    + si.getId());
                         }
                     } else {
                         ShortcutInfo removed = null;

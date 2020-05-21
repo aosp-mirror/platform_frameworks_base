@@ -63,7 +63,142 @@ StatsdConfig CreateStatsdConfig(bool useCondition = true) {
     return config;
 }
 
+StatsdConfig CreateStatsdConfigWithStates() {
+    StatsdConfig config;
+    config.add_allowed_log_source("AID_ROOT");     // LogEvent defaults to UID of root.
+    config.add_default_pull_packages("AID_ROOT");  // Fake puller is registered with root.
+
+    auto pulledAtomMatcher = CreateSimpleAtomMatcher("TestMatcher", util::SUBSYSTEM_SLEEP_STATE);
+    *config.add_atom_matcher() = pulledAtomMatcher;
+    *config.add_atom_matcher() = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = CreateBatteryStateNoneMatcher();
+    *config.add_atom_matcher() = CreateBatteryStateUsbMatcher();
+
+    auto screenOnPredicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = screenOnPredicate;
+
+    auto screenOffPredicate = CreateScreenIsOffPredicate();
+    *config.add_predicate() = screenOffPredicate;
+
+    auto deviceUnpluggedPredicate = CreateDeviceUnpluggedPredicate();
+    *config.add_predicate() = deviceUnpluggedPredicate;
+
+    auto screenOnOnBatteryPredicate = config.add_predicate();
+    screenOnOnBatteryPredicate->set_id(StringToId("screenOnOnBatteryPredicate"));
+    screenOnOnBatteryPredicate->mutable_combination()->set_operation(LogicalOperation::AND);
+    addPredicateToPredicateCombination(screenOnPredicate, screenOnOnBatteryPredicate);
+    addPredicateToPredicateCombination(deviceUnpluggedPredicate, screenOnOnBatteryPredicate);
+
+    auto screenOffOnBatteryPredicate = config.add_predicate();
+    screenOffOnBatteryPredicate->set_id(StringToId("ScreenOffOnBattery"));
+    screenOffOnBatteryPredicate->mutable_combination()->set_operation(LogicalOperation::AND);
+    addPredicateToPredicateCombination(screenOffPredicate, screenOffOnBatteryPredicate);
+    addPredicateToPredicateCombination(deviceUnpluggedPredicate, screenOffOnBatteryPredicate);
+
+    const State screenState =
+            CreateScreenStateWithSimpleOnOffMap(/*screen on id=*/321, /*screen off id=*/123);
+    *config.add_state() = screenState;
+
+    // ValueMetricSubsystemSleepWhileScreenOnOnBattery
+    auto valueMetric1 = config.add_value_metric();
+    valueMetric1->set_id(metricId);
+    valueMetric1->set_what(pulledAtomMatcher.id());
+    valueMetric1->set_condition(screenOnOnBatteryPredicate->id());
+    *valueMetric1->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    valueMetric1->set_bucket(FIVE_MINUTES);
+    valueMetric1->set_use_absolute_value_on_reset(true);
+    valueMetric1->set_skip_zero_diff_output(false);
+    valueMetric1->set_max_pull_delay_sec(INT_MAX);
+
+    // ValueMetricSubsystemSleepWhileScreenOffOnBattery
+    ValueMetric* valueMetric2 = config.add_value_metric();
+    valueMetric2->set_id(StringToId("ValueMetricSubsystemSleepWhileScreenOffOnBattery"));
+    valueMetric2->set_what(pulledAtomMatcher.id());
+    valueMetric2->set_condition(screenOffOnBatteryPredicate->id());
+    *valueMetric2->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    valueMetric2->set_bucket(FIVE_MINUTES);
+    valueMetric2->set_use_absolute_value_on_reset(true);
+    valueMetric2->set_skip_zero_diff_output(false);
+    valueMetric2->set_max_pull_delay_sec(INT_MAX);
+
+    // ValueMetricSubsystemSleepWhileOnBatterySliceScreen
+    ValueMetric* valueMetric3 = config.add_value_metric();
+    valueMetric3->set_id(StringToId("ValueMetricSubsystemSleepWhileOnBatterySliceScreen"));
+    valueMetric3->set_what(pulledAtomMatcher.id());
+    valueMetric3->set_condition(deviceUnpluggedPredicate.id());
+    *valueMetric3->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    valueMetric3->add_slice_by_state(screenState.id());
+    valueMetric3->set_bucket(FIVE_MINUTES);
+    valueMetric3->set_use_absolute_value_on_reset(true);
+    valueMetric3->set_skip_zero_diff_output(false);
+    valueMetric3->set_max_pull_delay_sec(INT_MAX);
+    return config;
+}
+
 }  // namespace
+
+/**
+ * Tests the initial condition and condition after the first log events for
+ * value metrics with either a combination condition or simple condition.
+ *
+ * Metrics should be initialized with condition kUnknown (given that the
+ * predicate is using the default InitialValue of UNKNOWN). The condition should
+ * be updated to either kFalse or kTrue if a condition event is logged for all
+ * children conditions.
+ */
+TEST(ValueMetricE2eTest, TestInitialConditionChanges) {
+    StatsdConfig config = CreateStatsdConfigWithStates();
+    int64_t baseTimeNs = getElapsedRealtimeNs();
+    int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
+    int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(config.value_metric(0).bucket()) * 1000000;
+
+    ConfigKey cfgKey;
+    int32_t tagId = util::SUBSYSTEM_SLEEP_STATE;
+    auto processor =
+            CreateStatsLogProcessor(baseTimeNs, configAddedTimeNs, config, cfgKey,
+                                    SharedRefBase::make<FakeSubsystemSleepCallback>(), tagId);
+
+    EXPECT_EQ(processor->mMetricsManagers.size(), 1u);
+    sp<MetricsManager> metricsManager = processor->mMetricsManagers.begin()->second;
+    EXPECT_TRUE(metricsManager->isConfigValid());
+    EXPECT_EQ(3, metricsManager->mAllMetricProducers.size());
+
+    // Combination condition metric - screen on and device unplugged
+    sp<MetricProducer> metricProducer1 = metricsManager->mAllMetricProducers[0];
+    // Simple condition metric - device unplugged
+    sp<MetricProducer> metricProducer2 = metricsManager->mAllMetricProducers[2];
+
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer2->mCondition);
+
+    auto screenOnEvent =
+            CreateScreenStateChangedEvent(configAddedTimeNs + 30, android::view::DISPLAY_STATE_ON);
+    processor->OnLogEvent(screenOnEvent.get());
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer2->mCondition);
+
+    auto screenOffEvent =
+            CreateScreenStateChangedEvent(configAddedTimeNs + 40, android::view::DISPLAY_STATE_OFF);
+    processor->OnLogEvent(screenOffEvent.get());
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, metricProducer2->mCondition);
+
+    auto pluggedUsbEvent = CreateBatteryStateChangedEvent(
+            configAddedTimeNs + 50, BatteryPluggedStateEnum::BATTERY_PLUGGED_USB);
+    processor->OnLogEvent(pluggedUsbEvent.get());
+    EXPECT_EQ(ConditionState::kFalse, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kFalse, metricProducer2->mCondition);
+
+    auto pluggedNoneEvent = CreateBatteryStateChangedEvent(
+            configAddedTimeNs + 70, BatteryPluggedStateEnum::BATTERY_PLUGGED_NONE);
+    processor->OnLogEvent(pluggedNoneEvent.get());
+    EXPECT_EQ(ConditionState::kFalse, metricProducer1->mCondition);
+    EXPECT_EQ(ConditionState::kTrue, metricProducer2->mCondition);
+}
 
 TEST(ValueMetricE2eTest, TestPulledEvents) {
     auto config = CreateStatsdConfig();

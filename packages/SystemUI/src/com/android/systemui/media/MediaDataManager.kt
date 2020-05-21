@@ -55,7 +55,19 @@ private const val LUMINOSITY_THRESHOLD = 0.05f
 private const val SATURATION_MULTIPLIER = 0.8f
 
 private val LOADING = MediaData(false, 0, null, null, null, null, null,
-        emptyList(), emptyList(), null, null, null)
+        emptyList(), emptyList(), null, null, null, null)
+
+fun isMediaNotification(sbn: StatusBarNotification): Boolean {
+    if (!sbn.notification.hasMediaSession()) {
+        return false
+    }
+    val notificationStyle = sbn.notification.notificationStyle
+    if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle) ||
+            Notification.MediaStyle::class.java.equals(notificationStyle)) {
+        return true
+    }
+    return false
+}
 
 /**
  * A class that facilitates management and loading of Media Data, ready for binding.
@@ -65,14 +77,14 @@ class MediaDataManager @Inject constructor(
     private val context: Context,
     private val mediaControllerFactory: MediaControllerFactory,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExcecutor: Executor
+    @Main private val foregroundExecutor: Executor
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
-        if (isMediaNotification(sbn)) {
+        if (Utils.useQsMediaPlayer(context) && isMediaNotification(sbn)) {
             if (!mediaEntries.containsKey(key)) {
                 mediaEntries.put(key, LOADING)
             }
@@ -201,10 +213,10 @@ class MediaDataManager @Inject constructor(
             }
         }
 
-        foregroundExcecutor.execute {
+        foregroundExecutor.execute {
             onMediaDataLoaded(key, MediaData(true, bgColor, app, smallIconDrawable, artist, song,
                     artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
-                    notif.contentIntent))
+                    notif.contentIntent, null))
         }
     }
 
@@ -270,25 +282,10 @@ class MediaDataManager @Inject constructor(
         }
     }
 
-    private fun isMediaNotification(sbn: StatusBarNotification): Boolean {
-        if (!Utils.useQsMediaPlayer(context)) {
-            return false
-        }
-        if (!sbn.notification.hasMediaSession()) {
-            return false
-        }
-        val notificationStyle = sbn.notification.notificationStyle
-        if (Notification.DecoratedMediaCustomViewStyle::class.java.equals(notificationStyle) ||
-                Notification.MediaStyle::class.java.equals(notificationStyle)) {
-            return true
-        }
-        return false
-    }
-
     /**
      * Are there any media notifications active?
      */
-    fun hasActiveMedia() = mediaEntries.size > 0
+    fun hasActiveMedia() = mediaEntries.isNotEmpty()
 
     fun hasAnyMedia(): Boolean {
         // TODO: implement this when we implemented resumption

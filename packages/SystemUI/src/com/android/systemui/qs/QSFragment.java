@@ -157,6 +157,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (mListening) {
             setListening(false);
         }
+        mQSCustomizer.setQs(null);
     }
 
     @Override

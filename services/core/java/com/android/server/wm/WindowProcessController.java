@@ -1315,12 +1315,15 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
      *
      * @param isCached whether or not the process is cached.
      */
+    @HotPath(caller = HotPath.OOM_ADJUSTMENT)
     public void onProcCachedStateChanged(boolean isCached) {
-        synchronized (mAtm.mGlobalLock) {
-            if (!isCached && mPendingConfiguration != null) {
-                final Configuration config = mPendingConfiguration;
-                mPendingConfiguration = null;
-                dispatchConfigurationChange(config);
+        if (!isCached) {
+            synchronized (mAtm.mGlobalLockWithoutBoost) {
+                if (mPendingConfiguration != null) {
+                    final Configuration config = mPendingConfiguration;
+                    mPendingConfiguration = null;
+                    dispatchConfigurationChange(config);
+                }
             }
         }
     }

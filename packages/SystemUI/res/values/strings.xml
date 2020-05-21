@@ -212,6 +212,13 @@
     <!-- Power menu item for taking a screenshot [CHAR LIMIT=20]-->
     <string name="global_action_screenshot">Screenshot</string>
 
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="default">Unlock your phone for more options</string>
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="tablet">Unlock your tablet for more options</string>
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="device">Unlock your device for more options</string>
+
     <!-- text to show in place of RemoteInput images when they cannot be shown.
          [CHAR LIMIT=50] -->
     <string name="remote_input_image_insertion_text">sent an image</string>
@@ -789,6 +796,9 @@
 
     <!-- Accessibility text describing sensors off active. [CHAR LIMIT=NONE] -->
     <string name="accessibility_sensors_off_active">Sensors off active</string>
+
+    <!-- Accessibility text describing that media is playing. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_media_active">Media is active</string>
 
     <!-- Content description of the clear button in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_clear_all">Clear all notifications.</string>
