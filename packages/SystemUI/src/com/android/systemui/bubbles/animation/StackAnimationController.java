@@ -459,6 +459,10 @@ public class StackAnimationController extends
             float friction,
             SpringForce spring,
             Float finalPosition) {
+        if (!isActiveController()) {
+            return;
+        }
+
         Log.d(TAG, String.format("Flinging %s.",
                 PhysicsAnimationLayout.getReadablePropertyName(property)));
 
@@ -679,7 +683,7 @@ public class StackAnimationController extends
             DynamicAnimation.ViewProperty property, SpringForce spring,
             float vel, float finalPosition, @Nullable Runnable... after) {
 
-        if (mLayout.getChildCount() == 0) {
+        if (mLayout.getChildCount() == 0 || !isActiveController()) {
             return;
         }
 
