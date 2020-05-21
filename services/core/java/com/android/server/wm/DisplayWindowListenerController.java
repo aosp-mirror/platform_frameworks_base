@@ -95,4 +95,27 @@ class DisplayWindowListenerController {
         }
         mDisplayListeners.finishBroadcast();
     }
+
+    void dispatchFixedRotationStarted(DisplayContent display, int newRotation) {
+        int count = mDisplayListeners.beginBroadcast();
+        for (int i = 0; i < count; ++i) {
+            try {
+                mDisplayListeners.getBroadcastItem(i).onFixedRotationStarted(
+                        display.mDisplayId, newRotation);
+            } catch (RemoteException e) {
+            }
+        }
+        mDisplayListeners.finishBroadcast();
+    }
+
+    void dispatchFixedRotationFinished(DisplayContent display) {
+        int count = mDisplayListeners.beginBroadcast();
+        for (int i = 0; i < count; ++i) {
+            try {
+                mDisplayListeners.getBroadcastItem(i).onFixedRotationFinished(display.mDisplayId);
+            } catch (RemoteException e) {
+            }
+        }
+        mDisplayListeners.finishBroadcast();
+    }
 }

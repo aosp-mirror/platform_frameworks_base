@@ -46,4 +46,13 @@ oneway interface IDisplayWindowListener {
      */
     void onDisplayRemoved(int displayId);
 
+    /**
+     * Called when fixed rotation is started on a display.
+     */
+    void onFixedRotationStarted(int displayId, int newRotation);
+
+    /**
+     * Called when the previous fixed rotation on a display is finished.
+     */
+    void onFixedRotationFinished(int displayId);
 }
