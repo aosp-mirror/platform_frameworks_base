@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impression désactivée par <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activer profil professionnel"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vos applications personnelles sont bloquées jusqu\'à ce que vous activiez votre profil professionnel"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Vos applications personnelles seront bloquées demain"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Les applications personnelles seront bloquées le <xliff:g id="DATE">%1$s</xliff:g> à <xliff:g id="TIME">%2$s</xliff:g>. Votre profil professionnel ne peut pas rester désactivé pendant plus de <xliff:g id="NUMBER">%3$d</xliff:g> jours."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Activer le profil professionnel"</string>
     <string name="me" msgid="6207584824693813140">"Moi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Options de la tablette"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Autorise l\'application à modifier votre collection de photos."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"lire les positions issues de votre collection multimédia"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Autorise l\'application à lire les positions indiquées dans votre collection multimédia."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Confirmer que c\'est bien vous"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Confirmez que c\'est vous"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Matériel biométrique indisponible"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentification annulée"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Données biométriques non reconnues"</string>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Vérification de <xliff:g id="NAME">%s</xliff:g> en cours…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Vérification du contenu actuel"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nouveau périphérique <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toucher pour configurer"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Vous devrez peut-être reformater l\'appareil. Touchez pour l\'éjecter."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Pour transférer des photos et d\'autres fichiers"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Il y a un problème avec <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Touchez la notification pour corriger la situation"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Le média « <xliff:g id="NAME">%s</xliff:g> » est corrompu. Sélectionnez-le pour corriger la situation."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Vous devrez peut-être reformater l\'appareil. Touchez pour l\'éjecter."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> non compatible"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ne fonctionne pas"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Cet appareil n\'est pas compatible avec la mémoire de stockage « <xliff:g id="NAME">%s</xliff:g> ». Touchez pour la configurer dans un format compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Cet appareil ne prend pas en charge ce média « <xliff:g id="NAME">%s</xliff:g> ». Sélectionnez-le pour le configurer dans un format compatible."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Cet appareil ne prend pas en charge ce média <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Vous devrez peut-être reformater l\'appareil"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Retrait inattendu de la mémoire « <xliff:g id="NAME">%s</xliff:g> »"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Éjectez les périphériques avant de les retirer pour éviter toute perte de données."</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> retiré(e)"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Activer les fonctionnalités d\'accessibilité?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Si vous maintenez enfoncées les deux touches de volume pendant quelques secondes, vous activez les fonctionnalités d\'accessibilité. Cela peut modifier le fonctionnement de votre appareil.\n\nFonctionnalités actuellement utilisées :\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPour les modifier, sélectionnez Paramètres &gt; Accessibilité."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Activer TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Si vous maintenez enfoncées les deux touches de volume pendant quelques secondes, vous activez TalkBack, un lecteur d\'écran très pratique pour les personnes aveugles ou malvoyantes. TalkBack change complètement le fonctionnement de votre appareil.\n\nPour attribuer ce raccourci à une autre fonctionnalité, sélectionnez Paramètres &gt; Accessibilité."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Activer <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Si vous maintenez enfoncées les deux touches de volume pendant quelques secondes, vous activez la fonctionnalité d\'accessibilité <xliff:g id="SERVICE">%1$s</xliff:g>. Cela peut modifier le fonctionnement de votre appareil.\n\nPour attribuer ce raccourci à une autre fonctionnalité, sélectionnez Paramètres &gt; Accessibilité."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activer"</string>

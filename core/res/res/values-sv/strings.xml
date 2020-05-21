@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Utskrift har inaktiverats av <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivera jobbprofilen"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Privata appar blockeras tills du aktiverar jobbprofilen"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Dina privata appar blockeras i morgon"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Privata appar blockeras den <xliff:g id="DATE">%1$s</xliff:g> kl. <xliff:g id="TIME">%2$s</xliff:g>. Jobbprofilen får vara inaktiverad i högst <xliff:g id="NUMBER">%3$d</xliff:g> dagar."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Aktivera jobbprofilen"</string>
     <string name="me" msgid="6207584824693813140">"Jag"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Alternativ för surfplattan"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Tillåter att appen gör ändringar i din fotosamling."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"läsa av platser i din mediesamling"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tillåter att appen läser av platser i din mediesamling."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Verifiera din identitet"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Verifiera din identitet"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrisk maskinvara är inte tillgänglig"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Autentiseringen avbröts"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Identifierades inte"</string>
@@ -545,7 +545,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Ofullständigt fingeravtryck. Försök igen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Fingeravtryckssensorn är smutsig. Rengör den och försök igen."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Du rörde fingret för snabbt. Försök igen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Du rörde fingret för långsamt. Försök igen."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> kontrolleras …"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Granskar nuvarande innehåll"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nytt <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Tryck för att konfigurera"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Du måste eventuellt formatera om enheten. Tryck för att mata ut."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"För överföring av foton och media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem med <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tryck och åtgärda"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> har skadats. Välj för att åtgärda."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Du måste eventuellt formatera om enheten. Tryck för att mata ut."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> stöds inte"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> fungerar inte"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Enheten har inte stöd för <xliff:g id="NAME">%s</xliff:g>. Tryck här om du vill konfigurera i ett format som stöds."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Enheten stöder inte detta <xliff:g id="NAME">%s</xliff:g>. Välj för att konfigurera i ett format som stöds."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Enheten har inte stöd för detta <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Du måste eventuellt formatera om enheten"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> togs bort oväntat"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Mata ut media innan du tar bort den för att inte förlora innehåll"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> har tagits bort"</string>
@@ -1410,7 +1413,7 @@
     <string name="deny" msgid="6632259981847676572">"Neka"</string>
     <string name="permission_request_notification_title" msgid="1810025922441048273">"Begärd behörighet"</string>
     <string name="permission_request_notification_with_subtitle" msgid="3743417870360129298">"Begärd behörighet\nför kontot <xliff:g id="ACCOUNT">%s</xliff:g>."</string>
-    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din arbetsprofil"</string>
+    <string name="forward_intent_to_owner" msgid="4620359037192871015">"Du använder den här appen i din jobbprofil"</string>
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Du använder den här appen i din jobbprofil"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Indatametod"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Synkronisera"</string>
@@ -1548,7 +1551,7 @@
     <string name="activity_resolver_set_always" msgid="4142825808921411476">"Ställ in på att alltid öppnas"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Bara en gång"</string>
     <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Inställningar"</string>
-    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s har inte stöd för arbetsprofil"</string>
+    <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s har inte stöd för jobbprofil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Surfplatta"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"Mobil"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Vill du aktivera tillgänglighetsfunktionerna?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras tillgänglighetsfunktionerna. Det kan leda till att enheten fungerar annorlunda.\n\nAktuella funktioner:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kan ändra vilka funktioner som aktiveras under Inställningar &gt; Tillgänglighet."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Vill du aktivera TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras TalkBack, en skärmläsare som personer med nedsatt syn kan använda som hjälpmedel. Med TalkBack fungerar enheten helt annorlunda.\n\nDu kan ändra vilken funktion som ska aktiveras med genvägen under Inställningar &gt; Tillgänglighet."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Vill du aktivera <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Om du trycker ned båda volymknapparna i ett par sekunder aktiveras <xliff:g id="SERVICE">%1$s</xliff:g>, en tillgänglighetsfunktion. Det kan leda till att enheten fungerar annorlunda.\n\nDu kan ändra vilken funktion som ska aktiveras med genvägen under Inställningar &gt; Tillgänglighet."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivera"</string>
