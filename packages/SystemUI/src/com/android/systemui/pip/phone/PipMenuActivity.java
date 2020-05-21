@@ -399,11 +399,12 @@ public class PipMenuActivity extends Activity {
     }
 
     private void hideMenu(Runnable animationEndCallback) {
-        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, false /* isDismissing */);
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, false /* isDismissing */,
+                true /* animate */);
     }
 
     private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
-            boolean isDismissing) {
+            boolean isDismissing, boolean animate) {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedFinish();
             if (notifyMenuVisibility) {
@@ -419,7 +420,7 @@ public class PipMenuActivity extends Activity {
                     mDismissButton.getAlpha(), 0f);
             mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim);
             mMenuContainerAnimator.setInterpolator(Interpolators.ALPHA_OUT);
-            mMenuContainerAnimator.setDuration(MENU_FADE_DURATION);
+            mMenuContainerAnimator.setDuration(animate ? MENU_FADE_DURATION : 0);
             mMenuContainerAnimator.addListener(new AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(Animator animation) {
@@ -582,16 +583,20 @@ public class PipMenuActivity extends Activity {
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_EXPAND_PIP,
                     "Could not notify controller to expand PIP");
-        }, false /* notifyMenuVisibility */, false /* isDismissing */);
+        }, false /* notifyMenuVisibility */, false /* isDismissing */, true /* animate */);
     }
 
     private void dismissPip() {
+        // Since tapping on the close-button invokes a double-tap wait callback in PipTouchHandler,
+        // we want to disable animating the fadeout animation of the buttons in order to call on
+        // PipTouchHandler#onPipDismiss fast enough.
+        final boolean animate = mMenuState != MENU_STATE_CLOSE;
         // Do not notify menu visibility when hiding the menu, the controller will do this when it
         // handles the message
         hideMenu(() -> {
             sendEmptyMessage(PipMenuActivityController.MESSAGE_DISMISS_PIP,
                     "Could not notify controller to dismiss PIP");
-        }, false /* notifyMenuVisibility */, true /* isDismissing */);
+        }, false /* notifyMenuVisibility */, true /* isDismissing */, animate);
     }
 
     private void showSettings() {
