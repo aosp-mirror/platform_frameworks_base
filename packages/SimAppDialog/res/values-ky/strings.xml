@@ -19,7 +19,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="8898068901680117589">"SIM-картанын колдонмосунун диалогу"</string>
     <string name="install_carrier_app_title" msgid="334729104862562585">"Мобилдик кызматты жандыруу"</string>
-    <string name="install_carrier_app_description" msgid="4014303558674923797">"Жаңы SIM-картаңыз талаптагыдай иштеши үчүн, <xliff:g id="ID_1">%1$s</xliff:g> колдонмосун орнотуп алышыңыз керек"</string>
+    <string name="install_carrier_app_description" msgid="4014303558674923797">"Жаңы SIM картаңыз талаптагыдай иштеши үчүн, <xliff:g id="ID_1">%1$s</xliff:g> колдонмосун орнотуп алышыңыз керек"</string>
     <string name="install_carrier_app_description_default" msgid="7356830245205847840">"Жаңы SIM картаңыз талаптагыдай иштеши үчүн, байланыш операторунун колдонмосун орнотуп алышыңыз керек"</string>
     <string name="install_carrier_app_defer_action" msgid="2558576736886876209">"Азыр эмес"</string>
     <string name="install_carrier_app_download_action" msgid="7859229305958538064">"Колдонмону жүктөп алуу"</string>
