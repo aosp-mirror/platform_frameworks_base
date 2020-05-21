@@ -32,6 +32,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.util.animation.PhysicsAnimator;
 import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import com.google.android.collect.Sets;
@@ -68,6 +69,10 @@ public class ExpandedAnimationController
      * target.
      */
     private static final float FLING_TO_DISMISS_MIN_VELOCITY = 6000f;
+
+    private final PhysicsAnimator.SpringConfig mAnimateOutSpringConfig =
+            new PhysicsAnimator.SpringConfig(
+                    EXPAND_COLLAPSE_ANIM_STIFFNESS, SpringForce.DAMPING_RATIO_NO_BOUNCY);
 
     /** Horizontal offset between bubbles, which we need to know to re-stack them. */
     private float mStackOffsetPx;
@@ -116,10 +121,17 @@ public class ExpandedAnimationController
 
     private int mExpandedViewPadding;
 
+    /**
+     * Callback to run whenever any bubble is animated out. The BubbleStackView will check if the
+     * end of this animation means we have no bubbles left, and notify the BubbleController.
+     */
+    private Runnable mOnBubbleAnimatedOutAction;
+
     public ExpandedAnimationController(Point displaySize, int expandedViewPadding,
-            int orientation) {
+            int orientation, Runnable onBubbleAnimatedOutAction) {
         updateResources(orientation, displaySize);
         mExpandedViewPadding = expandedViewPadding;
+        mOnBubbleAnimatedOutAction = onBubbleAnimatedOutAction;
     }
 
     /**
@@ -355,8 +367,8 @@ public class ExpandedAnimationController
         }
         animationForChild(bubble)
                 .withStiffness(SpringForce.STIFFNESS_HIGH)
-                .scaleX(1.1f)
-                .scaleY(1.1f)
+                .scaleX(0f)
+                .scaleY(0f)
                 .translationY(bubble.getTranslationY() + translationYBy)
                 .alpha(0f, after)
                 .start();
@@ -500,18 +512,17 @@ public class ExpandedAnimationController
 
     @Override
     void onChildRemoved(View child, int index, Runnable finishRemoval) {
-        final PhysicsAnimationLayout.PhysicsPropertyAnimator animator = animationForChild(child);
-
         // If we're removing the dragged-out bubble, that means it got dismissed.
         if (child.equals(getDraggedOutBubble())) {
             mMagnetizedBubbleDraggingOut = null;
             finishRemoval.run();
+            mOnBubbleAnimatedOutAction.run();
         } else {
-            animator.alpha(0f, finishRemoval /* endAction */)
-                    .withStiffness(SpringForce.STIFFNESS_HIGH)
-                    .withDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
-                    .scaleX(1.1f)
-                    .scaleY(1.1f)
+            PhysicsAnimator.getInstance(child)
+                    .spring(DynamicAnimation.ALPHA, 0f)
+                    .spring(DynamicAnimation.SCALE_X, 0f, mAnimateOutSpringConfig)
+                    .spring(DynamicAnimation.SCALE_Y, 0f, mAnimateOutSpringConfig)
+                    .withEndActions(finishRemoval, mOnBubbleAnimatedOutAction)
                     .start();
         }
 
