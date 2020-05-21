@@ -52,6 +52,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
 import android.util.Log;
 import android.util.Pair;
@@ -64,7 +65,6 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.BackgroundThread;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.job.ConstantsProto;
 import com.android.server.job.JobSchedulerService;
@@ -2496,32 +2496,32 @@ public final class QuotaController extends StateController {
             pw.println();
             pw.println("QuotaController:");
             pw.increaseIndent();
-            pw.printPair(KEY_ALLOWED_TIME_PER_PERIOD_MS, ALLOWED_TIME_PER_PERIOD_MS).println();
-            pw.printPair(KEY_IN_QUOTA_BUFFER_MS, IN_QUOTA_BUFFER_MS).println();
-            pw.printPair(KEY_WINDOW_SIZE_ACTIVE_MS, WINDOW_SIZE_ACTIVE_MS).println();
-            pw.printPair(KEY_WINDOW_SIZE_WORKING_MS, WINDOW_SIZE_WORKING_MS).println();
-            pw.printPair(KEY_WINDOW_SIZE_FREQUENT_MS, WINDOW_SIZE_FREQUENT_MS).println();
-            pw.printPair(KEY_WINDOW_SIZE_RARE_MS, WINDOW_SIZE_RARE_MS).println();
-            pw.printPair(KEY_WINDOW_SIZE_RESTRICTED_MS, WINDOW_SIZE_RESTRICTED_MS).println();
-            pw.printPair(KEY_MAX_EXECUTION_TIME_MS, MAX_EXECUTION_TIME_MS).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_ACTIVE, MAX_JOB_COUNT_ACTIVE).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_WORKING, MAX_JOB_COUNT_WORKING).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_FREQUENT, MAX_JOB_COUNT_FREQUENT).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_RARE, MAX_JOB_COUNT_RARE).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_RESTRICTED, MAX_JOB_COUNT_RESTRICTED).println();
-            pw.printPair(KEY_RATE_LIMITING_WINDOW_MS, RATE_LIMITING_WINDOW_MS).println();
-            pw.printPair(KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
+            pw.print(KEY_ALLOWED_TIME_PER_PERIOD_MS, ALLOWED_TIME_PER_PERIOD_MS).println();
+            pw.print(KEY_IN_QUOTA_BUFFER_MS, IN_QUOTA_BUFFER_MS).println();
+            pw.print(KEY_WINDOW_SIZE_ACTIVE_MS, WINDOW_SIZE_ACTIVE_MS).println();
+            pw.print(KEY_WINDOW_SIZE_WORKING_MS, WINDOW_SIZE_WORKING_MS).println();
+            pw.print(KEY_WINDOW_SIZE_FREQUENT_MS, WINDOW_SIZE_FREQUENT_MS).println();
+            pw.print(KEY_WINDOW_SIZE_RARE_MS, WINDOW_SIZE_RARE_MS).println();
+            pw.print(KEY_WINDOW_SIZE_RESTRICTED_MS, WINDOW_SIZE_RESTRICTED_MS).println();
+            pw.print(KEY_MAX_EXECUTION_TIME_MS, MAX_EXECUTION_TIME_MS).println();
+            pw.print(KEY_MAX_JOB_COUNT_ACTIVE, MAX_JOB_COUNT_ACTIVE).println();
+            pw.print(KEY_MAX_JOB_COUNT_WORKING, MAX_JOB_COUNT_WORKING).println();
+            pw.print(KEY_MAX_JOB_COUNT_FREQUENT, MAX_JOB_COUNT_FREQUENT).println();
+            pw.print(KEY_MAX_JOB_COUNT_RARE, MAX_JOB_COUNT_RARE).println();
+            pw.print(KEY_MAX_JOB_COUNT_RESTRICTED, MAX_JOB_COUNT_RESTRICTED).println();
+            pw.print(KEY_RATE_LIMITING_WINDOW_MS, RATE_LIMITING_WINDOW_MS).println();
+            pw.print(KEY_MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW,
                     MAX_JOB_COUNT_PER_RATE_LIMITING_WINDOW).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_ACTIVE, MAX_SESSION_COUNT_ACTIVE).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_WORKING, MAX_SESSION_COUNT_WORKING).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_FREQUENT, MAX_SESSION_COUNT_FREQUENT).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_RARE, MAX_SESSION_COUNT_RARE).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_RESTRICTED, MAX_SESSION_COUNT_RESTRICTED).println();
-            pw.printPair(KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
+            pw.print(KEY_MAX_SESSION_COUNT_ACTIVE, MAX_SESSION_COUNT_ACTIVE).println();
+            pw.print(KEY_MAX_SESSION_COUNT_WORKING, MAX_SESSION_COUNT_WORKING).println();
+            pw.print(KEY_MAX_SESSION_COUNT_FREQUENT, MAX_SESSION_COUNT_FREQUENT).println();
+            pw.print(KEY_MAX_SESSION_COUNT_RARE, MAX_SESSION_COUNT_RARE).println();
+            pw.print(KEY_MAX_SESSION_COUNT_RESTRICTED, MAX_SESSION_COUNT_RESTRICTED).println();
+            pw.print(KEY_MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW,
                     MAX_SESSION_COUNT_PER_RATE_LIMITING_WINDOW).println();
-            pw.printPair(KEY_TIMING_SESSION_COALESCING_DURATION_MS,
+            pw.print(KEY_TIMING_SESSION_COALESCING_DURATION_MS,
                     TIMING_SESSION_COALESCING_DURATION_MS).println();
-            pw.printPair(KEY_MIN_QUOTA_CHECK_DELAY_MS, MIN_QUOTA_CHECK_DELAY_MS).println();
+            pw.print(KEY_MIN_QUOTA_CHECK_DELAY_MS, MIN_QUOTA_CHECK_DELAY_MS).println();
             pw.decreaseIndent();
         }
 

@@ -17,9 +17,9 @@
 package com.android.server.job.restrictions;
 
 import android.app.job.JobInfo;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.controllers.JobStatus;
 

@@ -17,6 +17,7 @@
 package com.android.internal.util;
 
 import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 

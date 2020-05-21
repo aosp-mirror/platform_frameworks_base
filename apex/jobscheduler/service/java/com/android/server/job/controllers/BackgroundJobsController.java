@@ -20,11 +20,11 @@ import static com.android.server.job.JobSchedulerService.NEVER_INDEX;
 
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.AppStateTracker;
 import com.android.server.AppStateTracker.Listener;
 import com.android.server.LocalServices;
