@@ -88,12 +88,13 @@
 #include <utils/String8.h>
 #include <utils/Trace.h>
 
-#include "core_jni_helpers.h"
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
 #include <nativehelper/ScopedPrimitiveArray.h>
 #include <nativehelper/ScopedUtfChars.h>
+#include "core_jni_helpers.h"
 #include "fd_utils.h"
+#include "filesystem_utils.h"
 
 #include "nativebridge/native_bridge.h"
 
@@ -612,15 +613,6 @@ static void EnableDebugger() {
       }
     }
   }
-}
-
-static bool IsFilesystemSupported(const std::string& fsType) {
-    std::string supported;
-    if (!ReadFileToString("/proc/filesystems", &supported)) {
-        ALOGE("Failed to read supported filesystems");
-        return false;
-    }
-    return supported.find(fsType + "\n") != std::string::npos;
 }
 
 static void PreApplicationInit() {
@@ -1554,15 +1546,14 @@ static void isolateJitProfile(JNIEnv* env, jobjectArray pkg_data_info_list,
 
 static void BindMountStorageToLowerFs(const userid_t user_id, const uid_t uid,
     const char* dir_name, const char* package, fail_fn_t fail_fn) {
-
-  bool hasSdcardFs = IsFilesystemSupported("sdcardfs");
-  std::string source;
-  if (hasSdcardFs) {
-    source = StringPrintf("/mnt/runtime/default/emulated/%d/%s/%s", user_id, dir_name, package);
-  } else {
-    source = StringPrintf("/mnt/pass_through/%d/emulated/%d/%s/%s",
-        user_id, user_id, dir_name, package);
-  }
+    bool hasSdcardFs = IsSdcardfsUsed();
+    std::string source;
+    if (hasSdcardFs) {
+        source = StringPrintf("/mnt/runtime/default/emulated/%d/%s/%s", user_id, dir_name, package);
+    } else {
+        source = StringPrintf("/mnt/pass_through/%d/emulated/%d/%s/%s", user_id, user_id, dir_name,
+                              package);
+    }
   std::string target = StringPrintf("/storage/emulated/%d/%s/%s", user_id, dir_name, package);
 
   // As the parent is mounted as tmpfs, we need to create the target dir here.
