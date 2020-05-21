@@ -13,17 +13,19 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.theme.font.sam"
-    android:versionCode="1"
-    android:versionName="1.0">
-    <overlay android:targetPackage="android"
-        android:category="android.theme.customization.font"
-        android:priority="1"/>
 
-    <application android:label="@string/font_overlay" android:hasCode="false">
-        <meta-data
-            android:name="android.theme.customization.REQUIRED_SYSTEM_FONTS"
-            android:value="fraunces,fraunces-semi-bold,karla,karla-bold" />
-    </application>
-</manifest>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <path
+      android:pathData="M5,7.81l0,8.38l6,-4.19z"
+      android:fillColor="#000000"/>
+  <path
+      android:pathData="M13,8h2v8h-2z"
+      android:fillColor="#000000"/>
+  <path
+      android:pathData="M17,8h2v8h-2z"
+      android:fillColor="#000000"/>
+</vector>

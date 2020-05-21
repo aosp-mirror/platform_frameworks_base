@@ -6,9 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
-import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.media.InfoMediaManager
-import com.android.settingslib.media.LocalMediaManager
 import com.android.systemui.R
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
@@ -30,10 +27,9 @@ class MediaViewManager @Inject constructor(
     private val context: Context,
     @Main private val foregroundExecutor: Executor,
     @Background private val backgroundExecutor: DelayableExecutor,
-    private val localBluetoothManager: LocalBluetoothManager?,
     private val visualStabilityManager: VisualStabilityManager,
     private val activityStarter: ActivityStarter,
-    mediaManager: MediaDataManager
+    mediaManager: MediaDataCombineLatest
 ) {
     private var playerWidth: Int = 0
     private var playerWidthPlusPadding: Int = 0
@@ -42,7 +38,7 @@ class MediaViewManager @Inject constructor(
     val mediaCarousel: HorizontalScrollView
     private val mediaContent: ViewGroup
     private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
-    private val visualStabilityCallback : VisualStabilityManager.Callback
+    private val visualStabilityCallback: VisualStabilityManager.Callback
     private var activeMediaIndex: Int = 0
     private var needsReordering: Boolean = false
     private var scrollIntoCurrentMedia: Int = 0
@@ -151,15 +147,8 @@ class MediaViewManager @Inject constructor(
     private fun updateView(key: String, data: MediaData) {
         var existingPlayer = mediaPlayers[key]
         if (existingPlayer == null) {
-            // Set up listener for device changes
-            // TODO: integrate with MediaTransferManager?
-            val imm = InfoMediaManager(context, data.packageName,
-                    null /* notification */, localBluetoothManager)
-            val routeManager = LocalMediaManager(context, localBluetoothManager,
-                    imm, data.packageName)
-
-            existingPlayer = MediaControlPanel(context, routeManager, foregroundExecutor,
-                    backgroundExecutor, activityStarter)
+            existingPlayer = MediaControlPanel(context, foregroundExecutor, backgroundExecutor,
+                    activityStarter)
             existingPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context),
                     mediaContent))
             mediaPlayers[key] = existingPlayer

@@ -2184,7 +2184,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         final int appStackClipMode = getDisplayContent().mAppTransition.getAppStackClipMode();
 
         // Separate position and size for use in animators.
-        mTmpRect.set(getAnimationBounds(appStackClipMode));
+        final Rect screenBounds = getAnimationBounds(appStackClipMode);
+        mTmpRect.set(screenBounds);
         getAnimationPosition(mTmpPoint);
         if (!sHierarchicalAnimations) {
             // Non-hierarchical animation uses position in global coordinates.
@@ -2203,7 +2204,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             localBounds.offsetTo(mTmpPoint.x, mTmpPoint.y);
             final RemoteAnimationController.RemoteAnimationRecord adapters =
                     controller.createRemoteAnimationRecord(this, mTmpPoint, localBounds,
-                            mTmpRect, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
+                            screenBounds, (isChanging ? mSurfaceFreezer.mFreezeBounds : null));
             resultAdapters = new Pair<>(adapters.mAdapter, adapters.mThumbnailAdapter);
         } else if (isChanging) {
             final float durationScale = mWmService.getTransitionAnimationScaleLocked();
@@ -2616,10 +2617,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return willSync;
     }
 
-    boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
-            int waitingId) {
-        boolean willSync = true;
-
+    boolean setPendingListener(BLASTSyncEngine.TransactionReadyListener waitingListener,
+        int waitingId) {
         // If we are invisible, no need to sync, likewise if we are already engaged in a sync,
         // we can't support overlapping syncs on a single container yet.
         if (!isVisible() || mWaitingListener != null) {
@@ -2630,6 +2629,15 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Make sure to set these before we call setReady in case the sync was a no-op
         mWaitingSyncId = waitingId;
         mWaitingListener = waitingListener;
+        return true;
+    }
+
+    boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
+            int waitingId) {
+        boolean willSync = setPendingListener(waitingListener, waitingId);
+        if (!willSync) {
+            return false;
+        }
 
         int localId = mBLASTSyncEngine.startSyncSet(this);
         willSync |= addChildrenToSyncSet(localId);

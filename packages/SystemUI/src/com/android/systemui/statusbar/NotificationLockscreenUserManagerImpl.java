@@ -35,7 +35,6 @@ import android.content.IntentSender;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.os.Handler;
-import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -43,7 +42,6 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
-import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -92,9 +90,9 @@ public class NotificationLockscreenUserManagerImpl implements
     private final SparseBooleanArray mUsersAllowingPrivateNotifications = new SparseBooleanArray();
     private final SparseBooleanArray mUsersAllowingNotifications = new SparseBooleanArray();
     private final UserManager mUserManager;
-    private final IStatusBarService mBarService;
     private final List<UserChangedListener> mListeners = new ArrayList<>();
     private final BroadcastDispatcher mBroadcastDispatcher;
+    private final NotificationClickNotifier mClickNotifier;
 
     private boolean mShowLockscreenNotifications;
     private boolean mAllowLockscreenRemoteInput;
@@ -170,11 +168,7 @@ public class NotificationLockscreenUserManagerImpl implements
                         final NotificationVisibility nv = NotificationVisibility.obtain(
                                 notificationKey,
                                 rank, count, true, location);
-                        try {
-                            mBarService.onNotificationClick(notificationKey, nv);
-                        } catch (RemoteException exception) {
-                            /* ignore */
-                        }
+                        mClickNotifier.onNotificationClick(notificationKey, nv);
                     }
                     break;
             }
@@ -203,7 +197,7 @@ public class NotificationLockscreenUserManagerImpl implements
             BroadcastDispatcher broadcastDispatcher,
             DevicePolicyManager devicePolicyManager,
             UserManager userManager,
-            IStatusBarService iStatusBarService,
+            NotificationClickNotifier clickNotifier,
             KeyguardManager keyguardManager,
             StatusBarStateController statusBarStateController,
             @Main Handler mainHandler,
@@ -214,7 +208,7 @@ public class NotificationLockscreenUserManagerImpl implements
         mDevicePolicyManager = devicePolicyManager;
         mUserManager = userManager;
         mCurrentUserId = ActivityManager.getCurrentUser();
-        mBarService = iStatusBarService;
+        mClickNotifier = clickNotifier;
         statusBarStateController.addCallback(this);
         mLockPatternUtils = new LockPatternUtils(context);
         mKeyguardManager = keyguardManager;
