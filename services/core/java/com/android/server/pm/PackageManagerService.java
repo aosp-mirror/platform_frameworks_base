@@ -24510,9 +24510,10 @@ public class PackageManagerService extends IPackageManager.Stub
                 if (updatedPackageNames != null) {
                     outUpdatedPackageNames.addAll(updatedPackageNames);
                 }
-
-                return true;
             }
+
+            PackageManager.invalidatePackageInfoCache();
+            return true;
         }
 
         @Override
