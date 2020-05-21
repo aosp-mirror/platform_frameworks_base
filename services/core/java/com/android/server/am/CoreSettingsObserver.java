@@ -131,6 +131,10 @@ final class CoreSettingsObserver extends ContentObserver {
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.INSERTION_HANDLE_OPACITY,
                 WidgetFlags.KEY_INSERTION_HANDLE_OPACITY, int.class,
                 WidgetFlags.INSERTION_HANDLE_OPACITY_DEFAULT));
+        sDeviceConfigEntries.add(new DeviceConfigEntry<Float>(
+                DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.LINE_SLOP_RATIO,
+                WidgetFlags.KEY_LINE_SLOP_RATIO, float.class,
+                WidgetFlags.LINE_SLOP_RATIO_DEFAULT));
         sDeviceConfigEntries.add(new DeviceConfigEntry<Boolean>(
                 DeviceConfig.NAMESPACE_WIDGET, WidgetFlags.ENABLE_NEW_MAGNIFIER,
                 WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER, boolean.class,
