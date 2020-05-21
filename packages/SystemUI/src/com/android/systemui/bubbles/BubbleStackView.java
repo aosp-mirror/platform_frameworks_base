@@ -362,6 +362,10 @@ public class BubbleStackView extends FrameLayout
             new MagnetizedObject.MagnetListener() {
                 @Override
                 public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    if (mExpandedAnimationController.getDraggedOutBubble() == null) {
+                        return;
+                    }
+
                     animateDesaturateAndDarken(
                             mExpandedAnimationController.getDraggedOutBubble(), true);
                 }
@@ -369,6 +373,10 @@ public class BubbleStackView extends FrameLayout
                 @Override
                 public void onUnstuckFromTarget(@NonNull MagnetizedObject.MagneticTarget target,
                         float velX, float velY, boolean wasFlungOut) {
+                    if (mExpandedAnimationController.getDraggedOutBubble() == null) {
+                        return;
+                    }
+
                     animateDesaturateAndDarken(
                             mExpandedAnimationController.getDraggedOutBubble(), false);
 
@@ -383,6 +391,10 @@ public class BubbleStackView extends FrameLayout
 
                 @Override
                 public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                    if (mExpandedAnimationController.getDraggedOutBubble() == null) {
+                        return;
+                    }
+
                     mExpandedAnimationController.dismissDraggedOutBubble(
                             mExpandedAnimationController.getDraggedOutBubble() /* bubble */,
                             mDismissTargetContainer.getHeight() /* translationYBy */,
