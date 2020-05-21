@@ -24,7 +24,7 @@
 #include "BroadcastRadio/Tuner.h"
 
 namespace android {
-int register_android_server_AlarmManagerService(JNIEnv* env);
+int register_android_server_alarm_AlarmManagerService(JNIEnv* env);
 int register_android_server_BatteryStatsService(JNIEnv* env);
 int register_android_server_ConsumerIrService(JNIEnv *env);
 int register_android_server_InputManager(JNIEnv* env);
@@ -86,7 +86,7 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_SerialService(env);
     register_android_server_InputManager(env);
     register_android_server_LightsService(env);
-    register_android_server_AlarmManagerService(env);
+    register_android_server_alarm_AlarmManagerService(env);
     register_android_server_UsbDeviceManager(env);
     register_android_server_UsbMidiDevice(env);
     register_android_server_UsbAlsaJackDetector(env);
