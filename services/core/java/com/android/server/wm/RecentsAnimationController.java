@@ -406,8 +406,9 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        mMinimizedHomeBounds = mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask()
-                .getBounds();
+        final ActivityStack rootHomeTask =
+                mDisplayContent.getDefaultTaskDisplayArea().getRootHomeTask();
+        mMinimizedHomeBounds = rootHomeTask != null ? rootHomeTask.getBounds() : null;
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
 

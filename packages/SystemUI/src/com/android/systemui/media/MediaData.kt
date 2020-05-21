@@ -34,7 +34,8 @@ data class MediaData(
     val actionsToShowInCompact: List<Int>,
     val packageName: String?,
     val token: MediaSession.Token?,
-    val clickIntent: PendingIntent?
+    val clickIntent: PendingIntent?,
+    val device: MediaDeviceData?
 )
 
 /** State of a media action. */
@@ -42,4 +43,10 @@ data class MediaAction(
     val drawable: Drawable?,
     val intent: PendingIntent?,
     val contentDescription: CharSequence?
+)
+
+/** State of the media device. */
+data class MediaDeviceData(
+    val icon: Drawable?,
+    val name: String?
 )

@@ -32,9 +32,12 @@ import java.io.FileDescriptor
 import java.io.PrintWriter
 
 @SmallTest
-class DumpManagerTest : SysuiTestCase() {
+class DumpHandlerTest : SysuiTestCase() {
 
-    private lateinit var dumpManager: DumpManager
+    private lateinit var dumpHandler: DumpHandler
+
+    @Mock
+    private lateinit var logBufferEulogizer: LogBufferEulogizer
 
     @Mock
     private lateinit var fd: FileDescriptor
@@ -53,11 +56,13 @@ class DumpManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var buffer2: LogBuffer
 
+    private val dumpManager = DumpManager()
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
 
-        dumpManager = DumpManager(mContext)
+        dumpHandler = DumpHandler(mContext, dumpManager, logBufferEulogizer)
     }
 
     @Test
@@ -71,7 +76,7 @@ class DumpManagerTest : SysuiTestCase() {
 
         // WHEN some of them are dumped explicitly
         val args = arrayOf("dumpable1", "dumpable3", "buffer2")
-        dumpManager.dump(fd, pw, args)
+        dumpHandler.dump(fd, pw, args)
 
         // THEN only the requested ones have their dump() method called
         verify(dumpable1).dump(fd, pw, args)
@@ -91,7 +96,7 @@ class DumpManagerTest : SysuiTestCase() {
 
         // WHEN that module is dumped
         val args = arrayOf("dumpable1")
-        dumpManager.dump(fd, pw, args)
+        dumpHandler.dump(fd, pw, args)
 
         // THEN its dump() method is called
         verify(dumpable1).dump(fd, pw, args)
@@ -108,7 +113,7 @@ class DumpManagerTest : SysuiTestCase() {
 
         // WHEN a critical dump is requested
         val args = arrayOf("--dump-priority", "CRITICAL")
-        dumpManager.dump(fd, pw, args)
+        dumpHandler.dump(fd, pw, args)
 
         // THEN all modules are dumped (but no buffers)
         verify(dumpable1).dump(fd, pw, args)
@@ -127,9 +132,9 @@ class DumpManagerTest : SysuiTestCase() {
         dumpManager.registerBuffer("buffer1", buffer1)
         dumpManager.registerBuffer("buffer2", buffer2)
 
-        // WHEN a critical dump is requested
+        // WHEN a normal dump is requested
         val args = arrayOf("--dump-priority", "NORMAL")
-        dumpManager.dump(fd, pw, args)
+        dumpHandler.dump(fd, pw, args)
 
         // THEN all buffers are dumped (but no modules)
         verify(dumpable1, never()).dump(

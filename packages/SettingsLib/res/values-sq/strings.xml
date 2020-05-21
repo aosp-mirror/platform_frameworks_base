@@ -207,7 +207,7 @@
     <string name="enable_adb_summary" msgid="3711526030096574316">"Korrigjo gabimet e modalitetit kur UBS-ja është e lidhur"</string>
     <string name="clear_adb_keys" msgid="3010148733140369917">"Anulo autorizimet e korrigjimeve të gabimeve të USB-së"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Korrigjimi përmes Wi-Fi"</string>
-    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Regjimi i korrigjimit kur Wi‑Fi është i lidhur"</string>
+    <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Modaliteti i korrigjimit kur Wi‑Fi është i lidhur"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Gabim"</string>
     <string name="adb_wireless_settings" msgid="2295017847215680229">"Korrigjimi përmes Wi-Fi"</string>
     <string name="adb_wireless_list_empty_off" msgid="1713707973837255490">"Për të parë dhe përdorur pajisjet e disponueshme, aktivizo korrigjimin përmes Wi-Fi"</string>
@@ -446,7 +446,7 @@
     <string name="power_remaining_duration_shutdown_imminent" product="device" msgid="4374784375644214578">"Pajisja mund të fiket së shpejti (<xliff:g id="LEVEL">%1$s</xliff:g>)"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="7415639699283965818">"<xliff:g id="TIME">%1$s</xliff:g> të mbetura deri në karikim"</string>
-    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> deri sa të karikohen"</string>
+    <string name="power_charging_duration" msgid="5005740040558984057">"<xliff:g id="LEVEL">%1$s</xliff:g> - <xliff:g id="TIME">%2$s</xliff:g> derisa të karikohet"</string>
     <string name="battery_info_status_unknown" msgid="268625384868401114">"I panjohur"</string>
     <string name="battery_info_status_charging" msgid="4279958015430387405">"Po karikohet"</string>
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Po ngarkon me shpejtësi"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Joaktiv"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Aktiv"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Pajisja jote duhet të riniset që ky ndryshim të zbatohet. Rinise tani ose anuloje."</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> për punën"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

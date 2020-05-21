@@ -251,7 +251,7 @@
     <string name="wifi_display_certification" msgid="1805579519992520381">"Certifikacija bežičnog prikaza"</string>
     <string name="wifi_verbose_logging" msgid="1785910450009679371">"Omogući opširnu prijavu na Wi-Fi"</string>
     <string name="wifi_scan_throttling" msgid="2985624788509913617">"Usporavanje traženja Wi-Fija"</string>
-    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Nasum. odabir MAC-a poboljšan Wi‑Fi‑jem"</string>
+    <string name="wifi_enhanced_mac_randomization" msgid="5437378364995776979">"Nasum. odabir MAC-a poboljšan Wi‑Fijem"</string>
     <string name="mobile_data_always_on" msgid="8275958101875563572">"Mobilni podaci uvijek aktivni"</string>
     <string name="tethering_hardware_offload" msgid="4116053719006939161">"Hardversko ubrzanje za modemsko povezivanje"</string>
     <string name="bluetooth_show_devices_without_names" msgid="923584526471885819">"Prikaži Bluetooth uređaje bez naziva"</string>
@@ -534,8 +534,8 @@
     <string name="user_add_user_title" msgid="5457079143694924885">"Dodati novog korisnika?"</string>
     <string name="user_add_user_message_long" msgid="1527434966294733380">"Da biste ovaj uređaj dijelili s drugima, možete napraviti dodatne korisnike. Svaki korisnik ima svoj prostor koji može prilagoditi pomoću vlastitih aplikacija, pozadine i tako dalje. Korisnici mogu prilagoditi i postavke uređaja koje utječu na sve ostale korisnike, na primjer Wi‑Fi.\n\nKada dodate novog korisnika, ta osoba mora postaviti svoj prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike. Postavke i usluge pristupačnosti možda se neće prenijeti na novog korisnika."</string>
     <string name="user_add_user_message_short" msgid="3295959985795716166">"Kada dodate novog korisnika, ta osoba mora postaviti vlastiti prostor.\n\nBilo koji korisnik može ažurirati aplikacije za sve ostale korisnike."</string>
-    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Postaviti korisnika sada?"</string>
-    <string name="user_setup_dialog_message" msgid="269931619868102841">"Provjerite može li osoba uzeti uređaj i postaviti svoj prostor"</string>
+    <string name="user_setup_dialog_title" msgid="8037342066381939995">"Želite li postaviti korisnika?"</string>
+    <string name="user_setup_dialog_message" msgid="269931619868102841">"Uređaj morate dati toj osobi da sama postavi svoj prostor"</string>
     <string name="user_setup_profile_dialog_message" msgid="4788197052296962620">"Želite li sada postaviti profil?"</string>
     <string name="user_setup_button_setup_now" msgid="1708269547187760639">"Postavi sada"</string>
     <string name="user_setup_button_setup_later" msgid="8712980133555493516">"Ne sad"</string>
@@ -555,4 +555,6 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Omogućeno"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Uređaj se mora ponovno pokrenuti da bi se ta promjena primijenila. Ponovo pokrenite uređaj odmah ili odustanite."</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> za posao"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>

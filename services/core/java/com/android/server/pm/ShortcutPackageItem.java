@@ -18,8 +18,10 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.content.pm.PackageInfo;
 import android.content.pm.ShortcutInfo;
+import android.util.AtomicFile;
 import android.util.Slog;
 
+import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.Preconditions;
 
 import org.json.JSONException;
@@ -27,7 +29,11 @@ import org.json.JSONObject;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -142,6 +148,31 @@ abstract class ShortcutPackageItem {
 
     public abstract void saveToXml(@NonNull XmlSerializer out, boolean forBackup)
             throws IOException, XmlPullParserException;
+
+    public void saveToFile(File path, boolean forBackup) {
+        final AtomicFile file = new AtomicFile(path);
+        FileOutputStream os = null;
+        try {
+            os = file.startWrite();
+            final BufferedOutputStream bos = new BufferedOutputStream(os);
+
+            // Write to XML
+            XmlSerializer itemOut = new FastXmlSerializer();
+            itemOut.setOutput(bos, StandardCharsets.UTF_8.name());
+            itemOut.startDocument(null, true);
+
+            saveToXml(itemOut, forBackup);
+
+            itemOut.endDocument();
+
+            bos.flush();
+            os.flush();
+            file.finishWrite(os);
+        } catch (XmlPullParserException | IOException e) {
+            Slog.e(TAG, "Failed to write to file " + file.getBaseFile(), e);
+            file.failWrite(os);
+        }
+    }
 
     public JSONObject dumpCheckin(boolean clear) throws JSONException {
         final JSONObject result = new JSONObject();

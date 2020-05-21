@@ -1977,6 +1977,7 @@ public final class ViewRootImpl implements ViewParent,
                     (mCompatibleVisibilityInfo.globalVisibility & ~View.SYSTEM_UI_FLAG_LOW_PROFILE)
                             | (mAttachInfo.mSystemUiVisibility & View.SYSTEM_UI_FLAG_LOW_PROFILE);
             if (mDispatchedSystemUiVisibility != mCompatibleVisibilityInfo.globalVisibility) {
+                mHandler.removeMessages(MSG_DISPATCH_SYSTEM_UI_VISIBILITY);
                 mHandler.sendMessage(mHandler.obtainMessage(
                         MSG_DISPATCH_SYSTEM_UI_VISIBILITY, mCompatibleVisibilityInfo));
             }
@@ -2031,8 +2032,10 @@ public final class ViewRootImpl implements ViewParent,
             }
         } else {
             info.globalVisibility |= systemUiFlag;
+            info.localChanges &= ~systemUiFlag;
         }
         if (mDispatchedSystemUiVisibility != info.globalVisibility) {
+            mHandler.removeMessages(MSG_DISPATCH_SYSTEM_UI_VISIBILITY);
             mHandler.sendMessage(mHandler.obtainMessage(MSG_DISPATCH_SYSTEM_UI_VISIBILITY, info));
         }
     }

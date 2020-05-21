@@ -78,7 +78,22 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
     val progress: LiveData<Progress>
         get() = _progress
     private var controller: MediaController? = null
+        set(value) {
+            if (field?.sessionToken != value?.sessionToken) {
+                field?.unregisterCallback(callback)
+                value?.registerCallback(callback)
+                field = value
+            }
+        }
     private var playbackState: PlaybackState? = null
+    private var callback = object : MediaController.Callback() {
+        override fun onPlaybackStateChanged(state: PlaybackState) {
+            playbackState = state
+            if (shouldPollPlaybackPosition()) {
+                checkPlaybackPosition()
+            }
+        }
+    }
 
     /** Listening state (QS open or closed) is used to control polling of progress. */
     var listening = true
@@ -95,6 +110,9 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
     @WorkerThread
     fun onSeek(position: Long) {
         controller?.transportControls?.seekTo(position)
+        // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
+        // position.
+        playbackState = null
     }
 
     /**
@@ -125,12 +143,23 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
      */
     @AnyThread
     fun clearController() = bgExecutor.execute {
+        controller = null
+        playbackState = null
         _data = _data.copy(enabled = false)
+    }
+
+    /**
+     * Call to clean up any resources.
+     */
+    @AnyThread
+    fun onDestroy() {
+        controller = null
+        playbackState = null
     }
 
     @AnyThread
     private fun checkPlaybackPosition(): Runnable = bgExecutor.executeDelayed({
-        val duration = _data?.duration ?: -1
+        val duration = _data.duration ?: -1
         val currentPosition = playbackState?.computePosition(duration.toLong())?.toInt()
         if (currentPosition != null && _data.elapsedTime != currentPosition) {
             _data = _data.copy(elapsedTime = currentPosition)

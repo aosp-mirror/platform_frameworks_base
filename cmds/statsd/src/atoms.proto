@@ -4945,9 +4945,12 @@ message MobileBytesTransferByFgBg {
 
 /**
  * Used for pull network statistics via mobile|wifi networks, and sliced by interesting dimensions.
- * Note that data is expected to be sliced into more dimensions in future. In other words,
- * the caller must not assume the data is unique when filtering with a set of matching conditions.
- * Thus, as the dimension grows, the caller will not be affected.
+ * Note that the data is expected to be sliced into more dimensions in future. In other words,
+ * the caller must not assume any row of data is one full report when filtering with a set of
+ * matching conditions, because future data may represent with multiple rows what is currently
+ * represented by one.
+ * To avoid being broken by future slicing, callers must take care to aggregate rows even if they
+ * query all the existing columns.
  *
  * Pulled from:
  *   StatsPullAtomService (using NetworkStatsService to get NetworkStats)
@@ -4972,21 +4975,26 @@ message DataUsageBytesTransfer {
     optional int32 rat_type = 6;
 
     // Mcc/Mnc read from sim if the record is for a specific subscription, null indicates the
-    // record is combined regardless of subscription.
+    // record is combined across subscriptions.
     optional string sim_mcc = 7;
     optional string sim_mnc = 8;
+
+    // Allows mobile virtual network operators (MVNOs) to be identified with individual IDs.
+    // See TelephonyManager#getSimCarrierId.
+    optional int32 carrier_id = 9;
 
     // Enumeration of opportunistic states with an additional ALL state indicates the record is
     // combined regardless of the boolean value in its field.
     enum DataSubscriptionState {
+        UNKNOWN = 0; // For server side backward compatibility.
         ALL = 1;
         OPPORTUNISTIC = 2;
         NOT_OPPORTUNISTIC = 3;
     }
     // Mark whether the subscription is an opportunistic data subscription, and ALL indicates the
-    // record is combined regardless of opportunistic data subscription.
+    // record is combined across opportunistic data subscriptions.
     // See {@link SubscriptionManager#setOpportunistic}.
-    optional DataSubscriptionState opportunistic_data_sub = 9;
+    optional DataSubscriptionState opportunistic_data_sub = 10;
 }
 
 /**

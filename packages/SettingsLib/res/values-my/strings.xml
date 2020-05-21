@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"မသိ"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"အသုံးပြုသူ- <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"မူရင်းအချို့ သတ်မှတ်ပြီး"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"ပုံမှန်သတ်မှတ်ထားခြင်းမရှိ"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"မူရင်း သတ်မှတ်မထားပါ။"</string>
     <string name="tts_settings" msgid="8130616705989351312">"စာသားမှစကားပြောပြောင်း ဆက်တင်များ"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"စာသားမှ စကားပြောသို့ အထွက်"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"စကားပြောနှုန်း"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ပိတ်ထားသည်"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ဖွင့်ထားသည်"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ဤအပြောင်းအလဲ ထည့်သွင်းရန် သင့်စက်ကို ပြန်လည်စတင်ရမည်။ ယခု ပြန်လည်စတင်ပါ သို့မဟုတ် ပယ်ဖျက်ပါ။"</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"အလုပ် <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

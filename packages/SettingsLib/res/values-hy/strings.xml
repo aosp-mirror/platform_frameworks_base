@@ -433,7 +433,7 @@
     <string name="power_discharge_by" msgid="4113180890060388350">"Լիցքը (<xliff:g id="LEVEL">%2$s</xliff:g>) պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only" msgid="92545648425937000">"Լիցքը պետք է որ բավականացնի մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_discharge_by_only_short" msgid="5883041507426914446">"Մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Մարտկոցի լիցքը կարող է սպառվել մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_suggestion_battery_run_out" msgid="6332089307827787087">"Լիցքը կարող է սպառվել մինչև <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="8956656616031395152">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից քիչ"</string>
     <string name="power_remaining_less_than_duration" msgid="318215464914990578">"Մնացել է <xliff:g id="THRESHOLD">%1$s</xliff:g>-ից քիչ (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="446388082266121894">"Մնացել է ավելի քան <xliff:g id="TIME_REMAINING">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -452,7 +452,7 @@
     <string name="battery_info_status_charging_fast" msgid="8027559755902954885">"Արագ լիցքավորում"</string>
     <string name="battery_info_status_charging_slow" msgid="3190803837168962319">"Դանդաղ լիցքավորում"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"Չի լիցքավորվում"</string>
-    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Միացված է հոսանքի աղբյուրին, սակայն այս պահին չի կարող լիցքավորվել"</string>
+    <string name="battery_info_status_not_charging" msgid="8330015078868707899">"Միացված է հոսանքին, այս պահին չի կարող լիցքավորվել"</string>
     <string name="battery_info_status_full" msgid="4443168946046847468">"Լիցքավորված է"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Վերահսկվում է ադմինիստրատորի կողմից"</string>
     <string name="disabled" msgid="8017887509554714950">"Կասեցված է"</string>
@@ -553,6 +553,7 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Անջատված է"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Միացված է"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Սարքն անհրաժեշտ է վերագործարկել, որպեսզի փոփոխությունը կիրառվի։ Վերագործարկեք հիմա կամ չեղարկեք փոփոխությունը։"</string>
-    <!-- no translation found for accessibility_work_profile_app_description (5470883112342119165) -->
+    <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Աշխատանքային <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
     <skip />
 </resources>

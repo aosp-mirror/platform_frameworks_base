@@ -1509,7 +1509,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mActivityRecord != null ? mActivityRecord.getTask() : null;
     }
 
-    ActivityStack getRootTask() {
+    @Nullable ActivityStack getRootTask() {
         final Task task = getTask();
         if (task != null) {
             return (ActivityStack) task.getRootTask();
@@ -2262,7 +2262,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mHasSurface = hasSurface;
     }
 
+    /**
+     * Checks whether one of the Windows in a Display embedded in this Window can be an IME target.
+     */
+    private boolean canWindowInEmbeddedDisplayBeImeTarget() {
+        final int embeddedDisplayContentsSize = mEmbeddedDisplayContents.size();
+        for (int i = embeddedDisplayContentsSize - 1; i >= 0; i--) {
+            final DisplayContent edc = mEmbeddedDisplayContents.valueAt(i);
+            if (edc.forAllWindows(WindowState::canBeImeTarget, true)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     boolean canBeImeTarget() {
+        // If any of the embedded windows can be the IME target, this window will be the final IME
+        // target. This is because embedded windows are on a different display in WM so it would
+        // cause confusion trying to set the IME to a window on a different display. Instead, just
+        // make the host window the IME target.
+        if (canWindowInEmbeddedDisplayBeImeTarget()) {
+            return true;
+        }
+
         if (mIsImWindow) {
             // IME windows can't be IME targets. IME targets are required to be below the IME
             // windows and that wouldn't be possible if the IME window is its own target...silly.
@@ -2527,7 +2549,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             final Task task = getTask();
             if (task != null) {
                 task.getDimBounds(mTmpRect);
-            } else {
+            } else if (getRootTask() != null) {
                 getRootTask().getDimBounds(mTmpRect);
             }
         }
@@ -5707,16 +5729,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean prepareForSync(BLASTSyncEngine.TransactionReadyListener waitingListener,
             int waitingId) {
-        if (!isVisible()) {
+        boolean willSync = setPendingListener(waitingListener, waitingId);
+        if (!willSync) {
             return false;
         }
-        mWaitingListener = waitingListener;
-        mWaitingSyncId = waitingId;
-        mUsingBLASTSyncTransaction = true;
 
         mLocalSyncId = mBLASTSyncEngine.startSyncSet(this);
         addChildrenToSyncSet(mLocalSyncId);
 
+        // In the WindowContainer implementation we immediately mark ready
+        // since a generic WindowContainer only needs to wait for its
+        // children to finish and is immediately ready from its own
+        // perspective but at the WindowState level we need to wait for ourselves
+        // to draw even if the children draw first our don't need to sync, so we omit
+        // the set ready call until later in finishDrawing()
         mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         mWmService.mH.sendNewMessageDelayed(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this,
             BLAST_TIMEOUT_DURATION);

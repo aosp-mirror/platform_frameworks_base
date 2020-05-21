@@ -229,7 +229,7 @@
     <string name="adb_wireless_qrcode_summary" msgid="8051414549011801917">"Pair device over Wi‑Fi by scanning a QR code"</string>
     <string name="adb_wireless_verifying_qrcode_text" msgid="6123192424916029207">"Pairing device…"</string>
     <string name="adb_qrcode_pairing_device_failed_msg" msgid="6936292092592914132">"Failed to pair the device. Either the QR code was incorrect, or the device is not connected to the same network."</string>
-    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address &amp; port"</string>
+    <string name="adb_wireless_ip_addr_preference_title" msgid="8335132107715311730">"IP address and port"</string>
     <string name="adb_wireless_qrcode_pairing_title" msgid="1906409667944674707">"Scan QR code"</string>
     <string name="adb_wireless_qrcode_pairing_description" msgid="6014121407143607851">"Pair device over Wi‑Fi by scanning a QR code"</string>
     <string name="adb_wireless_no_network_msg" msgid="2365795244718494658">"Please connect to a Wi‑Fi network"</string>
@@ -554,4 +554,6 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"Work <xliff:g id="APP_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
+    <skip />
 </resources>
