@@ -1280,7 +1280,6 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testGetOrCreateRootHomeTask_supportedSecondaryDisplay() {
         DisplayContent display = createNewDisplay();
         doReturn(true).when(display).supportsSystemDecorations();
-        doReturn(false).when(display).isUntrustedVirtualDisplay();
 
         // Remove the current home stack if it exists so a new one can be created below.
         TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
@@ -1304,10 +1303,10 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrCreateRootHomeTask_untrustedVirtualDisplay() {
+    public void testGetOrCreateRootHomeTask_untrustedDisplay() {
         DisplayContent display = createNewDisplay();
         TaskDisplayArea taskDisplayArea = display.getDefaultTaskDisplayArea();
-        doReturn(true).when(display).isUntrustedVirtualDisplay();
+        doReturn(false).when(display).isTrusted();
 
         assertNull(taskDisplayArea.getRootHomeTask());
         assertNull(taskDisplayArea.getOrCreateRootHomeTask());

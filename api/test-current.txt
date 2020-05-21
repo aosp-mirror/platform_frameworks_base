@@ -5103,6 +5103,7 @@ package android.view {
     method @NonNull public android.graphics.ColorSpace[] getSupportedWideColorGamut();
     method public int getType();
     method public boolean hasAccess(int);
+    field public static final int FLAG_TRUSTED = 128; // 0x80
     field public static final int TYPE_EXTERNAL = 2; // 0x2
     field public static final int TYPE_INTERNAL = 1; // 0x1
     field public static final int TYPE_OVERLAY = 4; // 0x4
