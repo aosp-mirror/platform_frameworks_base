@@ -491,10 +491,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
-     * @see #setFixedRotationLaunchingApp
+     * @see #setFixedRotationLaunchingApp(ActivityRecord, int)
      * @see DisplayRotation#shouldRotateSeamlessly
      */
-    ActivityRecord mFixedRotationLaunchingApp;
+    private ActivityRecord mFixedRotationLaunchingApp;
 
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
@@ -1469,6 +1469,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     }
 
+    @Nullable ActivityRecord getFixedRotationLaunchingApp() {
+        return mFixedRotationLaunchingApp;
+    }
+
+    void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r) {
+        setFixedRotationLaunchingAppUnchecked(r, ROTATION_UNDEFINED);
+    }
+
+    void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
+        if (mFixedRotationLaunchingApp == null && r != null) {
+            mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
+        } else if (mFixedRotationLaunchingApp != null && r == null) {
+            mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
+        }
+        mFixedRotationLaunchingApp = r;
+    }
+
     /**
      * Sets the provided record to {@link mFixedRotationLaunchingApp} if possible to apply fixed
      * rotation transform to it and indicate that the display may be rotated after it is launched.
@@ -1490,7 +1507,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (!r.hasFixedRotationTransform()) {
             startFixedRotationTransform(r, rotation);
         }
-        mFixedRotationLaunchingApp = r;
+        setFixedRotationLaunchingAppUnchecked(r, rotation);
         if (prevRotatedLaunchingApp != null) {
             prevRotatedLaunchingApp.finishFixedRotationTransform();
         }
@@ -1518,7 +1535,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Clears the {@link mFixedRotationLaunchingApp} without applying rotation to display. It is
+     * Clears the {@link #mFixedRotationLaunchingApp} without applying rotation to display. It is
      * used when the display won't rotate (e.g. the orientation from sensor has updated again before
      * applying rotation to display) but the launching app has been transformed. So the record need
      * to be cleared and restored to stop using seamless rotation and rotated configuration.
@@ -1528,7 +1545,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return;
         }
         mFixedRotationLaunchingApp.finishFixedRotationTransform();
-        mFixedRotationLaunchingApp = null;
+        setFixedRotationLaunchingAppUnchecked(null);
     }
 
     private void startFixedRotationTransform(WindowToken token, int rotation) {
@@ -5250,7 +5267,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         rotatedLaunchingApp.finishFixedRotationTransform(
                 () -> applyRotation(oldRotation, newRotation));
-        mFixedRotationLaunchingApp = null;
+        setFixedRotationLaunchingAppUnchecked(null);
     }
 
     /** Checks whether the given activity is in size compatibility mode and notifies the change. */
@@ -5564,7 +5581,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp) {
                 // Because it won't affect display orientation, just finish the transform.
                 animatingRecents.finishFixedRotationTransform();
-                mFixedRotationLaunchingApp = null;
+                setFixedRotationLaunchingAppUnchecked(null);
             } else {
                 // If there is already a launching activity that is not the recents, before its
                 // transition is completed, the recents animation may be started. So if the recents
