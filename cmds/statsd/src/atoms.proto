@@ -24,6 +24,7 @@ import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/app/settings_enums.proto";
+import "frameworks/base/core/proto/android/app/media_output_enum.proto";
 import "frameworks/base/core/proto/android/app/tvsettings_enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/a2dp/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
@@ -441,6 +442,8 @@ message Atom {
         EvsUsageStatsReported evs_usage_stats_reported = 274 [(module) = "evs"];
         AudioPowerUsageDataReported audio_power_usage_data_reported = 275;
         TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
+        MediaOutputOpSwitchReported mediaoutput_op_switch_reported =
+            277 [(module) = "settings"];
         SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
@@ -9866,4 +9869,41 @@ message BytesTransferByTagAndMetered {
     optional int64 tx_bytes = 6;
 
     optional int64 tx_packets = 7;
+}
+
+/*
+ * Logs when the Media Output Switcher finishes a media switch operation.
+ *
+ * Logged from:
+ *  packages/apps/Settings/src/com/android/settings/media/MediaOutputSliceWorker.java
+ */
+message MediaOutputOpSwitchReported {
+    // Source medium type before switching.
+    optional android.app.settings.mediaoutput.MediumType source = 1;
+
+    // Target medium type after switching.
+    optional android.app.settings.mediaoutput.MediumType target = 2;
+
+    // The result of switching.
+    optional android.app.settings.mediaoutput.SwitchResult result = 3;
+
+    // The detail code of a switching result.
+    optional android.app.settings.mediaoutput.SubResult subresult = 4;
+
+    /*
+     * The package name of a pre-installed app, whose media session is being switched.
+     */
+    optional string media_session_package_name = 5;
+
+    // The amount of available wired devices when a switching is being performed.
+    optional int32 available_wired_device_count = 6;
+
+    // The amount of available Bluetooth devices a switching is being performed.
+    optional int32 available_bt_device_count = 7;
+
+    // The amount of available remote devices when a switching is being performed.
+    optional int32 available_remote_device_count = 8;
+
+    // The amount of applied devices within a remote dynamic group after a switching is done.
+    optional int32 applied_device_count_within_remote_group = 9;
 }
