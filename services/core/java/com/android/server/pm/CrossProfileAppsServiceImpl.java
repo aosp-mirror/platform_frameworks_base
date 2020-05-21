@@ -31,6 +31,7 @@ import android.app.AppOpsManager;
 import android.app.AppOpsManager.Mode;
 import android.app.IApplicationThread;
 import android.app.admin.DevicePolicyEventLogger;
+import android.app.admin.DevicePolicyManager;
 import android.app.admin.DevicePolicyManagerInternal;
 import android.content.ComponentName;
 import android.content.Context;
@@ -254,6 +255,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         final int[] enabledProfileIds =
                 mInjector.getUserManager().getEnabledProfileIds(mInjector.getCallingUserId());
         if (enabledProfileIds.length < 2) {
+            return false;
+        }
+        if (isProfileOwner(packageName, enabledProfileIds)) {
             return false;
         }
         return hasRequestedAppOpPermission(
@@ -575,6 +579,9 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
         if (profileIds.length < 2) {
             return false;
         }
+        if (isProfileOwner(packageName, profileIds)) {
+            return false;
+        }
         return hasRequestedAppOpPermission(
                 AppOpsManager.opToPermission(OP_INTERACT_ACROSS_PROFILES), packageName)
                 && !isPlatformSignedAppWithNonUserConfigurablePermission(packageName, profileIds);
@@ -696,6 +703,25 @@ public class CrossProfileAppsServiceImpl extends ICrossProfileApps.Stub {
                         pid,
                         uid,
                         packageName);
+    }
+
+    private boolean isProfileOwner(String packageName, int[] userIds) {
+        for (int userId : userIds) {
+            if (isProfileOwner(packageName, userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean isProfileOwner(String packageName, final @UserIdInt int userId) {
+        final ComponentName profileOwner =
+                mInjector.withCleanCallingIdentity(() ->
+                        mInjector.getDevicePolicyManagerInternal().getProfileOwnerAsUser(userId));
+        if (profileOwner == null) {
+            return false;
+        }
+        return profileOwner.getPackageName().equals(packageName);
     }
 
     private static class InjectorImpl implements Injector {
