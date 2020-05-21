@@ -17,7 +17,7 @@
 package com.android.server.stats.pull;
 
 import static android.app.AppOpsManager.OP_FLAG_SELF;
-import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXY;
+import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.app.usage.NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
@@ -215,7 +215,7 @@ public class StatsPullAtomService extends SystemService {
 
     private static final int MAX_BATTERY_STATS_HELPER_FREQUENCY_MS = 1000;
     private static final int CPU_TIME_PER_THREAD_FREQ_MAX_NUM_FREQUENCIES = 8;
-    private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXY;
+    private static final int OP_FLAGS_PULLED = OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED;
     private static final String COMMON_PERMISSION_PREFIX = "android.permission.";
     private static final String APP_OPS_TARGET_COLLECTION_SIZE = "app_ops_target_collection_size";
     private static final String DANGEROUS_PERMISSION_STATE_SAMPLE_RATE =
