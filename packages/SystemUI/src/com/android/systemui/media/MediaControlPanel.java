@@ -33,7 +33,6 @@ import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.graphics.drawable.RippleDrawable;
 import android.media.session.MediaController;
-import android.media.session.MediaController.PlaybackInfo;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
 import android.service.media.MediaBrowserService;
@@ -294,14 +293,6 @@ public class MediaControlPanel {
             mActivityStarter.startActivity(intent, false, true /* dismissShade */,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         });
-        final boolean isRemotePlayback;
-        PlaybackInfo playbackInfo = mController.getPlaybackInfo();
-        if (playbackInfo != null) {
-            isRemotePlayback = playbackInfo.getPlaybackType() == PlaybackInfo.PLAYBACK_TYPE_REMOTE;
-        } else {
-            Log.d(TAG, "PlaybackInfo was null. Defaulting to local playback.");
-            isRemotePlayback = false;
-        }
 
         ImageView iconView = mViewHolder.getSeamlessIcon();
         TextView deviceName = mViewHolder.getSeamlessText();
@@ -312,18 +303,18 @@ public class MediaControlPanel {
         rect.setStroke(2, deviceName.getCurrentTextColor());
         rect.setColor(Color.TRANSPARENT);
 
-        if (isRemotePlayback) {
+        final MediaDeviceData device = data.getDevice();
+        if (device != null && !device.getEnabled()) {
             mViewHolder.getSeamless().setEnabled(false);
             // TODO(b/156875717): setEnabled should cause the alpha to change.
             mViewHolder.getSeamless().setAlpha(0.38f);
             iconView.setImageResource(R.drawable.ic_hardware_speaker);
             iconView.setVisibility(View.VISIBLE);
             deviceName.setText(R.string.media_seamless_remote_device);
-        } else if (data.getDevice() != null && data.getDevice().getIcon() != null
-                && data.getDevice().getName() != null) {
+        } else if (device != null) {
             mViewHolder.getSeamless().setEnabled(true);
             mViewHolder.getSeamless().setAlpha(1f);
-            Drawable icon = data.getDevice().getIcon();
+            Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
 
             if (icon instanceof AdaptiveIcon) {
@@ -333,7 +324,7 @@ public class MediaControlPanel {
             } else {
                 iconView.setImageDrawable(icon);
             }
-            deviceName.setText(data.getDevice().getName());
+            deviceName.setText(device.getName());
         } else {
             // Reset to default
             Log.w(TAG, "device is null. Not binding output chip.");
