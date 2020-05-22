@@ -194,6 +194,14 @@ public class PipBoundsHandler {
         mLastPipComponentName = null;
     }
 
+    /**
+     * Returns ture if there's a valid snap fraction. This is used with {@link EXTRA_IS_FIRST_ENTRY}
+     * to see if this is the first time user has entered PIP for the component.
+     */
+    public boolean hasSaveReentryBounds() {
+        return mReentrySnapFraction != INVALID_SNAP_FRACTION;
+    }
+
     public Rect getDisplayBounds() {
         return new Rect(0, 0, mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight);
     }

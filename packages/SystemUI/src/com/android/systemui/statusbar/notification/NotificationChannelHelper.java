@@ -67,14 +67,14 @@ public class NotificationChannelHelper {
         return channel;
     }
 
-    private static String getName(NotificationEntry entry) {
-        if (entry.getRanking().getShortcutInfo().getShortLabel() != null) {
-            return entry.getRanking().getShortcutInfo().getShortLabel().toString();
+    private static CharSequence getName(NotificationEntry entry) {
+        if (entry.getRanking().getShortcutInfo().getLabel() != null) {
+            return entry.getRanking().getShortcutInfo().getLabel().toString();
         }
         Bundle extras = entry.getSbn().getNotification().extras;
-        String nameString = extras.getString(Notification.EXTRA_CONVERSATION_TITLE);
+        CharSequence nameString = extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE);
         if (TextUtils.isEmpty(nameString)) {
-            nameString = extras.getString(Notification.EXTRA_TITLE);
+            nameString = extras.getCharSequence(Notification.EXTRA_TITLE);
         }
         if (TextUtils.isEmpty(nameString)) {
             nameString = "fallback";

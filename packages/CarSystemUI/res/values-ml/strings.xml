@@ -26,4 +26,8 @@
     <string name="car_new_user" msgid="6637442369728092473">"പുതിയ ഉപയോക്താവ്"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"നിങ്ങളൊരു പുതിയ ഉപയോക്താവിനെ ചേർക്കുമ്പോൾ, ആ വ്യക്തി സ്വന്തം ഇടം സജ്ജീകരിക്കേണ്ടതുണ്ട്."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"ഏതൊരു ഉപയോക്താവിനും മറ്റെല്ലാ ഉപയോക്താക്കൾക്കുമായി ആപ്പുകൾ അപ്‌ഡേറ്റ് ചെയ്യാനാവും."</string>
+    <!-- no translation found for car_loading_profile (4507385037552574474) -->
+    <skip />
+    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
+    <skip />
 </resources>

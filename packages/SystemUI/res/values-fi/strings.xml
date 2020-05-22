@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Kiinnittää huomion äänellä tai värinällä"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Kiinnittää huomion äänellä tai värinällä. Näistä keskusteluista (<xliff:g id="APP_NAME">%1$s</xliff:g>) syntyy oletuksena kuplia."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kelluva sisällön pikakuvake säilyttää huomiosi"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Näkyy keskusteluosion yläosassa kuplana"</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Näkyy keskustelukohdan yläosassa kuplana"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Asetukset"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Tärkeä"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ei tue keskustelukohtaisia asetuksia"</string>
@@ -1010,7 +1010,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Järjestelmän navigointitapa vaihdettu. Voit muuttaa sitä asetuksista."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Vaihda järjestelmän navigointitapaa asetuksista"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Virransäästötila"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Näkyy keskusteluosion yläosassa"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Näkyy keskustelukohdan yläosassa"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profiilikuva näkyy lukitusnäytöllä"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Näkyy kelluvana kuplana sovellusten päällä"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Keskeyttää Älä häiritse ‑tilan"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> säädintä lisätty</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> säädin lisätty</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Poistettu"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Lisätty suosikkeihin"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Lisätty suosikkeihin sijalle <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Poistettu suosikeista"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"suosikki"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"poista suosikeista"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Siirrä kohtaan <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Säätimet"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Valitse säätimet, joita käytetään virtavalikosta"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Järjestele säätimiä koskettamalla pitkään ja vetämällä"</string>

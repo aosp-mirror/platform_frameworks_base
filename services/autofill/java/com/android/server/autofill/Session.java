@@ -2581,6 +2581,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     if (sVerbose) Slog.v(TAG, "Exiting view " + id);
                     mUi.hideFillUi(this);
                     hideAugmentedAutofillLocked(viewState);
+                    // We don't send an empty response to IME so that it doesn't cause UI flicker
+                    // on the IME side if it arrives before the input view is finished on the IME.
+                    mInlineSessionController.resetInlineFillUiLocked();
                     mCurrentViewId = null;
                 }
                 break;

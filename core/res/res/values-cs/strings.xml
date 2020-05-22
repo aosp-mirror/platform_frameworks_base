@@ -206,7 +206,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Aplikace <xliff:g id="OWNER_APP">%s</xliff:g> tisk zakazuje."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Zapněte pracovní profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše osobní aplikace jsou zablokovány, dokud nezapnete pracovní profil"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Vaše osobní aplikace budou zítra zablokovány"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Osobní aplikace budou zablokovány <xliff:g id="DATE">%1$s</xliff:g> v <xliff:g id="TIME">%2$s</xliff:g>. Pracovní profil nesmí být vypnutý déle než <xliff:g id="NUMBER">%3$d</xliff:g> d."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Zapnout pracovní profil"</string>
     <string name="me" msgid="6207584824693813140">"Já"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabletu"</string>
@@ -542,7 +542,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Umožňuje aplikaci upravit vaši sbírku fotek."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"čtení míst ze sbírky médií"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Umožňuje aplikaci číst místa z vaší sbírky médií."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Potvrďte, že jste to vy"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Potvrďte, že jste to vy"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrický hardware není k dispozici"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Ověření bylo zrušeno"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nerozpoznáno"</string>
@@ -1381,17 +1381,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Kontroluje se <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Kontrola aktuálního obsahu"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nové médium <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"Médium <xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Klepnutím médium nastavíte"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Zařízení možná bude nutné znovu naformátovat. Klepnutím ho vyjmete."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"K přenosu fotek a médií"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problém s médiem <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Médium <xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Problém odstraníte klepnutím"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Úložiště <xliff:g id="NAME">%s</xliff:g> je poškozeno. Vyberte ho a zahajte opravu."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Zařízení možná bude nutné znovu naformátovat. Klepnutím ho vyjmete."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Úložiště <xliff:g id="NAME">%s</xliff:g> není podporováno"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Médium <xliff:g id="NAME">%s</xliff:g> nefunguje"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno. Klepnutím zahájíte nastavení v podporovaném formátu."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno. Vyberte ho a zahajte nastavení v podporovaném formátu."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Úložiště <xliff:g id="NAME">%s</xliff:g> není v tomto zařízení podporováno."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Zařízení možná bude nutné znovu naformátovat"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Úložiště <xliff:g id="NAME">%s</xliff:g> neočekávaně odpojeno"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Před odebráním médium nejprve odpojte, zabráníte tak ztrátě obsahu"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Médium <xliff:g id="NAME">%s</xliff:g> bylo odebráno"</string>
@@ -1669,8 +1672,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Zapnout funkce pro usnadnění přístupu?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Podržením obou tlačítek hlasitosti po dobu několika sekund zapnete funkce pro usnadnění přístupu. Tato funkce může změnit fungování zařízení.\n\nAktuální funkce:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVybrané funkce můžete změnit v Nastavení &gt; Přístupnost."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Zapnout TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Podržením obou tlačítek hlasitosti po dobu několika sekund zapnete funkci TalkBack. Jedná se o čtečku obrazovky, která je užitečná pro nevidomé a slabozraké. TalkBack zcela změní fungování zařízení.\n\nZkratku můžete nastavit na jinou funkci v Nastavení &gt; Přístupnost."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Zapnout <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Podržením obou tlačítek hlasitosti po dobu několika sekund zapnete funkci pro usnadnění přístupu <xliff:g id="SERVICE">%1$s</xliff:g>. Tato funkce může změnit fungování zařízení.\n\nZkratku můžete nastavit na jinou funkci v Nastavení &gt; Přístupnost."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Zapnout"</string>

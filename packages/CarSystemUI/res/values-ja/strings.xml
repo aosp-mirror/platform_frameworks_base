@@ -26,4 +26,6 @@
     <string name="car_new_user" msgid="6637442369728092473">"新しいユーザー"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"新しいユーザーを追加したら、そのユーザーは自分のスペースをセットアップする必要があります。"</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"どのユーザーも他のすべてのユーザーに代わってアプリを更新できます。"</string>
+    <string name="car_loading_profile" msgid="4507385037552574474">"読み込んでいます"</string>
+    <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"ユーザーを読み込んでいます（<xliff:g id="FROM_USER">%1$d</xliff:g>～<xliff:g id="TO_USER">%2$d</xliff:g>）"</string>
 </resources>

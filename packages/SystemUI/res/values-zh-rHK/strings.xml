@@ -1027,6 +1027,13 @@
       <item quantity="other">已新增 <xliff:g id="NUMBER_1">%s</xliff:g> 個控制項。</item>
       <item quantity="one">已新增 <xliff:g id="NUMBER_0">%s</xliff:g> 個控制項。</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"已移除"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"已加入收藏"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"已加入至收藏位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"已取消收藏"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"加入收藏"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"取消收藏"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"移至位置 <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"控制項"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"從電源選單選擇要存取的控制項"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住並拖曳便可重新排列控制項"</string>
