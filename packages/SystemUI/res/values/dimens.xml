@@ -1000,6 +1000,10 @@
     <!-- The touchable/draggable edge size for PIP resize. -->
     <dimen name="pip_resize_edge_size">48dp</dimen>
 
+    <!-- PIP Resize handle size and margin. -->
+    <dimen name="pip_resize_handle_size">12dp</dimen>
+    <dimen name="pip_resize_handle_margin">4dp</dimen>
+
     <!-- The corner radius for PiP window. -->
     <dimen name="pip_corner_radius">8dp</dimen>
 
