@@ -99,7 +99,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.AccelerateInterpolator;
@@ -1622,31 +1621,21 @@ public class ChooserActivity extends ResolverActivity implements
         return getIntent().getBooleanExtra(Intent.EXTRA_AUTO_LAUNCH_SINGLE_CHOICE, true);
     }
 
-    void showTargetDetails(TargetInfo ti) {
-        if (ti == null) {
-            return;
-        }
-        ComponentName name = ti.getResolveInfo().activityInfo.getComponentName();
-        boolean pinned = mPinnedSharedPrefs.getBoolean(name.flattenToString(), false);
+    private void showTargetDetails(DisplayResolveInfo ti) {
+        if (ti == null) return;
 
-        ResolverTargetActionsDialogFragment f;
+        List<DisplayResolveInfo> targetList;
 
         // For multiple targets, include info on all targets
         if (ti instanceof MultiDisplayResolveInfo) {
             MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) ti;
-            List<CharSequence> labels = new ArrayList<>();
-
-            for (TargetInfo innerInfo : mti.getTargets()) {
-                labels.add(innerInfo.getResolveInfo().loadLabel(getPackageManager()));
-            }
-            f = new ResolverTargetActionsDialogFragment(mti.getDisplayLabel(), name,
-                    mti.getTargets(), labels,
-                    mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
+            targetList = mti.getTargets();
         } else {
-            f = new ResolverTargetActionsDialogFragment(
-                    ti.getResolveInfo().loadLabel(getPackageManager()), name, pinned,
-                    mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
+            targetList = Collections.singletonList(ti);
         }
+
+        ResolverTargetActionsDialogFragment f = new ResolverTargetActionsDialogFragment(
+                targetList, mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
 
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
     }
@@ -2156,7 +2145,10 @@ public class ChooserActivity extends ResolverActivity implements
 
             Bundle extras = new Bundle();
             extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
-            ChooserTarget chooserTarget = new ChooserTarget(shortcutInfo.getShortLabel(),
+
+            ChooserTarget chooserTarget = new ChooserTarget(
+                    shortcutInfo.getLongLabel() != null ? shortcutInfo.getLongLabel()
+                            : shortcutInfo.getShortLabel(),
                     null, // Icon will be loaded later if this target is selected to be shown.
                     score, matchingShortcuts.get(i).getTargetComponent().clone(), extras);
 
@@ -2979,12 +2971,17 @@ public class ChooserActivity extends ResolverActivity implements
             if (isClickable) {
                 itemView.setOnClickListener(v -> startSelected(mListPosition,
                         false/* always */, true/* filterd */));
-                itemView.setOnLongClickListener(v -> {
-                    showTargetDetails(
-                            mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                                    .targetInfoForPosition(mListPosition, /* filtered */ true));
-                    return true;
-                });
+
+                TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
+                        .targetInfoForPosition(mListPosition, /* filtered */ true);
+
+                // This should always be the case for ItemViewHolder, check for sanity
+                if (ti instanceof DisplayResolveInfo) {
+                    itemView.setOnLongClickListener(v -> {
+                        showTargetDetails((DisplayResolveInfo) ti);
+                        return true;
+                    });
+                }
             }
         }
     }
@@ -3309,15 +3306,21 @@ public class ChooserActivity extends ResolverActivity implements
                         startSelected(holder.getItemIndex(column), false, true);
                     }
                 });
-                v.setOnLongClickListener(new OnLongClickListener() {
-                    @Override
-                    public boolean onLongClick(View v) {
-                        showTargetDetails(
-                                mChooserListAdapter.targetInfoForPosition(
-                                        holder.getItemIndex(column), true));
-                        return true;
+
+                // Direct Share targets should not show any menu
+                if (!isDirectShare) {
+                    final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
+                            holder.getItemIndex(column), true);
+
+                    // This should always be the case for non-DS targets, check for sanity
+                    if (ti instanceof DisplayResolveInfo) {
+                        v.setOnLongClickListener(v1 -> {
+                            showTargetDetails((DisplayResolveInfo) ti);
+                            return true;
+                        });
                     }
-                });
+                }
+
                 holder.addView(i, v);
 
                 // Force Direct Share to be 2 lines and auto-wrap to second line via hoz scroll =

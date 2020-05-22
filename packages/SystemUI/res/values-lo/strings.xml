@@ -715,7 +715,7 @@
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ເອົາໃຈໃສ່ທາງລັດແບບລອຍໄປຫາເນື້ອຫານີ້."</string>
     <string name="notification_channel_summary_priority" msgid="7415770044553264622">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ ແລະ ສະແດງເປັນຟອງ."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ຕັ້ງຄ່າ"</string>
-    <string name="notification_priority_title" msgid="2079708866333537093">"ຄວາມສຳຄັນ"</string>
+    <string name="notification_priority_title" msgid="2079708866333537093">"ສຳຄັນ"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ຮອງຮັບການຕັ້ງຄ່າສະເພາະຂອງການສົນທະນາ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ບໍ່ມີຟອງຫຼ້າສຸດ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ຟອງຫຼ້າສຸດ ແລະ ຟອງທີ່ປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="other">ເພີ່ມ <xliff:g id="NUMBER_1">%s</xliff:g> ການຄວບຄຸມແລ້ວ.</item>
       <item quantity="one">ເພີ່ມ <xliff:g id="NUMBER_0">%s</xliff:g> ການຄວບຄຸມແລ້ວ.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"ລຶບອອກແລ້ວ"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"ເພີ່ມລາຍການທີ່ມັກແລ້ວ"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"ເພີ່ມລາຍການທີ່ມັກແລ້ວ, ຕຳແໜ່ງ <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ຍົກເລີກລາຍການທີ່ມັກແລ້ວ"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ເພີ່ມລາຍການທີ່ມັກ"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ຍົກເລີກລາຍການທີ່ມັກ"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"ຍ້າຍໄປຕຳແໜ່ງ <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"ການຄວບຄຸມ"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"ເລືອກການຄວບຄຸມເພື່ອເຂົ້າເຖິງຈາກເມນູເປີດປິດ"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>

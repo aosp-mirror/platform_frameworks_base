@@ -713,7 +713,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Kinukuha ang iyong atensyon sa pamamagitan ng tunog o pag-vibrate."</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Kinukuha ang iyong atensyon sa pamamagitan ng tunog o pag-vibrate. Mga pag-uusap mula sa <xliff:g id="APP_NAME">%1$s</xliff:g> bubble bilang default."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Pinapanatili ang iyong atensyon sa pamamagitan ng lumulutang na shortcut sa content na ito."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Lumalabas sa itaas ng seksyon ng pag-uusap at nagpapakita bilang bubble."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Makikita sa itaas ng seksyon ng pag-uusap at lalabas bilang bubble"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mga Setting"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga setting na partikular sa pag-uusap"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> kontrol ang naidagdag.</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> na kontrol ang naidagdag.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Inalis"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Ginawang paborito"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Ginawang paborito, posisyon <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Inalis sa paborito"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"gawing paborito"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"alisin sa paborito"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Ilipat sa posisyong <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Mga Kontrol"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pumili ng mga kontrol na maa-access mula sa power menu"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"I-hold at i-drag para baguhin ang pagkakaayos ng mga kontrol"</string>

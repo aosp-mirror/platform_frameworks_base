@@ -26,4 +26,8 @@
     <string name="car_new_user" msgid="6637442369728092473">"ຜູ້ໃຊ້ໃໝ່"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"ເມື່ອທ່ານເພີ່ມຜູ້ໃຊ້ໃໝ່, ບຸກຄົນນັ້ນຈຳເປັນຕ້ອງຕັ້ງຄ່າພື້ນທີ່ຂອງເຂົາເຈົ້າ."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"ຜູ້ໃຊ້ຕ່າງໆສາມາດອັບເດດແອັບສຳລັບຜູ້ໃຊ້ອື່ນທັງໝົດໄດ້."</string>
+    <!-- no translation found for car_loading_profile (4507385037552574474) -->
+    <skip />
+    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
+    <skip />
 </resources>
