@@ -160,7 +160,7 @@ public:
     static const long kPullerCacheClearIntervalSec = 1;
 
     // Max time to do a pull.
-    static const int64_t kPullMaxDelayNs = 10 * NS_PER_SEC;
+    static const int64_t kPullMaxDelayNs = 30 * NS_PER_SEC;
 
     // Maximum number of pushed atoms statsd stats will track above kMaxPushedAtomId.
     static const int kMaxNonPlatformPushedAtoms = 100;
