@@ -2756,19 +2756,22 @@ public class DisplayPolicy {
      * @return Whether the top app should hide the statusbar based on the top fullscreen opaque
      *         window.
      */
-    private boolean topAppHidesStatusBar() {
+    boolean topAppHidesStatusBar() {
         if (mTopFullscreenOpaqueWindowState == null || mForceShowSystemBars) {
             return false;
         }
-        final int fl = PolicyControl.getWindowFlags(null,
-                mTopFullscreenOpaqueWindowState.getAttrs());
+        final LayoutParams attrs = mTopFullscreenOpaqueWindowState.getAttrs();
+        final int fl = PolicyControl.getWindowFlags(null, attrs);
+        final int sysui = PolicyControl.getSystemUiVisibility(null, attrs);
+        final InsetsSource request = mTopFullscreenOpaqueWindowState.getRequestedInsetsState()
+                .peekSource(ITYPE_STATUS_BAR);
         if (WindowManagerDebugConfig.DEBUG) {
             Slog.d(TAG, "frame: " + mTopFullscreenOpaqueWindowState.getFrameLw());
-            Slog.d(TAG, "attr: " + mTopFullscreenOpaqueWindowState.getAttrs()
-                    + " lp.flags=0x" + Integer.toHexString(fl));
+            Slog.d(TAG, "attr: " + attrs + " request: " + request);
         }
         return (fl & LayoutParams.FLAG_FULLSCREEN) != 0
-                || (mLastSystemUiFlags & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0;
+                || (sysui & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
+                || (request != null && !request.isVisible());
     }
 
     /**
