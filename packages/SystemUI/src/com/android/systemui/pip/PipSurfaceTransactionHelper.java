@@ -24,6 +24,7 @@ import android.graphics.RectF;
 import android.view.SurfaceControl;
 
 import com.android.systemui.R;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -32,10 +33,11 @@ import javax.inject.Singleton;
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for PiP transition.
  */
 @Singleton
-public class PipSurfaceTransactionHelper {
+public class PipSurfaceTransactionHelper implements ConfigurationController.ConfigurationListener {
 
+    private final Context mContext;
     private final boolean mEnableCornerRadius;
-    private final int mCornerRadius;
+    private int mCornerRadius;
 
     /** for {@link #scale(SurfaceControl.Transaction, SurfaceControl, Rect, Rect)} operation */
     private final Matrix mTmpTransform = new Matrix();
@@ -44,9 +46,16 @@ public class PipSurfaceTransactionHelper {
     private final RectF mTmpDestinationRectF = new RectF();
 
     @Inject
-    public PipSurfaceTransactionHelper(Context context) {
+    public PipSurfaceTransactionHelper(Context context, ConfigurationController configController) {
         final Resources res = context.getResources();
+        mContext = context;
         mEnableCornerRadius = res.getBoolean(R.bool.config_pipEnableRoundCorner);
+        configController.addCallback(this);
+    }
+
+    @Override
+    public void onDensityOrFontScaleChanged() {
+        final Resources res = mContext.getResources();
         mCornerRadius = res.getDimensionPixelSize(R.dimen.pip_corner_radius);
     }
 
