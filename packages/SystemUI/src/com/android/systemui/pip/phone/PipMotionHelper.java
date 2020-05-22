@@ -28,7 +28,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
-import com.android.systemui.shared.system.WindowManagerWrapper;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.animation.FloatProperties;
 import com.android.systemui.util.animation.PhysicsAnimator;
@@ -59,8 +58,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private PipMenuActivityController mMenuController;
     private PipSnapAlgorithm mSnapAlgorithm;
-
-    private final Rect mStableInsets = new Rect();
 
     /** PIP's current bounds on the screen. */
     private final Rect mBounds = new Rect();
@@ -148,7 +145,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
         mFloatingContentCoordinator = floatingContentCoordinator;
-        onConfigurationChanged();
         mPipTaskOrganizer.registerPipTransitionCallback(mPipTransitionCallback);
     }
 
@@ -167,14 +163,6 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     @Override
     public void moveToBounds(@NonNull Rect bounds) {
         animateToBounds(bounds, mConflictResolutionSpringConfig);
-    }
-
-    /**
-     * Updates whenever the configuration changes.
-     */
-    void onConfigurationChanged() {
-        mSnapAlgorithm.onConfigurationChanged();
-        WindowManagerWrapper.getInstance().getStableInsets(mStableInsets);
     }
 
     /**
@@ -530,6 +518,5 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         final String innerPrefix = prefix + "  ";
         pw.println(prefix + TAG);
         pw.println(innerPrefix + "mBounds=" + mBounds);
-        pw.println(innerPrefix + "mStableInsets=" + mStableInsets);
     }
 }
