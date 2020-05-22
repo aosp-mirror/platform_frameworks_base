@@ -237,7 +237,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                     .spring(FloatProperties.RECT_Y, toBounds.top, mSpringConfig)
                     .withEndActions(() -> mSpringingToTouch = false);
 
-            startBoundsAnimator(toBounds.left /* toX */, toBounds.top /* toY */);
+            startBoundsAnimator(toBounds.left /* toX */, toBounds.top /* toY */,
+                    false /* dismiss */);
         }
     }
 
@@ -334,7 +335,8 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         final float estimatedFlingYEndValue =
                 PhysicsAnimator.estimateFlingEndValue(mBounds.top, velocityY, mFlingConfigY);
 
-        startBoundsAnimator(xEndValue /* toX */, estimatedFlingYEndValue /* toY */);
+        startBoundsAnimator(xEndValue /* toX */, estimatedFlingYEndValue /* toY */,
+                false /* dismiss */);
     }
 
     /**
@@ -346,30 +348,26 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         mAnimatedBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_X, bounds.left, springConfig)
                 .spring(FloatProperties.RECT_Y, bounds.top, springConfig);
-        startBoundsAnimator(bounds.left /* toX */, bounds.top /* toY */);
+        startBoundsAnimator(bounds.left /* toX */, bounds.top /* toY */,
+                false /* dismiss */);
     }
 
     /**
      * Animates the dismissal of the PiP off the edge of the screen.
      */
-    void animateDismiss(float velocityX, float velocityY, @Nullable Runnable updateAction) {
+    void animateDismiss() {
         mAnimatedBounds.set(mBounds);
 
         // Animate off the bottom of the screen, then dismiss PIP.
         mAnimatedBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_Y,
                         mBounds.bottom + mBounds.height(),
-                        velocityY,
+                        0,
                         mSpringConfig)
                 .withEndActions(this::dismissPip);
 
-        // If we were provided with an update action, run it whenever there's an update.
-        if (updateAction != null) {
-            mAnimatedBoundsPhysicsAnimator.addUpdateListener(
-                    (target, values) -> updateAction.run());
-        }
-
-        startBoundsAnimator(mBounds.left /* toX */, mBounds.bottom + mBounds.height() /* toY */);
+        startBoundsAnimator(mBounds.left /* toX */, mBounds.bottom + mBounds.height() /* toY */,
+                true /* dismiss */);
     }
 
     /**
@@ -440,7 +438,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * This will also add end actions to the bounds animator that cancel the TimeAnimator and update
      * the 'real' bounds to equal the final animated bounds.
      */
-    private void startBoundsAnimator(float toX, float toY) {
+    private void startBoundsAnimator(float toX, float toY, boolean dismiss) {
         if (!mSpringingToTouch) {
             cancelAnimations();
         }
@@ -456,7 +454,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
         mAnimatedBoundsPhysicsAnimator
                 .withEndActions(() -> {
-                    mPipTaskOrganizer.scheduleFinishResizePip(mAnimatedBounds);
+                    if (!dismiss) {
+                        mPipTaskOrganizer.scheduleFinishResizePip(mAnimatedBounds);
+                    }
                     mAnimatingToBounds.setEmpty();
                 })
                 .addUpdateListener(mResizePipUpdateListener)

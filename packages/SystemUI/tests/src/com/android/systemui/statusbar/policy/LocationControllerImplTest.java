@@ -14,8 +14,11 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Intent;
@@ -32,7 +35,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.LocationController.LocationChangeCallback;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -42,17 +44,19 @@ import org.junit.runner.RunWith;
 public class LocationControllerImplTest extends SysuiTestCase {
 
     private LocationControllerImpl mLocationController;
+    private TestableLooper mTestableLooper;
 
     @Before
     public void setup() {
+        mTestableLooper = TestableLooper.get(this);
         mLocationController = spy(new LocationControllerImpl(mContext,
-                TestableLooper.get(this).getLooper(),
+                mTestableLooper.getLooper(),
+                mTestableLooper.getLooper(),
                 mock(BroadcastDispatcher.class),
                 mock(BootCompleteCache.class)));
     }
 
     @Test
-    @Ignore("flaky")
     public void testRemoveSelfActive_DoesNotCrash() {
         LocationController.LocationChangeCallback callback = new LocationChangeCallback() {
             @Override
@@ -70,11 +74,10 @@ public class LocationControllerImplTest extends SysuiTestCase {
         mLocationController.onReceive(mContext, new Intent(
                 LocationManager.HIGH_POWER_REQUEST_CHANGE_ACTION));
 
-        TestableLooper.get(this).processAllMessages();
+        mTestableLooper.processAllMessages();
     }
 
     @Test
-    @Ignore("flaky")
     public void testRemoveSelfSettings_DoesNotCrash() {
         LocationController.LocationChangeCallback callback = new LocationChangeCallback() {
             @Override
@@ -85,6 +88,47 @@ public class LocationControllerImplTest extends SysuiTestCase {
         mLocationController.addCallback(callback);
         mLocationController.addCallback(mock(LocationChangeCallback.class));
 
-        TestableLooper.get(this).processAllMessages();
+        mTestableLooper.processAllMessages();
+    }
+
+    @Test
+    public void testAddCallback_notifiedImmediately() {
+        LocationChangeCallback callback = mock(LocationChangeCallback.class);
+
+        mLocationController.addCallback(callback);
+
+        mTestableLooper.processAllMessages();
+
+        verify(callback).onLocationSettingsChanged(anyBoolean());
+    }
+
+    @Test
+    public void testCallbackNotified() {
+        LocationChangeCallback callback = mock(LocationChangeCallback.class);
+
+        mLocationController.addCallback(callback);
+        mLocationController.onReceive(mContext, new Intent(LocationManager.MODE_CHANGED_ACTION));
+
+        mTestableLooper.processAllMessages();
+
+        verify(callback, times(2)).onLocationSettingsChanged(anyBoolean());
+    }
+
+    @Test
+    public void testCallbackRemoved() {
+        LocationChangeCallback callback = mock(LocationChangeCallback.class);
+
+        mLocationController.addCallback(callback);
+        mTestableLooper.processAllMessages();
+
+        verify(callback).onLocationSettingsChanged(anyBoolean());
+        mLocationController.removeCallback(callback);
+
+        mLocationController.onReceive(mContext, new Intent(LocationManager.MODE_CHANGED_ACTION));
+
+        mTestableLooper.processAllMessages();
+
+        // No new callbacks
+        verify(callback).onLocationSettingsChanged(anyBoolean());
     }
 }

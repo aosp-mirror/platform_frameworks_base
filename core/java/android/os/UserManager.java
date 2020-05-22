@@ -478,8 +478,8 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_CREDENTIALS = "no_config_credentials";
 
     /**
-     * When set on the primary user this specifies if the user can remove other users.
-     * When set on a secondary user, this specifies if the user can remove itself.
+     * When set on the admin user this specifies if the user can remove users.
+     * When set on a non-admin secondary user, this specifies if the user can remove itself.
      * This restriction has no effect on managed profiles.
      * The default value is <code>false</code>.
      *
@@ -619,11 +619,11 @@ public class UserManager {
     public static final String DISALLOW_NETWORK_RESET = "no_network_reset";
 
     /**
-     * Specifies if a user is disallowed from factory resetting
-     * from Settings. This can only be set by device owners and profile owners on the primary user.
+     * Specifies if a user is disallowed from factory resetting from Settings.
+     * This can only be set by device owners and profile owners on an admin user.
      * The default value is <code>false</code>.
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can factory reset the device.
+     * <p>This restriction has no effect on non-admin users since they cannot factory reset the
+     * device.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean

@@ -98,6 +98,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var action4: ImageButton
 
     private lateinit var session: MediaSession
+    private val device = MediaDeviceData(true, null, DEVICE_NAME)
+    private val disabledDevice = MediaDeviceData(false, null, null)
 
     @Before
     fun setUp() {
@@ -181,7 +183,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindWhenUnattached() {
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, null, null, MediaDeviceData(null, DEVICE_NAME))
+                emptyList(), PACKAGE, null, null, device)
         player.bind(state)
         assertThat(player.isPlaying()).isFalse()
     }
@@ -190,8 +192,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindText() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null,
-                MediaDeviceData(null, DEVICE_NAME))
+                emptyList(), PACKAGE, session.getSessionToken(), null, device)
         player.bind(state)
         assertThat(appName.getText()).isEqualTo(APP)
         assertThat(titleText.getText()).isEqualTo(TITLE)
@@ -202,9 +203,40 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindBackgroundColor() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null,
-                MediaDeviceData(null, DEVICE_NAME))
+                emptyList(), PACKAGE, session.getSessionToken(), null, device)
         player.bind(state)
         assertThat(background.getBackgroundTintList()).isEqualTo(ColorStateList.valueOf(BG_COLOR))
+    }
+
+    @Test
+    fun bindDevice() {
+        player.attach(holder)
+        val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+                emptyList(), PACKAGE, session.getSessionToken(), null, device)
+        player.bind(state)
+        assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
+        assertThat(seamless.isEnabled()).isTrue()
+    }
+
+    @Test
+    fun bindDisabledDevice() {
+        player.attach(holder)
+        val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+                emptyList(), PACKAGE, session.getSessionToken(), null, disabledDevice)
+        player.bind(state)
+        assertThat(seamless.isEnabled()).isFalse()
+        assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(
+                R.string.media_seamless_remote_device))
+    }
+
+    @Test
+    fun bindNullDevice() {
+        player.attach(holder)
+        val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+                emptyList(), PACKAGE, session.getSessionToken(), null, null)
+        player.bind(state)
+        assertThat(seamless.isEnabled()).isTrue()
+        assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(
+                com.android.internal.R.string.ext_media_seamless_action))
     }
 }

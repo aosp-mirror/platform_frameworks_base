@@ -6031,10 +6031,12 @@ public class DevicePolicyManager {
      * this API to enforce auto time will result in
      * {@link UserManager#DISALLOW_CONFIG_DATE_TIME} being set, while calling this API to lift
      * the requirement will result in {@link UserManager#DISALLOW_CONFIG_DATE_TIME} being cleared.
+     * From Android 11, this API can also no longer be called on a managed profile.
      *
      * @param admin Which {@link DeviceAdminReceiver} this request is associated with.
      * @param required Whether auto time is set required or not.
-     * @throws SecurityException if {@code admin} is not a device owner.
+     * @throws SecurityException if {@code admin} is not a device owner, not a profile owner or
+     * if this API is called on a managed profile.
      * @deprecated From {@link android.os.Build.VERSION_CODES#R}. Use {@link #setAutoTimeEnabled}
      * to turn auto time on or off and use {@link UserManager#DISALLOW_CONFIG_DATE_TIME}
      * to prevent the user from changing this setting.

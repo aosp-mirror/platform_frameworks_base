@@ -1013,7 +1013,7 @@
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Söhbət bölməsinin yuxarısında göstərilir"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Kilid ekranında profil şəkli göstərilir"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Tətbiqlərin üzərində üzən qabarcıq kimi görünəcək"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Narahat Etməyin rejimi bölünsün"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Narahat Etməyin rejimində göstərilsin"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Anladım"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Böyütmə Üst-üstə Düşən Pəncərəsi"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Böyütmə Pəncərəsi"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> nizamlayıcı əlavə edilib.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> nizamlayıcı əlavə edilib.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Silinib"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Sevimlilərə əlavə edilib"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Sevimlilərə əlavə edilib, sıra: <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Sevimlilərdən silinib"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"sevimli"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"sevimlilərdən silin"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> mövqeyinə keçirin"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Nizamlayıcılar"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Enerji menyusundan daxil olacağınız nizamlayıcıları seçin"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Nizamlayıcıları yenidən tənzimləmək üçün tutub sürüşdürün"</string>

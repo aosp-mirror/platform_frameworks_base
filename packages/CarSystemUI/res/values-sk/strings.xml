@@ -26,4 +26,8 @@
     <string name="car_new_user" msgid="6637442369728092473">"Nový používateľ"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"Keď pridáte nového používateľa, musí si nastaviť vlastný priestor."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"Ktorýkoľvek používateľ môže aktualizovať aplikácie všetkých ostatných používateľov."</string>
+    <!-- no translation found for car_loading_profile (4507385037552574474) -->
+    <skip />
+    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
+    <skip />
 </resources>

@@ -295,7 +295,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                 mListener.onGestureStarted();
             }
         } else if (state == GestureMatcher.STATE_GESTURE_COMPLETED) {
-            onGestureCompleted(gestureId);
+            onGestureCompleted(gestureId, event, rawEvent, policyFlags);
         } else if (state == GestureMatcher.STATE_GESTURE_CANCELED && mState.isGestureDetecting()) {
             // We only want to call the cancelation callback if there are no other pending
             // detectors.
@@ -311,8 +311,8 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         }
     }
 
-    private void onGestureCompleted(int gestureId) {
-        MotionEvent event = mState.getLastReceivedEvent();
+    private void onGestureCompleted(
+            int gestureId, MotionEvent event, MotionEvent rawEvent, int policyFlags) {
         // Note that gestures that complete immediately call clear() from onMotionEvent.
         // Gestures that complete on a delay call clear() here.
         switch (gestureId) {

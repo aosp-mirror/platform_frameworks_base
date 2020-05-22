@@ -21,11 +21,6 @@
             android:paddingLeft="0dp"
             android:paddingRight="0dp">
     <item
-        android:gravity="end|fill_vertical"
-        android:width="40dp"
-        android:drawable="@*android:drawable/control_background_40dp_material" />
-
-    <item
         android:drawable="@drawable/ic_ksh_key_down"
         android:gravity="end|bottom"
         android:paddingBottom="6dp"

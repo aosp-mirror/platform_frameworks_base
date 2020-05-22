@@ -257,13 +257,16 @@ public class DataManager {
     }
 
     /**
-     * Queries launch counts of apps within {@code packageNameFilter} between {@code startTime}
-     * and {@code endTime}.
+     * Queries usage stats of apps within {@code packageNameFilter} between {@code startTime} and
+     * {@code endTime}.
+     *
+     * @return a map which keys are package names and values are {@link AppUsageStatsData}.
      */
     @NonNull
-    public Map<String, Integer> queryAppLaunchCount(@UserIdInt int callingUserId, long startTime,
+    public Map<String, AppUsageStatsData> queryAppUsageStats(
+            @UserIdInt int callingUserId, long startTime,
             long endTime, Set<String> packageNameFilter) {
-        return UsageStatsQueryHelper.queryAppLaunchCount(callingUserId, startTime, endTime,
+        return UsageStatsQueryHelper.queryAppUsageStats(callingUserId, startTime, endTime,
                 packageNameFilter);
     }
 
