@@ -58,7 +58,7 @@ class MediaHierarchyManager @Inject constructor(
     private var rootOverlay: ViewGroupOverlay? = null
     private lateinit var currentState: MediaState
     private val mediaCarousel
-        get() = mediaViewManager.mediaCarousel
+        get() = mediaViewManager.mediaFrame
     private var animationStartState: MediaState? = null
     private var statusbarState: Int = statusBarStateController.state
     private var animator = ValueAnimator.ofFloat(0.0f, 1.0f).apply {
