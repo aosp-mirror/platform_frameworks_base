@@ -19,6 +19,7 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -66,6 +67,7 @@ public class PipMenuActivityController {
     public static final String EXTRA_MENU_STATE = "menu_state";
     public static final String EXTRA_SHOW_MENU_WITH_DELAY = "show_menu_with_delay";
     public static final String EXTRA_SHOW_RESIZE_HANDLE = "show_resize_handle";
+    public static final String EXTRA_MESSAGE_CALLBACK_WHAT = "message_callback_what";
 
     public static final int MESSAGE_MENU_STATE_CHANGED = 100;
     public static final int MESSAGE_EXPAND_PIP = 101;
@@ -129,9 +131,10 @@ public class PipMenuActivityController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_MENU_STATE_CHANGED: {
-                    int menuState = msg.arg1;
-                    boolean resize = msg.arg2 != 0;
-                    onMenuStateChanged(menuState, resize, (Runnable) msg.obj);
+                    final int menuState = msg.arg1;
+                    final boolean resize = msg.arg2 != 0;
+                    onMenuStateChanged(menuState, resize,
+                            getMenuStateChangeFinishedCallback(msg.replyTo, (Bundle) msg.obj));
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
@@ -254,8 +257,8 @@ public class PipMenuActivityController {
     }
 
     /**
-     * Similar to {@link #showMenu(int, Rect, boolean, boolean)} but only show the menu upon
-     * PiP window transition is finished.
+     * Similar to {@link #showMenu(int, Rect, boolean, boolean, boolean)} but only show the menu
+     * upon PiP window transition is finished.
      */
     public void showMenuWithDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean willResizeMenu, boolean showResizeHandle) {
@@ -270,6 +273,22 @@ public class PipMenuActivityController {
             boolean willResizeMenu, boolean showResizeHandle) {
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
                 false /* withDelay */, showResizeHandle);
+    }
+
+    private Runnable getMenuStateChangeFinishedCallback(@Nullable Messenger replyTo,
+            @Nullable Bundle data) {
+        if (replyTo == null || data == null) {
+            return null;
+        }
+        return () -> {
+            try {
+                final Message m = Message.obtain();
+                m.what = data.getInt(EXTRA_MESSAGE_CALLBACK_WHAT);
+                replyTo.send(m);
+            } catch (RemoteException e) {
+                // ignored
+            }
+        };
     }
 
     private void showMenuInternal(int menuState, Rect stackBounds, boolean allowMenuTimeout,
