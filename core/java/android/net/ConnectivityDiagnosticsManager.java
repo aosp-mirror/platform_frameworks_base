@@ -437,7 +437,7 @@ public class ConnectivityDiagnosticsManager {
          */
         private long mReportTimestamp;
 
-        /** The detection method used to identify the suspected data stall */
+        /** A bitmask of the detection methods used to identify the suspected data stall */
         @DetectionMethod private final int mDetectionMethod;
 
         /** LinkProperties available on the Network at the reported timestamp */
@@ -499,9 +499,9 @@ public class ConnectivityDiagnosticsManager {
         }
 
         /**
-         * Returns the detection method used to identify this suspected data stall.
+         * Returns the bitmask of detection methods used to identify this suspected data stall.
          *
-         * @return The detection method used to identify the suspected data stall
+         * @return The bitmask of detection methods used to identify the suspected data stall
          */
         public int getDetectionMethod() {
             return mDetectionMethod;
