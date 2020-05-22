@@ -216,11 +216,11 @@ public class ThermalManagerServiceTest {
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).notifyThrottling(any(Temperature.class));
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(anyInt());
+                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).notifyThrottling(any(Temperature.class));
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(anyInt());
+                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
         resetListenerMock();
         mService.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
         ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
@@ -228,7 +228,7 @@ public class ThermalManagerServiceTest {
                 .times(4)).notifyThrottling(captor.capture());
         assertListEqualsIgnoringOrder(mFakeHal.mTemperatureList, captor.getAllValues());
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+                .times(0)).onStatusChange(Temperature.THROTTLING_NONE);
         captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(2)).notifyThrottling(captor.capture());
@@ -236,7 +236,7 @@ public class ThermalManagerServiceTest {
                 new ArrayList<>(Arrays.asList(mFakeHal.mSkin1, mFakeHal.mSkin2)),
                 captor.getAllValues());
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+                .times(0)).onStatusChange(Temperature.THROTTLING_NONE);
     }
 
     private void resetListenerMock() {
