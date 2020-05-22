@@ -84,10 +84,10 @@
     <!--TODO (b/156917828): Add content description for a11y purposes?-->
     <ImageButton
         android:id="@+id/resize_handle"
-        android:layout_width="@dimen/pip_action_size"
-        android:layout_height="@dimen/pip_action_size"
+        android:layout_width="@dimen/pip_resize_handle_size"
+        android:layout_height="@dimen/pip_resize_handle_size"
         android:layout_gravity="top|start"
-        android:padding="@dimen/pip_action_padding"
+        android:layout_margin="@dimen/pip_resize_handle_margin"
         android:src="@drawable/pip_resize_handle"
         android:background="?android:selectableItemBackgroundBorderless" />
 </FrameLayout>
