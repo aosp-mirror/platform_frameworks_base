@@ -1032,6 +1032,13 @@
       <item quantity="few">Dodane su <xliff:g id="NUMBER_1">%s</xliff:g> kontrole.</item>
       <item quantity="other">Dodano je <xliff:g id="NUMBER_1">%s</xliff:g> kontrola.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Uklonjeno"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Dodano u favorite"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Dodano u favorite, položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Uklonjeno iz favorita"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"dodali u favorite"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"uklonili iz favorita"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Premjestite na položaj <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontrole"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Odaberite kontrole kojima želite pristupati iz izbornika napajanja"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>

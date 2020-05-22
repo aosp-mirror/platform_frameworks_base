@@ -5300,6 +5300,7 @@ package android.window {
     field public static final int FEATURE_SYSTEM_LAST = 10000; // 0x2710
     field public static final int FEATURE_UNDEFINED = -1; // 0xffffffff
     field public static final int FEATURE_VENDOR_FIRST = 10001; // 0x2711
+    field public static final int FEATURE_WINDOWED_MAGNIFICATION = 4; // 0x4
     field public static final int FEATURE_WINDOW_TOKENS = 2; // 0x2
   }
 

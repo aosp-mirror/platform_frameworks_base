@@ -343,7 +343,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
         initializeRecentsAnimationController(mController, homeActivity);
 
-        assertEquals(homeActivity, mDefaultDisplay.mFixedRotationLaunchingApp);
+        assertEquals(homeActivity, mDefaultDisplay.getFixedRotationLaunchingApp());
 
         // Check that the home app is in portrait
         assertEquals(Configuration.ORIENTATION_PORTRAIT,
@@ -353,7 +353,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // top rotated record should be cleared.
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
         assertFalse(homeActivity.hasFixedRotationTransform());
-        assertNull(mDefaultDisplay.mFixedRotationLaunchingApp);
+        assertNull(mDefaultDisplay.getFixedRotationLaunchingApp());
     }
 
     @Test
@@ -367,7 +367,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
                 (mDefaultDisplay.getRotation() + 1) % 4);
 
         assertTrue(activity.hasFixedRotationTransform());
-        assertEquals(activity, mDefaultDisplay.mFixedRotationLaunchingApp);
+        assertEquals(activity, mDefaultDisplay.getFixedRotationLaunchingApp());
 
         // Before the transition is done, the recents animation is triggered.
         initializeRecentsAnimationController(mController, homeActivity);
@@ -377,7 +377,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         mController.cleanupAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION);
         // The rotation transform should be cleared after updating orientation with display.
         assertFalse(activity.hasFixedRotationTransform());
-        assertNull(mDefaultDisplay.mFixedRotationLaunchingApp);
+        assertNull(mDefaultDisplay.getFixedRotationLaunchingApp());
     }
 
     @Test
@@ -436,7 +436,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         // The transform state should keep because we expect to listen the signal from the
         // transition executed by moving the task to front.
         assertTrue(homeActivity.hasFixedRotationTransform());
-        assertEquals(homeActivity, mDefaultDisplay.mFixedRotationLaunchingApp);
+        assertEquals(homeActivity, mDefaultDisplay.getFixedRotationLaunchingApp());
 
         mDefaultDisplay.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(
                 homeActivity.token);

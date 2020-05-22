@@ -80,7 +80,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
 
         mMediaData = new MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null,
                 new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null);
-        mDeviceData = new MediaDeviceData(null, DEVICE_NAME);
+        mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME);
     }
 
     @Test

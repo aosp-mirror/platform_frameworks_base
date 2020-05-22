@@ -719,7 +719,7 @@
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Уведомления приходят со звуком или вибрацией"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Уведомления приходят со звуком или вибрацией. Разговоры из приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" по умолчанию появляются в виде всплывающего чата."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлекает ваше внимание к контенту с помощью плавающего ярлыка"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Появляется в верхней части списка разговоров и в виде всплывающего чата."</string>
+    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Появляется в верхней части списка разговоров и в виде всплывающего чата"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает настройки разговора."</string>
@@ -1038,6 +1038,13 @@
       <item quantity="many">Добавлено <xliff:g id="NUMBER_1">%s</xliff:g> элементов управления.</item>
       <item quantity="other">Добавлено <xliff:g id="NUMBER_1">%s</xliff:g> элемента управления.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Удалено"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Добавлено в избранное"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Добавлено в избранное на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Не добавлено в избранное"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"добавить в избранное"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"удалить из избранного"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Переместить на позицию <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Элементы управления"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Выберите элементы управления, которые будут доступны в меню кнопки питания."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок элементов управления, перетащите их"</string>

@@ -1026,6 +1026,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> 件のコントロールを追加しました。</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> 件のコントロールを追加しました。</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"削除済み"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"お気に入りに追加済み"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"お気に入りに追加済み、位置: <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"お気に入りから削除済み"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"お気に入りに追加"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"お気に入りから削除"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"ポジション <xliff:g id="NUMBER">%d</xliff:g> に移動"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"コントロール"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"電源ボタン メニューからアクセスするコントロールを選択する"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>

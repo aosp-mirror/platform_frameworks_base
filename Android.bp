@@ -703,6 +703,7 @@ filegroup {
         // TODO: remove these annotations as soon as we can use andoid.support.annotations.*
         ":framework-annotations",
         "core/java/android/net/DhcpResults.java",
+        "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/util/HexDump.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
@@ -733,6 +734,7 @@ filegroup {
 filegroup {
     name: "framework-tethering-shared-srcs",
     srcs: [
+        "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
@@ -1131,6 +1133,7 @@ filegroup {
         "core/java/android/os/BasicShellCommandHandler.java",
         "core/java/android/os/RegistrantList.java",
         "core/java/android/os/Registrant.java",
+        "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/LocalLog.java",
         "core/java/android/util/TimeUtils.java",
         "core/java/com/android/internal/os/SomeArgs.java",
@@ -1153,6 +1156,7 @@ filegroup {
 filegroup {
     name: "framework-telephony-shared-srcs",
     srcs: [
+        "core/java/android/util/IndentingPrintWriter.java",
         "core/java/android/util/RecurrenceRule.java",
         "core/java/com/android/internal/os/SomeArgs.java",
         "core/java/com/android/internal/util/BitwiseInputStream.java",

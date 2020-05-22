@@ -61,6 +61,13 @@ public class DisplayAreaOrganizer extends WindowOrganizer {
     public static final int FEATURE_ONE_HANDED = FEATURE_SYSTEM_FIRST + 3;
 
     /**
+     * Display area that can be magnified in
+     * {@link Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW}. It contains all windows
+     * below {@link WindowManager.LayoutParams#TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY}.
+     */
+    public static final int FEATURE_WINDOWED_MAGNIFICATION = FEATURE_SYSTEM_FIRST + 4;
+
+    /**
      * The last boundary of display area for system features
      */
     public static final int FEATURE_SYSTEM_LAST = 10_000;

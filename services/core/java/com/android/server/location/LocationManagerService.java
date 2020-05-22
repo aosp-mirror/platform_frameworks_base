@@ -102,6 +102,8 @@ import com.android.server.location.AbstractLocationProvider.State;
 import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.UserInfoHelper.UserListener;
+import com.android.server.location.geofence.GeofenceManager;
+import com.android.server.location.geofence.GeofenceProxy;
 import com.android.server.location.gnss.GnssManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
@@ -192,6 +194,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private static final LocationRequest DEFAULT_LOCATION_REQUEST = new LocationRequest();
 
     private final Object mLock = new Object();
+
     private final Context mContext;
     private final Handler mHandler;
     private final LocalService mLocalService;
@@ -201,13 +204,14 @@ public class LocationManagerService extends ILocationManager.Stub {
     private final AppForegroundHelper mAppForegroundHelper;
     private final LocationUsageLogger mLocationUsageLogger;
 
+    private final GeofenceManager mGeofenceManager;
+
     @Nullable private GnssManagerService mGnssManagerService = null;
 
     private final PassiveLocationProviderManager mPassiveManager;
 
     private PowerManager mPowerManager;
 
-    private GeofenceManager mGeofenceManager;
     private GeocoderProxy mGeocodeProvider;
 
     @GuardedBy("mLock")
@@ -244,6 +248,9 @@ public class LocationManagerService extends ILocationManager.Stub {
         mAppForegroundHelper = new AppForegroundHelper(mContext);
         mLocationUsageLogger = new LocationUsageLogger();
 
+        mGeofenceManager = new GeofenceManager(mContext, mUserInfoHelper, mSettingsHelper,
+                mAppOpsHelper, mLocationUsageLogger);
+
         // set up passive provider - we do this early because it has no dependencies on system
         // services or external code that isn't ready yet, and because this allows the variable to
         // be final. other more complex providers are initialized later, when system services are
@@ -272,9 +279,10 @@ public class LocationManagerService extends ILocationManager.Stub {
         mSettingsHelper.onSystemReady();
         mAppForegroundHelper.onSystemReady();
 
+        mGeofenceManager.onSystemReady();
+
         synchronized (mLock) {
             mPowerManager = mContext.getSystemService(PowerManager.class);
-            mGeofenceManager = new GeofenceManager(mContext, mSettingsHelper);
 
             // add listeners
             mContext.getPackageManager().addOnPermissionsChangeListener(
@@ -2101,72 +2109,14 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void requestGeofence(LocationRequest request, Geofence geofence, PendingIntent intent,
-            String packageName, String attributionTag) {
-        if (request == null) {
-            request = DEFAULT_LOCATION_REQUEST;
-        }
-
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
-                AppOpsManager.toReceiverId(intent));
-        identity.enforceLocationPermission(PERMISSION_COARSE);
-
-        Objects.requireNonNull(intent);
-
-        boolean callerHasLocationHardwarePermission =
-                mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
-                        == PERMISSION_GRANTED;
-        LocationRequest sanitizedRequest = createSanitizedRequest(request, identity,
-                callerHasLocationHardwarePermission);
-
-        if (D) {
-            Log.d(TAG, "requestGeofence: " + sanitizedRequest + " " + geofence + " " + intent);
-        }
-
-        if (identity.userId != UserHandle.USER_SYSTEM) {
-            // temporary measure until geofences work for secondary users
-            Log.w(TAG, "proximity alerts are currently available only to the primary user");
-            return;
-        }
-
-        mLocationUsageLogger.logLocationApiUsage(
-                LocationStatsEnums.USAGE_STARTED,
-                LocationStatsEnums.API_REQUEST_GEOFENCE,
-                packageName,
-                request,
-                /* hasListener= */ false,
-                true,
-                geofence,
-                mAppForegroundHelper.isAppForeground(identity.uid));
-
-        mGeofenceManager.addFence(sanitizedRequest, geofence, intent, identity);
+    public void requestGeofence(Geofence geofence, PendingIntent intent, String packageName,
+            String attributionTag) {
+        mGeofenceManager.addGeofence(geofence, intent, packageName, attributionTag);
     }
 
     @Override
-    public void removeGeofence(Geofence geofence, PendingIntent intent, String packageName) {
-        if (intent == null) {
-            throw new IllegalArgumentException("invalid pending intent: " + null);
-        }
-
-        if (D) Log.d(TAG, "removeGeofence: " + geofence + " " + intent);
-
-        mLocationUsageLogger.logLocationApiUsage(
-                LocationStatsEnums.USAGE_ENDED,
-                LocationStatsEnums.API_REQUEST_GEOFENCE,
-                packageName,
-                /* LocationRequest= */ null,
-                /* hasListener= */ false,
-                true,
-                geofence,
-                mAppForegroundHelper.isAppForeground(Binder.getCallingUid()));
-
-        // geo-fence manager uses the public location API, need to clear identity
-        long identity = Binder.clearCallingIdentity();
-        try {
-            mGeofenceManager.removeFence(geofence, intent);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+    public void removeGeofence(PendingIntent pendingIntent) {
+        mGeofenceManager.removeGeofence(pendingIntent);
     }
 
     @Override
@@ -2674,45 +2624,46 @@ public class LocationManagerService extends ILocationManager.Stub {
             return;
         }
 
+        String dumpFilter = args.length == 0 ? null : args[0];
+
+        ipw.println("Location Manager State:");
+        ipw.increaseIndent();
+        ipw.println("Elapsed Realtime: " + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
+
+        ipw.println("User Info:");
+        ipw.increaseIndent();
+        mUserInfoHelper.dump(fd, ipw, args);
+        ipw.decreaseIndent();
+
+        ipw.println("Location Settings:");
+        ipw.increaseIndent();
+        mSettingsHelper.dump(fd, ipw, args);
+        ipw.decreaseIndent();
+
         synchronized (mLock) {
-            ipw.println("Location Manager State:");
-            ipw.increaseIndent();
-            ipw.print("Current System Time: "
-                    + TimeUtils.logTimeOfDay(System.currentTimeMillis()));
-            ipw.println(", Current Elapsed Time: "
-                    + TimeUtils.formatDuration(SystemClock.elapsedRealtime()));
-
-            ipw.println("User Info:");
-            ipw.increaseIndent();
-            mUserInfoHelper.dump(fd, ipw, args);
-            ipw.decreaseIndent();
-
-            ipw.println("Location Settings:");
-            ipw.increaseIndent();
-            mSettingsHelper.dump(fd, ipw, args);
-            ipw.decreaseIndent();
-
             ipw.println("Battery Saver Location Mode: "
                     + locationPowerSaveModeToString(mBatterySaverMode));
 
-            ipw.println("Location Listeners:");
-            ipw.increaseIndent();
-            for (Receiver receiver : mReceivers.values()) {
-                ipw.println(receiver);
-            }
-            ipw.decreaseIndent();
-
-            ipw.println("Active Records by Provider:");
-            ipw.increaseIndent();
-            for (Map.Entry<String, ArrayList<UpdateRecord>> entry : mRecordsByProvider.entrySet()) {
-                ipw.println(entry.getKey() + ":");
+            if (dumpFilter == null) {
+                ipw.println("Location Listeners:");
                 ipw.increaseIndent();
-                for (UpdateRecord record : entry.getValue()) {
-                    ipw.println(record);
+                for (Receiver receiver : mReceivers.values()) {
+                    ipw.println(receiver);
                 }
                 ipw.decreaseIndent();
-            }
-            ipw.decreaseIndent();
+
+                ipw.println("Active Records by Provider:");
+                ipw.increaseIndent();
+                for (Map.Entry<String, ArrayList<UpdateRecord>> entry :
+                        mRecordsByProvider.entrySet()) {
+                    ipw.println(entry.getKey() + ":");
+                    ipw.increaseIndent();
+                    for (UpdateRecord record : entry.getValue()) {
+                        ipw.println(record);
+                    }
+                    ipw.decreaseIndent();
+                }
+                ipw.decreaseIndent();
 
             ipw.println("Historical Records by Provider:");
             ipw.increaseIndent();
@@ -2724,32 +2675,39 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             ipw.decreaseIndent();
 
-            mRequestStatistics.history.dump(ipw);
+                mRequestStatistics.history.dump(ipw);
 
-            if (mGeofenceManager != null) {
-                ipw.println("Geofences:");
-                ipw.increaseIndent();
-                mGeofenceManager.dump(ipw);
-                ipw.decreaseIndent();
-            }
-
-            if (mExtraLocationControllerPackage != null) {
-                ipw.println("Location Controller Extra Package: " + mExtraLocationControllerPackage
-                        + (mExtraLocationControllerPackageEnabled ? " [enabled]" : "[disabled]"));
+                if (mExtraLocationControllerPackage != null) {
+                    ipw.println(
+                            "Location Controller Extra Package: " + mExtraLocationControllerPackage
+                                    + (mExtraLocationControllerPackageEnabled ? " [enabled]"
+                                    : "[disabled]"));
+                }
             }
         }
 
         ipw.println("Location Providers:");
         ipw.increaseIndent();
         for (LocationProviderManager manager : mProviderManagers) {
-            manager.dump(fd, ipw, args);
+            if (dumpFilter == null || manager.getName().equals(dumpFilter)) {
+                manager.dump(fd, ipw, args);
+            }
         }
         ipw.decreaseIndent();
 
-        if (mGnssManagerService != null) {
-            ipw.println("GNSS Manager:");
+        if (dumpFilter == null || GPS_PROVIDER.equals(dumpFilter)) {
+            if (mGnssManagerService != null) {
+                ipw.println("GNSS Manager:");
+                ipw.increaseIndent();
+                mGnssManagerService.dump(fd, ipw, args);
+                ipw.decreaseIndent();
+            }
+        }
+
+        if (dumpFilter == null || "geofence".equals(dumpFilter)) {
+            ipw.println("Geofence Manager:");
             ipw.increaseIndent();
-            mGnssManagerService.dump(fd, ipw, args);
+            mGeofenceManager.dump(fd, ipw, args);
             ipw.decreaseIndent();
         }
     }

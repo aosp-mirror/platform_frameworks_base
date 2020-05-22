@@ -1026,6 +1026,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> కంట్రోల్‌లు యాడ్ అయ్యాయి.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> కంట్రోల్ యాడ్ అయింది.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"తీసివేయబడింది"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"<xliff:g id="NUMBER">%d</xliff:g>వ స్థానంలో ఇష్టమైనదిగా గుర్తు పెట్టబడింది"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ఇష్టమైనదిగా పెట్టిన గుర్తు తీసివేయబడింది"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"ఇష్టమైనదిగా గుర్తు పెట్టు"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"ఇష్టమైనదిగా పెట్టిన గుర్తును తీసివేయి"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> పొజిషన్‌కు తరలించండి"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"నియంత్రణలు"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"పవర్ మెనూ నుండి యాక్సెస్ చేయడానికి నియంత్రణలను ఎంచుకోండి"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"నియంత్రణల క్రమం మార్చడానికి పట్టుకుని&amp;amp, లాగండి"</string>

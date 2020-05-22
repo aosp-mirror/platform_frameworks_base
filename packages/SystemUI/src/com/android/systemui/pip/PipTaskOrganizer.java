@@ -58,6 +58,7 @@ import com.android.internal.os.SomeArgs;
 import com.android.systemui.R;
 import com.android.systemui.pip.phone.PipUpdateThread;
 import com.android.systemui.stackdivider.Divider;
+import com.android.systemui.wm.DisplayController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -82,8 +83,10 @@ import javax.inject.Singleton;
  * see also {@link com.android.systemui.pip.phone.PipMotionHelper}.
  */
 @Singleton
-public class PipTaskOrganizer extends TaskOrganizer {
+public class PipTaskOrganizer extends TaskOrganizer implements
+        DisplayController.OnDisplaysChangedListener {
     private static final String TAG = PipTaskOrganizer.class.getSimpleName();
+    private static final boolean DEBUG = false;
 
     private static final int MSG_RESIZE_IMMEDIATE = 1;
     private static final int MSG_RESIZE_ANIMATE = 2;
@@ -206,10 +209,17 @@ public class PipTaskOrganizer extends TaskOrganizer {
             mSurfaceControlTransactionFactory;
     private PictureInPictureParams mPictureInPictureParams;
 
+    /**
+     * If set to {@code true}, the entering animation will be skipped and we will wait for
+     * {@link #onFixedRotationFinished(int)} callback to actually enter PiP.
+     */
+    private boolean mShouldDeferEnteringPip;
+
     @Inject
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
-            @Nullable Divider divider) {
+            @Nullable Divider divider,
+            @NonNull DisplayController displayController) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
@@ -219,6 +229,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
         mPipAnimationController = new PipAnimationController(context, surfaceTransactionHelper);
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitDivider = divider;
+        displayController.addDisplayWindowListener(this);
     }
 
     public Handler getUpdateHandler() {
@@ -281,7 +292,8 @@ public class PipTaskOrganizer extends TaskOrganizer {
             final int direction = syncWithSplitScreenBounds(destinationBounds)
                     ? TRANSITION_DIRECTION_TO_SPLIT_SCREEN
                     : TRANSITION_DIRECTION_TO_FULLSCREEN;
-            final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
             mSurfaceTransactionHelper.scale(tx, mLeash, destinationBounds,
                     mLastReportedBounds);
             tx.setWindowCrop(mLeash, destinationBounds.width(), destinationBounds.height());
@@ -325,51 +337,65 @@ public class PipTaskOrganizer extends TaskOrganizer {
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo info, SurfaceControl leash) {
         Objects.requireNonNull(info, "Requires RunningTaskInfo");
-        mPictureInPictureParams = info.pictureInPictureParams;
-        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
-                info.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
-                null /* bounds */, getMinimalSize(info.topActivityInfo));
-        Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         mTaskInfo = info;
         mToken = mTaskInfo.token;
         mInPip = true;
         mLeash = leash;
-
-        // TODO: Skip enter animation when entering pip from another orientation
-        final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
         mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
+        mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
+
+        if (mShouldDeferEnteringPip) {
+            if (DEBUG) Log.d(TAG, "Defer entering PiP animation, fixed rotation is ongoing");
+            // if deferred, hide the surface till fixed rotation is completed
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            tx.setAlpha(mLeash, 0f);
+            tx.apply();
+            return;
+        }
+
+        final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
+                mTaskInfo.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
+                null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
+        Objects.requireNonNull(destinationBounds, "Missing destination bounds");
+        final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
             scheduleAnimateResizePip(currentBounds, destinationBounds,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
                     null /* updateBoundsCallback */);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
-            // If we are fading the PIP in, then we should move the pip to the final location as
-            // soon as possible, but set the alpha immediately since the transaction can take a
-            // while to process
-            final SurfaceControl.Transaction tx = new SurfaceControl.Transaction();
-            tx.setAlpha(mLeash, 0f);
-            tx.apply();
-            final WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-            wct.setBounds(mToken, destinationBounds);
-            wct.scheduleFinishEnterPip(mToken, destinationBounds);
-            applySyncTransaction(wct, new WindowContainerTransactionCallback() {
-                @Override
-                public void onTransactionReady(int id, SurfaceControl.Transaction t) {
-                    t.apply();
-                    mUpdateHandler.post(() -> mPipAnimationController
-                            .getAnimator(mLeash, destinationBounds, 0f, 1f)
-                            .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
-                            .setPipAnimationCallback(mPipAnimationCallback)
-                            .setDuration(mEnterExitAnimationDuration)
-                            .start());
-                }
-            });
+            enterPipWithAlphaAnimation(destinationBounds, mEnterExitAnimationDuration);
             mOneShotAnimationType = ANIM_TYPE_BOUNDS;
         } else {
             throw new RuntimeException("Unrecognized animation type: " + mOneShotAnimationType);
         }
+    }
+
+    private void enterPipWithAlphaAnimation(Rect destinationBounds, long durationMs) {
+        // If we are fading the PIP in, then we should move the pip to the final location as
+        // soon as possible, but set the alpha immediately since the transaction can take a
+        // while to process
+        final SurfaceControl.Transaction tx =
+                mSurfaceControlTransactionFactory.getTransaction();
+        tx.setAlpha(mLeash, 0f);
+        tx.apply();
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+        wct.setBounds(mToken, destinationBounds);
+        wct.scheduleFinishEnterPip(mToken, destinationBounds);
+        applySyncTransaction(wct, new WindowContainerTransactionCallback() {
+            @Override
+            public void onTransactionReady(int id, SurfaceControl.Transaction t) {
+                t.apply();
+                mUpdateHandler.post(() -> mPipAnimationController
+                        .getAnimator(mLeash, destinationBounds, 0f, 1f)
+                        .setTransitionDirection(TRANSITION_DIRECTION_TO_PIP)
+                        .setPipAnimationCallback(mPipAnimationCallback)
+                        .setDuration(durationMs)
+                        .start());
+            }
+        });
     }
 
     /**
@@ -391,6 +417,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
             Log.wtf(TAG, "Unrecognized token: " + token);
             return;
         }
+        mShouldDeferEnteringPip = false;
         mPictureInPictureParams = null;
         mInPip = false;
     }
@@ -399,7 +426,7 @@ public class PipTaskOrganizer extends TaskOrganizer {
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo info) {
         Objects.requireNonNull(mToken, "onTaskInfoChanged requires valid existing mToken");
         final PictureInPictureParams newParams = info.pictureInPictureParams;
-        if (!applyPictureInPictureParams(newParams)) {
+        if (newParams == null || !applyPictureInPictureParams(newParams)) {
             Log.d(TAG, "Ignored onTaskInfoChanged with PiP param: " + newParams);
             return;
         }
@@ -414,6 +441,23 @@ public class PipTaskOrganizer extends TaskOrganizer {
     @Override
     public void onBackPressedOnTaskRoot(ActivityManager.RunningTaskInfo taskInfo) {
         // Do nothing
+    }
+
+    @Override
+    public void onFixedRotationStarted(int displayId, int newRotation) {
+        mShouldDeferEnteringPip = true;
+    }
+
+    @Override
+    public void onFixedRotationFinished(int displayId) {
+        if (mShouldDeferEnteringPip && mInPip) {
+            final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
+                    mTaskInfo.topActivity, getAspectRatioOrDefault(mPictureInPictureParams),
+                    null /* bounds */, getMinimalSize(mTaskInfo.topActivityInfo));
+            // schedule a regular animation to ensure all the callbacks are still being sent
+            enterPipWithAlphaAnimation(destinationBounds, 0 /* durationMs */);
+        }
+        mShouldDeferEnteringPip = false;
     }
 
     /**
@@ -476,6 +520,10 @@ public class PipTaskOrganizer extends TaskOrganizer {
      */
     public void scheduleAnimateResizePip(Rect toBounds, int duration,
             Consumer<Rect> updateBoundsCallback) {
+        if (mShouldDeferEnteringPip) {
+            Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
+            return;
+        }
         scheduleAnimateResizePip(mLastReportedBounds, toBounds,
                 TRANSITION_DIRECTION_NONE, duration, updateBoundsCallback);
     }
@@ -565,6 +613,10 @@ public class PipTaskOrganizer extends TaskOrganizer {
             Consumer<Rect> updateBoundsCallback) {
         if (!mInPip) {
             // can be initiated in other component, ignore if we are no longer in PIP
+            return;
+        }
+        if (mShouldDeferEnteringPip) {
+            Log.d(TAG, "skip scheduleOffsetPip, entering pip deferred");
             return;
         }
         SomeArgs args = SomeArgs.obtain();

@@ -1013,7 +1013,7 @@
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"대화 섹션의 상단에 표시"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"잠금 화면에서 프로필 사진 표시"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"앱 상단에서 플로팅 대화창으로 표시"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"방해 금지 모드 제외"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"방해 금지 모드 무시"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"확인"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
@@ -1026,6 +1026,13 @@
       <item quantity="other">제어 기능 <xliff:g id="NUMBER_1">%s</xliff:g>개가 추가되었습니다.</item>
       <item quantity="one">제어 기능 <xliff:g id="NUMBER_0">%s</xliff:g>개가 추가되었습니다.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"삭제됨"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"즐겨찾기에 추가됨"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"즐겨찾기에 추가됨, 위치 <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"즐겨찾기에서 삭제됨"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"즐겨찾기"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"즐겨찾기에서 삭제"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"다음 위치로 이동: <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"제어"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"전원 메뉴에서 액세스할 컨트롤을 선택합니다."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누르고 드래그하여 컨트롤 재정렬"</string>

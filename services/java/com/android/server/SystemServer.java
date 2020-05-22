@@ -184,6 +184,8 @@ import dalvik.system.VMRuntime;
 
 import com.google.android.startop.iorap.IorapForwardingService;
 
+import libcore.timezone.ZoneInfoDb;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -308,6 +310,8 @@ public final class SystemServer {
             "com.android.server.appsearch.AppSearchManagerService";
     private static final String ROLLBACK_MANAGER_SERVICE_CLASS =
             "com.android.server.rollback.RollbackManagerService";
+    private static final String ALARM_MANAGER_SERVICE_CLASS =
+            "com.android.server.alarm.AlarmManagerService";
 
     private static final String TETHERING_CONNECTOR_CLASS = "android.net.ITetheringConnector";
 
@@ -446,8 +450,9 @@ public final class SystemServer {
             // Default the timezone property to GMT if not set.
             //
             String timezoneProperty = SystemProperties.get("persist.sys.timezone");
-            if (timezoneProperty == null || timezoneProperty.isEmpty()) {
-                Slog.w(TAG, "Timezone not set; setting to GMT.");
+            if (!isValidTimeZoneId(timezoneProperty)) {
+                Slog.w(TAG, "persist.sys.timezone is not valid (" + timezoneProperty
+                        + "); setting to GMT.");
                 SystemProperties.set("persist.sys.timezone", "GMT");
             }
 
@@ -623,6 +628,12 @@ public final class SystemServer {
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+
+    private static boolean isValidTimeZoneId(String timezoneProperty) {
+        return timezoneProperty != null
+                && !timezoneProperty.isEmpty()
+                && ZoneInfoDb.getInstance().hasTimeZone(timezoneProperty);
     }
 
     private boolean isFirstBootOrUpgrade() {
@@ -1145,7 +1156,7 @@ public final class SystemServer {
             }
 
             t.traceBegin("StartAlarmManagerService");
-            mSystemServiceManager.startService(new AlarmManagerService(context));
+            mSystemServiceManager.startService(ALARM_MANAGER_SERVICE_CLASS);
             t.traceEnd();
 
             t.traceBegin("StartInputManagerService");

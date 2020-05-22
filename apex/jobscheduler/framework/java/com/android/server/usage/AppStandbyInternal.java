@@ -8,8 +8,7 @@ import android.app.usage.UsageStatsManager.StandbyBuckets;
 import android.app.usage.UsageStatsManager.SystemForcedReasons;
 import android.content.Context;
 import android.os.Looper;
-
-import com.android.internal.util.IndentingPrintWriter;
+import android.util.IndentingPrintWriter;
 
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;

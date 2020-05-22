@@ -1026,6 +1026,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kontrol eklendi.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kontrol eklendi.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Kaldırıldı"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Favoriler listesine eklendi"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Favorilere eklendi, konum: <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Favorilerden kaldırıldı"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"favorilere ekleyin"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"favorilerden kaldırın"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g>. konuma taşı"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kontroller"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Güç menüsünden erişmek için denetimleri seçin"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>

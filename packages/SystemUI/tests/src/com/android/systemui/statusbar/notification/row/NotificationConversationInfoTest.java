@@ -193,7 +193,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         when(mMockPackageManager.getPackageInfo(eq("android"), anyInt()))
                 .thenReturn(packageInfo);
 
-        when(mShortcutInfo.getShortLabel()).thenReturn("Convo name");
+        when(mShortcutInfo.getLabel()).thenReturn("Convo name");
         List<ShortcutInfo> shortcuts = Arrays.asList(mShortcutInfo);
         when(mLauncherApps.getShortcuts(any(), any())).thenReturn(shortcuts);
         when(mIconFactory.getConversationDrawable(

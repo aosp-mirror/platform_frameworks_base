@@ -42,13 +42,20 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
     }
 
     /**
+     * Must be implemented to return the {@link ListenerMultiplexer} this registration is registered
+     * with. Often this is easiest to accomplish by defining registration subclasses as non-static
+     * inner classes of the multiplexer they are to be used with.
+     */
+    protected abstract ListenerMultiplexer<?, TRequest, TListener, ?, ?> getOwner();
+
+    /**
      * Removes this registration. If called before {@link #onRegister(Object)} or after
      * {@link #onUnregister()}, then this will have no effect.
      */
     public final void remove() {
         Object key = mKey;
         if (key != null) {
-            remove(key);
+            getOwner().removeRegistration(key, this);
         }
     }
 
@@ -62,12 +69,6 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
             remove();
         }
     }
-
-    /**
-     * Must be implemented to remove this registration from the owning manager via
-     * {@link ListenerMultiplexer#removeRegistration(Object, ListenerRegistration)}.
-     */
-    protected abstract void remove(Object key);
 
     /**
      * May be overridden in place of {@link #onRegister(Object)}.

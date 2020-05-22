@@ -2683,15 +2683,4 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     DEVICE_CONTROLS_SETTINGS = 1844;
-
-    // ACTION: Settings > Wi-Fi > Tap on Openroaming Wi-Fi
-    // CATEGORY: SETTINGS
-    // OS: R
-    OPENROAMING_TAP  = 1845;
-
-    // When device already using any Wi-Fi service, to track if user still want to use Openroaming
-    // ACTION: Settings > Wi-Fi > Tap on Openroaming Wi-Fi
-    // CATEGORY: SETTINGS
-    // OS: R
-    OPENROAMING_TAP_ON_WIFI_CONNECTION  = 1846;
 }

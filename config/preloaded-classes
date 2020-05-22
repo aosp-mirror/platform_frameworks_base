@@ -6315,6 +6315,7 @@ android.util.FeatureFlagUtils
 android.util.FloatProperty
 android.util.Half
 android.util.IconDrawableFactory
+android.util.IndentingPrintWriter
 android.util.IntArray
 android.util.IntProperty
 android.util.JsonReader$1
@@ -9113,7 +9114,6 @@ com.android.internal.util.GrowingArrayUtils
 com.android.internal.util.HexDump
 com.android.internal.util.IState
 com.android.internal.util.ImageUtils
-com.android.internal.util.IndentingPrintWriter
 com.android.internal.util.IntPair
 com.android.internal.util.JournaledFile
 com.android.internal.util.LatencyTracker$1

@@ -334,29 +334,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     };
 
     /**
-     * Callback structure provided to {@link FingerprintManager#enumerate(int, EnumerateCallback)}.
-     * Users of{@link #FingerprintManager} may optionally provide an implementation of this to
-     * {@link FingerprintManager#enumerate(int, EnumerateCallback)} for listening to
-     * fingerprint template removal events.
-     *
-     * @hide
-     */
-    public static abstract class EnumerateCallback {
-        /**
-         * Called when the given fingerprint can't be removed.
-         * @param errMsgId An associated error message id
-         * @param errString An error message indicating why the fingerprint id can't be removed
-         */
-        public void onEnumerateError(int errMsgId, CharSequence errString) { }
-
-        /**
-         * Called when a given fingerprint is successfully removed.
-         * @param fingerprint the fingerprint template that was removed.
-         */
-        public void onEnumerate(Fingerprint fingerprint) { }
-    };
-
-    /**
      * @hide
      */
     public static abstract class LockoutResetCallback {
