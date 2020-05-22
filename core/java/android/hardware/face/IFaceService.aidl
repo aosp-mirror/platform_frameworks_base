@@ -83,12 +83,6 @@ interface IFaceService {
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
 
-    // Gets the number of hardware devices
-    // int getHardwareDeviceCount();
-
-    // Gets the unique device id for hardware enumerated at i
-    // long getHardwareDevice(int i);
-
     // Gets the authenticator ID for face
     long getAuthenticatorId();
 
@@ -100,9 +94,6 @@ interface IFaceService {
 
     // Explicitly set the active user (for enrolling work profile)
     void setActiveUser(int uid);
-
-    // Enumerate all faces
-    void enumerate(IBinder token, int userId, IFaceServiceReceiver receiver);
 
     void setFeature(int userId, int feature, boolean enabled, in byte [] token,
             IFaceServiceReceiver receiver, String opPackageName);

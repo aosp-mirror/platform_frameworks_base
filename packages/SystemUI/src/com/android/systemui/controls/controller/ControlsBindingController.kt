@@ -20,7 +20,7 @@ import android.content.ComponentName
 import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.service.controls.actions.ControlAction
-import com.android.systemui.controls.UserAwareController
+import com.android.systemui.util.UserAwareController
 import java.util.function.Consumer
 
 /**

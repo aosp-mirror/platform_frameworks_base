@@ -57,7 +57,6 @@ import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
-import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
 import static android.view.WindowManager.LayoutParams.TYPE_BOOT_PROGRESS;
@@ -72,6 +71,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+import static android.window.DisplayAreaOrganizer.FEATURE_WINDOWED_MAGNIFICATION;
 
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_CONFIG;
@@ -89,7 +89,6 @@ import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.FOCUSED_ROOT_TASK_ID;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
-import static com.android.server.wm.DisplayContentProto.OVERLAY_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
@@ -257,17 +256,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Most surfaces will be a child of this window. There are some special layers and windows
      * which are always on top of others and omitted from Screen-Magnification, for example the
      * strict mode flash or the magnification overlay itself. Those layers will be children of
-     * {@link #mOverlayContainers} where mWindowContainers contains everything else.
+     * {@link #mOverlayLayer} where mWindowContainers contains everything else.
      */
+     // TODO(b/156425461) we don't need this extra layer between DisplayContent and DisplayArea.Root
     private final WindowContainers mWindowContainers =
             new WindowContainers("mWindowContainers", mWmService);
 
-    // Contains some special windows which are always on top of others and omitted from
-    // Screen-Magnification, for example the WindowMagnification windows.
-    private final NonAppWindowContainers mOverlayContainers =
-            new NonAppWindowContainers("mOverlayContainers", mWmService);
-
-    /** The containers below are the only child containers {@link #mWindowContainers} can have. */
+    /**
+     * We organize all top-level Surfaces into the following layer.
+     * It contains a few Surfaces which are always on top of others, and omitted from
+     * Screen-Magnification, for example the strict mode flash or the fullscreen magnification
+     * overlay.
+     */
+    private SurfaceControl mOverlayLayer;
 
     // Contains all IME window containers. Note that the z-ordering of the IME windows will depend
     // on the IME target. We mainly have this container grouping so we can keep track of all the IME
@@ -493,10 +494,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The launching activity which is using fixed rotation transformation.
      *
      * @see #handleTopActivityLaunchingInDifferentOrientation
-     * @see #setFixedRotationLaunchingApp
+     * @see #setFixedRotationLaunchingApp(ActivityRecord, int)
      * @see DisplayRotation#shouldRotateSeamlessly
      */
-    ActivityRecord mFixedRotationLaunchingApp;
+    private ActivityRecord mFixedRotationLaunchingApp;
 
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
@@ -973,16 +974,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 .setOpaque(true)
                 .setContainerLayer();
         mSurfaceControl = b.setName("Root").setContainerLayer().build();
+        mOverlayLayer = b.setName("Display Overlays").setParent(mSurfaceControl).build();
 
         getPendingTransaction()
                 .setLayer(mSurfaceControl, 0)
                 .setLayerStack(mSurfaceControl, mDisplayId)
-                .show(mSurfaceControl);
+                .show(mSurfaceControl)
+                .setLayer(mOverlayLayer, Integer.MAX_VALUE)
+                .show(mOverlayLayer);
         getPendingTransaction().apply();
 
         // These are the only direct children we should ever have and they are permanent.
         super.addChild(mWindowContainers, null);
-        super.addChild(mOverlayContainers, null);
 
         mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
                 mWmService, this, mRootDisplayArea, mImeWindowsContainers);
@@ -1058,10 +1061,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 case TYPE_INPUT_METHOD:
                 case TYPE_INPUT_METHOD_DIALOG:
                     mImeWindowsContainers.addChild(token);
-                    break;
-                case TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY:
-                    // TODO(display-area): Migrate to DisplayArea
-                    mOverlayContainers.addChild(token);
                     break;
                 default:
                     mDisplayAreaPolicy.addWindow(token);
@@ -1475,6 +1474,23 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     }
 
+    @Nullable ActivityRecord getFixedRotationLaunchingApp() {
+        return mFixedRotationLaunchingApp;
+    }
+
+    void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r) {
+        setFixedRotationLaunchingAppUnchecked(r, ROTATION_UNDEFINED);
+    }
+
+    void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
+        if (mFixedRotationLaunchingApp == null && r != null) {
+            mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
+        } else if (mFixedRotationLaunchingApp != null && r == null) {
+            mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
+        }
+        mFixedRotationLaunchingApp = r;
+    }
+
     /**
      * Sets the provided record to {@link mFixedRotationLaunchingApp} if possible to apply fixed
      * rotation transform to it and indicate that the display may be rotated after it is launched.
@@ -1496,7 +1512,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (!r.hasFixedRotationTransform()) {
             startFixedRotationTransform(r, rotation);
         }
-        mFixedRotationLaunchingApp = r;
+        setFixedRotationLaunchingAppUnchecked(r, rotation);
         if (prevRotatedLaunchingApp != null) {
             prevRotatedLaunchingApp.finishFixedRotationTransform();
         }
@@ -1524,7 +1540,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Clears the {@link mFixedRotationLaunchingApp} without applying rotation to display. It is
+     * Clears the {@link #mFixedRotationLaunchingApp} without applying rotation to display. It is
      * used when the display won't rotate (e.g. the orientation from sensor has updated again before
      * applying rotation to display) but the launching app has been transformed. So the record need
      * to be cleared and restored to stop using seamless rotation and rotated configuration.
@@ -1534,7 +1550,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return;
         }
         mFixedRotationLaunchingApp.finishFixedRotationTransform();
-        mFixedRotationLaunchingApp = null;
+        setFixedRotationLaunchingAppUnchecked(null);
     }
 
     private void startFixedRotationTransform(WindowToken token, int rotation) {
@@ -2668,6 +2684,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mPointerEventDispatcher.dispose();
             setRotationAnimation(null);
             mWmService.mAnimator.removeDisplayLocked(mDisplayId);
+            mOverlayLayer.release();
             mInputMonitor.onDisplayRemoved();
             mWmService.mDisplayNotificationController.dispatchDisplayRemoved(this);
         } finally {
@@ -2799,10 +2816,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         proto.write(ID, mDisplayId);
         mRootDisplayArea.dumpDebug(proto, ROOT_DISPLAY_AREA, logLevel);
-        for (int i = mOverlayContainers.getChildCount() - 1; i >= 0; --i) {
-            final WindowToken windowToken = mOverlayContainers.getChildAt(i);
-            windowToken.dumpDebug(proto, OVERLAY_WINDOWS, logLevel);
-        }
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
         proto.write(ROTATION, getRotation());
@@ -4302,76 +4315,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Window container class that contains all containers on this display that are not related to
-     * Apps. E.g. status bar.
-     */
-    private class NonAppWindowContainers extends DisplayChildWindowContainer<WindowToken> {
-        /**
-         * Compares two child window tokens returns -1 if the first is lesser than the second in
-         * terms of z-order and 1 otherwise.
-         */
-        private final Comparator<WindowToken> mWindowComparator = (token1, token2) ->
-                // Tokens with higher base layer are z-ordered on-top.
-                mWmService.mPolicy.getWindowLayerFromTypeLw(token1.windowType,
-                        token1.mOwnerCanManageAppTokens)
-                        < mWmService.mPolicy.getWindowLayerFromTypeLw(token2.windowType,
-                        token2.mOwnerCanManageAppTokens) ? -1 : 1;
-
-        private final String mName;
-        private final Dimmer mDimmer = new Dimmer(this);
-        private final Rect mTmpDimBoundsRect = new Rect();
-
-        NonAppWindowContainers(String name, WindowManagerService service) {
-            super(service);
-            mName = name;
-        }
-
-        @Override
-        boolean hasActivity() {
-            // I am a non-app-window-container :P
-            return false;
-        }
-
-        void addChild(WindowToken token) {
-            addChild(token, mWindowComparator);
-        }
-
-        @Override
-        int getOrientation(int candidate) {
-            ProtoLog.w(WM_DEBUG_ORIENTATION, "NonAppWindowContainer cannot set orientation: %s",
-                    this);
-            return SCREEN_ORIENTATION_UNSET;
-        }
-
-        @Override
-        String getName() {
-            return mName;
-        }
-
-        @Override
-        Dimmer getDimmer() {
-            return mDimmer;
-        }
-
-        @Override
-        void prepareSurfaces() {
-            mDimmer.resetDimStates();
-            super.prepareSurfaces();
-            getBounds(mTmpDimBoundsRect);
-
-            if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
-                scheduleAnimation();
-            }
-        }
-
-        @Override
-        boolean shouldMagnify() {
-            // Omitted from Screen-Magnification
-            return false;
-        }
-    }
-
-    /**
      * Container for IME windows.
      *
      * This has some special behaviors:
@@ -4464,15 +4407,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * and other potpourii.
      */
     SurfaceControl.Builder makeOverlay() {
-        return mWmService.makeSurfaceBuilder(mSession)
-                .setParent(mOverlayContainers.getSurfaceControl());
+        return mWmService.makeSurfaceBuilder(mSession).setParent(getOverlayLayer());
     }
 
     /**
-     * Reparents the given surface to {@link #mOverlayContainers}' SurfaceControl.
+     * Reparents the given surface to {@link #mOverlayLayer} SurfaceControl.
      */
     void reparentToOverlay(Transaction transaction, SurfaceControl surface) {
-        transaction.reparent(surface, mOverlayContainers.getSurfaceControl());
+        transaction.reparent(surface, getOverlayLayer());
     }
 
     void applyMagnificationSpec(MagnificationSpec spec) {
@@ -4527,10 +4469,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     void assignChildLayers(SurfaceControl.Transaction t) {
         mWindowContainers.assignLayer(t, 0);
-        mOverlayContainers.assignLayer(t, 1);
-
         mWindowContainers.assignChildLayers(t);
-        mOverlayContainers.assignChildLayers(t);
     }
 
     /**
@@ -4779,9 +4718,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }, false /* traverseTopToBottom */);
     }
 
+    // TODO(b/156425461) Make DisplayContent the DisplayArea.Root
+    @Override
+    public SurfaceControl getSurfaceControl() {
+        return mRootDisplayArea.getSurfaceControl();
+    }
+
+    private DisplayArea getWindowContainers() {
+        List<DisplayArea<? extends WindowContainer>> windowContainers =
+                mDisplayAreaPolicy.getDisplayAreas(FEATURE_WINDOWED_MAGNIFICATION);
+        if (windowContainers.size() != 1) {
+            throw new IllegalStateException("There should be only one DisplayArea for "
+                    + "FEATURE_WINDOWED_MAGNIFICATION");
+        }
+        return windowContainers.get(0);
+    }
+
     @VisibleForTesting
     SurfaceControl getWindowingLayer() {
-        return mWindowContainers.getSurfaceControl();
+        return getWindowContainers().getSurfaceControl();
     }
 
     @VisibleForTesting
@@ -4790,7 +4745,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     SurfaceControl getOverlayLayer() {
-        return mOverlayContainers.getSurfaceControl();
+        return mOverlayLayer;
     }
 
     /**
@@ -5260,7 +5215,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         rotatedLaunchingApp.finishFixedRotationTransform(
                 () -> applyRotation(oldRotation, newRotation));
-        mFixedRotationLaunchingApp = null;
+        setFixedRotationLaunchingAppUnchecked(null);
     }
 
     /** Checks whether the given activity is in size compatibility mode and notifies the change. */
@@ -5574,7 +5529,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp) {
                 // Because it won't affect display orientation, just finish the transform.
                 animatingRecents.finishFixedRotationTransform();
-                mFixedRotationLaunchingApp = null;
+                setFixedRotationLaunchingAppUnchecked(null);
             } else {
                 // If there is already a launching activity that is not the recents, before its
                 // transition is completed, the recents animation may be started. So if the recents

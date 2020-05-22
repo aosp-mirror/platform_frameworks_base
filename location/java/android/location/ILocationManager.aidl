@@ -54,9 +54,8 @@ interface ILocationManager
             in PendingIntent intent, String packageName, String attributionTag, String listenerId);
     void removeUpdates(in ILocationListener listener, in PendingIntent intent);
 
-    void requestGeofence(in LocationRequest request, in Geofence geofence,
-            in PendingIntent intent, String packageName, String attributionTag);
-    void removeGeofence(in Geofence fence, in PendingIntent intent, String packageName);
+    void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
+    void removeGeofence(in PendingIntent intent);
 
     boolean geocoderIsPresent();
     void getFromLocation(double latitude, double longitude, int maxResults,

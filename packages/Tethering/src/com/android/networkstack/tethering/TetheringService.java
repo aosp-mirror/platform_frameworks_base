@@ -264,10 +264,11 @@ public class TetheringService extends Service {
             if (onlyAllowPrivileged || mTethering.isTetherProvisioningRequired()) return false;
 
             int uid = Binder.getCallingUid();
+
             // If callerPkg's uid is not same as Binder.getCallingUid(),
             // checkAndNoteWriteSettingsOperation will return false and the operation will be
             // denied.
-            return TetheringService.checkAndNoteWriteSettingsOperation(mService, uid, callerPkg,
+            return mService.checkAndNoteWriteSettingsOperation(mService, uid, callerPkg,
                     callingAttributionTag, false /* throwException */);
         }
 
@@ -285,8 +286,8 @@ public class TetheringService extends Service {
      *
      * @return {@code true} iff the package is allowed to write settings.
      */
-    // TODO: Remove method and replace with direct call once R code is pushed to AOSP
-    private static boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
+    @VisibleForTesting
+    boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
             @NonNull String callingPackage, @Nullable String callingAttributionTag,
             boolean throwException) {
         return Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPackage,

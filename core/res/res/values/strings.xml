@@ -421,15 +421,17 @@
          [CHAR LIMIT=NONE] -->
     <string name="location_changed_notification_text">Contact your IT admin to learn more</string>
 
-    <!-- Feature Id for Country Detector. [CHAR LIMIT=NONE]-->
+    <!-- Attribution for Geofencing service. [CHAR LIMIT=NONE]-->
+    <string name="geofencing_service">Geofencing Service</string>
+    <!-- Attribution for Country Detector. [CHAR LIMIT=NONE]-->
     <string name="country_detector">Country Detector</string>
-    <!-- Feature Id for Location service. [CHAR LIMIT=NONE]-->
+    <!-- Attribution for Location service. [CHAR LIMIT=NONE]-->
     <string name="location_service">Location Service</string>
-    <!-- Feature Id for Gnss service. [CHAR LIMIT=NONE]-->
+    <!-- Attribution for GNSS service. [CHAR LIMIT=NONE]-->
     <string name="gnss_service">GNSS Service</string>
-    <!-- Feature Id for Sensor Notification service. [CHAR LIMIT=NONE]-->
+    <!-- Attribution for Sensor Notification service. [CHAR LIMIT=NONE]-->
     <string name="sensor_notification_service">Sensor Notification Service</string>
-    <!-- Feature Id for Twilight service. [CHAR LIMIT=NONE]-->
+    <!-- Attribution for Twilight service. [CHAR LIMIT=NONE]-->
     <string name="twilight_service">Twilight Service</string>
 
     <!-- Factory reset warning dialog strings--> <skip />

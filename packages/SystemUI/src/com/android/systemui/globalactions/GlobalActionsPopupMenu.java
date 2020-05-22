@@ -19,7 +19,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.WindowManager;
@@ -32,6 +31,8 @@ import com.android.systemui.R;
 /**
  * Customized widget for use in the GlobalActionsDialog. Ensures common positioning and user
  * interactions.
+ *
+ * It should be created with a {@link Context} with the right theme
  */
 public class GlobalActionsPopupMenu extends ListPopupWindow {
     private Context mContext;
@@ -42,15 +43,17 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
     private ListAdapter mAdapter;
 
     public GlobalActionsPopupMenu(@NonNull Context context, boolean isDropDownMode) {
-        super(new ContextThemeWrapper(context, R.style.Control_ListPopupWindow));
+        super(context);
         mContext = context;
+        Resources res = mContext.getResources();
+        setBackgroundDrawable(
+                res.getDrawable(R.drawable.rounded_bg_full, context.getTheme()));
         mIsDropDownMode = isDropDownMode;
 
         // required to show above the global actions dialog
         setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
         setModal(true);
 
-        Resources res = mContext.getResources();
         mGlobalActionsSidePadding = res.getDimensionPixelSize(R.dimen.global_actions_side_margin);
         if (!isDropDownMode) {
             mMenuVerticalPadding = res.getDimensionPixelSize(R.dimen.control_menu_vertical_padding);
@@ -89,11 +92,16 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
             // width should be between [.5, .9] of screen
             int parentWidth = res.getSystem().getDisplayMetrics().widthPixels;
             int widthSpec = MeasureSpec.makeMeasureSpec(
-                    (int) (parentWidth * 0.9), MeasureSpec.AT_MOST);
-            View child = mAdapter.getView(0, null, listView);
-            child.measure(widthSpec, MeasureSpec.UNSPECIFIED);
-            int width = Math.max(child.getMeasuredWidth(), (int) (parentWidth * 0.5));
-
+                    (int) (parentWidth * 0.9) - 2 * mMenuHorizontalPadding, MeasureSpec.AT_MOST);
+            int maxWidth = 0;
+            for (int i = 0; i < mAdapter.getCount(); i++) {
+                View child = mAdapter.getView(i, null, listView);
+                child.measure(widthSpec, MeasureSpec.UNSPECIFIED);
+                int w = child.getMeasuredWidth();
+                maxWidth = Math.max(w, maxWidth);
+            }
+            int width = Math.max(maxWidth, (int) (parentWidth * 0.5) - 2 * mMenuHorizontalPadding)
+                    + 2 * mMenuHorizontalPadding;
             listView.setPadding(mMenuHorizontalPadding, mMenuVerticalPadding,
                     mMenuHorizontalPadding, mMenuVerticalPadding);
 

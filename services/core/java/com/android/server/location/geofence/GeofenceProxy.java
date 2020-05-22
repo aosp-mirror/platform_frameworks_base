@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.server.location;
+package com.android.server.location.geofence;
 
 import android.annotation.Nullable;
 import android.content.ComponentName;
@@ -41,6 +41,10 @@ public final class GeofenceProxy {
     private static final String TAG = "GeofenceProxy";
     private static final String SERVICE_ACTION = "com.android.location.service.GeofenceProvider";
 
+    /**
+     * Creates and registers this proxy. If no suitable service is available for the proxy, returns
+     * null.
+     */
     @Nullable
     public static GeofenceProxy createAndBind(Context context, IGpsGeofenceHardware gpsGeofence) {
         GeofenceProxy proxy = new GeofenceProxy(context, gpsGeofence);
@@ -51,10 +55,10 @@ public final class GeofenceProxy {
         }
     }
 
-    private final IGpsGeofenceHardware mGpsGeofenceHardware;
-    private final ServiceWatcher mServiceWatcher;
+    final IGpsGeofenceHardware mGpsGeofenceHardware;
+    final ServiceWatcher mServiceWatcher;
 
-    private volatile IGeofenceHardware mGeofenceHardware;
+    volatile IGeofenceHardware mGeofenceHardware;
 
     private GeofenceProxy(Context context, IGpsGeofenceHardware gpsGeofence) {
         mGpsGeofenceHardware = Objects.requireNonNull(gpsGeofence);
@@ -66,7 +70,7 @@ public final class GeofenceProxy {
         mGeofenceHardware = null;
     }
 
-    private void updateGeofenceHardware(IBinder binder) throws RemoteException {
+    void updateGeofenceHardware(IBinder binder) throws RemoteException {
         IGeofenceProvider.Stub.asInterface(binder).setGeofenceHardware(mGeofenceHardware);
     }
 
@@ -84,6 +88,8 @@ public final class GeofenceProxy {
     }
 
     private class GeofenceProxyServiceConnection implements ServiceConnection {
+
+        GeofenceProxyServiceConnection() {}
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {

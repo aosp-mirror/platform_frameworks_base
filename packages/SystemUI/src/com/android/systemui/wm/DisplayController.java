@@ -134,6 +134,39 @@ public class DisplayController {
                         }
                     });
                 }
+
+                @Override
+                public void onFixedRotationStarted(int displayId, int newRotation) {
+                    mHandler.post(() -> {
+                        synchronized (mDisplays) {
+                            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
+                                Slog.w(TAG, "Skipping onFixedRotationStarted on unknown"
+                                        + " display, displayId=" + displayId);
+                                return;
+                            }
+                            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
+                                mDisplayChangedListeners.get(i).onFixedRotationStarted(
+                                        displayId, newRotation);
+                            }
+                        }
+                    });
+                }
+
+                @Override
+                public void onFixedRotationFinished(int displayId) {
+                    mHandler.post(() -> {
+                        synchronized (mDisplays) {
+                            if (mDisplays.get(displayId) == null || getDisplay(displayId) == null) {
+                                Slog.w(TAG, "Skipping onFixedRotationFinished on unknown"
+                                        + " display, displayId=" + displayId);
+                                return;
+                            }
+                            for (int i = mDisplayChangedListeners.size() - 1; i >= 0; --i) {
+                                mDisplayChangedListeners.get(i).onFixedRotationFinished(displayId);
+                            }
+                        }
+                    });
+                }
             };
 
     @Inject
@@ -232,5 +265,15 @@ public class DisplayController {
          * Called when a display is removed.
          */
         default void onDisplayRemoved(int displayId) {}
+
+        /**
+         * Called when fixed rotation on a display is started.
+         */
+        default void onFixedRotationStarted(int displayId, int newRotation) {}
+
+        /**
+         * Called when fixed rotation on a display is finished.
+         */
+        default void onFixedRotationFinished(int displayId) {}
     }
 }

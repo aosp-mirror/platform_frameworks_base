@@ -32,11 +32,11 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
 import android.util.proto.ProtoOutputStream;
 
 import androidx.test.runner.AndroidJUnit4;
 
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.job.JobSchedulerService.Constants;
