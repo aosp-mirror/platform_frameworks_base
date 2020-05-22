@@ -100,7 +100,7 @@ public final class IpFilterConfiguration extends FilterConfiguration {
      */
     public static final class Builder {
         private byte[] mSrcIpAddress = {0, 0, 0, 0};
-        private byte[] mDstIpAddress = {0, 0, 0, 0};;
+        private byte[] mDstIpAddress = {0, 0, 0, 0};
         private int mSrcPort = 0;
         private int mDstPort = 0;
         private boolean mPassthrough = false;

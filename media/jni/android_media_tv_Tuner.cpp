@@ -2362,28 +2362,25 @@ static sp<Filter> getFilter(JNIEnv *env, jobject filter) {
     return (Filter *)env->GetLongField(filter, gFields.filterContext);
 }
 
-static DvrSettings getDvrSettings(JNIEnv *env, jobject settings) {
+static DvrSettings getDvrSettings(JNIEnv *env, jobject settings, bool isRecorder) {
     DvrSettings dvrSettings;
     jclass clazz = env->FindClass("android/media/tv/tuner/dvr/DvrSettings");
     uint32_t statusMask =
             static_cast<uint32_t>(env->GetIntField(
                     settings, env->GetFieldID(clazz, "mStatusMask", "I")));
     uint32_t lowThreshold =
-            static_cast<uint32_t>(env->GetIntField(
-                    settings, env->GetFieldID(clazz, "mLowThreshold", "I")));
+            static_cast<uint32_t>(env->GetLongField(
+                    settings, env->GetFieldID(clazz, "mLowThreshold", "J")));
     uint32_t highThreshold =
-            static_cast<uint32_t>(env->GetIntField(
-                    settings, env->GetFieldID(clazz, "mHighThreshold", "I")));
+            static_cast<uint32_t>(env->GetLongField(
+                    settings, env->GetFieldID(clazz, "mHighThreshold", "J")));
     uint8_t packetSize =
-            static_cast<uint8_t>(env->GetIntField(
-                    settings, env->GetFieldID(clazz, "mPacketSize", "I")));
+            static_cast<uint8_t>(env->GetLongField(
+                    settings, env->GetFieldID(clazz, "mPacketSize", "J")));
     DataFormat dataFormat =
             static_cast<DataFormat>(env->GetIntField(
                     settings, env->GetFieldID(clazz, "mDataFormat", "I")));
-    DvrType type =
-            static_cast<DvrType>(env->GetIntField(
-                    settings, env->GetFieldID(clazz, "mType", "I")));
-    if (type == DvrType::RECORD) {
+    if (isRecorder) {
         RecordSettings recordSettings {
                 .statusMask = static_cast<unsigned char>(statusMask),
                 .lowThreshold = lowThreshold,
@@ -2392,7 +2389,7 @@ static DvrSettings getDvrSettings(JNIEnv *env, jobject settings) {
                 .packetSize = packetSize,
         };
         dvrSettings.record(recordSettings);
-    } else if (type == DvrType::PLAYBACK) {
+    } else {
         PlaybackSettings PlaybackSettings {
                 .statusMask = statusMask,
                 .lowThreshold = lowThreshold,
@@ -3101,8 +3098,9 @@ static jint android_media_tv_Tuner_read_filter_fmq(
         JNIEnv *env, jobject filter, jbyteArray buffer, jlong offset, jlong size) {
     sp<Filter> filterSp = getFilter(env, filter);
     if (filterSp == NULL) {
-        ALOGD("Failed to read filter FMQ: filter not found");
-        return (jint) Result::INVALID_STATE;
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Failed to read filter FMQ: filter not found");
+        return 0;
     }
     return copyData(env, filterSp->mFilterMQ, filterSp->mFilterMQEventFlag, buffer, offset, size);
 }
@@ -3337,7 +3335,9 @@ static jint android_media_tv_Tuner_configure_dvr(JNIEnv *env, jobject dvr, jobje
         return (int)Result::NOT_INITIALIZED;
     }
     sp<IDvr> iDvrSp = dvrSp->getIDvr();
-    Result result = iDvrSp->configure(getDvrSettings(env, settings));
+    bool isRecorder =
+            env->IsInstanceOf(dvr, env->FindClass("android/media/tv/tuner/dvr/DvrRecorder"));
+    Result result = iDvrSp->configure(getDvrSettings(env, settings, isRecorder));
     if (result != Result::SUCCESS) {
         return (jint) result;
     }
@@ -3440,19 +3440,21 @@ static int android_media_tv_Tuner_close_lnb(JNIEnv* env, jobject lnb) {
     return (jint) r;
 }
 
-static void android_media_tv_Tuner_dvr_set_fd(JNIEnv *env, jobject dvr, jobject jfd) {
+static void android_media_tv_Tuner_dvr_set_fd(JNIEnv *env, jobject dvr, jint fd) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
         ALOGD("Failed to set FD for dvr: dvr not found");
     }
-    dvrSp->mFd = jniGetFDFromFileDescriptor(env, jfd);
+    dvrSp->mFd = (int) fd;
     ALOGD("set fd = %d", dvrSp->mFd);
 }
 
 static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong size) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
-        ALOGD("Failed to read dvr: dvr not found");
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Failed to read dvr: dvr not found");
+        return 0;
     }
 
     long available = dvrSp->mDvrMQ->availableToWrite();
@@ -3466,6 +3468,12 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
         long length = first.getLength();
         long firstToWrite = std::min(length, write);
         ret = read(dvrSp->mFd, data, firstToWrite);
+
+        if (ret < 0) {
+            ALOGE("[DVR] Failed to read from FD: %s", strerror(errno));
+            jniThrowRuntimeException(env, strerror(errno));
+            return 0;
+        }
         if (ret < firstToWrite) {
             ALOGW("[DVR] file to MQ, first region: %ld bytes to write, but %ld bytes written",
                     firstToWrite, ret);
@@ -3480,6 +3488,7 @@ static jlong android_media_tv_Tuner_read_dvr(JNIEnv *env, jobject dvr, jlong siz
         ALOGD("[DVR] file to MQ: %ld bytes need to be written, %ld bytes written", write, ret);
         if (!dvrSp->mDvrMQ->commitWrite(ret)) {
             ALOGE("[DVR] Error: failed to commit write!");
+            return 0;
         }
 
     } else {
@@ -3524,12 +3533,14 @@ static jlong android_media_tv_Tuner_read_dvr_from_array(
 static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong size) {
     sp<Dvr> dvrSp = getDvr(env, dvr);
     if (dvrSp == NULL) {
-        ALOGW("Failed to write dvr: dvr not found");
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Failed to write dvr: dvr not found");
         return 0;
     }
 
     if (dvrSp->mDvrMQ == NULL) {
-        ALOGW("Failed to write dvr: dvr not configured");
+        jniThrowException(env, "java/lang/IllegalStateException",
+                "Failed to write dvr: dvr not configured");
         return 0;
     }
 
@@ -3546,6 +3557,12 @@ static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong si
         long length = first.getLength();
         long firstToRead = std::min(length, toRead);
         ret = write(dvrSp->mFd, data, firstToRead);
+
+        if (ret < 0) {
+            ALOGE("[DVR] Failed to write to FD: %s", strerror(errno));
+            jniThrowRuntimeException(env, strerror(errno));
+            return 0;
+        }
         if (ret < firstToRead) {
             ALOGW("[DVR] MQ to file: %ld bytes read, but %ld bytes written", firstToRead, ret);
         } else if (firstToRead < toRead) {
@@ -3559,6 +3576,7 @@ static jlong android_media_tv_Tuner_write_dvr(JNIEnv *env, jobject dvr, jlong si
         ALOGD("[DVR] MQ to file: %ld bytes to be read, %ld bytes written", toRead, ret);
         if (!dvrMq.commitRead(ret)) {
             ALOGE("[DVR] Error: failed to commit read!");
+            return 0;
         }
 
     } else {
