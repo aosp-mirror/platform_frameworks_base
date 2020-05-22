@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_FULL;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
@@ -180,6 +181,47 @@ public class InsetsPolicyTest extends WindowTestsBase {
 
         // The focused app window cannot control system bars.
         assertNull(controls);
+    }
+
+    @Test
+    public void testControlsForDispatch_topAppHidesStatusBar() {
+        addWindow(TYPE_STATUS_BAR, "statusBar");
+        addWindow(TYPE_NAVIGATION_BAR, "navBar");
+
+        // Add a fullscreen (MATCH_PARENT x MATCH_PARENT) app window which hides status bar.
+        final WindowState fullscreenApp = addWindow(TYPE_APPLICATION, "fullscreenApp");
+        final InsetsState requestedState = new InsetsState();
+        requestedState.getSource(ITYPE_STATUS_BAR).setVisible(false);
+        fullscreenApp.updateRequestedInsetsState(requestedState);
+
+        // Add a non-fullscreen dialog window.
+        final WindowState dialog = addWindow(TYPE_APPLICATION, "dialog");
+        dialog.mAttrs.width = WRAP_CONTENT;
+        dialog.mAttrs.height = WRAP_CONTENT;
+
+        // Let fullscreenApp be mTopFullscreenOpaqueWindowState.
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        displayPolicy.beginPostLayoutPolicyLw();
+        displayPolicy.applyPostLayoutPolicyLw(dialog, dialog.mAttrs, fullscreenApp, null);
+        displayPolicy.applyPostLayoutPolicyLw(fullscreenApp, fullscreenApp.mAttrs, null, null);
+        displayPolicy.finishPostLayoutPolicyLw();
+        mDisplayContent.getInsetsPolicy().updateBarControlTarget(dialog);
+
+        assertEquals(fullscreenApp, displayPolicy.getTopFullscreenOpaqueWindow());
+
+        // dialog is the focused window, but it can only control navigation bar.
+        final InsetsSourceControl[] dialogControls =
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(dialog);
+        assertNotNull(dialogControls);
+        assertEquals(1, dialogControls.length);
+        assertEquals(ITYPE_NAVIGATION_BAR, dialogControls[0].getType());
+
+        // fullscreenApp is hiding status bar, and it can keep controlling status bar.
+        final InsetsSourceControl[] fullscreenAppControls =
+                mDisplayContent.getInsetsStateController().getControlsForDispatch(fullscreenApp);
+        assertNotNull(fullscreenAppControls);
+        assertEquals(1, fullscreenAppControls.length);
+        assertEquals(ITYPE_STATUS_BAR, fullscreenAppControls[0].getType());
     }
 
     @Test
