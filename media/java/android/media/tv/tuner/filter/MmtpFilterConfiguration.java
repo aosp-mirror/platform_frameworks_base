@@ -50,7 +50,7 @@ public final class MmtpFilterConfiguration extends FilterConfiguration {
     }
 
     /**
-     * Creates a builder for {@link IpFilterConfiguration}.
+     * Creates a builder for {@link MmtpFilterConfiguration}.
      */
     @NonNull
     public static Builder builder() {
@@ -58,7 +58,7 @@ public final class MmtpFilterConfiguration extends FilterConfiguration {
     }
 
     /**
-     * Builder for {@link IpFilterConfiguration}.
+     * Builder for {@link MmtpFilterConfiguration}.
      */
     public static final class Builder {
         private int mMmtpPid = Tuner.INVALID_TS_PID;
