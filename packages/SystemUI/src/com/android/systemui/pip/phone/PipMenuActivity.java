@@ -89,6 +89,8 @@ public class PipMenuActivity extends Activity {
 
     private static final String TAG = "PipMenuActivity";
 
+    private static final int MESSAGE_INVALID_TYPE = -1;
+
     public static final int MESSAGE_SHOW_MENU = 1;
     public static final int MESSAGE_POKE_MENU = 2;
     public static final int MESSAGE_HIDE_MENU = 3;
@@ -96,6 +98,7 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_UPDATE_DISMISS_FRACTION = 5;
     public static final int MESSAGE_ANIMATION_ENDED = 6;
     public static final int MESSAGE_POINTER_EVENT = 7;
+    public static final int MESSAGE_MENU_EXPANDED = 8;
 
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
@@ -170,10 +173,13 @@ public class PipMenuActivity extends Activity {
                     mAllowTouches = true;
                     break;
                 }
-
                 case MESSAGE_POINTER_EVENT: {
                     final MotionEvent ev = (MotionEvent) msg.obj;
                     dispatchPointerEvent(ev);
+                    break;
+                }
+                case MESSAGE_MENU_EXPANDED : {
+                    mMenuContainerAnimator.start();
                     break;
                 }
             }
@@ -389,9 +395,9 @@ public class PipMenuActivity extends Activity {
             }
             if (withDelay) {
                 // starts the menu container animation after window expansion is completed
-                notifyMenuStateChange(menuState, resizeMenuOnShow, mMenuContainerAnimator::start);
+                notifyMenuStateChange(menuState, resizeMenuOnShow, MESSAGE_MENU_EXPANDED);
             } else {
-                notifyMenuStateChange(menuState, resizeMenuOnShow, null /* callback */);
+                notifyMenuStateChange(menuState, resizeMenuOnShow, MESSAGE_INVALID_TYPE);
                 mMenuContainerAnimator.start();
             }
         } else {
@@ -417,7 +423,7 @@ public class PipMenuActivity extends Activity {
         if (mMenuState != MENU_STATE_NONE) {
             cancelDelayedFinish();
             if (notifyMenuVisibility) {
-                notifyMenuStateChange(MENU_STATE_NONE, mResize, null /* callback */);
+                notifyMenuStateChange(MENU_STATE_NONE, mResize, MESSAGE_INVALID_TYPE);
             }
             mMenuContainerAnimator = new AnimatorSet();
             ObjectAnimator menuAnim = ObjectAnimator.ofFloat(mMenuContainer, View.ALPHA,
@@ -579,14 +585,21 @@ public class PipMenuActivity extends Activity {
         mBackgroundDrawable.setAlpha(alpha);
     }
 
-    private void notifyMenuStateChange(int menuState, boolean resize, Runnable callback) {
+    private void notifyMenuStateChange(int menuState, boolean resize, int callbackWhat) {
         mMenuState = menuState;
         mResize = resize;
         Message m = Message.obtain();
         m.what = PipMenuActivityController.MESSAGE_MENU_STATE_CHANGED;
         m.arg1 = menuState;
-        m.arg2 = resize ?  1 : 0;
-        m.obj = callback;
+        m.arg2 = resize ? 1 : 0;
+        if (callbackWhat != MESSAGE_INVALID_TYPE) {
+            // This message could be sent across processes when in secondary user.
+            // Make the receiver end sending back via our own Messenger
+            m.replyTo = mMessenger;
+            final Bundle data = new Bundle(1);
+            data.putInt(PipMenuActivityController.EXTRA_MESSAGE_CALLBACK_WHAT, callbackWhat);
+            m.obj = data;
+        }
         sendMessage(m, "Could not notify controller of PIP menu visibility");
     }
 
