@@ -500,6 +500,5 @@ public class PipBoundsHandler {
         pw.println(innerPrefix + "mImeHeight=" + mImeHeight);
         pw.println(innerPrefix + "mIsShelfShowing=" + mIsShelfShowing);
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
-        mSnapAlgorithm.dump(pw, innerPrefix);
     }
 }
