@@ -693,7 +693,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     accessibilityShortcutActivated();
                     break;
                 case MSG_BUGREPORT_TV:
-                    requestFullBugreportOrLaunchHandlerApp();
+                    requestBugreportForTv();
                     break;
                 case MSG_ACCESSIBILITY_TV:
                     if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(false)) {
@@ -3037,13 +3037,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return mAccessibilityTvScheduled;
     }
 
-    private void requestFullBugreportOrLaunchHandlerApp() {
+    private void requestBugreportForTv() {
         if ("1".equals(SystemProperties.get("ro.debuggable"))
                 || Settings.Global.getInt(mContext.getContentResolver(),
                         Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 0) == 1) {
             try {
                 if (!ActivityManager.getService().launchBugReportHandlerApp()) {
-                    ActivityManager.getService().requestFullBugReport();
+                    ActivityManager.getService().requestInteractiveBugReport();
                 }
             } catch (RemoteException e) {
                 Slog.e(TAG, "Error taking bugreport", e);
