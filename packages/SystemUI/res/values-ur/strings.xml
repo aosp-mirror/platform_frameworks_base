@@ -586,7 +586,7 @@
     <string name="accessibility_volume_settings" msgid="1458961116951564784">"صوتی ترتیبات"</string>
     <string name="accessibility_volume_expand" msgid="7653070939304433603">"پھیلائیں"</string>
     <string name="accessibility_volume_collapse" msgid="2746845391013829996">"سکیڑیں"</string>
-    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر کیپشن میڈیا"</string>
+    <string name="volume_odi_captions_tip" msgid="8825655463280990941">"خودکار طور پر میڈیا پر کیپشن لگائیں"</string>
     <string name="accessibility_volume_close_odi_captions_tip" msgid="8924753283621160480">"کیپشنز کی تجویز بند کریں"</string>
     <string name="volume_odi_captions_content_description" msgid="4172765742046013630">"کیپشنز کا اوورلے"</string>
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"فعال کریں"</string>
@@ -1013,7 +1013,7 @@
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو کے سیکشن میں سب سے اوپر دکھائیں"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ایپس کے سب سے اوپر فلوٹنگ بلبلہ کے طور پر ظاہر ہوں"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"مداخلت کریں ڈسٹرب نہ کریں"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ڈسٹرب نہ کریں میں مداخلت کریں"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"میگنیفیکیشن اوورلے ونڈو"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> کنٹرولز شامل کر دیے گئے۔</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> کنٹرول شامل کر دیا گیا۔</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"ہٹا دیا گیا"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"پسند کردہ"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"پسند کردہ، پوزیشن <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"ناپسند کردہ"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"پسندیدہ بنائیں"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"پسندیدگی ختم کریں"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"پوزیشن <xliff:g id="NUMBER">%d</xliff:g> میں منتقل کریں"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"کنٹرولز"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"پاور مینو سے رسائی حاصل کرنے کے لیے کنٹرولز کو منتخب کریں"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"کنٹرولز کو دوبارہ ترتیب دینے کے ليے پکڑیں اور گھسیٹیں"</string>

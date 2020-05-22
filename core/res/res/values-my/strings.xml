@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> က ပုံနှိပ်ထုတ်ယူခြင်းကို ပိတ်ထားသည်။"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"သင့်အလုပ်ပရိုဖိုင် ဖွင့်ခြင်း"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"သင့်အလုပ်ပရိုဖိုင် ဖွင့်သည်အထိ ကိုယ်ပိုင်အက်ပ်များကို ပိတ်ထားသည်"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"သင့်ကိုယ်ပိုင်အက်ပ်များကို မနက်ဖြန် ပိတ်လိုက်ပါမည်"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"ကိုယ်ပိုင်အက်ပ်များကို <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> ၌ ပိတ်သွားပါမည်။ သင်၏ အလုပ်ပရိုဖိုင်ကို <xliff:g id="NUMBER">%3$d</xliff:g> ရက်ထက်ကျော်ပြီး ပိတ်ထား၍မရပါ။"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"အလုပ်ပရိုဖိုင် ဖွင့်ရန်"</string>
     <string name="me" msgid="6207584824693813140">"ကျွန်ုပ်"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletဆိုင်ရာရွေးချယ်မှုများ"</string>
@@ -243,7 +243,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"အမှားရှာပြင် မှတ်တမ်း"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"စက်ရှင် ပြီးဆုံးပြီ"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"အမှားပြင် အစီရင်ခံစာ"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"ချွတ်ယွင်းမှုအစီရင်ခံစာ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"သင့်ရဲ့ လက်ရှိ စက်အခြေအနေ အချက်အလက်များကို အီးမေးလ် အနေဖြင့် ပေးပို့ရန် စုဆောင်းပါမည်။ အမှားရှာဖွေပြင်ဆင်မှုမှတ်တမ်းမှ ပေးပို့ရန် အသင့်ဖြစ်သည်အထိ အချိန် အနည်းငယ်ကြာမြင့်မှာ ဖြစ်သဖြင့် သည်းခံပြီး စောင့်ပါရန်"</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"လက်ငင်းတုံ့ပြန်နိုင်သည့် အစီရင်ခံချက်"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"အခြေအနေတော်တော်များများတွင် ၎င်းကိုအသုံးပြုပါ။ ၎င်းသည် အစီရင်ခံစာကို မှတ်သားခြင်း၊ ပြဿနာအကြောင်း နောက်ထပ်အသေးစိတ်များကို ထည့်သွင်းခြင်းနှင့် မျက်နှာပြင်ပုံဖမ်းယူခြင်းတို့ကို ပြုလုပ်ခွင့်ပေးပါသည်။ ပေးပို့ရန် အလွန်ကြာပြီး အသုံးပြုခြင်းနည်းပါးသည့်အပိုင်းကို ၎င်းက ချန်ခဲ့နိုင်ပါသည်။"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"အက်ပ်အား သင့်ဓာတ်ပုံစုစည်းမှုကို ပြုပြင်ခွင့်ပေးသည်။"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခြင်း"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"အက်ပ်အား သင့်မီဒီယာစုစည်းမှုမှ တည်နေရာများကို ဖတ်ခွင့်ပေးသည်။"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"သင်ဖြစ်ကြောင်း အတည်ပြုပါ"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"သင်ဖြစ်ကြောင်း အတည်ပြုပါ"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"ဇီဝအချက်အလက်သုံး ကွန်ပျူတာစက်ပစ္စည်း မရရှိနိုင်ပါ"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"အထောက်အထားစိစစ်ခြင်းကို ပယ်ဖျက်လိုက်သည်"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"မသိ"</string>
@@ -545,7 +545,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"လက်ဗွေ တစ်ပိုင်းတစ်စ တွေ့ရှိသည်။ ကျေးဇူးပြု၍ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"လက်ဗွေယူ၍ မရပါ။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"လက်ဗွေဖတ်ကိရိယာ ညစ်ပေနေသည်။ ကျေးဇူးပြု၍ သန့်ရှင်းလိုက်ပြီး ပြန်စမ်းကြည့်ပါ။"</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"လက်ညှိုး အလွန်မြန်ဆန်စွာ ရွေ့ခဲ့သည်။ ထပ်မံ ကြိုးစားပါ။"</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"လက်ညှိုး အရွှေ့မြန်လွန်းသည်။ ထပ်စမ်းကြည့်ပါ။"</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"လက်ညှိုးအလွန်နှေးကွေးစွာ ရွေ့ခဲ့သည်။ ကျေးဇူးပြု၍ ထပ်မံကြိုးစားပါ။"</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> ကို စစ်နေသည်…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"လက်ရှိ အကြောင်းအရာကို ပြန်လည်သုံးသပ်နေသည်"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> အသစ်"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> အလုပ်မလုပ်ပါ"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"စနစ်ထည့်သွင်းရန် တို့ပါ"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"စက်ကို ပြန်လည်ဖော်မက်လုပ်ရန် လိုအပ်နိုင်သည်။ ပယ်ရန် တို့ပါ။"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ဓာတ်ပုံနှင့် မီဒီယာများ လွှဲပြောင်းရန်အတွက်"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> တွင် ပြဿနာရှိနေသည်"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> အလုပ်မလုပ်ပါ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ပြင်ဆင်ရန်အတွက် ထိလိုက်ပါ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ပျက်နေပါသည်။ ပြင်ရန် ရွေးချယ်ပါ။"</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"စက်ကို ပြန်လည်ဖော်မက်လုပ်ရန် လိုအပ်နိုင်သည်။ ပယ်ရန် တို့ပါ။"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ပံ့ပိုးထားခြင်း မရှိသော <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> အလုပ်မလုပ်ပါ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကိုအသုံးပြု၍မရပါ။ အသုံးပြု၍ရသော စနစ်ပုံစံသို့သတ်မှတ်ရန် တို့ပါ။"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ဤစက်ပစ္စည်းတွင် <xliff:g id="NAME">%s</xliff:g> ကို ပံ့ပိုးမထားပါ။ ပံ့ပိုးသည့်ပုံစံတစ်ခုအဖြစ် စနစ်ထည့်သွင်းရန် ရွေးချယ်ပါ။"</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"ဤစက်သည် ဤ <xliff:g id="NAME">%s</xliff:g> ကို မပံ့ပိုးပါ။"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"စက်ကို ပြန်လည်ဖော်မက်လုပ်ရန် လိုအပ်နိုင်သည်"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> မမျှော်လင့်ဘဲ ဖယ်ရှားခဲ့သည်"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"အကြောင်းအရာ မဆုံးရှုံးစေရန် မီဒီယာကို မဖယ်ရှားမီ ဦးစွာထုတ်လိုက်ပါ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> ဖယ်ရှားလိုက်ပါပြီ"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်မလား။"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုများ ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nလက်ရှိ ဝန်ဆောင်မှုများ-\n<xliff:g id="SERVICE">%1$s</xliff:g>\n\'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် ရွေးထားသည့် ဝန်ဆောင်မှုများကို ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack ဖွင့်မလား။"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက မျက်စိမမြင်ရသော သို့မဟုတ် အမြင်အာရုံ ချို့တဲ့သော သူများအတွက် အသုံးဝင်သည့် ဖန်သားပြင်ဖတ် အက်ပ်ဖြစ်သော Talkback ကို ဖွင့်ပေးသည်။ TalkBack က သင့်စက်အလုပ်လုပ်ပုံကို လုံးဝ ပြောင်းလဲလိုက်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို \'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> ဖွင့်မလား။"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"အသံခလုတ်နှစ်ခုလုံးကို စက္ကန့်အနည်းငယ် ဖိထားခြင်းက အများသုံးစွဲနိုင်မှုဆိုင်ရာ ဝန်ဆောင်မှုဖြစ်သော <xliff:g id="SERVICE">%1$s</xliff:g> ကို ဖွင့်ပေးသည်။ ဤလုပ်ဆောင်ချက်က သင့်စက်အလုပ်လုပ်ပုံကို ပြောင်းလဲနိုင်သည်။\n\nဤဖြတ်လမ်းလင့်ခ်ကို \'ဆက်တင်များ &gt; အများသုံးစွဲနိုင်မှု\' တွင် နောက်ဝန်ဆောင်မှုတစ်ခုသို့ ပြောင်းနိုင်သည်။"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ဖွင့်ရန်"</string>

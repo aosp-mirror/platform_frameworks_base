@@ -19,6 +19,7 @@ package com.android.systemui.pip.phone;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 
+import android.annotation.Nullable;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -65,6 +66,8 @@ public class PipMenuActivityController {
     public static final String EXTRA_DISMISS_FRACTION = "dismiss_fraction";
     public static final String EXTRA_MENU_STATE = "menu_state";
     public static final String EXTRA_SHOW_MENU_WITH_DELAY = "show_menu_with_delay";
+    public static final String EXTRA_SHOW_RESIZE_HANDLE = "show_resize_handle";
+    public static final String EXTRA_MESSAGE_CALLBACK_WHAT = "message_callback_what";
 
     public static final int MESSAGE_MENU_STATE_CHANGED = 100;
     public static final int MESSAGE_EXPAND_PIP = 101;
@@ -128,9 +131,10 @@ public class PipMenuActivityController {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MESSAGE_MENU_STATE_CHANGED: {
-                    int menuState = msg.arg1;
-                    boolean resize = msg.arg2 != 0;
-                    onMenuStateChanged(menuState, resize, (Runnable) msg.obj);
+                    final int menuState = msg.arg1;
+                    final boolean resize = msg.arg2 != 0;
+                    onMenuStateChanged(menuState, resize,
+                            getMenuStateChangeFinishedCallback(msg.replyTo, (Bundle) msg.obj));
                     break;
                 }
                 case MESSAGE_EXPAND_PIP: {
@@ -248,37 +252,54 @@ public class PipMenuActivityController {
             // start, then start it
             startMenuActivity(MENU_STATE_NONE, null /* stackBounds */,
                     false /* allowMenuTimeout */, false /* resizeMenuOnShow */,
-                    false /* withDelay */);
+                    false /* withDelay */, false /* showResizeHandle */);
         }
     }
 
     /**
-     * Similar to {@link #showMenu(int, Rect, boolean, boolean)} but only show the menu upon
-     * PiP window transition is finished.
+     * Similar to {@link #showMenu(int, Rect, boolean, boolean, boolean)} but only show the menu
+     * upon PiP window transition is finished.
      */
     public void showMenuWithDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu) {
+            boolean willResizeMenu, boolean showResizeHandle) {
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
-                true /* withDelay */);
+                true /* withDelay */, showResizeHandle);
     }
 
     /**
      * Shows the menu activity immediately.
      */
     public void showMenu(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu) {
+            boolean willResizeMenu, boolean showResizeHandle) {
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
-                false /* withDelay */);
+                false /* withDelay */, showResizeHandle);
+    }
+
+    private Runnable getMenuStateChangeFinishedCallback(@Nullable Messenger replyTo,
+            @Nullable Bundle data) {
+        if (replyTo == null || data == null) {
+            return null;
+        }
+        return () -> {
+            try {
+                final Message m = Message.obtain();
+                m.what = data.getInt(EXTRA_MESSAGE_CALLBACK_WHAT);
+                replyTo.send(m);
+            } catch (RemoteException e) {
+                // ignored
+            }
+        };
     }
 
     private void showMenuInternal(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu, boolean withDelay) {
+            boolean willResizeMenu, boolean withDelay, boolean showResizeHandle) {
         if (DEBUG) {
             Log.d(TAG, "showMenu() state=" + menuState
                     + " hasActivity=" + (mToActivityMessenger != null)
                     + " allowMenuTimeout=" + allowMenuTimeout
                     + " willResizeMenu=" + willResizeMenu
                     + " withDelay=" + withDelay
+                    + " showResizeHandle=" + showResizeHandle
                     + " callers=\n" + Debug.getCallers(5, "    "));
         }
 
@@ -291,6 +312,7 @@ public class PipMenuActivityController {
             data.putBoolean(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
             data.putBoolean(EXTRA_WILL_RESIZE_MENU, willResizeMenu);
             data.putBoolean(EXTRA_SHOW_MENU_WITH_DELAY, withDelay);
+            data.putBoolean(EXTRA_SHOW_RESIZE_HANDLE, showResizeHandle);
             Message m = Message.obtain();
             m.what = PipMenuActivity.MESSAGE_SHOW_MENU;
             m.obj = data;
@@ -302,7 +324,8 @@ public class PipMenuActivityController {
         } else if (!mStartActivityRequested || isStartActivityRequestedElapsed()) {
             // If we haven't requested the start activity, or if it previously took too long to
             // start, then start it
-            startMenuActivity(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay);
+            startMenuActivity(menuState, stackBounds, allowMenuTimeout, willResizeMenu, withDelay,
+                    showResizeHandle);
         }
     }
 
@@ -405,7 +428,7 @@ public class PipMenuActivityController {
      * Starts the menu activity on the top task of the pinned stack.
      */
     private void startMenuActivity(int menuState, Rect stackBounds, boolean allowMenuTimeout,
-            boolean willResizeMenu, boolean withDelay) {
+            boolean willResizeMenu, boolean withDelay, boolean showResizeHandle) {
         try {
             StackInfo pinnedStackInfo = ActivityTaskManager.getService().getStackInfo(
                     WINDOWING_MODE_PINNED, ACTIVITY_TYPE_UNDEFINED);
@@ -422,6 +445,7 @@ public class PipMenuActivityController {
                 intent.putExtra(EXTRA_ALLOW_TIMEOUT, allowMenuTimeout);
                 intent.putExtra(EXTRA_WILL_RESIZE_MENU, willResizeMenu);
                 intent.putExtra(EXTRA_SHOW_MENU_WITH_DELAY, withDelay);
+                intent.putExtra(EXTRA_SHOW_RESIZE_HANDLE, showResizeHandle);
                 ActivityOptions options = ActivityOptions.makeCustomAnimation(mContext, 0, 0);
                 options.setLaunchTaskId(
                         pinnedStackInfo.taskIds[pinnedStackInfo.taskIds.length - 1]);

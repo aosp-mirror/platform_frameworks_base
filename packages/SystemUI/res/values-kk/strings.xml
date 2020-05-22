@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> басқару элементі енгізілді.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> басқару элементі енгізілді.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Өшірілді"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Таңдаулыларға қосылды"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Таңдаулыларға қосылды, <xliff:g id="NUMBER">%d</xliff:g>-позиция"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Таңдаулылардан алып тасталды"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"таңдаулылар"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"таңдаулылардан алып тастау"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"<xliff:g id="NUMBER">%d</xliff:g> позициясына жылжыту"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Басқару элементтері"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"\"Қуат\" мәзірінен пайдалануға болатын басқару элементтерін таңдаңыз."</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>

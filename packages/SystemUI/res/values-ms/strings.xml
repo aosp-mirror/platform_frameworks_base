@@ -512,7 +512,7 @@
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Sejarah"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"Masuk"</string>
     <string name="notification_section_header_gentle" msgid="3044910806569985386">"Pemberitahuan senyap"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Pemberitahuan memaklumi"</string>
+    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Pemberitahuan makluman"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Perbualan"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Kosongkan semua pemberitahuan senyap"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Pemberitahuan dijeda oleh Jangan Ganggu"</string>
@@ -702,12 +702,12 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"Minimumkan"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Senyap"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Kekal senyap"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Memaklumi"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"Pemakluman"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Teruskan memberikan makluman"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Matikan pemberitahuan"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Terus tunjukkan pemberitahuan daripada apl ini?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Senyap"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"Memaklumi"</string>
+    <string name="notification_alert_title" msgid="7629202599338071971">"Pemakluman"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Gelembung"</string>
     <string name="notification_channel_summary_low" msgid="7300447764759926720">"Membantu anda fokus tanpa bunyi atau getaran."</string>
     <string name="notification_channel_summary_default" msgid="3539949463907902037">"Menarik perhatian anda dengan bunyi atau getaran."</string>
@@ -744,7 +744,7 @@
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Perbualan penting"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Bukan perbualan penting"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Disenyapkan"</string>
-    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Memaklumi"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"Pemakluman"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Tunjukkan gelembung"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"Alih keluar gelembung"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"Tambahkan pada skrin utama"</string>
@@ -1013,7 +1013,7 @@
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Tunjukkan di atas bahagian perbualan"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tunjukkan gambar profil pada skrin kunci"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Dipaparkan sebagai gelembung terapung di atas apl"</string>
-    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ganggu Ciri Jangan Ganggu"</string>
+    <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ganggu ciri Jangan Ganggu"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Tetingkap Tindanan Pembesaran"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Tetingkap Pembesaran"</string>
@@ -1027,6 +1027,13 @@
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> kawalan ditambah.</item>
       <item quantity="one"><xliff:g id="NUMBER_0">%s</xliff:g> kawalan ditambah.</item>
     </plurals>
+    <string name="controls_removed" msgid="3731789252222856959">"Dialih keluar"</string>
+    <string name="accessibility_control_favorite" msgid="8694362691985545985">"Digemari"</string>
+    <string name="accessibility_control_favorite_position" msgid="54220258048929221">"Digemari, kedudukan <xliff:g id="NUMBER">%d</xliff:g>"</string>
+    <string name="accessibility_control_not_favorite" msgid="1291760269563092359">"Dinyahgemari"</string>
+    <string name="accessibility_control_change_favorite" msgid="2943178027582253261">"gemari"</string>
+    <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"nyahgemari"</string>
+    <string name="accessibility_control_move" msgid="8980344493796647792">"Alih ke kedudukan <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Kawalan"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Pilih kawalan untuk diakses daripada menu kuasa"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; seret untuk mengatur semula kawalan"</string>
