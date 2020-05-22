@@ -199,12 +199,17 @@ class MediaDataManager @Inject constructor(
         val actionIcons: MutableList<MediaAction> = ArrayList()
         val actions = notif.actions
         val actionsToShowCollapsed = notif.extras.getIntArray(
-                Notification.EXTRA_COMPACT_ACTIONS)?.toList() ?: emptyList()
+                Notification.EXTRA_COMPACT_ACTIONS)?.toMutableList() ?: mutableListOf<Int>()
         // TODO: b/153736623 look into creating actions when this isn't a media style notification
 
         val packageContext: Context = sbn.getPackageContext(context)
         if (actions != null) {
-            for (action in actions) {
+            for ((index, action) in actions.withIndex()) {
+                if (action.getIcon() == null) {
+                    Log.i(TAG, "No icon for action $index ${action.title}")
+                    actionsToShowCollapsed.remove(index)
+                    continue
+                }
                 val mediaAction = MediaAction(
                         action.getIcon().loadDrawable(packageContext),
                         action.actionIntent,
