@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> പ്രിന്റിംഗ് പ്രവർത്തനരഹിതമാക്കി."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുന്നത് വരെ നിങ്ങളുടെ വ്യക്തിപരമായ ആപ്പുകൾ ബ്ലോക്കായിരിക്കും"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"നിങ്ങളുടെ വ്യക്തിപര ആപ്പുകൾ നാളെ ബ്ലോക്ക് ചെയ്യും"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"വ്യക്തിപര ആപ്പുകൾ <xliff:g id="DATE">%1$s</xliff:g>-ാം തീയതി <xliff:g id="TIME">%2$s</xliff:g>-ന് ബ്ലോക്ക് ചെയ്യപ്പെടും. നിങ്ങളുടെ ഔദ്യോഗിക പ്രൊഫൈലിന് <xliff:g id="NUMBER">%3$d</xliff:g> ദിവസത്തിൽ കൂടുതൽ ഓഫായ നിലയിൽ തുടരാൻ കഴിയില്ല."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ഔദ്യോഗിക പ്രൊഫൈൽ ഓണാക്കുക"</string>
     <string name="me" msgid="6207584824693813140">"ഞാന്‍"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ടാബ്‌ലെറ്റ് ഓപ്‌ഷനുകൾ"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> പരിശോധിക്കുന്നു…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"നിലവിലെ ഉള്ളടക്കം അവലോകനം ചെയ്യുന്നു"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"പുതിയ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"സജ്ജമാക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ഫോട്ടോകളും മീഡിയയും ട്രാൻസ്‌ഫർ ചെയ്യാൻ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>-ൽ പ്രശ്‌നം"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"പരിഹരിക്കാൻ ടാപ്പ് ചെയ്യുക"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> കേടായി. പരിഹരിക്കാൻ തിരഞ്ഞെടുക്കുക."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം. പുറത്തെടുക്കാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"പിന്തുണയില്ലാത്ത <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> പ്രവർത്തിക്കുന്നില്ല"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ഈ ഉപകരണം <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നതല്ല. പിന്തുണയുള്ള ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> ഈ ഉപകരണത്തിന് അനുയോജ്യമല്ല. അനുയോജ്യമായ ഒരു ഫോർമാറ്റിൽ സജ്ജമാക്കുന്നതിന് തിരഞ്ഞെടുക്കുക."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"ഈ ഉപകരണം ഈ <xliff:g id="NAME">%s</xliff:g> പിന്തുണയ്ക്കുന്നില്ല."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ഉപകരണം വീണ്ടും ഫോർമാറ്റ് ചെയ്യേണ്ടി വന്നേക്കാം"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> അപ്രതീക്ഷിതമായി നീക്കംചെയ്‌തു"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ഉള്ളടക്കം നഷ്‌ടമാകുന്നത് തടയാൻ, നീക്കം ചെയ്യുന്നതിന് മുൻപ് മീഡിയ ഒഴിവാക്കുക"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> നീക്കം ചെ‌യ്‌തു"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ഉപയോഗസഹായി ഫീച്ചറുകൾ ഓണാക്കണോ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത്, ഉപയോഗസഹായി ഫീച്ചറുകൾ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന വിധം ഇത് മാറ്റിയേക്കാം.\n\nനിലവിലുള്ള ഫീച്ചറുകൾ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nതിരഞ്ഞെടുത്ത ഫീച്ചറുകൾ ക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിൽ മാറ്റാനാവും."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack ഓണാക്കണോ?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത്, കാഴ്ചക്കുറവുള്ളവർക്കോ അന്ധർക്കോ ഉപകാരപ്പെടുന്ന TalkBack എന്ന സ്ക്രീൻ റീഡർ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന വിധം TalkBack പൂർണ്ണമായും മാറ്റുന്നു.\n\nക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിലെ മറ്റൊരു ഫീച്ചറിലേക്ക് നിങ്ങൾക്ക് ഈ കുറുക്കുവഴി മാറ്റാനാവും."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> ഓണാക്കണോ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"രണ്ട് വോളിയം കീകളും അൽപ്പ നേരത്തേക്ക് അമർത്തിപ്പിടിക്കുന്നത് ഉപയോഗസഹായി ഫീച്ചറായ <xliff:g id="SERVICE">%1$s</xliff:g> എന്നതിനെ ഓണാക്കുന്നു. നിങ്ങളുടെ ഉപകരണം പ്രവർത്തിക്കുന്ന വിധം ഇത് മാറ്റിയേക്കാം.\n\nക്രമീകരണം &gt; ഉപയോഗസഹായി എന്നതിലെ മറ്റൊരു ഫീച്ചറിലേക്ക് നിങ്ങൾക്ക് ഈ കുറുക്കുവഴി മാറ്റാനാവും."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ഓണാക്കുക"</string>
@@ -1867,8 +1868,8 @@
     <string name="close_button_text" msgid="10603510034455258">"അവസാനിപ്പിക്കുക"</string>
     <string name="notification_messaging_title_template" msgid="772857526770251989">"<xliff:g id="CONVERSATION_TITLE">%1$s</xliff:g>: <xliff:g id="SENDER_NAME">%2$s</xliff:g>"</string>
     <plurals name="selected_count" formatted="false" msgid="3946212171128200491">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> തിരഞ്ഞെടുത്തു</item>
+      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
+      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> എണ്ണം തിരഞ്ഞെടുത്തു</item>
     </plurals>
     <string name="default_notification_channel_label" msgid="3697928973567217330">"വർഗ്ഗീകരിച്ചിട്ടില്ലാത്ത"</string>
     <string name="importance_from_user" msgid="2782756722448800447">"ഈ അറിയിപ്പുകളുടെ പ്രാധാന്യം നിങ്ങൾ സജ്ജീകരിച്ചു."</string>

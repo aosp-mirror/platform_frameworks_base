@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ඔබේ කාර්යාල පැතිකඩ ඔන් කරන්න"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ඔබ ඔබගේ කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන තෙක් ඔබගේ පෞද්ගලික යෙදුම් අවහිර කර ඇත"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"ඔබේ පෞද්ගලික යෙදුම් හෙට අවහිර කරනු ඇත"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"පෞද්ගලික යෙදුම් <xliff:g id="DATE">%1$s</xliff:g> දින <xliff:g id="TIME">%2$s</xliff:g>ට අවහිර වනු ඇත. ඔබේ කාර්යාල පැතිකඩ දින <xliff:g id="NUMBER">%3$d</xliff:g>කට වඩා ඉවත් කර තැබිය නොහැකිය."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්න"</string>
     <string name="me" msgid="6207584824693813140">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ටැබ්ලට විකල්ප"</string>
@@ -1345,17 +1345,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> පරීක්ෂා කරමින්…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"වත්මන් අන්තර්ගතය සමාලෝචනය කරමින්"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"අලුත් <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ක්‍රියා නොකරයි"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"පිහිටුවීමට තට්ටු කරන්න"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ඔබට උපාංගය නැවත හැඩගැන්වීමට අවශ්‍ය විය හැකිය. ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ඡායාරූප සහ මාධ්‍ය හුවමාරු කිරීම සඳහා"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> සමගින් වන ගැටලුව"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ක්‍රියා නොකරයි"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"විසඳීමට තට්ටු කරන්න"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> දූෂිතයි. විසඳීමට තට්ටු කරන්න."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ඔබට උපාංගය නැවත හැඩගැන්වීමට අවශ්‍ය විය හැකිය. ඉවත් කිරීමට තට්ටු කරන්න."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"සහාය නොදක්වන <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ක්‍රියා නොකරයි"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"මෙම උපාංගය මෙම <xliff:g id="NAME">%s</xliff:g> සඳහා සහාය නොදක්වයි. සහාය දක්වන ආකෘතියකින් පිහිටුවීමට තට්ටු කරන්න."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"මෙම උපාංගය මෙම <xliff:g id="NAME">%s</xliff:g> සඳහා සහාය නොදක්වයි. සහාය දක්වන ආකෘතියකින් පිහිටුවීමට තෝරන්න."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"මෙම උපාංගය මෙම <xliff:g id="NAME">%s</xliff:g>ට සඳහා සහාය නොදක්වයි."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ඔබට උපාංගය නැවත හැඩගැන්වීමට අවශ්‍ය විය හැකිය"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> අනපේක්ෂිතව ඉවත් කරන ලදි"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"අන්තර්ගතය නැති වීම වළක්වා ගැනීම සඳහා ඉවත් කිරීමට පෙර මාධ්‍යය ඉවත් කරන්න"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> ඉවත් කරන ලදී"</string>
@@ -1626,8 +1629,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ප්‍රවේශ්‍යතා විශේෂාංග ක්‍රියාත්මක කරන්නද?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංග ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nවත්මන් විශේෂාංග:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nඔබට තේරූ විශේෂාංග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි වෙනස් කළ හැකිය."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack ක්‍රියාත්මක කරන්නද?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම, අන්ධ හෝ අඩු දෘෂ්ටියක් අති පුද්ගලයන්ට ප්‍රයෝජනවත් තිර කියවනයක් වන TalkBack ක්‍රියාත්මක කරයි. TalkBack ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කරයි.\n\nඔබට සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි මෙම කෙටිමග තවත් විශේෂාංගයකට වෙනස් කළ හැකිය."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරන්නද?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"හඬ පරිමා යතුරු දෙකම තත්පර කීපයකට පහළට අල්ලාගෙන සිටීම ප්‍රවේශ්‍යතා විශේෂාංගයක් වන <xliff:g id="SERVICE">%1$s</xliff:g> ක්‍රියාත්මක කරයි. මෙය ඔබේ උපාංගය ක්‍රියා කරන ආකාරය වෙනස් කළ හැකිය.\n\nඔබට මෙම කෙටිමග සැකසීම් &gt; ප්‍රවේශ්‍යතාව හි තවත් විශේෂාංගයකට වෙනස් කළ හැකිය."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ක්‍රියාත්මක කරන්න"</string>

@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> aplikazioak desgaitu egin du inprimatzeko aukera."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktibatu laneko profila"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikazio pertsonalak blokeatuta egongo dira laneko profila aktibatzen duzun arte"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Aplikazio pertsonalak bihar blokeatuko dira"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Aplikazio pertsonalak egun eta ordu honetan blokeatuko dira: <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. Laneko profila ezin da egon desaktibatuta <xliff:g id="NUMBER">%3$d</xliff:g> egun baino gehiagoan."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Aktibatu laneko profila"</string>
     <string name="me" msgid="6207584824693813140">"Ni"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tabletaren aukerak"</string>
@@ -544,7 +544,7 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Utzi egin da autentifikazioa"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Ez da ezarri PIN koderik, eredurik edo pasahitzik"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Errorea autentifikatzean"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Hatz-marka digitala ez da osorik hauteman. Saiatu berriro."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Hatz-marka ez da osorik hauteman. Saiatu berriro."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Ezin izan da prozesatu hatz-marka. Saiatu berriro."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Hatz-marken sentsorea zikina dago. Garbi ezazu, eta saiatu berriro."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Hatza azkarregi mugitu duzu. Saiatu berriro."</string>
@@ -856,7 +856,7 @@
     <string name="emergency_calls_only" msgid="3057351206678279851">"Larrialdi-deiak soilik"</string>
     <string name="lockscreen_network_locked_message" msgid="2814046965899249635">"Sarea blokeatuta dago"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"SIM txartela PUK bidez blokeatuta dago."</string>
-    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearen gida edo jarri bezeroarentzako arreta-zerbitzuarekin harremanetan."</string>
+    <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Ikusi erabiltzailearen gida edo jarri bezeroarentzako laguntza-zerbitzuarekin harremanetan."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"SIM txartela blokeatuta dago."</string>
     <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"SIM txartela desblokeatzen…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"Desblokeatzeko eredua oker marraztu duzu <xliff:g id="NUMBER_0">%1$d</xliff:g> aldiz. \n\nSaiatu berriro <xliff:g id="NUMBER_1">%2$d</xliff:g> segundo barru."</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> egiaztatzen…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Uneko edukia berrikusten"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Euskarri berria: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Sakatu konfiguratzeko"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Gailua formateatu beharko duzu, agian. Saka ezazu kanporatzeko."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Argazkiak eta multimedia-fitxategiak transferitzeko"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Arazo bat dago honekin: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Sakatu konpontzeko"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Hondatuta dago <xliff:g id="NAME">%s</xliff:g>. Hauta ezazu konpontzeko."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Gailua formateatu beharko duzu, agian. Saka ezazu kanporatzeko."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Ez da onartzen <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ez da funtzionatzen ari"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Sakatu onartzen den formatu batean konfiguratzeko."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Gailuak ez du <xliff:g id="NAME">%s</xliff:g> onartzen. Hauta ezazu onartzen den formatu batean konfiguratzeko."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Gailuak ez du onartzen <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Gailua formateatu beharko duzu, agian"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ustekabean kendu da"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Kendu aurretik, kanporatu euskarria edukirik ez galtzeko"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Kendu egin da <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Erabilerraztasun-eginbideak aktibatu nahi dituzu?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Eduki sakatuta bolumen-teklak segundo batzuez erabilerraztasun-eginbideak aktibatzeko. Honen bidez, baliteke zure mugikorraren funtzionamendua aldatzea.\n\nUneko eginbideak:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAukeratutako eginbideak aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack aktibatu nahi duzu?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Eduki sakatuta bolumen-teklak segundo batzuez TalkBack eginbidea aktibatzeko. Eginbide hori itsuak diren edo ikusmen urria duten pertsonentzako pantaila-irakurgailu lagungarri bat da. TalkBack eginbideak guztiz aldatzen du zure mugikorraren funtzionamendua.\n\nLasterbide hau beste eginbide batengatik aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> aktibatu nahi duzu?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Eduki sakatuta bolumen-teklak segundo batzuez <xliff:g id="SERVICE">%1$s</xliff:g> izeneko erabilerraztasun-eginbidea aktibatzeko. Honen bidez, baliteke zure mugikorraren funtzionamendua aldatzea.\n\nLasterbide hau beste eginbide batengatik aldatzeko, joan Ezarpenak &gt; Erabilerraztasuna atalera."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktibatu"</string>

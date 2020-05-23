@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> хэвлэх үйлдлийг идэвхгүй болгосон."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Ажлын профайлаа асаах"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Та ажлын профайлыг асаах хүртэл таны хувийн аппуудыг хориглосон"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Таны хувийн аппуудыг маргааш хориглоно"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Хувийн аппуудыг <xliff:g id="DATE">%1$s</xliff:g>-н <xliff:g id="TIME">%2$s</xliff:g>-д блоклоно. Таны ажлын профайл <xliff:g id="NUMBER">%3$d</xliff:g>-с олон хоног унтраалттай байх боломжгүй."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ажлын профайлыг асаах"</string>
     <string name="me" msgid="6207584824693813140">"Би"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Таблетын сонголтууд"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>-г шалгаж байна…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Одоогийн агуулгыг хянаж байна"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Шинэ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ажиллахгүй байна"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Тохируулахын тулд товшино уу"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Та төхөөрөмжийг дахин форматлах шаардлагатай байж болзошгүй. Салгахын тулд товшино уу."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Зураг, медиа шилжүүлэхэд зориулсан"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> алдаатай байна"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ажиллахгүй байна"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Засахын тулд товшино уу"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> эвдэрсэн байна. Засахын тулд сонгоно уу."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Та төхөөрөмжийг дахин форматлах шаардлагатай байж болзошгүй. Салгахын тулд товшино уу."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Дэмжээгүй <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ажиллахгүй байна"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Энэ төхөөрөмж нь <xliff:g id="NAME">%s</xliff:g>-г дэмждэггүй. Дэмжигдсэн хэлбэршүүлэлтэд тохируулахын тулд товшино уу."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Энэ төхөөрөмж <xliff:g id="NAME">%s</xliff:g>-г дэмждэггүй. Дэмжсэн хэлбэршүүлэлтэд тохируулахын тулд сонгоно уу."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Тус төхөөрөмж нь энэ <xliff:g id="NAME">%s</xliff:g>-г дэмждэггүй."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Та төхөөрөмжийг дахин форматлах шаардлагатай байж болзошгүй"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>-ыг гэнэт гаргасан байна"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Агуулга алдахаас сэргийлэхийн тулд медиаг төхөөрөмжөөс салгахаасаа өмнө холболтыг салгана уу"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g>-г устгасан"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Хандалтын онцлогуудыг асаах уу?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Дууны түвшний түлхүүрийг хэдэн секундийн турш зэрэг дарах нь хандалтын онцлогуудыг асаадаг. Энэ нь таны төхөөрөмжийн ажиллах зарчмыг өөрчилж болзошгүй.\n\nОдоогийн онцлогууд:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nТа сонгосон онцлогуудыг Тохиргоо &gt; Хандалт хэсэгт өөрчлөх боломжтой."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack-г асаах уу?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Дууны түвшний түлхүүрийг хэдэн секундийн турш зэрэг дарах нь TalkBack-г асаадаг. Энэ нь хараагүй эсвэл сул хараатай хүмүүст туслах дэлгэц уншигч юм. TalkBack нь таны төхөөрөмжийн ажиллах зарчмыг бүхэлд нь өөрчилдөг.\n\nТа Тохиргоо &gt; Хандалт хэсэгт энэ товчлолыг өөр онцлогт оноож өөрчлөх боломжтой."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g>-г асаах уу?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Дууны түвшний түлхүүрийг хэдэн секундийн турш зэрэг дарах нь хандалтын онцлог болох <xliff:g id="SERVICE">%1$s</xliff:g>-г асаадаг. Энэ нь таны төхөөрөмжийн ажиллах зарчмыг өөрчилж болзошгүй.\n\nТа Тохиргоо &gt; Хандалт хэсэгт энэ товчлолыг өөр онцлогт оноож өөрчлөх боломжтой."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Асаах"</string>

@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」暫停了列印。"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"開啟工作設定檔"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系統會封鎖您的個人應用程式，直至您開啟工作設定檔為止"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"您的個人應用程式將於明天封鎖"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"個人應用程式將於 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> 封鎖。您的工作設定檔不能保持關閉狀態超過 <xliff:g id="NUMBER">%3$d</xliff:g> 天。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"啟用工作設定檔"</string>
     <string name="me" msgid="6207584824693813140">"我本人"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板電腦選項"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"正在檢查 <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"正在檢查目前的內容"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"新 <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"輕按即可設定"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"您可能需要將裝置重新格式化。輕按即可退出。"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"用於轉移相片和媒體"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>發生問題"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"輕按即可修正問題"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>已損毀。選取即可修正。"</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"您可能需要將裝置重新格式化。輕按即可退出。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"不支援的 <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"「<xliff:g id="NAME">%s</xliff:g>」無法運作"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"此裝置並不支援此 <xliff:g id="NAME">%s</xliff:g>。輕按即可在支援的格式設定。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"這部裝置不支援此 <xliff:g id="NAME">%s</xliff:g>。選取即可使用支援的格式設定。"</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"這部裝置不支援此 <xliff:g id="NAME">%s</xliff:g>。"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"您可能需要將裝置重新格式化"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>被意外移除"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"請先退出媒體，再將其移除，以免內容遺失。"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"已移除 <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"要啟用無障礙功能嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按下兩個音量鍵幾秒，以開啟無障礙功能。這可能會變更裝置的運作。\n\n目前功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n您可在「設定」&gt;「無障礙功能」中變更所選功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"要開啟 TalkBack 嗎？"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"同時按下兩個音量鍵幾秒以開啟 TalkBack。此螢幕閱讀器對盲人或低視力人士非常實用。TalkBack 會完全變更裝置的運作。\n\n您可在「設定」&gt;「無障礙功能」中變更此快速鍵。"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"要啟用 <xliff:g id="SERVICE">%1$s</xliff:g> 嗎？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按下兩個音量鍵幾秒，以開啟 <xliff:g id="SERVICE">%1$s</xliff:g> 無障礙功能。這可能會變更裝置的運作。\n\n您可在「設定」&gt;「無障礙功能」中變更此快速鍵。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"開啟"</string>

@@ -203,7 +203,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Yazdırma işlemi <xliff:g id="OWNER_APP">%s</xliff:g> tarafından devre dışı bırakıldı."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"İş profilinizi açın"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi açana kadar kişisel uygulamalarınız engellendi"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Kişisel uygulamalarınız yarın engellenecek"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"İş profilini aç"</string>
     <string name="me" msgid="6207584824693813140">"Ben"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet seçenekleri"</string>
@@ -1343,17 +1344,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> kontrol ediliyor…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Geçerli içerik inceleniyor"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Yeni <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ayarlamak için dokunun"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Cihazı yeniden biçimlendirmeniz gerekebilir. Çıkarmak için dokunun."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotoğraf ve medya aktarmak için"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> medyasında sorun oluştu"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Düzeltmek için dokunun"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> bozuk. Düzeltmek için seçin."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Cihazı yeniden biçimlendirmeniz gerekebilir. Çıkarmak için dokunun."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Desteklenmeyen <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> çalışmıyor"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Bu cihaz, bu <xliff:g id="NAME">%s</xliff:g> ortamını desteklemiyor. Desteklenen bir biçimde kurmak için dokunun."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Bu cihaz, bu <xliff:g id="NAME">%s</xliff:g> medyasını desteklemiyor. Desteklenen bir biçimde ayarlamak için seçin."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Bu <xliff:g id="NAME">%s</xliff:g>, bu cihaz tarafından desteklenmiyor."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Cihazı yeniden biçimlendirmeniz gerekebilir"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> beklenmedik şekilde çıkarıldı"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"İçerik kaybı olmaması için medyayı çıkarmadan önce kaldırın"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> kaldırıldı"</string>
@@ -1624,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Erişilebilirlik özellikleri etkinleştirilsin mi?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ses tuşlarının ikisini birden birkaç saniyeliğine basılı tutmak, erişilebilirlik özelliklerini açar. Bu, cihazınızın çalışma şeklini değiştirebilir.\n\nGeçerli özellikler:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nSeçilen özellikleri Ayarlar &gt; Erişilebilirlik\'te değiştirebilirsiniz."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack etkinleştirilsin mi?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ses tuşlarının ikisini birden birkaç saniyeliğine basılı tutmak TalkBack özelliğini açar. TalkBack, görme engelliler ve gözleri az gören kullanıcılar için yardımcı olan bir ekran okuyucudur. TalkBack, cihazınızın çalışma şeklini tamamen değiştirir.\n\nBu kısayolu, Ayarlar &gt; Erişilebilirlik\'te başka bir özellikle değiştirebilirsiniz."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> etkinleştirilsin mi?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ses tuşlarının ikisini birden birkaç saniyeliğine basılı tutmak <xliff:g id="SERVICE">%1$s</xliff:g> erişilebilirlik özelliğini etkinleştirir. Bu, cihazınızın çalışma şeklini değiştirebilir.\n\nBu kısayolu, Ayarlar &gt; Erişilebilirlik\'te başka bir özellikle değiştirebilirsiniz."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Etkinleştir"</string>
