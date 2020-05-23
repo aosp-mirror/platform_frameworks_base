@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」により印刷は無効にされています。"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"仕事用プロファイルを ON にする"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"個人用アプリは、仕事用プロファイルを ON にしない限りブロックされます"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"個人用アプリは、明日ブロックされます"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"個人用アプリは、<xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> にブロックされます仕事用プロファイルをオフにできるのは <xliff:g id="NUMBER">%3$d</xliff:g> 日間です。"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"仕事用プロファイルを有効にする"</string>
     <string name="me" msgid="6207584824693813140">"自分"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"タブレットオプション"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"写真コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"メディア コレクションの位置情報の読み取り"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"本人確認"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"本人確認"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"生体認証ハードウェアが利用できません"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"認証をキャンセルしました"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"認識されませんでした"</string>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g>を確認しています…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"現在のコンテンツを確認しています"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"新しい <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"タップして設定してください"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"写真などのメディア転送用"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>に関する問題"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"タップして修正してください"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g>が破損しています。修正するには選択してください。"</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"デバイスの再フォーマットが必要になる場合があります。取り出すにはタップしてください。"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"対応していない<xliff:g id="NAME">%s</xliff:g>です"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g>は動作していません"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。タップして、対応している形式でセットアップしてください。"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。サポートされるフォーマットで設定するには選択してください。"</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"このデバイスはこの <xliff:g id="NAME">%s</xliff:g>に対応していません。"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"デバイスの再フォーマットが必要になる場合があります"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>が不適切に取り外されました"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"コンテンツの喪失を防ぐため、メディアを取り出してから取り外してください"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g>の取り外し"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ユーザー補助機能を ON にしますか？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\n現在の機能:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n選択した機能は [設定] &gt; [ユーザー補助] で変更できます。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack を ON にしますか？"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"音量大と音量小の両方のボタンを数秒ほど長押しすると、TalkBack が ON になります。TalkBack は、目の不自由な方や視力の弱い方向けのスクリーン リーダーです。TalkBack を ON にすると、デバイスの動作が完全に変わります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> を ON にしますか？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"音量大と音量小の両方のボタンを数秒ほど長押しすると、ユーザー補助機能の <xliff:g id="SERVICE">%1$s</xliff:g> が ON になります。この機能が ON になると、デバイスの動作が変わることがあります。\n\nこのショートカットは [設定] &gt; [ユーザー補助] で別の機能に変更できます。"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ON にする"</string>
@@ -1888,7 +1889,7 @@
     <string name="app_suspended_default_message" msgid="6451215678552004172">"現在、<xliff:g id="APP_NAME_0">%1$s</xliff:g> は使用できません。このアプリの使用は [<xliff:g id="APP_NAME_1">%2$s</xliff:g>] で管理されています。"</string>
     <string name="app_suspended_more_details" msgid="211260942831587014">"詳細"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"アプリの一時停止を解除"</string>
-    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルの有効化"</string>
+    <string name="work_mode_off_title" msgid="5503291976647976560">"仕事用プロファイルを ON にしますか？"</string>
     <string name="work_mode_off_message" msgid="8417484421098563803">"仕事用のアプリ、通知、データなど、仕事用プロファイルの機能が ON になります"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"ON にする"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"アプリの利用不可"</string>
