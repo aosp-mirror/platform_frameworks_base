@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Çap <xliff:g id="OWNER_APP">%s</xliff:g> tərəfindən deaktiv edildi."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"İş profilinizi aktiv edin"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"İş profilinizi aktiv edənədək şəxsi tətbiqləriniz bloklanır"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Şəxsi tətbiqləriniz sabah bloklanacaq"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Şəxsi tətbiqlər bu tarixdə bloklanacaq: <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. İş profiliniz <xliff:g id="NUMBER">%3$d</xliff:g> gündən çox deaktiv qala bilər."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"İş profilini aktiv edin"</string>
     <string name="me" msgid="6207584824693813140">"Mən"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planşet seçimləri"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Tətbiqin foto kolleksiyanıza düzəliş etməsinə icazə verir."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"media kolleksiyanızdan məkanları oxuyun"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Tətbiqin media kolleksiyanızdan məkanları oxumasına icazə verin."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Siz olduğunuzu təsdiqləyin"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Kimliyinizi doğrulayın"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrik proqram əlçatan deyil"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Doğrulama ləğv edildi"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Tanınmır"</string>
@@ -1216,7 +1216,7 @@
     <string name="dump_heap_ready_text" msgid="5849618132123045516">"<xliff:g id="PROC">%1$s</xliff:g> üçün senpşotu paylaşa bilərsiniz. Diqqətli olun: bu snepşotda yazdıqlarınızdan ibarət olan mühüm şəxsi məlumat ola bilər. Əməliyyat həmin məlumata daxil ola bilər."</string>
     <string name="sendText" msgid="493003724401350724">"Mətn üçün əməliyyat seçin"</string>
     <string name="volume_ringtone" msgid="134784084629229029">"Zəngin səs gücü"</string>
-    <string name="volume_music" msgid="7727274216734955095">"Media həcmi"</string>
+    <string name="volume_music" msgid="7727274216734955095">"Media səsi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="2614142915948898228">"Bluetooth vasitəsilə oynadılır"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="1514829655029062233">"Səssiz zəng"</string>
     <string name="volume_call" msgid="7625321655265747433">"Daxili zəng səsi"</string>
@@ -1227,7 +1227,7 @@
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"Bluetooth həcmi"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"Zəng səsi gücü"</string>
     <string name="volume_icon_description_incall" msgid="4491255105381227919">"Zəng həcmi"</string>
-    <string name="volume_icon_description_media" msgid="4997633254078171233">"Media həcmi"</string>
+    <string name="volume_icon_description_media" msgid="4997633254078171233">"Media səsi"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"Bildiriş səsi"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"Defolt rinqton"</string>
     <string name="ringtone_default_with_actual" msgid="2709686194556159773">"Defolt (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> yoxlanılır…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Cari kontent nəzərdən keçirilir"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Yeni <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> işləmir"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Quraşdırmaq üçün klikləyin"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Cihazı yenidən formatlamaq tələb oluna bilər. Çıxarmaq üçün toxunun."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Fotoların və medianın köçürülməsi üçün"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g> ilə bağlı problem"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> işləmir"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Həll etmək üçün klikləyin"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> zədələnib. Düzəltmək üçün seçin."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Cihazı yenidən formatlamaq tələb oluna bilər. Çıxarmaq üçün toxunun."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Dəstəklənməyən <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> işləmir"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"<xliff:g id="NAME">%s</xliff:g> bu cihaz tərəfindən dəstəklənmir. Dəstəklənən formatda ayarlamaq üçün tıklayın."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> bu cihaz tərəfindən dəstəklənmir. Dəstəklənən formatda ayarlamaq üçün seçin."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"<xliff:g id="NAME">%s</xliff:g> bu cihaz tərəfindən dəstəklənmir."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Cihazı yenidən formatlamaq tələb oluna bilər"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> gözlənilmədən çıxarıldı"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Kontenti itirməmək üçün silmədən öncə medianı çıxarın"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> silindi"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Əlçatımlılıq funksiyaları aktiv edilsin?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hər iki səs səviyyəsi düyməsinə bir neçə saniyə basıb saxladıqda əlçatımlılıq funksiyaları aktiv olur. Bu, cihazınızın işləmə qaydasını dəyişə bilər.\n\nCari funksiyalar:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAyarlar və Əlçatımlılıq bölməsində seçilmiş funksiyaları dəyişə bilərsiniz."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack aktiv edilsin?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Hər iki səs səviyyəsi düyməsinə bir neçə saniyəlik basıb saxladıqda görmə qabiliyyəti məhdud və ya pis olan insanlar üçün faydalı ekran oxucusu olan TalkBack aktivləşir. TalkBack cihazınızın işləmə qaydasını tamamilə dəyişir.\n\nAyarlar və Əlçatımlılıq bölməsində bu qısayolu başqa bir funksiyaya dəyişə bilərsiniz."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> aktiv edilsin?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hər iki səs səviyyəsi düyməsinə bir neçə saniyə basıb saxladıqda əlçatımlılıq funksiyası olan <xliff:g id="SERVICE">%1$s</xliff:g> aktiv olur. Bu, cihazınızın işləmə qaydasını dəyişə bilər.\n\nAyarlar və Əlçatımlılıq bölməsində bu qısayolu başqa bir funksiyata dəyişə bilərsiniz."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktiv edin"</string>
