@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"ការបោះពុម្ព​ត្រូវបាន​បិទ​ដោយ <xliff:g id="OWNER_APP">%s</xliff:g> ។"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"បើកកម្រងព័ត៌មានការងាររបស់អ្នក"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"កម្មវិធីផ្ទាល់ខ្លួន​របស់អ្នកត្រូវ​បានទប់ស្កាត់ រហូតទាល់តែ​អ្នកបើក​កម្រងព័ត៌មាន​ការងាររបស់អ្នក"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"កម្មវិធី​ផ្ទាល់ខ្លួន​របស់អ្នក​នឹងត្រូវបាន​ទប់ស្កាត់​នៅថ្ងៃស្អែក"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"កម្មវិធីផ្ទាល់ខ្លួន​នឹងត្រូវបាន​ទប់ស្កាត់​នៅថ្ងៃទី <xliff:g id="DATE">%1$s</xliff:g> នៅម៉ោង <xliff:g id="TIME">%2$s</xliff:g>។ កម្រងព័ត៌មាន​ការងាររបស់អ្នក​មិនអាចបន្តបិទ​រយៈពេល​លើសពី <xliff:g id="NUMBER">%3$d</xliff:g> ថ្ងៃបានទេ។"</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"បើក​កម្រង​ព័ត៌មាន​ការងារ"</string>
     <string name="me" msgid="6207584824693813140">"ខ្ញុំ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ជម្រើស​កុំព្យូទ័រ​បន្ទះ"</string>
@@ -1345,17 +1345,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"កំពុង​ពិនិត្យ <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"កំពុង​ពិនិត្យ​​មើលខ្លឹមសារ​បច្ចុប្បន្ន"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> ថ្មី"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ចុច​ដើម្បី​រៀបចំ"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ។ សូមចុច ដើម្បីដកចេញ។"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"សម្រាប់ផ្ទេររូបភាព និងមេឌៀ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"មាន​បញ្ហា​ជាមួយ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ចុចដើម្បីកែបញ្ហា"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ខូចហើយ។ សូម​ជ្រើសរើស​ដើម្បី​ជួសជុល។"</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ។ សូមចុច ដើម្បីដកចេញ។"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> មិនគាំទ្រ"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> មិនដំណើរការទេ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ឧបករណ៍នេះមិនគាំទ្រ <xliff:g id="NAME">%s</xliff:g> នេះទេ។ ប៉ះដើម្បីកំណត់ទម្រង់ដែលគាំទ្រ។"</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ឧបករណ៍នេះ​មិន​ស្គាល់ <xliff:g id="NAME">%s</xliff:g> នេះ​ទេ។ សូម​ជ្រើសរើស​ដើម្បី​រៀបចំ​ក្នុង​ទម្រង់ដែលស្គាល់។"</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"ឧបករណ៍នេះ​មិនស្គាល់ <xliff:g id="NAME">%s</xliff:g> នេះទេ។"</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"អ្នកប្រហែលជាត្រូវសម្អាតឧបករណ៍ឡើងវិញ"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"បានដក <xliff:g id="NAME">%s</xliff:g> ចេញដោយមិនបានរំពឹងទុក"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ដក​មេឌៀ​មុន​ពេល​យក​វា​ចេញ ដើម្បី​ជៀសវាង​ការ​បាត់​បង់​ខ្លឹមសារ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"បានយក <xliff:g id="NAME">%s</xliff:g> ចេញ"</string>
@@ -1626,8 +1629,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"បើក​មុខងារ​ភាពងាយប្រើ​ឬ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nមុខងារ​បច្ចុប្បន្ន៖\n<xliff:g id="SERVICE">%1$s</xliff:g>\nអ្នកអាច​ប្ដូរ​មុខងារ​ដែលបាន​ជ្រើសរើស​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"បើក​មុខងារ​តបវិញ​ឬ?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក​មុខងារ​តបវិញ ដែលជា​កម្មវិធី​អានអេក្រង់​ដែលមាន​ប្រយោជន៍​សម្រាប់ជនពិការ​ភ្នែក ឬអ្នក​ខ្សោយភ្នែក។ មុខងារ​តបវិញ​ផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ​ទាំងស្រុង។\n\nអ្នកអាច​ប្ដូរផ្លូវ​កាត់នេះ​ទៅមុខងារ​ផ្សេងទៀត​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"បើក <xliff:g id="SERVICE">%1$s</xliff:g> ឬ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ការសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ទាំងពីរ​ឱ្យជាប់​រយៈពេល​ពីរបីវិនាទី​នឹងបើក <xliff:g id="SERVICE">%1$s</xliff:g> ដែលជា​មុខងារ​ភាពងាយប្រើ។ ការធ្វើ​បែបនេះ​អាចផ្លាស់ប្ដូរ​របៀបដែល​ឧបករណ៍​របស់អ្នក​ដំណើរការ។\n\nអ្នកអាច​ប្ដូរផ្លូវកាត់​នេះទៅ​មុខងារ​ផ្សេងទៀត​នៅក្នុង​ការកំណត់ &gt; ភាពងាយស្រួល។"</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"បើក"</string>

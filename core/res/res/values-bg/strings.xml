@@ -191,7 +191,7 @@
     <string name="device_ownership_relinquished" msgid="4080886992183195724">"Администраторът предостави устройствотото за лична употреба"</string>
     <string name="network_logging_notification_title" msgid="554983187553845004">"Устройството се управлява"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Организацията ви управлява това устройство и може да наблюдава мрежовия трафик. Докоснете за подробности."</string>
-    <string name="location_changed_notification_title" msgid="3620158742816699316">"Приложенията могат да осъществяват достъп до местоположението ви"</string>
+    <string name="location_changed_notification_title" msgid="3620158742816699316">"Прилож. имат достъп до местоположението ви"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Обърнете се към системния си администратор, за да научите повече"</string>
     <string name="country_detector" msgid="7023275114706088854">"Инструмент за установяване на държавата"</string>
     <string name="location_service" msgid="2439187616018455546">"Услуга за местоположението"</string>
@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Отпечатването е деактивиранo от <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Служ. потр. профил: Включване"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Личните ви приложения са блокирани, докато не включите служебния си потребителски профил"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Личните ви приложения ще бъдат блокирани утре"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Личните приложения ще бъдат блокирани на <xliff:g id="DATE">%1$s</xliff:g> в <xliff:g id="TIME">%2$s</xliff:g>. Служебният ви потребителски профил не може да бъде изключен за повече от <xliff:g id="NUMBER">%3$d</xliff:g> дни."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Включване на служебния потребителски профил"</string>
     <string name="me" msgid="6207584824693813140">"Аз"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Опции за таблета"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> се проверява…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Текущото съдържание се преглежда"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Ново хранилище (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Докоснете, за да настроите"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Може да е необходимо да форматирате отново устройството. Докоснете, за да извадите."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"За прехвърляне на снимки и мултимедия"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Проблем с хранилището (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Докоснете за коригиране"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Носителят (<xliff:g id="NAME">%s</xliff:g>) е повреден. Изберете, за да отстраните проблема."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Може да е необходимо да форматирате отново устройството. Докоснете, за да извадите."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g>: Не се поддържа"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> не работи"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Докоснете, за да настроите в поддържан формат."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Устройството не поддържа този носител (<xliff:g id="NAME">%s</xliff:g>). Изберете, за да настроите в поддържан формат."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Устройството не поддържа това хранилище (<xliff:g id="NAME">%s</xliff:g>)."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Може да е необходимо да форматирате отново устройството"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g>: Неочаквано премахване"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Спрете носителя, преди да го премахнете, за да избегнете загубата на съдържание"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Премахнахте <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Да се включат ли функциите за достъпност?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите функциите за достъпност. Това може да промени начина, по който работи устройството ви.\n\nТекущи функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМожете да промените избраните функции от „Настройки“ &gt; „Достъпност“."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Да се включи ли TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите TalkBack. Това е екранен четец, който е полезен за незрящи лица и хора със слабо зрение. TalkBack напълно променя начина, по който работи устройството ви.\n\nМожете да зададете друга функция за този пряк път от „Настройки“ &gt; „Достъпност“."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Да се включи ли <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите функцията за достъпност <xliff:g id="SERVICE">%1$s</xliff:g>. Това може да промени начина, по който работи устройството ви.\n\nМожете да зададете друга функция за този пряк път от „Настройки“ &gt; „Достъпност“."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Включване"</string>
@@ -2030,7 +2031,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> файла</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> файл</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Няма препоръчани хора, с които да споделяте"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Няма препоръки за хора, с които да споделяте"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Списък с приложения"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Приложението няма разрешение за записване, но може да записва звук чрез това USB устройство."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Начало"</string>

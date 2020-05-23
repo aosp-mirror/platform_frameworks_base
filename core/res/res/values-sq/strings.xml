@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Pajisja është e menaxhuar"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacionet mund të kenë qasje te vendndodhja jote"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakto me administratorin e teknologjisë së informacionit për të mësuar më shumë"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakto me administratorin e TI-së për të mësuar më shumë"</string>
     <string name="country_detector" msgid="7023275114706088854">"Zbuluesi i shtetit"</string>
     <string name="location_service" msgid="2439187616018455546">"Vendndodhja e shërbimit"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Shërbimi GNSS"</string>
@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivizo profilin e punës"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikacionet e tua personale janë bllokuar derisa të aktivizosh profilin tënd të punës"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Aplikacionet e tua personale do të bllokohen nesër"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Aplikacionet personale do të bllokohen më <xliff:g id="DATE">%1$s</xliff:g> në <xliff:g id="TIME">%2$s</xliff:g>. Profili yt i punës nuk mund të qëndrojë joaktiv për më shumë se <xliff:g id="NUMBER">%3$d</xliff:g> ditë."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Aktivizo profilin e punës"</string>
     <string name="me" msgid="6207584824693813140">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsionet e tabletit"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> po kontrollohet…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Përmbajtja aktuale po rishikohet"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> e re"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> nuk punon"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Trokit për ta konfiguruar"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Mund të jetë nevoja ta riformatosh pajisjen. Trokit për ta nxjerrë."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Për transferimin e fotografive dhe skedarëve të tjerë"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem me <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> nuk punon"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Trokit për ta rregulluar"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> është dëmtuar. Zgjidh për ta rregulluar."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Mund të jetë nevoja ta riformatosh pajisjen. Trokit për ta nxjerrë."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> nuk mbështetet"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> nuk punon"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>. Trokit për ta konfiguruar në një format të mbështetur."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>. Përzgjidhe për ta konfiguruar në një format të mbështetur."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Kjo pajisje nuk e mbështet këtë <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Mund të jetë nevoja ta riformatosh pajisjen"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> u hoq papritur"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Nxirr median para se ta heqësh për të shmangur humbjen e përmbajtjes"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> u hoq"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Të aktivizohen veçoritë e qasshmërisë?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Mbajtja shtypur e dy tasteve të volumit për pak sekonda aktivizon veçoritë e qasshmërisë. Kjo mund të ndryshojë mënyrën se si funksionon pajisja jote.\n\nVeçoritë aktuale:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nKe ndryshuar veçoritë e zgjedhura te Cilësimet &gt; Qasshmëria."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Të aktivizohet TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Mbajtja shtypur e dy tasteve të volumit për pak sekonda aktivizon TalkBack, një lexues ekrani që është i dobishëm për personat që janë të verbër ose kanë probleme me shikimin. TalkBack ndryshon plotësisht mënyrën se si funksionon pajisja jote.\n\nMund të ndryshosh këtë shkurtore te një veçori tjetër te Cilësimet &gt; Qasshmëria."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Të aktivizohet <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Mbajtja shtypur e dy tasteve të volumit për pak sekonda aktivizon <xliff:g id="SERVICE">%1$s</xliff:g>, një veçori të qasshmërisë. Kjo mund të ndryshojë mënyrën se si funksionon pajisja jote.\n\nMund të ndryshosh këtë shkurtore te një veçori tjetër te Cilësimet &gt; Qasshmëria."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivizo"</string>

@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"ການພິມຖືກປິດໄວ້ໂດຍ <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ຈົນກວ່າທ່ານຈະເປີດໃຊ້​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກຂອງທ່ານ"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"ແອັບສ່ວນຕົວຂອງທ່ານຈະຖືກບລັອກໄວ້ໃນມື້ອື່ນ"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"ແອັບສ່ວນຕົວຈະຖືກບລັອກໃນວັນທີ <xliff:g id="DATE">%1$s</xliff:g> ເວລາ <xliff:g id="TIME">%2$s</xliff:g>. ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກຂອງທ່ານຈະບໍ່ສາມາດປິດໄດ້ເກີນ <xliff:g id="NUMBER">%3$d</xliff:g> ມື້."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ເປີດໃຊ້ໂປຣໄຟລ໌ບ່ອນເຮັດວຽກ"</string>
     <string name="me" msgid="6207584824693813140">"ຂ້າພະເຈົ້າ"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ໂຕເລືອກແທັບເລັດ"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"ກຳລັງກວດສອບ <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"ກຳລັງຕໍ່ອາຍຸເນື້ອຫາປັດຈຸບັນ"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> ໃໝ່"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ບໍ່ເຮັດວຽກ"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"ແຕະເພື່ອຕັ້ງຄ່າ"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"ທ່ານຈະຕ້ອງຟໍແມັດອຸປະກອນຄືນໃໝ່. ແຕະເພື່ອຖອດອອກ."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ສຳ​ລັບ​ການ​ໂອນ​ຮູບຖ່າຍ ແລະ​ມີ​ເດຍ"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"ເກີດບັນຫາກັບ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ບໍ່ເຮັດວຽກ"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ແຕະເພື່ອແກ້ໄຂ"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ເສຍຫາຍ. ແຕະເພື່ອສ້ອມແປງ."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"ທ່ານຈະຕ້ອງຟໍແມັດອຸປະກອນຄືນໃໝ່. ແຕະເພື່ອຖອດອອກ."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"ບໍ່​ຮອງ​ຮັບ <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ບໍ່ເຮັດວຽກ"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບ <xliff:g id="NAME">%s</xliff:g> ນີ້. ແຕະເພື່ອຕັ້ງຄ່າໃນຮູບແບບທີ່ຮອງຮັບ."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບ <xliff:g id="NAME">%s</xliff:g> ນີ້. ແຕະເພື່ອຕັ້ງຄ່າໃນຮູບແບບທີ່ຮອງຮັບ."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບ <xliff:g id="NAME">%s</xliff:g> ນີ້."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"ທ່ານຈະຕ້ອງຟໍແມັດອຸປະກອນຄືນໃໝ່"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> ຖືກ​ຖອດ​ອອກ​ໄປ​ແບບ​ບໍ່​ຄາດ​ຄິດ"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"ກະລຸນາດີດມີເດຍອອກກ່ອນການຖອດເພື່ອຫຼີກເວັ້ນການສູນເສຍຂໍ້ມູນ"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"ຖອດ <xliff:g id="NAME">%s</xliff:g> ອອກແລ້ວ"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ເປີດໃຊ້ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງບໍ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nຄຸນສົມບັດປັດຈຸບັນ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nທ່ານສາມາດປ່ຽນຄຸນສົມບັດທີ່ເລືອກໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"ເປີດໃຊ້ TalkBack ບໍ?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ TalkBack, ຕົວອ່ານໜ້າຈໍທີ່ມີປະໂຫຍດສຳລັບຄົນຕາບອດ ຫຼື ມີບັນຫາທາງສາຍຕາ. TalkBack ຈະປ່ຽນວິທີການເຮັດວຽກຂອງໂທລະສັບທ່ານໂດຍສົມບູນ.\n\nທ່ານສາມາດປ່ຽນທາງລັດນີ້ເປັນຄຸນສົມບັດອື່ນໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"ເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g> ບໍ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ສອງສາມວິນາທີເພື່ອເປີດໃຊ້ <xliff:g id="SERVICE">%1$s</xliff:g>, ຄຸນສົມບັດການຊ່ວຍເຂົ້າເຖິງ. ນີ້ອາດປ່ຽນວິທີການເຮັດວຽກຂອງອຸປະກອນທ່ານ.\n\nທ່ານສາມາດປ່ຽນທາງລັດນີ້ເປັນຄຸນສົມບັດອື່ນໄດ້ໃນການຕັ້ງຄ່າ &gt; ການຊ່ວຍເຂົ້າເຖິງ."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ເປີດໃຊ້"</string>

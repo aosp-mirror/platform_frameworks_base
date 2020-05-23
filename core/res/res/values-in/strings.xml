@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Fitur pencetakan dinonaktifkan oleh <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktifkan profil kerja Anda"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikasi pribadi Anda diblokir hingga Anda mengaktifkan profil kerja Anda"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Aplikasi kerja Anda akan diblokir besok"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Aplikasi pribadi akan diblokir pada tanggal <xliff:g id="DATE">%1$s</xliff:g> jam <xliff:g id="TIME">%2$s</xliff:g>. Profil kerja Anda tidak dapat dihentikan selama lebih dari <xliff:g id="NUMBER">%3$d</xliff:g> hari."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Aktifkan profil kerja"</string>
     <string name="me" msgid="6207584824693813140">"Saya"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsi tablet"</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Memeriksa <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Meninjau konten saat ini"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> baru"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Ketuk untuk menyiapkan"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Anda mungkin perlu memformat ulang perangkat. Ketuk untuk mengeluarkan"</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Untuk mentransfer foto dan media"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Masalah pada <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Ketuk untuk memperbaiki"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> rusak. Pilih untuk memperbaikinya."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Anda mungkin perlu memformat ulang perangkat. Ketuk untuk mengeluarkan"</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> tidak didukung"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> tidak berfungsi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Perangkat tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Ketuk untuk menyiapkan dalam format yang didukung."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Perangkat ini tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini. Pilih untuk menyiapkan dalam format yang didukung."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Perangkat ini tidak mendukung <xliff:g id="NAME">%s</xliff:g> ini."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Anda mungkin perlu memformat ulang perangkat"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> tiba-tiba dicabut"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Keluarkan media sebelum mencabut agar konten tidak hilang"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> dicabut"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Aktifkan fitur aksesibilitas?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nFitur saat ini:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nAnda dapat mengubah fitur yang dipilih di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Aktifkan TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan TalkBack, pembaca layar yang membantu pengguna dengan gangguan penglihatan atau tunanetra. TalkBack akan mengubah cara kerja perangkat Anda sepenuhnya.\n\nAnda dapat mengubah pintasan ini ke fitur lain di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Aktifkan <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Menahan kedua tombol volume selama beberapa detik akan mengaktifkan <xliff:g id="SERVICE">%1$s</xliff:g>, yang merupakan fitur aksesibilitas. Tindakan ini dapat mengubah cara kerja perangkat Anda.\n\nAnda dapat mengubah pintasan ini ke fitur lain di Setelan &gt; Aksesibilitas."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktifkan"</string>

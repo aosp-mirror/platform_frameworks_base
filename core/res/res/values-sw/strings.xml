@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Kipengele cha kuchapisha kimezimwa na <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Washa wasifu wako wa kazini"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Programu zako za binafsi zimezuiwa hadi uwashe wasifu wako wa kazini"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Programu zako za binafsi zitazuiwa kesho"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Programu za binafsi zitazuiwa tarehe <xliff:g id="DATE">%1$s</xliff:g> saa <xliff:g id="TIME">%2$s</xliff:g>. Wasifu wako wa kazini haupaswi kuzimwa kwa zaidi ya siku <xliff:g id="NUMBER">%3$d</xliff:g>."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Washa wasifu wa kazini"</string>
     <string name="me" msgid="6207584824693813140">"Mimi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Chaguo za kompyuta ndogo"</string>
@@ -544,9 +544,9 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Imeghairi uthibitishaji"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Hujaweka pin, mchoro au nenosiri"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Hitilafu imetokea wakati wa uthibitishaji"</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Kitambuzi kimegundua sehemu ya alama ya kidole. Tafadhali jaribu tena."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Kitambua alama kimetambua sehemu ya alama. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Imeshindwa kuchakata alama ya kidole. Tafadhali jaribu tena."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Kitambuzi alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Kitambua alama ya kidole ni kichafu. Tafadhali kisafishe na ujaribu tena."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Ulisogeza kidole kwa kasi mno. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Kidole kilisogezwa polepole zaidi. Tafadhali jaribu tena."</string>
   <string-array name="fingerprint_acquired_vendor">
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Inakagua <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Inakagua maudhui ya sasa"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"<xliff:g id="NAME">%s</xliff:g> mpya"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> haifanyi kazi"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Gusa ili uweke mipangilio"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Huenda ukahitaji kubadilisha mipangilio ya kifaa. Gusa ili uondoe."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Kwa ajili ya kuhamisha picha na maudhui"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Tatizo limetokea kwenye <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> haifanyi kazi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Gusa ili urekebishe"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> imeharibika. Ichague ili uirekebishe."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Huenda ukahitaji kubadilisha mipangilio ya kifaa. Gusa ili uondoe."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> isiyotumika"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> haifanyi kazi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Kifaa hiki hakitumii <xliff:g id="NAME">%s</xliff:g>. Gusa ili uweke mipangilio ya muundo unaoweza kutumika."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Kifaa hiki hakitumii <xliff:g id="NAME">%s</xliff:g> hii. Ichague ili uweke muundo unaotumika."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Kifaa hiki hakitumii <xliff:g id="NAME">%s</xliff:g> hii."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Huenda ukahitaji kubadilisha mipangilio ya kifaa"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> imeondolewa bila kutarajiwa"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Ondoa kifaa cha maudhui kabla ya kukichomoa ili usipoteze maudhui"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Imeondoa <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Ungependa kuwasha vipengele vya ufikivu?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hatua ya kushikilia chini vitufe vyote viwili vya sauti kwa sekunde chache huwasha vipengele vya ufikivu. Huenda hatua hii ikabadilisha jinsi kifaa chako kinavyofanya kazi.\n\nVipengele vya sasa:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nUnaweza kubadilisha vipengele ulivyochagua katika Mipangilio &gt; Ufikivu."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Ungependa kuwasha TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Kushikilia vitufe vyote viwili vya sauti kwa sekunde chache huwasha kipengele cha TalkBack, kisoma skrini ambacho ni muhimu kwa vipofu au walio na uwezo mdogo wa kuona. TalkBack hubadilisha kikamilifu jinsi kifaa chako kinavyofanya kazi.\n\nUnaweza kubadilisha njia hii ya mkato iwe kipengele kingine katika Mipangilio &gt; Ufikivu."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Ungependa kuwasha <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Hatua ya kushikilia chini vitufe vyote viwili vya sauti kwa sekunde chache huwasha <xliff:g id="SERVICE">%1$s</xliff:g>, kipengele cha ufikivu. Huenda hatua hii ikabadilisha jinsi kifaa chako kinavyofanya kazi.\n\nUnaweza kubadilisha njia hii ya mkato iwe kipengele kingine katika Mipangilio &gt; Ufikivu."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Washa"</string>

@@ -203,7 +203,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> desactivou a impresión."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa o perfil de traballo"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As túas aplicacións persoais están bloqueadas ata que actives o teu perfil de traballo"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"As túas aplicacións persoais bloquearanse mañá"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Activar perfil de traballo"</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcións da tableta"</string>
@@ -547,7 +548,7 @@
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Detectouse unha impresión dixital parcial. Téntao de novo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"O sensor de impresión dixital está sucio. Límpao e téntao de novo."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"O dedo moveuse demasiado rápido. Téntao de novo."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Moviches o dedo demasiado rápido. Téntao de novo."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"O dedo moveuse demasiado lento. Téntao de novo."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -1343,17 +1344,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Comprobando <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Revisando contido actual"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nova <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"O dispositivo (<xliff:g id="NAME">%s</xliff:g>) non funciona"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toca para configurar"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Pode ser necesario que formates de novo o dispositivo. Toca para expulsalo."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Para transferir fotos e contidos multimedia"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Produciuse un problema coa <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"O dispositivo (<xliff:g id="NAME">%s</xliff:g>) non funciona"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toca para solucionalo"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"A <xliff:g id="NAME">%s</xliff:g> está danada. Selecciona para corrixir o problema."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Pode ser necesario que formates de novo o dispositivo. Toca para expulsalo."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> incompatible"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"O dispositivo (<xliff:g id="NAME">%s</xliff:g>) non funciona"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Este dispositivo non é compatible con esta <xliff:g id="NAME">%s</xliff:g>. Toca para configurala nun formato compatible."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Este dispositivo non é compatible con esta <xliff:g id="NAME">%s</xliff:g>. Selecciona para configurala nun formato compatible."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Este dispositivo non é compatible con: <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Pode ser necesario que formates de novo o dispositivo"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Retirouse a <xliff:g id="NAME">%s</xliff:g> de forma inesperada"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Para evitar perder contido, expulsa os dispositivos multimedia antes de quitalos"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Quitouse a <xliff:g id="NAME">%s</xliff:g>"</string>
@@ -1624,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Queres activar as funcións de accesibilidade?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ao manter as dúas teclas de volume premidas durante uns segundos actívanse as funcións de accesibilidade. Esta acción pode cambiar o funcionamento do dispositivo.\n\nFuncións activadas actualmente:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPodes cambiar as funcións seleccionadas en Configuración &gt; Accesibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Queres activar TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ao manter as dúas teclas de volume premidas durante uns segundos actívase TalkBack, un lector de pantalla útil para as persoas cegas ou con visión reducida. TalkBack cambia completamente o funcionamento do dispositivo.\n\nPodes cambiar o uso deste atallo para outra función en Configuración &gt; Accesibilidade."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Queres activar <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ao manter as dúas teclas de volume premidas durante uns segundos actívase <xliff:g id="SERVICE">%1$s</xliff:g>, unha función de accesibilidade. Esta acción pode cambiar o funcionamento do dispositivo.\n\nPodes cambiar o uso deste atallo para outra función en Configuración &gt; Accesibilidade."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Activar"</string>

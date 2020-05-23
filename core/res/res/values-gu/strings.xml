@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> દ્વારા પ્રિન્ટ કરવાનું બંધ કરાયું છે."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"જ્યાં સુધી તમે કાર્યાલયની પ્રોફાઇલ ચાલુ ન કરો ત્યાં સુધી તમારી વ્યક્તિગત ઍપ બ્લૉક કરેલી રહે છે"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"તમારી વ્યક્તિગત ઍપ આવતી કાલે બ્લૉક કરવામાં આવશે"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"વ્યક્તિગત ઍપને <xliff:g id="DATE">%1$s</xliff:g>ના રોજ <xliff:g id="TIME">%2$s</xliff:g> વાગ્યે બ્લૉક કરવામાં આવશે. તમારી ઑફિસની પ્રોફાઇલ <xliff:g id="NUMBER">%3$d</xliff:g>ને દિવસ કરતાં વધુ સમય માટે બંધ રાખી શકાતી નથી."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
     <string name="me" msgid="6207584824693813140">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ટેબ્લેટ વિકલ્પો"</string>
@@ -240,11 +240,11 @@
     <string name="global_action_power_off" msgid="4404936470711393203">"પાવર બંધ"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"પાવર"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"ફરી શરૂ કરો"</string>
-    <string name="global_action_emergency" msgid="1387617624177105088">"કટોકટી"</string>
+    <string name="global_action_emergency" msgid="1387617624177105088">"ઇમર્જન્સી"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"બગ રિપોર્ટ"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"સત્ર સમાપ્ત કરો"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"સ્ક્રીનશૉટ"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"ખામી જણાવતો રિપોર્ટ"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"બગ રિપોર્ટ"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"આ, એક ઇ-મેઇલ સંદેશ તરીકે મોકલવા માટે, તમારા વર્તમાન ઉપકરણ સ્થિતિ વિશેની માહિતી એકત્રિત કરશે. એક બગ રિપોર્ટ પ્રારંભ કરીને તે મોકલવા માટે તૈયાર ન થઈ જાય ત્યાં સુધી તેમાં થોડો સમય લાગશે; કૃપા કરીને ધીરજ રાખો."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"ક્રિયાપ્રતિક્રિયાત્મક રિપોર્ટ"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"મોટાભાગના સંજોગોમાં આનો ઉપયોગ કરો. તે રિપોર્ટની પ્રગતિને ટ્રૅક કરવા, સમસ્યા વિશે વધુ વિગતો દાખલ કરવાની અને સ્ક્રીનશૉટ્સ લેવાની મંજૂરી આપે છે. તે કેટલાક ઓછા ઉપયોગમાં આવતાં વિભાગો કે જે જાણ કરવામાં વધુ સમય લેતાં હોય તેને છોડી દઈ શકે છે."</string>
@@ -294,7 +294,7 @@
     <string name="android_system_label" msgid="5974767339591067210">"Android સિસ્ટમ"</string>
     <string name="user_owner_label" msgid="8628726904184471211">"વ્યક્તિગત પ્રોફાઇલ પર સ્વિચ કરો"</string>
     <string name="managed_profile_label" msgid="7316778766973512382">"કાર્યાલયની પ્રોફાઇલ પર સ્વિચ કરો"</string>
-    <string name="permgrouplab_contacts" msgid="4254143639307316920">"સંપર્કો"</string>
+    <string name="permgrouplab_contacts" msgid="4254143639307316920">"Contacts"</string>
     <string name="permgroupdesc_contacts" msgid="9163927941244182567">"તમારા સંપર્કોને ઍક્સેસ કરવાની"</string>
     <string name="permgrouplab_location" msgid="1858277002233964394">"સ્થાન"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"આ ઉપકરણના સ્થાનને ઍક્સેસ કરવાની"</string>
@@ -537,8 +537,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"એપને તમારો ફોટો સંગ્રહ સંશોધિત કરવાની મંજૂરી આપે છે."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"આપના મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવા"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"એપને તમારા મીડિયા સંગ્રહમાંથી સ્થાનો વાંચવાની મંજૂરી આપે છે."</string>
-    <!-- no translation found for biometric_dialog_default_title (55026799173208210) -->
-    <skip />
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"તે તમે જ છો એ ચકાસો"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"બાયોમેટ્રિક હાર્ડવેર ઉપલબ્ધ નથી"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"પ્રમાણીકરણ રદ કર્યું"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"ઓળખાયેલ નથી"</string>
@@ -832,7 +831,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="7982445492532123308">"અનલૉક કરવા માટે અથવા કટોકટીનો કૉલ કરવા માટે મેનૂ દબાવો."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="7434061749374801753">"અનલૉક કરવા માટે મેનૂ દબાવો."</string>
     <string name="lockscreen_pattern_instructions" msgid="3169991838169244941">"અનલૉક કરવા માટે પૅટર્ન દોરો."</string>
-    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"કટોકટી"</string>
+    <string name="lockscreen_emergency_call" msgid="7500692654885445299">"ઇમર્જન્સી"</string>
     <string name="lockscreen_return_to_call" msgid="3156883574692006382">"કૉલ પર પાછા ફરો"</string>
     <string name="lockscreen_pattern_correct" msgid="8050630103651508582">"સાચું!"</string>
     <string name="lockscreen_pattern_wrong" msgid="2940138714468358458">"ફરી પ્રયાસ કરો"</string>
@@ -932,7 +931,7 @@
     <string name="js_dialog_before_unload_positive_button" msgid="4274257182303565509">"આ પૃષ્ઠ છોડો"</string>
     <string name="js_dialog_before_unload_negative_button" msgid="3873765747622415310">"આ પૃષ્ઠ પર રહો"</string>
     <string name="js_dialog_before_unload" msgid="7213364985774778744">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nશું તમે ખરેખર આ પૃષ્ઠથી દૂર નેવિગેટ કરવા માંગો છો?"</string>
-    <string name="save_password_label" msgid="9161712335355510035">"પુષ્ટિ કરો"</string>
+    <string name="save_password_label" msgid="9161712335355510035">"કન્ફર્મ કરો"</string>
     <string name="double_tap_toast" msgid="7065519579174882778">"ટિપ: ઝૂમ વધારવા અને ઘટાડવા માટે બે વાર ટેપ કરો."</string>
     <string name="autofill_this_form" msgid="3187132440451621492">"સ્વતઃભરણ"</string>
     <string name="setup_autofill" msgid="5431369130866618567">"સ્વતઃભરણ સેટ કરો"</string>
@@ -1344,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> તપાસી રહ્યાં છીએ…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"હાલના કન્ટેન્ટને રિવ્યૂ કરવું"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"નવું <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"સેટ કરવા માટે ટૅપ કરો"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે. બહાર કાઢવા માટે ટૅપ કરો."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"ફોટો અને મીડિયા ટ્રાન્સફર કરવા માટે"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"<xliff:g id="NAME">%s</xliff:g>ની સમસ્યા"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"ઠીક કરવા માટે ટૅપ કરો"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> દૂષિત છે. સુધારવા માટે પસંદ કરો."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે. બહાર કાઢવા માટે ટૅપ કરો."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"અસમર્થિત <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> કામ કરી રહ્યું નથી"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફોર્મેટમાં સેટ કરવા માટે ટૅપ કરો."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"આ ઉપકરણ આ <xliff:g id="NAME">%s</xliff:g> નું સમર્થન કરતું નથી. સમર્થિત ફૉર્મેટમાં સેટ કરવા માટે પસંદ કરો."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"આ ડિવાઇસમાં આ <xliff:g id="NAME">%s</xliff:g> માટે સુવિધા નથી."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"તમને કદાચ ડિવાઇસને ફરીથી ફૉર્મેટ કરવાની જરૂર પડી શકે છે"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> અનપેક્ષિત રીતે દૂર કર્યું"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"કન્ટેન્ટ ગુમાવવાનું ટાળવા માટે મીડિયાને દૂર કરતા પહેલાં બહાર કાઢો"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> કાઢી નાખ્યું"</string>
@@ -1625,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"ઍક્સેસિબિલિટી સુવિધાઓ ચાલુ કરીએ?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધાઓ ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nવર્તમાન સુવિધાઓ:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને પસંદ કરેલી સુવિધાઓને બદલી શકો છો."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"ટૉકબૅક ચાલુ કરીએ?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ટૉકબૅક ચાલુ થઈ જાય છે, જે એક સ્ક્રીન રીડર છે કે જે દૃષ્ટિહીન અથવા ઓછી દૃષ્ટિવાળા લોકોને સહાયરૂપ થઈ શકે છે. ટૉકબૅકથી તમારા ડિવાઇસની કામ કરવાની રીત પૂર્ણપણે બદલાઈ જાય છે.\n\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને આ શૉર્ટકટને બીજી સુવિધામાં બદલી શકો છો."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g>ને ચાલુ કરીએ?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"બન્ને વૉલ્યૂમ કીને થોડી સેકન્ડ સુધી દબાવી રાખવાથી ઍક્સેસિબિલિટી સુવિધા એવી <xliff:g id="SERVICE">%1$s</xliff:g> ચાલુ થઈ જાય છે. આનાથી તમારા ડિવાઇસની કામ કરવાની રીત બદલાઈ શકે છે.\n\nતમે સેટિંગ &gt; ઍક્સેસિબિલિટીમાં જઈને આ શૉર્ટકટને બીજી સુવિધામાં બદલી શકો છો."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"ચાલુ કરો"</string>

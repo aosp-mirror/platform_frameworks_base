@@ -203,7 +203,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impressão desativada por <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Ative o perfil de trabalho"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As suas apps pessoais estão bloqueadas até ativar o seu perfil de trabalho."</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"As suas apps pessoais serão bloqueadas amanhã."</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"As apps pessoais serão bloqueadas a <xliff:g id="DATE">%1$s</xliff:g> à(s) <xliff:g id="TIME">%2$s</xliff:g>. O seu perfil de trabalho não pode ficar desativado durante mais de <xliff:g id="NUMBER">%3$d</xliff:g> dias."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ativar perfil de trabalho"</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opções do tablet"</string>
@@ -544,7 +544,7 @@
     <string name="biometric_error_canceled" msgid="8266582404844179778">"Autenticação cancelada"</string>
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Nenhum PIN, padrão ou palavra-passe definidos."</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Erro ao autenticar."</string>
-    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Impressão digital detetada. Tente novamente."</string>
+    <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Impressão digital parcial detetada. Tente novamente."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Não foi possível processar a impressão digital. Tente novamente."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"O sensor de impressões digitais está sujo. Limpe-o e tente novamente."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"O dedo moveu-se demasiado rápido. Tente novamente."</string>
@@ -1343,17 +1343,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"A verificar o <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"A rever o conteúdo atual…"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Novo <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> não está a funcionar."</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Toque para configurar."</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Poderá ser necessário reformatar o dispositivo. Toque para o ejetar."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Transf. fotos, conteúdos multimédia."</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Ocorreu um problema com o <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> não está a funcionar."</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Toque para corrigir."</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"O(a) <xliff:g id="NAME">%s</xliff:g> está danificado(a). Selecione para corrigir."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Poderá ser necessário reformatar o dispositivo. Toque para o ejetar."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> não suportado"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> não está a funcionar."</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Este dispositivo não é compatível com este <xliff:g id="NAME">%s</xliff:g>. Toque para o configurar num formato compatível."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Este dispositivo não é compatível com este(a) <xliff:g id="NAME">%s</xliff:g>. Selecione para configurar num formato compatível."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Este dispositivo não é compatível com este <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Poderá ser necessário reformatar o dispositivo."</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> foi removido inesperadamente"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Ejete o armazenamento multimédia antes de o remover para evitar a perda de conteúdos."</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> removido"</string>
@@ -1624,8 +1627,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Pretende ativar as funcionalidades de acessibilidade?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Manter premidas ambas as teclas de volume durante alguns segundos ativa as funcionalidades de acessibilidade. Estas podem alterar a forma como o seu dispositivo funciona.\n\nFuncionalidades atuais:\n<xliff:g id="SERVICE">%1$s</xliff:g>\npode alterar as funcionalidades selecionadas em Definições &gt; Acessibilidade."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Pretende ativar o TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Manter premidas ambas as teclas de volume durante alguns segundos ativa o TalkBack, um leitor de ecrã que é útil para pessoas cegas ou com visão reduzida. O TalkBack altera completamente a forma como o seu dispositivo funciona.\n\nPode alterar este atalho para outra funcionalidade em Definições &gt; Acessibilidade."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Pretende ativar o serviço <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Manter premidas ambas as teclas de volume durante alguns segundos ativa o serviço <xliff:g id="SERVICE">%1$s</xliff:g>, uma funcionalidade de acessibilidade. Esta pode alterar a forma como o seu dispositivo funciona.\n\nPode alterar este atalho para outra funcionalidade em Definições &gt; Acessibilidade."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Ativar"</string>
@@ -1888,7 +1889,7 @@
     <string name="app_suspended_more_details" msgid="211260942831587014">"Saiba mais"</string>
     <string name="app_suspended_unsuspend_message" msgid="1665438589450555459">"Retomar app"</string>
     <string name="work_mode_off_title" msgid="5503291976647976560">"Ativar o perfil de trabalho?"</string>
-    <string name="work_mode_off_message" msgid="8417484421098563803">"As aplicações de trabalho, as notificações, os dados e outras funcionalidades do perfil de trabalho serão desativados"</string>
+    <string name="work_mode_off_message" msgid="8417484421098563803">"As apps de trabalho, as notificações, os dados e outras funcionalidades do perfil de trabalho serão desativados"</string>
     <string name="work_mode_turn_on" msgid="3662561662475962285">"Ativar"</string>
     <string name="app_blocked_title" msgid="7353262160455028160">"A app não está disponível"</string>
     <string name="app_blocked_message" msgid="542972921087873023">"De momento, a app <xliff:g id="APP_NAME">%1$s</xliff:g> não está disponível."</string>

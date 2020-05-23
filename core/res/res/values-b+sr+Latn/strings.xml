@@ -205,7 +205,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Uključite poslovni profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Lične aplikacije su blokirane dok ne uključite poslovni profil"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Lične aplikacije će biti blokirane sutra"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Lične aplikacije će biti blokirane: <xliff:g id="DATE">%1$s</xliff:g> u <xliff:g id="TIME">%2$s</xliff:g>. Poslovni profil ne sme da bude isključen duže od <xliff:g id="NUMBER">%3$d</xliff:g> dana."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Uključi poslovni profil"</string>
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije za tablet"</string>
@@ -1363,17 +1363,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Proverava se <xliff:g id="NAME">%s</xliff:g>…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Pregleda se aktuelni sadržaj"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Novi/a <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ne radi"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dodirnite da biste podesili"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Možda morate da reformatirate uređaj. Dodirnite da biste izbacili."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prenos slika i medija"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem sa: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ne radi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dodirnite da biste ispravili"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Medij <xliff:g id="NAME">%s</xliff:g> je oštećen. Izaberite da ga popravite."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Možda morate da reformatirate uređaj. Dodirnite da biste izbacili."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Uređaj <xliff:g id="NAME">%s</xliff:g> nije podržan"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ne radi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ovaj uređaj ne podržava ovaj uređaj <xliff:g id="NAME">%s</xliff:g>. Dodirnite da biste podesili podržani format."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Ovaj uređaj ne podržava ovaj medij (<xliff:g id="NAME">%s</xliff:g>). Izaberite da ga podesite u podržanom formatu."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Ovaj uređaj ne podržava: <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Možda morate da reformatirate uređaj"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Uređaj <xliff:g id="NAME">%s</xliff:g> je neočekivano uklonjen"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Izbacite medijum pre nego što ga uklonite da ne biste izgubili sadržaj"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> je uklonjen/a"</string>
@@ -1646,8 +1649,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Želite li da uključite funkcije pristupačnosti?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključiće se funkcije pristupačnosti. To može da promeni način rada uređaja.\n\nPostojeće funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nMožete da promenite izabrane funkcije u odeljku Podešavanja &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Želite li da uključite TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključuje se TalkBack, čitač ekrana koji je koristan za slepe i slabovide osobe. TalkBack potpuno menja način rada uređaja.\n\nMožete da promenite funkciju na koju se odnosi ova prečica u odeljku Podešavanja &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Želite li da uključite uslugu <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Ako zadržite oba tastera za jačinu zvuka par sekundi, uključuje se <xliff:g id="SERVICE">%1$s</xliff:g>, funkcija pristupačnosti. To može da promeni način rada uređaja.\n\nMožete da promenite funkciju na koju se odnosi ova prečica u odeljku Podešavanja &gt; Pristupačnost."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Uključi"</string>

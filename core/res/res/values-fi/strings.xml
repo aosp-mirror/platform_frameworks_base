@@ -203,7 +203,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> on poistanut tulostuksen käytöstä."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Laita työprofiilisi päälle"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Henkilökohtaiset sovelluksesi estetään, kunnes laitat työprofiilisi päälle"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Henkilökohtaiset sovelluksesi estetään huomenna"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
+    <skip />
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Laita työprofiili päälle"</string>
     <string name="me" msgid="6207584824693813140">"Minä"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-laitteen asetukset"</string>
@@ -545,7 +546,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"PIN-koodia, kuviota tai salasanaa ei ole asetettu"</string>
     <string name="biometric_error_generic" msgid="6784371929985434439">"Virhe todennuksessa"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Sormenjälki havaittiin vain osittain. Yritä uudelleen."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen käsittely epäonnistui. Yritä uudelleen."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Sormenjäljen prosessointi epäonnistui. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Sormenjälkitunnistin on likainen. Puhdista tunnistin ja yritä uudelleen."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Liikutit sormea liian nopeasti. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Liikutit sormea liian hitaasti. Yritä uudelleen."</string>
@@ -1343,17 +1344,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> tarkastetaan…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Tarkastetaan nykyistä sisältöä"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Uusi <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> ei toimi"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Määritä koskettamalla."</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Sinun on ehkä alustettava laite uudelleen. Poista napauttamalla."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Kuvien ja median siirtämiseen"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Ongelma: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> ei toimi"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Korjaa napauttamalla."</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> on viallinen. Korjaa valitsemalla."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Sinun on ehkä alustettava laite uudelleen. Poista napauttamalla."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Epäyhteensopiva <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> ei toimi"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"<xliff:g id="NAME">%s</xliff:g> ei ole yhteensopiva tämän laitteen kanssa. Ota se käyttöön tuetussa tilassa napauttamalla."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Tämä laite ei tue laitetta <xliff:g id="NAME">%s</xliff:g>. Valitse laite, niin voit suorittaa määrityksen tuetussa muodossa."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"<xliff:g id="NAME">%s</xliff:g> ei ole yhteensopiva tämän laitteen kanssa."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Sinun on ehkä alustettava laite uudelleen"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> poistettiin yllättäen"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Poista media ennen sen irrottamista, niin et menetä sisältöä."</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> poistettu"</string>
@@ -1624,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Laitetaanko esteettömyysominaisuudet päälle?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Molempien äänenvoimakkuuspainikkeiden painaminen muutaman sekunnin ajan laittaa esteettömyysominaisuudet päälle. Tämä voi muuttaa laitteesi toimintaa.\n\nNykyiset ominaisuudet:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVoit muuttaa valittuja ominaisuuksia kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Laitetaanko TalkBack päälle?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Molempien äänenvoimakkuuspainikkeiden pitkään painaminen laittaa päälle TalkBackin, eli näytönlukuohjelman, josta on hyötyä sokeille ja heikkonäköisille. TalkBack muuttaa laitteesi toiminnan täysin.\n\nVoit muuttaa tätä pikanäppäintä kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Laitetaanko <xliff:g id="SERVICE">%1$s</xliff:g> päälle?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Molempien äänenvoimakkuuspainikkeiden pitkään painaminen laittaa päälle esteettömyysominaisuuden <xliff:g id="SERVICE">%1$s</xliff:g>. Tämä voi muuttaa laitteesi toimintaa.\n\nVoit muuttaa tätä pikanäppäintä kohdassa Asetukset &gt; Esteettömyys."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Laita päälle"</string>
@@ -1807,8 +1809,8 @@
       <item quantity="one">1 minuutin ajan (<xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g> asti)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary" formatted="false" msgid="7725354244196466758">
-      <item quantity="other">%1$d tunniksi (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
-      <item quantity="one">1 tunniksi (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
+      <item quantity="other">%1$d tuntia (kunnes kello on <xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g>)</item>
+      <item quantity="one">1 tunti (kunnes kello on <xliff:g id="FORMATTEDTIME_0">%2$s</xliff:g>)</item>
     </plurals>
     <plurals name="zen_mode_duration_hours_summary_short" formatted="false" msgid="588719069121765642">
       <item quantity="other">%1$d tunnin ajan (<xliff:g id="FORMATTEDTIME_1">%2$s</xliff:g> asti)</item>

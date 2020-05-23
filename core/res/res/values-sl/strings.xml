@@ -207,7 +207,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Tiskanje je onemogočil pravilnik <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Vklopite delovni profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Osebne aplikacije so blokirane, dokler ne vklopite delovnega profila"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Osebne aplikacije bodo blokirane jutri"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Osebne aplikacije bodo blokirane <xliff:g id="DATE">%1$s</xliff:g> ob <xliff:g id="TIME">%2$s</xliff:g>. Delovni profil ne sme biti izklopljen več kot toliko dni: <xliff:g id="NUMBER">%3$d</xliff:g>."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Vklopi delovni profil"</string>
     <string name="me" msgid="6207584824693813140">"Jaz"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Možnosti tabličnega računalnika"</string>
@@ -1337,7 +1337,7 @@
     <string name="no_permissions" msgid="5729199278862516390">"Ni zahtevanih dovoljenj"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"to je lahko plačljivo"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"V redu"</string>
-    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Polnjenje akumulatorja v napravi prek USB-ja"</string>
+    <string name="usb_charging_notification_title" msgid="1674124518282666955">"Polnjenje naprave prek USB-ja"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Polnjenje akumulatorja v povezani napravi prek USB-ja"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Vklopljen je prenos datotek prek USB-ja"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"Vklopljen je način PTP prek USB-ja"</string>
@@ -1383,17 +1383,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"Preverjanje nosilca <xliff:g id="NAME">%s</xliff:g> …"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Pregledovanje trenutne vsebine"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Nova naprava za shranjevanje: <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"Naprava <xliff:g id="NAME">%s</xliff:g> ne deluje"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Dotaknite se, če želite nastaviti"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Napravo boste morda morali znova formatirati. Če jo želite izvreči, se dotaknite."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Za prenos fotografij in predstavnosti"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Težava z nosilcem <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"Naprava <xliff:g id="NAME">%s</xliff:g> ne deluje"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Dotaknite se, da to popravite"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"Nosilec <xliff:g id="NAME">%s</xliff:g> je pokvarjen. Izberite, če ga želite popraviti."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Napravo boste morda morali znova formatirati. Če jo želite izvreči, se dotaknite."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"Nepodprta naprava za shran. <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"Naprava <xliff:g id="NAME">%s</xliff:g> ne deluje"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"Ta naprava ne podpira tega nosilca <xliff:g id="NAME">%s</xliff:g>. Dotaknite se, če želite nastaviti v podprti obliki."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"Naprava ne podpira nosilca <xliff:g id="NAME">%s</xliff:g>. Izberite, če ga želite nastaviti v podprti obliki."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"Ta naprava ne podpira nosilca <xliff:g id="NAME">%s</xliff:g>."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Napravo boste morda morali znova formatirati"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"Shramba <xliff:g id="NAME">%s</xliff:g> nepričak. odstranjena"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Medij izvrzite, preden ga odstranite, da se izognete izgubi vsebine"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"Nosilec <xliff:g id="NAME">%s</xliff:g> je odstranjen"</string>
@@ -1668,8 +1671,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Želite vklopiti funkcije za ljudi s posebnimi potrebami?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili funkcije za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTrenutne funkcije:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nIzbrane funkcije lahko spremenite v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami«."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"Želite vklopiti TalkBack?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili bralnik zaslona TalkBack, ki pomaga slepim in slabovidnim osebam. TalkBack povsem spremeni način delovanja naprave.\n\nTo bližnjico lahko v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami« spremenite, da bo uporabljena za drugo funkcijo."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Želite vklopiti storitev <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Če za nekaj sekund pridržite obe tipki za glasnost, boste vklopili storitev <xliff:g id="SERVICE">%1$s</xliff:g>, ki je funkcija za ljudi s posebnimi potrebami. To lahko spremeni način delovanja naprave.\n\nTo bližnjico lahko v meniju »Nastavitve« &gt; »Funkcije za ljudi s posebnimi potrebami« spremenite, da bo uporabljena za drugo funkcijo."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Vklopi"</string>
