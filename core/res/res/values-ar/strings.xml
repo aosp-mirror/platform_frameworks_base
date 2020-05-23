@@ -210,8 +210,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"تفعيل الملف الشخصي للعمل"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تم حظر تطبيقاتك الشخصية إلى أن تفعِّل ملفك الشخصي للعمل."</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"سيتم حظر التطبيقات الشخصية في <xliff:g id="DATE">%1$s</xliff:g> في <xliff:g id="TIME">%2$s</xliff:g>. لا يمكن أن يظل الملف الشخصي للعمل غير مُفعَّل لأكثر من <xliff:g id="NUMBER">%3$d</xliff:g> يوم."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"تفعيل الملف الشخصي للعمل"</string>
     <string name="me" msgid="6207584824693813140">"أنا"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"خيارات الجهاز اللوحي"</string>
@@ -2010,7 +2009,7 @@
     <string name="language_selection_title" msgid="52674936078683285">"إضافة لغة"</string>
     <string name="country_selection_title" msgid="5221495687299014379">"تفضيل المنطقة"</string>
     <string name="search_language_hint" msgid="7004225294308793583">"اكتب اسم اللغة"</string>
-    <string name="language_picker_section_suggested" msgid="6556199184638990447">"اللغات المقترحة"</string>
+    <string name="language_picker_section_suggested" msgid="6556199184638990447">"المناطق المقترحة"</string>
     <string name="language_picker_section_all" msgid="1985809075777564284">"جميع اللغات"</string>
     <string name="region_picker_section_all" msgid="756441309928774155">"كل المناطق"</string>
     <string name="locale_search_menu" msgid="6258090710176422934">"البحث"</string>
