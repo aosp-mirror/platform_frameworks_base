@@ -110,9 +110,6 @@ public class ThermalManagerService extends SystemService {
     @VisibleForTesting
     final TemperatureWatcher mTemperatureWatcher = new TemperatureWatcher();
 
-    /** Invalid throttling status */
-    private static final int INVALID_THROTTLING = Integer.MIN_VALUE;
-
     public ThermalManagerService(Context context) {
         this(context, null);
     }
@@ -121,8 +118,7 @@ public class ThermalManagerService extends SystemService {
     ThermalManagerService(Context context, @Nullable ThermalHalWrapper halWrapper) {
         super(context);
         mHalWrapper = halWrapper;
-        // Initialize to invalid to send status onActivityManagerReady
-        mStatus = INVALID_THROTTLING;
+        mStatus = Temperature.THROTTLING_NONE;
     }
 
     @Override
@@ -155,11 +151,15 @@ public class ThermalManagerService extends SystemService {
             }
             mHalWrapper.setCallback(this::onTemperatureChangedCallback);
             if (!halConnected) {
+                Slog.w(TAG, "No Thermal HAL service on this device");
                 return;
             }
             List<Temperature> temperatures = mHalWrapper.getCurrentTemperatures(false,
                     0);
             final int count = temperatures.size();
+            if (count == 0) {
+                Slog.w(TAG, "Thermal HAL reported invalid data, abort connection");
+            }
             for (int i = 0; i < count; i++) {
                 onTemperatureChanged(temperatures.get(i), false);
             }
@@ -183,9 +183,6 @@ public class ThermalManagerService extends SystemService {
     }
 
     private void notifyStatusListenersLocked() {
-        if (!Temperature.isValidStatus(mStatus)) {
-            return;
-        }
         final int length = mThermalStatusListeners.beginBroadcast();
         try {
             for (int i = 0; i < length; i++) {
@@ -199,7 +196,7 @@ public class ThermalManagerService extends SystemService {
     }
 
     private void onTemperatureMapChangedLocked() {
-        int newStatus = INVALID_THROTTLING;
+        int newStatus = Temperature.THROTTLING_NONE;
         final int count = mTemperatureMap.size();
         for (int i = 0; i < count; i++) {
             Temperature t = mTemperatureMap.valueAt(i);
@@ -292,11 +289,7 @@ public class ThermalManagerService extends SystemService {
         shutdownIfNeeded(temperature);
         synchronized (mLock) {
             Temperature old = mTemperatureMap.put(temperature.getName(), temperature);
-            if (old != null) {
-                if (old.getStatus() != temperature.getStatus()) {
-                    notifyEventListenersLocked(temperature);
-                }
-            } else {
+            if (old == null || old.getStatus() != temperature.getStatus()) {
                 notifyEventListenersLocked(temperature);
             }
             if (sendStatus) {
@@ -438,8 +431,7 @@ public class ThermalManagerService extends SystemService {
             synchronized (mLock) {
                 final long token = Binder.clearCallingIdentity();
                 try {
-                    return Temperature.isValidStatus(mStatus) ? mStatus
-                            : Temperature.THROTTLING_NONE;
+                    return mStatus;
                 } finally {
                     Binder.restoreCallingIdentity(token);
                 }
@@ -964,6 +956,12 @@ public class ThermalManagerService extends SystemService {
                                 if (ThermalStatusCode.SUCCESS == status.code) {
                                     for (android.hardware.thermal.V2_0.Temperature
                                             temperature : temperatures) {
+                                        if (!Temperature.isValidStatus(
+                                                temperature.throttlingStatus)) {
+                                            Slog.e(TAG, "Invalid status data from HAL");
+                                            temperature.throttlingStatus =
+                                                Temperature.THROTTLING_NONE;
+                                        }
                                         ret.add(new Temperature(
                                                 temperature.value, temperature.type,
                                                 temperature.name,
