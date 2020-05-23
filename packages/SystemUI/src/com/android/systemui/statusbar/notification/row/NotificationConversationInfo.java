@@ -117,6 +117,7 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     @VisibleForTesting
     boolean mSkipPost = false;
+    private int mActualHeight;
 
     @Retention(SOURCE)
     @IntDef({ACTION_DEFAULT, ACTION_HOME, ACTION_FAVORITE, ACTION_SNOOZE, ACTION_MUTE,
@@ -582,7 +583,15 @@ public class NotificationConversationInfo extends LinearLayout implements
 
     @Override
     public int getActualHeight() {
-        return getHeight();
+        // Because we're animating the bounds, getHeight will return the small height at the
+        // beginning of the animation. Instead we'd want it to already return the end value
+        return mActualHeight;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        mActualHeight = getHeight();
     }
 
     @VisibleForTesting
