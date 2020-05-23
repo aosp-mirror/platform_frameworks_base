@@ -33,7 +33,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
-import android.net.TetherOffloadRuleParcel;
 import android.net.TetheredClient;
 import android.net.TetheringManager;
 import android.net.TetheringRequestParcel;
@@ -66,6 +65,7 @@ import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
 import com.android.networkstack.tethering.BpfCoordinator;
+import com.android.networkstack.tethering.BpfCoordinator.Ipv6ForwardingRule;
 import com.android.networkstack.tethering.PrivateAddressCoordinator;
 
 import java.io.IOException;
@@ -272,40 +272,6 @@ public class IpServer extends StateMachine {
         }
     }
 
-    static class Ipv6ForwardingRule {
-        public final int upstreamIfindex;
-        public final int downstreamIfindex;
-        public final Inet6Address address;
-        public final MacAddress srcMac;
-        public final MacAddress dstMac;
-
-        Ipv6ForwardingRule(int upstreamIfindex, int downstreamIfIndex, Inet6Address address,
-                MacAddress srcMac, MacAddress dstMac) {
-            this.upstreamIfindex = upstreamIfindex;
-            this.downstreamIfindex = downstreamIfIndex;
-            this.address = address;
-            this.srcMac = srcMac;
-            this.dstMac = dstMac;
-        }
-
-        public Ipv6ForwardingRule onNewUpstream(int newUpstreamIfindex) {
-            return new Ipv6ForwardingRule(newUpstreamIfindex, downstreamIfindex, address, srcMac,
-                    dstMac);
-        }
-
-        // Don't manipulate TetherOffloadRuleParcel directly because implementing onNewUpstream()
-        // would be error-prone due to generated stable AIDL classes not having a copy constructor.
-        public TetherOffloadRuleParcel toTetherOffloadRuleParcel() {
-            final TetherOffloadRuleParcel parcel = new TetherOffloadRuleParcel();
-            parcel.inputInterfaceIndex = upstreamIfindex;
-            parcel.outputInterfaceIndex = downstreamIfindex;
-            parcel.destination = address.getAddress();
-            parcel.prefixLength = 128;
-            parcel.srcL2Address = srcMac.toByteArray();
-            parcel.dstL2Address = dstMac.toByteArray();
-            return parcel;
-        }
-    }
     private final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> mIpv6ForwardingRules =
             new LinkedHashMap<>();
 
