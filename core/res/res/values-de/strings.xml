@@ -192,7 +192,7 @@
     <string name="network_logging_notification_title" msgid="554983187553845004">"Dies ist ein verwaltetes Gerät"</string>
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Deine Organisation verwaltet dieses Gerät und überprüft unter Umständen den Netzwerkverkehr. Tippe hier, um weitere Informationen zu erhalten."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps können auf deinen Standort zugreifen"</string>
-    <string name="location_changed_notification_text" msgid="7158423339982706912">"Wende dich an deinen IT-Administrator, um mehr zu erfahren"</string>
+    <string name="location_changed_notification_text" msgid="7158423339982706912">"Für Infos wende dich an deinen IT-Administrator"</string>
     <string name="country_detector" msgid="7023275114706088854">"Country Detector"</string>
     <string name="location_service" msgid="2439187616018455546">"Standortdienst"</string>
     <string name="sensor_notification_service" msgid="7474531979178682676">"Sensor Notification Service"</string>
@@ -202,7 +202,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drucken wurde von <xliff:g id="OWNER_APP">%s</xliff:g> deaktiviert."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Arbeitsprofil aktivieren"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Deine privaten Apps werden blockiert, bis du dein Arbeitsprofil aktivierst"</string>
-    <string name="personal_apps_suspension_tomorrow_text" msgid="6322541302153673994">"Deine privaten Apps werden morgen blockiert"</string>
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Private Apps werden am <xliff:g id="DATE">%1$s</xliff:g> um <xliff:g id="TIME">%2$s</xliff:g> blockiert. Dein Arbeitsprofil darf nicht länger als <xliff:g id="NUMBER">%3$d</xliff:g> Tage pausiert werden."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Arbeitsprofil aktivieren"</string>
     <string name="me" msgid="6207584824693813140">"Eigene"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Tablet-Optionen"</string>
@@ -536,7 +536,7 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"Ermöglicht der App, deine Fotosammlung zu ändern."</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"Standorte aus meiner Mediensammlung abrufen"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"Ermöglicht der App, Standorte aus deiner Mediensammlung abzurufen."</string>
-    <string name="biometric_dialog_default_title" msgid="5284880398508155088">"Deine Identität bestätigen"</string>
+    <string name="biometric_dialog_default_title" msgid="55026799173208210">"Deine Identität bestätigen"</string>
     <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"Biometrische Hardware nicht verfügbar"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"Authentifizierung abgebrochen"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"Nicht erkannt"</string>
@@ -1341,17 +1341,20 @@
     <string name="ext_media_checking_notification_title" msgid="8299199995416510094">"<xliff:g id="NAME">%s</xliff:g> wird geprüft…"</string>
     <string name="ext_media_checking_notification_message" msgid="2231566971425375542">"Aktuelle Inhalte werden geprüft"</string>
     <string name="ext_media_new_notification_title" msgid="3517407571407687677">"Neues Speichergerät (<xliff:g id="NAME">%s</xliff:g>)"</string>
+    <string name="ext_media_new_notification_title" product="automotive" msgid="9085349544984742727">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
     <string name="ext_media_new_notification_message" msgid="6095403121990786986">"Zum Einrichten tippen"</string>
-    <string name="ext_media_new_notification_message" product="automotive" msgid="8488046026389025694"></string>
+    <string name="ext_media_new_notification_message" product="automotive" msgid="5140127881613227162">"Eventuell musst du das Gerät neu formatieren. Zum Auswerfen tippen."</string>
     <string name="ext_media_ready_notification_message" msgid="777258143284919261">"Zum Übertragen von Fotos und Medien"</string>
     <string name="ext_media_unmountable_notification_title" msgid="4895444667278979910">"Problem mit <xliff:g id="NAME">%s</xliff:g>"</string>
+    <string name="ext_media_unmountable_notification_title" product="automotive" msgid="3142723758949023280">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
     <string name="ext_media_unmountable_notification_message" msgid="3256290114063126205">"Tippen, um das Problem zu beheben"</string>
     <string name="ext_media_unmountable_notification_message" product="tv" msgid="3003611129979934633">"<xliff:g id="NAME">%s</xliff:g> ist beschädigt. Zur Problembehebung auswählen."</string>
-    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="5622514265490819212"></string>
+    <string name="ext_media_unmountable_notification_message" product="automotive" msgid="2274596120715020680">"Eventuell musst du das Gerät neu formatieren. Zum Auswerfen tippen."</string>
     <string name="ext_media_unsupported_notification_title" msgid="4358280700537030333">"<xliff:g id="NAME">%s</xliff:g> nicht unterstützt"</string>
+    <string name="ext_media_unsupported_notification_title" product="automotive" msgid="6004193172658722381">"<xliff:g id="NAME">%s</xliff:g> funktioniert nicht"</string>
     <string name="ext_media_unsupported_notification_message" msgid="917738524888367560">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zum Einrichten in einem unterstützten Format tippen."</string>
     <string name="ext_media_unsupported_notification_message" product="tv" msgid="7744945987775645685">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt. Zur Einrichtung eines unterstützten Formats auswählen."</string>
-    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="7657357085538772913">"<xliff:g id="NAME">%s</xliff:g> wird von diesem Gerät nicht unterstützt."</string>
+    <string name="ext_media_unsupported_notification_message" product="automotive" msgid="3412494732736336330">"Eventuell musst du das Gerät neu formatieren"</string>
     <string name="ext_media_badremoval_notification_title" msgid="4114625551266196872">"<xliff:g id="NAME">%s</xliff:g> wurde unerwartet entfernt"</string>
     <string name="ext_media_badremoval_notification_message" msgid="1986514704499809244">"Lass das Speichergerät vor dem Entfernen auswerfen, damit keine Daten verloren gehen"</string>
     <string name="ext_media_nomedia_notification_title" msgid="742671636376975890">"<xliff:g id="NAME">%s</xliff:g> wurde entfernt"</string>
@@ -1625,8 +1628,6 @@
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Bedienungshilfen aktivieren?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du die Bedienungshilfen. Dadurch kann sich die Funktionsweise deines Geräts ändern.\n\nAktuelle Funktionen:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nDu kannst ausgewählte Funktionen unter \"Einstellungen\" &gt; \"Bedienungshilfen\" ändern."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
-    <string name="accessibility_shortcut_talkback_warning_title" msgid="3410100187167382427">"TalkBack aktivieren?"</string>
-    <string name="accessibility_shortcut_talkback_warning" msgid="8412954203626349109">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du TalkBack. Das ist ein sogenannter Screenreader, also eine Funktion, die Menschen mit eingeschränktem Sehvermögen und Blinden den Bildschirminhalt vorliest. Mit TalkBack ändert sich die Funktionsweise deines Geräts grundlegend.\n\nUnter \"Einstellungen &gt; \"Bedienungshilfen\" kannst du dieser Verknüpfung eine andere Funktion zuweisen."</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> aktivieren?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Wenn du beide Lautstärketasten einige Sekunden lang gedrückt hältst, aktivierst du die Bedienungshilfe \"<xliff:g id="SERVICE">%1$s</xliff:g>\". Dadurch kann sich die Funktionsweise deines Geräts ändern.\n\nUnter \"Einstellungen &gt; \"Bedienungshilfen\" kannst du dieser Verknüpfung eine andere Funktion zuweisen."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Aktivieren"</string>
