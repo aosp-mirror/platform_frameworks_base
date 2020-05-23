@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Questo dispositivo è gestito dalla tua organizzazione, che potrebbe monitorare il traffico di rete. Tocca per i dettagli."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Le app possono accedere alla tua posizione"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Contatta l\'amministratore IT per saperne di più"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Rilevatore paese"</string>
     <string name="location_service" msgid="2439187616018455546">"Servizio di geolocalizzazione"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Servizio GNSS"</string>

@@ -195,6 +195,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Организација управља овим уређајем и може да надгледа мрежни саобраћај. Додирните за детаље."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Апликације могу да приступају вашој локацији"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Обратите се ИТ администратору да бисте сазнали више"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Детектор земље"</string>
     <string name="location_service" msgid="2439187616018455546">"Услуга локације"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS услуга"</string>

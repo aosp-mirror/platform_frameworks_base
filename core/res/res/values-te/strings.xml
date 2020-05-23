@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"యాప్‌లు మీ లొకేషన్‌ను యాక్సెస్ చేయగలవు"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"మరింత తెలుసుకోవడానికి మీ IT అడ్మిన్‌ను కాంటాక్ట్ చేయండి"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"దేశం డిటెక్టర్"</string>
     <string name="location_service" msgid="2439187616018455546">"లొకేషన్ సర్వీస్"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS సర్వీస్"</string>
@@ -203,8 +205,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"ముద్రణ <xliff:g id="OWNER_APP">%s</xliff:g> ద్వారా నిలిపివేయబడింది."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"మీ పని ప్రొఫైల్‌ను‌ ఆన్ చేయి"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ప్రారంభించే వరకు, మీ వ్యక్తిగత యాప్‌లు బ్లాక్ చేయబడతాయి"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"<xliff:g id="DATE">%1$s</xliff:g> తేదీన <xliff:g id="TIME">%2$s</xliff:g>కు వ్యక్తిగత యాప్‌లు బ్లాక్ చేయబడతాయి. మీ కార్యాలయ ప్రొఫైల్‌ను <xliff:g id="NUMBER">%3$d</xliff:g> కంటే ఎక్కువ రోజులు ఆఫ్ చేసి ఉంచకూడదు."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"కార్యాలయ ప్రొఫైల్‌ను ఆన్ చేయండి"</string>
     <string name="me" msgid="6207584824693813140">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"టాబ్లెట్ ఎంపికలు"</string>

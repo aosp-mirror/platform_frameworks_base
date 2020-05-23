@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Tổ chức của bạn sẽ quản lý thiết bị này và có thể theo dõi lưu lượng truy cập mạng. Nhấn để biết chi tiết."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Ứng dụng có thể truy cập vào thông tin vị trí của bạn"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Hãy liên hệ với quản trị viên CNTT để tìm hiểu thêm"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Trình phát hiện quốc gia"</string>
     <string name="location_service" msgid="2439187616018455546">"Dịch vụ vị trí"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Dịch vụ GNSS"</string>

@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"سازمانتان این دستگاه را مدیریت می‌کند و ممکن است ترافیک شبکه را پایش کند. برای اطلاع از جزئیات، ضربه بزنید."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"برنامه‌ها می‌توانند به مکانتان دسترسی پیدا کنند"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"برای کسب اطلاعات بیشتر با سرپرست فناوری اطلاعات تماس بگیرید"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"کشوریاب"</string>
     <string name="location_service" msgid="2439187616018455546">"خدمات مکان"</string>
     <string name="gnss_service" msgid="8907781262179951385">"‏سرویس GNSS"</string>
@@ -203,8 +205,7 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> چاپ کردن را غیرفعال کرده است."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"نمایه کاری‌تان را روشن کنید"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تا زمانی‌که نمایه کاری‌تان را روشن نکنید، برنامه‌های شخصی‌تان مسدودند"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8705436617422002146) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"برنامه‌های شخصی در تاریخ <xliff:g id="DATE">%1$s</xliff:g> ساعت <xliff:g id="TIME">%2$s</xliff:g> مسدود خواهند شد. نمایه کاری‌تان نباید بیشتر از <xliff:g id="NUMBER">%3$d</xliff:g> روز خاموش بماند."</string>
     <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"روشن کردن نمایه کاری"</string>
     <string name="me" msgid="6207584824693813140">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"گزینه‌های رایانهٔ لوحی"</string>
