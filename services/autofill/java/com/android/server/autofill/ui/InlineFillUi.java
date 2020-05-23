@@ -259,7 +259,7 @@ public final class InlineFillUi {
 
         final AutofillValue value = dataset.getFieldValues().get(fieldIndex);
         if (value == null || !value.isText()) {
-            return dataset.getAuthentication() != null;
+            return dataset.getAuthentication() == null;
         }
         final String valueText = value.getTextValue().toString().toLowerCase();
         return valueText.toLowerCase().startsWith(constraintLowerCase);
