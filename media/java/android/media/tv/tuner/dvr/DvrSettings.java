@@ -139,6 +139,10 @@ public class DvrSettings {
 
         /**
          * Sets status mask.
+         *
+         * <p>Use Filter.STATUS_ for {@link DvrRecorder} and DvrPlayback.STATUS_ for
+         * {@link DvrPlayback}.
+         * <p>If status mask is not set, no status is send to the listener.
          */
         @NonNull
         public Builder setStatusMask(@Filter.Status int statusMask) {

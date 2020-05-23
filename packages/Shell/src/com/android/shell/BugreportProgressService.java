@@ -613,7 +613,7 @@ public class BugreportProgressService extends Service {
             return;
         }
         ParcelFileDescriptor screenshotFd = null;
-        if (isDefaultScreenshotRequired(bugreportType)) {
+        if (isDefaultScreenshotRequired(bugreportType, /* hasScreenshotButton= */ !mIsTv)) {
             screenshotFd = info.getDefaultScreenshotFd();
             if (screenshotFd == null) {
                 Log.e(TAG, "Failed to start bugreport generation as"
@@ -651,10 +651,12 @@ public class BugreportProgressService extends Service {
     }
 
     private static boolean isDefaultScreenshotRequired(
-            @BugreportParams.BugreportMode int bugreportType) {
+            @BugreportParams.BugreportMode int bugreportType,
+            boolean hasScreenshotButton) {
         // Modify dumpstate#SetOptionsFromMode as well for default system screenshots.
-        // We override dumpstate for interactive bugreports.
-        return bugreportType == BugreportParams.BUGREPORT_MODE_FULL
+        // We override dumpstate for interactive bugreports with a screenshot button.
+        return (bugreportType == BugreportParams.BUGREPORT_MODE_INTERACTIVE && !hasScreenshotButton)
+                || bugreportType == BugreportParams.BUGREPORT_MODE_FULL
                 || bugreportType == BugreportParams.BUGREPORT_MODE_WEAR;
     }
 
