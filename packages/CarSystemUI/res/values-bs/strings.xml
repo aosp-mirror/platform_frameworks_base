@@ -27,5 +27,5 @@
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"Kada dodate novog korisnika, ta osoba treba postaviti svoj prostor."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"Bilo koji korisnik može ažurirati aplikacije za sve druge korisnike."</string>
     <string name="car_loading_profile" msgid="4507385037552574474">"Učitavanje"</string>
-    <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"Učitavanje korisnika (od <xliff:g id="FROM_USER">%1$d</xliff:g> do <xliff:g id="TO_USER">%2$d</xliff:g>)"</string>
+    <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"Učitavanje korisnika (od korisnika <xliff:g id="FROM_USER">%1$d</xliff:g> do korisnika <xliff:g id="TO_USER">%2$d</xliff:g>)"</string>
 </resources>
