@@ -77,6 +77,9 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ekranga moslashtirish"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ekran hajmida cho‘zish"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinshot"</string>
+    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Boshqa parametrlar uchun telefoningiz qulfini oching"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Boshqa parametrlar uchun planshetingiz qulfini oching"</string>
+    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Boshqa parametrlar uchun qurilmangiz qulfini oching"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"rasm yuborildi"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinshot saqlanmoqda…"</string>
@@ -323,6 +326,7 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS yordamida manzilni o‘rnatish"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Joylashuv so‘rovlari yoniq"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Sensorlar nofaol ishlayapti"</string>
+    <string name="accessibility_media_active" msgid="4942087422908239969">"Media ijro qilinmoqda"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Barcha eslatmalarni tozalash."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -511,8 +515,8 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Boshqarish"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Tarix"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"Kiruvchi"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Sokin bildirishnomalar"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Ogohlantirishlar"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Tovushsiz"</string>
+    <string name="notification_section_header_alerting" msgid="5581175033680477651">"Bildirishnomalar"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Suhbatlar"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Barcha sokin bildirishnomalarni tozalash"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Bezovta qilinmasin rejimida bildirishnomalar pauza qilingan"</string>
@@ -707,13 +711,14 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Bildirishnoma kelmasin"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Tovushsiz"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"Ogohlantirish"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"Asosiy"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Pufaklar"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Bildirishnomalar tovush va tebranishsiz keladi."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Bildirishnomalar tovush va tebranish bilan keladi."</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Bildirishnomalar tovush va tebranish bilan keladi. <xliff:g id="APP_NAME">%1$s</xliff:g> suhbatlari standart holatda bulutcha shaklida chiqadi."</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Ovozsiz yoki tebranmaydi"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Ovozsiz yoki tebranishsiz hamda suhbatlar ruknining pastida chiqadi"</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Telefon sozlamalari asosida jiringlashi yoki tebranishi mumkin"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon sozlamalari asosida jiringlashi yoki tebranishi mumkin. <xliff:g id="APP_NAME">%1$s</xliff:g> suhbatlari standart holatda bulutcha shaklida chiqadi."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Bu kontentni ochuvchi erkin yorliq diqqatingizda boʻladi."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Suhbatlar ruknining tepasida bulutcha shaklida chiqadi."</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Suhbatlar ruknining tepasida qalqib chiquvchi bulutcha shaklida chiqadi, ekran qulfida profil rasmi chiqadi"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat sozlamalari ishlamaydi"</string>
