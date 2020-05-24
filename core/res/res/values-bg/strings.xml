@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Организацията ви управлява това устройство и може да наблюдава мрежовия трафик. Докоснете за подробности."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Прилож. имат достъп до местоположението ви"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Обърнете се към системния си администратор, за да научите повече"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Инструмент за установяване на държавата"</string>
     <string name="location_service" msgid="2439187616018455546">"Услуга за местоположението"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Услуга за GNSS"</string>

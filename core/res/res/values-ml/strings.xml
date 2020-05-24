@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"നിങ്ങളുടെ സ്ഥാപനമാണ് ഈ ഉപകരണം മാനേജുചെയ്യുന്നത്, നെറ്റ്‌വർക്ക് ട്രാഫിക്ക് നിരീക്ഷിക്കുകയും ചെയ്തേക്കാം, വിശദാംശങ്ങൾ അറിയാൻ ടാപ്പുചെയ്യുക."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ആപ്പുകൾക്ക് നിങ്ങളുടെ ലൊക്കേഷൻ ആക്‌സസ് ചെയ്യാനാകും"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"കൂടുതലറിയാൻ നിങ്ങളുടെ ഐടി അഡ്‌മിനെ ബന്ധപ്പെടുക"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"രാജ്യം കണ്ടെത്താനുള്ള സംവിധാനം"</string>
     <string name="location_service" msgid="2439187616018455546">"ലൊക്കേഷൻ സേവനം"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS സേവനം"</string>

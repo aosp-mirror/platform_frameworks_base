@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ამ მოწყობილობას თქვენი ორგანიზაცია მართავს და მას ქსელის ტრაფიკის მონიტორინგი შეუძლია. შეეხეთ დამატებითი დეტალებისთვის."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"აპებს შეუძლია თქვენს მდებარეობაზე წვდომა"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ინფოსთვის მიმართეთ IT ადმინისტრატორს"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"ქვეყნის დეტექტორი"</string>
     <string name="location_service" msgid="2439187616018455546">"მდებარეობის სერვისი"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS სერვისი"</string>

@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacionet mund të kenë qasje te vendndodhja jote"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakto me administratorin e TI-së për të mësuar më shumë"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Zbuluesi i shtetit"</string>
     <string name="location_service" msgid="2439187616018455546">"Vendndodhja e shërbimit"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Shërbimi GNSS"</string>

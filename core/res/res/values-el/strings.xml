@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ο οργανισμός σας διαχειρίζεται αυτήν τη συσκευή και ενδέχεται να παρακολουθεί την επισκεψιμότητα δικτύου. Πατήστε για λεπτομέρειες."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Οι εφαρμογές μπορούν να αποκτήσουν πρόσβαση στην τοποθεσία σας"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Μιλήστε με τον διαχειριστή IT, για να μάθετε περισσότερα."</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Ανιχνευτής χώρας"</string>
     <string name="location_service" msgid="2439187616018455546">"Υπηρεσία τοποθεσίας"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Υπηρεσία GNSS"</string>
@@ -1443,7 +1445,7 @@
     <string name="car_mode_disable_notification_message" msgid="8954550232288567515">"Πατήστε για να εξέλθετε από την εφαρμογή οδήγησης."</string>
     <string name="back_button_label" msgid="4078224038025043387">"Πίσω"</string>
     <string name="next_button_label" msgid="6040209156399907780">"Επόμενο"</string>
-    <string name="skip_button_label" msgid="3566599811326688389">"Παράλειψη"</string>
+    <string name="skip_button_label" msgid="3566599811326688389">"Παράβλεψη"</string>
     <string name="no_matches" msgid="6472699895759164599">"Δεν υπάρχουν αποτελέσματα"</string>
     <string name="find_on_page" msgid="5400537367077438198">"Εύρεση στη σελίδα"</string>
     <plurals name="matches_found" formatted="false" msgid="1101758718194295554">

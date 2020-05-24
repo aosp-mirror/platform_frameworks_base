@@ -197,6 +197,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ваша арганізацыя кіруе гэтай прыладай і можа сачыць за сеткавым трафікам. Дакраніцеся для атрымання дадатковай інфармацыі."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Праграмы могуць атрымліваць даныя пра ваша месцазнаходжанне"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Каб даведацца больш, звярніцеся да ІТ-адміністратара"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Дэтэктар краіны"</string>
     <string name="location_service" msgid="2439187616018455546">"Служба геалакацыі"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Служба GNSS"</string>
@@ -552,7 +554,7 @@
     <string name="biometric_error_generic" msgid="6784371929985434439">"Памылка аўтэнтыфікацыі"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Адсканіравана толькі частка адбітка пальца. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не атрымалася апрацаваць адбітак пальца. Паспрабуйце яшчэ раз."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Датчык адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Сканер адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Вы занадта хутка паднялі палец. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Палец рухаўся занадта павольна. Паспрабуйце яшчэ раз."</string>
   <string-array name="fingerprint_acquired_vendor">

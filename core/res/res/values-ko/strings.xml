@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"조직에서 이 기기를 관리하며 네트워크 트래픽을 모니터링할 수도 있습니다. 자세한 내용을 보려면 탭하세요."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"앱에서 위치 정보에 액세스할 수 있음"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"자세한 내용은 IT 관리자에게 문의하세요."</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"국가 감지기"</string>
     <string name="location_service" msgid="2439187616018455546">"위치 서비스"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 서비스"</string>

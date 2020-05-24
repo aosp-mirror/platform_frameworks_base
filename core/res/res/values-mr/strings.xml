@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तुमची संस्था हे डिव्हाइस व्यवस्थापित करते आणि नेटवर्क रहदारीचे निरीक्षण करू शकते. तपशीलांसाठी टॅप करा."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ॲप्स तुमचे स्थान अ‍ॅक्सेस करू शकतात"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"अधिक जाणून घेण्यासाठी तुमच्या आयटी ॲडमिनशी संपर्क साधा"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"कंट्री डिटेक्टर"</string>
     <string name="location_service" msgid="2439187616018455546">"स्थान सेवा"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>

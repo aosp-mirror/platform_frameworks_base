@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"貴機構會管理這個裝置，且可能監控網路流量。輕觸即可瞭解詳情。"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"應用程式可存取你的位置資訊"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"如要瞭解詳情，請與你的 IT 管理員聯絡"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"國家/地區偵測器"</string>
     <string name="location_service" msgid="2439187616018455546">"定位服務"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS 服務"</string>

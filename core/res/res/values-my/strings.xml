@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"ဤစက်ပစ္စည်းကို သင်၏ အဖွဲ့အစည်းက စီမံပြီး ကွန်ရက်အသွားအလာကို စောင့်ကြည့်နိုင်ပါသည်။ ထပ်မံလေ့လာရန် တို့ပါ။"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"အက်ပ်များက သင်၏တည်နေရာကို ကြည့်နိုင်သည်"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"ပိုမိုလေ့လာရန် သင်၏ IT စီမံခန့်ခွဲသူကို ဆက်သွယ်ပါ"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"နိုင်ငံ ရှာဖွေစနစ်"</string>
     <string name="location_service" msgid="2439187616018455546">"တည်နေရာဝန်ဆောင်မှု"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS ဝန်ဆောင်မှု"</string>

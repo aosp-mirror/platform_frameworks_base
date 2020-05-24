@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Din organisation administrerer denne enhed og kan overvåge netværkstrafik. Tryk for at se info."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Apps kan få adgang til din placering"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakt din it-administrator for at få flere oplysninger"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"Landeregistrering"</string>
     <string name="location_service" msgid="2439187616018455546">"Placeringstjeneste"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS-tjeneste"</string>
