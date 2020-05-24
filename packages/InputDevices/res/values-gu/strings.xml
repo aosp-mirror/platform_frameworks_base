@@ -45,4 +45,6 @@
     <string name="keyboard_layout_azerbaijani" msgid="7315895417176467567">"અઝરબૈજાની"</string>
     <string name="keyboard_layout_polish" msgid="1121588624094925325">"પોલિશ"</string>
     <string name="keyboard_layout_belarusian" msgid="7619281752698687588">"બેલારુશિયન"</string>
+    <!-- no translation found for keyboard_layout_mongolian (7678483495823936626) -->
+    <skip />
 </resources>
