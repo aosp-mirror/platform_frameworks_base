@@ -193,6 +193,8 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"আপোনাৰ প্ৰতিষ্ঠানটোৱে এই ডিভাইচটো পৰিচালনা কৰে আৰু ই নেটৱৰ্কৰ ট্ৰেফিক পৰ্যবেক্ষণ কৰিব পাৰে। সবিশেষ জানিবলৈ টিপক।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"এপ্‌সমূহে আপোনাৰ অৱস্থান এক্সেছ কৰিব পাৰে"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"অধিক জানিবলৈ আপোনাৰ আইটি প্ৰশাসকৰ সৈতে যোগাযোগ কৰক"</string>
+    <!-- no translation found for geofencing_service (3826902410740315456) -->
+    <skip />
     <string name="country_detector" msgid="7023275114706088854">"দেশ চিনাক্তকাৰী"</string>
     <string name="location_service" msgid="2439187616018455546">"অৱস্থান সেৱা"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS সেৱা"</string>
