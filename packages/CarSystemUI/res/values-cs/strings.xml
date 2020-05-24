@@ -26,8 +26,6 @@
     <string name="car_new_user" msgid="6637442369728092473">"Nový uživatel"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"Každý nově přidaný uživatel si musí nastavit vlastní prostor."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"Každý uživatel může aktualizovat aplikace všech ostatních uživatelů."</string>
-    <!-- no translation found for car_loading_profile (4507385037552574474) -->
-    <skip />
-    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
-    <skip />
+    <string name="car_loading_profile" msgid="4507385037552574474">"Načítání"</string>
+    <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"Načítání uživatele (předchozí: <xliff:g id="FROM_USER">%1$d</xliff:g>, následující: <xliff:g id="TO_USER">%2$d</xliff:g>)"</string>
 </resources>
