@@ -6354,12 +6354,36 @@ public class ConnectivityServiceTest {
         expectNat64PrefixChange(callback, mCellNetworkAgent, pref64FromDns);
         inOrder.verify(mMockNetd).clatdStart(iface, pref64FromDns.toString());
 
-        // If the RA prefix reappears, clatd is restarted and prefix discovery is stopped.
+        // If an RA advertises the same prefix that was discovered by DNS, nothing happens: prefix
+        // discovery is not stopped, and there are no callbacks.
+        lp.setNat64Prefix(pref64FromDns);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        callback.assertNoCallback();
+        inOrder.verify(mMockNetd, never()).clatdStop(iface);
+        inOrder.verify(mMockNetd, never()).clatdStart(eq(iface), anyString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+
+        // If the RA is later withdrawn, nothing happens again.
+        lp.setNat64Prefix(null);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        callback.assertNoCallback();
+        inOrder.verify(mMockNetd, never()).clatdStop(iface);
+        inOrder.verify(mMockNetd, never()).clatdStart(eq(iface), anyString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+
+        // If the RA prefix changes, clatd is restarted and prefix discovery is stopped.
         lp.setNat64Prefix(pref64FromRa);
         mCellNetworkAgent.sendLinkProperties(lp);
         expectNat64PrefixChange(callback, mCellNetworkAgent, pref64FromRa);
         inOrder.verify(mMockNetd).clatdStop(iface);
         inOrder.verify(mMockDnsResolver).stopPrefix64Discovery(netId);
+
+        // Stopping prefix discovery results in a prefix removed notification.
+        mService.mNetdEventCallback.onNat64PrefixEvent(netId, false /* added */,
+                pref64FromDnsStr, 96);
+
         inOrder.verify(mMockNetd).clatdStart(iface, pref64FromRa.toString());
         inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
 
