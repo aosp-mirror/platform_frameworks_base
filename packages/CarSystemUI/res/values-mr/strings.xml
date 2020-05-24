@@ -26,8 +26,6 @@
     <string name="car_new_user" msgid="6637442369728092473">"नवीन वापरकर्ता"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"तुम्ही नवीन वापरकर्ता जोडता तेव्हा त्या व्यक्तीने त्यांची जागा सेट करणे आवश्यक असते."</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"कोणताही वापरकर्ता इतर सर्व वापरकर्त्यांसाठी अ‍ॅप्स अपडेट करू शकतो."</string>
-    <!-- no translation found for car_loading_profile (4507385037552574474) -->
-    <skip />
-    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
-    <skip />
+    <string name="car_loading_profile" msgid="4507385037552574474">"लोड करत आहे"</string>
+    <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"वापरकर्ता लोड करत आहे (<xliff:g id="FROM_USER">%1$d</xliff:g> पासून <xliff:g id="TO_USER">%2$d</xliff:g> पर्यंत)"</string>
 </resources>
