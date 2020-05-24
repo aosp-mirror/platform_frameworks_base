@@ -550,7 +550,7 @@
     <string name="biometric_error_device_not_secured" msgid="3129845065043995924">"Не заданы PIN-код, узор разблакіроўкі або пароль"</string>
     <string name="fingerprint_acquired_partial" msgid="8532380671091299342">"Адсканіравана толькі частка адбітка пальца. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_insufficient" msgid="2545149524031515411">"Не атрымалася апрацаваць адбітак пальца. Паспрабуйце яшчэ раз."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Датчык адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="4694800187151533990">"Сканер адбіткаў пальцаў брудны. Ачысціце яго і паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_too_fast" msgid="5151661932298844352">"Вы занадта хутка паднялі палец. Паспрабуйце яшчэ раз."</string>
     <string name="fingerprint_acquired_too_slow" msgid="6683510291554497580">"Палец рухаўся занадта павольна. Паспрабуйце яшчэ раз."</string>
   <string-array name="fingerprint_acquired_vendor">

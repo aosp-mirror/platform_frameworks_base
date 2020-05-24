@@ -26,8 +26,6 @@
     <string name="car_new_user" msgid="6637442369728092473">"نیا صارف"</string>
     <string name="user_add_user_message_setup" msgid="1035578846007352323">"جب آپ ایک نیا صارف شامل کرتے ہیں تو اس شخص کو اپنی جگہ سیٹ کرنی ہوتی ہے۔"</string>
     <string name="user_add_user_message_update" msgid="7061671307004867811">"کوئی بھی صارف دیگر سبھی صارفین کے لیے ایپس کو اپ ڈیٹ کر سکتا ہے۔"</string>
-    <!-- no translation found for car_loading_profile (4507385037552574474) -->
-    <skip />
-    <!-- no translation found for car_loading_profile_developer_message (1660962766911529611) -->
-    <skip />
+    <string name="car_loading_profile" msgid="4507385037552574474">"لوڈ ہو رہی ہے"</string>
+    <string name="car_loading_profile_developer_message" msgid="1660962766911529611">"صارف کی نئی پروفائل لوڈ ہو رہی ہے (<xliff:g id="FROM_USER">%1$d</xliff:g> سے <xliff:g id="TO_USER">%2$d</xliff:g> کو)"</string>
 </resources>
