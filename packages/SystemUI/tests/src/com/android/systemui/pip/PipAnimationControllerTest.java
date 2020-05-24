@@ -22,6 +22,7 @@ import static com.android.systemui.pip.PipAnimationController.TRANSITION_DIRECTI
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.graphics.Matrix;
@@ -33,6 +34,7 @@ import android.view.SurfaceControl;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -59,7 +61,8 @@ public class PipAnimationControllerTest extends SysuiTestCase {
     @Before
     public void setUp() throws Exception {
         mPipAnimationController = new PipAnimationController(
-                mContext, new PipSurfaceTransactionHelper(mContext));
+                mContext, new PipSurfaceTransactionHelper(mContext,
+                mock(ConfigurationController.class)));
         mLeash = new SurfaceControl.Builder()
                 .setContainerLayer()
                 .setName("FakeLeash")

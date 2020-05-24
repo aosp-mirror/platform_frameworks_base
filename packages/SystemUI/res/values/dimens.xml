@@ -1000,8 +1000,15 @@
     <!-- The touchable/draggable edge size for PIP resize. -->
     <dimen name="pip_resize_edge_size">48dp</dimen>
 
+    <!-- PIP Resize handle size and margin. -->
+    <dimen name="pip_resize_handle_size">12dp</dimen>
+    <dimen name="pip_resize_handle_margin">4dp</dimen>
+
     <!-- The corner radius for PiP window. -->
     <dimen name="pip_corner_radius">8dp</dimen>
+
+    <!-- The buffer to use when calculating whether the pip is in an adjust zone. -->
+    <dimen name="pip_bottom_offset_buffer">1dp</dimen>
 
     <dimen name="default_gear_space">18dp</dimen>
     <dimen name="cell_overlay_padding">18dp</dimen>

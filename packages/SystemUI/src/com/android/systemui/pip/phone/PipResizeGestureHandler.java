@@ -32,7 +32,6 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
-import android.util.DisplayMetrics;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
@@ -56,7 +55,7 @@ public class PipResizeGestureHandler {
 
     private static final String TAG = "PipResizeGestureHandler";
 
-    private final DisplayMetrics mDisplayMetrics = new DisplayMetrics();
+    private final Context mContext;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipMotionHelper mMotionHelper;
     private final int mDisplayId;
@@ -74,10 +73,10 @@ public class PipResizeGestureHandler {
     private final Rect mTmpBottomLeftCorner = new Rect();
     private final Rect mTmpBottomRightCorner = new Rect();
     private final Rect mDisplayBounds = new Rect();
-    private final int mDelta;
     private final Supplier<Rect> mMovementBoundsSupplier;
     private final Runnable mUpdateMovementBoundsRunnable;
 
+    private int mDelta;
     private boolean mAllowGesture;
     private boolean mIsAttached;
     private boolean mIsEnabled;
@@ -93,8 +92,7 @@ public class PipResizeGestureHandler {
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
             PipTaskOrganizer pipTaskOrganizer, Supplier<Rect> movementBoundsSupplier,
             Runnable updateMovementBoundsRunnable) {
-        final Resources res = context.getResources();
-        context.getDisplay().getMetrics(mDisplayMetrics);
+        mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mPipBoundsHandler = pipBoundsHandler;
@@ -102,9 +100,8 @@ public class PipResizeGestureHandler {
         mPipTaskOrganizer = pipTaskOrganizer;
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
-
         context.getDisplay().getRealSize(mMaxSize);
-        mDelta = res.getDimensionPixelSize(R.dimen.pip_resize_edge_size);
+        reloadResources();
 
         mEnableUserResize = DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_SYSTEMUI,
@@ -120,6 +117,15 @@ public class PipResizeGestureHandler {
                         }
                     }
                 });
+    }
+
+    public void onConfigurationChanged() {
+        reloadResources();
+    }
+
+    private void reloadResources() {
+        final Resources res = mContext.getResources();
+        mDelta = res.getDimensionPixelSize(R.dimen.pip_resize_edge_size);
     }
 
     private void resetDragCorners() {

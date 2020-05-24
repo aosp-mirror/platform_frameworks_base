@@ -1,5 +1,0 @@
-service derive_sdk /apex/com.android.sdkext/bin/derive_sdk
-    user nobody
-    group nobody
-    oneshot
-    disabled
