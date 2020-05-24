@@ -17,13 +17,10 @@
 package com.android.systemui.pip;
 
 import android.content.Context;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.Size;
-
-import java.io.PrintWriter;
 
 import javax.inject.Inject;
 
@@ -39,8 +36,6 @@ public class PipSnapAlgorithm {
     private final float mMinAspectRatioForMinSize;
     private final float mMaxAspectRatioForMinSize;
 
-    private int mOrientation = Configuration.ORIENTATION_UNDEFINED;
-
     @Inject
     public PipSnapAlgorithm(Context context) {
         Resources res = context.getResources();
@@ -50,15 +45,6 @@ public class PipSnapAlgorithm {
         mMaxAspectRatioForMinSize = res.getFloat(
                 com.android.internal.R.dimen.config_pictureInPictureAspectRatioLimitForMinSize);
         mMinAspectRatioForMinSize = 1f / mMaxAspectRatioForMinSize;
-        onConfigurationChanged();
-    }
-
-    /**
-     * Updates the snap algorithm when the configuration changes.
-     */
-    public void onConfigurationChanged() {
-        Resources res = mContext.getResources();
-        mOrientation = res.getConfiguration().orientation;
     }
 
     /**
@@ -220,11 +206,5 @@ public class PipSnapAlgorithm {
         } else {
             boundsOut.offsetTo(boundedLeft, movementBounds.bottom);
         }
-    }
-
-    public void dump(PrintWriter pw, String prefix) {
-        final String innerPrefix = prefix + "  ";
-        pw.println(prefix + PipSnapAlgorithm.class.getSimpleName());
-        pw.println(innerPrefix + "mOrientation=" + mOrientation);
     }
 }
