@@ -446,13 +446,14 @@
     <!-- Regex of wired ethernet ifaces -->
     <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
 
-
-
     <!-- Configuration of Ethernet interfaces in the following format:
          <interface name|mac address>;[Network Capabilities];[IP config];[Override Transport]
          Where
                [Network Capabilities] Optional. A comma seprated list of network capabilities.
-                   Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
+                   Values must be from NetworkCapabilities#NET_CAPABILITY_* constants.
+                   The NOT_ROAMING, NOT_CONGESTED and NOT_SUSPENDED capabilities are always
+                   added automatically because this configuration provides no way to update
+                   them dynamically.
                [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
                    use the following format to specify static IP configuration:
                        ip=<ip-address/mask> gateway=<ip-address> dns=<comma-sep-ip-addresses>
