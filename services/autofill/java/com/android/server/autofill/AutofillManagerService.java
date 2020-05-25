@@ -1662,12 +1662,8 @@ public final class AutofillManagerService
                 @NonNull IResultReceiver receiver) {
             boolean enabled = false;
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-                if (service != null) {
-                    enabled = Objects.equals(packageName, service.getServicePackageName());
-                } else if (sVerbose) {
-                    Slog.v(TAG, "isServiceEnabled(): no service for " + userId);
-                }
+                final AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
+                enabled = Objects.equals(packageName, service.getServicePackageName());
             }
             send(receiver, enabled);
         }
