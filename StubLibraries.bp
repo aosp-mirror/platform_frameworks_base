@@ -84,7 +84,7 @@ stubs_defaults {
     // finalized stub library to resolve them. If a new class gets added,
     // this may be need to be revisited to use a manually maintained stub
     // library with empty classes in order to resolve those references.
-    libs: ["sdk_system_29_android"],
+    libs: ["sdk_system_30_android"],
     aidl: {
         local_include_dirs: ["apex/media/aidl/stable"],
     },
@@ -129,6 +129,23 @@ droidstubs {
     jdiff_enabled: true,
 }
 
+droidstubs {
+    name: "api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/current.txt",
+            removed_api_file: "non-updatable-api/removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android-non-updatable.api.public.latest",
+        },
+    },
+}
+
 priv_apps = " " +
     "--show-annotation android.annotation.SystemApi\\(" +
         "client=android.annotation.SystemApi.Client.PRIVILEGED_APPS" +
@@ -169,6 +186,24 @@ droidstubs {
         dest: "android.txt",
     },
     jdiff_enabled: true,
+}
+
+droidstubs {
+    name: "system-api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + priv_apps,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/system-current.txt",
+            removed_api_file: "non-updatable-api/system-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android-non-updatable.api.system.latest",
+            baseline_file: "non-updatable-api/system-lint-baseline.txt",
+        },
+    },
 }
 
 droidstubs {
@@ -238,6 +273,22 @@ droidstubs {
     },
 }
 
+droidstubs {
+    name: "module-lib-api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + module_libs,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/module-lib-current.txt",
+            removed_api_file: "non-updatable-api/module-lib-removed.txt",
+        },
+        api_lint: {
+            enabled: true,
+            new_since: ":android-non-updatable.api.module-lib.latest",
+        },
+    },
+}
 
 // The following droidstub module generates source files for the API stub library for
 // modules. Note that it not only includes its own APIs but also other APIs that have
@@ -274,16 +325,62 @@ java_defaults {
 }
 
 java_library_static {
-    name: "android_stubs_current",
+    name: "android_monolith_stubs_current",
     srcs: [ ":api-stubs-docs" ],
     static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
 java_library_static {
-    name: "android_system_stubs_current",
+    name: "android_merged_stubs_current",
+    srcs: [ ":api-stubs-docs-non-updatable" ],
+    static_libs: [
+        "conscrypt.module.public.api.stubs",
+        "framework-media-stubs-publicapi",
+        "framework-mediaprovider-stubs-publicapi",
+        "framework-permission-stubs-publicapi",
+        "framework-sdkextensions-stubs-publicapi",
+        "framework-statsd-stubs-publicapi",
+        "framework-tethering-stubs-publicapi",
+        "framework-wifi-stubs-publicapi",
+        "private-stub-annotations-jar",
+    ],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_stubs_current",
+    static_libs: ["android_merged_stubs_current"],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_system_monolith_stubs_current",
     srcs: [ ":system-api-stubs-docs" ],
     static_libs: [ "private-stub-annotations-jar" ],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_system_merged_stubs_current",
+    srcs: [ ":system-api-stubs-docs-non-updatable" ],
+    static_libs: [
+        "conscrypt.module.public.api.stubs",
+        "framework-media-stubs-systemapi",
+        "framework-mediaprovider-stubs-systemapi",
+        "framework-permission-stubs-systemapi",
+        "framework-sdkextensions-stubs-systemapi",
+        "framework-statsd-stubs-systemapi",
+        "framework-tethering-stubs-systemapi",
+        "framework-wifi-stubs-systemapi",
+        "private-stub-annotations-jar",
+    ],
+    defaults: ["android_defaults_stubs_current"],
+}
+
+java_library_static {
+    name: "android_system_stubs_current",
+    static_libs: ["android_system_merged_stubs_current"],
     defaults: ["android_defaults_stubs_current"],
 }
 
@@ -297,6 +394,20 @@ java_library_static {
 java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs" ],
+    defaults: ["android_defaults_stubs_current"],
+    libs: ["sdk_system_29_android"],
+}
+
+java_library_static {
+    name: "android_non_updatable_stubs_current",
+    srcs: [":api-stubs-docs-non-updatable"],
+    defaults: ["android_defaults_stubs_current"],
+    libs: ["sdk_system_29_android"],
+}
+
+java_library_static {
+    name: "android_system_non_updatable_stubs_current",
+    srcs: [":system-api-stubs-docs-non-updatable"],
     defaults: ["android_defaults_stubs_current"],
     libs: ["sdk_system_29_android"],
 }
