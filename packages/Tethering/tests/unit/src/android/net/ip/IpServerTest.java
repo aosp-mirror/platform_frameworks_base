@@ -17,6 +17,7 @@
 package android.net.ip;
 
 import static android.net.INetd.IF_STATE_UP;
+import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_NCM;
 import static android.net.TetheringManager.TETHERING_USB;
@@ -74,6 +75,7 @@ import android.net.dhcp.IDhcpServer;
 import android.net.dhcp.IDhcpServerCallbacks;
 import android.net.ip.IpNeighborMonitor.NeighborEvent;
 import android.net.ip.IpNeighborMonitor.NeighborEventConsumer;
+import android.net.ip.RouterAdvertisementDaemon.RaParams;
 import android.net.util.InterfaceParams;
 import android.net.util.InterfaceSet;
 import android.net.util.SharedLog;
@@ -196,7 +198,7 @@ public class IpServerTest {
         if (upstreamIface != null) {
             LinkProperties lp = new LinkProperties();
             lp.setInterfaceName(upstreamIface);
-            dispatchTetherConnectionChanged(upstreamIface, lp);
+            dispatchTetherConnectionChanged(upstreamIface, lp, 0);
         }
         reset(mNetd, mCallback);
     }
@@ -694,7 +696,7 @@ public class IpServerTest {
         InOrder inOrder = inOrder(mNetd);
         LinkProperties lp = new LinkProperties();
         lp.setInterfaceName(UPSTREAM_IFACE2);
-        dispatchTetherConnectionChanged(UPSTREAM_IFACE2, lp);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE2, lp, -1);
         inOrder.verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX2, neighA, macA));
         inOrder.verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
         inOrder.verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX2, neighB, macB));
@@ -702,7 +704,7 @@ public class IpServerTest {
         reset(mNetd);
 
         // When the upstream is lost, rules are removed.
-        dispatchTetherConnectionChanged(null, null);
+        dispatchTetherConnectionChanged(null, null, 0);
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX2, neighA, macA));
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX2, neighB, macB));
         reset(mNetd);
@@ -715,19 +717,19 @@ public class IpServerTest {
 
         // Rules can be added again once upstream IPv6 connectivity is available.
         lp.setInterfaceName(UPSTREAM_IFACE);
-        dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp, -1);
         recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
         verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighB, macB));
         verify(mNetd, never()).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighA, macA));
 
         // If upstream IPv6 connectivity is lost, rules are removed.
         reset(mNetd);
-        dispatchTetherConnectionChanged(UPSTREAM_IFACE, null);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE, null, 0);
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
 
         // When the interface goes down, rules are removed.
         lp.setInterfaceName(UPSTREAM_IFACE);
-        dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp, -1);
         recvNewNeigh(myIfindex, neighA, NUD_REACHABLE, macA);
         recvNewNeigh(myIfindex, neighB, NUD_REACHABLE, macB);
         verify(mNetd).tetherOffloadRuleAdd(matches(UPSTREAM_IFINDEX, neighA, macA));
@@ -788,6 +790,49 @@ public class IpServerTest {
         verify(mIpNeighborMonitor, never()).start();
     }
 
+    private LinkProperties buildIpv6OnlyLinkProperties(final String iface) {
+        final LinkProperties linkProp = new LinkProperties();
+        linkProp.setInterfaceName(iface);
+        linkProp.addLinkAddress(new LinkAddress("2001:db8::1/64"));
+        linkProp.addRoute(new RouteInfo(new IpPrefix("::/0"), null, iface, RTN_UNICAST));
+        final InetAddress dns = InetAddresses.parseNumericAddress("2001:4860:4860::8888");
+        linkProp.addDnsServer(dns);
+
+        return linkProp;
+    }
+
+    @Test
+    public void testAdjustTtlValue() throws Exception {
+        final ArgumentCaptor<RaParams> raParamsCaptor =
+                ArgumentCaptor.forClass(RaParams.class);
+        initTetheredStateMachine(TETHERING_WIFI, UPSTREAM_IFACE);
+        verify(mRaDaemon).buildNewRa(any(), raParamsCaptor.capture());
+        final RaParams noV6Params = raParamsCaptor.getValue();
+        assertEquals(65, noV6Params.hopLimit);
+        reset(mRaDaemon);
+
+        when(mNetd.getProcSysNet(
+                INetd.IPV6, INetd.CONF, UPSTREAM_IFACE, "hop_limit")).thenReturn("64");
+        final LinkProperties lp = buildIpv6OnlyLinkProperties(UPSTREAM_IFACE);
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp, 1);
+        verify(mRaDaemon).buildNewRa(any(), raParamsCaptor.capture());
+        final RaParams nonCellularParams = raParamsCaptor.getValue();
+        assertEquals(65, nonCellularParams.hopLimit);
+        reset(mRaDaemon);
+
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE, null, 0);
+        verify(mRaDaemon).buildNewRa(any(), raParamsCaptor.capture());
+        final RaParams noUpstream = raParamsCaptor.getValue();
+        assertEquals(65, nonCellularParams.hopLimit);
+        reset(mRaDaemon);
+
+        dispatchTetherConnectionChanged(UPSTREAM_IFACE, lp, -1);
+        verify(mRaDaemon).buildNewRa(any(), raParamsCaptor.capture());
+        final RaParams cellularParams = raParamsCaptor.getValue();
+        assertEquals(63, cellularParams.hopLimit);
+        reset(mRaDaemon);
+    }
+
     private void assertDhcpServingParams(final DhcpServingParamsParcel params,
             final IpPrefix prefix) {
         // Last address byte is random
@@ -838,9 +883,10 @@ public class IpServerTest {
      * @param upstreamIface String name of upstream interface (or null)
      * @param v6lp IPv6 LinkProperties of the upstream interface, or null for an IPv4-only upstream.
      */
-    private void dispatchTetherConnectionChanged(String upstreamIface, LinkProperties v6lp) {
+    private void dispatchTetherConnectionChanged(String upstreamIface, LinkProperties v6lp,
+            int ttlAdjustment) {
         dispatchTetherConnectionChanged(upstreamIface);
-        mIpServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, v6lp);
+        mIpServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, ttlAdjustment, 0, v6lp);
         mLooper.dispatchAll();
     }
 
