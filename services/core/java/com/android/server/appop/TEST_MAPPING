@@ -43,14 +43,6 @@
                     "include-filter": "android.app.cts.ActivityManagerApi29Test"
                 }
             ]
-        },
-        {
-            "name": "CtsStatsdHostTestCases",
-            "options": [
-                {
-                    "include-filter": "android.cts.statsd.atom.UidAtomTests"
-                }
-            ]
         }
     ]
 }
