@@ -17,10 +17,8 @@
 package com.android.tests.rollback.host;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
@@ -62,9 +60,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      * For example, <code>runPhase("testApkOnlyEnableRollback");</code>
      */
     private void runPhase(String phase) throws Exception {
-        assertTrue(runDeviceTests("com.android.tests.rollback",
+        assertThat(runDeviceTests("com.android.tests.rollback",
                     "com.android.tests.rollback.StagedRollbackTest",
-                    phase));
+                    phase)).isTrue();
     }
 
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";
@@ -150,17 +148,17 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Trigger rollback and wait for reboot to happen
         runPhase("testBadApkOnly_Phase3");
-        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(2)));
+        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(2))).isTrue();
 
         getDevice().waitForDeviceAvailable();
 
         runPhase("testBadApkOnly_Phase4");
 
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
-                REASON_APP_CRASH, TESTAPP_A));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
-                null, null));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
+                REASON_APP_CRASH, TESTAPP_A)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
+                null, null)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null)).isTrue();
     }
 
     @Test
@@ -183,17 +181,17 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // 3. Staged rollback session becomes ready.
         // 4. Device actually reboots.
         // So we give a generous timeout here.
-        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5)));
+        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5))).isTrue();
         getDevice().waitForDeviceAvailable();
 
         // verify rollback committed
         runPhase("testNativeWatchdogTriggersRollback_Phase3");
 
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
-                        REASON_NATIVE_CRASH, null));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
-                null, null));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
+                        REASON_NATIVE_CRASH, null)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
+                null, null)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null)).isTrue();
     }
 
     @Test
@@ -223,17 +221,17 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // 3. Staged rollback session becomes ready.
         // 4. Device actually reboots.
         // So we give a generous timeout here.
-        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5)));
+        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5))).isTrue();
         getDevice().waitForDeviceAvailable();
 
         // verify all available rollbacks have been committed
         runPhase("testNativeWatchdogTriggersRollbackForAll_Phase4");
 
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
-                        REASON_NATIVE_CRASH, null));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
-                null, null));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
+                        REASON_NATIVE_CRASH, null)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
+                null, null)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null)).isTrue();
     }
 
     /**
@@ -306,16 +304,16 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         // Verify apex was installed and then crash the apk
         runPhase("testRollbackApexWithApkCrashing_Phase2");
         // Wait for crash to trigger rollback
-        assertTrue(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5)));
+        assertThat(getDevice().waitForDeviceNotAvailable(TimeUnit.MINUTES.toMillis(5))).isTrue();
         getDevice().waitForDeviceAvailable();
         // Verify rollback occurred due to crash of apk-in-apex
         runPhase("testRollbackApexWithApkCrashing_Phase3");
 
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
-                REASON_APP_CRASH, TESTAPP_A));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
-                null, null));
-        assertTrue(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null));
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_INITIATE, null,
+                REASON_APP_CRASH, TESTAPP_A)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_BOOT_TRIGGERED, null,
+                null, null)).isTrue();
+        assertThat(mLogger.watchdogEventOccurred(ROLLBACK_SUCCESS, null, null, null)).isTrue();
     }
 
     /**
@@ -356,10 +354,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-            assertNull(getDevice().pullFile(newFilePath3));
-            assertNull(getDevice().pullFile(newFilePath4));
+            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
+            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
+            assertThat(getDevice().pullFile(newFilePath3)).isNull();
+            assertThat(getDevice().pullFile(newFilePath4)).isNull();
         });
 
         // Verify snapshots are deleted after restoration
@@ -411,10 +409,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-            assertNull(getDevice().pullFile(newFilePath3));
-            assertNull(getDevice().pullFile(newFilePath4));
+            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
+            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
+            assertThat(getDevice().pullFile(newFilePath3)).isNull();
+            assertThat(getDevice().pullFile(newFilePath4)).isNull();
         });
 
         // Verify snapshots are deleted after restoration
@@ -464,10 +462,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-            assertNull(getDevice().pullFile(newFilePath3));
-            assertNull(getDevice().pullFile(newFilePath4));
+            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
+            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
+            assertThat(getDevice().pullFile(newFilePath3)).isNull();
+            assertThat(getDevice().pullFile(newFilePath4)).isNull();
         });
 
         // Verify snapshots are deleted after restoration
@@ -515,10 +513,10 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
         // Verify that old files have been restored and new files are gone
         runAsRoot(() -> {
-            assertEquals(TEST_STRING_1, getDevice().pullFileContents(oldFilePath1));
-            assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
-            assertNull(getDevice().pullFile(newFilePath3));
-            assertNull(getDevice().pullFile(newFilePath4));
+            assertThat(getDevice().pullFileContents(oldFilePath1)).isEqualTo(TEST_STRING_1);
+            assertThat(getDevice().pullFileContents(oldFilePath2)).isEqualTo(TEST_STRING_2);
+            assertThat(getDevice().pullFile(newFilePath3)).isNull();
+            assertThat(getDevice().pullFile(newFilePath4)).isNull();
         });
     }
 
@@ -549,7 +547,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         runPhase("testCleanUp");
         runAsRoot(() -> {
             for (String dir : after) {
-                assertNull(getDevice().getFileEntry(dir));
+                assertThat(getDevice().getFileEntry(dir)).isNull();
             }
         });
     }
@@ -561,7 +559,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         try {
             getDevice().enableAdbRoot();
             getDevice().remountSystemWritable();
-            assertTrue(getDevice().pushFile(apex, "/system/apex/" + fileName));
+            assertThat(getDevice().pushFile(apex, "/system/apex/" + fileName)).isTrue();
         } finally {
             getDevice().disableAdbRoot();
         }
@@ -607,8 +605,9 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         try {
             getDevice().enableAdbRoot();
             IFileEntry file = getDevice().getFileEntry(path);
-            assertTrue("Not a directory: " + path, file.isDirectory());
-            assertTrue("Directory not empty: " + path, file.getChildren(false).isEmpty());
+            assertWithMessage("Not a directory: " + path).that(file.isDirectory()).isTrue();
+            assertWithMessage("Directory not empty: " + path)
+                    .that(file.getChildren(false)).isEmpty();
         } catch (DeviceNotAvailableException e) {
             fail("Can't access directory: " + path);
         } finally {
