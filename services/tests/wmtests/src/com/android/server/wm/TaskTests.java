@@ -146,4 +146,16 @@ public class TaskTests extends WindowTestsBase {
         task.setBounds(bounds);
         assertEquals(new Point(bounds.left, bounds.top), task.getLastSurfacePosition());
     }
+
+    @Test
+    public void testIsInStack() {
+        final Task task1 = createTaskStackOnDisplay(mDisplayContent);
+        final Task task2 = createTaskStackOnDisplay(mDisplayContent);
+        final ActivityRecord activity1 =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task1);
+        final ActivityRecord activity2 =
+                WindowTestUtils.createActivityRecordInTask(mDisplayContent, task2);
+        assertEquals(activity1, task1.isInTask(activity1));
+        assertNull(task1.isInTask(activity2));
+    }
 }
