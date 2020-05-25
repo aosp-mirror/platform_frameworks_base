@@ -191,6 +191,14 @@ public class InsetsSource implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
+        return equals(o, false);
+    }
+
+    /**
+     * @param excludeInvisibleImeFrames If {@link InsetsState#ITYPE_IME} frames should be ignored
+     *                                  when IME is not visible.
+     */
+    public boolean equals(Object o, boolean excludeInvisibleImeFrames) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
@@ -198,6 +206,7 @@ public class InsetsSource implements Parcelable {
 
         if (mType != that.mType) return false;
         if (mVisible != that.mVisible) return false;
+        if (excludeInvisibleImeFrames && !mVisible && mType == ITYPE_IME) return true;
         if (!Objects.equals(mVisibleFrame, that.mVisibleFrame)) return false;
         return mFrame.equals(that.mFrame);
     }
