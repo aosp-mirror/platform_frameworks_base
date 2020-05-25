@@ -77,6 +77,12 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Fylla skjá með aðdrætti"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Teygja yfir allan skjáinn"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skjámynd"</string>
+    <!-- no translation found for global_action_lock_message (4466026255205186456) -->
+    <skip />
+    <!-- no translation found for global_action_lock_message (7621167597240332986) -->
+    <skip />
+    <!-- no translation found for global_action_lock_message (538790401275363781) -->
+    <skip />
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"sendi mynd"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Vistar skjámynd…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Vistar skjámynd…"</string>
@@ -323,6 +329,8 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Staðsetning valin með GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Staðsetningarbeiðnir virkar"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Slökkt á skynjurum valið"</string>
+    <!-- no translation found for accessibility_media_active (4942087422908239969) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="970525598287244592">"Hreinsa allar tilkynningar."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -511,8 +519,10 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Stjórna"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ferill"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"Mótteknar"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"Þöglar tilkynningar"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"Viðvörunartilkynningar"</string>
+    <!-- no translation found for notification_section_header_gentle (6804099527336337197) -->
+    <skip />
+    <!-- no translation found for notification_section_header_alerting (5581175033680477651) -->
+    <skip />
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Samtöl"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Hreinsa allar þöglar tilkynningar"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Hlé gert á tilkynningum þar sem stillt er á „Ónáðið ekki“"</string>
@@ -707,13 +717,20 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Slökkva á tilkynningum"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Sýna áfram tilkynningar frá þessu forriti?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Hljóðlaust"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"Viðvörun"</string>
+    <!-- no translation found for notification_alert_title (3656229781017543655) -->
+    <skip />
     <string name="notification_bubble_title" msgid="8330481035191903164">"Blaðra"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"Auðveldar þér að einbeita þér án hljóðs eða titrings."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"Fangar athygli þína með hljóði eða titringi."</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"Fangar athygli þína með hljóði eða titringi. Samtöl á <xliff:g id="APP_NAME">%1$s</xliff:g> birtast sjálfkrafa í blöðru."</string>
+    <!-- no translation found for notification_channel_summary_low (4860617986908931158) -->
+    <skip />
+    <!-- no translation found for notification_conversation_summary_low (1734433426085468009) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (3282930979307248890) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (1782419896613644568) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Fangar athygli þína með fljótandi flýtileið á þetta efni."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"Sýnt sem blaðra efst í samtali."</string>
+    <!-- no translation found for notification_channel_summary_priority (7952654515769021553) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Áfram"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Forgangur"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> styður ekki stillingar fyrir einstök samtöl"</string>
