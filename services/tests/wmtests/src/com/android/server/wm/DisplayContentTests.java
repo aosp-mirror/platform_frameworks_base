@@ -72,6 +72,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityTaskManager;
@@ -1142,7 +1143,7 @@ public class DisplayContentTests extends WindowTestsBase {
         Mockito.doReturn(ROTATION_90).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
         // TODO(display-merge): Remove cast
-        Mockito.doAnswer(
+        doAnswer(
                 invocation -> {
                     continued[0] = true;
                     return true;
@@ -1246,6 +1247,22 @@ public class DisplayContentTests extends WindowTestsBase {
 
         WindowState result = display.findScrollCaptureTargetWindow(null, task.mTaskId);
         assertEquals(window, result);
+    }
+
+    @Test
+    public void testEnsureActivitiesVisibleNotRecursive() {
+        final TaskDisplayArea mockTda = mock(TaskDisplayArea.class);
+        doReturn(mockTda).when(mDisplayContent).getTaskDisplayAreaAt(anyInt());
+        final boolean[] called = { false };
+        doAnswer(invocation -> {
+            // The assertion will fail if DisplayArea#ensureActivitiesVisible is called twice.
+            assertFalse(called[0]);
+            called[0] = true;
+            mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
+            return null;
+        }).when(mockTda).ensureActivitiesVisible(any(), anyInt(), anyBoolean(), anyBoolean());
+
+        mDisplayContent.ensureActivitiesVisible(null, 0, false, false);
     }
 
     private boolean isOptionsPanelAtRight(int displayId) {
