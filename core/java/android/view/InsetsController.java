@@ -713,6 +713,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 // applied before starting animation).
                 continue;
             }
+            if (fromIme && animationType == ANIMATION_TYPE_USER) {
+                // App is already controlling the IME, don't cancel it.
+                continue;
+            }
             typesReady |= InsetsState.toPublicType(consumer.getType());
         }
         applyAnimation(typesReady, true /* show */, fromIme);
