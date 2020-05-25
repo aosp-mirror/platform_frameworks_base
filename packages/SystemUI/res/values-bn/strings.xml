@@ -77,6 +77,12 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ফুল স্ক্রিন করুন"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট"</string>
+    <!-- no translation found for global_action_lock_message (4466026255205186456) -->
+    <skip />
+    <!-- no translation found for global_action_lock_message (7621167597240332986) -->
+    <skip />
+    <!-- no translation found for global_action_lock_message (538790401275363781) -->
+    <skip />
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
@@ -323,6 +329,8 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS এর দ্বারা সেট করা লোকেশন"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"লোকেশন অনুরোধ সক্রিয় রয়েছে"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"সেন্সর অফ অ্যাক্টিভ"</string>
+    <!-- no translation found for accessibility_media_active (4942087422908239969) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="970525598287244592">"সমস্ত বিজ্ঞপ্তি সাফ করুন৷"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>টি"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -511,8 +519,10 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"পরিচালনা করুন"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ইতিহাস"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"ইনকামিং"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"নীরব বিজ্ঞপ্তি"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"বিজ্ঞপ্তি সংক্রান্ত সতর্কতা"</string>
+    <!-- no translation found for notification_section_header_gentle (6804099527336337197) -->
+    <skip />
+    <!-- no translation found for notification_section_header_alerting (5581175033680477651) -->
+    <skip />
     <string name="notification_section_header_conversations" msgid="821834744538345661">"কথোপকথন"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"সব নীরব বিজ্ঞপ্তি মুছুন"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"\'বিরক্ত করবে না\' দিয়ে বিজ্ঞপ্তি পজ করা হয়েছে"</string>
@@ -707,13 +717,20 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"বিজ্ঞপ্তি বন্ধ করুন"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"এই অ্যাপের বিজ্ঞপ্তি পরেও দেখে যেতে চান?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"সাইলেন্ট"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"সতর্ক করুন"</string>
+    <!-- no translation found for notification_alert_title (3656229781017543655) -->
+    <skip />
     <string name="notification_bubble_title" msgid="8330481035191903164">"বাবল"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"সাউন্ড বা ভাইব্রেশন ছাড়া ফোকাস করতে আপনাকে সাহায্য করে।"</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"সাউন্ড বা ভাইব্রেশনের সাহায্যে দৃষ্টি আকর্ষণ করে।"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"সাউন্ড বা ভাইব্রেশনের সাহায্যে দৃষ্টি আকর্ষণ করে। ডিফল্টভাবে <xliff:g id="APP_NAME">%1$s</xliff:g> বাবল থেকে কথোপকথন।"</string>
+    <!-- no translation found for notification_channel_summary_low (4860617986908931158) -->
+    <skip />
+    <!-- no translation found for notification_conversation_summary_low (1734433426085468009) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (3282930979307248890) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (1782419896613644568) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ফ্লোটিং শর্টকাট ব্যবহার করে এই কন্টেন্টে আপনার দৃষ্টি আকর্ষণ করে রাখে।"</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"কথোপকথন বিভাগের উপরে বাবল হিসেবে দেখা যায়।"</string>
+    <!-- no translation found for notification_channel_summary_priority (7952654515769021553) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপে কথোপকথনের ক্ষেত্রে প্রযোজ্য সেটিংস কাজ করে না"</string>
