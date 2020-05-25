@@ -3511,14 +3511,15 @@ class Task extends WindowContainer<WindowContainer> {
             int transit, boolean isVoiceInteraction,
             @Nullable OnAnimationFinishedCallback finishedCallback) {
         final RecentsAnimationController control = mWmService.getRecentsAnimationController();
-        if (control != null && enter
-                && getDisplayContent().mAppTransition.isNextAppTransitionCustomFromRecents()) {
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                    "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
-                    control, asTask(), AppTransition.appTransitionToString(transit));
+        if (control != null) {
             // We let the transition to be controlled by RecentsAnimation, and callback task's
             // RemoteAnimationTarget for remote runner to animate.
-            control.addTaskToTargets(getRootTask(), finishedCallback);
+            if (enter) {
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                        "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
+                        control, asTask(), AppTransition.appTransitionToString(transit));
+                control.addTaskToTargets(getRootTask(), finishedCallback);
+            }
         } else {
             super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, finishedCallback);
         }
