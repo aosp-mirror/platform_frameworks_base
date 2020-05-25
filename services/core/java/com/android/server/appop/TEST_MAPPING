@@ -48,7 +48,12 @@
             ]
         },
         {
-            "name": "UidAtomTests:testAppOps"
+            "name": "CtsStatsdHostTestCases",
+            "options": [
+                {
+                    "include-filter": "android.cts.statsd.atom.UidAtomTests"
+                }
+            ]
         }
     ]
 }
