@@ -24,15 +24,6 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "CtsStatsdHostTestCases",
-            "options": [
-                {
-                    "include-filter": "android.cts.statsd.atom.UidAtomTests"
-                }
-            ]
-        },
-        {
-            "file_patterns": ["(/|^)AppOpsManager.java"],
             "name": "FrameworksServicesTests",
             "options": [
                 {
