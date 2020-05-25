@@ -1,0 +1,231 @@
+// Baseline format: 1.0
+ArrayReturn: android.view.contentcapture.ViewNode#getAutofillOptions():
+    Method should return Collection<CharSequence> (or subclass) instead of raw array; was `java.lang.CharSequence[]`
+
+
+GenericException: android.app.prediction.AppPredictor#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+GenericException: android.hardware.location.ContextHubClient#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+GenericException: android.net.IpSecManager.IpSecTunnelInterface#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+GenericException: android.service.autofill.augmented.FillWindow#finalize():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+
+
+KotlinKeyword: android.app.Notification#when:
+    Avoid field names that are Kotlin hard keywords ("when"); see https://android.github.io/kotlin-guides/interop.html#no-hard-keywords
+
+
+MissingNullability: android.media.soundtrigger.SoundTriggerDetectionService#onUnbind(android.content.Intent) parameter #0:
+    Missing nullability on parameter `intent` in method `onUnbind`
+MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #0:
+    Missing nullability on parameter `inputId` in method `onEvent`
+MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #1:
+    Missing nullability on parameter `eventType` in method `onEvent`
+MissingNullability: android.media.tv.TvRecordingClient.RecordingCallback#onEvent(String, String, android.os.Bundle) parameter #2:
+    Missing nullability on parameter `eventArgs` in method `onEvent`
+MissingNullability: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context) parameter #0:
+    Missing nullability on parameter `base` in method `attachBaseContext`
+MissingNullability: android.provider.ContactsContract.MetadataSync#CONTENT_URI:
+    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSync`
+MissingNullability: android.provider.ContactsContract.MetadataSync#METADATA_AUTHORITY_URI:
+    Missing nullability on field `METADATA_AUTHORITY_URI` in class `class android.provider.ContactsContract.MetadataSync`
+MissingNullability: android.provider.ContactsContract.MetadataSyncState#CONTENT_URI:
+    Missing nullability on field `CONTENT_URI` in class `class android.provider.ContactsContract.MetadataSyncState`
+MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #0:
+    Missing nullability on parameter `context` in method `attachInfo`
+MissingNullability: android.provider.SearchIndexablesProvider#attachInfo(android.content.Context, android.content.pm.ProviderInfo) parameter #1:
+    Missing nullability on parameter `info` in method `attachInfo`
+MissingNullability: android.service.autofill.augmented.AugmentedAutofillService#onUnbind(android.content.Intent) parameter #0:
+    Missing nullability on parameter `intent` in method `onUnbind`
+MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
+    Missing nullability on parameter `fd` in method `dump`
+MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #1:
+    Missing nullability on parameter `pw` in method `dump`
+MissingNullability: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #2:
+    Missing nullability on parameter `args` in method `dump`
+MissingNullability: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context) parameter #0:
+    Missing nullability on parameter `base` in method `attachBaseContext`
+MissingNullability: android.telephony.NetworkService#onUnbind(android.content.Intent) parameter #0:
+    Missing nullability on parameter `intent` in method `onUnbind`
+MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringDaily(java.time.ZonedDateTime) parameter #0:
+    Missing nullability on parameter `start` in method `createRecurringDaily`
+MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringMonthly(java.time.ZonedDateTime) parameter #0:
+    Missing nullability on parameter `start` in method `createRecurringMonthly`
+MissingNullability: android.telephony.SubscriptionPlan.Builder#createRecurringWeekly(java.time.ZonedDateTime) parameter #0:
+    Missing nullability on parameter `start` in method `createRecurringWeekly`
+MissingNullability: android.telephony.data.DataService#onUnbind(android.content.Intent) parameter #0:
+    Missing nullability on parameter `intent` in method `onUnbind`
+MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String):
+    Missing nullability on method `setServiceId` return
+MissingNullability: android.telephony.mbms.DownloadRequest.Builder#setServiceId(String) parameter #0:
+    Missing nullability on parameter `serviceId` in method `setServiceId`
+
+
+ProtectedMember: android.printservice.recommendation.RecommendationService#attachBaseContext(android.content.Context):
+    Protected methods not allowed; must be public: method android.printservice.recommendation.RecommendationService.attachBaseContext(android.content.Context)}
+ProtectedMember: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]):
+    Protected methods not allowed; must be public: method android.service.contentcapture.ContentCaptureService.dump(java.io.FileDescriptor,java.io.PrintWriter,String[])}
+ProtectedMember: android.service.notification.NotificationAssistantService#attachBaseContext(android.content.Context):
+    Protected methods not allowed; must be public: method android.service.notification.NotificationAssistantService.attachBaseContext(android.content.Context)}
+
+
+SamShouldBeLast: android.accounts.AccountManager#addAccount(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean):
+    
+SamShouldBeLast: android.accounts.AccountManager#addOnAccountsUpdatedListener(android.accounts.OnAccountsUpdateListener, android.os.Handler, boolean, String[]):
+    
+SamShouldBeLast: android.accounts.AccountManager#confirmCredentials(android.accounts.Account, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#editProperties(String, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#finishSession(android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAccountsByTypeAndFeatures(String, String[], android.accounts.AccountManagerCallback<android.accounts.Account[]>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, android.os.Bundle, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthToken(android.accounts.Account, String, boolean, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#getAuthTokenByFeatures(String, String, String[], android.app.Activity, android.os.Bundle, android.os.Bundle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#hasFeatures(android.accounts.Account, String[], android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#isCredentialsUpdateSuggested(android.accounts.Account, String, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#removeAccount(android.accounts.Account, android.accounts.AccountManagerCallback<java.lang.Boolean>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#removeAccount(android.accounts.Account, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#renameAccount(android.accounts.Account, String, android.accounts.AccountManagerCallback<android.accounts.Account>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#startAddAccountSession(String, String, String[], android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#startUpdateCredentialsSession(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.accounts.AccountManager#updateCredentials(android.accounts.Account, String, android.os.Bundle, android.app.Activity, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler):
+    
+SamShouldBeLast: android.app.AlarmManager#set(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.AlarmManager#setExact(int, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.AlarmManager#setWindow(int, long, long, String, android.app.AlarmManager.OnAlarmListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.WallpaperInfo#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.app.WallpaperManager#addOnColorsChangedListener(android.app.WallpaperManager.OnColorsChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.app.admin.DevicePolicyManager#installSystemUpdate(android.content.ComponentName, android.net.Uri, java.util.concurrent.Executor, android.app.admin.DevicePolicyManager.InstallSystemUpdateCallback):
+    
+SamShouldBeLast: android.content.IntentFilter#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.ApplicationInfo#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpBack(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.PackageItemInfo#dumpFront(android.util.Printer, String):
+    
+SamShouldBeLast: android.content.pm.ResolveInfo#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.location.Location#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.location.LocationManager#addNmeaListener(android.location.OnNmeaMessageListener, android.os.Handler):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssMeasurementsCallback(java.util.concurrent.Executor, android.location.GnssMeasurementsEvent.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssNavigationMessageCallback(java.util.concurrent.Executor, android.location.GnssNavigationMessage.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#registerGnssStatusCallback(java.util.concurrent.Executor, android.location.GnssStatus.Callback):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(String, long, float, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(android.location.LocationRequest, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.location.LocationManager#requestLocationUpdates(long, float, android.location.Criteria, java.util.concurrent.Executor, android.location.LocationListener):
+    
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(String, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.location.LocationManager#requestSingleUpdate(android.location.Criteria, android.location.LocationListener, android.os.Looper):
+    
+SamShouldBeLast: android.media.AudioFocusRequest.Builder#setOnAudioFocusChangeListener(android.media.AudioManager.OnAudioFocusChangeListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.AudioManager#requestAudioFocus(android.media.AudioManager.OnAudioFocusChangeListener, int, int):
+    
+SamShouldBeLast: android.media.AudioRecord#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.AudioRecord#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
+    
+SamShouldBeLast: android.media.AudioRecordingMonitor#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
+    
+SamShouldBeLast: android.media.AudioRouting#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.AudioTrack#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    SAM-compatible parameters (such as parameter 1, "listener", in android.media.AudioTrack.addOnRoutingChangedListener) should be last to improve Kotlin interoperability; see https://kotlinlang.org/docs/reference/java-interop.html#sam-conversions
+SamShouldBeLast: android.media.MediaRecorder#addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.MediaRecorder#registerAudioRecordingCallback(java.util.concurrent.Executor, android.media.AudioManager.AudioRecordingCallback):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#addOnActiveSessionsChangedListener(android.media.session.MediaSessionManager.OnActiveSessionsChangedListener, android.content.ComponentName, android.os.Handler):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#addOnSession2TokensChangedListener(android.media.session.MediaSessionManager.OnSession2TokensChangedListener, android.os.Handler):
+    
+SamShouldBeLast: android.media.session.MediaSessionManager#registerCallback(java.util.concurrent.Executor, android.media.session.MediaSessionManager.Callback):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#enableReaderMode(android.app.Activity, android.nfc.NfcAdapter.ReaderCallback, int, android.os.Bundle):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#ignore(android.nfc.Tag, int, android.nfc.NfcAdapter.OnTagRemovedListener, android.os.Handler):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#setBeamPushUrisCallback(android.nfc.NfcAdapter.CreateBeamUrisCallback, android.app.Activity):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#setNdefPushMessageCallback(android.nfc.NfcAdapter.CreateNdefMessageCallback, android.app.Activity, android.app.Activity...):
+    
+SamShouldBeLast: android.nfc.NfcAdapter#setOnNdefPushCompleteCallback(android.nfc.NfcAdapter.OnNdefPushCompleteCallback, android.app.Activity, android.app.Activity...):
+    
+SamShouldBeLast: android.os.Binder#attachInterface(android.os.IInterface, String):
+    
+SamShouldBeLast: android.os.Binder#linkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.Binder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.Handler#dump(android.util.Printer, String):
+    
+SamShouldBeLast: android.os.Handler#postAtTime(Runnable, Object, long):
+    
+SamShouldBeLast: android.os.Handler#postAtTime(Runnable, long):
+    
+SamShouldBeLast: android.os.Handler#postDelayed(Runnable, Object, long):
+    
+SamShouldBeLast: android.os.Handler#postDelayed(Runnable, long):
+    
+SamShouldBeLast: android.os.Handler#removeCallbacks(Runnable, Object):
+    
+SamShouldBeLast: android.os.IBinder#linkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.IBinder#unlinkToDeath(android.os.IBinder.DeathRecipient, int):
+    
+SamShouldBeLast: android.os.RecoverySystem#verifyPackage(java.io.File, android.os.RecoverySystem.ProgressListener, java.io.File):
+    
+SamShouldBeLast: android.view.View#postDelayed(Runnable, long):
+    
+SamShouldBeLast: android.view.View#postOnAnimationDelayed(Runnable, long):
+    
+SamShouldBeLast: android.view.View#scheduleDrawable(android.graphics.drawable.Drawable, Runnable, long):
+    
+SamShouldBeLast: android.view.Window#addOnFrameMetricsAvailableListener(android.view.Window.OnFrameMetricsAvailableListener, android.os.Handler):
+    
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addAccessibilityStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityStateChangeListener, android.os.Handler):
+    
+SamShouldBeLast: android.view.accessibility.AccessibilityManager#addTouchExplorationStateChangeListener(android.view.accessibility.AccessibilityManager.TouchExplorationStateChangeListener, android.os.Handler):
+    
+SamShouldBeLast: android.webkit.WebChromeClient#onShowFileChooser(android.webkit.WebView, android.webkit.ValueCallback<android.net.Uri[]>, android.webkit.WebChromeClient.FileChooserParams):
+    
