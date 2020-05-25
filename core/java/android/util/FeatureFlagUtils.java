@@ -45,8 +45,6 @@ public class FeatureFlagUtils {
     /** @hide */
     public static final String SETTINGS_DO_NOT_RESTORE_PRESERVED =
             "settings_do_not_restore_preserved";
-    /** @hide */
-    public static final String SETTINGS_SCHEDULES_FLAG = "settings_schedules";
 
     private static final Map<String, String> DEFAULT_FLAGS;
 
@@ -69,7 +67,6 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put(SETTINGS_DO_NOT_RESTORE_PRESERVED, "true");
 
         DEFAULT_FLAGS.put("settings_tether_all_in_one", "false");
-        DEFAULT_FLAGS.put(SETTINGS_SCHEDULES_FLAG, "false");
         DEFAULT_FLAGS.put("settings_contextual_home2", "true");
     }
 
