@@ -176,6 +176,7 @@ java_defaults {
     installable: false,
     sdk_version: "module_current",
     libs: [ "stub-annotations" ],
+    java_version: "1.8",
     dist: {
         targets: ["sdk", "win_sdk"],
         dir: "apistubs/android/public",
@@ -187,6 +188,7 @@ java_defaults {
     installable: false,
     sdk_version: "module_current",
     libs: [ "stub-annotations" ],
+    java_version: "1.8",
     dist: {
         targets: ["sdk", "win_sdk"],
         dir: "apistubs/android/system",
@@ -198,6 +200,7 @@ java_defaults {
     installable: false,
     sdk_version: "module_current",
     libs: [ "stub-annotations" ],
+    java_version: "1.8",
     dist: {
         targets: ["sdk", "win_sdk"],
         dir: "apistubs/android/module-lib",
