@@ -3758,11 +3758,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (r == null) {
             return null;
         }
-        final Task task = r.getRootTask();
-        if (task != null && r.isDescendantOf(task)) {
-            if (task != this) Slog.w(TAG, "Illegal state! task does not point to stack it is in. "
-                    + "stack=" + this + " task=" + task + " r=" + r
-                    + " callers=" + Debug.getCallers(15, "\n"));
+        if (r.isDescendantOf(this)) {
             return r;
         }
         return null;
