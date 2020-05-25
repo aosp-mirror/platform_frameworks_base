@@ -82,7 +82,7 @@ android_library {
 
 android_test {
     name: "TetheringTests",
-    certificate: "platform",
+    platform_apis: true,
     test_suites: [
         "device-tests",
         "mts",
