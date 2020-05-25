@@ -153,7 +153,8 @@ public class TaskStackTests extends WindowTestsBase {
 
         // Stack removal is deferred if one of its child is animating.
         doReturn(true).when(stack).hasWindowsAlive();
-        doReturn(true).when(task).isAnimating(eq(TRANSITION | CHILDREN), anyInt());
+        doReturn(stack).when(task).getAnimatingContainer(
+                eq(TRANSITION | CHILDREN), anyInt());
 
         stack.removeIfPossible();
         // For the case of deferred removal the task controller will still be connected to the its

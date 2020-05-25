@@ -64,6 +64,7 @@ import android.graphics.Rect;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.Trace;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Pools;
 import android.util.Slog;
@@ -181,6 +182,14 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     final SurfaceFreezer mSurfaceFreezer;
     protected final WindowManagerService mWmService;
 
+    /**
+     * Sources which triggered a surface animation on this container. An animation target can be
+     * promoted to higher level, for example, from a set of {@link ActivityRecord}s to
+     * {@link ActivityStack}. In this case, {@link ActivityRecord}s are set on this variable while
+     * the animation is running, and reset after finishing it.
+     */
+    private final ArraySet<WindowContainer> mSurfaceAnimationSources = new ArraySet<>();
+
     private final Point mTmpPos = new Point();
     protected final Point mLastSurfacePosition = new Point();
 
@@ -192,8 +201,6 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * surface to the animation leash
      */
     private boolean mCommittedReparentToAnimationLeash;
-
-    private final Configuration mTmpConfig = new Configuration();
 
     /** Interface for {@link #isAnimating} to check which cases for the container is animating. */
     public interface AnimationFlags {
@@ -872,29 +879,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @see AnimationFlags#PARENTS
      * @see AnimationFlags#CHILDREN
      */
-    boolean isAnimating(int flags, int typesToCheck) {
-        int animationType = mSurfaceAnimator.getAnimationType();
-        if (mSurfaceAnimator.isAnimating() && (animationType & typesToCheck) > 0) {
-            return true;
-        }
-        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
-            return true;
-        }
-        if ((flags & PARENTS) != 0) {
-            final WindowContainer parent = getParent();
-            if (parent != null && parent.isAnimating(flags & ~CHILDREN, typesToCheck)) {
-                return true;
-            }
-        }
-        if ((flags & CHILDREN) != 0) {
-            for (int i = 0; i < mChildren.size(); ++i) {
-                final WindowContainer wc = mChildren.get(i);
-                if (wc.isAnimating(flags & ~PARENTS, typesToCheck)) {
-                    return true;
-                }
-            }
-        }
-        return false;
+    final boolean isAnimating(int flags, int typesToCheck) {
+        return getAnimatingContainer(flags, typesToCheck) != null;
     }
 
     /**
@@ -904,16 +890,20 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      *              checking animating status.
      * @param typesToExclude The combination of bitmask {@link AnimationType} to exclude when
      *                     checking if animating.
+     *
+     * @deprecated Use {@link #isAnimating(int, int)}
      */
-    boolean isAnimatingExcluding(int flags, int typesToExclude) {
+    @Deprecated
+    final boolean isAnimatingExcluding(int flags, int typesToExclude) {
         return isAnimating(flags, ANIMATION_TYPE_ALL & ~typesToExclude);
     }
 
     /**
-     * @see #isAnimating(int, int)
+     * @deprecated Use {@link #isAnimating(int, int)}
      * TODO (b/152333373): Migrate calls to use isAnimating with specified animation type
      */
-    boolean isAnimating(int flags) {
+    @Deprecated
+    final boolean isAnimating(int flags) {
         return isAnimating(flags, ANIMATION_TYPE_ALL);
     }
 
@@ -2107,8 +2097,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void cancelAnimation() {
+        doAnimationFinished(mSurfaceAnimator.getAnimationType(), mSurfaceAnimator.getAnimation());
         mSurfaceAnimator.cancelAnimation();
         mSurfaceFreezer.unfreeze(getPendingTransaction());
+    }
+
+    ArraySet<WindowContainer> getAnimationSources() {
+        return mSurfaceAnimationSources;
     }
 
     @Override
@@ -2156,6 +2151,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @param transit The app transition type indicates what kind of transition to be applied.
      * @param enter Whether the app transition is entering transition or not.
      * @param isVoiceInteraction Whether the container is participating in voice interaction or not.
+     * @param sources {@link ActivityRecord}s which causes this app transition animation.
      *
      * @return {@code true} when the container applied the app transition, {@code false} if the
      *         app transition is disabled or skipped.
@@ -2163,7 +2159,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @see #getAnimationAdapter
      */
     boolean applyAnimation(WindowManager.LayoutParams lp, int transit, boolean enter,
-            boolean isVoiceInteraction, @Nullable OnAnimationFinishedCallback finishedCallback) {
+            boolean isVoiceInteraction, @Nullable ArrayList<WindowContainer> sources) {
         if (mWmService.mDisableTransitionAnimation) {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS_ANIM,
                     "applyAnimation: transition animation is disabled or skipped. "
@@ -2178,7 +2174,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "WC#applyAnimation");
             if (okToAnimate()) {
-                applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, finishedCallback);
+                applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, sources);
             } else {
                 cancelAnimation();
             }
@@ -2276,14 +2272,17 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     protected void applyAnimationUnchecked(WindowManager.LayoutParams lp, boolean enter,
             int transit, boolean isVoiceInteraction,
-            @Nullable OnAnimationFinishedCallback finishedCallback) {
+            @Nullable ArrayList<WindowContainer> sources) {
         final Pair<AnimationAdapter, AnimationAdapter> adapters = getAnimationAdapter(lp,
                 transit, enter, isVoiceInteraction);
         AnimationAdapter adapter = adapters.first;
         AnimationAdapter thumbnailAdapter = adapters.second;
         if (adapter != null) {
+            if (sources != null) {
+                mSurfaceAnimationSources.addAll(sources);
+            }
             startAnimation(getPendingTransaction(), adapter, !isVisible(),
-                    ANIMATION_TYPE_APP_TRANSITION, finishedCallback);
+                    ANIMATION_TYPE_APP_TRANSITION);
             if (adapter.getShowWallpaper()) {
                 getDisplayContent().pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
             }
@@ -2411,10 +2410,18 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         updateSurfacePosition(t);
     }
 
+    private void doAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
+        for (int i = 0; i < mSurfaceAnimationSources.size(); ++i) {
+            mSurfaceAnimationSources.valueAt(i).onAnimationFinished(type, anim);
+        }
+        mSurfaceAnimationSources.clear();
+    }
+
     /**
      * Called when an animation has finished running.
      */
     protected void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {
+        doAnimationFinished(type, anim);
         mWmService.onAnimationFinished();
     }
 
@@ -2428,16 +2435,66 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     /**
      * @return The {@link WindowContainer} which is running an animation.
      *
-     * It traverses from the current container to its parents recursively. If nothing is animating,
-     * it will return {@code null}.
+     * By default this only checks if this container itself is actually running an animation, but
+     * you can extend the check target over its relatives, or relax the condition so that this can
+     * return {@code WindowContainer} if an animation starts soon by giving a combination
+     * of {@link AnimationFlags}.
+     *
+     * Note that you can give a combination of bitmask flags to specify targets and condition for
+     * checking animating status.
+     * e.g. {@code isAnimating(TRANSITION | PARENT)} returns {@code true} if either this
+     * container itself or one of its parents is running an animation or waiting for an app
+     * transition.
+     *
+     * Note that TRANSITION propagates to parents and children as well.
+     *
+     * @param flags The combination of bitmask flags to specify targets and condition for
+     *              checking animating status.
+     * @param typesToCheck The combination of bitmask {@link AnimationType} to compare when
+     *                     determining if animating.
+     *
+     * @see AnimationFlags#TRANSITION
+     * @see AnimationFlags#PARENTS
+     * @see AnimationFlags#CHILDREN
      */
     @Nullable
-    WindowContainer getAnimatingContainer() {
-        if (isAnimating()) {
+    WindowContainer getAnimatingContainer(int flags, int typesToCheck) {
+        int animationType = mSurfaceAnimator.getAnimationType();
+        if (mSurfaceAnimator.isAnimating() && (animationType & typesToCheck) > 0) {
             return this;
         }
-        final WindowContainer parent = getParent();
-        return (parent != null) ? parent.getAnimatingContainer() : null;
+        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
+            return this;
+        }
+        if ((flags & PARENTS) != 0) {
+            final WindowContainer parent = getParent();
+            if (parent != null) {
+                final WindowContainer wc = parent.getAnimatingContainer(
+                        flags & ~CHILDREN, typesToCheck);
+                if (wc != null) {
+                    return wc;
+                }
+            }
+        }
+        if ((flags & CHILDREN) != 0) {
+            for (int i = 0; i < mChildren.size(); ++i) {
+                final WindowContainer wc = mChildren.get(i).getAnimatingContainer(
+                        flags & ~PARENTS, typesToCheck);
+                if (wc != null) {
+                    return wc;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @deprecated Use {@link #getAnimatingContainer(int, int)} instead.
+     */
+    @Nullable
+    @Deprecated
+    final WindowContainer getAnimatingContainer() {
+        return getAnimatingContainer(PARENTS, ANIMATION_TYPE_ALL);
     }
 
     /**

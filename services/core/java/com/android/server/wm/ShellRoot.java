@@ -104,7 +104,7 @@ public class ShellRoot {
                         0 /* windowCornerRadius */),
                 mDisplayContent.mWmService.mSurfaceAnimationRunner);
         mToken.startAnimation(mToken.getPendingTransaction(), adapter, false /* hidden */,
-                ANIMATION_TYPE_WINDOW_ANIMATION, null /* animationFinishedCallback */);
+                ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
     WindowInfo getWindowInfo() {
