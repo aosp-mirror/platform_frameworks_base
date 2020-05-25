@@ -85,12 +85,6 @@
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "-1953668890": {
-      "message": "Can't start recents animation, nextAppTransition=%s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
     "-1949279037": {
       "message": "Attempted to add input method window with bad token %s.  Aborting.",
       "level": "WARN",
@@ -889,12 +883,6 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
-    "-242787066": {
-      "message": "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/WindowContainer.java"
-    },
     "-198463978": {
       "message": "updateRotationUnchecked: alwaysSendConfiguration=%b forceRelayout=%b",
       "level": "VERBOSE",
@@ -1134,6 +1122,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
+    },
+    "210750281": {
+      "message": "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/Task.java"
     },
     "221540118": {
       "message": "mUserActivityTimeout set to %d",
@@ -1543,23 +1537,11 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowToken.java"
     },
-    "845234215": {
-      "message": "App is requesting an orientation, return %d for display id=%d",
-      "level": "VERBOSE",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
-    },
     "853091290": {
       "message": "Moved stack=%s behind stack=%s",
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
-    "854237232": {
-      "message": "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "873914452": {
       "message": "goodToGo()",
