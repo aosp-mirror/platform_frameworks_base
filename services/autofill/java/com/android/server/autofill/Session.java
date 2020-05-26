@@ -2588,14 +2588,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             id)) {
                         // Regular autofill handled the view and returned null response, but it
                         // triggered augmented autofill
-                        if (!isSameViewEntered) {
+                        if (!isSameViewEntered || mExpiredResponse) {
                             if (sDebug) Slog.d(TAG, "trigger augmented autofill.");
                             triggerAugmentedAutofillLocked(flags);
                         } else {
                             if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
                         }
                         return;
-                    } else if (mForAugmentedAutofillOnly && isSameViewEntered) {
+                    } else if (mForAugmentedAutofillOnly && isSameViewEntered
+                            && !mExpiredResponse) {
                         // Regular autofill is disabled.
                         if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
                         return;
