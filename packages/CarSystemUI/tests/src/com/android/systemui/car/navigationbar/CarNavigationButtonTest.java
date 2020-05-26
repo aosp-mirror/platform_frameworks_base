@@ -180,6 +180,56 @@ public class CarNavigationButtonTest extends SysuiTestCase {
     }
 
     @Test
+    public void onUnselected_withAppIcon_showsAppIcon() {
+        CarNavigationButton roleBasedButton = mTestView.findViewById(R.id.role_based_button);
+        Drawable appIcon = getContext().getDrawable(R.drawable.ic_android);
+
+        roleBasedButton.setSelected(false);
+        roleBasedButton.setAppIcon(appIcon);
+
+        Drawable currentDrawable = ((AlphaOptimizedImageButton) roleBasedButton.findViewById(
+                R.id.car_nav_button_icon_image)).getDrawable();
+
+        assertThat(currentDrawable).isEqualTo(appIcon);
+    }
+
+    @Test
+    public void onUnselected_withAppIcon_applyUnselectedAlpha() {
+        CarNavigationButton roleBasedButton = mTestView.findViewById(R.id.role_based_button);
+
+        roleBasedButton.setSelected(false);
+        roleBasedButton.setAppIcon(getContext().getDrawable(R.drawable.ic_android));
+
+        assertThat(roleBasedButton.getAlpha()).isEqualTo(
+                CarNavigationButton.DEFAULT_UNSELECTED_ALPHA);
+    }
+
+    @Test
+    public void onSelected_withAppIcon_showsAppIconWithSelectedAlpha() {
+        CarNavigationButton roleBasedButton = mTestView.findViewById(R.id.role_based_button);
+        Drawable appIcon = getContext().getDrawable(R.drawable.ic_android);
+
+        roleBasedButton.setSelected(true);
+        roleBasedButton.setAppIcon(appIcon);
+
+        Drawable currentDrawable = ((AlphaOptimizedImageButton) roleBasedButton.findViewById(
+                R.id.car_nav_button_icon_image)).getDrawable();
+
+        assertThat(currentDrawable).isEqualTo(appIcon);
+    }
+
+    @Test
+    public void onSelected_withAppIcon_applySelectedAlpha() {
+        CarNavigationButton roleBasedButton = mTestView.findViewById(R.id.role_based_button);
+
+        roleBasedButton.setSelected(true);
+        roleBasedButton.setAppIcon(getContext().getDrawable(R.drawable.ic_android));
+
+        assertThat(roleBasedButton.getAlpha()).isEqualTo(
+                CarNavigationButton.DEFAULT_SELECTED_ALPHA);
+    }
+
+    @Test
     public void onClick_launchesIntentActivity() {
         mDefaultButton.performClick();
 
