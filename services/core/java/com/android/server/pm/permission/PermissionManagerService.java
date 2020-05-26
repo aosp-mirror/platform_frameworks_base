@@ -4948,6 +4948,20 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         StorageManager.UUID_PRIVATE_INTERNAL, true, mDefaultPermissionCallback);
             }
         }
+
+        @Override
+        public void retainHardAndSoftRestrictedPermissions(@NonNull List<String> permissions) {
+            synchronized (mLock) {
+                Iterator<String> iterator = permissions.iterator();
+                while (iterator.hasNext()) {
+                    String permission = iterator.next();
+                    BasePermission basePermission = mSettings.mPermissions.get(permission);
+                    if (basePermission == null || !basePermission.isHardOrSoftRestricted()) {
+                        iterator.remove();
+                    }
+                }
+            }
+        }
     }
 
     private static final class OnPermissionChangeListeners extends Handler {
