@@ -61,9 +61,7 @@ public class BubbleOverflow implements BubbleViewProvider {
     }
 
     void setUpOverflow(ViewGroup parentViewGroup, BubbleStackView stackView) {
-        mBitmapSize = mContext.getResources().getDimensionPixelSize(R.dimen.bubble_bitmap_size);
-        mIconBitmapSize = mContext.getResources().getDimensionPixelSize(
-                R.dimen.bubble_overflow_icon_bitmap_size);
+        updateDimensions();
 
         mExpandedView = (BubbleExpandedView) mInflater.inflate(
                 R.layout.bubble_expanded_view, parentViewGroup /* root */,
@@ -72,6 +70,15 @@ public class BubbleOverflow implements BubbleViewProvider {
         mExpandedView.setStackView(stackView);
 
         updateIcon(mContext, parentViewGroup);
+    }
+
+    void updateDimensions() {
+        mBitmapSize = mContext.getResources().getDimensionPixelSize(R.dimen.bubble_bitmap_size);
+        mIconBitmapSize = mContext.getResources().getDimensionPixelSize(
+                R.dimen.bubble_overflow_icon_bitmap_size);
+        if (mExpandedView != null) {
+            mExpandedView.updateDimensions();
+        }
     }
 
     void updateIcon(Context context, ViewGroup parentViewGroup) {
