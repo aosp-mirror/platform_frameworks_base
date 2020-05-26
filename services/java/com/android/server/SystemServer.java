@@ -180,6 +180,8 @@ import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
+import libcore.timezone.ZoneInfoDb;
+
 import dalvik.system.VMRuntime;
 
 import com.google.android.startop.iorap.IorapForwardingService;
@@ -438,8 +440,9 @@ public final class SystemServer {
             // Default the timezone property to GMT if not set.
             //
             String timezoneProperty = SystemProperties.get("persist.sys.timezone");
-            if (timezoneProperty == null || timezoneProperty.isEmpty()) {
-                Slog.w(TAG, "Timezone not set; setting to GMT.");
+            if (!isValidTimeZoneId(timezoneProperty)) {
+                Slog.w(TAG, "persist.sys.timezone is not valid (" + timezoneProperty
+                        + "); setting to GMT.");
                 SystemProperties.set("persist.sys.timezone", "GMT");
             }
 
@@ -615,6 +618,12 @@ public final class SystemServer {
         // Loop forever.
         Looper.loop();
         throw new RuntimeException("Main thread loop unexpectedly exited");
+    }
+
+    private static boolean isValidTimeZoneId(String timezoneProperty) {
+        return timezoneProperty != null
+                && !timezoneProperty.isEmpty()
+                && ZoneInfoDb.getInstance().hasTimeZone(timezoneProperty);
     }
 
     private boolean isFirstBootOrUpgrade() {
