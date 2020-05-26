@@ -138,7 +138,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         // Rotation is ignored so because the display size is close to square (700/600<1.333).
         assertTrue(mActivity.mDisplayContent.ignoreRotationForApps());
 
-        final Rect displayBounds = mActivity.mDisplayContent.getBounds();
+        final Rect displayBounds = mActivity.mDisplayContent.getWindowConfiguration().getBounds();
         final float aspectRatio = 1.2f;
         mActivity.info.minAspectRatio = mActivity.info.maxAspectRatio = aspectRatio;
         prepareUnresizable(-1f, SCREEN_ORIENTATION_UNSPECIFIED);
@@ -160,13 +160,22 @@ public class SizeCompatTests extends ActivityTestsBase {
         assertFitted();
 
         // After the orientation of activity is changed, even display is not rotated, the aspect
-        // ratio should be the same (bounds=[0, 0 - 600, 600], appBounds=[0, 100 - 600, 600]).
+        // ratio should be the same (appBounds=[9, 100 - 592, 800], x-offset=round((600-583)/2)=9).
         assertEquals(appBounds.width(), appBounds.height() * aspectRatio, 0.5f /* delta */);
         // The notch is still on top.
         assertEquals(mActivity.getBounds().height(), appBounds.height() + notchHeight);
 
         mActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
         assertFitted();
+
+        // Close-to-square display can rotate without being restricted by the requested orientation.
+        // The notch becomes on the left side. The activity is horizontal centered in 100 ~ 800.
+        // So the bounds and appBounds will be [200, 0 - 700, 600] (500x600) that is still fitted.
+        // Left = 100 + (800 - 100 - 500) / 2 = 200.
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
+        assertFitted();
+        assertEquals(appBounds.left,
+                notchHeight + (displayBounds.width() - notchHeight - appBounds.width()) / 2);
     }
 
     @Test
