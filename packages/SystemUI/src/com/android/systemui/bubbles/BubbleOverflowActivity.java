@@ -92,6 +92,14 @@ public class BubbleOverflowActivity extends Activity {
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
         mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
 
+        updateDimensions();
+        onDataChanged(mBubbleController.getOverflowBubbles());
+        mBubbleController.setOverflowCallback(() -> {
+            onDataChanged(mBubbleController.getOverflowBubbles());
+        });
+    }
+
+    void updateDimensions() {
         Resources res = getResources();
         final int columns = res.getInteger(R.integer.bubbles_overflow_columns);
         mRecyclerView.setLayoutManager(
@@ -99,8 +107,9 @@ public class BubbleOverflowActivity extends Activity {
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-        final int recyclerViewWidth = (displayMetrics.widthPixels
-                - res.getDimensionPixelSize(R.dimen.bubble_overflow_padding));
+
+        final int overflowPadding = res.getDimensionPixelSize(R.dimen.bubble_overflow_padding);
+        final int recyclerViewWidth = displayMetrics.widthPixels - (overflowPadding * 2);
         final int viewWidth = recyclerViewWidth / columns;
 
         final int maxOverflowBubbles = res.getInteger(R.integer.bubbles_max_overflow);
@@ -112,17 +121,12 @@ public class BubbleOverflowActivity extends Activity {
         mAdapter = new BubbleOverflowAdapter(getApplicationContext(), mOverflowBubbles,
                 mBubbleController::promoteBubbleFromOverflow, viewWidth, viewHeight);
         mRecyclerView.setAdapter(mAdapter);
-        onDataChanged(mBubbleController.getOverflowBubbles());
-        mBubbleController.setOverflowCallback(() -> {
-            onDataChanged(mBubbleController.getOverflowBubbles());
-        });
-        onThemeChanged();
     }
 
     /**
      * Handle theme changes.
      */
-    void onThemeChanged() {
+    void updateTheme() {
         final int mode =
                 getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         switch (mode) {
@@ -181,7 +185,8 @@ public class BubbleOverflowActivity extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        onThemeChanged();
+        updateDimensions();
+        updateTheme();
     }
 
     @Override
