@@ -36,6 +36,7 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.AsyncTask;
+import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -90,7 +91,8 @@ import dagger.Lazy;
 public class NotificationMediaManager implements Dumpable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
-    private static final long PAUSED_MEDIA_TIMEOUT = TimeUnit.MINUTES.toMillis(10);
+    private static final long PAUSED_MEDIA_TIMEOUT = SystemProperties
+            .getLong("debug.sysui.media_timeout", TimeUnit.MINUTES.toMillis(10));
 
     private final StatusBarStateController mStatusBarStateController
             = Dependency.get(StatusBarStateController.class);
@@ -163,6 +165,9 @@ public class NotificationMediaManager implements Dumpable {
                 Log.v(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: " + state);
             }
             if (mMediaTimeoutCancellation != null) {
+                if (DEBUG_MEDIA) {
+                    Log.v(TAG, "DEBUG_MEDIA: media timeout cancelled");
+                }
                 mMediaTimeoutCancellation.run();
                 mMediaTimeoutCancellation = null;
             }
@@ -182,8 +187,16 @@ public class NotificationMediaManager implements Dumpable {
             }
             if (entry != null) {
                 if (!isPlayingState(state.getState())) {
+                    if (DEBUG_MEDIA) {
+                        Log.v(TAG, "DEBUG_MEDIA: schedule timeout for "
+                                + mMediaNotificationKey);
+                    }
                     mMediaTimeoutCancellation = mMainExecutor.executeDelayed(() -> {
                         synchronized (mEntryManager) {
+                            if (DEBUG_MEDIA) {
+                                Log.v(TAG, "DEBUG_MEDIA: execute timeout for "
+                                        + mMediaNotificationKey);
+                            }
                             if (mMediaNotificationKey == null) {
                                 return;
                             }
@@ -375,21 +388,18 @@ public class NotificationMediaManager implements Dumpable {
                             UserHandle.USER_ALL);
 
                     for (MediaController aController : sessions) {
-                        if (PlaybackState.STATE_PLAYING ==
-                                getMediaControllerPlaybackState(aController)) {
-                            // now to see if we have one like this
-                            final String pkg = aController.getPackageName();
+                        // now to see if we have one like this
+                        final String pkg = aController.getPackageName();
 
-                            for (NotificationEntry entry : allNotifications) {
-                                if (entry.getSbn().getPackageName().equals(pkg)) {
-                                    if (DEBUG_MEDIA) {
-                                        Log.v(TAG, "DEBUG_MEDIA: found controller matching "
-                                                + entry.getSbn().getKey());
-                                    }
-                                    controller = aController;
-                                    mediaNotification = entry;
-                                    break;
+                        for (NotificationEntry entry : allNotifications) {
+                            if (entry.getSbn().getPackageName().equals(pkg)) {
+                                if (DEBUG_MEDIA) {
+                                    Log.v(TAG, "DEBUG_MEDIA: found controller matching "
+                                            + entry.getSbn().getKey());
                                 }
+                                controller = aController;
+                                mediaNotification = entry;
+                                break;
                             }
                         }
                     }
