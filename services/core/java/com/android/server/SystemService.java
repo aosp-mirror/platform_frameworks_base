@@ -68,8 +68,7 @@ import java.util.List;
 public abstract class SystemService {
 
     /** @hide */
-    // TODO(b/133242016) STOPSHIP: change to false before R ships
-    protected static final boolean DEBUG_USER = true;
+    protected static final boolean DEBUG_USER = false;
 
     /*
      * The earliest boot phase the system send to system services on boot.
