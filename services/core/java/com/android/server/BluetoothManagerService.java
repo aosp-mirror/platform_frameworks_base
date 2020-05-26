@@ -957,7 +957,8 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
     }
 
     /**
-     * Call IBluetooth.onLeServiceUp() to continue if Bluetooth should be on.
+     * Call IBluetooth.onLeServiceUp() to continue if Bluetooth should be on,
+     * call IBluetooth.onBrEdrDown() to disable if Bluetooth should be off.
      */
     private void continueFromBleOnState() {
         if (DBG) {
@@ -969,11 +970,10 @@ class BluetoothManagerService extends IBluetoothManager.Stub {
                 Slog.e(TAG, "onBluetoothServiceUp: mBluetooth is null!");
                 return;
             }
-            if (!mEnableExternal && !isBleAppPresent() && isAirplaneModeOn()) {
-                // Airplane mode is turned on while enabling BLE only mode, disable
-                // BLE now.
-                disableBleScanMode();
-                sendBrEdrDownCallback();
+            if (!mEnableExternal && !isBleAppPresent()) {
+                Slog.i(TAG, "Bluetooth was disabled while enabling BLE, disable BLE now");
+                mEnable = false;
+                mBluetooth.onBrEdrDown();
                 return;
             }
             if (isBluetoothPersistedStateOnBluetooth() || !isBleAppPresent()) {
