@@ -129,6 +129,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
+import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.NotificationShadeDepthController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
@@ -238,10 +239,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final Executor mBackgroundExecutor;
     private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
     private ControlsController mControlsController;
-    private SharedPreferences mControlsPreferences;
     private final RingerModeTracker mRingerModeTracker;
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     private Handler mMainHandler;
+    private CurrentUserContextTracker mCurrentUserContextTracker;
     @VisibleForTesting
     boolean mShowLockScreenCardsAndControls = false;
 
@@ -301,7 +302,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             @Background Executor backgroundExecutor,
             ControlsListingController controlsListingController,
             ControlsController controlsController, UiEventLogger uiEventLogger,
-            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler) {
+            RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
+            CurrentUserContextTracker currentUserContextTracker) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -330,6 +332,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mControlsController = controlsController;
         mSysUiState = sysUiState;
         mMainHandler = handler;
+        mCurrentUserContextTracker = currentUserContextTracker;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -382,12 +385,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         controlsListingController.addCallback(list -> mControlsServiceInfos = list);
 
-        // Need to be user-specific with the context to make sure we read the correct prefs
-        Context userContext = context.createContextAsUser(
-                new UserHandle(mUserManager.getUserHandle()), 0);
-        mControlsPreferences = userContext.getSharedPreferences(PREFS_CONTROLS_FILE,
-            Context.MODE_PRIVATE);
-
         // Listen for changes to show controls on the power menu while locked
         onPowerMenuLockScreenSettingsChanged();
         mContext.getContentResolver().registerContentObserver(
@@ -403,8 +400,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private void seedFavorites() {
         if (mControlsServiceInfos.isEmpty()
-                || mControlsController.getFavorites().size() > 0
-                || mControlsPreferences.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false)) {
+                || mControlsController.getFavorites().size() > 0) {
+            return;
+        }
+
+        // Need to be user-specific with the context to make sure we read the correct prefs
+        SharedPreferences prefs = mCurrentUserContextTracker.getCurrentUserContext()
+                .getSharedPreferences(PREFS_CONTROLS_FILE, Context.MODE_PRIVATE);
+        if (prefs.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false)) {
             return;
         }
 
@@ -426,7 +429,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         if (preferredComponent == null) {
             Log.i(TAG, "Controls seeding: No preferred component has been set, will not seed");
-            mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
+            prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
             return;
         }
 
@@ -434,8 +437,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 preferredComponent,
                 (accepted) -> {
                     Log.i(TAG, "Controls seeded: " + accepted);
-                    mControlsPreferences.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED,
-                        accepted).apply();
+                    prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, accepted).apply();
                 });
     }
 
