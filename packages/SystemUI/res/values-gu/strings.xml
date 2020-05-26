@@ -77,6 +77,12 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"સ્ક્રીન ભરવા માટે ઝૂમ કરો"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"સ્ક્રીન ભરવા માટે ખેંચો"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"સ્ક્રીનશૉટ"</string>
+    <!-- no translation found for global_action_lock_message (4466026255205186456) -->
+    <skip />
+    <!-- no translation found for global_action_lock_message (7621167597240332986) -->
+    <skip />
+    <!-- no translation found for global_action_lock_message (538790401275363781) -->
+    <skip />
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"છબી મોકલી"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"સ્ક્રીનશોટ સાચવી રહ્યું છે…"</string>
@@ -323,6 +329,8 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS દ્વારા સ્થાન સેટ કરાયું"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"સ્થાન વિનંતીઓ સક્રિય"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"\'સેન્સર બંધ છે\'ની સુવિધા સક્રિય છે"</string>
+    <!-- no translation found for accessibility_media_active (4942087422908239969) -->
+    <skip />
     <string name="accessibility_clear_all" msgid="970525598287244592">"બધા સૂચનો સાફ કરો."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -511,8 +519,10 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"મેનેજ કરો"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ઇતિહાસ"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"ઇનકમિંગ"</string>
-    <string name="notification_section_header_gentle" msgid="3044910806569985386">"સાઇલન્ટ નોટિફિકેશન"</string>
-    <string name="notification_section_header_alerting" msgid="3168140660646863240">"નોટિફિકેશન બદલી રહ્યાં છીએ"</string>
+    <!-- no translation found for notification_section_header_gentle (6804099527336337197) -->
+    <skip />
+    <!-- no translation found for notification_section_header_alerting (5581175033680477651) -->
+    <skip />
     <string name="notification_section_header_conversations" msgid="821834744538345661">"વાતચીત"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"બધા સાઇલન્ટ નોટિફિકેશન સાફ કરો"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
@@ -707,13 +717,20 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"નોટિફિકેશન બંધ કરો"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"આ ઍપમાંથી નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"સાઇલન્ટ"</string>
-    <string name="notification_alert_title" msgid="7629202599338071971">"અલર્ટ કરવાનું ચાલુ રાખો"</string>
+    <!-- no translation found for notification_alert_title (3656229781017543655) -->
+    <skip />
     <string name="notification_bubble_title" msgid="8330481035191903164">"બબલ"</string>
-    <string name="notification_channel_summary_low" msgid="7300447764759926720">"તમને સાઉન્ડ અથવા વાઇબ્રેશન વિના ફોકસ કરવામાં સહાય કરે છે."</string>
-    <string name="notification_channel_summary_default" msgid="3539949463907902037">"સાઉન્ડ અથવા વાઇબ્રેશન વિના તમારું ધ્યાન દોરે છે."</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="6298026344552480458">"સાઉન્ડ અથવા વાઇબ્રેશન વિના તમારું ધ્યાન દોરે છે. ડિફૉલ્ટ તરીકે <xliff:g id="APP_NAME">%1$s</xliff:g> બબલની વાતચીત."</string>
+    <!-- no translation found for notification_channel_summary_low (4860617986908931158) -->
+    <skip />
+    <!-- no translation found for notification_conversation_summary_low (1734433426085468009) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default (3282930979307248890) -->
+    <skip />
+    <!-- no translation found for notification_channel_summary_default_with_bubbles (1782419896613644568) -->
+    <skip />
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ફ્લોટિંગ શૉર્ટકટથી આ કન્ટેન્ટ પર તમારું ધ્યાન દોરી રાખે છે."</string>
-    <string name="notification_channel_summary_priority" msgid="7415770044553264622">"વાતચીત વિભાગની ટોચ પર બતાવે છે અને બબલ તરીકે દેખાય છે."</string>
+    <!-- no translation found for notification_channel_summary_priority (7952654515769021553) -->
+    <skip />
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"સેટિંગ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"પ્રાધાન્યતા"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> વાતચીત માટેના ચોક્કસ સેટિંગને સપોર્ટ કરતી નથી"</string>

@@ -1123,6 +1123,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "210750281": {
+      "message": "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
+      "at": "com\/android\/server\/wm\/Task.java"
+    },
     "221540118": {
       "message": "mUserActivityTimeout set to %d",
       "level": "DEBUG",
@@ -1536,12 +1542,6 @@
       "level": "DEBUG",
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimation.java"
-    },
-    "854237232": {
-      "message": "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_RECENTS_ANIMATIONS",
-      "at": "com\/android\/server\/wm\/Task.java"
     },
     "873914452": {
       "message": "goodToGo()",
