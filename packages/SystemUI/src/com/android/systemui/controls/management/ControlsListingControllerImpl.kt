@@ -29,6 +29,7 @@ import com.android.settingslib.widget.CandidateInfo
 import com.android.systemui.controls.ControlsServiceInfo
 import com.android.systemui.dagger.qualifiers.Background
 import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -75,6 +76,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
 
     private var availableComponents = emptySet<ComponentName>()
     private var availableServices = emptyList<ServiceInfo>()
+    private var userChangeInProgress = AtomicInteger(0)
 
     override var currentUserId = ActivityManager.getCurrentUser()
         private set
@@ -85,6 +87,7 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
             newServices.mapTo(mutableSetOf<ComponentName>(), { s -> s.getComponentName() })
 
         backgroundExecutor.execute {
+            if (userChangeInProgress.get() > 0) return@execute
             if (!newComponents.equals(availableComponents)) {
                 Log.d(TAG, "ServiceConfig reloaded, count: ${newComponents.size}")
                 availableComponents = newComponents
@@ -105,22 +108,18 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
     }
 
     override fun changeUser(newUser: UserHandle) {
+        userChangeInProgress.incrementAndGet()
+        serviceListing.setListening(false)
+
         backgroundExecutor.execute {
-            serviceListing.setListening(false)
-
-            // Notify all callbacks in order to clear their existing state prior to attaching
-            // a new listener
-            availableServices = emptyList()
-            callbacks.forEach {
-                it.onServicesUpdated(emptyList())
+            if (userChangeInProgress.decrementAndGet() == 0) {
+                currentUserId = newUser.identifier
+                val contextForUser = context.createContextAsUser(newUser, 0)
+                serviceListing = serviceListingBuilder(contextForUser)
+                serviceListing.addCallback(serviceListingCallback)
+                serviceListing.setListening(true)
+                serviceListing.reload()
             }
-
-            currentUserId = newUser.identifier
-            val contextForUser = context.createContextAsUser(newUser, 0)
-            serviceListing = serviceListingBuilder(contextForUser)
-            serviceListing.addCallback(serviceListingCallback)
-            serviceListing.setListening(true)
-            serviceListing.reload()
         }
     }
 
@@ -134,10 +133,16 @@ class ControlsListingControllerImpl @VisibleForTesting constructor(
      */
     override fun addCallback(listener: ControlsListingController.ControlsListingCallback) {
         backgroundExecutor.execute {
-            val services = getCurrentServices()
-            Log.d(TAG, "Subscribing callback, service count: ${services.size}")
-            callbacks.add(listener)
-            listener.onServicesUpdated(services)
+            if (userChangeInProgress.get() > 0) {
+                // repost this event, as callers may rely on the initial callback from
+                // onServicesUpdated
+                addCallback(listener)
+            } else {
+                val services = getCurrentServices()
+                Log.d(TAG, "Subscribing callback, service count: ${services.size}")
+                callbacks.add(listener)
+                listener.onServicesUpdated(services)
+            }
         }
     }
 
