@@ -310,8 +310,6 @@ java_defaults {
     name: "android_defaults_stubs_current",
     libs: [ "stub-annotations" ],
     static_libs: [
-        "private-stub-annotations-jar",
-
         // License notices from art module
         "art-notices-for-framework-stubs-jar",
     ],
@@ -329,6 +327,7 @@ java_defaults {
 java_library_static {
     name: "android_monolith_stubs_current",
     srcs: [ ":api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
@@ -345,6 +344,7 @@ java_library_static {
         "framework-statsd-stubs-publicapi",
         "framework-tethering-stubs-publicapi",
         "framework-wifi-stubs-publicapi",
+        "private-stub-annotations-jar",
     ],
     defaults: ["android_defaults_stubs_current"],
 }
@@ -358,6 +358,7 @@ java_library_static {
 java_library_static {
     name: "android_system_monolith_stubs_current",
     srcs: [ ":system-api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 
@@ -375,6 +376,7 @@ java_library_static {
         "framework-statsd-stubs-systemapi",
         "framework-tethering-stubs-systemapi",
         "framework-wifi-stubs-systemapi",
+        "private-stub-annotations-jar",
     ],
     defaults: ["android_defaults_stubs_current"],
 }
@@ -388,6 +390,7 @@ java_library_static {
 java_library_static {
     name: "android_test_stubs_current",
     srcs: [ ":test-api-stubs-docs" ],
+    static_libs: [ "private-stub-annotations-jar" ],
     defaults: ["android_defaults_stubs_current"],
 }
 

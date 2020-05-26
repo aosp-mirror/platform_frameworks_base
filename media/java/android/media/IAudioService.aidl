@@ -40,6 +40,7 @@ import android.media.audiopolicy.AudioVolumeGroup;
 import android.media.audiopolicy.IAudioPolicyCallback;
 import android.media.projection.IMediaProjection;
 import android.net.Uri;
+import android.view.KeyEvent;
 
 /**
  * {@hide}
@@ -77,6 +78,9 @@ interface IAudioService {
 
     @UnsupportedAppUsage
     void setStreamVolume(int streamType, int index, int flags, String callingPackage);
+
+    oneway void handleVolumeKey(in KeyEvent event, boolean isOnTv,
+            String callingPackage, String caller);
 
     boolean isStreamMute(int streamType);
 

@@ -125,6 +125,10 @@ stubs_defaults {
     args: mainline_framework_stubs_args,
     installable: false,
     sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
     check_api: {
         current: {
@@ -147,6 +151,10 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
     check_api: {
         current: {
@@ -167,6 +175,8 @@ java_defaults {
     name: "framework-module-stubs-lib-defaults-publicapi",
     installable: false,
     sdk_version: "module_current",
+    libs: [ "stub-annotations" ],
+    java_version: "1.8",
     dist: {
         targets: ["sdk", "win_sdk"],
         dir: "apistubs/android/public",
@@ -177,6 +187,8 @@ java_defaults {
     name: "framework-module-stubs-lib-defaults-systemapi",
     installable: false,
     sdk_version: "module_current",
+    libs: [ "stub-annotations" ],
+    java_version: "1.8",
     dist: {
         targets: ["sdk", "win_sdk"],
         dir: "apistubs/android/system",
@@ -187,6 +199,8 @@ java_defaults {
     name: "framework-module-stubs-lib-defaults-module_libs_api",
     installable: false,
     sdk_version: "module_current",
+    libs: [ "stub-annotations" ],
+    java_version: "1.8",
     dist: {
         targets: ["sdk", "win_sdk"],
         dir: "apistubs/android/module-lib",
@@ -204,6 +218,10 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
 
     // Do not generate stubs as they are not needed
@@ -230,6 +248,10 @@ stubs_defaults {
     libs: ["framework-annotations-lib"],
     installable: false,
     sdk_version: "module_current",
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: framework_packages_to_document,
 }
 
@@ -237,6 +259,10 @@ stubs_defaults {
     name: "service-module-stubs-srcs-defaults",
     args: mainline_service_stubs_args,
     installable: false,
+    annotations_enabled: true,
+    merge_annotations_dirs: [
+        "metalava-manual",
+    ],
     filter_packages: ["com.android."],
     check_api: {
         current: {

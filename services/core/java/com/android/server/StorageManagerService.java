@@ -83,6 +83,7 @@ import android.content.res.ObbInfo;
 import android.database.ContentObserver;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.DropBoxManager;
 import android.os.Environment;
 import android.os.Handler;
@@ -4663,6 +4664,10 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         public void onAppOpsChanged(int code, int uid, @Nullable String packageName, int mode) {
+            if (packageName == null) {
+                // This happens :(
+                return;
+            }
             final long token = Binder.clearCallingIdentity();
             try {
                 if (mIsFuseEnabled) {
@@ -4670,7 +4675,20 @@ class StorageManagerService extends IStorageManager.Stub
                     switch(code) {
                         case OP_REQUEST_INSTALL_PACKAGES:
                             // Always kill regardless of op change, to remount apps /storage
-                            killAppForOpChange(code, uid, packageName);
+                            try {
+                                ApplicationInfo ai = mIPackageManager.getApplicationInfo(
+                                        packageName,
+                                        0, UserHandle.getUserId(uid));
+                                if (ai.targetSdkVersion >= Build.VERSION_CODES.O) {
+                                    killAppForOpChange(code, uid, packageName);
+                                } else {
+                                    // Apps targeting <26 didn't need this app op to install
+                                    // packages - they only need the manifest permission, instead.
+                                    // So, there's also no need to kill them.
+                                }
+                            } catch (RemoteException e) {
+                                // Ignore, this is an in-process call
+                            }
                             return;
                         case OP_MANAGE_EXTERNAL_STORAGE:
                             if (mode != MODE_ALLOWED) {

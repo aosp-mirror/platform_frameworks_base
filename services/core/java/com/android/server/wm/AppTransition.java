@@ -407,14 +407,6 @@ public class AppTransition implements Dump {
         return mNextAppTransitionType == NEXT_TRANSIT_TYPE_OPEN_CROSS_PROFILE_APPS;
     }
 
-    boolean isNextAppTransitionCustomFromRecents() {
-        final RecentTasks recentTasks = mService.mAtmService.getRecentTasks();
-        final String recentsPackageName =
-                (recentTasks != null) ? recentTasks.getRecentsComponent().getPackageName() : null;
-        return mNextAppTransitionType == NEXT_TRANSIT_TYPE_CUSTOM
-                && mNextAppTransitionPackage.equals(recentsPackageName);
-    }
-
     /**
      * @return true if and only if we are currently fetching app transition specs from the future
      *         passed into {@link #overridePendingAppTransitionMultiThumbFuture}

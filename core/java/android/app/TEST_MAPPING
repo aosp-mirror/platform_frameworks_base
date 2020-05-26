@@ -24,10 +24,6 @@
         },
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
-            "name": "UidAtomTests:testAppOps"
-        },
-        {
-            "file_patterns": ["(/|^)AppOpsManager.java"],
             "name": "FrameworksServicesTests",
             "options": [
                 {
