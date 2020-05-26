@@ -137,6 +137,7 @@ public class WindowlessWindowManager implements IWindowSession {
         final SurfaceControl.Builder b = new SurfaceControl.Builder(mSurfaceSession)
                 .setParent(mRootSurface)
                 .setFormat(attrs.format)
+                .setBufferSize(getSurfaceWidth(attrs), getSurfaceHeight(attrs))
                 .setName(attrs.getTitle().toString());
         final SurfaceControl sc = b.build();
 
@@ -243,13 +244,8 @@ public class WindowlessWindowManager implements IWindowSession {
         WindowManager.LayoutParams attrs = state.mParams;
 
         if (viewFlags == View.VISIBLE) {
-            final Rect surfaceInsets = attrs.surfaceInsets;
-            int width = surfaceInsets != null
-                    ? attrs.width + surfaceInsets.left + surfaceInsets.right : attrs.width;
-            int height = surfaceInsets != null
-                    ? attrs.height + surfaceInsets.top + surfaceInsets.bottom : attrs.height;
-
-            t.setBufferSize(sc, width, height).setOpaque(sc, isOpaque(attrs)).show(sc).apply();
+            t.setBufferSize(sc, getSurfaceWidth(attrs), getSurfaceHeight(attrs))
+                    .setOpaque(sc, isOpaque(attrs)).show(sc).apply();
             outSurfaceControl.copyFrom(sc);
         } else {
             t.hide(sc).apply();
@@ -445,5 +441,16 @@ public class WindowlessWindowManager implements IWindowSession {
     @Override
     public android.os.IBinder asBinder() {
         return null;
+    }
+
+    private int getSurfaceWidth(WindowManager.LayoutParams attrs) {
+      final Rect surfaceInsets = attrs.surfaceInsets;
+      return surfaceInsets != null
+          ? attrs.width + surfaceInsets.left + surfaceInsets.right : attrs.width;
+    }
+    private int getSurfaceHeight(WindowManager.LayoutParams attrs) {
+      final Rect surfaceInsets = attrs.surfaceInsets;
+      return surfaceInsets != null
+          ? attrs.height + surfaceInsets.top + surfaceInsets.bottom : attrs.height;
     }
 }
