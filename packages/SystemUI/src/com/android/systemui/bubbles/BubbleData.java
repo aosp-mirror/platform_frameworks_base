@@ -57,6 +57,8 @@ import javax.inject.Singleton;
 @Singleton
 public class BubbleData {
 
+    BubbleLogger mLogger = new BubbleLoggerImpl();
+
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleData" : TAG_BUBBLES;
 
     private static final Comparator<Bubble> BUBBLES_BY_SORT_KEY_DESCENDING =
@@ -214,6 +216,7 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "promoteBubbleFromOverflow: " + bubble);
         }
+        mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
         moveOverflowBubbleToPending(bubble);
         // Preserve new order for next repack, which sorts by last updated time.
         bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
@@ -440,6 +443,7 @@ public class BubbleData {
                 if (DEBUG_BUBBLE_DATA) {
                     Log.d(TAG, "Cancel overflow bubble: " + b);
                 }
+                mLogger.logOverflowRemove(b, reason);
                 mStateChange.bubbleRemoved(b, reason);
                 mOverflowBubbles.remove(b);
             }
@@ -482,6 +486,7 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "Overflowing: " + bubble);
         }
+        mLogger.logOverflowAdd(bubble, reason);
         mOverflowBubbles.add(0, bubble);
         bubble.stopInflation();
         if (mOverflowBubbles.size() == mMaxOverflowBubbles + 1) {
@@ -491,6 +496,7 @@ public class BubbleData {
                 Log.d(TAG, "Overflow full. Remove: " + oldest);
             }
             mStateChange.bubbleRemoved(oldest, BubbleController.DISMISS_OVERFLOW_MAX_REACHED);
+            mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_MAX_REACHED);
             mOverflowBubbles.remove(oldest);
         }
     }
