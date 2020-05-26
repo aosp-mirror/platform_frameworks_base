@@ -339,6 +339,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
     private int mResizeMode;
+    private boolean mResizeForBlastSyncReported;
+
     /**
      * Special mode that is intended only for the rounded corner overlay: during rotation
      * transition, we un-rotate the window token such that the window appears as it did before the
@@ -1392,11 +1394,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // variables, because mFrameSizeChanged only tracks the width and height changing.
         updateLastFrames();
 
+        // Add a window that is using blastSync to the resizing list if it hasn't been reported
+        // already. This because the window is waiting on a finishDrawing from the client.
         if (didFrameInsetsChange
                 || winAnimator.mSurfaceResized
                 || configChanged
                 || dragResizingChanged
-                || mReportOrientationChanged) {
+                || mReportOrientationChanged
+                || requestResizeForBlastSync()) {
             ProtoLog.v(WM_DEBUG_RESIZE,
                         "Resize reasons for w=%s:  %s surfaceResized=%b configChanged=%b "
                                 + "dragResizingChanged=%b reportOrientationChanged=%b",
@@ -3506,6 +3511,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mReportOrientationChanged = false;
         mDragResizingChangeReported = true;
         mWinAnimator.mSurfaceResized = false;
+        mResizeForBlastSyncReported = true;
         mWindowFrames.resetInsetsChanged();
 
         final Rect frame = mWindowFrames.mCompatFrame;
@@ -5757,6 +5763,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (!willSync) {
             return false;
         }
+        mResizeForBlastSyncReported = false;
 
         mLocalSyncId = mBLASTSyncEngine.startSyncSet(this);
         addChildrenToSyncSet(mLocalSyncId);
@@ -5800,5 +5807,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWaitingSyncId = 0;
         mWaitingListener = null;
         return mWinAnimator.finishDrawingLocked(null);
+    }
+
+    private boolean requestResizeForBlastSync() {
+        return useBLASTSync() && !mResizeForBlastSyncReported;
     }
 }
