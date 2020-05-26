@@ -92,6 +92,15 @@ public abstract class ConcurrencyModule {
     }
 
     /**
+     * @deprecated Please specify @Main or @Background when injecting a Handler or use an Executor.
+     */
+    @Deprecated
+    @Provides
+    public static Handler provideHandler() {
+        return new Handler();
+    }
+
+    /**
      * Provide a Background-Thread Executor by default.
      */
     @Provides
