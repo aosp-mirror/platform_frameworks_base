@@ -198,6 +198,9 @@ public class Nat464Xlat extends BaseNetworkObserver {
         if (mPrefixDiscoveryRunning && !isPrefixDiscoveryNeeded()) {
             stopPrefixDiscovery();
         }
+        if (!mPrefixDiscoveryRunning) {
+            setPrefix64(mNat64PrefixInUse);
+        }
     }
 
     /**
@@ -220,6 +223,10 @@ public class Nat464Xlat extends BaseNetworkObserver {
         mNat64PrefixInUse = null;
         mIface = null;
         mBaseIface = null;
+
+        if (!mPrefixDiscoveryRunning) {
+            setPrefix64(null);
+        }
 
         if (isPrefixDiscoveryNeeded()) {
             if (!mPrefixDiscoveryRunning) {
@@ -306,6 +313,16 @@ public class Nat464Xlat extends BaseNetworkObserver {
         // stopped after it succeeds, because stopping it will cause netd to report that the prefix
         // has been removed, and that will cause us to stop clatd.
         return requiresClat(mNetwork) && mNat64PrefixFromRa == null;
+    }
+
+    private void setPrefix64(IpPrefix prefix) {
+        final String prefixString = (prefix != null) ? prefix.toString() : "";
+        try {
+            mDnsResolver.setPrefix64(getNetId(), prefixString);
+        } catch (RemoteException | ServiceSpecificException e) {
+            Slog.e(TAG, "Error setting NAT64 prefix on netId " + getNetId() + " to "
+                    + prefix + ": " + e);
+        }
     }
 
     private void maybeHandleNat64PrefixChange() {
