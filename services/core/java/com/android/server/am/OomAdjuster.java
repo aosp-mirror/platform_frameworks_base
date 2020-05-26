@@ -324,8 +324,21 @@ public final class OomAdjuster {
         boolean success = applyOomAdjLocked(app, doingAll, now, SystemClock.elapsedRealtime());
 
         if (uidRec != null) {
-            updateAppUidRecLocked(app);
-            // If this proc state is changed, need to update its uid record here
+            // After uidRec.reset() above, for UidRecord that has multiple processes (ProcessRecord)
+            // , We need to apply all ProcessRecord into UidRecord.
+            final ArraySet<ProcessRecord> procRecords = app.uidRecord.procRecords;
+            for (int i = procRecords.size() - 1; i >= 0; i--) {
+                final ProcessRecord pr = procRecords.valueAt(i);
+                if (!pr.killedByAm && pr.thread != null) {
+                    if (pr.isolated && pr.numberOfRunningServices() <= 0
+                            && pr.isolatedEntryPoint == null) {
+                        // No op.
+                    } else {
+                        // Keeping this process, update its uid.
+                        updateAppUidRecLocked(pr);
+                    }
+                }
+            }
             if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
                     && (uidRec.setProcState != uidRec.getCurProcState()
                     || uidRec.setCapability != uidRec.curCapability
