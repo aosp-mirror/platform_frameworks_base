@@ -65,7 +65,7 @@ stubs_defaults {
     name: "metalava-full-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
     srcs: [
-        ":conscrypt.module.public.api.stubs.source",
+        ":conscrypt.module.public.api{.public.stubs.source}",
         ":framework-updatable-sources",
     ],
     sdk_version: "core_platform",
