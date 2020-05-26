@@ -498,6 +498,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     private ActivityRecord mFixedRotationLaunchingApp;
 
+    private FixedRotationAnimationController mFixedRotationAnimationController;
+
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
 
@@ -1479,6 +1481,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mFixedRotationLaunchingApp;
     }
 
+    @VisibleForTesting
+    @Nullable FixedRotationAnimationController getFixedRotationAnimationController() {
+        return mFixedRotationAnimationController;
+    }
+
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r) {
         setFixedRotationLaunchingAppUnchecked(r, ROTATION_UNDEFINED);
     }
@@ -1486,8 +1493,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
         if (mFixedRotationLaunchingApp == null && r != null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
+            if (mFixedRotationAnimationController == null) {
+                mFixedRotationAnimationController = new FixedRotationAnimationController(this);
+                mFixedRotationAnimationController.hide();
+            }
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
+            finishFixedRotationAnimationIfPossible();
         }
         mFixedRotationLaunchingApp = r;
     }
@@ -1573,6 +1585,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         int rotation = rotationForActivityInDifferentOrientation(activityRecord);
         if (rotation != ROTATION_UNDEFINED) {
             startFixedRotationTransform(activityRecord, rotation);
+        }
+    }
+
+    /** Re-show the previously hidden windows if all seamless rotated windows are done. */
+    void finishFixedRotationAnimationIfPossible() {
+        final FixedRotationAnimationController controller = mFixedRotationAnimationController;
+        if (controller != null && !mDisplayRotation.hasSeamlessRotatingWindow()) {
+            controller.show();
+            mFixedRotationAnimationController = null;
         }
     }
 
