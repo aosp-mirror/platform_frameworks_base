@@ -3511,14 +3511,15 @@ class Task extends WindowContainer<WindowContainer> {
             int transit, boolean isVoiceInteraction,
             @Nullable OnAnimationFinishedCallback finishedCallback) {
         final RecentsAnimationController control = mWmService.getRecentsAnimationController();
-        if (control != null && enter
-                && getDisplayContent().mAppTransition.isNextAppTransitionCustomFromRecents()) {
-            ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
-                    "addTaskToRecentsAnimationIfNeeded, control: %s, task: %s, transit: %s",
-                    control, asTask(), AppTransition.appTransitionToString(transit));
+        if (control != null) {
             // We let the transition to be controlled by RecentsAnimation, and callback task's
             // RemoteAnimationTarget for remote runner to animate.
-            control.addTaskToTargets(getRootTask(), finishedCallback);
+            if (enter) {
+                ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
+                        "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
+                        control, asTask(), AppTransition.appTransitionToString(transit));
+                control.addTaskToTargets(getRootTask(), finishedCallback);
+            }
         } else {
             super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, finishedCallback);
         }
@@ -3766,11 +3767,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (r == null) {
             return null;
         }
-        final Task task = r.getRootTask();
-        if (task != null && r.isDescendantOf(task)) {
-            if (task != this) Slog.w(TAG, "Illegal state! task does not point to stack it is in. "
-                    + "stack=" + this + " task=" + task + " r=" + r
-                    + " callers=" + Debug.getCallers(15, "\n"));
+        if (r.isDescendantOf(this)) {
             return r;
         }
         return null;

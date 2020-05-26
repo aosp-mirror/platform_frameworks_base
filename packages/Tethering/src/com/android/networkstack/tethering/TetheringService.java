@@ -254,8 +254,8 @@ public class TetheringService extends Service {
             // If callerPkg's uid is not same as Binder.getCallingUid(),
             // checkAndNoteWriteSettingsOperation will return false and the operation will be
             // denied.
-            return Settings.checkAndNoteWriteSettingsOperation(mService, uid, callerPkg,
-                false /* throwException */);
+            return mService.checkAndNoteWriteSettingsOperation(mService, uid, callerPkg,
+                    false /* throwException */);
         }
 
         private boolean hasTetherAccessPermission() {
@@ -264,6 +264,19 @@ public class TetheringService extends Service {
             return mService.checkCallingOrSelfPermission(
                     ACCESS_NETWORK_STATE) == PERMISSION_GRANTED;
         }
+    }
+
+    /**
+     * Check if the package is a allowed to write settings. This also accounts that such an access
+     * happened.
+     *
+     * @return {@code true} iff the package is allowed to write settings.
+     */
+    @VisibleForTesting
+    boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
+            @NonNull String callingPackage, boolean throwException) {
+        return Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPackage,
+                throwException);
     }
 
     /**

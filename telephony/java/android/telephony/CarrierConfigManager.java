@@ -132,13 +132,39 @@ public class CarrierConfigManager {
      *
      * {@code true}: Call forwarding option "When unreachable" is supported.
      * {@code false}: Call forwarding option "When unreachable" is not supported. Option will be
-     * greyed out in the UI.
+     * removed in the UI.
      *
      * By default this value is true.
      * @hide
      */
     public static final String KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL =
             "call_forwarding_when_unreachable_supported_bool";
+
+     /**
+      * Boolean indicating if carrier supports call forwarding option "When unanswered".
+      *
+      * {@code true}: Call forwarding option "When unanswered" is supported.
+      * {@code false}: Call forwarding option "When unanswered" is not supported. Option will be
+      * removed in the UI.
+      *
+      * By default this value is true.
+      * @hide
+      */
+    public static final String KEY_CALL_FORWARDING_WHEN_UNANSWERED_SUPPORTED_BOOL =
+            "call_forwarding_when_unanswered_supported_bool";
+
+     /**
+      * Boolean indicating if carrier supports call forwarding option "When busy".
+      *
+      * {@code true}: Call forwarding option "When busy" is supported.
+      * {@code false}: Call forwarding option "When busy" is not supported. Option will be
+      * removed in the UI.
+      *
+      * By default this value is true.
+      * @hide
+      */
+    public static final String KEY_CALL_FORWARDING_WHEN_BUSY_SUPPORTED_BOOL =
+            "call_forwarding_when_busy_supported_bool";
 
     /**
      * Boolean indicating if the "Caller ID" item is visible in the Additional Settings menu.
@@ -3857,6 +3883,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_BARRING_SUPPORTS_DEACTIVATE_ALL_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNREACHABLE_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_UNANSWERED_SUPPORTED_BOOL, true);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_WHEN_BUSY_SUPPORTED_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALLER_ID_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_ADDITIONAL_SETTINGS_CALL_WAITING_VISIBILITY_BOOL, true);
         sDefaults.putBoolean(KEY_DISABLE_SUPPLEMENTARY_SERVICES_IN_AIRPLANE_MODE_BOOL, false);

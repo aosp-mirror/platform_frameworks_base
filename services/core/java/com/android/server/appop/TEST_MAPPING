@@ -43,9 +43,6 @@
                     "include-filter": "android.app.cts.ActivityManagerApi29Test"
                 }
             ]
-        },
-        {
-            "name": "UidAtomTests:testAppOps"
         }
     ]
 }
