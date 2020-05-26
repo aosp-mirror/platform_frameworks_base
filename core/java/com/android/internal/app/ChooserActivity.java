@@ -101,6 +101,7 @@ import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -2777,6 +2778,7 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void onListRebuilt(ResolverListAdapter listAdapter) {
         setupScrollListener();
+        maybeSetupGlobalLayoutListener();
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
         if (chooserListAdapter.getUserHandle()
@@ -2854,6 +2856,28 @@ public class ChooserActivity extends ResolverActivity implements
                         }
 
                         elevatedView.setElevation(defaultElevation);
+                    }
+                });
+    }
+
+    private void maybeSetupGlobalLayoutListener() {
+        if (shouldShowTabs()) {
+            return;
+        }
+        final View recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
+        recyclerView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        // Fixes an issue were the accessibility border disappears on list creation.
+                        recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        final TextView titleView = findViewById(R.id.title);
+                        if (titleView != null) {
+                            titleView.setFocusable(true);
+                            titleView.setFocusableInTouchMode(true);
+                            titleView.requestFocus();
+                            titleView.requestAccessibilityFocus();
+                        }
                     }
                 });
     }
