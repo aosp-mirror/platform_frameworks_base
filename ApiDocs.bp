@@ -66,7 +66,7 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":art-module-public-api-stubs-source",
-        ":conscrypt.module.public.api.stubs.source",
+        ":conscrypt.module.public.api{.public.stubs.source}",
         ":android_icu4j_public_api_files",
         "test-mock/src/**/*.java",
         "test-runner/src/**/*.java",
