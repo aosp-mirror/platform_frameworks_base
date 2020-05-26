@@ -397,6 +397,15 @@ public class PipTouchHandler {
         mShelfHeight = shelfHeight;
     }
 
+    public void adjustBoundsForRotation(Rect outBounds, Rect curBounds, Rect insetBounds) {
+        final Rect toMovementBounds = new Rect();
+        mSnapAlgorithm.getMovementBounds(outBounds, insetBounds, toMovementBounds, 0);
+        final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
+        if ((prevBottom - mBottomOffsetBufferPx) <= curBounds.top) {
+            outBounds.offsetTo(outBounds.left, toMovementBounds.bottom);
+        }
+    }
+
     public void onMovementBoundsChanged(Rect insetBounds, Rect normalBounds, Rect curBounds,
             boolean fromImeAdjustment, boolean fromShelfAdjustment, int displayRotation) {
         final int bottomOffset = mIsImeShowing ? mImeHeight : 0;
