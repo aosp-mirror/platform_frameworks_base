@@ -446,6 +446,7 @@ public class AppStateTracker {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_USER_REMOVED);
             filter.addAction(Intent.ACTION_BATTERY_CHANGED);
+            filter.addAction(Intent.ACTION_PACKAGE_REMOVED);
             mContext.registerReceiver(new MyReceiver(), filter);
 
             refreshForcedAppStandbyUidPackagesLocked();
@@ -686,6 +687,13 @@ public class AppStateTracker {
                     mIsPluggedIn = (intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, 0) != 0);
                 }
                 updateForceAllAppStandbyState();
+            } else if (Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())
+                    && !intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+                final String pkgName = intent.getData().getSchemeSpecificPart();
+                if (mExemptedPackages.remove(userId, pkgName)) {
+                    mHandler.notifyExemptChanged();
+                }
             }
         }
     }
