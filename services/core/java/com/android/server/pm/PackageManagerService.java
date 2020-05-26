@@ -369,6 +369,7 @@ import com.android.server.pm.permission.PermissionsState;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
+import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
@@ -4406,6 +4407,11 @@ public class PackageManagerService extends IPackageManager.Stub
         if (getInstantAppPackageName(callingUid) != null) {
             throw new SecurityException("Instant applications don't have access to this method");
         }
+        if (!mUserManager.exists(userId)) {
+            throw new SecurityException("User doesn't exist");
+        }
+        mPermissionManager.enforceCrossUserPermission(
+                callingUid, userId, false, false, "checkPackageStartable");
         final boolean userKeyUnlocked = StorageManager.isUserKeyUnlocked(userId);
         synchronized (mLock) {
             final PackageSetting ps = mSettings.mPackages.get(packageName);
@@ -5778,9 +5784,15 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public ChangedPackages getChangedPackages(int sequenceNumber, int userId) {
-        if (getInstantAppPackageName(Binder.getCallingUid()) != null) {
+        final int callingUid = Binder.getCallingUid();
+        if (getInstantAppPackageName(callingUid) != null) {
             return null;
         }
+        if (!mUserManager.exists(userId)) {
+            return null;
+        }
+        mPermissionManager.enforceCrossUserPermission(
+                callingUid, userId, false, false, "getChangedPackages");
         synchronized (mLock) {
             if (sequenceNumber >= mChangedPackagesSequenceNumber) {
                 return null;
@@ -8800,9 +8812,23 @@ public class PackageManagerService extends IPackageManager.Stub
 
     private ProviderInfo resolveContentProviderInternal(String name, int flags, int userId) {
         if (!mUserManager.exists(userId)) return null;
-        flags = updateFlagsForComponent(flags, userId);
         final int callingUid = Binder.getCallingUid();
+        flags = updateFlagsForComponent(flags, userId);
         final ProviderInfo providerInfo = mComponentResolver.queryProvider(name, flags, userId);
+        boolean checkedGrants = false;
+        if (providerInfo != null) {
+            // Looking for cross-user grants before enforcing the typical cross-users permissions
+            if (userId != UserHandle.getUserId(callingUid)) {
+                final UriGrantsManagerInternal mUgmInternal =
+                        LocalServices.getService(UriGrantsManagerInternal.class);
+                checkedGrants =
+                        mUgmInternal.checkAuthorityGrants(callingUid, providerInfo, userId, true);
+            }
+        }
+        if (!checkedGrants) {
+            mPermissionManager.enforceCrossUserPermission(
+                    callingUid, userId, false, false, "resolveContentProvider");
+        }
         if (providerInfo == null) {
             return null;
         }
