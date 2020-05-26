@@ -21,7 +21,7 @@
     <color name="car_user_switcher_name_text_color">@*android:color/car_body1_light</color>
     <color name="car_user_switcher_add_user_background_color">#131313</color>
     <color name="car_user_switcher_add_user_add_sign_color">@*android:color/car_body1_light</color>
-    <color name="car_nav_icon_fill_color">#8Fffffff</color>
+    <color name="car_nav_icon_fill_color">#8F8F8F</color>
     <color name="car_nav_icon_fill_color_selected">#ffffff</color>
     <!-- colors for seekbar -->
     <color name="car_seekbar_track_background">#131315</color>
