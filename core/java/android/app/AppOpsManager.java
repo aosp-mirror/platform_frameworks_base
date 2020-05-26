@@ -3688,7 +3688,7 @@ public class AppOpsManager {
         /**
          * @hide
          */
-        @UnsupportedAppUsage(/*maxTargetSdk = Build.VERSION_CODES.R,*/ publicAlternatives = "{@code "
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@code "
                 + "#getOpStr()}")
         public int getOp() {
             return mOp;
@@ -3707,7 +3707,7 @@ public class AppOpsManager {
          * @deprecated Use {@link #getLastAccessTime(int)} instead
          */
         @Deprecated
-        @UnsupportedAppUsage(/*maxTargetSdk = Build.VERSION_CODES.R,*/ publicAlternatives = "{@code "
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@code "
                 + "#getLastAccessTime(int)}")
         public long getTime() {
             return getLastAccessTime(OP_FLAGS_ALL);
@@ -3822,7 +3822,7 @@ public class AppOpsManager {
          * @deprecated Use {@link #getLastRejectTime(int)} instead
          */
         @Deprecated
-        @UnsupportedAppUsage(/*maxTargetSdk = Build.VERSION_CODES.R,*/ publicAlternatives = "{@code "
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, publicAlternatives = "{@code "
                 + "#getLastRejectTime(int)}")
         public long getRejectTime() {
             return getLastRejectTime(OP_FLAGS_ALL);
