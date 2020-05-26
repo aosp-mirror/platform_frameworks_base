@@ -2294,6 +2294,88 @@ NoClone: android.service.autofill.augmented.AugmentedAutofillService#dump(java.i
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
     
 NoClone: android.util.proto.ProtoOutputStream#ProtoOutputStream(java.io.FileDescriptor) parameter #0:
+
+
+
+NoSettingsProvider: android.provider.Settings.Global#APP_OPS_CONSTANTS:
+    New setting keys are not allowed (Field: APP_OPS_CONSTANTS); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Global#AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
+    
+NoSettingsProvider: android.provider.Settings.Global#AUTOMATIC_POWER_SAVE_MODE:
+    
+NoSettingsProvider: android.provider.Settings.Global#BATTERY_SAVER_CONSTANTS:
+    
+NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD:
+    
+NoSettingsProvider: android.provider.Settings.Global#DYNAMIC_POWER_SAVINGS_ENABLED:
+    
+NoSettingsProvider: android.provider.Settings.Global#HIDDEN_API_BLACKLIST_EXEMPTIONS:
+    
+NoSettingsProvider: android.provider.Settings.Global#HIDE_ERROR_DIALOGS:
+    New setting keys are not allowed (Field: HIDE_ERROR_DIALOGS); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Global#LOCATION_GLOBAL_KILL_SWITCH:
+    
+NoSettingsProvider: android.provider.Settings.Global#LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST:
+    
+NoSettingsProvider: android.provider.Settings.Global#LOW_POWER_MODE:
+    
+NoSettingsProvider: android.provider.Settings.Global#LOW_POWER_MODE_STICKY:
+    
+NoSettingsProvider: android.provider.Settings.Global#NOTIFICATION_BUBBLES:
+    
+NoSettingsProvider: android.provider.Settings.Global#OVERLAY_DISPLAY_DEVICES:
+    
+NoSettingsProvider: android.provider.Settings.Global#TETHER_OFFLOAD_DISABLED:
+    
+NoSettingsProvider: android.provider.Settings.Global#USE_OPEN_WIFI_PACKAGE:
+    
+NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED:
+    
+NoSettingsProvider: android.provider.Settings.Secure#ACCESSIBILITY_SHORTCUT_TARGET_SERVICE:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_FEATURE_FIELD_CLASSIFICATION:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_SERVICE:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_FIELD_CLASSIFICATION_IDS_SIZE:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_USER_DATA_SIZE:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MAX_VALUE_LENGTH:
+    
+NoSettingsProvider: android.provider.Settings.Secure#AUTOFILL_USER_DATA_MIN_VALUE_LENGTH:
+    
+NoSettingsProvider: android.provider.Settings.Secure#CONTENT_CAPTURE_ENABLED:
+    
+NoSettingsProvider: android.provider.Settings.Secure#DISABLED_PRINT_SERVICES:
+    
+NoSettingsProvider: android.provider.Settings.Secure#DOZE_ALWAYS_ON:
+    
+NoSettingsProvider: android.provider.Settings.Secure#ENABLED_VR_LISTENERS:
+    
+NoSettingsProvider: android.provider.Settings.Secure#IMMERSIVE_MODE_CONFIRMATIONS:
+    New setting keys are not allowed (Field: IMMERSIVE_MODE_CONFIRMATIONS); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#LOCATION_ACCESS_CHECK_DELAY_MILLIS:
+    
+NoSettingsProvider: android.provider.Settings.Secure#LOCATION_ACCESS_CHECK_INTERVAL_MILLIS:
+    
+NoSettingsProvider: android.provider.Settings.Secure#LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS:
+    New setting keys are not allowed (Field: LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#LOCK_SCREEN_SHOW_NOTIFICATIONS:
+    New setting keys are not allowed (Field: LOCK_SCREEN_SHOW_NOTIFICATIONS); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#NFC_PAYMENT_DEFAULT_COMPONENT:
+    New setting keys are not allowed (Field: NFC_PAYMENT_DEFAULT_COMPONENT); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#NOTIFICATION_BADGING:
+    
+NoSettingsProvider: android.provider.Settings.Secure#POWER_MENU_LOCKED_SHOW_CONTENT:
+    New setting keys are not allowed (Field: POWER_MENU_LOCKED_SHOW_CONTENT); use getters/setters in relevant manager class
+NoSettingsProvider: android.provider.Settings.Secure#SYNC_PARENT_SOUNDS:
+    
+NoSettingsProvider: android.provider.Settings.Secure#USER_SETUP_COMPLETE:
+    
+NoSettingsProvider: android.provider.Settings.Secure#VOICE_INTERACTION_SERVICE:
     
 
 
