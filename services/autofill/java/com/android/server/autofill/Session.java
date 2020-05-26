@@ -312,6 +312,43 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     private final AssistDataReceiverImpl mAssistReceiver = new AssistDataReceiverImpl();
 
+    void onSwitchInputMethodLocked() {
+        if (mExpiredResponse) {
+            return;
+        }
+
+        if (shouldExpireResponseOnInputMethodSwitch()) {
+            // Set the old response expired, so the next action (ACTION_VIEW_ENTERED) can trigger
+            // a new fill request.
+            mExpiredResponse = true;
+        }
+    }
+
+    private boolean shouldExpireResponseOnInputMethodSwitch() {
+        // One of below cases will need a new fill request to update the inline spec for the new
+        // input method.
+        // 1. The autofill provider supports inline suggestion and the render service is available.
+        // 2. Had triggered the augmented autofill and the render service is available. Whether the
+        // augmented autofill triggered by:
+        //    a. Augmented autofill only
+        //    b. The autofill provider respond null
+        if (mService.getRemoteInlineSuggestionRenderServiceLocked() == null) {
+            return false;
+        }
+
+        if (isInlineSuggestionsEnabledByAutofillProviderLocked()) {
+            return true;
+        }
+
+        final ViewState state = mViewStates.get(mCurrentViewId);
+        if (state != null
+                && (state.getState() & ViewState.STATE_TRIGGERED_AUGMENTED_AUTOFILL) != 0) {
+            return true;
+        }
+
+        return false;
+    }
+
     /**
      * TODO(b/151867668): improve how asynchronous data dependencies are handled, without using
      * CountDownLatch.
