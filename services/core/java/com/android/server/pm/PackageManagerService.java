@@ -236,7 +236,6 @@ import android.content.pm.parsing.component.ParsedService;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.res.Resources;
-import android.content.rollback.IRollbackManager;
 import android.database.ContentObserver;
 import android.graphics.Bitmap;
 import android.hardware.display.DisplayManager;
@@ -367,6 +366,7 @@ import com.android.server.pm.permission.PermissionManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.pm.permission.PermissionsState;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.security.VerityUtils;
 import com.android.server.storage.DeviceStorageMonitorInternal;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -14314,8 +14314,7 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     private boolean performRollbackManagerRestore(int userId, int token, PackageInstalledInfo res,
             PostInstallData data) {
-        IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                ServiceManager.getService(Context.ROLLBACK_SERVICE));
+        RollbackManagerInternal rm = LocalServices.getService(RollbackManagerInternal.class);
 
         final String packageName = res.pkg.getPackageName();
         final int[] allUsers = mUserManager.getUserIds();
@@ -14343,9 +14342,9 @@ public class PackageManagerService extends IPackageManager.Stub
         if (ps != null && doSnapshotOrRestore) {
             final String seInfo = AndroidPackageUtils.getSeInfo(res.pkg, ps);
             try {
-                rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
-                        seInfo, token);
-            } catch (RemoteException re) {
+                rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
+                        appId, ceDataInode, seInfo, token);
+            } catch (RuntimeException re) {
                 Log.e(TAG, "Error snapshotting/restoring user data: " + re);
                 return false;
             }
@@ -21390,7 +21389,7 @@ public class PackageManagerService extends IPackageManager.Stub
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {
-        (new PackageManagerShellCommand(this, mPermissionManagerService)).exec(
+        (new PackageManagerShellCommand(this, mPermissionManagerService, mContext)).exec(
                 this, in, out, err, args, callback, resultReceiver);
     }
 
