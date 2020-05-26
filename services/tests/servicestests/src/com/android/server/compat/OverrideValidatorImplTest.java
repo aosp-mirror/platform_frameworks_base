@@ -288,7 +288,8 @@ public class OverrideValidatorImplTest {
     public void getOverrideAllowedState_finalBuildTargetSdkChangeDebugAppOptin_allowOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 1).build();
+                        .addTargetSdkChangeWithId(TARGET_SDK_AFTER, 1)
+                        .addTargetSdkChangeWithId(TARGET_SDK, 2).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
@@ -296,19 +297,23 @@ public class OverrideValidatorImplTest {
                         .withTargetSdk(TARGET_SDK)
                         .withPackageName(PACKAGE_NAME).build());
 
-        OverrideAllowedState allowedState =
+        OverrideAllowedState stateTargetSdkGreaterChange =
                 overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
+        OverrideAllowedState stateTargetSdkEqualChange =
+                overrideValidator.getOverrideAllowedState(2, PACKAGE_NAME);
 
-        assertThat(allowedState)
+        assertThat(stateTargetSdkGreaterChange)
                 .isEqualTo(new OverrideAllowedState(ALLOWED, TARGET_SDK, TARGET_SDK_AFTER));
+
+        assertThat(stateTargetSdkEqualChange)
+                .isEqualTo(new OverrideAllowedState(ALLOWED, TARGET_SDK, TARGET_SDK));
     }
 
     @Test
     public void getOverrideAllowedState_finalBuildTargetSdkChangeDebugAppOptout_rejectOverride()
             throws Exception {
         CompatConfig config = CompatConfigBuilder.create(finalBuild(), mContext)
-                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1)
-                        .addTargetSdkChangeWithId(TARGET_SDK, 2).build();
+                        .addTargetSdkChangeWithId(TARGET_SDK_BEFORE, 1).build();
         IOverrideValidator overrideValidator = config.getOverrideValidator();
         when(mPackageManager.getApplicationInfo(eq(PACKAGE_NAME), anyInt()))
                 .thenReturn(ApplicationInfoBuilder.create()
@@ -319,14 +324,10 @@ public class OverrideValidatorImplTest {
 
         OverrideAllowedState stateTargetSdkLessChange =
                 overrideValidator.getOverrideAllowedState(1, PACKAGE_NAME);
-        OverrideAllowedState stateTargetSdkEqualChange =
-                overrideValidator.getOverrideAllowedState(2, PACKAGE_NAME);
 
         assertThat(stateTargetSdkLessChange).isEqualTo(
                 new OverrideAllowedState(DISABLED_TARGET_SDK_TOO_HIGH, TARGET_SDK,
                                          TARGET_SDK_BEFORE));
-        assertThat(stateTargetSdkEqualChange).isEqualTo(
-                new OverrideAllowedState(DISABLED_TARGET_SDK_TOO_HIGH, TARGET_SDK, TARGET_SDK));
     }
 
     @Test
