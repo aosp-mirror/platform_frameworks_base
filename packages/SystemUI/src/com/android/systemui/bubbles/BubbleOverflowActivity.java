@@ -70,6 +70,9 @@ public class BubbleOverflowActivity extends Activity {
         }
         @Override
         public boolean canScrollVertically() {
+            if (mBubbleController.inLandscape()) {
+                return super.canScrollVertically();
+            }
             return false;
         }
     }
