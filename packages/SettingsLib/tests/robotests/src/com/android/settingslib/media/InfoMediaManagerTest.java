@@ -590,7 +590,7 @@ public class InfoMediaManagerTest {
         final MediaDevice mediaDevice = mInfoMediaManager.findMediaDevice(TEST_ID);
         assertThat(mediaDevice).isNull();
 
-        mInfoMediaManager.mMediaRouterCallback.onTransferred(null, null);
+        mInfoMediaManager.mMediaRouterCallback.onTransferred(sessionInfo, sessionInfo);
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
@@ -602,6 +602,7 @@ public class InfoMediaManagerTest {
     @Test
     public void onTransferred_buildAllRoutes_shouldAddMediaDevice() {
         final MediaRoute2Info info = mock(MediaRoute2Info.class);
+        final RoutingSessionInfo sessionInfo = mock(RoutingSessionInfo.class);
         mInfoMediaManager.registerCallback(mCallback);
 
         when(info.getId()).thenReturn(TEST_ID);
@@ -616,7 +617,7 @@ public class InfoMediaManagerTest {
         assertThat(mediaDevice).isNull();
 
         mInfoMediaManager.mPackageName = "";
-        mInfoMediaManager.mMediaRouterCallback.onTransferred(null, null);
+        mInfoMediaManager.mMediaRouterCallback.onTransferred(sessionInfo, sessionInfo);
 
         final MediaDevice infoDevice = mInfoMediaManager.mMediaDevices.get(0);
         assertThat(infoDevice.getId()).isEqualTo(TEST_ID);
