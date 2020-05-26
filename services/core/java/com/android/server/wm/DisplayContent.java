@@ -1102,12 +1102,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     void removeShellRoot(int windowType) {
-        ShellRoot root = mShellRoots.get(windowType);
-        if (root == null) {
-            return;
+        synchronized(mWmService.mGlobalLock) {
+            ShellRoot root = mShellRoots.get(windowType);
+            if (root == null) {
+                return;
+            }
+            root.clear();
+            mShellRoots.remove(windowType);
         }
-        root.clear();
-        mShellRoots.remove(windowType);
     }
 
     void setRemoteInsetsController(IDisplayWindowInsetsController controller) {
