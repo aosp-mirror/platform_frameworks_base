@@ -554,6 +554,5 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ဖွင့်ထားသည်"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ဤအပြောင်းအလဲ ထည့်သွင်းရန် သင့်စက်ကို ပြန်လည်စတင်ရမည်။ ယခု ပြန်လည်စတင်ပါ သို့မဟုတ် ပယ်ဖျက်ပါ။"</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"အလုပ် <xliff:g id="APP_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
-    <skip />
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"ကြိုးတပ်နားကြပ်"</string>
 </resources>

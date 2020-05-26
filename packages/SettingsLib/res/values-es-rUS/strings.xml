@@ -153,7 +153,7 @@
     <string name="unknown" msgid="3544487229740637809">"Desconocido"</string>
     <string name="running_process_item_user_label" msgid="3988506293099805796">"Usuario: <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="launch_defaults_some" msgid="3631650616557252926">"Configuraciones predeterminadas establecidas"</string>
-    <string name="launch_defaults_none" msgid="8049374306261262709">"No se establecieron configuraciones predeterminadas"</string>
+    <string name="launch_defaults_none" msgid="8049374306261262709">"Sin configuraciones predeterminadas"</string>
     <string name="tts_settings" msgid="8130616705989351312">"Configuración de texto a voz"</string>
     <string name="tts_settings_title" msgid="7602210956640483039">"Salida de texto a voz"</string>
     <string name="tts_default_rate_title" msgid="3964187817364304022">"Velocidad de voz"</string>
@@ -554,6 +554,5 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Habilitado"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Debes reiniciar el dispositivo para que se aplique el cambio. Reinícialo ahora o cancela la acción."</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> de trabajo"</string>
-    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
-    <skip />
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Auriculares con cable"</string>
 </resources>
