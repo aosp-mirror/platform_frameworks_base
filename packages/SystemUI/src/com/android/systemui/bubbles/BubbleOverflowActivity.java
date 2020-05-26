@@ -280,7 +280,7 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
 
         Bubble.FlyoutMessage message = b.getFlyoutMessage();
         if (message != null && message.senderName != null) {
-            vh.textView.setText(message.senderName);
+            vh.textView.setText(message.senderName.toString());
         } else {
             vh.textView.setText(b.getAppName());
         }
