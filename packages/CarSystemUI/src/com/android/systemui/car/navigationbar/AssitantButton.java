@@ -18,6 +18,7 @@ package com.android.systemui.car.navigationbar;
 
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_ASSIST_GESTURE;
 
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Bundle;
@@ -31,7 +32,6 @@ import com.android.internal.app.IVoiceInteractionSessionShowCallback;
  * AssitantButton is a ui component that will trigger the Voice Interaction Service.
  */
 public class AssitantButton extends CarNavigationButton {
-
     private static final String TAG = "AssistantButton";
     private final AssistUtils mAssistUtils;
     private IVoiceInteractionSessionShowCallback mShowCallback =
@@ -50,9 +50,7 @@ public class AssitantButton extends CarNavigationButton {
     public AssitantButton(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAssistUtils = new AssistUtils(context);
-        setOnClickListener(v -> {
-            showAssistant();
-        });
+        setOnClickListener(v -> showAssistant());
     }
 
     private void showAssistant() {
@@ -64,5 +62,10 @@ public class AssitantButton extends CarNavigationButton {
     @Override
     protected void setUpIntents(TypedArray typedArray) {
         // left blank because for the assistant button Intent will not be passed from the layout.
+    }
+
+    @Override
+    protected String getRoleName() {
+        return RoleManager.ROLE_ASSISTANT;
     }
 }
