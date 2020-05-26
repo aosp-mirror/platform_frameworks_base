@@ -144,6 +144,13 @@ MutableBareField: android.net.wifi.WifiConfiguration#carrierId:
 
 
 NoClone: android.service.contentcapture.ContentCaptureService#dump(java.io.FileDescriptor, java.io.PrintWriter, String[]) parameter #0:
+
+
+
+NoSettingsProvider: android.provider.Settings.Global#TETHER_OFFLOAD_DISABLED:
+    New setting keys are not allowed. (Field: TETHER_OFFLOAD_DISABLED)
+NoSettingsProvider: android.provider.Settings.Global#TETHER_SUPPORTED:
+    New setting keys are not allowed. (Field: TETHER_SUPPORTED)
     
 
 
