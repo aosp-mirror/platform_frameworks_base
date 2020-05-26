@@ -28,6 +28,7 @@ import android.app.KeyguardManager;
 import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.app.admin.DevicePolicyManager;
+import android.app.role.RoleManager;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -321,4 +322,9 @@ public class SystemServicesModule {
         return context.getSystemService(WindowManager.class);
     }
 
+    @Provides
+    @Singleton
+    static RoleManager provideRoleManager(Context context) {
+        return context.getSystemService(RoleManager.class);
+    }
 }
