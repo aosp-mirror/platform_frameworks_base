@@ -797,11 +797,14 @@ class ControlsControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSeedFavoritesForComponent() {
+    fun testSeedFavoritesForComponentWithLimit() {
         var succeeded = false
-        val control = statelessBuilderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure)
-            .build()
 
+        val controls = mutableListOf<Control>()
+        for (i in 1..10) {
+            controls.add(statelessBuilderFromInfo(ControlInfo("id$i", TEST_CONTROL_TITLE,
+                TEST_CONTROL_SUBTITLE, TEST_DEVICE_TYPE), "testStructure").build())
+        }
         controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
             succeeded = accepted
         })
@@ -809,12 +812,19 @@ class ControlsControllerImplTest : SysuiTestCase() {
         verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
 
-        controlLoadCallbackCaptor.value.accept(listOf(control))
+        controlLoadCallbackCaptor.value.accept(controls)
 
         delayableExecutor.runAllReady()
 
-        assertEquals(listOf(TEST_STRUCTURE_INFO),
-            controller.getFavoritesForComponent(TEST_COMPONENT))
+        val structureInfo = controller.getFavoritesForComponent(TEST_COMPONENT)[0]
+        assertEquals(structureInfo.controls.size,
+            ControlsControllerImpl.SUGGESTED_CONTROLS_PER_STRUCTURE)
+
+        var i = 1
+        structureInfo.controls.forEach {
+            assertEquals(it.controlId, "id$i")
+            i++
+        }
         assertTrue(succeeded)
     }
 

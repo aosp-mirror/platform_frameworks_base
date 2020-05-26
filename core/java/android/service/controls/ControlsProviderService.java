@@ -98,9 +98,12 @@ public abstract class ControlsProviderService extends Service {
      *
      * The service may be asked to provide a small number of recommended controls, in
      * order to suggest some controls to the user for favoriting. The controls shall be built using
-     * the stateless builder {@link Control.StatelessBuilder}. The number of controls requested
-     * through {@link Subscription#request} will be limited. Call {@link Subscriber#onComplete}
-     * when done, or {@link Subscriber#onError} for error scenarios.
+     * the stateless builder {@link Control.StatelessBuilder}. The total number of controls
+     * requested through {@link Subscription#request} will be restricted to a maximum. Within this
+     * larger limit, only 6 controls per structure will be loaded. Therefore, it is advisable to
+     * seed multiple structures if they exist. Any control sent over this limit  will be discarded.
+     * Call {@link Subscriber#onComplete} when done, or {@link Subscriber#onError} for error
+     * scenarios.
      */
     @Nullable
     public Publisher<Control> createPublisherForSuggested() {
