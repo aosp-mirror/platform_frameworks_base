@@ -3612,9 +3612,31 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenForceBucketSplitBefor
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 10));
+                return true;
+            }))
+            // App Update.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 1000);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1000, 15));
+                return true;
+            }));
 
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition changed event
+    int64_t conditionChangeTimeNs = bucketStartTimeNs + 10;
+    valueProducer->onConditionChanged(true, conditionChangeTimeNs);
 
     // App update event.
     int64_t appUpdateTimeNs = bucket2StartTimeNs + 1000;
@@ -3629,26 +3651,21 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenForceBucketSplitBefor
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
-    ASSERT_EQ(0, report.value_metrics().data_size());
-    ASSERT_EQ(2, report.value_metrics().skipped_size());
+    ASSERT_EQ(1, report.value_metrics().data_size());
+    ASSERT_EQ(1, report.value_metrics().skipped_size());
 
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
-              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().data(0).bucket_info_size());
+    auto data = report.value_metrics().data(0);
+    ASSERT_EQ(0, data.bucket_info(0).bucket_num());
+    EXPECT_EQ(5, data.bucket_info(0).values(0).value_long());
+
     EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(appUpdateTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-    EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
-    EXPECT_EQ(NanoToMillis(appUpdateTimeNs), dropEvent.drop_time_millis());
-
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
-              report.value_metrics().skipped(1).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(appUpdateTimeNs),
-              report.value_metrics().skipped(1).end_bucket_elapsed_millis());
-    ASSERT_EQ(1, report.value_metrics().skipped(1).drop_event_size());
-
-    dropEvent = report.value_metrics().skipped(1).drop_event(0);
     EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(appUpdateTimeNs), dropEvent.drop_time_millis());
 }
