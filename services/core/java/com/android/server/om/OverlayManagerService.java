@@ -45,6 +45,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.content.res.ApkAssets;
+import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -62,6 +63,7 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 
+import com.android.internal.R;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.FgThread;
 import com.android.server.IoThread;
@@ -246,7 +248,7 @@ public final class OverlayManagerService extends SystemService {
                     new File(Environment.getDataSystemDirectory(), "overlays.xml"), "overlays");
             mPackageManager = new PackageManagerHelperImpl(context);
             mUserManager = UserManagerService.getInstance();
-            IdmapManager im = new IdmapManager(mPackageManager);
+            IdmapManager im = new IdmapManager(IdmapDaemon.getInstance(), mPackageManager);
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                     OverlayConfig.getSystemInstance(), getDefaultOverlayPackages(),
@@ -1116,6 +1118,17 @@ public final class OverlayManagerService extends SystemService {
                 // Intentionally left blank
             }
             return false;
+        }
+
+        @Override
+        public String getOverlayableConfigurator() {
+            return Resources.getSystem().getString(R.string.config_overlayableConfigurator);
+        }
+
+        @Override
+        public String[] getOverlayableConfiguratorTargets() {
+            return Resources.getSystem().getStringArray(
+                    R.array.config_overlayableConfiguratorTargets);
         }
 
         @Override
