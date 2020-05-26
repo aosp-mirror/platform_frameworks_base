@@ -33,7 +33,7 @@ import com.android.internal.annotations.GuardedBy;
  */
 public final class UidRecord {
     final int uid;
-    private int mCurProcState;
+    int mCurProcState;
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
     int curCapability;
     int setCapability;
