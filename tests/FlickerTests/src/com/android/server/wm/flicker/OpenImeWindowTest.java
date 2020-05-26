@@ -56,6 +56,7 @@ public class OpenImeWindowTest extends NonRotationTestBase {
     @Test
     public void checkVisibility_imeWindowBecomesVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
+                .skipUntilFirstAssertion()
                 .hidesImeWindow(IME_WINDOW_TITLE)
                 .then()
                 .showsImeWindow(IME_WINDOW_TITLE)
