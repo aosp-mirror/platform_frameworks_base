@@ -3655,8 +3655,19 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private void generatePositionChangeEvents() {
         for (ExpandableView child : mChildrenChangingPositions) {
-            mAnimationEvents.add(new AnimationEvent(child,
-                    AnimationEvent.ANIMATION_TYPE_CHANGE_POSITION));
+            Integer duration = null;
+            if (child instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) child;
+                if (row.getEntry().isMarkedForUserTriggeredMovement()) {
+                    duration = StackStateAnimator.ANIMATION_DURATION_PRIORITY_CHANGE;
+                    row.getEntry().markForUserTriggeredMovement(false);
+                }
+            }
+            AnimationEvent animEvent = duration == null
+                    ? new AnimationEvent(child, AnimationEvent.ANIMATION_TYPE_CHANGE_POSITION)
+                    : new AnimationEvent(
+                            child, AnimationEvent.ANIMATION_TYPE_CHANGE_POSITION, duration);
+            mAnimationEvents.add(animEvent);
         }
         mChildrenChangingPositions.clear();
         if (mGenerateChildOrderChangedEvent) {
