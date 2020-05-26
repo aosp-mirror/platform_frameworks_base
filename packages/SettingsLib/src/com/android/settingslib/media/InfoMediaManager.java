@@ -56,7 +56,7 @@ import java.util.concurrent.Executors;
 public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);;
     @VisibleForTesting
     final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
     @VisibleForTesting
@@ -364,8 +364,8 @@ public class InfoMediaManager extends MediaManager {
     private void buildAvailableRoutes() {
         for (MediaRoute2Info route : mRouterManager.getAvailableRoutes(mPackageName)) {
             if (DEBUG) {
-                Log.d(TAG, "buildAvailableRoutes() route : " + route.getName()
-                        + ", type : " + route.getType());
+                Log.d(TAG, "buildAvailableRoutes() route : " + route.getName() + ", volume : "
+                        + route.getVolume() + ", type : " + route.getType());
             }
             addMediaDevice(route);
         }
