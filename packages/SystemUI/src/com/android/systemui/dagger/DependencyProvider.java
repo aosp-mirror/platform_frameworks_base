@@ -96,12 +96,6 @@ public class DependencyProvider {
         return new AmbientDisplayConfiguration(context);
     }
 
-    /** */
-    @Provides
-    public Handler provideHandler() {
-        return new Handler();
-    }
-
     @Singleton
     @Provides
     public DataSaverController provideDataSaverController(NetworkController networkController) {
