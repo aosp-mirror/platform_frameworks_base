@@ -554,6 +554,5 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"បានបើក"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ត្រូវតែ​ចាប់ផ្ដើម​ឧបករណ៍​របស់អ្នក​ឡើងវិញ ទើប​ការផ្លាស់ប្ដូរ​នេះ​ត្រូវបានអនុវត្ត​។ ចាប់ផ្ដើមឡើងវិញ​ឥឡូវនេះ ឬ​បោះបង់​។"</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"<xliff:g id="APP_NAME">%s</xliff:g> សម្រាប់ការងារ"</string>
-    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
-    <skip />
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"កាស​មានខ្សែ"</string>
 </resources>
