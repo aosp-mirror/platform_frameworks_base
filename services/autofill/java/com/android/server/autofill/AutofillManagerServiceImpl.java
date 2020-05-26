@@ -1564,6 +1564,16 @@ final class AutofillManagerServiceImpl
         }
     }
 
+    void onSwitchInputMethod() {
+        synchronized (mLock) {
+            final int sessionCount = mSessions.size();
+            for (int i = 0; i < sessionCount; i++) {
+                final Session session = mSessions.valueAt(i);
+                session.onSwitchInputMethodLocked();
+            }
+        }
+    }
+
     @Override
     public String toString() {
         return "AutofillManagerServiceImpl: [userId=" + mUserId
