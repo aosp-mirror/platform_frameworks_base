@@ -120,8 +120,8 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.controls.ControlsServiceInfo;
 import com.android.systemui.controls.controller.ControlsController;
+import com.android.systemui.controls.dagger.ControlsComponent;
 import com.android.systemui.controls.management.ControlsAnimations;
-import com.android.systemui.controls.management.ControlsListingController;
 import com.android.systemui.controls.ui.ControlsUiController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -140,6 +140,7 @@ import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -234,11 +235,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final IStatusBarService mStatusBarService;
     private final NotificationShadeWindowController mNotificationShadeWindowController;
     private GlobalActionsPanelPlugin mWalletPlugin;
-    private ControlsUiController mControlsUiController;
+    private Optional<ControlsUiController> mControlsUiControllerOptional;
     private final IWindowManager mIWindowManager;
     private final Executor mBackgroundExecutor;
     private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
-    private ControlsController mControlsController;
+    private Optional<ControlsController> mControlsControllerOptional;
+    private SharedPreferences mControlsPreferences;
     private final RingerModeTracker mRingerModeTracker;
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     private Handler mMainHandler;
@@ -298,11 +300,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             NotificationShadeDepthController depthController, SysuiColorExtractor colorExtractor,
             IStatusBarService statusBarService,
             NotificationShadeWindowController notificationShadeWindowController,
-            ControlsUiController controlsUiController, IWindowManager iWindowManager,
+            IWindowManager iWindowManager,
             @Background Executor backgroundExecutor,
-            ControlsListingController controlsListingController,
-            ControlsController controlsController, UiEventLogger uiEventLogger,
+            UiEventLogger uiEventLogger,
             RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
+            ControlsComponent controlsComponent,
             CurrentUserContextTracker currentUserContextTracker) {
         mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
         mWindowManagerFuncs = windowManagerFuncs;
@@ -325,11 +327,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mSysuiColorExtractor = colorExtractor;
         mStatusBarService = statusBarService;
         mNotificationShadeWindowController = notificationShadeWindowController;
-        mControlsUiController = controlsUiController;
+        mControlsUiControllerOptional = controlsComponent.getControlsUiController();
         mIWindowManager = iWindowManager;
         mBackgroundExecutor = backgroundExecutor;
         mRingerModeTracker = ringerModeTracker;
-        mControlsController = controlsController;
+        mControlsControllerOptional = controlsComponent.getControlsController();
         mSysUiState = sysUiState;
         mMainHandler = handler;
         mCurrentUserContextTracker = currentUserContextTracker;
@@ -374,7 +376,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                         mDialog.mWalletViewController.onDeviceLockStateChanged(!unlocked);
                     }
                     if (!mDialog.isShowingControls() && shouldShowControls()) {
-                        mDialog.showControls(mControlsUiController);
+                        mDialog.showControls(mControlsUiControllerOptional.get());
                     }
                     if (unlocked) {
                         mDialog.hideLockMessage();
@@ -383,7 +385,16 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         });
 
-        controlsListingController.addCallback(list -> mControlsServiceInfos = list);
+        if (controlsComponent.getControlsListingController().isPresent()) {
+            controlsComponent.getControlsListingController().get()
+                    .addCallback(list -> mControlsServiceInfos = list);
+        }
+
+        // Need to be user-specific with the context to make sure we read the correct prefs
+        Context userContext = context.createContextAsUser(
+                new UserHandle(mUserManager.getUserHandle()), 0);
+        mControlsPreferences = userContext.getSharedPreferences(PREFS_CONTROLS_FILE,
+            Context.MODE_PRIVATE);
 
         // Listen for changes to show controls on the power menu while locked
         onPowerMenuLockScreenSettingsChanged();
@@ -399,8 +410,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private void seedFavorites() {
+        if (!mControlsControllerOptional.isPresent()) return;
         if (mControlsServiceInfos.isEmpty()
-                || mControlsController.getFavorites().size() > 0) {
+                || mControlsControllerOptional.get().getFavorites().size() > 0) {
             return;
         }
 
@@ -433,7 +445,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return;
         }
 
-        mControlsController.seedFavoritesForComponent(
+        mControlsControllerOptional.get().seedFavoritesForComponent(
                 preferredComponent,
                 (accepted) -> {
                     Log.i(TAG, "Controls seeded: " + accepted);
@@ -636,10 +648,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mDepthController.setShowingHomeControls(true);
         GlobalActionsPanelPlugin.PanelViewController walletViewController =
                 getWalletViewController();
+        ControlsUiController uiController = null;
+        if (mControlsUiControllerOptional.isPresent() && shouldShowControls()) {
+            uiController = mControlsUiControllerOptional.get();
+        }
         ActionsDialog dialog = new ActionsDialog(mContext, mAdapter, mOverflowAdapter,
                 walletViewController, mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
-                controlsAvailable(), shouldShowControls() ? mControlsUiController : null,
+                controlsAvailable(), uiController,
                 mSysUiState, this::onRotate, mKeyguardShowing);
         boolean walletViewAvailable = walletViewController != null
                 && walletViewController.getPanelContent() != null;
@@ -2403,7 +2419,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private boolean controlsAvailable() {
         return mDeviceProvisioned
-                && mControlsUiController.getAvailable()
+                && mControlsUiControllerOptional.isPresent()
+                && mControlsUiControllerOptional.get().getAvailable()
                 && !mControlsServiceInfos.isEmpty();
     }
 

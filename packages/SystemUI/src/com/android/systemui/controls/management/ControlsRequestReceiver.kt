@@ -55,6 +55,9 @@ class ControlsRequestReceiver : BroadcastReceiver() {
     }
 
     override fun onReceive(context: Context, intent: Intent) {
+        if (!context.packageManager.hasSystemFeature(PackageManager.FEATURE_CONTROLS)) {
+            return
+        }
 
         val packageName = intent.getParcelableExtra<ComponentName>(Intent.EXTRA_COMPONENT_NAME)
                 ?.packageName
