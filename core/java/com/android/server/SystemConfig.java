@@ -69,14 +69,19 @@ public class SystemConfig {
     static SystemConfig sInstance;
 
     // permission flag, determines which types of configuration are allowed to be read
-    private static final int ALLOW_FEATURES = 0x01;
-    private static final int ALLOW_LIBS = 0x02;
-    private static final int ALLOW_PERMISSIONS = 0x04;
-    private static final int ALLOW_APP_CONFIGS = 0x08;
-    private static final int ALLOW_PRIVAPP_PERMISSIONS = 0x10;
-    private static final int ALLOW_OEM_PERMISSIONS = 0x20;
-    private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x40;
-    private static final int ALLOW_ASSOCIATIONS = 0x80;
+    private static final int ALLOW_FEATURES = 0x001;
+    private static final int ALLOW_LIBS = 0x002;
+    private static final int ALLOW_PERMISSIONS = 0x004;
+    private static final int ALLOW_APP_CONFIGS = 0x008;
+    private static final int ALLOW_PRIVAPP_PERMISSIONS = 0x010;
+    private static final int ALLOW_OEM_PERMISSIONS = 0x020;
+    private static final int ALLOW_HIDDENAPI_WHITELISTING = 0x040;
+    private static final int ALLOW_ASSOCIATIONS = 0x080;
+    // ALLOW_OVERRIDE_APP_RESTRICTIONS allows to use "allow-in-power-save-except-idle",
+    // "allow-in-power-save", "allow-in-data-usage-save", "allow-unthrottled-location",
+    // and "allow-ignore-location-settings".
+    private static final int ALLOW_OVERRIDE_APP_RESTRICTIONS = 0x100;
+    private static final int ALLOW_IMPLICIT_BROADCASTS = 0x200;
     private static final int ALLOW_ALL = ~0;
 
     // property for runtime configuration differentiation
@@ -513,11 +518,21 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "permissions"), oemPermissionFlag);
 
-        // Allow Product to customize all system configs
+        // Allow Product to customize these configs
+        // TODO(b/157203468): ALLOW_HIDDENAPI_WHITELISTING must be removed because we prohibited
+        // the use of hidden APIs from the product partition.
+        int productPermissionFlag = ALLOW_FEATURES | ALLOW_LIBS | ALLOW_PERMISSIONS
+                | ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS | ALLOW_HIDDENAPI_WHITELISTING
+                | ALLOW_ASSOCIATIONS | ALLOW_OVERRIDE_APP_RESTRICTIONS | ALLOW_IMPLICIT_BROADCASTS;
+        if (Build.VERSION.FIRST_SDK_INT <= Build.VERSION_CODES.R) {
+            // TODO(b/157393157): This must check product interface enforcement instead of
+            // FIRST_SDK_VERSION for the devices without product interface enforcement.
+            productPermissionFlag = ALLOW_ALL;
+        }
         readPermissions(Environment.buildPath(
-                Environment.getProductDirectory(), "etc", "sysconfig"), ALLOW_ALL);
+                Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
         readPermissions(Environment.buildPath(
-                Environment.getProductDirectory(), "etc", "permissions"), ALLOW_ALL);
+                Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
 
         // Allow /system_ext to customize all system configs
         readPermissions(Environment.buildPath(
@@ -631,6 +646,10 @@ public class SystemConfig {
             final boolean allowApiWhitelisting = (permissionFlag & ALLOW_HIDDENAPI_WHITELISTING)
                     != 0;
             final boolean allowAssociations = (permissionFlag & ALLOW_ASSOCIATIONS) != 0;
+            final boolean allowOverrideAppRestrictions =
+                    (permissionFlag & ALLOW_OVERRIDE_APP_RESTRICTIONS) != 0;
+            final boolean allowImplicitBroadcasts = (permissionFlag & ALLOW_IMPLICIT_BROADCASTS)
+                    != 0;
             while (true) {
                 XmlUtils.nextElement(parser);
                 if (parser.getEventType() == XmlPullParser.END_DOCUMENT) {
@@ -777,7 +796,7 @@ public class SystemConfig {
                         XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "allow-in-power-save-except-idle": {
-                        if (allowAll) {
+                        if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
@@ -791,7 +810,7 @@ public class SystemConfig {
                         XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "allow-in-power-save": {
-                        if (allowAll) {
+                        if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
@@ -805,7 +824,7 @@ public class SystemConfig {
                         XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "allow-in-data-usage-save": {
-                        if (allowAll) {
+                        if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
@@ -819,7 +838,7 @@ public class SystemConfig {
                         XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "allow-unthrottled-location": {
-                        if (allowAll) {
+                        if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
@@ -833,7 +852,7 @@ public class SystemConfig {
                         XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "allow-ignore-location-settings": {
-                        if (allowAll) {
+                        if (allowOverrideAppRestrictions) {
                             String pkgname = parser.getAttributeValue(null, "package");
                             if (pkgname == null) {
                                 Slog.w(TAG, "<" + name + "> without package in "
@@ -847,7 +866,7 @@ public class SystemConfig {
                         XmlUtils.skipCurrentTag(parser);
                     } break;
                     case "allow-implicit-broadcast": {
-                        if (allowAll) {
+                        if (allowImplicitBroadcasts) {
                             String action = parser.getAttributeValue(null, "action");
                             if (action == null) {
                                 Slog.w(TAG, "<" + name + "> without action in "
