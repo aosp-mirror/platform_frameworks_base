@@ -2147,8 +2147,7 @@ public class ChooserActivity extends ResolverActivity implements
             extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
 
             ChooserTarget chooserTarget = new ChooserTarget(
-                    shortcutInfo.getLongLabel() != null ? shortcutInfo.getLongLabel()
-                            : shortcutInfo.getShortLabel(),
+                    shortcutInfo.getLabel(),
                     null, // Icon will be loaded later if this target is selected to be shown.
                     score, matchingShortcuts.get(i).getTargetComponent().clone(), extras);
 
