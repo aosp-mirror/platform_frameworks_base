@@ -625,6 +625,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // Used in performing layout
     private boolean mTmpWindowsBehindIme;
 
+    /**
+     * Used to prevent recursions when calling
+     * {@link #ensureActivitiesVisible(ActivityRecord, int, boolean, boolean)}
+     */
+    private boolean mInEnsureActivitiesVisible = false;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final ActivityRecord activity = w.mActivityRecord;
@@ -5442,9 +5448,18 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void ensureActivitiesVisible(ActivityRecord starting, int configChanges,
             boolean preserveWindows, boolean notifyClients) {
-        for (int i = getTaskDisplayAreaCount() - 1; i >= 0; --i) {
-            getTaskDisplayAreaAt(i).ensureActivitiesVisible(starting, configChanges,
-                    preserveWindows, notifyClients);
+        if (mInEnsureActivitiesVisible) {
+            // Don't do recursive work.
+            return;
+        }
+        mInEnsureActivitiesVisible = true;
+        try {
+            for (int i = getTaskDisplayAreaCount() - 1; i >= 0; --i) {
+                getTaskDisplayAreaAt(i).ensureActivitiesVisible(starting, configChanges,
+                        preserveWindows, notifyClients);
+            }
+        } finally {
+            mInEnsureActivitiesVisible = false;
         }
     }
 

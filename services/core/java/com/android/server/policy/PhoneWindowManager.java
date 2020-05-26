@@ -4200,6 +4200,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         return false;
     }
 
+    // pre-condition: event.getKeyCode() is one of KeyEvent.KEYCODE_VOLUME_UP,
+    //                                   KeyEvent.KEYCODE_VOLUME_DOWN, KeyEvent.KEYCODE_VOLUME_MUTE
     private void dispatchDirectAudioEvent(KeyEvent event) {
         // When System Audio Mode is off, volume keys received by AVR can be either consumed by AVR
         // or forwarded to the TV. It's up to Amplifier manufacturer’s implementation.
@@ -4214,42 +4216,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 return;
             }
         }
-        if (event.getAction() != KeyEvent.ACTION_DOWN) {
-            return;
-        }
-        int keyCode = event.getKeyCode();
-        int flags = AudioManager.FLAG_SHOW_UI | AudioManager.FLAG_PLAY_SOUND
-                | AudioManager.FLAG_FROM_KEY;
-        String pkgName = mContext.getOpPackageName();
-
-        switch (keyCode) {
-            case KeyEvent.KEYCODE_VOLUME_UP:
-                try {
-                    getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_RAISE,
-                            AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName, TAG);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error dispatching volume up in dispatchTvAudioEvent.", e);
-                }
-                break;
-            case KeyEvent.KEYCODE_VOLUME_DOWN:
-                try {
-                    getAudioService().adjustSuggestedStreamVolume(AudioManager.ADJUST_LOWER,
-                            AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName, TAG);
-                } catch (Exception e) {
-                    Log.e(TAG, "Error dispatching volume down in dispatchTvAudioEvent.", e);
-                }
-                break;
-            case KeyEvent.KEYCODE_VOLUME_MUTE:
-                try {
-                    if (event.getRepeatCount() == 0) {
-                        getAudioService().adjustSuggestedStreamVolume(
-                                AudioManager.ADJUST_TOGGLE_MUTE,
-                                AudioManager.USE_DEFAULT_STREAM_TYPE, flags, pkgName, TAG);
-                    }
-                } catch (Exception e) {
-                    Log.e(TAG, "Error dispatching mute in dispatchTvAudioEvent.", e);
-                }
-                break;
+        try {
+            getAudioService().handleVolumeKey(event, mUseTvRouting,
+                    mContext.getOpPackageName(), TAG);
+        } catch (Exception e) {
+            Log.e(TAG, "Error dispatching volume key in handleVolumeKey for event:"
+                    + event, e);
         }
     }
 
