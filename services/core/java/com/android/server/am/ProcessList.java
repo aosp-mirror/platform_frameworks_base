@@ -2808,6 +2808,7 @@ public final class ProcessList {
                     uidRec.curCapability);
         }
         proc.uidRecord = uidRec;
+        uidRec.procRecords.add(proc);
 
         // Reset render thread tid if it was already set, so new process can set it again.
         proc.renderThreadTid = 0;
@@ -2901,6 +2902,7 @@ public final class ProcessList {
         }
         if (old != null && old.uidRecord != null) {
             old.uidRecord.numProcs--;
+            old.uidRecord.procRecords.remove(old);
             if (old.uidRecord.numProcs == 0) {
                 // No more processes using this uid, tell clients it is gone.
                 if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,

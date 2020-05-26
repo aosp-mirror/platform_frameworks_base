@@ -4914,8 +4914,13 @@ public final class ActiveServices {
 
     // TODO: remove this toast after feature development is done
     void showWhileInUseDebugToastLocked(int uid, int op, int mode) {
-        for (int i = mAm.mProcessList.mLruProcesses.size() - 1; i >= 0; i--) {
-            ProcessRecord pr = mAm.mProcessList.mLruProcesses.get(i);
+        final UidRecord uidRec = mAm.mProcessList.getUidRecordLocked(uid);
+        if (uidRec == null) {
+            return;
+        }
+
+        for (int i = uidRec.procRecords.size() - 1; i >= 0; i--) {
+            ProcessRecord pr = uidRec.procRecords.valueAt(i);
             if (pr.uid != uid) {
                 continue;
             }
