@@ -446,17 +446,17 @@ public class AppsFilter {
             }
         }
 
-        if (!newPkgSetting.pkg.getProtectedBroadcasts().isEmpty()) {
-            mProtectedBroadcasts.addAll(newPkgSetting.pkg.getProtectedBroadcasts());
-            recomputeComponentVisibility(existingSettings, newPkgSetting.pkg.getPackageName());
-        }
-
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
         try {
             final AndroidPackage newPkg = newPkgSetting.pkg;
             if (newPkg == null) {
                 // nothing to add
                 return;
+            }
+
+            if (!newPkg.getProtectedBroadcasts().isEmpty()) {
+                mProtectedBroadcasts.addAll(newPkg.getProtectedBroadcasts());
+                recomputeComponentVisibility(existingSettings, newPkg.getPackageName());
             }
 
             final boolean newIsForceQueryable =
