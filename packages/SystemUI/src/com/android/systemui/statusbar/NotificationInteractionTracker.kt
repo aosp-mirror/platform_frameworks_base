@@ -23,7 +23,9 @@ class NotificationInteractionTracker @Inject constructor(
         entryManager.addNotificationEntryListener(this)
     }
 
-    fun hasUserInteractedWith(key: String): Boolean = key in interactions
+    fun hasUserInteractedWith(key: String): Boolean {
+        return interactions[key] ?: false
+    }
 
     override fun onNotificationAdded(entry: NotificationEntry) {
         interactions[entry.key] = false
