@@ -603,6 +603,29 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRequestResizeForBlastSync() {
+        final WindowState win = mChildAppWindowAbove;
+        makeWindowVisible(win, win.getParentWindow());
+        win.mLayoutSeq = win.getDisplayContent().mLayoutSeq;
+        win.reportResized();
+        win.updateResizingWindowIfNeeded();
+        assertThat(mWm.mResizingWindows).doesNotContain(win);
+
+        // Check that the window is in resizing if using blast sync.
+        win.reportResized();
+        win.prepareForSync(mock(BLASTSyncEngine.TransactionReadyListener.class), 1);
+        win.updateResizingWindowIfNeeded();
+        assertThat(mWm.mResizingWindows).contains(win);
+
+        // Don't re-add the window again if it's been reported to the client and still waiting on
+        // the client draw for blast sync.
+        win.reportResized();
+        mWm.mResizingWindows.remove(win);
+        win.updateResizingWindowIfNeeded();
+        assertThat(mWm.mResizingWindows).doesNotContain(win);
+    }
+
+    @Test
     public void testGetTransformationMatrix() {
         final int PARENT_WINDOW_OFFSET = 1;
         final int DISPLAY_IN_PARENT_WINDOW_OFFSET = 2;
