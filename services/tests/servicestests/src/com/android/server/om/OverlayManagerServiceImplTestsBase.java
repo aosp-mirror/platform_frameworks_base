@@ -17,6 +17,7 @@
 package com.android.server.om;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,17 +27,19 @@ import android.content.om.OverlayInfo.State;
 import android.content.om.OverlayableInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 
 import androidx.annotation.Nullable;
 
 import com.android.internal.content.om.OverlayConfig;
 
+import org.junit.Assert;
 import org.junit.Before;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,27 +50,46 @@ class OverlayManagerServiceImplTestsBase {
     private OverlayManagerServiceImpl mImpl;
     private DummyDeviceState mState;
     private DummyListener mListener;
+    private DummyPackageManagerHelper mPackageManager;
+    private DummyIdmapDaemon mIdmapDaemon;
+    private OverlayConfig mOverlayConfig;
 
     @Before
     public void setUp() {
         mState = new DummyDeviceState();
         mListener = new DummyListener();
-        final DummyPackageManagerHelper pmh = new DummyPackageManagerHelper(mState);
+        mPackageManager = new DummyPackageManagerHelper(mState);
+        mIdmapDaemon = new DummyIdmapDaemon(mState);
+        mOverlayConfig = mock(OverlayConfig.class);
+        when(mOverlayConfig.getPriority(any())).thenReturn(OverlayConfig.DEFAULT_PRIORITY);
+        when(mOverlayConfig.isEnabled(any())).thenReturn(false);
+        when(mOverlayConfig.isMutable(any())).thenReturn(true);
+        reinitializeImpl();
+    }
 
-        mImpl = new OverlayManagerServiceImpl(pmh,
-                new DummyIdmapManager(mState, pmh),
+    void reinitializeImpl() {
+        mImpl = new OverlayManagerServiceImpl(mPackageManager,
+                new IdmapManager(mIdmapDaemon, mPackageManager),
                 new OverlayManagerSettings(),
-                mState.mOverlayConfig,
+                mOverlayConfig,
                 new String[0],
                 mListener);
     }
 
-    public OverlayManagerServiceImpl getImpl() {
+    OverlayManagerServiceImpl getImpl() {
         return mImpl;
     }
 
-    public DummyListener getListener() {
+    DummyListener getListener() {
         return mListener;
+    }
+
+    DummyPackageManagerHelper getPackageManager() {
+        return mPackageManager;
+    }
+
+    DummyIdmapDaemon getIdmapDaemon() {
+        return mIdmapDaemon;
     }
 
     void assertState(@State int expected, final String overlayPackageName, int userId) {
@@ -81,7 +103,7 @@ class OverlayManagerServiceImplTestsBase {
         assertEquals(msg, expected, info.state);
     }
 
-    void assertOverlayInfoList(final String targetPackageName, int userId,
+    void assertOverlayInfoForTarget(final String targetPackageName, int userId,
             OverlayInfo... overlayInfos) {
         final List<OverlayInfo> expected =
                 mImpl.getOverlayInfosForTarget(targetPackageName, userId);
@@ -89,198 +111,202 @@ class OverlayManagerServiceImplTestsBase {
         assertEquals(expected, actual);
     }
 
-    /**
-     * Creates an overlay configured through {@link OverlayConfig}.
-     *
-     * @throws IllegalStateException if the package is already installed
-     */
-    void addOverlayPackage(String packageName, String targetPackageName, int userId,
-            boolean mutable, boolean enabled, int priority) {
-        mState.addOverlay(packageName, targetPackageName, userId, mutable, enabled, priority);
+    DummyDeviceState.PackageBuilder target(String packageName) {
+        return new DummyDeviceState.PackageBuilder(packageName, null /* targetPackageName */,
+                null /* targetOverlayableName */);
+    }
+
+    DummyDeviceState.PackageBuilder overlay(String packageName, String targetPackageName) {
+        return overlay(packageName, targetPackageName, null /* targetOverlayableName */);
+    }
+
+    DummyDeviceState.PackageBuilder overlay(String packageName, String targetPackageName,
+            String targetOverlayableName) {
+        return new DummyDeviceState.PackageBuilder(packageName, targetPackageName,
+                targetOverlayableName);
+    }
+
+    void addSystemPackage(DummyDeviceState.PackageBuilder pkg, int userId) {
+        mState.add(pkg, userId);
+    }
+
+    void configureSystemOverlay(String packageName, boolean mutable, boolean enabled,
+            int priority) {
+        when(mOverlayConfig.getPriority(packageName)).thenReturn(priority);
+        when(mOverlayConfig.isEnabled(packageName)).thenReturn(enabled);
+        when(mOverlayConfig.isMutable(packageName)).thenReturn(mutable);
     }
 
     /**
-     * Adds the target package to the device.
+     * Adds the package to the device.
      *
      * This corresponds to when the OMS receives the
      * {@link android.content.Intent#ACTION_PACKAGE_ADDED} broadcast.
      *
-     * @throws IllegalStateException if the package is not currently installed
+     * @throws IllegalStateException if the package is currently installed
      */
-    void installTargetPackage(String packageName, int userId) {
-        if (mState.select(packageName, userId) != null) {
-            throw new IllegalStateException("package already installed");
+    void installNewPackage(DummyDeviceState.PackageBuilder pkg, int userId) {
+        if (mState.select(pkg.packageName, userId) != null) {
+            throw new IllegalStateException("package " + pkg.packageName + " already installed");
         }
-        mState.addTarget(packageName, userId);
-        mImpl.onTargetPackageAdded(packageName, userId);
+        mState.add(pkg, userId);
+        if (pkg.targetPackage == null) {
+            mImpl.onTargetPackageAdded(pkg.packageName, userId);
+        } else {
+            mImpl.onOverlayPackageAdded(pkg.packageName, userId);
+        }
     }
 
     /**
-     * Begins upgrading the target package.
+     * Begins upgrading the package.
      *
      * This corresponds to when the OMS receives the
      * {@link android.content.Intent#ACTION_PACKAGE_REMOVED} broadcast with the
-     * {@link android.content.Intent#EXTRA_REPLACING} extra.
-     *
-     * @throws IllegalStateException if the package is not currently installed
-     */
-    void beginUpgradeTargetPackage(String packageName, int userId) {
-        if (mState.select(packageName, userId) == null) {
-            throw new IllegalStateException("package not installed");
-        }
-        mImpl.onTargetPackageReplacing(packageName, userId);
-    }
-
-    /**
-     * Ends upgrading the target package.
-     *
-     * This corresponds to when the OMS receives the
+     * {@link android.content.Intent#EXTRA_REPLACING} extra and then receives the
      * {@link android.content.Intent#ACTION_PACKAGE_ADDED} broadcast with the
      * {@link android.content.Intent#EXTRA_REPLACING} extra.
      *
      * @throws IllegalStateException if the package is not currently installed
      */
-    void endUpgradeTargetPackage(String packageName, int userId) {
-        if (mState.select(packageName, userId) == null) {
-            throw new IllegalStateException("package not installed");
+    void upgradePackage(DummyDeviceState.PackageBuilder pkg, int userId) {
+        final DummyDeviceState.Package replacedPackage = mState.select(pkg.packageName, userId);
+        if (replacedPackage == null) {
+            throw new IllegalStateException("package " + pkg.packageName + " not installed");
         }
-        mState.addTarget(packageName, userId);
-        mImpl.onTargetPackageReplaced(packageName, userId);
+        if (replacedPackage.targetPackageName != null) {
+            mImpl.onOverlayPackageReplacing(pkg.packageName, userId);
+        }
+
+        mState.add(pkg, userId);
+        if (pkg.targetPackage == null) {
+            mImpl.onTargetPackageReplaced(pkg.packageName, userId);
+        } else {
+            mImpl.onOverlayPackageReplaced(pkg.packageName, userId);
+        }
     }
 
     /**
-     * Removes the target package from the device.
+     * Removes the package from the device.
      *
      * This corresponds to when the OMS receives the
      * {@link android.content.Intent#ACTION_PACKAGE_REMOVED} broadcast.
      *
      * @throws IllegalStateException if the package is not currently installed
      */
-    void uninstallTargetPackage(String packageName, int userId) {
-        if (mState.select(packageName, userId) == null) {
-            throw new IllegalStateException("package not installed");
+    void uninstallPackage(String packageName, int userId) {
+        final DummyDeviceState.Package pkg = mState.select(packageName, userId);
+        if (pkg == null) {
+            throw new IllegalStateException("package " + packageName+ " not installed");
         }
-        mState.remove(packageName, userId);
-        mImpl.onTargetPackageRemoved(packageName, userId);
+        mState.remove(pkg.packageName);
+        if (pkg.targetPackageName == null) {
+            mImpl.onTargetPackageRemoved(pkg.packageName, userId);
+        } else {
+            mImpl.onOverlayPackageRemoved(pkg.packageName, userId);
+        }
     }
 
-    /**
-     * Adds the overlay package to the device.
-     *
-     * This corresponds to when the OMS receives the
-     * {@link android.content.Intent#ACTION_PACKAGE_ADDED} broadcast.
-     *
-     * @throws IllegalStateException if the package is already installed
-     */
-    void installOverlayPackage(String packageName, String targetPackageName, int userId) {
-        if (mState.select(packageName, userId) != null) {
-            throw new IllegalStateException("package already installed");
-        }
-        mState.addOverlay(packageName, targetPackageName, userId);
-        mImpl.onOverlayPackageAdded(packageName, userId);
-    }
+    /** Represents the state of packages installed on a fake device. */
+    static class DummyDeviceState {
+        private ArrayMap<String, Package> mPackages = new ArrayMap<>();
 
-    /**
-     * Begins upgrading the overlay package.
-     *
-     * This corresponds to when the OMS receives the
-     * {@link android.content.Intent#ACTION_PACKAGE_REMOVED} broadcast with the
-     * {@link android.content.Intent#EXTRA_REPLACING} extra.
-     *
-     * @throws IllegalStateException if the package is not currently installed
-     */
-    void beginUpgradeOverlayPackage(String packageName, int userId) {
-        if (mState.select(packageName, userId) == null) {
-            throw new IllegalStateException("package not installed, cannot upgrade");
-        }
+        void add(PackageBuilder pkgBuilder, int userId) {
+            final Package pkg = pkgBuilder.build();
+            final Package previousPkg = select(pkg.packageName, userId);
+            mPackages.put(pkg.packageName, pkg);
 
-        mImpl.onOverlayPackageReplacing(packageName, userId);
-    }
-
-    /**
-     * Ends upgrading the overlay package, potentially changing its target package.
-     *
-     * This corresponds to when the OMS receives the
-     * {@link android.content.Intent#ACTION_PACKAGE_ADDED} broadcast with the
-     * {@link android.content.Intent#EXTRA_REPLACING} extra.
-     *
-     * @throws IllegalStateException if the package is not currently installed
-     */
-    void endUpgradeOverlayPackage(String packageName, String targetPackageName, int userId) {
-        if (mState.select(packageName, userId) == null) {
-            throw new IllegalStateException("package not installed, cannot upgrade");
-        }
-
-        mState.addOverlay(packageName, targetPackageName, userId);
-        mImpl.onOverlayPackageReplaced(packageName, userId);
-    }
-
-    private static final class DummyDeviceState {
-        private List<Package> mPackages = new ArrayList<>();
-        private OverlayConfig mOverlayConfig = mock(OverlayConfig.class);
-
-        /** Adds a non-overlay to the device. */
-        public void addTarget(String packageName, int userId) {
-            remove(packageName, userId);
-            mPackages.add(new Package(packageName, userId, null, false, false, 0));
-        }
-
-        /** Adds an overlay to the device. */
-        public void addOverlay(String packageName, String targetPackageName, int userId) {
-            addOverlay(packageName, targetPackageName, userId, true, false, OverlayConfig.DEFAULT_PRIORITY);
-        }
-
-        /** Adds a configured overlay to the device. */
-        public void addOverlay(String packageName, String targetPackageName, int userId,
-                boolean mutable, boolean enabled, int priority) {
-            remove(packageName, userId);
-            mPackages.add(new Package(packageName, userId, targetPackageName, mutable, enabled,
-                    priority));
-            when(mOverlayConfig.getPriority(packageName)).thenReturn(priority);
-            when(mOverlayConfig.isEnabled(packageName)).thenReturn(enabled);
-            when(mOverlayConfig.isMutable(packageName)).thenReturn(mutable);
-        }
-
-        /** Remove a package from the device. */
-        public void remove(String packageName, int userId) {
-            final Iterator<Package> iter = mPackages.iterator();
-            while (iter.hasNext()) {
-                final Package pkg = iter.next();
-                if (pkg.packageName.equals(packageName) && pkg.userId == userId) {
-                    iter.remove();
-                    return;
-                }
+            pkg.installedUserIds.add(userId);
+            if (previousPkg != null) {
+                pkg.installedUserIds.addAll(previousPkg.installedUserIds);
             }
         }
 
-        /** Retrieves all packages on device for a particular user. */
-        public List<Package> select(int userId) {
-            return mPackages.stream().filter(p -> p.userId == userId).collect(Collectors.toList());
+        void remove(String packageName) {
+            mPackages.remove(packageName);
         }
 
-        /** Retrieves the package with the specified package name for a particular user. */
-        public Package select(String packageName, int userId) {
-            return mPackages.stream().filter(
-                    p -> p.packageName.equals(packageName) && p.userId == userId)
-                    .findFirst().orElse(null);
+        void uninstall(String packageName, int userId) {
+            final Package pkg = mPackages.get(packageName);
+            if (pkg != null) {
+                pkg.installedUserIds.remove(userId);
+            }
         }
 
-        private static final class Package {
-            public final String packageName;
-            public final int userId;
-            public final String targetPackageName;
-            public final boolean mutable;
-            public final boolean enabled;
-            public final int priority;
+        List<Package> select(int userId) {
+            return mPackages.values().stream().filter(p -> p.installedUserIds.contains(userId))
+                    .collect(Collectors.toList());
+        }
 
-            private Package(String packageName, int userId, String targetPackageName,
-                    boolean mutable, boolean enabled, int priority) {
+        Package select(String packageName, int userId) {
+            final Package pkg = mPackages.get(packageName);
+            return pkg != null && pkg.installedUserIds.contains(userId) ? pkg : null;
+        }
+
+        private Package selectFromPath(String path) {
+            return mPackages.values().stream()
+                    .filter(p -> p.apkPath.equals(path)).findFirst().orElse(null);
+        }
+
+        static final class PackageBuilder {
+            private String packageName;
+            private String targetPackage;
+            private String certificate = "[default]";
+            private int version = 0;
+            private ArrayList<String> overlayableNames = new ArrayList<>();
+            private String targetOverlayableName;
+
+            private PackageBuilder(String packageName, String targetPackage,
+                    String targetOverlayableName) {
                 this.packageName = packageName;
-                this.userId = userId;
+                this.targetPackage = targetPackage;
+                this.targetOverlayableName = targetOverlayableName;
+            }
+
+            PackageBuilder setCertificate(String certificate) {
+                this.certificate = certificate;
+                return this;
+            }
+
+            PackageBuilder addOverlayable(String overlayableName) {
+                overlayableNames.add(overlayableName);
+                return this;
+            }
+
+            PackageBuilder setVersion(int version) {
+                this.version = version;
+                return this;
+            }
+
+            Package build() {
+                final String apkPath = String.format("%s/%s/base.apk",
+                        targetPackage == null ? "/system/app/:" : "/vendor/overlay/:",
+                        packageName);
+                final Package newPackage = new Package(packageName, targetPackage,
+                        targetOverlayableName, version, apkPath, certificate);
+                newPackage.overlayableNames.addAll(overlayableNames);
+                return newPackage;
+            }
+        }
+
+        static final class Package {
+            final String packageName;
+            final String targetPackageName;
+            final String targetOverlayableName;
+            final int versionCode;
+            final String apkPath;
+            final String certificate;
+            final ArrayList<String> overlayableNames = new ArrayList<>();
+            private final ArraySet<Integer> installedUserIds = new ArraySet<>();
+
+            private Package(String packageName, String targetPackageName,
+                    String targetOverlayableName, int versionCode, String apkPath,
+                    String certificate) {
+                this.packageName = packageName;
                 this.targetPackageName = targetPackageName;
-                this.mutable = mutable;
-                this.enabled = enabled;
-                this.priority = priority;
+                this.targetOverlayableName = targetOverlayableName;
+                this.versionCode = versionCode;
+                this.apkPath = apkPath;
+                this.certificate = certificate;
             }
         }
     }
@@ -288,6 +314,8 @@ class OverlayManagerServiceImplTestsBase {
     static final class DummyPackageManagerHelper implements PackageManagerHelper,
             OverlayableInfoCallback {
         private final DummyDeviceState mState;
+        String[] overlayableConfiguratorTargets = new String[0];
+        String overlayableConfigurator = "";
 
         private DummyPackageManagerHelper(DummyDeviceState state) {
             mState = state;
@@ -300,13 +328,12 @@ class OverlayManagerServiceImplTestsBase {
                 return null;
             }
             final ApplicationInfo ai = new ApplicationInfo();
-            ai.sourceDir = String.format("%s/%s/base.apk",
-                    pkg.targetPackageName == null ? "/system/app/" : "/vendor/overlay/",
-                    pkg.packageName);
+            ai.sourceDir = pkg.apkPath;
             PackageInfo pi = new PackageInfo();
             pi.applicationInfo = ai;
             pi.packageName = pkg.packageName;
             pi.overlayTarget = pkg.targetPackageName;
+            pi.targetOverlayableName = pkg.targetOverlayableName;
             pi.overlayCategory = "dummy-category-" + pkg.targetPackageName;
             return pi;
         }
@@ -314,14 +341,16 @@ class OverlayManagerServiceImplTestsBase {
         @Override
         public boolean signaturesMatching(@NonNull String packageName1,
                 @NonNull String packageName2, int userId) {
-            return false;
+            final DummyDeviceState.Package pkg1 = mState.select(packageName1, userId);
+            final DummyDeviceState.Package pkg2 = mState.select(packageName2, userId);
+            return pkg1 != null && pkg2 != null && pkg1.certificate.equals(pkg2.certificate);
         }
 
         @Override
         public List<PackageInfo> getOverlayPackages(int userId) {
             return mState.select(userId).stream()
                     .filter(p -> p.targetPackageName != null)
-                    .map(p -> getPackageInfo(p.packageName, p.userId))
+                    .map(p -> getPackageInfo(p.packageName, userId))
                     .collect(Collectors.toList());
         }
 
@@ -329,7 +358,11 @@ class OverlayManagerServiceImplTestsBase {
         @Override
         public OverlayableInfo getOverlayableForTarget(@NonNull String packageName,
                 @NonNull String targetOverlayableName, int userId) {
-            throw new UnsupportedOperationException();
+            final DummyDeviceState.Package pkg = mState.select(packageName, userId);
+            if (pkg == null || !pkg.overlayableNames.contains(targetOverlayableName)) {
+                return null;
+            }
+            return new OverlayableInfo(targetOverlayableName, null /* actor */);
         }
 
         @Nullable
@@ -341,69 +374,98 @@ class OverlayManagerServiceImplTestsBase {
         @NonNull
         @Override
         public Map<String, Map<String, String>> getNamedActors() {
-            throw new UnsupportedOperationException();
+            return Collections.emptyMap();
         }
 
         @Override
         public boolean doesTargetDefineOverlayable(String targetPackageName, int userId) {
-            throw new UnsupportedOperationException();
+            final DummyDeviceState.Package pkg = mState.select(targetPackageName, userId);
+            return pkg != null && pkg.overlayableNames.contains(targetPackageName);
         }
 
         @Override
         public void enforcePermission(String permission, String message) throws SecurityException {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public String[] getOverlayableConfiguratorTargets() {
+            return overlayableConfiguratorTargets;
+        }
+
+        @Override
+        public String getOverlayableConfigurator() {
+            return overlayableConfigurator;
+        }
     }
 
-    static class DummyIdmapManager extends IdmapManager {
+    static class DummyIdmapDaemon extends IdmapDaemon {
         private final DummyDeviceState mState;
-        private Set<String> mIdmapFiles = new ArraySet<>();
+        private final ArrayMap<String, IdmapHeader> mIdmapFiles = new ArrayMap<>();
 
-        private DummyIdmapManager(DummyDeviceState state,
-                DummyPackageManagerHelper packageManagerHelper) {
-            super(packageManagerHelper);
-            mState = state;
+        DummyIdmapDaemon(DummyDeviceState state) {
+            this.mState = state;
+        }
+
+        private int getCrc(@NonNull final String path) {
+            final DummyDeviceState.Package pkg = mState.selectFromPath(path);
+            Assert.assertNotNull(pkg);
+            return pkg.versionCode;
         }
 
         @Override
-        boolean createIdmap(@NonNull final PackageInfo targetPackage,
-                @NonNull final PackageInfo overlayPackage, int userId) {
-            final DummyDeviceState.Package t = mState.select(targetPackage.packageName, userId);
-            if (t == null) {
+        String createIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
+                int userId) {
+            mIdmapFiles.put(overlayPath, new IdmapHeader(getCrc(targetPath),
+                    getCrc(overlayPath), targetPath, policies, enforce));
+            return overlayPath;
+        }
+
+        @Override
+        boolean removeIdmap(String overlayPath, int userId) {
+            return mIdmapFiles.remove(overlayPath) != null;
+        }
+
+        @Override
+        boolean verifyIdmap(String targetPath, String overlayPath, int policies, boolean enforce,
+                int userId) {
+            final IdmapHeader idmap = mIdmapFiles.get(overlayPath);
+            if (idmap == null) {
                 return false;
             }
-            final DummyDeviceState.Package o = mState.select(overlayPackage.packageName, userId);
-            if (o == null) {
-                return false;
+            return idmap.isUpToDate(getCrc(targetPath), getCrc(overlayPath), targetPath);
+        }
+
+        @Override
+        boolean idmapExists(String overlayPath, int userId) {
+            return mIdmapFiles.containsKey(overlayPath);
+        }
+
+        IdmapHeader getIdmap(String overlayPath) {
+            return mIdmapFiles.get(overlayPath);
+        }
+
+        static class IdmapHeader {
+            private final int targetCrc;
+            private final int overlayCrc;
+            final String targetPath;
+            final int policies;
+            final boolean enforceOverlayable;
+
+            private IdmapHeader(int targetCrc, int overlayCrc, String targetPath, int policies,
+                    boolean enforceOverlayable) {
+                this.targetCrc = targetCrc;
+                this.overlayCrc = overlayCrc;
+                this.targetPath = targetPath;
+                this.policies = policies;
+                this.enforceOverlayable = enforceOverlayable;
             }
-            final String key = createKey(overlayPackage.packageName, userId);
-            return mIdmapFiles.add(key);
-        }
 
-        @Override
-        boolean removeIdmap(@NonNull final OverlayInfo oi, final int userId) {
-            final String key = createKey(oi.packageName, oi.userId);
-            if (!mIdmapFiles.contains(key)) {
-                return false;
+            private boolean isUpToDate(int expectedTargetCrc, int expectedOverlayCrc,
+                    String expectedTargetPath) {
+                return expectedTargetCrc == targetCrc && expectedOverlayCrc == overlayCrc
+                        && expectedTargetPath.equals(targetPath);
             }
-            mIdmapFiles.remove(key);
-            return true;
-        }
-
-        @Override
-        boolean idmapExists(@NonNull final OverlayInfo oi) {
-            final String key = createKey(oi.packageName, oi.userId);
-            return mIdmapFiles.contains(key);
-        }
-
-        @Override
-        boolean idmapExists(@NonNull final PackageInfo overlayPackage, final int userId) {
-            final String key = createKey(overlayPackage.packageName, userId);
-            return mIdmapFiles.contains(key);
-        }
-
-        private String createKey(@NonNull final String packageName, final int userId) {
-            return String.format("%s:%d", packageName, userId);
         }
     }
 
