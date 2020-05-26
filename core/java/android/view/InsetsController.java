@@ -69,6 +69,8 @@ import java.util.function.BiFunction;
  */
 public class InsetsController implements WindowInsetsController, InsetsAnimationControlCallbacks {
 
+    private int mTypesBeingCancelled;
+
     public interface Host {
 
         Handler getHandler();
@@ -778,6 +780,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             @AnimationType int animationType,
             @LayoutInsetsDuringAnimation int layoutInsetsDuringAnimation,
             boolean useInsetsAnimationThread) {
+        if ((types & mTypesBeingCancelled) != 0) {
+            throw new IllegalStateException("Cannot start a new insets animation of "
+                    + Type.toString(types)
+                    + " while an existing " + Type.toString(mTypesBeingCancelled)
+                    + " is being cancelled.");
+        }
         if (types == 0) {
             // nothing to animate.
             listener.onCancelled(null);
@@ -827,7 +835,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         animationType);
         mRunningAnimations.add(new RunningAnimation(runner, animationType));
         if (cancellationSignal != null) {
-            cancellationSignal.setOnCancelListener(runner::cancel);
+            cancellationSignal.setOnCancelListener(() -> {
+                cancelAnimation(runner, true /* invokeCallback */);
+            });
         }
         if (layoutInsetsDuringAnimation == LAYOUT_INSETS_DURING_ANIMATION_SHOWN) {
             showDirectly(types);
@@ -915,14 +925,20 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private void cancelExistingControllers(@InsetsType int types) {
-        for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
-            InsetsAnimationControlRunner control = mRunningAnimations.get(i).runner;
-            if ((control.getTypes() & types) != 0) {
-                cancelAnimation(control, true /* invokeCallback */);
+        final int originalmTypesBeingCancelled = mTypesBeingCancelled;
+        mTypesBeingCancelled |= types;
+        try {
+            for (int i = mRunningAnimations.size() - 1; i >= 0; i--) {
+                InsetsAnimationControlRunner control = mRunningAnimations.get(i).runner;
+                if ((control.getTypes() & types) != 0) {
+                    cancelAnimation(control, true /* invokeCallback */);
+                }
             }
-        }
-        if ((types & ime()) != 0) {
-            abortPendingImeControlRequest();
+            if ((types & ime()) != 0) {
+                abortPendingImeControlRequest();
+            }
+        } finally {
+            mTypesBeingCancelled = originalmTypesBeingCancelled;
         }
     }
 
@@ -976,6 +992,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                     if (getSourceConsumer(types.valueAt(j)).notifyAnimationFinished()) {
                         mHost.notifyInsetsChanged();
                     }
+                }
+                if (invokeCallback && runningAnimation.startDispatched) {
+                    dispatchAnimationEnd(runningAnimation.runner.getAnimation());
                 }
                 break;
             }
