@@ -443,14 +443,10 @@ public class BrightnessController implements ToggleSlider.Listener {
             max = mMaximumBacklight;
         }
         // convertGammaToLinearFloat returns 0-1
-        if (BrightnessSynchronizer.brightnessFloatToInt(mContext, brightnessValue)
-                == BrightnessSynchronizer.brightnessFloatToInt(mContext,
+        if (BrightnessSynchronizer.floatEquals(brightnessValue,
                 convertGammaToLinearFloat(mControl.getValue(), min, max))) {
-            // If we have more resolution on the slider than we do in the actual setting, then
-            // multiple slider positions will map to the same setting value. Thus, if we see a
-            // setting value here that maps to the current slider position, we don't bother to
-            // calculate the new slider position since it may differ and look like a brightness
-            // change to the user even though it isn't one.
+            // If the value in the slider is equal to the value on the current brightness
+            // then the slider does not need to animate, since the brightness will not change.
             return;
         }
         // Returns GAMMA_SPACE_MIN - GAMMA_SPACE_MAX
