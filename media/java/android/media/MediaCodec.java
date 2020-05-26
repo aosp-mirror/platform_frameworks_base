@@ -662,7 +662,8 @@ import java.util.concurrent.locks.ReentrantLock;
  excessive frames. Since {@link android.os.Build.VERSION_CODES#Q} the default behavior is to drop
  excessive frames. Applications can opt out of this behavior for non-View surfaces (such as
  ImageReader or SurfaceTexture) by targeting SDK {@link android.os.Build.VERSION_CODES#Q} and
- setting the key {@code "allow-frame-drop"} to {@code 0} in their configure format.
+ setting the key {@link MediaFormat#KEY_ALLOW_FRAME_DROP} to {@code 0}
+ in their configure format.
 
  <h4>Transformations When Rendering onto Surface</h4>
 
