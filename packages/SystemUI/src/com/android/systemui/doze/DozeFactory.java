@@ -28,6 +28,7 @@ import android.os.Handler;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.FalsingManager;
@@ -69,7 +70,7 @@ public class DozeFactory {
             WakefulnessLifecycle wakefulnessLifecycle, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DockManager dockManager, @Nullable IWallpaperManager wallpaperManager,
             ProximitySensor proximitySensor,
-            DelayedWakeLock.Builder delayedWakeLockBuilder, Handler handler,
+            DelayedWakeLock.Builder delayedWakeLockBuilder, @Main Handler handler,
             DelayableExecutor delayableExecutor,
             BiometricUnlockController biometricUnlockController,
             BroadcastDispatcher broadcastDispatcher, DozeHost dozeHost) {
