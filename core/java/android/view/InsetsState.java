@@ -79,7 +79,9 @@ public class InsetsState implements Parcelable {
             ITYPE_TOP_DISPLAY_CUTOUT,
             ITYPE_RIGHT_DISPLAY_CUTOUT,
             ITYPE_BOTTOM_DISPLAY_CUTOUT,
-            ITYPE_IME
+            ITYPE_IME,
+            ITYPE_CLIMATE_BAR,
+            ITYPE_EXTRA_NAVIGATION_BAR
     })
     public @interface InternalInsetsType {}
 
@@ -110,7 +112,11 @@ public class InsetsState implements Parcelable {
     /** Input method window. */
     public static final int ITYPE_IME = 13;
 
-    static final int LAST_TYPE = ITYPE_IME;
+    /** Additional system decorations inset type. */
+    public static final int ITYPE_CLIMATE_BAR = 14;
+    public static final int ITYPE_EXTRA_NAVIGATION_BAR = 15;
+
+    static final int LAST_TYPE = ITYPE_EXTRA_NAVIGATION_BAR;
 
     // Derived types
 
@@ -418,8 +424,10 @@ public class InsetsState implements Parcelable {
     public static @Type.InsetsType int toPublicType(@InternalInsetsType int type) {
         switch (type) {
             case ITYPE_STATUS_BAR:
+            case ITYPE_CLIMATE_BAR:
                 return Type.STATUS_BARS;
             case ITYPE_NAVIGATION_BAR:
+            case ITYPE_EXTRA_NAVIGATION_BAR:
                 return Type.NAVIGATION_BARS;
             case ITYPE_CAPTION_BAR:
                 return Type.CAPTION_BAR;
@@ -498,6 +506,10 @@ public class InsetsState implements Parcelable {
                 return "ITYPE_BOTTOM_DISPLAY_CUTOUT";
             case ITYPE_IME:
                 return "ITYPE_IME";
+            case ITYPE_CLIMATE_BAR:
+                return "ITYPE_CLIMATE_BAR";
+            case ITYPE_EXTRA_NAVIGATION_BAR:
+                return "ITYPE_EXTRA_NAVIGATION_BAR";
             default:
                 return "ITYPE_UNKNOWN_" + type;
         }
