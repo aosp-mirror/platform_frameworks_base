@@ -16,12 +16,14 @@
 
 package android.view;
 
+import static android.view.InsetsController.DEBUG;
 import static android.view.SyncRtSurfaceTransactionApplier.applyParams;
 
 import android.annotation.UiThread;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Trace;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.InsetsController.AnimationType;
 import android.view.SyncRtSurfaceTransactionApplier.SurfaceParams;
@@ -37,6 +39,7 @@ import android.view.animation.Interpolator;
  */
 public class InsetsAnimationThreadControlRunner implements InsetsAnimationControlRunner {
 
+    private static final String TAG = "InsetsAnimThreadRunner";
     private final InsetsAnimationControlImpl mControl;
     private final InsetsAnimationControlCallbacks mOuterCallbacks;
     private final Handler mMainThreadHandler;
@@ -71,6 +74,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
 
         @Override
         public void applySurfaceParams(SurfaceParams... params) {
+            if (DEBUG) Log.d(TAG, "applySurfaceParams");
             SurfaceControl.Transaction t = new SurfaceControl.Transaction();
             for (int i = params.length - 1; i >= 0; i--) {
                 SyncRtSurfaceTransactionApplier.SurfaceParams surfaceParams = params[i];
@@ -82,6 +86,7 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
 
         @Override
         public void releaseSurfaceControlFromRt(SurfaceControl sc) {
+            if (DEBUG) Log.d(TAG, "releaseSurfaceControlFromRt");
             // Since we don't push the SurfaceParams to the RT we can release directly
             sc.release();
         }
