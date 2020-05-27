@@ -113,6 +113,7 @@ import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ADD_REMOVE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_RESIZE;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_STARTING_WINDOW;
@@ -3559,6 +3560,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Called when the insets state changed.
      */
     void notifyInsetsChanged() {
+        ProtoLog.d(WM_DEBUG_IME, "notifyInsetsChanged for %s ", this);
         try {
             mClient.insetsChanged(getInsetsState());
         } catch (RemoteException e) {
@@ -3568,6 +3570,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public void notifyInsetsControlChanged() {
+        ProtoLog.d(WM_DEBUG_IME, "notifyInsetsControlChanged for %s ", this);
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
         try {
