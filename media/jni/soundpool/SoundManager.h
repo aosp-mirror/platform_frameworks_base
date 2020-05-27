@@ -21,6 +21,8 @@
 #include <mutex>
 #include <unordered_map>
 
+#include <android-base/thread_annotations.h>
+
 namespace android {
 
 class SoundPool;
@@ -91,20 +93,21 @@ private:
         }
     private:
         mutable std::recursive_mutex  mCallbackLock; // allow mCallback to setCallback().
+                                          // No thread-safety checks in R for recursive_mutex.
         SoundPool*          mSoundPool = nullptr; // GUARDED_BY(mCallbackLock)
         SoundPoolCallback*  mCallback = nullptr;  // GUARDED_BY(mCallbackLock)
         void*               mUserData = nullptr;  // GUARDED_BY(mCallbackLock)
     };
 
-    std::shared_ptr<Sound> findSound_l(int32_t soundID) const;
+    std::shared_ptr<Sound> findSound_l(int32_t soundID) const REQUIRES(mSoundManagerLock);
 
     // The following variables are initialized in constructor and can be accessed anytime.
-    CallbackHandler         mCallbackHandler;              // has its own lock
-    const std::unique_ptr<SoundDecoder> mDecoder;          // has its own lock
+    CallbackHandler mCallbackHandler;              // has its own lock
+    const std::unique_ptr<SoundDecoder> mDecoder;  // has its own lock
 
-    mutable std::mutex      mSoundManagerLock;
-    std::unordered_map<int, std::shared_ptr<Sound>> mSounds; // GUARDED_BY(mSoundManagerLock)
-    int32_t                 mNextSoundID = 0;    // GUARDED_BY(mSoundManagerLock)
+    mutable std::mutex mSoundManagerLock;
+    std::unordered_map<int, std::shared_ptr<Sound>> mSounds GUARDED_BY(mSoundManagerLock);
+    int32_t mNextSoundID GUARDED_BY(mSoundManagerLock) = 0;
 };
 
 } // namespace android::soundpool
