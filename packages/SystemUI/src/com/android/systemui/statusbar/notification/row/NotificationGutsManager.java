@@ -46,6 +46,7 @@ import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -111,6 +112,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
     private final Lazy<StatusBar> mStatusBarLazy;
     private final Handler mMainHandler;
+    private final Handler mBgHandler;
     private Runnable mOpenRunnable;
     private final INotificationManager mNotificationManager;
     private final LauncherApps mLauncherApps;
@@ -122,7 +124,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
      * Injected constructor. See {@link NotificationsModule}.
      */
     public NotificationGutsManager(Context context, VisualStabilityManager visualStabilityManager,
-            Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler,
+            Lazy<StatusBar> statusBarLazy, @Main Handler mainHandler, @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
@@ -135,6 +137,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
         mMainHandler = mainHandler;
+        mBgHandler = bgHandler;
         mAccessibilityManager = accessibilityManager;
         mHighPriorityProvider = highPriorityProvider;
         mNotificationManager = notificationManager;
@@ -463,7 +466,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 iconFactoryLoader,
                 mContextTracker.getCurrentUserContext(),
                 mBuilderProvider,
-                mDeviceProvisionedController.isDeviceProvisioned());
+                mDeviceProvisionedController.isDeviceProvisioned(),
+                mMainHandler,
+                mBgHandler);
     }
 
     /**

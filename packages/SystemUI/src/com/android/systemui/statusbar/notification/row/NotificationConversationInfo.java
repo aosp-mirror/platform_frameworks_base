@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static android.app.Notification.EXTRA_IS_GROUP_CONVERSATION;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_ALL;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_NONE;
 import static android.app.NotificationManager.BUBBLE_PREFERENCE_SELECTED;
@@ -43,9 +42,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.graphics.drawable.Icon;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -65,15 +62,16 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
 import java.lang.annotation.Retention;
-import java.util.List;
 
 import javax.inject.Provider;
 
@@ -86,10 +84,12 @@ public class NotificationConversationInfo extends LinearLayout implements
 
 
     private INotificationManager mINotificationManager;
-    ShortcutManager mShortcutManager;
+    private ShortcutManager mShortcutManager;
     private PackageManager mPm;
     private ConversationIconFactory mIconFactory;
     private VisualStabilityManager mVisualStabilityManager;
+    private Handler mMainHandler;
+    private Handler mBgHandler;
 
     private String mPackageName;
     private String mAppName;
@@ -97,6 +97,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private String mDelegatePkg;
     private NotificationChannel mNotificationChannel;
     private ShortcutInfo mShortcutInfo;
+    private NotificationEntry mEntry;
     private StatusBarNotification mSbn;
     @Nullable private Notification.BubbleMetadata mBubbleMetadata;
     private Context mUserContext;
@@ -213,11 +214,14 @@ public class NotificationConversationInfo extends LinearLayout implements
             ConversationIconFactory conversationIconFactory,
             Context userContext,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
-            boolean isDeviceProvisioned) {
+            boolean isDeviceProvisioned,
+            @Main Handler mainHandler,
+            @Background Handler bgHandler) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
         mVisualStabilityManager = visualStabilityManager;
         mPackageName = pkg;
+        mEntry = entry;
         mSbn = entry.getSbn();
         mPm = pm;
         mAppName = mPackageName;
@@ -231,7 +235,8 @@ public class NotificationConversationInfo extends LinearLayout implements
         mUserContext = userContext;
         mBubbleMetadata = bubbleMetadata;
         mBuilderProvider = builderProvider;
-
+        mMainHandler = mainHandler;
+        mBgHandler = bgHandler;
         mShortcutManager = shortcutManager;
         mShortcutInfo = entry.getRanking().getShortcutInfo();
         if (mShortcutInfo == null) {
@@ -494,11 +499,13 @@ public class NotificationConversationInfo extends LinearLayout implements
     }
 
     private void updateChannel() {
-        Handler bgHandler = new Handler(Dependency.get(Dependency.BG_LOOPER));
-        bgHandler.post(
+        mBgHandler.post(
                 new UpdateChannelRunnable(mINotificationManager, mPackageName,
                         mAppUid, mSelectedAction, mNotificationChannel));
-        mVisualStabilityManager.temporarilyAllowReordering();
+        mMainHandler.postDelayed(() -> {
+            mEntry.markForUserTriggeredMovement(true);
+            mVisualStabilityManager.temporarilyAllowReordering();
+        }, StackStateAnimator.ANIMATION_DURATION_STANDARD);
     }
 
     private boolean shouldShowPriorityOnboarding() {
