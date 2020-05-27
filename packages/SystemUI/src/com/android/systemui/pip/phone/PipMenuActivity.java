@@ -99,6 +99,7 @@ public class PipMenuActivity extends Activity {
     public static final int MESSAGE_ANIMATION_ENDED = 6;
     public static final int MESSAGE_POINTER_EVENT = 7;
     public static final int MESSAGE_MENU_EXPANDED = 8;
+    public static final int MESSAGE_FADE_OUT_MENU = 9;
 
     private static final int INITIAL_DISMISS_DELAY = 3500;
     private static final int POST_INTERACTION_DISMISS_DELAY = 2000;
@@ -180,6 +181,10 @@ public class PipMenuActivity extends Activity {
                 }
                 case MESSAGE_MENU_EXPANDED : {
                     mMenuContainerAnimator.start();
+                    break;
+                }
+                case MESSAGE_FADE_OUT_MENU: {
+                    fadeOutMenu();
                     break;
                 }
             }
@@ -407,6 +412,18 @@ public class PipMenuActivity extends Activity {
                 repostDelayedFinish(POST_INTERACTION_DISMISS_DELAY);
             }
         }
+    }
+
+    /**
+     * Different from {@link #hideMenu()}, this function does not try to finish this menu activity
+     * and instead, it fades out the controls by setting the alpha to 0 directly without menu
+     * visibility callbacks invoked.
+     */
+    private void fadeOutMenu() {
+        mMenuContainer.setAlpha(0f);
+        mSettingsButton.setAlpha(0f);
+        mDismissButton.setAlpha(0f);
+        mResizeHandle.setAlpha(0f);
     }
 
     private void hideMenu() {
