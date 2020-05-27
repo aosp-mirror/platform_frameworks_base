@@ -21,6 +21,8 @@
 #include <android/content/pm/FileSystemControlParcel.h>
 #include <android/content/pm/IDataLoaderStatusListener.h>
 #include <android/os/incremental/BnIncrementalServiceConnector.h>
+#include <android/os/incremental/BnStorageHealthListener.h>
+#include <android/os/incremental/StorageHealthCheckParams.h>
 #include <binder/IAppOpsCallback.h>
 #include <utils/String16.h>
 #include <utils/StrongPointer.h>
@@ -56,9 +58,14 @@ using RawMetadata = incfs::RawMetadata;
 using Clock = std::chrono::steady_clock;
 using TimePoint = std::chrono::time_point<Clock>;
 using Seconds = std::chrono::seconds;
+using BootClockTsUs = uint64_t;
 
 using IDataLoaderStatusListener = ::android::content::pm::IDataLoaderStatusListener;
 using DataLoaderStatusListener = ::android::sp<IDataLoaderStatusListener>;
+
+using StorageHealthCheckParams = ::android::os::incremental::StorageHealthCheckParams;
+using IStorageHealthListener = ::android::os::incremental::IStorageHealthListener;
+using StorageHealthListener = ::android::sp<IStorageHealthListener>;
 
 class IncrementalService final {
 public:
@@ -71,6 +78,8 @@ public:
 
     static constexpr StorageId kInvalidStorageId = -1;
     static constexpr StorageId kMaxStorageId = std::numeric_limits<int>::max();
+
+    static constexpr BootClockTsUs kMaxBootClockTsUs = std::numeric_limits<BootClockTsUs>::max();
 
     enum CreateOptions {
         TemporaryBind = 1,
@@ -97,8 +106,9 @@ public:
 
     StorageId createStorage(std::string_view mountPoint,
                             content::pm::DataLoaderParamsParcel&& dataLoaderParams,
-                            const DataLoaderStatusListener& dataLoaderStatusListener,
-                            CreateOptions options = CreateOptions::Default);
+                            CreateOptions options, const DataLoaderStatusListener& statusListener,
+                            StorageHealthCheckParams&& healthCheckParams,
+                            const StorageHealthListener& healthListener);
     StorageId createLinkedStorage(std::string_view mountPoint, StorageId linkedStorage,
                                   CreateOptions options = CreateOptions::Default);
     StorageId openStorage(std::string_view path);
@@ -161,7 +171,9 @@ private:
         DataLoaderStub(IncrementalService& service, MountId id,
                        content::pm::DataLoaderParamsParcel&& params,
                        content::pm::FileSystemControlParcel&& control,
-                       const DataLoaderStatusListener* externalListener, std::string&& healthPath);
+                       const DataLoaderStatusListener* statusListener,
+                       StorageHealthCheckParams&& healthCheckParams,
+                       const StorageHealthListener* healthListener, std::string&& healthPath);
         ~DataLoaderStub();
         // Cleans up the internal state and invalidates DataLoaderStub. Any subsequent calls will
         // result in an error.
@@ -212,7 +224,8 @@ private:
         MountId mId = kInvalidStorageId;
         content::pm::DataLoaderParamsParcel mParams;
         content::pm::FileSystemControlParcel mControl;
-        DataLoaderStatusListener mListener;
+        DataLoaderStatusListener mStatusListener;
+        StorageHealthListener mHealthListener;
 
         std::condition_variable mStatusCondition;
         int mCurrentStatus = content::pm::IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
@@ -291,9 +304,13 @@ private:
 
     DataLoaderStubPtr prepareDataLoader(IncFsMount& ifs,
                                         content::pm::DataLoaderParamsParcel&& params,
-                                        const DataLoaderStatusListener* externalListener = nullptr);
+                                        const DataLoaderStatusListener* statusListener = nullptr,
+                                        StorageHealthCheckParams&& healthCheckParams = {},
+                                        const StorageHealthListener* healthListener = nullptr);
     void prepareDataLoaderLocked(IncFsMount& ifs, content::pm::DataLoaderParamsParcel&& params,
-                                 const DataLoaderStatusListener* externalListener = nullptr);
+                                 const DataLoaderStatusListener* statusListener = nullptr,
+                                 StorageHealthCheckParams&& healthCheckParams = {},
+                                 const StorageHealthListener* healthListener = nullptr);
 
     BindPathMap::const_iterator findStorageLocked(std::string_view path) const;
     StorageId findStorageId(std::string_view path) const;
