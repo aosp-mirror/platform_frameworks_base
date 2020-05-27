@@ -46,6 +46,7 @@ import android.hardware.face.FaceManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.service.dreams.IDreamManager;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -62,6 +63,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -640,6 +642,9 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         mRow.getEntry().getSbn().getNotification().flags &= ~FLAG_BUBBLE;
+        NotificationListenerService.Ranking ranking = new RankingBuilder(
+                mRow.getEntry().getRanking()).setCanBubble(false).build();
+        mRow.getEntry().setRanking(ranking);
         mEntryListener.onEntryUpdated(mRow.getEntry());
 
         assertFalse(mBubbleController.hasBubbles());
