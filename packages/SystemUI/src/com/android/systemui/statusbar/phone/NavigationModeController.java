@@ -16,19 +16,14 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ApkAssets;
-import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -39,6 +34,7 @@ import android.util.Log;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.FileDescriptor;
@@ -69,16 +65,6 @@ public class NavigationModeController implements Dumpable {
 
     private ArrayList<ModeChangedListener> mListeners = new ArrayList<>();
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (DEBUG) {
-                Log.d(TAG, "ACTION_OVERLAY_CHANGED");
-            }
-            updateCurrentInteractionMode(true /* notify */);
-        }
-    };
-
     private final DeviceProvisionedController.DeviceProvisionedListener mDeviceProvisionedCallback =
             new DeviceProvisionedController.DeviceProvisionedListener() {
                 @Override
@@ -97,6 +83,7 @@ public class NavigationModeController implements Dumpable {
     @Inject
     public NavigationModeController(Context context,
             DeviceProvisionedController deviceProvisionedController,
+            ConfigurationController configurationController,
             @UiBackground Executor uiBgExecutor) {
         mContext = context;
         mCurrentUserContext = context;
@@ -105,10 +92,15 @@ public class NavigationModeController implements Dumpable {
         mUiBgExecutor = uiBgExecutor;
         deviceProvisionedController.addCallback(mDeviceProvisionedCallback);
 
-        IntentFilter overlayFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
-        overlayFilter.addDataScheme("package");
-        overlayFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
-        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, overlayFilter, null, null);
+        configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
+            @Override
+            public void onOverlayChanged() {
+                if (DEBUG) {
+                    Log.d(TAG, "onOverlayChanged");
+                }
+                updateCurrentInteractionMode(true /* notify */);
+            }
+        });
 
         updateCurrentInteractionMode(false /* notify */);
     }
