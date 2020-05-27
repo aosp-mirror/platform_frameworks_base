@@ -410,9 +410,12 @@ auto IncrementalService::getStorageSlotLocked() -> MountMap::iterator {
     }
 }
 
-StorageId IncrementalService::createStorage(
-        std::string_view mountPoint, DataLoaderParamsParcel&& dataLoaderParams,
-        const DataLoaderStatusListener& dataLoaderStatusListener, CreateOptions options) {
+StorageId IncrementalService::createStorage(std::string_view mountPoint,
+                                            content::pm::DataLoaderParamsParcel&& dataLoaderParams,
+                                            CreateOptions options,
+                                            const DataLoaderStatusListener& statusListener,
+                                            StorageHealthCheckParams&& healthCheckParams,
+                                            const StorageHealthListener& healthListener) {
     LOG(INFO) << "createStorage: " << mountPoint << " | " << int(options);
     if (!path::isAbsolute(mountPoint)) {
         LOG(ERROR) << "path is not absolute: " << mountPoint;
@@ -545,8 +548,8 @@ StorageId IncrementalService::createStorage(
     // Done here as well, all data structures are in good state.
     secondCleanupOnFailure.release();
 
-    auto dataLoaderStub =
-            prepareDataLoader(*ifs, std::move(dataLoaderParams), &dataLoaderStatusListener);
+    auto dataLoaderStub = prepareDataLoader(*ifs, std::move(dataLoaderParams), &statusListener,
+                                            std::move(healthCheckParams), &healthListener);
     CHECK(dataLoaderStub);
 
     mountIt->second = std::move(ifs);
@@ -1254,7 +1257,7 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
         dataLoaderParams.arguments = loader.arguments();
     }
 
-    prepareDataLoader(*ifs, std::move(dataLoaderParams), nullptr);
+    prepareDataLoader(*ifs, std::move(dataLoaderParams));
     CHECK(ifs->dataLoaderStub);
 
     std::vector<std::pair<std::string, metadata::BindPoint>> bindPoints;
@@ -1338,14 +1341,18 @@ void IncrementalService::runCmdLooper() {
 
 IncrementalService::DataLoaderStubPtr IncrementalService::prepareDataLoader(
         IncFsMount& ifs, DataLoaderParamsParcel&& params,
-        const DataLoaderStatusListener* externalListener) {
+        const DataLoaderStatusListener* statusListener,
+        StorageHealthCheckParams&& healthCheckParams, const StorageHealthListener* healthListener) {
     std::unique_lock l(ifs.lock);
-    prepareDataLoaderLocked(ifs, std::move(params), externalListener);
+    prepareDataLoaderLocked(ifs, std::move(params), statusListener, std::move(healthCheckParams),
+                            healthListener);
     return ifs.dataLoaderStub;
 }
 
 void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderParamsParcel&& params,
-                                                 const DataLoaderStatusListener* externalListener) {
+                                                 const DataLoaderStatusListener* statusListener,
+                                                 StorageHealthCheckParams&& healthCheckParams,
+                                                 const StorageHealthListener* healthListener) {
     if (ifs.dataLoaderStub) {
         LOG(INFO) << "Skipped data loader preparation because it already exists";
         return;
@@ -1360,7 +1367,8 @@ void IncrementalService::prepareDataLoaderLocked(IncFsMount& ifs, DataLoaderPara
 
     ifs.dataLoaderStub =
             new DataLoaderStub(*this, ifs.mountId, std::move(params), std::move(fsControlParcel),
-                               externalListener, path::join(ifs.root, constants().mount));
+                               statusListener, std::move(healthCheckParams), healthListener,
+                               path::join(ifs.root, constants().mount));
 }
 
 template <class Duration>
@@ -1680,19 +1688,24 @@ void IncrementalService::onAppOpChanged(const std::string& packageName) {
 IncrementalService::DataLoaderStub::DataLoaderStub(IncrementalService& service, MountId id,
                                                    DataLoaderParamsParcel&& params,
                                                    FileSystemControlParcel&& control,
-                                                   const DataLoaderStatusListener* externalListener,
+                                                   const DataLoaderStatusListener* statusListener,
+                                                   StorageHealthCheckParams&& healthCheckParams,
+                                                   const StorageHealthListener* healthListener,
                                                    std::string&& healthPath)
       : mService(service),
         mId(id),
         mParams(std::move(params)),
         mControl(std::move(control)),
-        mListener(externalListener ? *externalListener : DataLoaderStatusListener()),
+        mStatusListener(statusListener ? *statusListener : DataLoaderStatusListener()),
+        mHealthListener(healthListener ? *healthListener : StorageHealthListener()),
         mHealthPath(std::move(healthPath)) {
+    // TODO(b/153874006): enable external health listener.
+    mHealthListener = {};
     healthStatusOk();
 }
 
 IncrementalService::DataLoaderStub::~DataLoaderStub() {
-    if (mId != kInvalidStorageId) {
+    if (isValid()) {
         cleanupResources();
     }
 }
@@ -1710,13 +1723,14 @@ void IncrementalService::DataLoaderStub::cleanupResources() {
     mStatusCondition.wait_until(lock, now + 60s, [this] {
         return mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_DESTROYED;
     });
-    mListener = {};
+    mStatusListener = {};
+    mHealthListener = {};
     mId = kInvalidStorageId;
 }
 
 sp<content::pm::IDataLoader> IncrementalService::DataLoaderStub::getDataLoader() {
     sp<IDataLoader> dataloader;
-    auto status = mService.mDataLoaderManager->getDataLoader(mId, &dataloader);
+    auto status = mService.mDataLoaderManager->getDataLoader(id(), &dataloader);
     if (!status.isOk()) {
         LOG(ERROR) << "Failed to get dataloader: " << status.toString8();
         return {};
@@ -1752,15 +1766,15 @@ void IncrementalService::DataLoaderStub::setTargetStatusLocked(int status) {
     auto oldStatus = mTargetStatus;
     mTargetStatus = status;
     mTargetStatusTs = Clock::now();
-    LOG(DEBUG) << "Target status update for DataLoader " << mId << ": " << oldStatus << " -> "
+    LOG(DEBUG) << "Target status update for DataLoader " << id() << ": " << oldStatus << " -> "
                << status << " (current " << mCurrentStatus << ")";
 }
 
 bool IncrementalService::DataLoaderStub::bind() {
     bool result = false;
-    auto status = mService.mDataLoaderManager->bindToDataLoader(mId, mParams, this, &result);
+    auto status = mService.mDataLoaderManager->bindToDataLoader(id(), mParams, this, &result);
     if (!status.isOk() || !result) {
-        LOG(ERROR) << "Failed to bind a data loader for mount " << mId;
+        LOG(ERROR) << "Failed to bind a data loader for mount " << id();
         return false;
     }
     return true;
@@ -1771,9 +1785,9 @@ bool IncrementalService::DataLoaderStub::create() {
     if (!dataloader) {
         return false;
     }
-    auto status = dataloader->create(mId, mParams, mControl, this);
+    auto status = dataloader->create(id(), mParams, mControl, this);
     if (!status.isOk()) {
-        LOG(ERROR) << "Failed to start DataLoader: " << status.toString8();
+        LOG(ERROR) << "Failed to create DataLoader: " << status.toString8();
         return false;
     }
     return true;
@@ -1784,7 +1798,7 @@ bool IncrementalService::DataLoaderStub::start() {
     if (!dataloader) {
         return false;
     }
-    auto status = dataloader->start(mId);
+    auto status = dataloader->start(id());
     if (!status.isOk()) {
         LOG(ERROR) << "Failed to start DataLoader: " << status.toString8();
         return false;
@@ -1793,7 +1807,7 @@ bool IncrementalService::DataLoaderStub::start() {
 }
 
 bool IncrementalService::DataLoaderStub::destroy() {
-    return mService.mDataLoaderManager->unbindFromDataLoader(mId).isOk();
+    return mService.mDataLoaderManager->unbindFromDataLoader(id()).isOk();
 }
 
 bool IncrementalService::DataLoaderStub::fsmStep() {
@@ -1852,8 +1866,8 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         return binder::Status::
                 fromServiceSpecificError(-EINVAL, "onStatusChange came to invalid DataLoaderStub");
     }
-    if (mId != mountId) {
-        LOG(ERROR) << "Mount ID mismatch: expected " << mId << ", but got: " << mountId;
+    if (id() != mountId) {
+        LOG(ERROR) << "Mount ID mismatch: expected " << id() << ", but got: " << mountId;
         return binder::Status::fromServiceSpecificError(-EPERM, "Mount ID mismatch.");
     }
 
@@ -1869,7 +1883,7 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         mCurrentStatus = newStatus;
         targetStatus = mTargetStatus;
 
-        listener = mListener;
+        listener = mStatusListener;
 
         if (mCurrentStatus == IDataLoaderStatusListener::DATA_LOADER_UNAVAILABLE) {
             // For unavailable, unbind from DataLoader to ensure proper re-commit.
@@ -1877,7 +1891,7 @@ binder::Status IncrementalService::DataLoaderStub::onStatusChanged(MountId mount
         }
     }
 
-    LOG(DEBUG) << "Current status update for DataLoader " << mId << ": " << oldStatus << " -> "
+    LOG(DEBUG) << "Current status update for DataLoader " << id() << ": " << oldStatus << " -> "
                << newStatus << " (target " << targetStatus << ")";
 
     if (listener) {
