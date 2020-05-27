@@ -350,7 +350,6 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         }
         Intent fillInIntent = null;
         NotificationEntry entry = row.getEntry();
-        final boolean isBubble = entry.isBubble();
         CharSequence remoteInputText = null;
         if (!TextUtils.isEmpty(entry.remoteInputText)) {
             remoteInputText = entry.remoteInputText;
@@ -359,14 +358,15 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
             fillInIntent = new Intent().putExtra(Notification.EXTRA_REMOTE_INPUT_DRAFT,
                     remoteInputText.toString());
         }
-        if (isBubble) {
+        final boolean canBubble = entry.canBubble();
+        if (canBubble) {
             mLogger.logExpandingBubble(notificationKey);
-            expandBubbleStackOnMainThread(notificationKey);
+            expandBubbleStackOnMainThread(entry);
         } else {
             startNotificationIntent(
                     intent, fillInIntent, entry, row, wasOccluded, isActivityIntent);
         }
-        if (isActivityIntent || isBubble) {
+        if (isActivityIntent || canBubble) {
             mAssistManagerLazy.get().hideAssist();
         }
         if (shouldCollapse()) {
@@ -381,7 +381,7 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
                 rank, count, true, location);
         mClickNotifier.onNotificationClick(notificationKey, nv);
 
-        if (!isBubble) {
+        if (!canBubble) {
             if (parentToCancelFinal != null) {
                 // TODO: (b/145659174) remove - this cancels the parent if the notification clicked
                 // on will auto-cancel and is the only child in the group. This won't be
@@ -398,12 +398,12 @@ public class StatusBarNotificationActivityStarter implements NotificationActivit
         mIsCollapsingToShowActivityOverLockscreen = false;
     }
 
-    private void expandBubbleStackOnMainThread(String notificationKey) {
+    private void expandBubbleStackOnMainThread(NotificationEntry entry) {
         if (Looper.getMainLooper().isCurrentThread()) {
-            mBubbleController.expandStackAndSelectBubble(notificationKey);
+            mBubbleController.expandStackAndSelectBubble(entry);
         } else {
             mMainThreadHandler.post(
-                    () -> mBubbleController.expandStackAndSelectBubble(notificationKey));
+                    () -> mBubbleController.expandStackAndSelectBubble(entry));
         }
     }
 
