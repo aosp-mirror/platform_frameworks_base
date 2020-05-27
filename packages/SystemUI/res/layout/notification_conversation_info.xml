@@ -63,6 +63,8 @@
                     android:id="@+id/parent_channel_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:textDirection="locale"
                     android:layout_weight="1"
                     style="@style/TextAppearance.NotificationImportanceChannel"/>
                 <TextView
