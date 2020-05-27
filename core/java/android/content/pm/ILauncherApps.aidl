@@ -99,9 +99,9 @@ interface ILauncherApps {
             in IShortcutChangeCallback callback);
 
     void cacheShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
-            in UserHandle user);
+            in UserHandle user, int cacheFlags);
     void uncacheShortcuts(String callingPackage, String packageName, in List<String> shortcutIds,
-            in UserHandle user);
+            in UserHandle user, int cacheFlags);
 
     String getShortcutIconUri(String callingPackage, String packageName, String shortcutId,
             int userId);
