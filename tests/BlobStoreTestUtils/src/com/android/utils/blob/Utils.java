@@ -18,12 +18,16 @@ package com.android.utils.blob;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.Instrumentation;
 import android.app.blob.BlobHandle;
 import android.app.blob.BlobStoreManager;
 import android.app.blob.LeaseInfo;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.ParcelFileDescriptor;
+import android.util.Log;
+
+import androidx.test.uiautomator.UiDevice;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -32,6 +36,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class Utils {
+    public static final String TAG = "BlobStoreTest";
+
     public static final int BUFFER_SIZE_BYTES = 16 * 1024;
 
     public static final long KB_IN_BYTES = 1000;
@@ -68,7 +74,8 @@ public class Utils {
 
     public static void assertLeasedBlobs(BlobStoreManager blobStoreManager,
             BlobHandle... expectedBlobHandles) throws IOException {
-        assertThat(blobStoreManager.getLeasedBlobs()).containsExactly(expectedBlobHandles);
+        assertThat(blobStoreManager.getLeasedBlobs()).containsExactly(
+                (Object[]) expectedBlobHandles);
     }
 
     public static void assertNoLeasedBlobs(BlobStoreManager blobStoreManager)
@@ -140,5 +147,17 @@ public class Utils {
         assertThat(leaseInfo.getExpiryTimeMillis()).isEqualTo(expiryTimeMs);
         assertThat(leaseInfo.getDescriptionResId()).isEqualTo(descriptionResId);
         assertThat(leaseInfo.getDescription()).isEqualTo(description);
+    }
+
+    public static void triggerIdleMaintenance(Instrumentation instrumentation) throws IOException {
+        runShellCmd(instrumentation, "cmd blob_store idle-maintenance");
+    }
+
+    private static String runShellCmd(Instrumentation instrumentation,
+            String cmd) throws IOException {
+        final UiDevice uiDevice = UiDevice.getInstance(instrumentation);
+        final String result = uiDevice.executeShellCommand(cmd);
+        Log.i(TAG, "Output of '" + cmd + "': '" + result + "'");
+        return result;
     }
 }

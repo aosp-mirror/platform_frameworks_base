@@ -18,7 +18,6 @@ package com.android.server.blob;
 import static android.provider.DeviceConfig.NAMESPACE_BLOBSTORE;
 import static android.text.format.Formatter.FLAG_IEC_UNITS;
 import static android.text.format.Formatter.formatFileSize;
-import static android.util.TimeUtils.formatDuration;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -58,17 +57,23 @@ class BlobStoreConfig {
      * Job Id for idle maintenance job ({@link BlobStoreIdleJobService}).
      */
     public static final int IDLE_JOB_ID = 0xB70B1D7; // 191934935L
-    /**
-     * Max time period (in millis) between each idle maintenance job run.
-     */
-    public static final long IDLE_JOB_PERIOD_MILLIS = TimeUnit.DAYS.toMillis(1);
-
-    /**
-     * Timeout in millis after which sessions with no updates will be deleted.
-     */
-    public static final long SESSION_EXPIRY_TIMEOUT_MILLIS = TimeUnit.DAYS.toMillis(7);
 
     public static class DeviceConfigProperties {
+        /**
+         * Denotes the max time period (in millis) between each idle maintenance job run.
+         */
+        public static final String KEY_IDLE_JOB_PERIOD_MS = "idle_job_period_ms";
+        public static final long DEFAULT_IDLE_JOB_PERIOD_MS = TimeUnit.DAYS.toMillis(1);
+        public static long IDLE_JOB_PERIOD_MS = DEFAULT_IDLE_JOB_PERIOD_MS;
+
+        /**
+         * Denotes the timeout in millis after which sessions with no updates will be deleted.
+         */
+        public static final String KEY_SESSION_EXPIRY_TIMEOUT_MS =
+                "session_expiry_timeout_ms";
+        public static final long DEFAULT_SESSION_EXPIRY_TIMEOUT_MS = TimeUnit.DAYS.toMillis(7);
+        public static long SESSION_EXPIRY_TIMEOUT_MS = DEFAULT_SESSION_EXPIRY_TIMEOUT_MS;
+
         /**
          * Denotes how low the limit for the amount of data, that an app will be allowed to acquire
          * a lease on, can be.
@@ -119,6 +124,13 @@ class BlobStoreConfig {
             }
             properties.getKeyset().forEach(key -> {
                 switch (key) {
+                    case KEY_IDLE_JOB_PERIOD_MS:
+                        IDLE_JOB_PERIOD_MS = properties.getLong(key, DEFAULT_IDLE_JOB_PERIOD_MS);
+                        break;
+                    case KEY_SESSION_EXPIRY_TIMEOUT_MS:
+                        SESSION_EXPIRY_TIMEOUT_MS = properties.getLong(key,
+                                DEFAULT_SESSION_EXPIRY_TIMEOUT_MS);
+                        break;
                     case KEY_TOTAL_BYTES_PER_APP_LIMIT_FLOOR:
                         TOTAL_BYTES_PER_APP_LIMIT_FLOOR = properties.getLong(key,
                                 DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FLOOR);
@@ -143,6 +155,12 @@ class BlobStoreConfig {
 
         static void dump(IndentingPrintWriter fout, Context context) {
             final String dumpFormat = "%s: [cur: %s, def: %s]";
+            fout.println(String.format(dumpFormat, KEY_IDLE_JOB_PERIOD_MS,
+                    TimeUtils.formatDuration(IDLE_JOB_PERIOD_MS),
+                    TimeUtils.formatDuration(DEFAULT_IDLE_JOB_PERIOD_MS)));
+            fout.println(String.format(dumpFormat, KEY_SESSION_EXPIRY_TIMEOUT_MS,
+                    TimeUtils.formatDuration(SESSION_EXPIRY_TIMEOUT_MS),
+                    TimeUtils.formatDuration(DEFAULT_SESSION_EXPIRY_TIMEOUT_MS)));
             fout.println(String.format(dumpFormat, KEY_TOTAL_BYTES_PER_APP_LIMIT_FLOOR,
                     formatFileSize(context, TOTAL_BYTES_PER_APP_LIMIT_FLOOR, FLAG_IEC_UNITS),
                     formatFileSize(context, DEFAULT_TOTAL_BYTES_PER_APP_LIMIT_FLOOR,
@@ -164,6 +182,22 @@ class BlobStoreConfig {
                 context.getMainExecutor(),
                 properties -> DeviceConfigProperties.refresh(properties));
         DeviceConfigProperties.refresh(DeviceConfig.getProperties(NAMESPACE_BLOBSTORE));
+    }
+
+    /**
+     * Returns the max time period (in millis) between each idle maintenance job run.
+     */
+    public static long getIdleJobPeriodMs() {
+        return DeviceConfigProperties.IDLE_JOB_PERIOD_MS;
+    }
+
+    /**
+     * Returns whether a session is expired or not. A session is considered expired if the session
+     * has not been modified in a while (i.e. SESSION_EXPIRY_TIMEOUT_MS).
+     */
+    public static boolean hasSessionExpired(long sessionLastModifiedMs) {
+        return sessionLastModifiedMs
+                < System.currentTimeMillis() - DeviceConfigProperties.SESSION_EXPIRY_TIMEOUT_MS;
     }
 
     /**
@@ -277,9 +311,6 @@ class BlobStoreConfig {
         fout.println("XML current version: " + XML_VERSION_CURRENT);
 
         fout.println("Idle job ID: " + IDLE_JOB_ID);
-        fout.println("Idle job period: " + formatDuration(IDLE_JOB_PERIOD_MILLIS));
-
-        fout.println("Session expiry timeout: " + formatDuration(SESSION_EXPIRY_TIMEOUT_MILLIS));
 
         fout.println("Total bytes per app limit: " + formatFileSize(context,
                 getAppDataBytesLimit(), FLAG_IEC_UNITS));
