@@ -31,6 +31,8 @@ import android.graphics.PixelFormat;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.text.SpannableStringBuilder;
+import android.text.style.BulletSpan;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
@@ -293,8 +295,20 @@ public class ScreenPinningRequest implements View.OnClickListener,
                         .setImageDrawable(navigationBarView.getHomeDrawable());
             }
 
-            ((TextView) mLayout.findViewById(R.id.screen_pinning_description))
-                    .setText(descriptionStringResId);
+            // Create a bulleted list of the default description plus the two security notes.
+            int gapWidth = getResources().getDimensionPixelSize(
+                    R.dimen.screen_pinning_description_bullet_gap_width);
+            SpannableStringBuilder description = new SpannableStringBuilder();
+            description.append(getContext().getText(descriptionStringResId),
+                    new BulletSpan(gapWidth), /* flags */ 0);
+            description.append(System.lineSeparator());
+            description.append(getContext().getText(R.string.screen_pinning_exposes_personal_data),
+                    new BulletSpan(gapWidth), /* flags */ 0);
+            description.append(System.lineSeparator());
+            description.append(getContext().getText(R.string.screen_pinning_can_open_other_apps),
+                    new BulletSpan(gapWidth), /* flags */ 0);
+            ((TextView) mLayout.findViewById(R.id.screen_pinning_description)).setText(description);
+
             final int backBgVisibility = touchExplorationEnabled ? View.INVISIBLE : View.VISIBLE;
             mLayout.findViewById(R.id.screen_pinning_back_bg).setVisibility(backBgVisibility);
             mLayout.findViewById(R.id.screen_pinning_back_bg_light).setVisibility(backBgVisibility);
