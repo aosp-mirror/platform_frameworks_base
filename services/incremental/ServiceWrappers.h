@@ -69,6 +69,7 @@ public:
     using Control = incfs::Control;
     using FileId = incfs::FileId;
     using ErrorCode = incfs::ErrorCode;
+    using WaitResult = incfs::WaitResult;
 
     using ExistingMountCallback =
             std::function<void(std::string_view root, std::string_view backingDir,
@@ -90,6 +91,9 @@ public:
     virtual ErrorCode unlink(const Control& control, std::string_view path) const = 0;
     virtual base::unique_fd openForSpecialOps(const Control& control, FileId id) const = 0;
     virtual ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const = 0;
+    virtual WaitResult waitForPendingReads(
+            const Control& control, std::chrono::milliseconds timeout,
+            std::vector<incfs::ReadInfo>* pendingReadsBuffer) const = 0;
 };
 
 class AppOpsManagerWrapper {
