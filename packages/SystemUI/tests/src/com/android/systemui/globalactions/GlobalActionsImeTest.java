@@ -18,10 +18,13 @@ package com.android.systemui.globalactions;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.view.View;
 import android.view.WindowInsets;
@@ -54,16 +57,15 @@ public class GlobalActionsImeTest extends SysuiTestCase {
      * doesn't interfere with the IME, i.e. soft-keyboard state.
      */
     @Test
-    public void testGlobalActions_doesntStealImeControl() {
+    public void testGlobalActions_doesntStealImeControl() throws Exception {
+        turnScreenOn();
         final TestActivity activity = mActivityTestRule.launchActivity(null);
 
-        activity.waitFor(() -> activity.mHasFocus && activity.mControlsIme && activity.mImeVisible);
+        waitUntil("Ime is visible", activity::isImeVisible);
 
-        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(
-                "input keyevent --longpress POWER"
-        );
+        executeShellCommand("input keyevent --longpress POWER");
 
-        activity.waitFor(() -> !activity.mHasFocus);
+        waitUntil("activity loses focus", () -> !activity.mHasFocus);
         // Give the dialog time to animate in, and steal IME focus. Unfortunately, there's currently
         // no better way to wait for this.
         SystemClock.sleep(TimeUnit.SECONDS.toMillis(2));
@@ -76,7 +78,39 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         });
     }
 
-    /** Like Instrumentation.runOnMainThread(), but forwards AssertionErrors to the caller. */
+    private void turnScreenOn() throws Exception {
+        PowerManager powerManager = mContext.getSystemService(PowerManager.class);
+        assertNotNull(powerManager);
+        if (powerManager.isInteractive()) {
+            return;
+        }
+        executeShellCommand("input keyevent KEYCODE_WAKEUP");
+        waitUntil("Device not interactive", powerManager::isInteractive);
+        executeShellCommand("am wait-for-broadcast-idle");
+    }
+
+    private static void waitUntil(String message, BooleanSupplier predicate)
+            throws Exception {
+        int sleep = 125;
+        final long timeout = SystemClock.uptimeMillis() + 10_000;  // 10 second timeout
+        while (SystemClock.uptimeMillis() < timeout) {
+            if (predicate.getAsBoolean()) {
+                return; // okay
+            }
+            Thread.sleep(sleep);
+            sleep *= 5;
+            sleep = Math.min(2000, sleep);
+        }
+        fail(message);
+    }
+
+    private static void executeShellCommand(String cmd) {
+        InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand(cmd);
+    }
+
+    /**
+     * Like Instrumentation.runOnMainThread(), but forwards AssertionErrors to the caller.
+     */
     private static void runAssertionOnMainThread(Runnable r) {
         AssertionError[] t = new AssertionError[1];
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
@@ -96,7 +130,6 @@ public class GlobalActionsImeTest extends SysuiTestCase {
             WindowInsetsController.OnControllableInsetsChangedListener,
             View.OnApplyWindowInsetsListener {
 
-        private EditText mContent;
         boolean mHasFocus;
         boolean mControlsIme;
         boolean mImeVisible;
@@ -105,13 +138,13 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
 
-            mContent = new EditText(this);
-            mContent.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
-            setContentView(mContent);
-            mContent.requestFocus();
+            EditText content = new EditText(this);
+            content.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
+            setContentView(content);
+            content.requestFocus();
 
             getWindow().getDecorView().setOnApplyWindowInsetsListener(this);
-            WindowInsetsController wic = mContent.getWindowInsetsController();
+            WindowInsetsController wic = content.getWindowInsetsController();
             wic.addOnControllableInsetsChangedListener(this);
             wic.show(ime());
         }
@@ -133,16 +166,8 @@ public class GlobalActionsImeTest extends SysuiTestCase {
             }
         }
 
-        void waitFor(BooleanSupplier condition) {
-            synchronized (this) {
-                while (!condition.getAsBoolean()) {
-                    try {
-                        wait(TimeUnit.SECONDS.toMillis(5));
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                }
-            }
+        boolean isImeVisible() {
+            return mHasFocus && mControlsIme && mImeVisible;
         }
 
         @Override
