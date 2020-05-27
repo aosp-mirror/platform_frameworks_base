@@ -38,6 +38,7 @@ import java.nio.ByteBuffer;
 public class ScreenInternalAudioRecorder {
     private static String TAG = "ScreenAudioRecorder";
     private static final int TIMEOUT = 500;
+    private static final float MIC_VOLUME_SCALE = 1.4f;
     private final Context mContext;
     private AudioRecord mAudioRecord;
     private AudioRecord mAudioRecordMic;
@@ -148,6 +149,10 @@ public class ScreenInternalAudioRecorder {
                     readShortsInternal = mAudioRecord.read(bufferInternal, 0,
                             bufferInternal.length);
                     readShortsMic = mAudioRecordMic.read(bufferMic, 0, bufferMic.length);
+
+                    // modify the volume
+                    bufferMic = scaleValues(bufferMic,
+                            readShortsMic, MIC_VOLUME_SCALE);
                     readBytes = Math.min(readShortsInternal, readShortsMic) * 2;
                     buffer = addAndConvertBuffers(bufferInternal, readShortsInternal, bufferMic,
                             readShortsMic);
@@ -168,6 +173,19 @@ public class ScreenInternalAudioRecorder {
         });
     }
 
+    private short[] scaleValues(short[] buff, int len, float scale) {
+        for (int i = 0; i < len; i++) {
+            int oldValue = buff[i];
+            int newValue = (int) (buff[i] * scale);
+            if (newValue > Short.MAX_VALUE) {
+                newValue = Short.MAX_VALUE;
+            } else if (newValue < Short.MIN_VALUE) {
+                newValue = Short.MIN_VALUE;
+            }
+            buff[i] = (short) (newValue);
+        }
+        return buff;
+    }
     private byte[] addAndConvertBuffers(short[] a1, int a1Limit, short[] a2, int a2Limit) {
         int size = Math.max(a1Limit, a2Limit);
         if (size < 0) return new byte[0];

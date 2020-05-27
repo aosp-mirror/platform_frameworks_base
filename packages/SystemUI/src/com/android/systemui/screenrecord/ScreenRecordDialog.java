@@ -24,12 +24,9 @@ import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.NONE;
 import android.app.Activity;
 import android.app.PendingIntent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
@@ -88,8 +85,8 @@ public class ScreenRecordDialog extends Activity {
         });
 
         mModes = new ArrayList<>();
-        mModes.add(INTERNAL);
         mModes.add(MIC);
+        mModes.add(INTERNAL);
         mModes.add(MIC_AND_INTERNAL);
 
         mAudioSwitch = findViewById(R.id.screenrecord_audio_switch);
