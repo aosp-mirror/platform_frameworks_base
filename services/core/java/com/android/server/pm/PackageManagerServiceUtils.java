@@ -611,7 +611,6 @@ public class PackageManagerServiceUtils {
         final String packageName = pkgSetting.name;
         boolean compatMatch = false;
         if (pkgSetting.signatures.mSigningDetails.signatures != null) {
-
             // Already existing package. Make sure signatures match
             boolean match = parsedSignatures.checkCapability(
                     pkgSetting.signatures.mSigningDetails,
@@ -664,6 +663,13 @@ public class PackageManagerServiceUtils {
                     || pkgSetting.getSharedUser().signatures.mSigningDetails.checkCapability(
                             parsedSignatures,
                             PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID);
+            // Special case: if the sharedUserId capability check failed it could be due to this
+            // being the only package in the sharedUserId so far and the lineage being updated to
+            // deny the sharedUserId capability of the previous key in the lineage.
+            if (!match && pkgSetting.getSharedUser().packages.size() == 1
+                    && pkgSetting.getSharedUser().packages.valueAt(0).name.equals(packageName)) {
+                match = true;
+            }
             if (!match && compareCompat) {
                 match = matchSignaturesCompat(
                         packageName, pkgSetting.getSharedUser().signatures, parsedSignatures);
@@ -685,6 +691,42 @@ public class PackageManagerServiceUtils {
                         "Package " + packageName
                         + " has no signatures that match those in shared user "
                         + pkgSetting.getSharedUser().name + "; ignoring!");
+            }
+            // It is possible that this package contains a lineage that blocks sharedUserId access
+            // to an already installed package in the sharedUserId signed with a previous key.
+            // Iterate over all of the packages in the sharedUserId and ensure any that are signed
+            // with a key in this package's lineage have the SHARED_USER_ID capability granted.
+            if (parsedSignatures.hasPastSigningCertificates()) {
+                for (PackageSetting shUidPkgSetting : pkgSetting.getSharedUser().packages) {
+                    // if the current package in the sharedUserId is the package being updated then
+                    // skip this check as the update may revoke the sharedUserId capability from
+                    // the key with which this app was previously signed.
+                    if (packageName.equals(shUidPkgSetting.name)) {
+                        continue;
+                    }
+                    PackageParser.SigningDetails shUidSigningDetails =
+                            shUidPkgSetting.getSigningDetails();
+                    // The capability check only needs to be performed against the package if it is
+                    // signed with a key that is in the lineage of the package being installed.
+                    if (parsedSignatures.hasAncestor(shUidSigningDetails)) {
+                        if (!parsedSignatures.checkCapability(shUidSigningDetails,
+                                PackageParser.SigningDetails.CertCapabilities.SHARED_USER_ID)) {
+                            throw new PackageManagerException(
+                                    INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                                    "Package " + packageName
+                                            + " revoked the sharedUserId capability from the "
+                                            + "signing key used to sign " + shUidPkgSetting.name);
+                        }
+                    }
+                }
+            }
+            // If the lineage of this package diverges from the lineage of the sharedUserId then
+            // do not allow the installation to proceed.
+            if (!parsedSignatures.hasCommonAncestor(
+                    pkgSetting.getSharedUser().signatures.mSigningDetails)) {
+                throw new PackageManagerException(INSTALL_FAILED_SHARED_USER_INCOMPATIBLE,
+                        "Package " + packageName + " has a signing lineage "
+                                + "that diverges from the lineage of the sharedUserId");
             }
         }
         return compatMatch;

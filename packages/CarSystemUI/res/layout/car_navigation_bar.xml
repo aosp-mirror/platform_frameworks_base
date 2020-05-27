@@ -125,6 +125,7 @@
             android:id="@+id/assist"
             style="@style/NavigationBarButton"
             systemui:icon="@drawable/ic_mic_white"
+            systemui:useDefaultAppIconForRole="true"
         />
 
     </LinearLayout>

@@ -21,6 +21,7 @@ import android.app.ActivityManager;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
+import android.util.ArraySet;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
@@ -44,6 +45,7 @@ public final class UidRecord {
     boolean idle;
     boolean setIdle;
     int numProcs;
+    ArraySet<ProcessRecord> procRecords = new ArraySet<>();
 
     /**
      * Sequence number associated with the {@link #mCurProcState}. This is incremented using

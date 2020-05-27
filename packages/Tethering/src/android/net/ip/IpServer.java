@@ -738,7 +738,7 @@ public class IpServer extends StateMachine {
     //
     // TODO: Evaluate using a data structure than is more directly suited to
     // communicating only the relevant information.
-    private void updateUpstreamIPv6LinkProperties(LinkProperties v6only) {
+    private void updateUpstreamIPv6LinkProperties(LinkProperties v6only, int ttlAdjustment) {
         if (mRaDaemon == null) return;
 
         // Avoid unnecessary work on spurious updates.
@@ -761,7 +761,7 @@ public class IpServer extends StateMachine {
             params.mtu = mUsingBpfOffload ? v6only.getMtu() - 16 : v6only.getMtu();
             params.hasDefaultRoute = v6only.hasIpv6DefaultRoute();
 
-            if (params.hasDefaultRoute) params.hopLimit = getHopLimit(upstreamIface);
+            if (params.hasDefaultRoute) params.hopLimit = getHopLimit(upstreamIface, ttlAdjustment);
 
             for (LinkAddress linkAddr : v6only.getLinkAddresses()) {
                 if (linkAddr.getPrefixLength() != RFC7421_PREFIX_LENGTH) continue;
@@ -1052,12 +1052,11 @@ public class IpServer extends StateMachine {
         }
     }
 
-    private byte getHopLimit(String upstreamIface) {
+    private byte getHopLimit(String upstreamIface, int adjustTTL) {
         try {
             int upstreamHopLimit = Integer.parseUnsignedInt(
                     mNetd.getProcSysNet(INetd.IPV6, INetd.CONF, upstreamIface, "hop_limit"));
-            // Add one hop to account for this forwarding device
-            upstreamHopLimit++;
+            upstreamHopLimit = upstreamHopLimit + adjustTTL;
             // Cap the hop limit to 255.
             return (byte) Integer.min(upstreamHopLimit, 255);
         } catch (Exception e) {
@@ -1145,7 +1144,7 @@ public class IpServer extends StateMachine {
                     transitionTo(mUnavailableState);
                     break;
                 case CMD_IPV6_TETHER_UPDATE:
-                    updateUpstreamIPv6LinkProperties((LinkProperties) message.obj);
+                    updateUpstreamIPv6LinkProperties((LinkProperties) message.obj, message.arg1);
                     break;
                 default:
                     return NOT_HANDLED;
@@ -1209,7 +1208,7 @@ public class IpServer extends StateMachine {
                     if (DBG) Log.d(TAG, "Untethered (ifdown)" + mIfaceName);
                     break;
                 case CMD_IPV6_TETHER_UPDATE:
-                    updateUpstreamIPv6LinkProperties((LinkProperties) message.obj);
+                    updateUpstreamIPv6LinkProperties((LinkProperties) message.obj, message.arg1);
                     sendLinkProperties();
                     break;
                 case CMD_IP_FORWARDING_ENABLE_ERROR:

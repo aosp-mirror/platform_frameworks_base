@@ -161,9 +161,26 @@ public class IPv6TetheringCoordinator {
     private void updateIPv6TetheringInterfaces() {
         for (IpServer ipServer : mNotifyList) {
             final LinkProperties lp = getInterfaceIPv6LinkProperties(ipServer);
-            ipServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, 0, 0, lp);
+            ipServer.sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, getTtlAdjustment(), 0, lp);
             break;
         }
+    }
+
+    private int getTtlAdjustment() {
+        if (mUpstreamNetworkState == null || mUpstreamNetworkState.networkCapabilities == null) {
+            return 0;
+        }
+
+        // If upstream is cellular, set the TTL in Router Advertisements to "network-set TTL" - 1
+        // for carrier requirement.
+        if (mUpstreamNetworkState.networkCapabilities.hasTransport(
+                NetworkCapabilities.TRANSPORT_CELLULAR)) {
+            return -1;
+        }
+
+        // For other non-cellular upstream, set TTL as "network-set TTL" + 1 to preventing arbitrary
+        // distinction between tethered and untethered traffic.
+        return 1;
     }
 
     private LinkProperties getInterfaceIPv6LinkProperties(IpServer ipServer) {

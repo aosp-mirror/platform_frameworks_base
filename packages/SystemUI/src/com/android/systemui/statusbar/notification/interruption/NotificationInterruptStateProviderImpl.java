@@ -206,6 +206,13 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
+        if (isSnoozedPackage(sbn)) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
+            }
+            return false;
+        }
+
         boolean inShade = mStatusBarStateController.getState() == SHADE;
         if (entry.isBubble() && inShade) {
             if (DEBUG_HEADS_UP) {
@@ -365,14 +372,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 return false;
             }
         }
-
-        if (isSnoozedPackage(sbn)) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
-            }
-            return false;
-        }
-
         return true;
     }
 

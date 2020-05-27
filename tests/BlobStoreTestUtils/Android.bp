@@ -15,6 +15,9 @@
 java_library {
   name: "BlobStoreTestUtils",
   srcs: ["src/**/*.java"],
-  static_libs: ["truth-prebuilt"],
+  static_libs: [
+    "truth-prebuilt",
+    "androidx.test.uiautomator_uiautomator",
+  ],
   sdk_version: "test_current",
 }

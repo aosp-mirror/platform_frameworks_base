@@ -25,7 +25,7 @@
     android:paddingEnd="20dp"
     android:gravity="center">
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/default_no_selection_state"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -34,7 +34,7 @@
         systemui:selectedIcon="@drawable/car_ic_overview_selected"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/app_grid_activity"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.AppGridActivity"
@@ -44,7 +44,7 @@
         systemui:highlightWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/long_click_app_grid_activity"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.AppGridActivity"
@@ -54,7 +54,7 @@
         systemui:highlightWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/broadcast"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -63,7 +63,7 @@
         systemui:intent="intent:#Intent;action=android.car.intent.action.TOGGLE_HVAC_CONTROLS;end"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/selected_icon_undefined"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -71,7 +71,7 @@
         systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/highlightable_no_more_button"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -81,7 +81,7 @@
         systemui:highlightWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/not_highlightable_more_button"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -91,7 +91,7 @@
         systemui:showMoreWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/highlightable_more_button"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -102,7 +102,7 @@
         systemui:showMoreWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/broadcast"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -110,6 +110,15 @@
         systemui:intent="intent:#Intent;action=android.intent.action.MAIN;category=android.intent.category.HOME;launchFlags=0x14000000;end"
         systemui:selectedIcon="@drawable/car_ic_overview_selected"
         systemui:broadcast="true"
+    />
+
+    <com.android.systemui.car.navigationbar.AssitantButton
+        android:id="@+id/role_based_button"
+        style="@style/NavigationBarButton"
+        systemui:icon="@drawable/car_ic_overview"
+        systemui:selectedIcon="@drawable/car_ic_overview_selected"
+        systemui:useDefaultAppIconForRole="true"
+        systemui:highlightWhenSelected="true"
     />
 
 </LinearLayout>

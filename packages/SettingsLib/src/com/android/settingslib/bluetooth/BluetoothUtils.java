@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -132,6 +133,44 @@ public class BluetoothUtils {
      */
     public static Pair<Drawable, String> getBtRainbowDrawableWithDescription(Context context,
             CachedBluetoothDevice cachedDevice) {
+        final Resources resources = context.getResources();
+        final Pair<Drawable, String> pair = BluetoothUtils.getBtDrawableWithDescription(context,
+                cachedDevice);
+
+        if (pair.first instanceof BitmapDrawable) {
+            return new Pair<>(new AdaptiveOutlineDrawable(
+                    resources, ((BitmapDrawable) pair.first).getBitmap()), pair.second);
+        }
+
+        return new Pair<>(buildBtRainbowDrawable(context,
+                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
+    }
+
+    /**
+     * Build Bluetooth device icon with rainbow
+     */
+    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
+            int hashCode) {
+        final Resources resources = context.getResources();
+
+        // Deal with normal headset
+        final int[] iconFgColors = resources.getIntArray(R.array.bt_icon_fg_colors);
+        final int[] iconBgColors = resources.getIntArray(R.array.bt_icon_bg_colors);
+
+        // get color index based on mac address
+        final int index = Math.abs(hashCode % iconBgColors.length);
+        drawable.setTint(iconFgColors[index]);
+        final Drawable adaptiveIcon = new AdaptiveIcon(context, drawable);
+        ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
+
+        return adaptiveIcon;
+    }
+
+    /**
+     * Get bluetooth icon with description
+     */
+    public static Pair<Drawable, String> getBtDrawableWithDescription(Context context,
+            CachedBluetoothDevice cachedDevice) {
         final Pair<Drawable, String> pair = BluetoothUtils.getBtClassDrawableWithDescription(
                 context, cachedDevice);
         final BluetoothDevice bluetoothDevice = cachedDevice.getDevice();
@@ -159,9 +198,8 @@ public class BluetoothUtils {
                         final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
                                 iconSize, false);
                         bitmap.recycle();
-                        final AdaptiveOutlineDrawable drawable = new AdaptiveOutlineDrawable(
-                                resources, resizedBitmap);
-                        return new Pair<>(drawable, pair.second);
+                        return new Pair<>(new BitmapDrawable(resources,
+                                resizedBitmap), pair.second);
                     }
                 } catch (IOException e) {
                     Log.e(TAG, "Failed to get drawable for: " + iconUri, e);
@@ -171,28 +209,7 @@ public class BluetoothUtils {
             }
         }
 
-        return new Pair<>(buildBtRainbowDrawable(context,
-                pair.first, cachedDevice.getAddress().hashCode()), pair.second);
-    }
-
-    /**
-     * Build Bluetooth device icon with rainbow
-     */
-    public static Drawable buildBtRainbowDrawable(Context context, Drawable drawable,
-            int hashCode) {
-        final Resources resources = context.getResources();
-
-        // Deal with normal headset
-        final int[] iconFgColors = resources.getIntArray(R.array.bt_icon_fg_colors);
-        final int[] iconBgColors = resources.getIntArray(R.array.bt_icon_bg_colors);
-
-        // get color index based on mac address
-        final int index = Math.abs(hashCode % iconBgColors.length);
-        drawable.setTint(iconFgColors[index]);
-        final Drawable adaptiveIcon = new AdaptiveIcon(context, drawable);
-        ((AdaptiveIcon) adaptiveIcon).setBackgroundColor(iconBgColors[index]);
-
-        return adaptiveIcon;
+        return new Pair<>(pair.first, pair.second);
     }
 
     /**

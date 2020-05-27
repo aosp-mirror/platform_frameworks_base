@@ -554,6 +554,5 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"सक्षम पारिएको छ"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"यो परिवर्तन लागू गर्न तपाईंको यन्त्र अनिवार्य रूपमा रिबुट गर्नु पर्छ। अहिले रिबुट गर्नुहोस् वा रद्द गर्नुहोस्।"</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"कार्यालयको प्रोफाइल <xliff:g id="APP_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
-    <skip />
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"तारसहितको हेडफोन"</string>
 </resources>
