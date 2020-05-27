@@ -48,6 +48,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @SmallTest
@@ -73,6 +74,8 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     StatusBarNotification mSbn;
     @Mock
     Notification.BubbleMetadata mBubbleMetadata;
+    @Mock
+    ShortcutInfo mShortcutInfo;
 
     ShortcutHelper mShortcutHelper;
 
@@ -86,13 +89,13 @@ public class ShortcutHelperTest extends UiServiceTestCase {
         when(mNr.getSbn()).thenReturn(mSbn);
         when(mSbn.getPackageName()).thenReturn(PKG);
         when(mNr.getNotification()).thenReturn(mNotif);
+        when(mNr.getShortcutInfo()).thenReturn(mShortcutInfo);
+        when(mShortcutInfo.getId()).thenReturn(SHORTCUT_ID);
         when(mNotif.getBubbleMetadata()).thenReturn(mBubbleMetadata);
         when(mBubbleMetadata.getShortcutId()).thenReturn(SHORTCUT_ID);
     }
 
     private LauncherApps.Callback addShortcutBubbleAndVerifyListener() {
-        when(mNotif.isBubbleNotification()).thenReturn(true);
-
         mShortcutHelper.maybeListenForShortcutChangesForBubbles(mNr,
                 false /* removed */,
                 null /* handler */);
@@ -124,15 +127,54 @@ public class ShortcutHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testBubbleNoLongerBubble_listenerRemoved() {
+    public void testBubbleNoLongerHasBubbleMetadata_listenerRemoved() {
         // First set it up to listen
         addShortcutBubbleAndVerifyListener();
 
         // Then make it not a bubble
-        when(mNotif.isBubbleNotification()).thenReturn(false);
+        when(mNotif.getBubbleMetadata()).thenReturn(null);
         mShortcutHelper.maybeListenForShortcutChangesForBubbles(mNr,
                 false /* removed */,
                 null /* handler */);
+
+        verify(mLauncherApps, times(1)).unregisterCallback(any());
+    }
+
+    @Test
+    public void testBubbleNoLongerHasShortcutId_listenerRemoved() {
+        // First set it up to listen
+        addShortcutBubbleAndVerifyListener();
+
+        // Clear out shortcutId
+        when(mBubbleMetadata.getShortcutId()).thenReturn(null);
+        mShortcutHelper.maybeListenForShortcutChangesForBubbles(mNr,
+                false /* removed */,
+                null /* handler */);
+
+        verify(mLauncherApps, times(1)).unregisterCallback(any());
+    }
+
+    @Test
+    public void testNotifNoLongerHasShortcut_listenerRemoved() {
+        // First set it up to listen
+        addShortcutBubbleAndVerifyListener();
+
+        // Clear out shortcutId
+        when(mNr.getShortcutInfo()).thenReturn(null);
+        mShortcutHelper.maybeListenForShortcutChangesForBubbles(mNr,
+                false /* removed */,
+                null /* handler */);
+
+        verify(mLauncherApps, times(1)).unregisterCallback(any());
+    }
+
+    @Test
+    public void testOnShortcutsChanged_listenerRemoved() {
+        // First set it up to listen
+        LauncherApps.Callback callback = addShortcutBubbleAndVerifyListener();
+
+        // App shortcuts are removed:
+        callback.onShortcutsChanged(PKG, Collections.emptyList(),  mock(UserHandle.class));
 
         verify(mLauncherApps, times(1)).unregisterCallback(any());
     }

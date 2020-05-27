@@ -24,7 +24,6 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.service.notification.NotificationListenerService;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
@@ -123,8 +122,6 @@ public class BubbleData {
     // State tracked during an operation -- keeps track of what listener events to dispatch.
     private Update mStateChange;
 
-    private NotificationListenerService.Ranking mTmpRanking;
-
     private TimeSource mTimeSource = System::currentTimeMillis;
 
     @Nullable
@@ -210,15 +207,14 @@ public class BubbleData {
         }
         moveOverflowBubbleToPending(bubble);
         // Preserve new order for next repack, which sorts by last updated time.
-        bubble.markUpdatedAt(mTimeSource.currentTimeMillis());
         bubble.inflate(
                 b -> {
-                    notificationEntryUpdated(bubble, /* suppressFlyout */
-                            false, /* showInShade */ true);
-                    setSelectedBubble(bubble);
+                    b.setShouldAutoExpand(true);
+                    b.markUpdatedAt(mTimeSource.currentTimeMillis());
+                    notificationEntryUpdated(bubble, false /* suppressFlyout */,
+                            true /* showInShade */);
                 },
                 mContext, stack, factory);
-        dispatchPendingChanges();
     }
 
     void setShowingOverflow(boolean showingOverflow) {
@@ -284,7 +280,9 @@ public class BubbleData {
             bubble.setSuppressFlyout(suppressFlyout);
             doUpdate(bubble);
         }
+
         if (bubble.shouldAutoExpand()) {
+            bubble.setShouldAutoExpand(false);
             setSelectedBubbleInternal(bubble);
             if (!mExpanded) {
                 setExpandedInternal(true);
