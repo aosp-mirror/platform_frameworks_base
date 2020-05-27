@@ -16,6 +16,7 @@
 
 package android.view;
 
+import static android.view.InsetsController.DEBUG;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_APPEARANCE_CONTROLLED;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_BEHAVIOR_CONTROLLED;
 
@@ -84,6 +85,7 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
         if (mViewRoot.mView == null) {
             return null;
         }
+        if (DEBUG) Log.d(TAG, "windowInsetsAnimation started");
         return mViewRoot.mView.dispatchWindowInsetsAnimationStart(animation, bounds);
     }
 
@@ -94,11 +96,18 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             // The view has already detached from window.
             return null;
         }
+        if (DEBUG) {
+            for (WindowInsetsAnimation anim : runningAnimations) {
+                Log.d(TAG, "windowInsetsAnimation progress: "
+                        + anim.getInterpolatedFraction());
+            }
+        }
         return mViewRoot.mView.dispatchWindowInsetsAnimationProgress(insets, runningAnimations);
     }
 
     @Override
     public void dispatchWindowInsetsAnimationEnd(@NonNull WindowInsetsAnimation animation) {
+        if (DEBUG) Log.d(TAG, "windowInsetsAnimation ended");
         mViewRoot.mView.dispatchWindowInsetsAnimationEnd(animation);
     }
 
@@ -211,5 +220,13 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
     @Override
     public InputMethodManager getInputMethodManager() {
         return mViewRoot.mContext.getSystemService(InputMethodManager.class);
+    }
+
+    @Override
+    public String getRootViewTitle() {
+        if (mViewRoot == null) {
+            return null;
+        }
+        return mViewRoot.getTitle().toString();
     }
 }
