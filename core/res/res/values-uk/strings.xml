@@ -197,8 +197,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Адміністратор вашої організації контролює цей пристрій і відстежує мережевий трафік. Торкніться, щоб дізнатися більше."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Додаток має доступ до геоданих"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Дізнатися більше можна в IT-адміністратора"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"Сервіс геозонування"</string>
     <string name="country_detector" msgid="7023275114706088854">"Визначення країни"</string>
     <string name="location_service" msgid="2439187616018455546">"Служби локації"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Сервіс GNSS"</string>
