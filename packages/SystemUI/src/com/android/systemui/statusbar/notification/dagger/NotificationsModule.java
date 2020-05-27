@@ -25,6 +25,7 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
@@ -105,6 +106,7 @@ public interface NotificationsModule {
             VisualStabilityManager visualStabilityManager,
             Lazy<StatusBar> statusBarLazy,
             @Main Handler mainHandler,
+            @Background Handler bgHandler,
             AccessibilityManager accessibilityManager,
             HighPriorityProvider highPriorityProvider,
             INotificationManager notificationManager,
@@ -118,6 +120,7 @@ public interface NotificationsModule {
                 visualStabilityManager,
                 statusBarLazy,
                 mainHandler,
+                bgHandler,
                 accessibilityManager,
                 highPriorityProvider,
                 notificationManager,
