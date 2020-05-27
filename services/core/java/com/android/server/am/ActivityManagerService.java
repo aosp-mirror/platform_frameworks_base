@@ -11112,6 +11112,14 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             pw.print("    UID "); UserHandle.formatUid(pw, uidRec.uid);
             pw.print(": "); pw.println(uidRec);
+            pw.print("      curProcState="); pw.print(uidRec.mCurProcState);
+            pw.print(" curCapability=");
+            ActivityManager.printCapabilitiesFull(pw, uidRec.curCapability);
+            pw.println();
+            for (int j = uidRec.procRecords.size() - 1; j >= 0; j--) {
+                pw.print("      proc=");
+                pw.println(uidRec.procRecords.valueAt(j));
+            }
         }
         return printed;
     }
