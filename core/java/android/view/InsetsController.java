@@ -745,6 +745,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                         consumer.getType(), animationType, consumer.isRequestedVisible()));
                 continue;
             }
+            if (fromIme && animationType == ANIMATION_TYPE_USER) {
+                // App is already controlling the IME, don't cancel it.
+                continue;
+            }
             typesReady |= InsetsState.toPublicType(consumer.getType());
         }
         if (DEBUG) Log.d(TAG, "show typesReady: " + typesReady);
