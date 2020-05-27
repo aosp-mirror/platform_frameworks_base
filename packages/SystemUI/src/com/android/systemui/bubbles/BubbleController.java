@@ -864,12 +864,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         } else {
             bubble = mBubbleData.getOverflowBubbleWithKey(key);
             if (bubble != null) {
+                bubble.setShouldAutoExpand(true);
                 promoteBubbleFromOverflow(bubble);
             } else if (entry.canBubble()) {
                 // It can bubble but it's not -- it got aged out of the overflow before it
                 // was dismissed or opened, make it a bubble again.
                 setIsBubble(entry, true);
-                bubble.setShouldAutoExpand(true);
                 updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
             }
         }
