@@ -8183,6 +8183,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 + "creators");
         }
 
+        // Instead of passing the data stall directly to the ConnectivityDiagnostics handler, treat
+        // this as a Data Stall received directly from NetworkMonitor. This requires wrapping the
+        // Data Stall information as a DataStallReportParcelable and passing to
+        // #notifyDataStallSuspected. This ensures that unknown Data Stall detection methods are
+        // still passed to ConnectivityDiagnostics (with new detection methods masked).
         final DataStallReportParcelable p = new DataStallReportParcelable();
         p.timestampMillis = timestampMillis;
         p.detectionMethod = detectionMethod;
