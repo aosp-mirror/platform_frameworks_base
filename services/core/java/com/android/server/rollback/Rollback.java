@@ -28,7 +28,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
-import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.RollbackInfo;
@@ -619,9 +618,10 @@ class Rollback {
 
                             Intent broadcast = new Intent(Intent.ACTION_ROLLBACK_COMMITTED);
 
-                            for (UserInfo userInfo : UserManager.get(context).getUsers(true)) {
+                            UserManager userManager = context.getSystemService(UserManager.class);
+                            for (UserHandle user : userManager.getUserHandles(true)) {
                                 context.sendBroadcastAsUser(broadcast,
-                                        userInfo.getUserHandle(),
+                                        user,
                                         Manifest.permission.MANAGE_ROLLBACKS);
                             }
                         }
