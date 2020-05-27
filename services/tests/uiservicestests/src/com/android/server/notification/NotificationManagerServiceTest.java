@@ -6135,8 +6135,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
                 "tag", mUid, 0, nb.build(), new UserHandle(mUid), null, 0);
         NotificationRecord nr = new NotificationRecord(mContext, sbn, mTestNotificationChannel);
 
-
-
         // Test: Send the bubble notification
         mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
                 nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
@@ -6168,11 +6166,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         verify(mLauncherApps, times(1)).unregisterCallback(launcherAppsCallback.getValue());
 
         // We're no longer a bubble
-        Notification notif2 = mService.getNotificationRecord(
-                nr.getSbn().getKey()).getNotification();
-        assertFalse(notif2.isBubbleNotification());
+        NotificationRecord notif2 = mService.getNotificationRecord(
+                nr.getSbn().getKey());
+        assertNull(notif2.getShortcutInfo());
+        assertFalse(notif2.getNotification().isBubbleNotification());
     }
-
 
     @Test
     public void testNotificationBubbles_shortcut_stopListeningWhenNotifRemoved()
