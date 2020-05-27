@@ -81,7 +81,7 @@ class MediaDeviceManager @Inject constructor(
 
     private fun processDevice(key: String, device: MediaDevice?) {
         val enabled = device != null
-        val data = MediaDeviceData(enabled, device?.icon, device?.name)
+        val data = MediaDeviceData(enabled, device?.iconWithoutBackground, device?.name)
         listeners.forEach {
             it.onMediaDeviceChanged(key, data)
         }

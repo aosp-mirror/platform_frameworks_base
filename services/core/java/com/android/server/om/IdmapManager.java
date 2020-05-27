@@ -27,10 +27,10 @@ import android.content.pm.PackageInfo;
 import android.os.Build.VERSION_CODES;
 import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.util.Slog;
 
-import java.io.File;
+import com.android.internal.util.ArrayUtils;
+
 import java.io.IOException;
 
 /**
@@ -55,12 +55,16 @@ class IdmapManager {
         VENDOR_IS_Q_OR_LATER = isQOrLater;
     }
 
-    private final OverlayableInfoCallback mOverlayableCallback;
     private final IdmapDaemon mIdmapDaemon;
+    private final OverlayableInfoCallback mOverlayableCallback;
+    private final String mOverlayableConfigurator;
+    private final String[] mOverlayableConfiguratorTargets;
 
-    IdmapManager(final OverlayableInfoCallback verifyCallback) {
+    IdmapManager(final IdmapDaemon idmapDaemon, final OverlayableInfoCallback verifyCallback) {
         mOverlayableCallback = verifyCallback;
-        mIdmapDaemon = IdmapDaemon.getInstance();
+        mIdmapDaemon = idmapDaemon;
+        mOverlayableConfigurator = verifyCallback.getOverlayableConfigurator();
+        mOverlayableConfiguratorTargets = verifyCallback.getOverlayableConfiguratorTargets() ;
     }
 
     /**
@@ -103,23 +107,11 @@ class IdmapManager {
     }
 
     boolean idmapExists(@NonNull final OverlayInfo oi) {
-        return new File(getIdmapPath(oi.baseCodePath, oi.userId)).isFile();
+        return mIdmapDaemon.idmapExists(oi.baseCodePath, oi.userId);
     }
 
     boolean idmapExists(@NonNull final PackageInfo overlayPackage, final int userId) {
-        return new File(getIdmapPath(overlayPackage.applicationInfo.getBaseCodePath(), userId))
-            .isFile();
-    }
-
-    private @NonNull String getIdmapPath(@NonNull final String overlayPackagePath,
-            final int userId) {
-        try {
-            return mIdmapDaemon.getIdmapPath(overlayPackagePath, userId);
-        } catch (Exception e) {
-            Slog.w(TAG, "failed to get idmap path for " + overlayPackagePath + ": "
-                    + e.getMessage());
-            return "";
-        }
+        return mIdmapDaemon.idmapExists(overlayPackage.applicationInfo.getBaseCodePath(), userId);
     }
 
     /**
@@ -198,9 +190,17 @@ class IdmapManager {
         String targetOverlayableName = overlayPackage.targetOverlayableName;
         if (targetOverlayableName != null) {
             try {
+                if (!mOverlayableConfigurator.isEmpty()
+                        && ArrayUtils.contains(mOverlayableConfiguratorTargets,
+                                targetPackage.packageName)
+                        && mOverlayableCallback.signaturesMatching(mOverlayableConfigurator,
+                                overlayPackage.packageName, userId)) {
+                    return true;
+                }
+
                 OverlayableInfo overlayableInfo = mOverlayableCallback.getOverlayableForTarget(
                         targetPackage.packageName, targetOverlayableName, userId);
-                if (overlayableInfo != null) {
+                if (overlayableInfo != null && overlayableInfo.actor != null) {
                     String actorPackageName = OverlayActorEnforcer.getPackageNameForActor(
                             overlayableInfo.actor, mOverlayableCallback.getNamedActors()).first;
                     if (mOverlayableCallback.signaturesMatching(actorPackageName,

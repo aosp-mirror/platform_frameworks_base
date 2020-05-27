@@ -123,6 +123,21 @@ public class Signature implements Parcelable {
     }
 
     /**
+     * Copy constructor that creates a new instance from the provided {@code other} Signature.
+     *
+     * @hide
+     */
+    public Signature(Signature other) {
+        mSignature = other.mSignature.clone();
+        Certificate[] otherCertificateChain = other.mCertificateChain;
+        if (otherCertificateChain != null && otherCertificateChain.length > 1) {
+            mCertificateChain = Arrays.copyOfRange(otherCertificateChain, 1,
+                    otherCertificateChain.length);
+        }
+        mFlags = other.mFlags;
+    }
+
+    /**
      * Sets the flags representing the capabilities of the past signing certificate.
      * @hide
      */

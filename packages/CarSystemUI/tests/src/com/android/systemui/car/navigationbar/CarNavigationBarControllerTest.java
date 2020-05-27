@@ -53,6 +53,8 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Mock
     private ButtonSelectionStateController mButtonSelectionStateController;
     @Mock
+    private ButtonRoleHolderController mButtonRoleHolderController;
+    @Mock
     private HvacController mHvacController;
 
     @Before
@@ -66,10 +68,15 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
         mDependency.injectMockDependency(StatusBarIconController.class);
     }
 
+    private CarNavigationBarController createNavigationBarController() {
+        return new CarNavigationBarController(mContext, mNavigationBarViewFactory,
+                mButtonSelectionStateController, () -> mHvacController,
+                mButtonRoleHolderController);
+    }
+
     @Test
     public void testConnectToHvac_callsConnect() {
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         mCarNavigationBar.connectToHvac();
 
@@ -77,20 +84,37 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testRemoveAllFromHvac_callsRemoveAll() {
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+    public void testRemoveAll_callsHvacControllerRemoveAllComponents() {
+        mCarNavigationBar = createNavigationBarController();
 
-        mCarNavigationBar.removeAllFromHvac();
+        mCarNavigationBar.removeAll();
 
         verify(mHvacController).removeAllComponents();
+    }
+
+
+    @Test
+    public void testRemoveAll_callsButtonRoleHolderControllerRemoveAll() {
+        mCarNavigationBar = createNavigationBarController();
+
+        mCarNavigationBar.removeAll();
+
+        verify(mButtonRoleHolderController).removeAll();
+    }
+
+    @Test
+    public void testRemoveAll_callsButtonSelectionStateControllerRemoveAll() {
+        mCarNavigationBar = createNavigationBarController();
+
+        mCarNavigationBar.removeAll();
+
+        verify(mButtonSelectionStateController).removeAll();
     }
 
     @Test
     public void testGetTopWindow_topDisabled_returnsNull() {
         mTestableResources.addOverride(R.bool.config_enableTopNavigationBar, false);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getTopWindow();
 
@@ -100,8 +124,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetTopWindow_topEnabled_returnsWindow() {
         mTestableResources.addOverride(R.bool.config_enableTopNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getTopWindow();
 
@@ -111,8 +134,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetTopWindow_topEnabled_calledTwice_returnsSameWindow() {
         mTestableResources.addOverride(R.bool.config_enableTopNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window1 = mCarNavigationBar.getTopWindow();
         ViewGroup window2 = mCarNavigationBar.getTopWindow();
@@ -123,8 +145,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetBottomWindow_bottomDisabled_returnsNull() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, false);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getBottomWindow();
 
@@ -134,8 +155,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetBottomWindow_bottomEnabled_returnsWindow() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getBottomWindow();
 
@@ -145,8 +165,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetBottomWindow_bottomEnabled_calledTwice_returnsSameWindow() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window1 = mCarNavigationBar.getBottomWindow();
         ViewGroup window2 = mCarNavigationBar.getBottomWindow();
@@ -157,8 +176,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetLeftWindow_leftDisabled_returnsNull() {
         mTestableResources.addOverride(R.bool.config_enableLeftNavigationBar, false);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         ViewGroup window = mCarNavigationBar.getLeftWindow();
         assertThat(window).isNull();
     }
@@ -166,8 +184,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetLeftWindow_leftEnabled_returnsWindow() {
         mTestableResources.addOverride(R.bool.config_enableLeftNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getLeftWindow();
 
@@ -177,8 +194,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetLeftWindow_leftEnabled_calledTwice_returnsSameWindow() {
         mTestableResources.addOverride(R.bool.config_enableLeftNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window1 = mCarNavigationBar.getLeftWindow();
         ViewGroup window2 = mCarNavigationBar.getLeftWindow();
@@ -189,8 +205,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetRightWindow_rightDisabled_returnsNull() {
         mTestableResources.addOverride(R.bool.config_enableRightNavigationBar, false);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getRightWindow();
 
@@ -200,8 +215,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetRightWindow_rightEnabled_returnsWindow() {
         mTestableResources.addOverride(R.bool.config_enableRightNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getRightWindow();
 
@@ -211,8 +225,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testGetRightWindow_rightEnabled_calledTwice_returnsSameWindow() {
         mTestableResources.addOverride(R.bool.config_enableRightNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window1 = mCarNavigationBar.getRightWindow();
         ViewGroup window2 = mCarNavigationBar.getRightWindow();
@@ -223,8 +236,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testSetBottomWindowVisibility_setTrue_isVisible() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getBottomWindow();
         mCarNavigationBar.setBottomWindowVisibility(View.VISIBLE);
@@ -235,8 +247,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testSetBottomWindowVisibility_setFalse_isGone() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getBottomWindow();
         mCarNavigationBar.setBottomWindowVisibility(View.GONE);
@@ -247,8 +258,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testSetLeftWindowVisibility_setTrue_isVisible() {
         mTestableResources.addOverride(R.bool.config_enableLeftNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getLeftWindow();
         mCarNavigationBar.setLeftWindowVisibility(View.VISIBLE);
@@ -259,8 +269,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testSetLeftWindowVisibility_setFalse_isGone() {
         mTestableResources.addOverride(R.bool.config_enableLeftNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getLeftWindow();
         mCarNavigationBar.setLeftWindowVisibility(View.GONE);
@@ -271,8 +280,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testSetRightWindowVisibility_setTrue_isVisible() {
         mTestableResources.addOverride(R.bool.config_enableRightNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getRightWindow();
         mCarNavigationBar.setRightWindowVisibility(View.VISIBLE);
@@ -283,8 +291,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testSetRightWindowVisibility_setFalse_isGone() {
         mTestableResources.addOverride(R.bool.config_enableRightNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         ViewGroup window = mCarNavigationBar.getRightWindow();
         mCarNavigationBar.setRightWindowVisibility(View.GONE);
@@ -295,8 +302,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testRegisterBottomBarTouchListener_createViewFirst_registrationSuccessful() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         View.OnTouchListener controller = bottomBar.getStatusBarWindowTouchListener();
@@ -310,8 +316,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testRegisterBottomBarTouchListener_registerFirst_registrationSuccessful() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         mCarNavigationBar.registerBottomBarTouchListener(mock(View.OnTouchListener.class));
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
@@ -323,8 +328,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testRegisterNotificationController_createViewFirst_registrationSuccessful() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         CarNavigationBarController.NotificationsShadeController controller =
@@ -340,8 +344,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testRegisterNotificationController_registerFirst_registrationSuccessful() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
 
         mCarNavigationBar.registerNotificationController(
                 mock(CarNavigationBarController.NotificationsShadeController.class));
@@ -355,8 +358,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testShowAllKeyguardButtons_bottomEnabled_bottomKeyguardButtonsVisible() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         View bottomKeyguardButtons = bottomBar.findViewById(R.id.lock_screen_nav_buttons);
 
@@ -368,8 +370,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testShowAllKeyguardButtons_bottomEnabled_bottomNavButtonsGone() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         View bottomButtons = bottomBar.findViewById(R.id.nav_buttons);
 
@@ -381,8 +382,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testHideAllKeyguardButtons_bottomEnabled_bottomKeyguardButtonsGone() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         View bottomKeyguardButtons = bottomBar.findViewById(R.id.lock_screen_nav_buttons);
 
@@ -396,8 +396,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testHideAllKeyguardButtons_bottomEnabled_bottomNavButtonsVisible() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         View bottomButtons = bottomBar.findViewById(R.id.nav_buttons);
 
@@ -411,8 +410,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testToggleAllNotificationsUnseenIndicator_bottomEnabled_hasUnseen_setCorrectly() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         CarNavigationButton notifications = bottomBar.findViewById(R.id.notifications);
 
@@ -426,8 +424,7 @@ public class CarNavigationBarControllerTest extends SysuiTestCase {
     @Test
     public void testToggleAllNotificationsUnseenIndicator_bottomEnabled_noUnseen_setCorrectly() {
         mTestableResources.addOverride(R.bool.config_enableBottomNavigationBar, true);
-        mCarNavigationBar = new CarNavigationBarController(mContext, mNavigationBarViewFactory,
-                mButtonSelectionStateController, () -> mHvacController);
+        mCarNavigationBar = createNavigationBarController();
         CarNavigationBarView bottomBar = mCarNavigationBar.getBottomBar(/* isSetUp= */ true);
         CarNavigationButton notifications = bottomBar.findViewById(R.id.notifications);
 

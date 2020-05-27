@@ -87,7 +87,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
     private final Executor mUiBgExecutor;
     private final IStatusBarService mBarService;
     private final Lazy<KeyguardStateController> mKeyguardStateControllerLazy;
-    private final ButtonSelectionStateController mButtonSelectionStateController;
     private final Lazy<PhoneStatusBarPolicy> mIconPolicyLazy;
     private final Lazy<StatusBarIconController> mIconControllerLazy;
 
@@ -139,7 +138,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
             @UiBackground Executor uiBgExecutor,
             IStatusBarService barService,
             Lazy<KeyguardStateController> keyguardStateControllerLazy,
-            ButtonSelectionStateController buttonSelectionStateController,
             Lazy<PhoneStatusBarPolicy> iconPolicyLazy,
             Lazy<StatusBarIconController> iconControllerLazy
     ) {
@@ -156,7 +154,6 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
         mUiBgExecutor = uiBgExecutor;
         mBarService = barService;
         mKeyguardStateControllerLazy = keyguardStateControllerLazy;
-        mButtonSelectionStateController = buttonSelectionStateController;
         mIconPolicyLazy = iconPolicyLazy;
         mIconControllerLazy = iconControllerLazy;
 
@@ -280,10 +277,9 @@ public class CarNavigationBar extends SystemUI implements CommandQueue.Callbacks
      * before and after the device is provisioned. . Also for change of density and font size.
      */
     private void restartNavBars() {
-        // remove and reattach all hvac components such that we don't keep a reference to unused
-        // ui elements
-        mCarNavigationBarController.removeAllFromHvac();
-        mButtonSelectionStateController.removeAll();
+        // remove and reattach all components such that we don't keep a reference to unused ui
+        // elements
+        mCarNavigationBarController.removeAll();
 
         if (mTopNavigationBarWindow != null) {
             mTopNavigationBarWindow.removeAllViews();

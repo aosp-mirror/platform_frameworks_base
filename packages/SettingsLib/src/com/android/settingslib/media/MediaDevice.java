@@ -153,6 +153,13 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
     public abstract Drawable getIcon();
 
     /**
+     * Get icon of MediaDevice without background.
+     *
+     * @return drawable of icon
+     */
+    public abstract Drawable getIconWithoutBackground();
+
+    /**
      * Get unique ID that represent MediaDevice
      * @return unique id of MediaDevice
      */

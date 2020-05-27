@@ -50,8 +50,8 @@ public class OverlayActorEnforcer {
     /**
      * @return nullable actor result with {@link ActorState} failure status
      */
-    static Pair<String, ActorState> getPackageNameForActor(String actorUriString,
-            Map<String, Map<String, String>> namedActors) {
+    static Pair<String, ActorState> getPackageNameForActor(@NonNull String actorUriString,
+            @NonNull Map<String, Map<String, String>> namedActors) {
         Uri actorUri = Uri.parse(actorUriString);
 
         String actorScheme = actorUri.getScheme();

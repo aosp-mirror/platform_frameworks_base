@@ -25,7 +25,7 @@
     android:paddingEnd="20dp"
     android:gravity="center">
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/detectable_by_component_name"
         style="@style/NavigationBarButton"
         systemui:componentNames="com.android.car.carlauncher/.CarLauncher"
@@ -34,7 +34,7 @@
         systemui:highlightWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/detectable_by_category"
         style="@style/NavigationBarButton"
         systemui:categories="android.intent.category.APP_MAPS"
@@ -43,7 +43,7 @@
         systemui:highlightWhenSelected="true"
     />
 
-    <com.android.systemui.navigationbar.car.CarNavigationButton
+    <com.android.systemui.car.navigationbar.CarNavigationButton
         android:id="@+id/detectable_by_package"
         style="@style/NavigationBarButton"
         systemui:icon="@drawable/car_ic_phone"

@@ -128,7 +128,7 @@ public class IPv6TetheringCoordinatorTest {
         final UpstreamNetworkState mobileUpstream = createDualStackUpstream(TRANSPORT_CELLULAR);
         final ArgumentCaptor<LinkProperties> lp = ArgumentCaptor.forClass(LinkProperties.class);
         mIPv6TetheringCoordinator.updateUpstreamNetworkState(mobileUpstream);
-        verify(firstServer).sendMessage(eq(IpServer.CMD_IPV6_TETHER_UPDATE), eq(0), eq(0),
+        verify(firstServer).sendMessage(eq(IpServer.CMD_IPV6_TETHER_UPDATE), eq(-1), eq(0),
                 lp.capture());
         final LinkProperties v6OnlyLink = lp.getValue();
         assertOnlyOneV6AddressAndNoV4(v6OnlyLink);
@@ -140,7 +140,7 @@ public class IPv6TetheringCoordinatorTest {
         mNotifyList.remove(firstServer);
         mIPv6TetheringCoordinator.removeActiveDownstream(firstServer);
         verify(firstServer).sendMessage(IpServer.CMD_IPV6_TETHER_UPDATE, 0, 0, null);
-        verify(secondServer).sendMessage(eq(IpServer.CMD_IPV6_TETHER_UPDATE), eq(0), eq(0),
+        verify(secondServer).sendMessage(eq(IpServer.CMD_IPV6_TETHER_UPDATE), eq(-1), eq(0),
                 lp.capture());
         final LinkProperties localOnlyLink = lp.getValue();
         assertNotNull(localOnlyLink);
