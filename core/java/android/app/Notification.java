@@ -3614,6 +3614,7 @@ public class Notification implements Parcelable
          * <li>Directional conversations where there is an active speaker and many passive
          * individuals</li>
          * <li>Stream / posting updates from other individuals</li>
+         * <li>Email, document comments, or other conversation types that are not real-time</li>
          * </ul>
          * </p>
          *
