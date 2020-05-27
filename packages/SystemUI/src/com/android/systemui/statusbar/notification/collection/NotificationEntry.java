@@ -41,6 +41,7 @@ import android.app.Notification.MessagingStyle.Message;
 import android.app.NotificationChannel;
 import android.app.NotificationManager.Policy;
 import android.app.Person;
+import android.app.RemoteInput;
 import android.app.RemoteInputHistoryItem;
 import android.content.Context;
 import android.content.pm.ShortcutInfo;
@@ -69,6 +70,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.stack.PriorityBucket;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -132,7 +134,7 @@ public final class NotificationEntry extends ListEntry {
     private ShortcutInfo mShortcutInfo;
 
     /**
-     * If {@link android.app.RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
+     * If {@link RemoteInput#getEditChoicesBeforeSending} is enabled, and the user is
      * currently editing a choice (smart reply), then this field contains the information about the
      * suggestion being edited. Otherwise <code>null</code>.
      */
@@ -174,6 +176,8 @@ public final class NotificationEntry extends ListEntry {
     private boolean mPulseSupressed;
     private boolean mAllowFgsDismissal;
     private int mBucket = BUCKET_ALERTING;
+    @Nullable private Long mPendingAnimationDuration;
+    private boolean mIsMarkedForUserTriggeredMovement;
 
     /**
      * @param sbn the StatusBarNotification from system server
@@ -193,7 +197,7 @@ public final class NotificationEntry extends ListEntry {
             boolean allowFgsDismissal,
             long creationTime
     ) {
-        super(requireNonNull(Objects.requireNonNull(sbn).getKey()));
+        super(requireNonNull(requireNonNull(sbn).getKey()));
 
         requireNonNull(ranking);
 
@@ -441,7 +445,7 @@ public final class NotificationEntry extends ListEntry {
      * Get the children that are actually attached to this notification's row.
      *
      * TODO: Seems like most callers here should probably be using
-     * {@link com.android.systemui.statusbar.phone.NotificationGroupManager#getChildren}
+     * {@link NotificationGroupManager#getChildren}
      */
     public @Nullable List<NotificationEntry> getAttachedNotifChildren() {
         if (row == null) {
@@ -809,7 +813,7 @@ public final class NotificationEntry extends ListEntry {
         }
 
         if ((mSbn.getNotification().flags
-                & Notification.FLAG_FOREGROUND_SERVICE) != 0) {
+                & FLAG_FOREGROUND_SERVICE) != 0) {
             return true;
         }
         if (mSbn.getNotification().isMediaNotification()) {
@@ -940,6 +944,19 @@ public final class NotificationEntry extends ListEntry {
 
     public void setPulseSuppressed(boolean suppressed) {
         mPulseSupressed = suppressed;
+    }
+
+    /** Whether or not this entry has been marked for a user-triggered movement. */
+    public boolean isMarkedForUserTriggeredMovement() {
+        return mIsMarkedForUserTriggeredMovement;
+    }
+
+    /**
+     * Mark this entry for movement triggered by a user action (ex: changing the priorirty of a
+     * conversation). This can then be used for custom animations.
+     */
+    public void markForUserTriggeredMovement(boolean marked) {
+        mIsMarkedForUserTriggeredMovement = marked;
     }
 
     /** Information about a suggestion that is being edited. */

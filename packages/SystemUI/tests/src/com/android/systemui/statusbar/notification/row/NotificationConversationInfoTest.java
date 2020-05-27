@@ -60,6 +60,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Handler;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -72,7 +73,6 @@ import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.settingslib.notification.ConversationIconFactory;
-import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -153,13 +153,14 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
     private Provider<PriorityOnboardingDialogController.Builder> mBuilderProvider = () -> mBuilder;
     @Mock
     private Notification.BubbleMetadata mBubbleMetadata;
+    private Handler mTestHandler;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mTestableLooper = TestableLooper.get(this);
 
-        mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
+        mTestHandler = new Handler(mTestableLooper.getLooper());
         mDependency.injectTestDependency(MetricsLogger.class, mMetricsLogger);
         mDependency.injectTestDependency(BubbleController.class, mBubbleController);
         mDependency.injectTestDependency(ShadeController.class, mShadeController);
@@ -253,7 +254,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final ImageView view = mNotificationInfo.findViewById(R.id.conversation_icon);
         assertEquals(mIconDrawable, view.getDrawable());
     }
@@ -275,7 +278,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final TextView textView = mNotificationInfo.findViewById(R.id.pkg_name);
         assertTrue(textView.getText().toString().contains("App Name"));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -324,7 +329,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertTrue(textView.getText().toString().contains(group.getName()));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
@@ -348,7 +355,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
         assertEquals(GONE, textView.getVisibility());
@@ -371,7 +380,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
     }
@@ -404,7 +415,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
         assertEquals(VISIBLE, nameView.getVisibility());
         assertTrue(nameView.getText().toString().contains("Proxied"));
@@ -430,7 +443,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         settingsButton.performClick();
@@ -454,7 +469,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
     }
@@ -479,7 +496,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                false);
+                false,
+                mTestHandler,
+                mTestHandler);
         final View settingsButton = mNotificationInfo.findViewById(R.id.info);
         assertTrue(settingsButton.getVisibility() != View.VISIBLE);
     }
@@ -502,7 +521,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         View view = mNotificationInfo.findViewById(R.id.silence);
         assertThat(view.isSelected()).isTrue();
     }
@@ -528,7 +549,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
         assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
@@ -557,7 +580,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
         View view = mNotificationInfo.findViewById(R.id.default_behavior);
         assertThat(view.isSelected()).isTrue();
         assertThat(((TextView) view.findViewById(R.id.default_summary)).getText()).isEqualTo(
@@ -585,7 +610,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -627,7 +654,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mTestableLooper.processAllMessages();
@@ -668,7 +697,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         View silence = mNotificationInfo.findViewById(R.id.silence);
 
@@ -710,7 +741,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -745,7 +778,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         View fave = mNotificationInfo.findViewById(R.id.priority);
         fave.performClick();
@@ -778,7 +813,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -812,7 +849,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -846,7 +885,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         mNotificationInfo.findViewById(R.id.default_behavior).performClick();
         mNotificationInfo.findViewById(R.id.done).performClick();
@@ -879,7 +920,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         View silence = mNotificationInfo.findViewById(R.id.silence);
         silence.performClick();
@@ -911,7 +954,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         verify(mMockINotificationManager, times(1)).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
@@ -934,7 +979,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 mBuilderProvider,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         verify(mMockINotificationManager, never()).createConversationNotificationChannelForPackage(
                 anyString(), anyInt(), anyString(), any(), eq(CONVERSATION_ID));
@@ -967,7 +1014,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 () -> b,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         // WHEN user clicks "priority"
         mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
@@ -1001,7 +1050,9 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
                 mIconFactory,
                 mContext,
                 () -> b,
-                true);
+                true,
+                mTestHandler,
+                mTestHandler);
 
         // WHEN user clicks "priority"
         mNotificationInfo.setSelectedAction(NotificationConversationInfo.ACTION_FAVORITE);
