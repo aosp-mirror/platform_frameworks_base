@@ -119,11 +119,26 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public static final int FLAG_LONG_LIVED = 1 << 13;
 
-    /** @hide */
-    public static final int FLAG_CACHED = 1 << 14;
+    /**
+     * TODO(b/155135057): This is a quick and temporary fix for b/155135890. ShortcutService doesn't
+     *  need to be aware of the outside world. Replace this with a more extensible solution.
+     * @hide
+     */
+    public static final int FLAG_CACHED_NOTIFICATIONS = 1 << 14;
 
     /** @hide */
     public static final int FLAG_HAS_ICON_URI = 1 << 15;
+
+
+    /**
+     * TODO(b/155135057): This is a quick and temporary fix for b/155135890. ShortcutService doesn't
+     *  need to be aware of the outside world. Replace this with a more extensible solution.
+     * @hide
+     */
+    public static final int FLAG_CACHED_BUBBLES = 1 << 30;
+
+    /** @hide */
+    public static final int FLAG_CACHED_ALL = FLAG_CACHED_NOTIFICATIONS | FLAG_CACHED_BUBBLES;
 
     /** @hide */
     @IntDef(flag = true, prefix = { "FLAG_" }, value = {
@@ -141,8 +156,9 @@ public final class ShortcutInfo implements Parcelable {
             FLAG_ICON_FILE_PENDING_SAVE,
             FLAG_SHADOW,
             FLAG_LONG_LIVED,
-            FLAG_CACHED,
             FLAG_HAS_ICON_URI,
+            FLAG_CACHED_NOTIFICATIONS,
+            FLAG_CACHED_BUBBLES,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ShortcutFlags {}
@@ -1707,13 +1723,13 @@ public final class ShortcutInfo implements Parcelable {
     }
 
     /** @hide */
-    public void setCached() {
-        addFlags(FLAG_CACHED);
+    public void setCached(@ShortcutFlags int cacheFlag) {
+        addFlags(cacheFlag);
     }
 
     /** Return whether a shortcut is cached. */
     public boolean isCached() {
-        return hasFlags(FLAG_CACHED);
+        return (getFlags() & FLAG_CACHED_ALL) != 0;
     }
 
     /** Return whether a shortcut is dynamic. */
@@ -1807,7 +1823,7 @@ public final class ShortcutInfo implements Parcelable {
     /** @hide */
     public boolean isAlive() {
         return hasFlags(FLAG_PINNED) || hasFlags(FLAG_DYNAMIC) || hasFlags(FLAG_MANIFEST)
-                || hasFlags(FLAG_CACHED);
+                || isCached();
     }
 
     /** @hide */
