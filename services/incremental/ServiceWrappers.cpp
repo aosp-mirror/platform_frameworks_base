@@ -175,6 +175,10 @@ public:
     ErrorCode writeBlocks(std::span<const incfs::DataBlock> blocks) const final {
         return incfs::writeBlocks({blocks.data(), size_t(blocks.size())});
     }
+    WaitResult waitForPendingReads(const Control& control, std::chrono::milliseconds timeout,
+                                   std::vector<incfs::ReadInfo>* pendingReadsBuffer) const final {
+        return incfs::waitForPendingReads(control, timeout, pendingReadsBuffer);
+    }
 };
 
 RealServiceManager::RealServiceManager(sp<IServiceManager> serviceManager, JNIEnv* env)

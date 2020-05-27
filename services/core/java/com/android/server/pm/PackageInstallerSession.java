@@ -105,8 +105,10 @@ import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
 import android.os.SystemProperties;
 import android.os.UserHandle;
+import android.os.incremental.IStorageHealthListener;
 import android.os.incremental.IncrementalFileStorages;
 import android.os.incremental.IncrementalManager;
+import android.os.incremental.StorageHealthCheckParams;
 import android.os.storage.StorageManager;
 import android.provider.Settings.Secure;
 import android.stats.devicepolicy.DevicePolicyEnums;
@@ -230,6 +232,10 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     private static final InstallationFile[] EMPTY_INSTALLATION_FILE_ARRAY = {};
 
     private static final String SYSTEM_DATA_LOADER_PACKAGE = "android";
+
+    private static final int INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS = 2000;
+    private static final int INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS = 7000;
+    private static final int INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS = 60000;
 
     // TODO: enforce INSTALL_ALLOW_TEST
     // TODO: enforce INSTALL_ALLOW_DOWNGRADE
@@ -1568,7 +1574,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         dispatchSessionFinished(error, detailMessage, null);
     }
 
-    private void onDataLoaderUnrecoverable() {
+    private void onStorageUnhealthy() {
         if (TextUtils.isEmpty(mPackageName)) {
             // The package has not been installed.
             return;
@@ -2745,7 +2751,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
         final DataLoaderParams params = this.params.dataLoaderParams;
         final boolean manualStartAndDestroy = !isIncrementalInstallation();
-        final IDataLoaderStatusListener listener = new IDataLoaderStatusListener.Stub() {
+        final IDataLoaderStatusListener statusListener = new IDataLoaderStatusListener.Stub() {
             @Override
             public void onStatusChanged(int dataLoaderId, int status) {
                 switch (status) {
@@ -2757,7 +2763,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 if (mDestroyed || mDataLoaderFinished) {
                     switch (status) {
                         case IDataLoaderStatusListener.DATA_LOADER_UNRECOVERABLE:
-                            onDataLoaderUnrecoverable();
+                            onStorageUnhealthy();
                             return;
                     }
                     return;
@@ -2840,9 +2846,49 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         };
 
         if (!manualStartAndDestroy) {
+            final StorageHealthCheckParams healthCheckParams = new StorageHealthCheckParams();
+            healthCheckParams.blockedTimeoutMs = INCREMENTAL_STORAGE_BLOCKED_TIMEOUT_MS;
+            healthCheckParams.unhealthyTimeoutMs = INCREMENTAL_STORAGE_UNHEALTHY_TIMEOUT_MS;
+            healthCheckParams.unhealthyMonitoringMs = INCREMENTAL_STORAGE_UNHEALTHY_MONITORING_MS;
+
+            final boolean systemDataLoader =
+                    params.getComponentName().getPackageName() == SYSTEM_DATA_LOADER_PACKAGE;
+            final IStorageHealthListener healthListener = new IStorageHealthListener.Stub() {
+                @Override
+                public void onHealthStatus(int storageId, int status) {
+                    if (mDestroyed || mDataLoaderFinished) {
+                        // App's installed.
+                        switch (status) {
+                            case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
+                                onStorageUnhealthy();
+                                return;
+                        }
+                        return;
+                    }
+
+                    switch (status) {
+                        case IStorageHealthListener.HEALTH_STATUS_OK:
+                            break;
+                        case IStorageHealthListener.HEALTH_STATUS_READS_PENDING:
+                        case IStorageHealthListener.HEALTH_STATUS_BLOCKED:
+                            if (systemDataLoader) {
+                                // It's OK for ADB data loader to wait for pages.
+                                break;
+                            }
+                            // fallthrough
+                        case IStorageHealthListener.HEALTH_STATUS_UNHEALTHY:
+                            // Even ADB installation can't wait for missing pages for too long.
+                            mDataLoaderFinished = true;
+                            dispatchSessionVerificationFailure(INSTALL_FAILED_MEDIA_UNAVAILABLE,
+                                    "Image is missing pages required for installation.");
+                            break;
+                    }
+                }
+            };
+
             try {
                 mIncrementalFileStorages = IncrementalFileStorages.initialize(mContext, stageDir,
-                        params, listener, addedFiles);
+                        params, statusListener, healthCheckParams, healthListener, addedFiles);
                 return false;
             } catch (IOException e) {
                 throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE, e.getMessage(),
@@ -2850,8 +2896,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
-        if (!dataLoaderManager.bindToDataLoader(
-                sessionId, params.getData(), listener)) {
+        if (!dataLoaderManager.bindToDataLoader(sessionId, params.getData(), statusListener)) {
             throw new PackageManagerException(INSTALL_FAILED_MEDIA_UNAVAILABLE,
                     "Failed to initialize data loader");
         }
