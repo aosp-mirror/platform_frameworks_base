@@ -57,6 +57,6 @@ class PlayerViewHolderTest : SysuiTestCase() {
     @Test
     fun backgroundIsIlluminationDrawable() {
         val holder = PlayerViewHolder.create(inflater, parent)
-        assertThat(holder.background.background as IlluminationDrawable).isNotNull()
+        assertThat(holder.player.background as IlluminationDrawable).isNotNull()
     }
 }
