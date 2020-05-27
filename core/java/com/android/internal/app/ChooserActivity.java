@@ -171,17 +171,6 @@ public class ChooserActivity extends ResolverActivity implements
     public static final String EXTRA_PRIVATE_RETAIN_IN_ON_STOP
             = "com.android.internal.app.ChooserActivity.EXTRA_PRIVATE_RETAIN_IN_ON_STOP";
 
-    /**
-     * Integer extra to indicate which profile should be automatically selected.
-     * <p>Can only be used if there is a work profile.
-     * <p>Possible values can be either {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}.
-     */
-    static final String EXTRA_SELECTED_PROFILE =
-            "com.android.internal.app.ChooserActivity.EXTRA_SELECTED_PROFILE";
-
-    static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
-    static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
-
     private static final String PREF_NUM_SHEET_EXPANSIONS = "pref_num_sheet_expansions";
 
     private static final String CHIP_LABEL_METADATA_KEY = "android.service.chooser.chip_label";
@@ -928,15 +917,8 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     private int findSelectedProfile() {
-        int selectedProfile;
-        if (getIntent().hasExtra(EXTRA_SELECTED_PROFILE)) {
-            selectedProfile = getIntent().getIntExtra(EXTRA_SELECTED_PROFILE, /* defValue = */ -1);
-            if (selectedProfile != PROFILE_PERSONAL && selectedProfile != PROFILE_WORK) {
-                throw new IllegalArgumentException(EXTRA_SELECTED_PROFILE + " has invalid value "
-                        + selectedProfile + ". Must be either ChooserActivity.PROFILE_PERSONAL or "
-                        + "ChooserActivity.PROFILE_WORK.");
-            }
-        } else {
+        int selectedProfile = getSelectedProfileExtra();
+        if (selectedProfile == -1) {
             selectedProfile = getProfileForUser(getUser());
         }
         return selectedProfile;
