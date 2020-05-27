@@ -92,7 +92,6 @@ private:
         int mOutputFd;
         std::vector<SimpleAtomMatcher> mPushedMatchers;
         std::vector<PullInfo> mPulledInfo;
-        int mPullIntervalMin;
         bool mClientAlive;
     };
 
@@ -100,27 +99,25 @@ private:
 
     bool readConfig(std::shared_ptr<SubscriptionInfo> subscriptionInfo);
 
-    void spawnHelperThreadsLocked(std::shared_ptr<SubscriptionInfo> myInfo, int myToken);
+    void spawnHelperThread(int myToken);
 
     void waitForSubscriptionToEndLocked(std::shared_ptr<SubscriptionInfo> myInfo,
                                         int myToken,
                                         std::unique_lock<std::mutex>& lock,
                                         int timeoutSec);
 
-    void startPull(int myToken);
+    // Helper thread that pulls atoms at a regular frequency and sends
+    // heartbeats to perfd if statsd hasn't recently sent any data. Statsd must
+    // send heartbeats for perfd to escape a blocking read call and recheck if
+    // the user has terminated the subscription.
+    void pullAndSendHeartbeats(int myToken);
 
     void writePulledAtomsLocked(const vector<std::shared_ptr<LogEvent>>& data,
                                 const SimpleAtomMatcher& matcher);
 
     void getUidsForPullAtom(vector<int32_t>* uids, const PullInfo& pullInfo);
 
-    void attemptWriteToSocketLocked(size_t dataSize);
-
-    // Send ocassional heartbeats for two reasons: (a) for statsd to detect when
-    // the read end of the pipe has closed and (b) for perfd to escape a
-    // blocking read call and recheck if the user has terminated the
-    // subscription.
-    void sendHeartbeats(int myToken);
+    void attemptWriteToPipeLocked(size_t dataSize);
 
     sp<UidMap> mUidMap;
 
