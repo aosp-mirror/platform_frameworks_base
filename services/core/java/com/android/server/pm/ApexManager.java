@@ -33,9 +33,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
+import android.os.Binder;
 import android.os.Environment;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.sysprop.ApexProperties;
 import android.util.Slog;
 
@@ -73,12 +73,7 @@ abstract class ApexManager {
      */
     static ApexManager create(Context systemContext) {
         if (ApexProperties.updatable().orElse(false)) {
-            try {
-                return new ApexManagerImpl(systemContext, IApexService.Stub.asInterface(
-                        ServiceManager.getServiceOrThrow("apexservice")));
-            } catch (ServiceManager.ServiceNotFoundException e) {
-                throw new IllegalStateException("Required service apexservice not available");
-            }
+            return new ApexManagerImpl(systemContext);
         } else {
             return new ApexManagerFlattenedApex();
         }
@@ -247,8 +242,7 @@ abstract class ApexManager {
      * APEX packages.
      */
     @VisibleForTesting
-    static class ApexManagerImpl extends ApexManager {
-        private final IApexService mApexService;
+    protected static class ApexManagerImpl extends ApexManager {
         private final Context mContext;
         private final Object mLock = new Object();
         /**
@@ -261,9 +255,8 @@ abstract class ApexManager {
         @GuardedBy("mLock")
         private List<PackageInfo> mAllPackagesCache;
 
-        ApexManagerImpl(Context context, IApexService apexService) {
+        ApexManagerImpl(Context context) {
             mContext = context;
-            mApexService = apexService;
         }
 
         /**
@@ -286,10 +279,23 @@ abstract class ApexManager {
             return (packageInfo.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
         }
 
+        /**
+         * Retrieve the service from ServiceManager. If the service is not running, it will be
+         * started, and this function will block until it is ready.
+         */
+        @VisibleForTesting
+        protected IApexService waitForApexService() {
+            try {
+                return IApexService.Stub.asInterface(Binder.waitForService("apexservice"));
+            } catch (RemoteException e) {
+                throw new IllegalStateException("Required service apexservice not available");
+            }
+        }
+
         @Override
         List<ActiveApexInfo> getActiveApexInfos() {
             try {
-                return Arrays.stream(mApexService.getActivePackages())
+                return Arrays.stream(waitForApexService().getActivePackages())
                         .map(apexInfo -> new ActiveApexInfo(
                                 new File(
                                 Environment.getApexDirectory() + File.separator
@@ -324,7 +330,7 @@ abstract class ApexManager {
                     mAllPackagesCache = new ArrayList<>();
                     HashSet<String> activePackagesSet = new HashSet<>();
                     HashSet<String> factoryPackagesSet = new HashSet<>();
-                    final ApexInfo[] allPkgs = mApexService.getAllPackages();
+                    final ApexInfo[] allPkgs = waitForApexService().getAllPackages();
                     for (ApexInfo ai : allPkgs) {
                         // If the device is using flattened APEX, don't report any APEX
                         // packages since they won't be managed or updated by PackageManager.
@@ -431,7 +437,8 @@ abstract class ApexManager {
         @Override
         @Nullable ApexSessionInfo getStagedSessionInfo(int sessionId) {
             try {
-                ApexSessionInfo apexSessionInfo = mApexService.getStagedSessionInfo(sessionId);
+                ApexSessionInfo apexSessionInfo =
+                        waitForApexService().getStagedSessionInfo(sessionId);
                 if (apexSessionInfo.isUnknown) {
                     return null;
                 }
@@ -450,7 +457,7 @@ abstract class ApexManager {
                 ApexSessionParams params = new ApexSessionParams();
                 params.sessionId = sessionId;
                 params.childSessionIds = childSessionIds;
-                mApexService.submitStagedSession(params, apexInfoList);
+                waitForApexService().submitStagedSession(params, apexInfoList);
                 return apexInfoList;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
@@ -465,7 +472,7 @@ abstract class ApexManager {
         @Override
         void markStagedSessionReady(int sessionId) throws PackageManagerException {
             try {
-                mApexService.markStagedSessionReady(sessionId);
+                waitForApexService().markStagedSessionReady(sessionId);
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 throw new RuntimeException(re);
@@ -479,7 +486,7 @@ abstract class ApexManager {
         @Override
         void markStagedSessionSuccessful(int sessionId) {
             try {
-                mApexService.markStagedSessionSuccessful(sessionId);
+                waitForApexService().markStagedSessionSuccessful(sessionId);
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
                 throw new RuntimeException(re);
@@ -498,7 +505,7 @@ abstract class ApexManager {
         @Override
         boolean revertActiveSessions() {
             try {
-                mApexService.revertActiveSessions();
+                waitForApexService().revertActiveSessions();
                 return true;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
@@ -512,7 +519,7 @@ abstract class ApexManager {
         @Override
         boolean abortStagedSession(int sessionId) throws PackageManagerException {
             try {
-                mApexService.abortStagedSession(sessionId);
+                waitForApexService().abortStagedSession(sessionId);
                 return true;
             } catch (RemoteException re) {
                 Slog.e(TAG, "Unable to contact apexservice", re);
@@ -527,7 +534,7 @@ abstract class ApexManager {
         @Override
         boolean uninstallApex(String apexPackagePath) {
             try {
-                mApexService.unstagePackages(Collections.singletonList(apexPackagePath));
+                waitForApexService().unstagePackages(Collections.singletonList(apexPackagePath));
                 return true;
             } catch (Exception e) {
                 return false;
@@ -578,7 +585,7 @@ abstract class ApexManager {
                 ipw.increaseIndent();
                 ipw.println("APEX session state:");
                 ipw.increaseIndent();
-                final ApexSessionInfo[] sessions = mApexService.getSessions();
+                final ApexSessionInfo[] sessions = waitForApexService().getSessions();
                 for (ApexSessionInfo si : sessions) {
                     ipw.println("Session ID: " + si.sessionId);
                     ipw.increaseIndent();

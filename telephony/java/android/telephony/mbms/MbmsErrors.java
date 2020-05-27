@@ -16,7 +16,11 @@
 
 package android.telephony.mbms;
 
+import android.annotation.IntDef;
 import android.telephony.MbmsStreamingSession;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 public class MbmsErrors {
     /**
@@ -138,6 +142,13 @@ public class MbmsErrors {
 
         /** Indicates the the middleware has no record of the supplied {@link FileInfo} */
         public static final int ERROR_UNKNOWN_FILE_INFO = 403;
+
+        /**
+         * Indicates that the service announcement file passed via
+         * {@link android.telephony.MbmsDownloadSession#addServiceAnnouncementFile(byte[])}
+         * is malformed.
+         */
+        public static final int ERROR_MALFORMED_SERVICE_ANNOUNCEMENT_FILE = 404;
     }
 
     /**
@@ -154,6 +165,36 @@ public class MbmsErrors {
          * same {@code tmgi}.
          */
         public static final int ERROR_DUPLICATE_START_GROUP_CALL = 502;
+    }
+
+    /** @hide */
+    @IntDef(value = {
+            SUCCESS,
+            ERROR_NO_UNIQUE_MIDDLEWARE,
+            ERROR_MIDDLEWARE_NOT_BOUND,
+            ERROR_MIDDLEWARE_LOST,
+            InitializationErrors.ERROR_DUPLICATE_INITIALIZE,
+            InitializationErrors.ERROR_APP_PERMISSIONS_NOT_GRANTED,
+            InitializationErrors.ERROR_UNABLE_TO_INITIALIZE,
+            GeneralErrors.ERROR_MIDDLEWARE_NOT_YET_READY,
+            GeneralErrors.ERROR_OUT_OF_MEMORY,
+            GeneralErrors.ERROR_MIDDLEWARE_TEMPORARILY_UNAVAILABLE,
+            GeneralErrors.ERROR_IN_E911,
+            GeneralErrors.ERROR_NOT_CONNECTED_TO_HOME_CARRIER_LTE,
+            GeneralErrors.ERROR_UNABLE_TO_READ_SIM,
+            GeneralErrors.ERROR_CARRIER_CHANGE_NOT_ALLOWED,
+            StreamingErrors.ERROR_CONCURRENT_SERVICE_LIMIT_REACHED,
+            StreamingErrors.ERROR_UNABLE_TO_START_SERVICE,
+            StreamingErrors.ERROR_DUPLICATE_START_STREAM,
+            DownloadErrors.ERROR_CANNOT_CHANGE_TEMP_FILE_ROOT,
+            DownloadErrors.ERROR_UNKNOWN_DOWNLOAD_REQUEST,
+            DownloadErrors.ERROR_UNKNOWN_FILE_INFO,
+            DownloadErrors.ERROR_MALFORMED_SERVICE_ANNOUNCEMENT_FILE,
+            GroupCallErrors.ERROR_UNABLE_TO_START_SERVICE,
+            GroupCallErrors.ERROR_DUPLICATE_START_GROUP_CALL,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface MbmsError {
     }
 
     private MbmsErrors() {}

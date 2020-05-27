@@ -629,7 +629,7 @@ public final class ParcelableCall implements Parcelable {
             int capabilities = source.readInt();
             int properties = source.readInt();
             long connectTimeMillis = source.readLong();
-            Uri handle = source.readParcelable(classLoader);
+            Uri handle = Uri.CREATOR.createFromParcel(source);
             int handlePresentation = source.readInt();
             String callerDisplayName = source.readString();
             int callerDisplayNamePresentation = source.readInt();
@@ -711,7 +711,7 @@ public final class ParcelableCall implements Parcelable {
         destination.writeInt(mCapabilities);
         destination.writeInt(mProperties);
         destination.writeLong(mConnectTimeMillis);
-        destination.writeParcelable(mHandle, 0);
+        Uri.writeToParcel(destination, mHandle);
         destination.writeInt(mHandlePresentation);
         destination.writeString(mCallerDisplayName);
         destination.writeInt(mCallerDisplayNamePresentation);

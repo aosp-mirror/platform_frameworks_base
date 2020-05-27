@@ -39,7 +39,7 @@
     <!-- Albania: 5 digits, known short codes listed -->
     <shortcode country="al" pattern="\\d{5}" premium="15191|55[56]00" />
 
-    <!-- Argentia: 5 digits, known short codes listed -->
+    <!-- Argentina: 5 digits, known short codes listed -->
     <shortcode country="ar" pattern="\\d{5}" free="11711|28291" />
 
     <!-- Armenia: 3-4 digits, emergency numbers 10[123] -->
@@ -70,7 +70,7 @@
     <shortcode country="by" pattern="\\d{4}" premium="3336|4161|444[4689]|501[34]|7781" />
 
     <!-- Canada: 5-6 digits -->
-    <shortcode country="ca" pattern="\\d{5,6}" premium="60999|88188|43030" standard="244444" />
+    <shortcode country="ca" pattern="\\d{5,6}" premium="60999|88188|43030" standard="244444" free="455677" />
 
     <!-- Switzerland: 3-5 digits: http://www.swisscom.ch/fxres/kmu/thirdpartybusiness_code_of_conduct_en.pdf -->
     <shortcode country="ch" pattern="[2-9]\\d{2,4}" premium="543|83111|30118" free="98765|30075|30047" />

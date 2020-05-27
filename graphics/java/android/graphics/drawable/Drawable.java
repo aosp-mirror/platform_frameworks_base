@@ -617,7 +617,7 @@ public abstract class Drawable {
      * {@link #setTintList(ColorStateList) tint}.
      * </p>
      *
-     * @see {@link #setColorFilter(ColorFilter)} }
+     * @see #setColorFilter(ColorFilter)
      * @deprecated use {@link #setColorFilter(ColorFilter)} with an instance
      * of {@link android.graphics.BlendModeColorFilter}
      */

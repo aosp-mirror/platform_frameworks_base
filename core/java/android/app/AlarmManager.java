@@ -37,7 +37,6 @@ import android.util.proto.ProtoOutputStream;
 
 import libcore.timezone.ZoneInfoDb;
 
-import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -998,12 +997,7 @@ public class AlarmManager {
 
         // Reject this timezone if it isn't an Olson zone we recognize.
         if (mTargetSdkVersion >= Build.VERSION_CODES.M) {
-            boolean hasTimeZone = false;
-            try {
-                hasTimeZone = ZoneInfoDb.getInstance().hasTimeZone(timeZone);
-            } catch (IOException ignored) {
-            }
-
+            boolean hasTimeZone = ZoneInfoDb.getInstance().hasTimeZone(timeZone);
             if (!hasTimeZone) {
                 throw new IllegalArgumentException("Timezone: " + timeZone + " is not an Olson ID");
             }

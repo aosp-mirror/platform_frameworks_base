@@ -745,7 +745,6 @@
   <java-symbol type="string" name="config_ethernet_iface_regex" />
   <java-symbol type="array" name="config_ethernet_interfaces" />
   <java-symbol type="array" name="config_wakeonlan_supported_interfaces" />
-  <java-symbol type="string" name="cellbroadcast_default_package" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
@@ -1546,6 +1545,7 @@
   <java-symbol type="layout" name="select_dialog" />
   <java-symbol type="layout" name="simple_dropdown_hint" />
   <java-symbol type="layout" name="status_bar_latest_event_content" />
+  <java-symbol type="layout" name="system_user_home" />
   <java-symbol type="layout" name="text_edit_action_popup_text" />
   <java-symbol type="layout" name="text_drag_thumbnail" />
   <java-symbol type="layout" name="typing_filter" />
@@ -3871,4 +3871,12 @@
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
   <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
+
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_reject_enable_retry" />
+  <java-symbol type="integer" name="config_pdp_reject_retry_delay_ms" />
+  <java-symbol type="string" name="config_pdp_reject_dialog_title" />
+  <java-symbol type="string" name="config_pdp_reject_user_authentication_failed" />
+  <java-symbol type="string" name="config_pdp_reject_service_not_subscribed" />
+  <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
 </resources>

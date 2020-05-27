@@ -2512,6 +2512,16 @@ public class CarrierConfigManager {
             "parameters_use_for_5g_nr_signal_bar_int";
 
     /**
+     * There are two signal strengths, NR and LTE signal strength, during NR (non-standalone).
+     * Boolean indicating whether to use LTE signal strength as primary during NR (non-standalone).
+     * By default this value is true.
+     *
+     * @hide
+     */
+    public static final String KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL =
+            "signal_strength_nr_nsa_use_lte_as_primary_bool";
+
+    /**
      * String array of default bandwidth values per network type.
      * The entries should be of form "network_name:downstream,upstream", with values in Kbps.
      * @hide
@@ -3015,19 +3025,95 @@ public class CarrierConfigManager {
     public static final String KEY_5G_ICON_CONFIGURATION_STRING = "5g_icon_configuration_string";
 
     /**
-     * Timeout in seconds for displaying 5G icon, default value is 0 which means the timer is
-     * disabled.
+     * This configuration allows the system UI to determine how long to continue to display 5G icons
+     * when the device switches between different 5G scenarios.
      *
-     * System UI will show the 5G icon and start a timer with the timeout from this config when the
-     * device connects to a 5G cell. System UI stops displaying 5G icon when both the device
-     * disconnects from 5G cell and the timer is expired.
+     * There are seven 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
+     *    millimeter wave.
+     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
+     *    millimeter wave.
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in IDLE state.
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in CONNECTED state.
+     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
+     *    5G cell as a secondary cell) but the use of 5G is restricted.
+     * 6. legacy: device is not camped on a network that has 5G capability
+     * 7. any: any of the above scenarios
      *
-     * If 5G is reacquired during this timer, the timer is canceled and restarted when 5G is next
-     * lost. Allows us to momentarily lose 5G without blinking the icon.
+     * The configured string contains various timer rules separated by a semicolon.
+     * Each rule will have three items: prior 5G scenario, current 5G scenario, and grace period
+     * in seconds before changing the icon. When the 5G state changes from the prior to the current
+     * 5G scenario, the system UI will continue to show the icon for the prior 5G scenario (defined
+     * in {@link #KEY_5G_ICON_CONFIGURATION_STRING}) for the amount of time specified by the grace
+     * period. If the prior 5G scenario is reestablished, the timer will reset and start again if
+     * the UE changes 5G scenarios again. Defined states (5G scenarios #1-5) take precedence over
+     * 'any' (5G scenario #6), and unspecified transitions have a default grace period of 0.
+     * The order of rules in the configuration determines the priority (the first applicable timer
+     * rule will be used).
+     *
+     * Here is an example: "connected_mmwave,connected,30;connected_mmwave,any,10;connected,any,10"
+     * This configuration defines 3 timers:
+     * 1. When UE goes from 'connected_mmwave' to 'connected', system UI will continue to display
+     *    the 5G icon for 'connected_mmwave' for 30 seconds.
+     * 2. When UE goes from 'connected_mmwave' to any other state (except for connected, since
+     *    rule 1 would be used instead), system UI will continue to display the 5G icon for
+     *    'connected_mmwave' for 10 seconds.
+     * 3. When UE goes from 'connected' to any other state, system UI will continue to display the
+     *    5G icon for 'connected' for 10 seconds.
+     *
      * @hide
      */
-    public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT =
-            "5g_icon_display_grace_period_sec_int";
+    public static final String KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING =
+            "5g_icon_display_grace_period_string";
+
+    /**
+     * This configuration extends {@link #KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING} to allow the
+     * system UI to continue displaying 5G icons after the initial timer expires.
+     *
+     * There are seven 5G scenarios:
+     * 1. connected_mmwave: device currently connected to 5G cell as the secondary cell and using
+     *    millimeter wave.
+     * 2. connected: device currently connected to 5G cell as the secondary cell but not using
+     *    millimeter wave.
+     * 3. not_restricted_rrc_idle: device camped on a network that has 5G capability (not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in IDLE state.
+     * 4. not_restricted_rrc_con: device camped on a network that has 5G capability (not necessary
+     *    to connect a 5G cell as a secondary cell) and the use of 5G is not restricted and RRC
+     *    currently in CONNECTED state.
+     * 5. restricted: device camped on a network that has 5G capability (not necessary to connect a
+     *    5G cell as a secondary cell) but the use of 5G is restricted.
+     * 6. legacy: device is not camped on a network that has 5G capability
+     * 7. any: any of the above scenarios
+     *
+     * The configured string contains various timer rules separated by a semicolon.
+     * Each rule will have three items: primary 5G scenario, secondary 5G scenario, and
+     * grace period in seconds before changing the icon. When the timer for the primary 5G timer
+     * expires, the system UI will continue to show the icon for the primary 5G scenario (defined
+     * in {@link #KEY_5G_ICON_CONFIGURATION_STRING}) for the amount of time specified by the grace
+     * period. If the primary 5G scenario is reestablished, the timers will reset and the system UI
+     * will continue to display the icon for the primary 5G scenario without interruption. If the
+     * secondary 5G scenario is lost, the timer will reset and the icon will reflect the true state.
+     * Defined states (5G scenarios #1-5) take precedence over 'any' (5G scenario #6), and
+     * unspecified transitions have a default grace period of 0. The order of rules in the
+     * configuration determines the priority (the first applicable timer rule will be used).
+     *
+     * Here is an example: "connected,not_restricted_rrc_idle,30"
+     * This configuration defines a secondary timer that extends the primary 'connected' timer.
+     * When the primary 'connected' timer expires while the UE is in the 'not_restricted_rrc_idle'
+     * 5G state, system UI will continue to display the 5G icon for 'connected' for 30 seconds.
+     * If the 5G state returns to 'connected', the timer will be reset without change to the icon,
+     * and if the 5G state changes to neither 'connected' not 'not_restricted_rrc_idle', the icon
+     * will change to reflect the true state.
+     *
+     * @hide
+     */
+    public static final String KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING =
+            "5g_icon_display_secondary_grace_period_string";
 
     /**
      * Controls time in milliseconds until DcTracker reevaluates 5G connection state.
@@ -3056,6 +3142,38 @@ public class CarrierConfigManager {
      * @hide
      */
     public static final String KEY_UNMETERED_NR_NSA_SUB6_BOOL = "unmetered_nr_nsa_sub6_bool";
+
+    /**
+     * Whether NR (non-standalone) should be unmetered when the device is roaming.
+     * If false, then the values for {@link #KEY_UNMETERED_NR_NSA_BOOL},
+     * {@link #KEY_UNMETERED_NR_NSA_MMWAVE_BOOL}, {@link #KEY_UNMETERED_NR_NSA_SUB6_BOOL},
+     * and unmetered {@link SubscriptionPlan} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL =
+            "unmetered_nr_nsa_when_roaming_bool";
+
+    /**
+     * Whether NR (standalone) should be unmetered for all frequencies.
+     * If either {@link #KEY_UNMETERED_NR_SA_MMWAVE_BOOL} or
+     * {@link #KEY_UNMETERED_NR_SA_SUB6_BOOL} are true, then this value will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_SA_BOOL = "unmetered_nr_sa_bool";
+
+    /**
+     * Whether NR (standalone) frequencies above 6GHz (millimeter wave) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_SA_MMWAVE_BOOL = "unmetered_nr_sa_mmwave_bool";
+
+    /**
+     * Whether NR (standalone) frequencies below 6GHz (sub6) should be unmetered.
+     * If this is true, then the value for {@link #KEY_UNMETERED_NR_SA_BOOL} will be ignored.
+     * @hide
+     */
+    public static final String KEY_UNMETERED_NR_SA_SUB6_BOOL = "unmetered_nr_sa_sub6_bool";
 
     /**
      * Support ASCII 7-BIT encoding for long SMS. This carrier config is used to enable
@@ -3587,6 +3705,17 @@ public class CarrierConfigManager {
     public static final String KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY =
             "missed_incoming_call_sms_originator_string_array";
 
+
+    /**
+     * String array of Apn Type configurations.
+     * The entries should be of form "APN_TYPE_NAME:priority".
+     * priority is an integer that is sorted from highest to lowest.
+     * example: cbs:5
+     *
+     * @hide
+     */
+    public static final String KEY_APN_PRIORITY_STRING_ARRAY = "apn_priority_string_array";
+
     /**
      * The patterns of missed incoming call sms. This is the regular expression used for
      * matching the missed incoming call's date, time, and caller id. The pattern should match
@@ -3979,10 +4108,10 @@ public class CarrierConfigManager {
                 });
         sDefaults.putIntArray(KEY_LTE_RSRQ_THRESHOLDS_INT_ARRAY,
                 new int[] {
-                        -19, /* SIGNAL_STRENGTH_POOR */
+                        -20, /* SIGNAL_STRENGTH_POOR */
                         -17, /* SIGNAL_STRENGTH_MODERATE */
                         -14, /* SIGNAL_STRENGTH_GOOD */
-                        -12  /* SIGNAL_STRENGTH_GREAT */
+                        -11  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
                 new int[] {
@@ -4010,9 +4139,9 @@ public class CarrierConfigManager {
                 // Boundaries: [-20 dB, -3 dB]
                 new int[] {
                     -16, /* SIGNAL_STRENGTH_POOR */
-                    -11, /* SIGNAL_STRENGTH_MODERATE */
+                    -12, /* SIGNAL_STRENGTH_MODERATE */
                     -9, /* SIGNAL_STRENGTH_GOOD */
-                    -7  /* SIGNAL_STRENGTH_GREAT */
+                    -6  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_5G_NR_SSSINR_THRESHOLDS_INT_ARRAY,
                 // Boundaries: [-23 dB, 40 dB]
@@ -4024,10 +4153,11 @@ public class CarrierConfigManager {
                 });
         sDefaults.putInt(KEY_PARAMETERS_USE_FOR_5G_NR_SIGNAL_BAR_INT,
                 CellSignalStrengthNr.USE_SSRSRP);
+        sDefaults.putBoolean(KEY_SIGNAL_STRENGTH_NR_NSA_USE_LTE_AS_PRIMARY_BOOL, true);
         sDefaults.putStringArray(KEY_BANDWIDTH_STRING_ARRAY, new String[]{
                 "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
                 "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
-                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550:", "eHRPD:750,48",
+                "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550", "eHRPD:750,48",
                 "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
                 "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
@@ -4046,12 +4176,17 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_5G_ICON_CONFIGURATION_STRING,
                 "connected_mmwave:5G,connected:5G,not_restricted_rrc_idle:5G,"
                         + "not_restricted_rrc_con:5G");
-        sDefaults.putInt(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_SEC_INT, 0);
+        sDefaults.putString(KEY_5G_ICON_DISPLAY_GRACE_PERIOD_STRING, "");
+        sDefaults.putString(KEY_5G_ICON_DISPLAY_SECONDARY_GRACE_PERIOD_STRING, "");
         /* Default value is 1 hour. */
         sDefaults.putLong(KEY_5G_WATCHDOG_TIME_MS_LONG, 3600000);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_MMWAVE_BOOL, false);
         sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_SUB6_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_NSA_WHEN_ROAMING_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_MMWAVE_BOOL, false);
+        sDefaults.putBoolean(KEY_UNMETERED_NR_SA_SUB6_BOOL, false);
         sDefaults.putBoolean(KEY_ASCII_7_BIT_SUPPORT_FOR_LONG_MESSAGE_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_WIFI_CALLING_ICON_IN_STATUS_BAR_BOOL, false);
         /* Default value is minimum RSRP level needed for SIGNAL_STRENGTH_GOOD */
@@ -4112,6 +4247,10 @@ public class CarrierConfigManager {
         sDefaults.putLong(KEY_DATA_SWITCH_VALIDATION_MIN_GAP_LONG, TimeUnit.DAYS.toMillis(1));
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_ORIGINATOR_STRING_ARRAY,
                 new String[0]);
+        sDefaults.putStringArray(KEY_APN_PRIORITY_STRING_ARRAY, new String[] {
+                "default:0", "mms:2", "supl:2", "dun:2", "hipri:3", "fota:2",
+                "ims:2", "cbs:2", "ia:2", "emergency:2", "mcx:3", "xcap:3"
+        });
         sDefaults.putStringArray(KEY_MISSED_INCOMING_CALL_SMS_PATTERN_STRING_ARRAY, new String[0]);
     }
 

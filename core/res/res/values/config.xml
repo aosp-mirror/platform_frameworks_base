@@ -419,13 +419,14 @@
     <!-- Regex of wired ethernet ifaces -->
     <string translatable="false" name="config_ethernet_iface_regex">eth\\d</string>
 
-
-
     <!-- Configuration of Ethernet interfaces in the following format:
          <interface name|mac address>;[Network Capabilities];[IP config];[Override Transport]
          Where
                [Network Capabilities] Optional. A comma seprated list of network capabilities.
-                   Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
+                   Values must be from NetworkCapabilities#NET_CAPABILITY_* constants.
+                   The NOT_ROAMING, NOT_CONGESTED and NOT_SUSPENDED capabilities are always
+                   added automatically because this configuration provides no way to update
+                   them dynamically.
                [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
                    use the following format to specify static IP configuration:
                        ip=<ip-address/mask> gateway=<ip-address> dns=<comma-sep-ip-addresses>
@@ -450,10 +451,6 @@
         <item>eth0</item>
         -->
     </string-array>
-
-    <!-- Package name for the default CellBroadcastService module [DO NOT TRANSLATE] -->
-    <string name="cellbroadcast_default_package" translatable="false">com.android.cellbroadcastservice
-    </string>
 
     <!-- If the mobile hotspot feature requires provisioning, a package name and class name
         can be provided to launch a supported application that provisions the devices.
@@ -4367,4 +4364,9 @@
     <!-- Boolean indicating whether frameworks needs to reset cell broadcast geo-fencing
          check after reboot or airplane mode toggling -->
     <bool translatable="false" name="reset_geo_fencing_check_after_boot_or_apm">false</bool>
+
+    <!-- pdp data retry for cause 29, 33 and 55-->
+    <bool name="config_pdp_reject_enable_retry">false</bool>
+    <!--pdp data reject retry delay in ms-->
+    <integer name="config_pdp_reject_retry_delay_ms">-1</integer>
 </resources>

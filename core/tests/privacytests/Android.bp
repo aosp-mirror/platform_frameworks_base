@@ -1,0 +1,14 @@
+android_test {
+    name: "FrameworksPrivacyLibraryTests",
+    srcs: ["src/**/*.java"],
+    static_libs: [
+        "junit",
+        "rappor-tests",
+        "androidx.test.rules",
+        "truth-prebuilt",
+    ],
+    libs: ["android.test.runner"],
+    platform_apis: true,
+    certificate: "platform",
+    test_suites: ["device-tests"],
+}

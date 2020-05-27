@@ -48,13 +48,12 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":art-module-public-api-stubs-source",
-        ":conscrypt.module.public.api.stubs.source",
         ":android_icu4j_public_api_files",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: [
         "metalava-manual",
     ],
@@ -65,7 +64,10 @@ stubs_defaults {
 stubs_defaults {
     name: "metalava-full-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
-    srcs: [":framework-updatable-sources"],
+    srcs: [
+        ":conscrypt.module.public.api{.public.stubs.source}",
+        ":framework-updatable-sources",
+    ],
     sdk_version: "core_platform",
 }
 
@@ -97,13 +99,13 @@ droidstubs {
             removed_api_file: "api/removed.txt",
         },
         last_released: {
-            api_file: ":last-released-public-api",
+            api_file: ":android.api.public.latest",
             removed_api_file: "api/removed.txt",
             baseline_file: ":public-api-incompatibilities-with-last-released",
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-public-api",
+            new_since: ":android.api.public.latest",
             baseline_file: "api/lint-baseline.txt",
         },
     },
@@ -139,13 +141,13 @@ droidstubs {
             removed_api_file: "api/system-removed.txt",
         },
         last_released: {
-            api_file: ":last-released-system-api",
+            api_file: ":android.api.system.latest",
             removed_api_file: "api/system-removed.txt",
             baseline_file: ":system-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-system-api",
+            new_since: ":android.api.system.latest",
             baseline_file: "api/system-lint-baseline.txt",
         },
     },
@@ -207,13 +209,13 @@ droidstubs {
             removed_api_file: "api/module-lib-removed.txt",
         },
         last_released: {
-            api_file: ":last-released-module-lib-api",
+            api_file: ":android.api.module-lib.latest",
             removed_api_file: "api/module-lib-removed.txt",
             baseline_file: ":module-lib-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-module-lib-api",
+            new_since: ":android.api.module-lib.latest",
             baseline_file: "api/module-lib-lint-baseline.txt",
         },
     },
@@ -314,7 +316,7 @@ droidstubs {
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: [
         "metalava-manual",
     ],

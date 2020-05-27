@@ -25,6 +25,7 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_CONGESTED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_ROAMING;
+import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
@@ -606,6 +607,7 @@ public class VpnTest {
                         .addCapability(NET_CAPABILITY_NOT_METERED)
                         .addCapability(NET_CAPABILITY_NOT_ROAMING)
                         .addCapability(NET_CAPABILITY_NOT_CONGESTED)
+                        .addCapability(NET_CAPABILITY_NOT_SUSPENDED)
                         .setLinkUpstreamBandwidthKbps(20));
         setMockedNetworks(networks);
 
@@ -621,6 +623,7 @@ public class VpnTest {
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager,
@@ -635,6 +638,7 @@ public class VpnTest {
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager, new Network[] {wifi}, caps, false /* isAlwaysMetered */);
@@ -646,6 +650,7 @@ public class VpnTest {
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager, new Network[] {wifi}, caps, true /* isAlwaysMetered */);
@@ -657,6 +662,7 @@ public class VpnTest {
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         Vpn.applyUnderlyingCapabilities(
                 mConnectivityManager,
@@ -671,6 +677,7 @@ public class VpnTest {
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_METERED));
         assertFalse(caps.hasCapability(NET_CAPABILITY_NOT_ROAMING));
         assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_CONGESTED));
+        assertTrue(caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
     }
 
     /**

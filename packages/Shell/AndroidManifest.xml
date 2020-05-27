@@ -219,6 +219,9 @@
     <uses-permission android:name="android.permission.READ_COMPAT_CHANGE_CONFIG"/>
     <uses-permission android:name="android.permission.OVERRIDE_COMPAT_CHANGE_CONFIG"/>
 
+    <!-- Permission required for CTS test - BatterySaverTest -->
+    <uses-permission android:name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
+
     <!-- Permission required for CTS test - UiModeManagerTest -->
     <uses-permission android:name="android.permission.ENTER_CAR_MODE_PRIORITIZED"/>
 
@@ -246,6 +249,9 @@
 
     <!-- Permission required for testing system audio effect APIs. -->
     <uses-permission android:name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
+
+    <!-- Permissions needed to test shared libraries -->
+    <uses-permission android:name="android.permission.ACCESS_SHARED_LIBRARIES" />
 
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
@@ -292,22 +298,6 @@
                   android:noHistory="true"
                   android:excludeFromRecents="true"
                   android:exported="false" />
-
-        <!--
-        The following is used as a no-op/null home activity when
-        no other MAIN/HOME activity is present (e.g., in CSI).
-        -->
-        <activity android:name=".NullHome"
-                  android:excludeFromRecents="true"
-                  android:label=""
-                  android:screenOrientation="nosensor">
-            <!-- The priority here is set to be lower than that for Settings -->
-            <intent-filter android:priority="-1100">
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
 
         <receiver
             android:name=".BugreportReceiver"

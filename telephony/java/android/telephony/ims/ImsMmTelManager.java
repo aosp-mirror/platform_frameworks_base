@@ -141,8 +141,7 @@ public class ImsMmTelManager implements RegistrationManager {
     }
 
     /**
-     * Receives IMS capability status updates from the ImsService. This information is also
-     * available via the {@see #isAvailable(int, int)} method below.
+     * Receives IMS capability status updates from the ImsService.
      *
      * @see #registerMmTelCapabilityCallback(Executor, CapabilityCallback) (CapabilityCallback)
      * @see #unregisterMmTelCapabilityCallback(CapabilityCallback)
@@ -194,8 +193,6 @@ public class ImsMmTelManager implements RegistrationManager {
          * The status of the feature's capabilities has changed to either available or unavailable.
          * If unavailable, the feature is not able to support the unavailable capability at this
          * time.
-         *
-         * This information can also be queried using the {@see #isAvailable(int, int)} API.
          *
          * @param capabilities The new availability of the capabilities.
          */
@@ -497,8 +494,7 @@ public class ImsMmTelManager implements RegistrationManager {
     /**
      * Registers a {@link CapabilityCallback} with the system, which will provide MmTel service
      * availability updates for the subscription specified in
-     * {@link ImsManager#getImsMmTelManager(int)}. The method {@see #isAvailable(int, int)}
-     * can also be used to query this information at any time.
+     * {@link ImsManager#getImsMmTelManager(int)}.
      *
      * Use {@link SubscriptionManager.OnSubscriptionsChangedListener} to listen to
      * subscription changed events and call
@@ -640,7 +636,6 @@ public class ImsMmTelManager implements RegistrationManager {
      * @see android.telephony.CarrierConfigManager#KEY_HIDE_ENHANCED_4G_LTE_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_ENHANCED_4G_LTE_ON_BY_DEFAULT_BOOL
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_AVAILABLE_BOOL
-     * @see #setAdvancedCallingSettingEnabled(boolean)
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user's setting for advanced calling is enabled, false otherwise.
@@ -859,7 +854,6 @@ public class ImsMmTelManager implements RegistrationManager {
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user’s “Video Calling” setting is currently enabled.
-     * @see #setVtSettingEnabled(boolean)
      */
     @RequiresPermission(anyOf = {
             android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
@@ -934,7 +928,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
-     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(anyOf = {
@@ -1012,7 +1005,6 @@ public class ImsMmTelManager implements RegistrationManager {
      * active (SIM is not inserted, ESIM inactive) or invalid.
      * @return true if the user's setting for Voice over WiFi while roaming is enabled, false
      * if disabled.
-     * @see #setVoWiFiRoamingSettingEnabled(boolean)
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(anyOf = {
@@ -1131,7 +1123,6 @@ public class ImsMmTelManager implements RegistrationManager {
      * - {@link #WIFI_MODE_WIFI_ONLY}
      * - {@link #WIFI_MODE_CELLULAR_PREFERRED}
      * - {@link #WIFI_MODE_WIFI_PREFERRED}
-     * @see #setVoWiFiSettingEnabled(boolean)
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).
     @RequiresPermission(anyOf = {
@@ -1316,7 +1307,6 @@ public class ImsMmTelManager implements RegistrationManager {
      *
      * @throws IllegalArgumentException if the subscription associated with this operation is not
      * active (SIM is not inserted, ESIM inactive) or invalid.
-     * @see android.telecom.TelecomManager#getCurrentTtyMode
      * @see android.telephony.CarrierConfigManager#KEY_CARRIER_VOLTE_TTY_SUPPORTED_BOOL
      */
     @SuppressAutoDoc // No support for device / profile owner or carrier privileges (b/72967236).

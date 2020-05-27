@@ -16,9 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="no_upstream_notification_title" msgid="5030042590486713460">"無法透過數據連線連上網際網路"</string>
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"無法透過網路共用連上網際網路"</string>
     <string name="no_upstream_notification_message" msgid="3843613362272973447">"裝置無法連線"</string>
-    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"關閉數據連線"</string>
-    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"無線基地台或數據連線已開啟"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"關閉網路共用"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"無線基地台或網路共用已開啟"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"使用漫遊服務可能須支付額外費用"</string>
 </resources>

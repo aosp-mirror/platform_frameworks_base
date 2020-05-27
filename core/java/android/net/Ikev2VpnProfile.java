@@ -70,6 +70,15 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     private static final String MISSING_PARAM_MSG_TMPL = "Required parameter was not provided: %s";
     private static final String EMPTY_CERT = "";
 
+    /** @hide */
+    public static final List<String> DEFAULT_ALGORITHMS =
+            Collections.unmodifiableList(Arrays.asList(
+                    IpSecAlgorithm.CRYPT_AES_CBC,
+                    IpSecAlgorithm.AUTH_HMAC_SHA256,
+                    IpSecAlgorithm.AUTH_HMAC_SHA384,
+                    IpSecAlgorithm.AUTH_HMAC_SHA512,
+                    IpSecAlgorithm.AUTH_CRYPT_AES_GCM));
+
     @NonNull private final String mServerAddr;
     @NonNull private final String mUserIdentity;
 
@@ -92,6 +101,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
     private final boolean mIsBypassable; // Defaults in builder
     private final boolean mIsMetered; // Defaults in builder
     private final int mMaxMtu; // Defaults in builder
+    private final boolean mIsRestrictedToTestNetworks;
 
     private Ikev2VpnProfile(
             int type,
@@ -107,7 +117,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
             @NonNull List<String> allowedAlgorithms,
             boolean isBypassable,
             boolean isMetered,
-            int maxMtu) {
+            int maxMtu,
+            boolean restrictToTestNetworks) {
         super(type);
 
         checkNotNull(serverAddr, MISSING_PARAM_MSG_TMPL, "Server address");
@@ -131,6 +142,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         mIsBypassable = isBypassable;
         mIsMetered = isMetered;
         mMaxMtu = maxMtu;
+        mIsRestrictedToTestNetworks = restrictToTestNetworks;
 
         validate();
     }
@@ -172,7 +184,56 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 throw new IllegalArgumentException("Invalid auth method set");
         }
 
-        VpnProfile.validateAllowedAlgorithms(mAllowedAlgorithms);
+        validateAllowedAlgorithms(mAllowedAlgorithms);
+    }
+
+    /**
+     * Validates that the allowed algorithms are a valid set for IPsec purposes
+     *
+     * <p>In order for the algorithm list to be a valid set, it must contain at least one algorithm
+     * that provides Authentication, and one that provides Encryption. Authenticated Encryption with
+     * Associated Data (AEAD) algorithms are counted as providing Authentication and Encryption.
+     *
+     * @param allowedAlgorithms The list to be validated
+     */
+    private static void validateAllowedAlgorithms(@NonNull List<String> algorithmNames) {
+        VpnProfile.validateAllowedAlgorithms(algorithmNames);
+
+        // First, make sure no insecure algorithms were proposed.
+        if (algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_MD5)
+                || algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_SHA1)) {
+            throw new IllegalArgumentException("Algorithm not supported for IKEv2 VPN profiles");
+        }
+
+        // Validate that some valid combination (AEAD or AUTH + CRYPT) is present
+        if (hasAeadAlgorithms(algorithmNames) || hasNormalModeAlgorithms(algorithmNames)) {
+            return;
+        }
+
+        throw new IllegalArgumentException("Algorithm set missing support for Auth, Crypt or both");
+    }
+
+    /**
+     * Checks if the provided list has AEAD algorithms
+     *
+     * @hide
+     */
+    public static boolean hasAeadAlgorithms(@NonNull List<String> algorithmNames) {
+        return algorithmNames.contains(IpSecAlgorithm.AUTH_CRYPT_AES_GCM);
+    }
+
+    /**
+     * Checks the provided list has acceptable (non-AEAD) authentication and encryption algorithms
+     *
+     * @hide
+     */
+    public static boolean hasNormalModeAlgorithms(@NonNull List<String> algorithmNames) {
+        final boolean hasCrypt = algorithmNames.contains(IpSecAlgorithm.CRYPT_AES_CBC);
+        final boolean hasAuth = algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_SHA256)
+                || algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_SHA384)
+                || algorithmNames.contains(IpSecAlgorithm.AUTH_HMAC_SHA512);
+
+        return hasCrypt && hasAuth;
     }
 
     /** Retrieves the server address string. */
@@ -271,6 +332,15 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         return mMaxMtu;
     }
 
+    /**
+     * Returns whether or not this VPN profile is restricted to test networks.
+     *
+     * @hide
+     */
+    public boolean isRestrictedToTestNetworks() {
+        return mIsRestrictedToTestNetworks;
+    }
+
     @Override
     public int hashCode() {
         return Objects.hash(
@@ -287,7 +357,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 mAllowedAlgorithms,
                 mIsBypassable,
                 mIsMetered,
-                mMaxMtu);
+                mMaxMtu,
+                mIsRestrictedToTestNetworks);
     }
 
     @Override
@@ -310,7 +381,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                 && Objects.equals(mAllowedAlgorithms, other.mAllowedAlgorithms)
                 && mIsBypassable == other.mIsBypassable
                 && mIsMetered == other.mIsMetered
-                && mMaxMtu == other.mMaxMtu;
+                && mMaxMtu == other.mMaxMtu
+                && mIsRestrictedToTestNetworks == other.mIsRestrictedToTestNetworks;
     }
 
     /**
@@ -323,7 +395,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
      */
     @NonNull
     public VpnProfile toVpnProfile() throws IOException, GeneralSecurityException {
-        final VpnProfile profile = new VpnProfile("" /* Key; value unused by IKEv2VpnProfile(s) */);
+        final VpnProfile profile = new VpnProfile("" /* Key; value unused by IKEv2VpnProfile(s) */,
+                mIsRestrictedToTestNetworks);
         profile.type = mType;
         profile.server = mServerAddr;
         profile.ipsecIdentifier = mUserIdentity;
@@ -391,6 +464,9 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         builder.setBypassable(profile.isBypassable);
         builder.setMetered(profile.isMetered);
         builder.setMaxMtu(profile.maxMtu);
+        if (profile.isRestrictedToTestNetworks) {
+            builder.restrictToTestNetworks();
+        }
 
         switch (profile.type) {
             case TYPE_IKEV2_IPSEC_USER_PASS:
@@ -559,10 +635,11 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         @Nullable private X509Certificate mUserCert;
 
         @Nullable private ProxyInfo mProxyInfo;
-        @NonNull private List<String> mAllowedAlgorithms = new ArrayList<>();
+        @NonNull private List<String> mAllowedAlgorithms = DEFAULT_ALGORITHMS;
         private boolean mIsBypassable = false;
         private boolean mIsMetered = true;
         private int mMaxMtu = PlatformVpnProfile.MAX_MTU_DEFAULT;
+        private boolean mIsRestrictedToTestNetworks = false;
 
         /**
          * Creates a new builder with the basic parameters of an IKEv2/IPsec VPN.
@@ -745,7 +822,7 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
          * @param isMetered {@code true} if the VPN network should be treated as metered regardless
          *     of underlying network meteredness. Defaults to {@code true}.
          * @return this {@link Builder} object to facilitate chaining of method calls
-         * @see NetworkCapabilities.NET_CAPABILITY_NOT_METERED
+         * @see NetworkCapabilities#NET_CAPABILITY_NOT_METERED
          */
         @NonNull
         public Builder setMetered(boolean isMetered) {
@@ -756,7 +833,19 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         /**
          * Sets the allowable set of IPsec algorithms
          *
-         * <p>A list of allowed IPsec algorithms as defined in {@link IpSecAlgorithm}
+         * <p>If set, this will constrain the set of algorithms that the IPsec tunnel will use for
+         * integrity verification and encryption to the provided list.
+         *
+         * <p>The set of allowed IPsec algorithms is defined in {@link IpSecAlgorithm}. Adding of
+         * algorithms that are considered insecure (such as AUTH_HMAC_MD5 and AUTH_HMAC_SHA1) is not
+         * permitted, and will result in an IllegalArgumentException being thrown.
+         *
+         * <p>The provided algorithm list must contain at least one algorithm that provides
+         * Authentication, and one that provides Encryption. Authenticated Encryption with
+         * Associated Data (AEAD) algorithms provide both Authentication and Encryption.
+         *
+         * <p>By default, this profile will use any algorithm defined in {@link IpSecAlgorithm},
+         * with the exception of those considered insecure (as described above).
          *
          * @param algorithmNames the list of supported IPsec algorithms
          * @return this {@link Builder} object to facilitate chaining of method calls
@@ -765,9 +854,24 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
         @NonNull
         public Builder setAllowedAlgorithms(@NonNull List<String> algorithmNames) {
             checkNotNull(algorithmNames, MISSING_PARAM_MSG_TMPL, "algorithmNames");
-            VpnProfile.validateAllowedAlgorithms(algorithmNames);
+            validateAllowedAlgorithms(algorithmNames);
 
             mAllowedAlgorithms = algorithmNames;
+            return this;
+        }
+
+        /**
+         * Restricts this profile to use test networks (only).
+         *
+         * <p>This method is for testing only, and must not be used by apps. Calling
+         * provisionVpnProfile() with a profile where test-network usage is enabled will require the
+         * MANAGE_TEST_NETWORKS permission.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder restrictToTestNetworks() {
+            mIsRestrictedToTestNetworks = true;
             return this;
         }
 
@@ -792,7 +896,8 @@ public final class Ikev2VpnProfile extends PlatformVpnProfile {
                     mAllowedAlgorithms,
                     mIsBypassable,
                     mIsMetered,
-                    mMaxMtu);
+                    mMaxMtu,
+                    mIsRestrictedToTestNetworks);
         }
     }
 }

@@ -44,6 +44,10 @@ struct ManifestFixerOptions {
   // <instrumentation>.
   Maybe<std::string> rename_instrumentation_target_package;
 
+  // The Android package to use instead of the one defined in 'android:targetPackage' in
+  // <overlay>.
+  Maybe<std::string> rename_overlay_target_package;
+
   // The version name to set if 'android:versionName' is not defined in <manifest> or if
   // replace_version is set.
   Maybe<std::string> version_name_default;

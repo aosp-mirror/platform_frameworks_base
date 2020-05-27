@@ -16,13 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for no_upstream_notification_title (5030042590486713460) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_message (3843613362272973447) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_disable_button (6385491461813507624) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_title (3015912166812283303) -->
-    <skip />
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"இணைப்பு முறைக்கு இணைய இணைப்பு இல்லை"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"சாதனங்களால் இணைய முடியவில்லை"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"இணைப்பு முறையை ஆஃப் செய்"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"ஹாட்ஸ்பாட் அல்லது இணைப்பு முறை ஆன் செய்யப்பட்டுள்ளது"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"ரோமிங்கின்போது கூடுதல் கட்டணங்கள் விதிக்கப்படக்கூடும்"</string>
 </resources>

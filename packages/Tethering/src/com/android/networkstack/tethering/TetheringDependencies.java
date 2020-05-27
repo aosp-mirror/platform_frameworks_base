@@ -16,6 +16,7 @@
 
 package com.android.networkstack.tethering;
 
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.INetd;
@@ -45,6 +46,19 @@ public abstract class TetheringDependencies {
     public OffloadHardwareInterface getOffloadHardwareInterface(Handler h, SharedLog log) {
         return new OffloadHardwareInterface(h, log);
     }
+
+    /**
+     * Get a reference to the offload controller to be used by tethering.
+     */
+    @NonNull
+    public OffloadController getOffloadController(@NonNull Handler h,
+            @NonNull SharedLog log, @NonNull OffloadController.Dependencies deps) {
+        final NetworkStatsManager statsManager =
+                (NetworkStatsManager) getContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+        return new OffloadController(h, getOffloadHardwareInterface(h, log),
+                getContext().getContentResolver(), statsManager, log, deps);
+    }
+
 
     /**
      * Get a reference to the UpstreamNetworkMonitor to be used by tethering.
@@ -82,9 +96,9 @@ public abstract class TetheringDependencies {
     /**
      * Get a reference to the EntitlementManager to be used by tethering.
      */
-    public EntitlementManager getEntitlementManager(Context ctx, StateMachine target,
-            SharedLog log, int what) {
-        return new EntitlementManager(ctx, target, log, what);
+    public EntitlementManager getEntitlementManager(Context ctx, Handler h, SharedLog log,
+            Runnable callback) {
+        return new EntitlementManager(ctx, h, log, callback);
     }
 
     /**

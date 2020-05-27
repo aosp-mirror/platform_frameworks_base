@@ -106,6 +106,7 @@ public abstract class Conference extends Conferenceable {
     private int mCallerDisplayNamePresentation;
     private int mCallDirection;
     private boolean mRingbackRequested = false;
+    private boolean mIsMultiparty = true;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -998,8 +999,8 @@ public abstract class Conference extends Conferenceable {
     public void onExtrasChanged(Bundle extras) {}
 
     /**
-     * Set whether Telecom should treat this {@link Conference} as a conference call or if it
-     * should treat it as a single-party call.
+     * Set whether Telecom should treat this {@link Conference} as a multiparty conference call or
+     * if it should treat it as a single-party call.
      * This method is used as part of a workaround regarding IMS conference calls and user
      * expectation.  In IMS, once a conference is formed, the UE is connected to an IMS conference
      * server.  If all participants of the conference drop out of the conference except for one, the
@@ -1020,6 +1021,7 @@ public abstract class Conference extends Conferenceable {
     @TestApi
     @RequiresPermission(MODIFY_PHONE_STATE)
     public void setConferenceState(boolean isConference) {
+        mIsMultiparty = isConference;
         for (Listener l : mListeners) {
             l.onConferenceStateChanged(this, isConference);
         }
@@ -1043,6 +1045,20 @@ public abstract class Conference extends Conferenceable {
         }
     }
 
+    /**
+     * Determines if the {@link Conference} is considered "multiparty" or not.  By default all
+     * conferences are considered multiparty.  A multiparty conference is one where there are
+     * multiple conference participants (other than the host) in the conference.
+     * This is tied to {@link #setConferenceState(boolean)}, which is used for some use cases to
+     * have a conference appear as if it is a standalone call, in which case the conference will
+     * no longer be multiparty.
+     * @return {@code true} if conference is treated as a conference (i.e. it is multiparty),
+     * {@code false} if it should emulate a standalone call (i.e. not multiparty).
+     * @hide
+     */
+    public boolean isMultiparty() {
+        return mIsMultiparty;
+    }
 
     /**
      * Sets the address of this {@link Conference}.  Used when {@link #setConferenceState(boolean)}

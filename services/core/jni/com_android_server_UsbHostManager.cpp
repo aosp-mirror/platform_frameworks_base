@@ -134,6 +134,7 @@ static jobject android_server_UsbHostManager_openDevice(JNIEnv *env, jobject /* 
 
     jobject fileDescriptor = jniCreateFileDescriptor(env, newFD);
     if (fileDescriptor == NULL) {
+        close(newFD);
         return NULL;
     }
     return env->NewObject(gParcelFileDescriptorOffsets.mClass,

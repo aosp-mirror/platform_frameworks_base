@@ -65,6 +65,9 @@ class NetworkStackInstrumentationService : Service() {
          *
          * <p>For any subsequent HTTP/HTTPS query, the first response with a matching URL will be
          * used to mock the query response.
+         *
+         * <p>All requests that are expected to be sent must have a mock response: if an unexpected
+         * request is seen, the test will fail.
          */
         override fun addHttpResponse(response: HttpResponse) {
             httpResponses.getValue(response.requestUrl).add(response)

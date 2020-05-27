@@ -1659,11 +1659,22 @@ class Linker {
       return 1;
     }
 
-    // First extract the Package name without modifying it (via --rename-manifest-package).
+    // First extract the package name without modifying it (via --rename-manifest-package).
     if (Maybe<AppInfo> maybe_app_info =
             ExtractAppInfoFromManifest(manifest_xml.get(), context_->GetDiagnostics())) {
+      // Extract the package name from the manifest ignoring the value of --rename-manifest-package.
       const AppInfo& app_info = maybe_app_info.value();
       context_->SetCompilationPackage(app_info.package);
+    }
+
+    // Determine the package name under which to merge resources.
+    if (options_.rename_resources_package) {
+      if (!options_.custom_java_package) {
+        // Generate the R.java under the original package name instead of the package name specified
+        // through --rename-resources-package.
+        options_.custom_java_package = context_->GetCompilationPackage();
+      }
+      context_->SetCompilationPackage(options_.rename_resources_package.value());
     }
 
     // Now that the compilation package is set, load the dependencies. This will also extract
