@@ -300,6 +300,9 @@
     <!-- Permissions needed to test shared libraries -->
     <uses-permission android:name="android.permission.ACCESS_SHARED_LIBRARIES" />
 
+    <!-- Permissions required for CTS test - TVInputManagerTest -->
+    <uses-permission android:name="android.permission.TV_INPUT_HARDWARE" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
