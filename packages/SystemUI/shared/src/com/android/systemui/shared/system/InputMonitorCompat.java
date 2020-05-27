@@ -17,6 +17,8 @@ package com.android.systemui.shared.system;
 
 import android.os.Bundle;
 import android.os.Looper;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.view.Choreographer;
 import android.view.InputMonitor;
 
@@ -26,9 +28,9 @@ import com.android.systemui.shared.system.InputChannelCompat.InputEventReceiver;
 /**
  * @see android.view.InputMonitor
  */
-public class InputMonitorCompat {
-
+public class InputMonitorCompat implements Parcelable {
     private final InputMonitor mInputMonitor;
+    private boolean mForReturn = false;
 
     private InputMonitorCompat(InputMonitor monitor) {
         mInputMonitor = monitor;
@@ -61,6 +63,43 @@ public class InputMonitorCompat {
      * Gets the input monitor stored in a bundle
      */
     public static InputMonitorCompat fromBundle(Bundle bundle, String key) {
-        return new InputMonitorCompat((InputMonitor) bundle.getParcelable(key));
+        bundle.setClassLoader(InputMonitorCompat.class.getClassLoader());
+        return (InputMonitorCompat) bundle.getParcelable(key);
     }
+
+    /**
+     * Gets the input monitor compat as the return value.
+     */
+    public static InputMonitorCompat obtainReturnValue(InputMonitor monitor) {
+        final InputMonitorCompat monitorCompat = new InputMonitorCompat(monitor);
+        monitorCompat.mForReturn = true;
+        return monitorCompat;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        mInputMonitor.writeToParcel(dest,
+                mForReturn ? PARCELABLE_WRITE_RETURN_VALUE : flags);
+    }
+
+    private InputMonitorCompat(Parcel in) {
+        mInputMonitor = InputMonitor.CREATOR.createFromParcel(in);
+    }
+
+    public static final Creator<InputMonitorCompat> CREATOR = new Creator<InputMonitorCompat>() {
+        @Override
+        public InputMonitorCompat createFromParcel(Parcel in) {
+            return new InputMonitorCompat(in);
+        }
+
+        @Override
+        public InputMonitorCompat[] newArray(int size) {
+            return new InputMonitorCompat[size];
+        }
+    };
 }
