@@ -729,8 +729,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mNotificationEntryManager.getActiveNotificationsForCurrentUser()) {
             if (savedBubbleKeys.contains(e.getKey())
                     && mNotificationInterruptStateProvider.shouldBubbleUp(e)
+                    && e.isBubble()
                     && canLaunchInActivityView(mContext, e)) {
-                updateBubble(e, /* suppressFlyout= */ true);
+                updateBubble(e, true /* suppressFlyout */, false /* showInShade */);
             }
         }
         // Finally, remove the entries for this user now that bubbles are restored.
@@ -844,25 +845,34 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     void promoteBubbleFromOverflow(Bubble bubble) {
         bubble.setInflateSynchronously(mInflateSynchronously);
-        setIsBubble(bubble, /* isBubble */ true);
+        setIsBubble(bubble.getEntry(), /* isBubble */ true);
         mBubbleData.promoteBubbleFromOverflow(bubble, mStackView, mBubbleIconFactory);
     }
 
     /**
      * Request the stack expand if needed, then select the specified Bubble as current.
+     * If no bubble exists for this entry, one is created.
      *
-     * @param notificationKey the notification key for the bubble to be selected
+     * @param entry the notification for the bubble to be selected
      */
-    public void expandStackAndSelectBubble(String notificationKey) {
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(notificationKey);
-        if (bubble == null) {
-            bubble = mBubbleData.getOverflowBubbleWithKey(notificationKey);
-            if (bubble != null) {
-                mBubbleData.promoteBubbleFromOverflow(bubble, mStackView, mBubbleIconFactory);
-            }
-        } else if (bubble.getEntry().isBubble()){
+    public void expandStackAndSelectBubble(NotificationEntry entry) {
+        String key = entry.getKey();
+        Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
+        if (bubble != null) {
             mBubbleData.setSelectedBubble(bubble);
+        } else {
+            bubble = mBubbleData.getOverflowBubbleWithKey(key);
+            if (bubble != null) {
+                promoteBubbleFromOverflow(bubble);
+            } else if (entry.canBubble()) {
+                // It can bubble but it's not -- it got aged out of the overflow before it
+                // was dismissed or opened, make it a bubble again.
+                setIsBubble(entry, true);
+                bubble.setShouldAutoExpand(true);
+                updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
+            }
         }
+
         mBubbleData.setExpanded(true);
     }
 
@@ -882,11 +892,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param notif the notification associated with this bubble.
      */
     void updateBubble(NotificationEntry notif) {
-        updateBubble(notif, false /* suppressFlyout */);
-    }
-
-    void updateBubble(NotificationEntry notif, boolean suppressFlyout) {
-        updateBubble(notif, suppressFlyout, true /* showInShade */);
+        updateBubble(notif, false /* suppressFlyout */, true /* showInShade */);
     }
 
     void updateBubble(NotificationEntry notif, boolean suppressFlyout, boolean showInShade) {
@@ -901,7 +907,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.inflate(
                 b -> {
-                    mBubbleData.notificationEntryUpdated(b, suppressFlyout, showInShade);
+                    mBubbleData.notificationEntryUpdated(b, suppressFlyout,
+                            showInShade);
                     if (bubble.getBubbleIntent() == null) {
                         return;
                     }
@@ -979,18 +986,20 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private void onEntryAdded(NotificationEntry entry) {
         if (mNotificationInterruptStateProvider.shouldBubbleUp(entry)
+                && entry.isBubble()
                 && canLaunchInActivityView(mContext, entry)) {
             updateBubble(entry);
         }
     }
 
     private void onEntryUpdated(NotificationEntry entry) {
+        // shouldBubbleUp checks canBubble & for bubble metadata
         boolean shouldBubble = mNotificationInterruptStateProvider.shouldBubbleUp(entry)
                 && canLaunchInActivityView(mContext, entry);
         if (!shouldBubble && mBubbleData.hasAnyBubbleWithKey(entry.getKey())) {
             // It was previously a bubble but no longer a bubble -- lets remove it
             removeBubble(entry, DISMISS_NO_LONGER_BUBBLE);
-        } else if (shouldBubble) {
+        } else if (shouldBubble && entry.isBubble()) {
             updateBubble(entry);
         }
     }
@@ -1036,14 +1045,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    private void setIsBubble(Bubble b, boolean isBubble) {
+    private void setIsBubble(NotificationEntry entry, boolean isBubble) {
         if (isBubble) {
-            b.getEntry().getSbn().getNotification().flags |= FLAG_BUBBLE;
+            entry.getSbn().getNotification().flags |= FLAG_BUBBLE;
         } else {
-            b.getEntry().getSbn().getNotification().flags &= ~FLAG_BUBBLE;
+            entry.getSbn().getNotification().flags &= ~FLAG_BUBBLE;
         }
         try {
-            mBarService.onNotificationBubbleChanged(b.getKey(), isBubble, 0);
+            mBarService.onNotificationBubbleChanged(entry.getKey(), isBubble, 0);
         } catch (RemoteException e) {
             // Bad things have happened
         }
@@ -1092,7 +1101,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         }
                     } else {
                         if (bubble.getEntry().isBubble() && bubble.showInShade()) {
-                            setIsBubble(bubble, /* isBubble */ false);
+                            setIsBubble(bubble.getEntry(), false /* isBubble */);
                         }
                         if (bubble.getEntry().getRow() != null) {
                             bubble.getEntry().getRow().updateBubbleButton();
@@ -1327,7 +1336,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 boolean clearedTask, boolean wasVisible) {
             for (Bubble b : mBubbleData.getBubbles()) {
                 if (b.getDisplayId() == task.displayId) {
-                    expandStackAndSelectBubble(b.getKey());
+                    mBubbleData.setSelectedBubble(b);
+                    mBubbleData.setExpanded(true);
                     return;
                 }
             }
