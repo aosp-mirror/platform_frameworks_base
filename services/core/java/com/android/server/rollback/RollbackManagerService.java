@@ -43,8 +43,8 @@ public final class RollbackManagerService extends SystemService {
     }
 
     @Override
-    public void onUnlockUser(int user) {
-        mService.onUnlockUser(user);
+    public void onUserUnlocking(TargetUser user) {
+        mService.onUnlockUser(user.getUserHandle().getIdentifier());
     }
 
     @Override

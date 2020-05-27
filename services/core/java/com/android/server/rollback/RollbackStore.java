@@ -16,8 +16,6 @@
 
 package com.android.server.rollback;
 
-import static android.os.UserHandle.USER_SYSTEM;
-
 import static com.android.server.rollback.Rollback.rollbackStateFromString;
 
 import android.annotation.NonNull;
@@ -26,6 +24,7 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.content.rollback.RollbackInfo;
+import android.os.UserHandle;
 import android.util.Slog;
 import android.util.SparseIntArray;
 import android.util.SparseLongArray;
@@ -340,7 +339,7 @@ class RollbackStore {
                 rollbackStateFromString(dataJson.getString("state")),
                 dataJson.getInt("apkSessionId"),
                 dataJson.getBoolean("restoreUserDataInProgress"),
-                dataJson.optInt("userId", USER_SYSTEM),
+                dataJson.optInt("userId", UserHandle.SYSTEM.getIdentifier()),
                 dataJson.optString("installerPackageName", ""),
                 extensionVersionsFromJson(dataJson.optJSONArray("extensionVersions")));
     }
