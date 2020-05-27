@@ -88,7 +88,7 @@ void DeviceInfo::setWideColorDataspace(ADataSpace dataspace) {
     switch (dataspace) {
         case ADATASPACE_DISPLAY_P3:
             get()->mWideColorSpace =
-                    SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDCIP3);
+                    SkColorSpace::MakeRGB(SkNamedTransferFn::kSRGB, SkNamedGamut::kDisplayP3);
             break;
         case ADATASPACE_SCRGB:
             get()->mWideColorSpace = SkColorSpace::MakeSRGB();

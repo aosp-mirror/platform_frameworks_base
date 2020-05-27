@@ -695,6 +695,8 @@ message GlobalSettingsProto {
     }
     optional Notification notification = 82;
 
+    optional SettingProto nr_nsa_tracking_screen_off_mode = 153 [ (android.privacy).dest = DEST_AUTOMATIC ];
+
     optional SettingProto nsd_on = 83 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message Ntp {
@@ -1055,5 +1057,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 153;
+    // Next tag = 154;
 }

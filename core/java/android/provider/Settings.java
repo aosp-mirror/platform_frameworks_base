@@ -14394,6 +14394,21 @@ public final class Settings {
          * @hide
          */
         public static final String ADVANCED_BATTERY_USAGE_AMOUNT = "advanced_battery_usage_amount";
+
+        /**
+         * For 5G NSA capable devices, determines whether NR tracking indications are on
+         * when the screen is off.
+         *
+         * Values are:
+         * 0: off - All 5G NSA tracking indications are off when the screen is off.
+         * 1: extended - All 5G NSA tracking indications are on when the screen is off as long as
+         *    the device is camped on 5G NSA (5G icon is showing in status bar).
+         *    If the device is not camped on 5G NSA, tracking indications are off.
+         * 2: always on - All 5G NSA tracking indications are on whether the screen is on or off.
+         * @hide
+         */
+        public static final String NR_NSA_TRACKING_SCREEN_OFF_MODE =
+                "nr_nsa_tracking_screen_off_mode";
     }
 
     /**

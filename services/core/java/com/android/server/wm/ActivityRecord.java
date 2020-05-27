@@ -6542,14 +6542,14 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
         final int requestedOrientation = getRequestedConfigurationOrientation();
-        final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED;
+        final boolean orientationRequested = requestedOrientation != ORIENTATION_UNDEFINED
+                && !mDisplayContent.ignoreRotationForApps();
         final int orientation = orientationRequested
                 ? requestedOrientation
                 : newParentConfiguration.orientation;
         int rotation = newParentConfiguration.windowConfiguration.getRotation();
         final boolean canChangeOrientation = handlesOrientationChangeFromDescendant();
-        if (canChangeOrientation && mCompatDisplayInsets.mIsRotatable
-                && !mCompatDisplayInsets.mIsFloating) {
+        if (canChangeOrientation && !mCompatDisplayInsets.mIsFloating) {
             // Use parent rotation because the original display can rotate by requested orientation.
             resolvedConfig.windowConfiguration.setRotation(rotation);
         } else {
@@ -7635,7 +7635,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         private final int mWidth;
         private final int mHeight;
         final boolean mIsFloating;
-        final boolean mIsRotatable;
 
         /**
          * The nonDecorInsets for each rotation. Includes the navigation bar and cutout insets. It
@@ -7652,7 +7651,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         /** Constructs the environment to simulate the bounds behavior of the given container. */
         CompatDisplayInsets(DisplayContent display, WindowContainer container) {
             mIsFloating = container.getWindowConfiguration().tasksAreFloating();
-            mIsRotatable = !mIsFloating && !display.ignoreRotationForApps();
             if (mIsFloating) {
                 final Rect containerBounds = container.getWindowConfiguration().getBounds();
                 mWidth = containerBounds.width();
@@ -7709,7 +7707,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 return;
             }
 
-            if (mIsRotatable && canChangeOrientation) {
+            if (canChangeOrientation) {
                 getBoundsByRotation(outBounds, rotation);
                 if (orientationRequested) {
                     getFrameByOrientation(outAppBounds, orientation);

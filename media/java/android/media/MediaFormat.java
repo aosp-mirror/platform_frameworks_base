@@ -1163,6 +1163,18 @@ public final class MediaFormat {
      */
     public static final String KEY_MAX_B_FRAMES = "max-bframes";
 
+    /**
+     * A key for applications to opt out of allowing
+     * a Surface to discard undisplayed/unconsumed frames
+     * as means to catch up after falling behind.
+     * This value is an integer.
+     * The value 0 indicates the surface is not allowed to drop frames.
+     * The value 1 indicates the surface is allowed to drop frames.
+     *
+     * {@link MediaCodec} describes the semantics.
+     */
+    public static final String KEY_ALLOW_FRAME_DROP = "allow-frame-drop";
+
     /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;
     }

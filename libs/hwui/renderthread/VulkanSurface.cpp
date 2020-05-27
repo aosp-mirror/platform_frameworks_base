@@ -200,7 +200,7 @@ bool VulkanSurface::InitializeWindowInfoStruct(ANativeWindow* window, ColorMode 
                             "Could not get gamut matrix from color space");
         if (memcmp(&surfaceGamut, &SkNamedGamut::kSRGB, sizeof(surfaceGamut)) == 0) {
             outWindowInfo->dataspace = HAL_DATASPACE_V0_SCRGB;
-        } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDCIP3, sizeof(surfaceGamut)) == 0) {
+        } else if (memcmp(&surfaceGamut, &SkNamedGamut::kDisplayP3, sizeof(surfaceGamut)) == 0) {
             outWindowInfo->dataspace = HAL_DATASPACE_DISPLAY_P3;
         } else {
             LOG_ALWAYS_FATAL("Unreachable: unsupported wide color space.");

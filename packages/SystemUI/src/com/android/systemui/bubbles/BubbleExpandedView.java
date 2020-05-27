@@ -226,8 +226,12 @@ public class BubbleExpandedView extends LinearLayout {
     public BubbleExpandedView(Context context, AttributeSet attrs, int defStyleAttr,
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        updateDimensions();
+    }
+
+    void updateDimensions() {
         mDisplaySize = new Point();
-        mWindowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         // Get the real size -- this includes screen decorations (notches, statusbar, navbar).
         mWindowManager.getDefaultDisplay().getRealSize(mDisplaySize);
         Resources res = getResources();

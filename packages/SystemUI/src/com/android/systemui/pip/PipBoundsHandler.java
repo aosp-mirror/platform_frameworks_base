@@ -36,9 +36,10 @@ import android.util.Size;
 import android.util.TypedValue;
 import android.view.DisplayInfo;
 import android.view.Gravity;
-import android.view.IWindowManager;
-import android.view.WindowManagerGlobal;
 import android.window.WindowContainerTransaction;
+
+import com.android.systemui.wm.DisplayController;
+import com.android.systemui.wm.DisplayLayout;
 
 import java.io.PrintWriter;
 
@@ -56,10 +57,10 @@ public class PipBoundsHandler {
     private static final float INVALID_SNAP_FRACTION = -1f;
 
     private final Context mContext;
-    private final IWindowManager mWindowManager;
     private final PipSnapAlgorithm mSnapAlgorithm;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
-    private final Rect mTmpInsets = new Rect();
+    private final DisplayController mDisplayController;
+    private final DisplayLayout mDisplayLayout;
 
     private ComponentName mLastPipComponentName;
     private float mReentrySnapFraction = INVALID_SNAP_FRACTION;
@@ -80,11 +81,24 @@ public class PipBoundsHandler {
     private boolean mIsShelfShowing;
     private int mShelfHeight;
 
+    private final DisplayController.OnDisplaysChangedListener mDisplaysChangedListener =
+            new DisplayController.OnDisplaysChangedListener() {
+        @Override
+        public void onDisplayAdded(int displayId) {
+            if (displayId == mContext.getDisplayId()) {
+                mDisplayLayout.set(mDisplayController.getDisplayLayout(displayId));
+            }
+        }
+    };
+
     @Inject
-    public PipBoundsHandler(Context context, PipSnapAlgorithm pipSnapAlgorithm) {
+    public PipBoundsHandler(Context context, PipSnapAlgorithm pipSnapAlgorithm,
+            DisplayController displayController) {
         mContext = context;
         mSnapAlgorithm = pipSnapAlgorithm;
-        mWindowManager = WindowManagerGlobal.getWindowManagerService();
+        mDisplayLayout = new DisplayLayout();
+        mDisplayController = displayController;
+        mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
         reloadResources();
         // Initialize the aspect ratio to the default aspect ratio.  Don't do this in reload
         // resources as it would clobber mAspectRatio when entering PiP from fullscreen which
@@ -272,8 +286,8 @@ public class PipBoundsHandler {
      *
      * @return {@code true} if internal {@link DisplayInfo} is rotated, {@code false} otherwise.
      */
-    public boolean onDisplayRotationChanged(Rect outBounds, Rect oldBounds, int displayId,
-            int fromRotation, int toRotation, WindowContainerTransaction t) {
+    public boolean onDisplayRotationChanged(Rect outBounds, Rect oldBounds, Rect outInsetBounds,
+            int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) {
         // Bail early if the event is not sent to current {@link #mDisplayInfo}
         if ((displayId != mDisplayInfo.displayId) || (fromRotation == toRotation)) {
             return false;
@@ -294,6 +308,9 @@ public class PipBoundsHandler {
         final Rect postChangeStackBounds = new Rect(oldBounds);
         final float snapFraction = getSnapFraction(postChangeStackBounds);
 
+        // Update the display layout
+        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
+
         // Populate the new {@link #mDisplayInfo}.
         // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,
         // therefore, the width/height may require a swap first.
@@ -308,6 +325,7 @@ public class PipBoundsHandler {
         mSnapAlgorithm.applySnapFraction(postChangeStackBounds, postChangeMovementBounds,
                 snapFraction);
 
+        getInsetBounds(outInsetBounds);
         outBounds.set(postChangeStackBounds);
         t.setBounds(pinnedStackInfo.stackToken, outBounds);
         return true;
@@ -425,15 +443,11 @@ public class PipBoundsHandler {
      * Populates the bounds on the screen that the PIP can be visible in.
      */
     protected void getInsetBounds(Rect outRect) {
-        try {
-            mWindowManager.getStableInsets(mContext.getDisplayId(), mTmpInsets);
-            outRect.set(mTmpInsets.left + mScreenEdgeInsets.x,
-                    mTmpInsets.top + mScreenEdgeInsets.y,
-                    mDisplayInfo.logicalWidth - mTmpInsets.right - mScreenEdgeInsets.x,
-                    mDisplayInfo.logicalHeight - mTmpInsets.bottom - mScreenEdgeInsets.y);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Failed to get stable insets from WM", e);
-        }
+        Rect insets = mDisplayLayout.stableInsets();
+        outRect.set(insets.left + mScreenEdgeInsets.x,
+                insets.top + mScreenEdgeInsets.y,
+                mDisplayInfo.logicalWidth - insets.right - mScreenEdgeInsets.x,
+                mDisplayInfo.logicalHeight - insets.bottom - mScreenEdgeInsets.y);
     }
 
     /**

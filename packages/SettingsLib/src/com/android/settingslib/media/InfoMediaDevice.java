@@ -60,6 +60,11 @@ public class InfoMediaDevice extends MediaDevice {
                 mContext.getDrawable(getDrawableResId()), getId().hashCode());
     }
 
+    @Override
+    public Drawable getIconWithoutBackground() {
+        return mContext.getDrawable(getDrawableResId());
+    }
+
     @VisibleForTesting
     int getDrawableResId() {
         int resId;

@@ -1131,6 +1131,10 @@ class SettingsProtoDumpUtil {
                 Settings.Global.NSD_ON,
                 GlobalSettingsProto.NSD_ON);
 
+        dumpSetting(s, p,
+                Settings.Global.NR_NSA_TRACKING_SCREEN_OFF_MODE,
+                GlobalSettingsProto.NR_NSA_TRACKING_SCREEN_OFF_MODE);
+
         final long ntpToken = p.start(GlobalSettingsProto.NTP);
         dumpSetting(s, p,
                 Settings.Global.NTP_SERVER,
