@@ -319,6 +319,19 @@ public class InsetsState implements Parcelable {
         return mSources.get(type);
     }
 
+    /**
+     * Returns the source visibility or the default visibility if the source doesn't exist. This is
+     * useful if when treating this object as a request.
+     *
+     * @param type The {@link InternalInsetsType} to query.
+     * @return {@code true} if the source is visible or the type is default visible and the source
+     *         doesn't exist.
+     */
+    public boolean getSourceOrDefaultVisibility(@InternalInsetsType int type) {
+        final InsetsSource source = mSources.get(type);
+        return source != null ? source.isVisible() : getDefaultVisibility(type);
+    }
+
     public void setDisplayFrame(Rect frame) {
         mDisplayFrame.set(frame);
     }
@@ -347,20 +360,6 @@ public class InsetsState implements Parcelable {
         InsetsSource source = mSources.get(type);
         if (source != null) {
             source.setVisible(visible);
-        }
-    }
-
-    /**
-     * A shortcut for setting the visibility of the source.
-     *
-     * @param type The {@link InternalInsetsType} of the source to set the visibility
-     * @param referenceState The {@link InsetsState} for reference
-     */
-    public void setSourceVisible(@InternalInsetsType int type, InsetsState referenceState) {
-        InsetsSource source = mSources.get(type);
-        InsetsSource referenceSource = referenceState.mSources.get(type);
-        if (source != null && referenceSource != null) {
-            source.setVisible(referenceSource.isVisible());
         }
     }
 
@@ -452,7 +451,7 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    public static boolean getDefaultVisibility(@InsetsType int type) {
+    public static boolean getDefaultVisibility(@InternalInsetsType int type) {
         return type != ITYPE_IME;
     }
 
