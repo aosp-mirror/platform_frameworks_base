@@ -17,6 +17,7 @@
 package com.android.systemui.media
 
 import android.app.Notification
+import android.graphics.drawable.Drawable
 import android.media.MediaMetadata
 import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
@@ -73,6 +74,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     private lateinit var fakeExecutor: FakeExecutor
     @Mock private lateinit var listener: MediaDeviceManager.Listener
     @Mock private lateinit var device: MediaDevice
+    @Mock private lateinit var icon: Drawable
     @Mock private lateinit var route: RoutingSessionInfo
     private lateinit var session: MediaSession
     private lateinit var metadataBuilder: MediaMetadata.Builder
@@ -89,6 +91,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
         // Configure mocks.
         whenever(device.name).thenReturn(DEVICE_NAME)
+        whenever(device.iconWithoutBackground).thenReturn(icon)
         whenever(lmmFactory.create(PACKAGE)).thenReturn(lmm)
         whenever(lmm.getCurrentConnectedDevice()).thenReturn(device)
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(route)
@@ -157,6 +160,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.icon).isEqualTo(icon)
     }
 
     @Test
@@ -170,6 +174,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.icon).isEqualTo(icon)
     }
 
     @Test
@@ -183,6 +188,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
+        assertThat(data.icon).isEqualTo(icon)
     }
 
     @Test
@@ -204,6 +210,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
+        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -221,6 +228,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
+        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -238,6 +246,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
         assertThat(data.name).isNull()
+        assertThat(data.icon).isNull()
     }
 
     fun captureCallback(): LocalMediaManager.DeviceCallback {

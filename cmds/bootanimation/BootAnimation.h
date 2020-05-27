@@ -18,11 +18,14 @@
 #define ANDROID_BOOTANIMATION_H
 
 #include <vector>
+#include <queue>
 
 #include <stdint.h>
 #include <sys/types.h>
 
 #include <androidfw/AssetManager.h>
+#include <gui/DisplayEventReceiver.h>
+#include <utils/Looper.h>
 #include <utils/Thread.h>
 #include <binder/IBinder.h>
 
@@ -143,6 +146,13 @@ private:
         BootAnimation* mBootAnimation;
     };
 
+    // Display event handling
+    class DisplayEventCallback;
+    std::unique_ptr<DisplayEventReceiver> mDisplayEventReceiver;
+    sp<Looper> mLooper;
+    int displayEventCallback(int fd, int events, void* data);
+    void processDisplayEvents();
+
     status_t initTexture(Texture* texture, AssetManager& asset, const char* name);
     status_t initTexture(FileMap* map, int* width, int* height);
     status_t initFont(Font* font, const char* fallback);
@@ -159,6 +169,8 @@ private:
     void findBootAnimationFile();
     bool findBootAnimationFileInternal(const std::vector<std::string>& files);
     bool preloadAnimation();
+    EGLConfig getEglConfig(const EGLDisplay&);
+    void resizeSurface(int newWidth, int newHeight);
 
     void checkExit();
 

@@ -394,7 +394,9 @@ public class LocalMediaManager implements BluetoothCallback {
         return mPackageName;
     }
 
-    private MediaDevice updateCurrentConnectedDevice() {
+    @VisibleForTesting
+    MediaDevice updateCurrentConnectedDevice() {
+        MediaDevice connectedDevice = null;
         synchronized (mMediaDevicesLock) {
             for (MediaDevice device : mMediaDevices) {
                 if (device instanceof BluetoothMediaDevice) {
@@ -402,12 +404,12 @@ public class LocalMediaManager implements BluetoothCallback {
                         return device;
                     }
                 } else if (device instanceof PhoneMediaDevice) {
-                    return device;
+                    connectedDevice = device;
                 }
             }
         }
-        Log.w(TAG, "updateCurrentConnectedDevice() can't found current connected device");
-        return null;
+
+        return connectedDevice;
     }
 
     private boolean isActiveDevice(CachedBluetoothDevice device) {

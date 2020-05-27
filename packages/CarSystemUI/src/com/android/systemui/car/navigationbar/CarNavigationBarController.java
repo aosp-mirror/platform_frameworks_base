@@ -37,6 +37,7 @@ public class CarNavigationBarController {
     private final Context mContext;
     private final NavigationBarViewFactory mNavigationBarViewFactory;
     private final ButtonSelectionStateController mButtonSelectionStateController;
+    private final ButtonRoleHolderController mButtonRoleHolderController;
     private final Lazy<HvacController> mHvacControllerLazy;
 
     private boolean mShowTop;
@@ -59,11 +60,13 @@ public class CarNavigationBarController {
     public CarNavigationBarController(Context context,
             NavigationBarViewFactory navigationBarViewFactory,
             ButtonSelectionStateController buttonSelectionStateController,
-            Lazy<HvacController> hvacControllerLazy) {
+            Lazy<HvacController> hvacControllerLazy,
+            ButtonRoleHolderController buttonRoleHolderController) {
         mContext = context;
         mNavigationBarViewFactory = navigationBarViewFactory;
         mButtonSelectionStateController = buttonSelectionStateController;
         mHvacControllerLazy = hvacControllerLazy;
+        mButtonRoleHolderController = buttonRoleHolderController;
 
         // Read configuration.
         mShowTop = mContext.getResources().getBoolean(R.bool.config_enableTopNavigationBar);
@@ -101,9 +104,11 @@ public class CarNavigationBarController {
         mHvacControllerLazy.get().connectToCarService();
     }
 
-    /** Clean up hvac. */
-    public void removeAllFromHvac() {
+    /** Clean up */
+    public void removeAll() {
         mHvacControllerLazy.get().removeAllComponents();
+        mButtonSelectionStateController.removeAll();
+        mButtonRoleHolderController.removeAll();
     }
 
     /** Gets the top window if configured to do so. */
@@ -211,6 +216,7 @@ public class CarNavigationBarController {
         view.setStatusBarWindowTouchListener(statusBarTouchListener);
         view.setNotificationsPanelController(notifShadeController);
         mButtonSelectionStateController.addAllButtonsWithSelectionState(view);
+        mButtonRoleHolderController.addAllButtonsWithRoleName(view);
         mHvacControllerLazy.get().addTemperatureViewToController(view);
     }
 

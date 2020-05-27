@@ -2216,6 +2216,20 @@ public class UserManager {
                 }
             };
 
+    // Uses IS_USER_UNLOCKED_PROPERTY for invalidation as the APIs have the same dependencies.
+    private final PropertyInvalidatedCache<Integer, Boolean> mIsUserUnlockingOrUnlockedCache =
+            new PropertyInvalidatedCache<Integer, Boolean>(
+                32, CACHE_KEY_IS_USER_UNLOCKED_PROPERTY) {
+                @Override
+                protected Boolean recompute(Integer query) {
+                    try {
+                        return mService.isUserUnlockingOrUnlocked(query);
+                    } catch (RemoteException re) {
+                        throw re.rethrowFromSystemServer();
+                    }
+                }
+            };
+
     /** {@hide} */
     @UnsupportedAppUsage
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
@@ -2227,6 +2241,7 @@ public class UserManager {
     /** {@hide} */
     public void disableIsUserUnlockedCache() {
         mIsUserUnlockedCache.disableLocal();
+        mIsUserUnlockingOrUnlockedCache.disableLocal();
     }
 
     /** {@hide} */
@@ -2263,11 +2278,7 @@ public class UserManager {
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     public boolean isUserUnlockingOrUnlocked(@UserIdInt int userId) {
-        try {
-            return mService.isUserUnlockingOrUnlocked(userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
-        }
+        return mIsUserUnlockingOrUnlockedCache.query(userId);
     }
 
     /**

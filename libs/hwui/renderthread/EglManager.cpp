@@ -136,7 +136,7 @@ void EglManager::initialize() {
     LOG_ALWAYS_FATAL_IF(!DeviceInfo::get()->getWideColorSpace()->toXYZD50(&wideColorGamut),
                         "Could not get gamut matrix from wideColorSpace");
     bool hasWideColorSpaceExtension = false;
-    if (memcmp(&wideColorGamut, &SkNamedGamut::kDCIP3, sizeof(wideColorGamut)) == 0) {
+    if (memcmp(&wideColorGamut, &SkNamedGamut::kDisplayP3, sizeof(wideColorGamut)) == 0) {
         hasWideColorSpaceExtension = EglExtensions.displayP3;
     } else if (memcmp(&wideColorGamut, &SkNamedGamut::kSRGB, sizeof(wideColorGamut)) == 0) {
         hasWideColorSpaceExtension = EglExtensions.scRGB;
@@ -337,7 +337,7 @@ Result<EGLSurface, EGLint> EglManager::createSurface(EGLNativeWindowType window,
             skcms_Matrix3x3 colorGamut;
             LOG_ALWAYS_FATAL_IF(!colorSpace->toXYZD50(&colorGamut),
                                 "Could not get gamut matrix from color space");
-            if (memcmp(&colorGamut, &SkNamedGamut::kDCIP3, sizeof(colorGamut)) == 0) {
+            if (memcmp(&colorGamut, &SkNamedGamut::kDisplayP3, sizeof(colorGamut)) == 0) {
                 attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_PASSTHROUGH_EXT;
             } else if (memcmp(&colorGamut, &SkNamedGamut::kSRGB, sizeof(colorGamut)) == 0) {
                 attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;

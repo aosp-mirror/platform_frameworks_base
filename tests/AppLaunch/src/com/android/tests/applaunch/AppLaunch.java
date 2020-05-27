@@ -115,7 +115,7 @@ public class AppLaunch extends InstrumentationTestCase {
     private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 3000; // 3s between launching apps
     private static final int PROFILE_SAVE_SLEEP_TIMEOUT = 1000; // Allow 1s for the profile to save
     private static final int IORAP_TRACE_DURATION_TIMEOUT = 7000; // Allow 7s for trace to complete.
-    private static final int IORAP_TRIAL_LAUNCH_ITERATIONS = 3;  // min 3 launches to merge traces.
+    private static final int IORAP_TRIAL_LAUNCH_ITERATIONS = 5;  // min 5 launches to merge traces.
     private static final int IORAP_COMPILE_CMD_TIMEOUT = 60;  // in seconds: 1 minutes
     private static final int IORAP_COMPILE_MIN_TRACES = 1;  // configure iorapd to need 1 trace.
     private static final int IORAP_COMPILE_RETRIES = 3;  // retry compiler 3 times if it fails.

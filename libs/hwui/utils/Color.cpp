@@ -99,7 +99,7 @@ uint32_t ColorTypeToBufferFormat(SkColorType colorType) {
 namespace {
 static constexpr skcms_TransferFunction k2Dot6 = {2.6f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 
-// Skia's SkNamedGamut::kDCIP3 is based on a white point of D65. This gamut
+// Skia's SkNamedGamut::kDisplayP3 is based on a white point of D65. This gamut
 // matches the white point used by ColorSpace.Named.DCIP3.
 static constexpr skcms_Matrix3x3 kDCIP3 = {{
         {0.486143, 0.323835, 0.154234},
@@ -168,7 +168,7 @@ android_dataspace ColorSpaceToADataSpace(SkColorSpace* colorSpace, SkColorType c
         }
     }
 
-    if (nearlyEqual(fn, SkNamedTransferFn::kSRGB) && nearlyEqual(gamut, SkNamedGamut::kDCIP3)) {
+    if (nearlyEqual(fn, SkNamedTransferFn::kSRGB) && nearlyEqual(gamut, SkNamedGamut::kDisplayP3)) {
         return HAL_DATASPACE_DISPLAY_P3;
     }
 
@@ -209,7 +209,7 @@ sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace) {
             gamut = SkNamedGamut::kRec2020;
             break;
         case HAL_DATASPACE_STANDARD_DCI_P3:
-            gamut = SkNamedGamut::kDCIP3;
+            gamut = SkNamedGamut::kDisplayP3;
             break;
         case HAL_DATASPACE_STANDARD_ADOBE_RGB:
             gamut = SkNamedGamut::kAdobeRGB;

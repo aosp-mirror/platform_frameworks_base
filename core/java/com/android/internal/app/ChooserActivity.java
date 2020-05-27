@@ -101,6 +101,7 @@ import android.view.View.MeasureSpec;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewTreeObserver;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -2147,8 +2148,7 @@ public class ChooserActivity extends ResolverActivity implements
             extras.putString(Intent.EXTRA_SHORTCUT_ID, shortcutInfo.getId());
 
             ChooserTarget chooserTarget = new ChooserTarget(
-                    shortcutInfo.getLongLabel() != null ? shortcutInfo.getLongLabel()
-                            : shortcutInfo.getShortLabel(),
+                    shortcutInfo.getLabel(),
                     null, // Icon will be loaded later if this target is selected to be shown.
                     score, matchingShortcuts.get(i).getTargetComponent().clone(), extras);
 
@@ -2778,6 +2778,7 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void onListRebuilt(ResolverListAdapter listAdapter) {
         setupScrollListener();
+        maybeSetupGlobalLayoutListener();
 
         ChooserListAdapter chooserListAdapter = (ChooserListAdapter) listAdapter;
         if (chooserListAdapter.getUserHandle()
@@ -2855,6 +2856,28 @@ public class ChooserActivity extends ResolverActivity implements
                         }
 
                         elevatedView.setElevation(defaultElevation);
+                    }
+                });
+    }
+
+    private void maybeSetupGlobalLayoutListener() {
+        if (shouldShowTabs()) {
+            return;
+        }
+        final View recyclerView = mChooserMultiProfilePagerAdapter.getActiveAdapterView();
+        recyclerView.getViewTreeObserver()
+                .addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @Override
+                    public void onGlobalLayout() {
+                        // Fixes an issue were the accessibility border disappears on list creation.
+                        recyclerView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        final TextView titleView = findViewById(R.id.title);
+                        if (titleView != null) {
+                            titleView.setFocusable(true);
+                            titleView.setFocusableInTouchMode(true);
+                            titleView.requestFocus();
+                            titleView.requestAccessibilityFocus();
+                        }
                     }
                 });
     }

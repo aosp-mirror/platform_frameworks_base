@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.phone;
 
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_FORCE_SHOW_STATUS_BAR;
 
 import android.content.Context;
@@ -105,6 +106,7 @@ public class StatusBarWindowController {
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 PixelFormat.TRANSLUCENT);
+        mLp.privateFlags |= PRIVATE_FLAG_COLOR_SPACE_AGNOSTIC;
         mLp.token = new Binder();
         mLp.gravity = Gravity.TOP;
         mLp.setFitInsetsTypes(0 /* types */);

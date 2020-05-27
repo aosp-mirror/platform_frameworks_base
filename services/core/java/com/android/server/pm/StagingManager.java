@@ -40,7 +40,6 @@ import android.content.pm.PackageParser.SigningDetails;
 import android.content.pm.PackageParser.SigningDetails.SignatureSchemeVersion;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.parsing.PackageInfoWithoutStateUtils;
-import android.content.rollback.IRollbackManager;
 import android.content.rollback.RollbackInfo;
 import android.content.rollback.RollbackManager;
 import android.os.Bundle;
@@ -52,7 +51,6 @@ import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
@@ -75,6 +73,7 @@ import com.android.server.pm.parsing.PackageParser2;
 import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.pm.parsing.pkg.AndroidPackageUtils;
 import com.android.server.pm.parsing.pkg.ParsedPackage;
+import com.android.server.rollback.RollbackManagerInternal;
 import com.android.server.rollback.WatchdogRollbackLogger;
 
 import java.io.File;
@@ -483,8 +482,7 @@ public class StagingManager {
 
         final UserManagerInternal um = LocalServices.getService(UserManagerInternal.class);
         final int[] allUsers = um.getUserIds();
-        IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                ServiceManager.getService(Context.ROLLBACK_SERVICE));
+        RollbackManagerInternal rm = LocalServices.getService(RollbackManagerInternal.class);
 
         for (int i = 0, sessionsSize = apexSessions.size(); i < sessionsSize; i++) {
             final String packageName = apexSessions.get(i).getPackageName();
@@ -500,18 +498,18 @@ public class StagingManager {
     }
 
     private void snapshotAndRestoreApexUserData(
-            String packageName, int[] allUsers, IRollbackManager rm) {
+            String packageName, int[] allUsers, RollbackManagerInternal rm) {
         try {
             // appId, ceDataInode, and seInfo are not needed for APEXes
-            rm.snapshotAndRestoreUserData(packageName, allUsers, 0, 0,
+            rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(allUsers), 0, 0,
                     null, 0 /*token*/);
-        } catch (RemoteException re) {
+        } catch (RuntimeException re) {
             Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
         }
     }
 
     private void snapshotAndRestoreApkInApexUserData(
-            String packageName, int[] allUsers, IRollbackManager rm) {
+            String packageName, int[] allUsers, RollbackManagerInternal rm) {
         PackageManagerInternal mPmi = LocalServices.getService(PackageManagerInternal.class);
         AndroidPackage pkg = mPmi.getPackage(packageName);
         if (pkg == null) {
@@ -532,9 +530,9 @@ public class StagingManager {
 
             final String seInfo = AndroidPackageUtils.getSeInfo(pkg, ps);
             try {
-                rm.snapshotAndRestoreUserData(packageName, installedUsers, appId, ceDataInode,
-                        seInfo, 0 /*token*/);
-            } catch (RemoteException re) {
+                rm.snapshotAndRestoreUserData(packageName, UserHandle.toUserHandles(installedUsers),
+                        appId, ceDataInode, seInfo, 0 /*token*/);
+            } catch (RuntimeException re) {
                 Slog.e(TAG, "Error snapshotting/restoring user data: " + re);
             }
         }
@@ -878,11 +876,11 @@ public class StagingManager {
         if ((apksToInstall.params.installFlags & PackageManager.INSTALL_ENABLE_ROLLBACK) != 0) {
             // If rollback is available for this session, notify the rollback
             // manager of the apk session so it can properly enable rollback.
-            final IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                    ServiceManager.getService(Context.ROLLBACK_SERVICE));
+            final RollbackManagerInternal rm =
+                    LocalServices.getService(RollbackManagerInternal.class);
             try {
                 rm.notifyStagedApkSession(session.sessionId, apksToInstall.sessionId);
-            } catch (RemoteException re) {
+            } catch (RuntimeException re) {
                 Slog.e(TAG, "Failed to notifyStagedApkSession for session: "
                         + session.sessionId, re);
             }
@@ -1384,8 +1382,8 @@ public class StagingManager {
                 // If rollback is enabled for this session, we call through to the RollbackManager
                 // with the list of sessions it must enable rollback for. Note that
                 // notifyStagedSession is a synchronous operation.
-                final IRollbackManager rm = IRollbackManager.Stub.asInterface(
-                        ServiceManager.getService(Context.ROLLBACK_SERVICE));
+                final RollbackManagerInternal rm =
+                        LocalServices.getService(RollbackManagerInternal.class);
                 try {
                     // NOTE: To stay consistent with the non-staged install flow, we don't fail the
                     // entire install if rollbacks can't be enabled.
@@ -1395,7 +1393,7 @@ public class StagingManager {
                             mSessionRollbackIds.put(session.sessionId, rollbackId);
                         }
                     }
-                } catch (RemoteException re) {
+                } catch (RuntimeException re) {
                     Slog.e(TAG, "Failed to notifyStagedSession for session: "
                             + session.sessionId, re);
                 }

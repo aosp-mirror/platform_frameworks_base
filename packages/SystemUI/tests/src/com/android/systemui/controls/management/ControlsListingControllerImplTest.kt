@@ -65,7 +65,10 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     @Mock
     private lateinit var serviceInfo: ServiceInfo
     @Mock
-    private lateinit var componentName: ComponentName
+    private lateinit var serviceInfo2: ServiceInfo
+
+    private var componentName = ComponentName("pkg1", "class1")
+    private var componentName2 = ComponentName("pkg2", "class2")
 
     private val executor = FakeExecutor(FakeSystemClock())
 
@@ -82,6 +85,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         `when`(serviceInfo.componentName).thenReturn(componentName)
+        `when`(serviceInfo2.componentName).thenReturn(componentName2)
 
         val wrapper = object : ContextWrapper(mContext) {
             override fun createContextAsUser(user: UserHandle, flags: Int): Context {
@@ -179,7 +183,7 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testChangeUserResetsExistingCallbackServices() {
+    fun testChangeUserSendsCorrectServiceUpdate() {
         val list = listOf(serviceInfo)
         controller.addCallback(mockCallback)
 
@@ -197,9 +201,20 @@ class ControlsListingControllerImplTest : SysuiTestCase() {
         assertEquals(1, captor.value.size)
 
         reset(mockCallback)
+        reset(mockSL)
+
+        val updatedList = listOf(serviceInfo)
+        serviceListingCallbackCaptor.value.onServicesReloaded(updatedList)
         controller.changeUser(UserHandle.of(otherUser))
         executor.runAllReady()
         assertEquals(otherUser, controller.currentUserId)
+
+        // this event should was triggered just before the user change, and should
+        // be ignored
+        verify(mockCallback, never()).onServicesUpdated(any())
+
+        serviceListingCallbackCaptor.value.onServicesReloaded(emptyList<ServiceInfo>())
+        executor.runAllReady()
 
         verify(mockCallback).onServicesUpdated(capture(captor))
         assertEquals(0, captor.value.size)

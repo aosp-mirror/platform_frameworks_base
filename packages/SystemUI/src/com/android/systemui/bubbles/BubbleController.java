@@ -777,6 +777,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
+    boolean inLandscape() {
+        return mOrientation == Configuration.ORIENTATION_LANDSCAPE;
+    }
+
     /**
      * Set a listener to be notified of bubble expand events.
      */
