@@ -188,6 +188,17 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     private static final boolean DEBUG = false;
     private static final boolean VERIFY = false;
 
+    // Per-Cache performance counters. As some cache instances are declared static,
+    @GuardedBy("mLock")
+    private long mHits = 0;
+
+    @GuardedBy("mLock")
+    private long mMisses = 0;
+
+    // Most invalidation is done in a static context, so the counters need to be accessible.
+    @GuardedBy("sCorkLock")
+    private static final HashMap<String, Long> sInvalidates = new HashMap<>();
+
     /**
      * If sEnabled is false then all cache operations are stubbed out.  Set
      * it to false inside test processes.
@@ -265,6 +276,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             };
         synchronized (sCorkLock) {
             sCaches.put(this, null);
+            sInvalidates.put(propertyName, (long) 0);
         }
     }
 
@@ -367,6 +379,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
             synchronized (mLock) {
                 if (currentNonce == mLastSeenNonce) {
                     cachedResult = mCache.get(query);
+
+                    if (cachedResult != null) mHits++;
                 } else {
                     if (DEBUG) {
                         Log.d(TAG,
@@ -430,6 +444,7 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
                 if (mLastSeenNonce == currentNonce && result != null) {
                     mCache.put(query, result);
                 }
+                mMisses++;
             }
             return maybeCheckConsistency(query, result);
         }
@@ -535,6 +550,8 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
         // TODO(dancol): add an atomic compare and exchange property set operation to avoid a
         // small race with concurrent disable here.
         SystemProperties.set(name, newValueString);
+        long invalidateCount = sInvalidates.getOrDefault(name, (long) 0);
+        sInvalidates.put(name, ++invalidateCount);
     }
 
     /**
@@ -766,8 +783,16 @@ public abstract class PropertyInvalidatedCache<Query, Result> {
     }
 
     private void dumpContents(PrintWriter pw, String[] args) {
+        long invalidateCount;
+
+        synchronized (sCorkLock) {
+            invalidateCount = sInvalidates.getOrDefault(mPropertyName, (long) 0);
+        }
+
         synchronized (mLock) {
             pw.println(String.format("  Cache Property Name: %s", cacheName()));
+            pw.println(String.format("    Hits: %d, Misses: %d, Invalidates: %d",
+                    mHits, mMisses, invalidateCount));
             pw.println(String.format("    Last Observed Nonce: %d", mLastSeenNonce));
             pw.println(String.format("    Current Size: %d, Max Size: %d",
                     mCache.entrySet().size(), mMaxEntries));
