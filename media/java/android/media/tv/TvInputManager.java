@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Rect;
@@ -1799,6 +1800,40 @@ public final class TvInputManager {
         Preconditions.checkNotNull(callback);
         return acquireTvInputHardwareInternal(deviceId, info, tvInputSessionId, priorityHint,
                 executor, callback);
+    }
+
+    /**
+     * API to add a hardware device in the TvInputHardwareManager for CTS testing
+     * purpose.
+     *
+     * @param deviceId Id of the adding hardware device.
+     *
+     * @hide
+     */
+    @TestApi
+    public void addHardwareDevice(int deviceId) {
+        try {
+            mService.addHardwareDevice(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * API to remove a hardware device in the TvInputHardwareManager for CTS testing
+     * purpose.
+     *
+     * @param deviceId Id of the removing hardware device.
+     *
+     * @hide
+     */
+    @TestApi
+    public void removeHardwareDevice(int deviceId) {
+        try {
+            mService.removeHardwareDevice(deviceId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     private Hardware acquireTvInputHardwareInternal(int deviceId, TvInputInfo info,
