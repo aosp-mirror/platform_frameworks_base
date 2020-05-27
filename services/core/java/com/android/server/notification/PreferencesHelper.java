@@ -85,7 +85,8 @@ public class PreferencesHelper implements RankingConfig {
     private static final int XML_VERSION = 2;
     /** What version to check to do the upgrade for bubbles. */
     private static final int XML_VERSION_BUBBLES_UPGRADE = 1;
-    private static final int UNKNOWN_UID = UserHandle.USER_NULL;
+    @VisibleForTesting
+    static final int UNKNOWN_UID = UserHandle.USER_NULL;
     private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
 
     @VisibleForTesting
@@ -224,7 +225,7 @@ public class PreferencesHelper implements RankingConfig {
                             }
                             boolean skipWarningLogged = false;
                             boolean hasSAWPermission = false;
-                            if (upgradeForBubbles) {
+                            if (upgradeForBubbles && uid != UNKNOWN_UID) {
                                 hasSAWPermission = mAppOps.noteOpNoThrow(
                                         OP_SYSTEM_ALERT_WINDOW, uid, name, null,
                                         "check-notif-bubble") == AppOpsManager.MODE_ALLOWED;
