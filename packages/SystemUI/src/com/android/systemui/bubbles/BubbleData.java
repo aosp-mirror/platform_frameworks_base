@@ -21,6 +21,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.DEBUG_BUBBLE_DATA;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
+import android.annotation.NonNull;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -214,7 +215,7 @@ public class BubbleData {
                     notificationEntryUpdated(bubble, false /* suppressFlyout */,
                             true /* showInShade */);
                 },
-                mContext, stack, factory);
+                mContext, stack, factory, false /* skipInflation */);
     }
 
     void setShowingOverflow(boolean showingOverflow) {
@@ -268,7 +269,8 @@ public class BubbleData {
         }
         mPendingBubbles.remove(bubble); // No longer pending once we're here
         Bubble prevBubble = getBubbleInStackWithKey(bubble.getKey());
-        suppressFlyout |= !bubble.getEntry().getRanking().visuallyInterruptive();
+        suppressFlyout |= bubble.getEntry() == null
+                || !bubble.getEntry().getRanking().visuallyInterruptive();
 
         if (prevBubble == null) {
             // Create a new bubble
@@ -297,11 +299,14 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    public void notificationEntryRemoved(NotificationEntry entry, @DismissReason int reason) {
+    /**
+     * Called when a notification associated with a bubble is removed.
+     */
+    public void notificationEntryRemoved(String key, @DismissReason int reason) {
         if (DEBUG_BUBBLE_DATA) {
-            Log.d(TAG, "notificationEntryRemoved: entry=" + entry + " reason=" + reason);
+            Log.d(TAG, "notificationEntryRemoved: key=" + key + " reason=" + reason);
         }
-        doRemove(entry.getKey(), reason);
+        doRemove(key, reason);
         dispatchPendingChanges();
     }
 
@@ -349,7 +354,7 @@ public class BubbleData {
             return bubbleChildren;
         }
         for (Bubble b : mBubbles) {
-            if (groupKey.equals(b.getEntry().getSbn().getGroupKey())) {
+            if (b.getEntry() != null && groupKey.equals(b.getEntry().getSbn().getGroupKey())) {
                 bubbleChildren.add(b);
             }
         }
@@ -447,7 +452,9 @@ public class BubbleData {
             Bubble newSelected = mBubbles.get(newIndex);
             setSelectedBubbleInternal(newSelected);
         }
-        maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
+        if (bubbleToRemove.getEntry() != null) {
+            maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
+        }
     }
 
     void overflowBubble(@DismissReason int reason, Bubble bubble) {
@@ -615,7 +622,8 @@ public class BubbleData {
         return true;
     }
 
-    private void maybeSendDeleteIntent(@DismissReason int reason, NotificationEntry entry) {
+    private void maybeSendDeleteIntent(@DismissReason int reason,
+            @NonNull final NotificationEntry entry) {
         if (reason == BubbleController.DISMISS_USER_GESTURE) {
             Notification.BubbleMetadata bubbleMetadata = entry.getBubbleMetadata();
             PendingIntent deleteIntent = bubbleMetadata != null
