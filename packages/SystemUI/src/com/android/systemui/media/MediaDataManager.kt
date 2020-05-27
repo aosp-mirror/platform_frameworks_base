@@ -36,6 +36,7 @@ import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
+import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import java.io.IOException
 import java.util.concurrent.Executor
@@ -85,6 +86,7 @@ class MediaDataManager @Inject constructor(
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (Utils.useQsMediaPlayer(context) && isMediaNotification(sbn)) {
+            Assert.isMainThread()
             if (!mediaEntries.containsKey(key)) {
                 mediaEntries.put(key, LOADING)
             }
@@ -269,19 +271,23 @@ class MediaDataManager @Inject constructor(
     }
 
     fun onMediaDataLoaded(key: String, data: MediaData) {
+        Assert.isMainThread()
         if (mediaEntries.containsKey(key)) {
             // Otherwise this was removed already
             mediaEntries.put(key, data)
-            listeners.forEach {
+            val listenersCopy = listeners.toSet()
+            listenersCopy.forEach {
                 it.onMediaDataLoaded(key, data)
             }
         }
     }
 
     fun onNotificationRemoved(key: String) {
+        Assert.isMainThread()
         val removed = mediaEntries.remove(key)
         if (removed != null) {
-            listeners.forEach {
+            val listenersCopy = listeners.toSet()
+            listenersCopy.forEach {
                 it.onMediaDataRemoved(key)
             }
         }
