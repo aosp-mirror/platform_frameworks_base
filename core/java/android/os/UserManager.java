@@ -230,13 +230,14 @@ public class UserManager {
     public static final String DISALLOW_MODIFY_ACCOUNTS = "no_modify_accounts";
 
     /**
-     * Specifies if a user is disallowed from changing Wi-Fi
-     * access points. The default value is <code>false</code>.
-     * <p>
-     * Device owner and profile owner can set this restriction, although the restriction has no
-     * effect in a managed profile. When it is set by the profile owner of an organization-owned
-     * managed profile on the parent profile, it will disallow the personal user from changing
-     * Wi-Fi access points.
+     * Specifies if a user is disallowed from changing Wi-Fi access points via Settings.
+     *
+     * <p>A device owner and a profile owner can set this restriction, although the restriction has
+     * no effect in a managed profile. When it is set by a device owner, a profile owner on the
+     * primary user or by a profile owner of an organization-owned managed profile on the parent
+     * profile, it disallows the primary user from changing Wi-Fi access points.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -285,14 +286,16 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from turning on location sharing.
-     * The default value is <code>false</code>.
-     * <p>
-     * In a managed profile, location sharing always reflects the primary user's setting, but
+     *
+     * <p>In a managed profile, location sharing by default reflects the primary user's setting, but
      * can be overridden and forced off by setting this restriction to true in the managed profile.
-     * <p>
-     * Device owner and profile owner can set this restriction. When it is set by the profile
-     * owner of an organization-owned managed profile on the parent profile, it will prevent the
-     * user from turning on location sharing in the personal profile.
+     *
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a device
+     * owner, a profile owner on the primary user or by a profile owner of an organization-owned
+     * managed profile on the parent profile, it prevents the primary user from turning on
+     * location sharing.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -304,12 +307,13 @@ public class UserManager {
 
     /**
      * Specifies if airplane mode is disallowed on the device.
-     * <p>
-     * This restriction can only be set by the device owner, the profile owner on the primary user
-     * or the profile owner of an organization-owned managed profile on the parent profile, and it
-     * applies globally - i.e. it disables airplane mode on the entire device.
-     * <p>
-     * The default value is <code>false</code>.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by any of these owners, it applies globally - i.e., it disables airplane mode
+     * on the entire device.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -397,17 +401,18 @@ public class UserManager {
             "no_install_unknown_sources_globally";
 
     /**
-     * Specifies if a user is disallowed from configuring bluetooth.
-     * This does <em>not</em> restrict the user from turning bluetooth on or off.
-     * The default value is <code>false</code>.
-     * <p>
-     * This restriction doesn't prevent the user from using bluetooth. For disallowing usage of
+     * Specifies if a user is disallowed from configuring bluetooth via Settings. This does
+     * <em>not</em> restrict the user from turning bluetooth on or off.
+     *
+     * <p>This restriction doesn't prevent the user from using bluetooth. For disallowing usage of
      * bluetooth completely on the device, use {@link #DISALLOW_BLUETOOTH}.
-     * <p>
-     * Device owner and profile owner can set this restriction, although the restriction has no
-     * effect in a managed profile. When it is set by the profile owner of an organization-owned
-     * managed profile on the parent profile, it will disallow the personal user from configuring
-     * bluetooth.
+     *
+     * <p>A device owner and a profile owner can set this restriction, although the restriction has
+     * no effect in a managed profile. When it is set by a device owner, a profile owner on the
+     * primary user or by a profile owner of an organization-owned managed profile on the parent
+     * profile, it disallows the primary user from configuring bluetooth.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -418,13 +423,19 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_BLUETOOTH = "no_config_bluetooth";
 
     /**
-     * Specifies if bluetooth is disallowed on the device.
+     * Specifies if bluetooth is disallowed on the device. If bluetooth is disallowed on the device,
+     * bluetooth cannot be turned on or configured via Settings.
      *
-     * <p> This restriction can only be set by the device owner, the profile owner on the
-     * primary user or the profile owner of an organization-owned managed profile on the
-     * parent profile and it applies globally - i.e. it disables bluetooth on the entire
-     * device.
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally - i.e., it disables bluetooth on
+     * the entire device and all users will be affected. When it is set by a profile owner on the
+     * primary user or by a profile owner of an organization-owned managed profile on the parent
+     * profile, it disables the primary user from using bluetooth and configuring bluetooth
+     * in Settings.
+     *
      * <p>The default value is <code>false</code>.
+     *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -434,14 +445,17 @@ public class UserManager {
     public static final String DISALLOW_BLUETOOTH = "no_bluetooth";
 
     /**
-     * Specifies if outgoing bluetooth sharing is disallowed on the device. Device owner and profile
-     * owner can set this restriction. When it is set by device owner or the profile owner of an
-     * organization-owned managed profile on the parent profile, all users on this device will be
-     * affected.
+     * Specifies if outgoing bluetooth sharing is disallowed.
      *
-     * <p>Default is <code>true</code> for managed profiles and false for otherwise. When a device
-     * upgrades to {@link android.os.Build.VERSION_CODES#O}, the system sets it for all existing
-     * managed profiles.
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a device
+     * owner, it applies globally. When it is set by a profile owner on the primary user or by a
+     * profile owner of an organization-owned managed profile on the parent profile, it disables
+     * the primary user from any outgoing bluetooth sharing.
+     *
+     * <p>Default is <code>true</code> for managed profiles and false otherwise.
+     *
+     * <p>When a device upgrades to {@link android.os.Build.VERSION_CODES#O}, the system sets it
+     * for all existing managed profiles.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -452,10 +466,17 @@ public class UserManager {
     public static final String DISALLOW_BLUETOOTH_SHARING = "no_bluetooth_sharing";
 
     /**
-     * Specifies if a user is disallowed from transferring files over
-     * USB. This can only be set by device owners, profile owners on the primary user or
-     * profile owners of organization-owned managed profiles on the parent profile.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from transferring files over USB.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from transferring files over USB. No other
+     * user on the device is able to use file transfer over USB because the UI for file transfer
+     * is always associated with the primary user.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -512,13 +533,16 @@ public class UserManager {
     public static final String DISALLOW_REMOVE_MANAGED_PROFILE = "no_remove_managed_profile";
 
     /**
-     * Specifies if a user is disallowed from enabling or accessing debugging features. When set on
-     * the primary user or by the profile owner of an organization-owned managed profile on the
-     * parent profile, disables debugging features altogether, including USB debugging. When set on
-     * a managed profile or a secondary user, blocks debugging for that user only, including
-     * starting activities, making service calls, accessing content providers, sending broadcasts,
-     * installing/uninstalling packages, clearing user data, etc.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from enabling or accessing debugging features.
+     *
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a device
+     * owner, a profile owner on the primary user or by a profile owner of an organization-owned
+     * managed profile on the parent profile, it disables debugging features altogether, including
+     * USB debugging. When set on a managed profile or a secondary user, it blocks debugging for
+     * that user only, including starting activities, making service calls, accessing content
+     * providers, sending broadcasts, installing/uninstalling packages, clearing user data, etc.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -546,19 +570,18 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from enabling or disabling location providers. As a
-     * result, user is disallowed from turning on or off location.
+     * result, user is disallowed from turning on or off location via Settings.
      *
-     * <p>
-     * In a managed profile, location sharing is forced off when it is turned off on the primary
-     * user or by the profile owner of an organization-owned managed profile on the parent profile.
-     * The user can still turn off location sharing on a managed profile when the restriction is
-     * set by the profile owner on a managed profile.
-     * <p>
-     * This user restriction is different from {@link #DISALLOW_SHARE_LOCATION},
-     * as the device owner or profile owner can still enable or disable location mode via
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a device
+     * owner, a profile owner on the primary user or by a profile owner of an organization-owned
+     * managed profile on the parent profile, it disallows the primary user from turning location
+     * on or off.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction is different from {@link #DISALLOW_SHARE_LOCATION},
+     * as a device owner or a profile owner can still enable or disable location mode via
      * {@link DevicePolicyManager#setLocationEnabled} when this restriction is on.
-     * <p>
-     * The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -570,15 +593,18 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_LOCATION = "no_config_location";
 
     /**
-     * Specifies if date, time and timezone configuring is disallowed.
+     * Specifies configuring date, time and timezone is disallowed via Settings.
      *
-     * <p>When restriction is set by device owners or profile owners of organization-owned
-     * managed profiles on the parent profile, it applies globally - i.e., it disables date,
-     * time and timezone setting on the entire device and all users will be affected. When it's set
-     * by profile owners, it's only applied to the managed user.
+     * <p>A device owner and a profile owner can set this restriction, although the restriction has
+     * no effect in a managed profile. When it is set by a device owner or by a profile owner of an
+     * organization-owned managed profile on the parent profile, it applies globally - i.e.,
+     * it disables date, time and timezone setting on the entire device and all users are affected.
+     * When it is set by a profile owner on the primary user, it disables the primary user
+     * from configuring date, time and timezone and disables all configuring of date, time and
+     * timezone in Settings.
+     *
      * <p>The default value is <code>false</code>.
      *
-     * <p>This user restriction has no effect on managed profiles.
      * <p>Key for user restrictions.
      * <p>Type: Boolean
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
@@ -588,10 +614,18 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_DATE_TIME = "no_config_date_time";
 
     /**
-     * Specifies if a user is disallowed from configuring Tethering
-     * & portable hotspots. This can only be set by device owners, profile owners on the
-     * primary user or profile owners of organization-owned managed profiles on the parent profile.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from configuring Tethering and portable hotspots
+     * via Settings.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from using Tethering and hotspots and
+     * disables all configuring of Tethering and hotspots in Settings.
+     *
+     * <p>The default value is <code>false</code>.
+     *
      * <p>In Android 9.0 or higher, if tethering is enabled when this restriction is set,
      * tethering will be automatically turned off.
      *
@@ -685,10 +719,16 @@ public class UserManager {
     public static final String ENSURE_VERIFY_APPS = "ensure_verify_apps";
 
     /**
-     * Specifies if a user is disallowed from configuring cell
-     * broadcasts. This can only be set by device owners, profile owners on the primary user or
-     * profile owners of organization-owned managed profiles on the parent profile.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from configuring cell broadcasts.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from configuring cell broadcasts.
+     *
+     * <p>The default value is <code>false</code>.
+     *
      * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can configure cell broadcasts.
      *
@@ -701,10 +741,16 @@ public class UserManager {
     public static final String DISALLOW_CONFIG_CELL_BROADCASTS = "no_config_cell_broadcasts";
 
     /**
-     * Specifies if a user is disallowed from configuring mobile
-     * networks. This can only be set by device owners, profile owners on the primary user or
-     * profile owners of organization-owned managed profiles on the parent profile.
-     * The default value is <code>false</code>.
+     * Specifies if a user is disallowed from configuring mobile networks.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from configuring mobile networks.
+     *
+     * <p>The default value is <code>false</code>.
+     *
      * <p>This restriction has no effect on secondary users and managed profiles since only the
      * primary user can configure mobile networks.
      *
@@ -747,11 +793,14 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from mounting physical external media.
-     * <p>
-     * This restriction can only be set by the device owner, the profile owner on the primary user
-     * or the profile owner of an organization-owned managed profile on the parent profile.
-     * <p>
-     * The default value is <code>false</code>.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from mounting physical external media.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -764,13 +813,14 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from adjusting microphone volume. If set, the microphone
      * will be muted.
-     * <p>
-     * The default value is <code>false</code>.
-     * <p>
-     * Device owner and profile owner can set this restriction, although the restriction has no
-     * effect in a managed profile. When it is set by the profile owner of an organization-owned
-     * managed profile on the parent profile, it will disallow the personal user from adjusting the
-     * microphone volume.
+     *
+     * <p>A device owner and a profile owner can set this restriction, although the restriction has
+     * no effect in a managed profile. When it is set by a device owner, it applies globally. When
+     * it is set by a profile owner on the primary user or by a profile owner of an
+     * organization-owned managed profile on the parent profile, it will disallow the primary user
+     * from adjusting the microphone volume.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -800,13 +850,13 @@ public class UserManager {
     /**
      * Specifies that the user is not allowed to make outgoing phone calls. Emergency calls are
      * still permitted.
-     * <p>
-     * The default value is <code>false</code>.
-     * <p>
-     * Device owner and profile owner can set this restriction, although the restriction has no
-     * effect in a managed profile. When it is set by the profile owner of an organization-owned
-     * managed profile on the parent profile, it will disallow the personal user from making
-     * outgoing phone calls.
+     *
+     * <p>A device owner and a profile owner can set this restriction, although the restriction has
+     * no effect in a managed profile. When it is set by a device owner, a profile owner on the
+     * primary user or by a profile owner of an organization-owned managed profile on the parent
+     * profile, it disallows the primary user from making outgoing phone calls.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -817,12 +867,15 @@ public class UserManager {
     public static final String DISALLOW_OUTGOING_CALLS = "no_outgoing_calls";
 
     /**
-     * Specifies that the user is not allowed to send or receive
-     * SMS messages. The default value is <code>false</code>.
-     * <p>
-     * Device owner and profile owner can set this restriction. When it is set by the
-     * profile owner of an organization-owned managed profile on the parent profile,
-     * it will disable SMS in the personal profile.
+     * Specifies that the user is not allowed to send or receive SMS messages.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from sending or receiving SMS messages.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -941,9 +994,15 @@ public class UserManager {
 
     /**
      * Specifies if the user is not allowed to reboot the device into safe boot mode.
-     * This can only be set by device owners, profile owners on the primary user or profile
-     * owners of organization-owned managed profiles on the parent profile.
-     * The default value is <code>false</code>.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from rebooting the device into safe
+     * boot mode.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -981,12 +1040,14 @@ public class UserManager {
 
     /**
      * Specifies if a user is not allowed to use the camera.
-     * <p>
-     * Device owner and profile owner can set this restriction. When the restriction is set by
-     * the device owner or the profile owner of an organization-owned managed profile on the
-     * parent profile, it is applied globally.
-     * <p>
-     * The default value is <code>false</code>.
+     *
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a
+     * device owner, it applies globally - i.e., it disables the use of camera on the entire device
+     * and all users are affected. When it is set by a profile owner on the primary user or by a
+     * profile owner of an organization-owned managed profile on the parent profile, it disables
+     * the primary user from using camera.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
@@ -1006,9 +1067,15 @@ public class UserManager {
     public static final String DISALLOW_UNMUTE_DEVICE = "disallow_unmute_device";
 
     /**
-     * Specifies if a user is not allowed to use cellular data when roaming. This can only be set by
-     * device owners or profile owners of organization-owned managed profiles on the parent profile.
-     * The default value is <code>false</code>.
+     * Specifies if a user is not allowed to use cellular data when roaming.
+     *
+     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * user or a profile owner of an organization-owned managed profile on the parent profile.
+     * When it is set by a device owner, it applies globally. When it is set by a profile owner
+     * on the primary user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the primary user from using cellular data when roaming.
+     *
+     * <p>The default value is <code>false</code>.
      *
      * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
      * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
@@ -1103,9 +1170,10 @@ public class UserManager {
      * Specifies if the contents of a user's screen is not allowed to be captured for artificial
      * intelligence purposes.
      *
-     * <p>Device owner and profile owner can set this restriction. When it is set by the
-     * device owner or the profile owner of an organization-owned managed profile on the parent
-     * profile, only the target user will be affected.
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a device
+     * owner, a profile owner on the primary user or by a profile owner of an organization-owned
+     * managed profile on the parent profile, it disables the primary user's screen from being
+     * captured for artificial intelligence purposes.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1119,9 +1187,10 @@ public class UserManager {
      * Specifies if the current user is able to receive content suggestions for selections based on
      * the contents of their screen.
      *
-     * <p>Device owner and profile owner can set this restriction. When it is set by the
-     * device owner or the profile owner of an organization-owned managed profile on the parent
-     * profile, only the target user will be affected.
+     * <p>A device owner and a profile owner can set this restriction. When it is set by a device
+     * owner, a profile owner on the primary user or by a profile owner of an organization-owned
+     * managed profile on the parent profile, it disables the primary user from receiving content
+     * suggestions for selections based on the contents of their screen.
      *
      * <p>The default value is <code>false</code>.
      *
@@ -1185,10 +1254,11 @@ public class UserManager {
     /**
      * Specifies whether the user is allowed to modify private DNS settings.
      *
-     * <p>The default value is <code>false</code>.
+     * <p>This restriction can only be set by a device owner or a profile owner of an
+     * organization-owned managed profile on the parent profile. When it is set by either of these
+     * owners, it applies globally.
      *
-     * <p>This user restriction can only be applied by the device owner or the profile owner
-     * of an organization-owned managed profile on the parent profile.
+     * <p>The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
