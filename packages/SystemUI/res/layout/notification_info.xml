@@ -46,7 +46,6 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:orientation="vertical"
-
             android:layout_height="wrap_content"
             android:minHeight="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
@@ -57,6 +56,7 @@
                 android:id="@+id/channel_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textDirection="locale"
                 style="@style/TextAppearance.NotificationImportanceChannel"/>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -84,6 +84,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
+                    android:textDirection="locale"
                     style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
             </LinearLayout>
             <TextView
