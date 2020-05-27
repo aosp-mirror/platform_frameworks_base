@@ -95,7 +95,7 @@ public class TransformState {
         if (sameAs(otherState)) {
             ensureVisible();
         } else {
-            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount);
+            CrossFadeHelper.fadeIn(mTransformedView, transformationAmount, true /* remap */);
         }
         transformViewFullyFrom(otherState, transformationAmount);
     }
@@ -424,7 +424,7 @@ public class TransformState {
         if (transformationAmount == 0.0f) {
             prepareFadeIn();
         }
-        CrossFadeHelper.fadeIn(mTransformedView, transformationAmount);
+        CrossFadeHelper.fadeIn(mTransformedView, transformationAmount, true /* remap */);
     }
 
     public void disappear(float transformationAmount, TransformableView otherView) {
