@@ -46,6 +46,8 @@ class BlobStoreManagerShellCommand extends ShellCommand {
                 return runDeleteBlob(pw);
             case "idle-maintenance":
                 return runIdleMaintenance(pw);
+            case "query-blob-existence":
+                return runQueryBlobExistence(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -91,6 +93,16 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         return 0;
     }
 
+    private int runQueryBlobExistence(PrintWriter pw) {
+        final ParsedArgs args = new ParsedArgs();
+        if (parseOptions(pw, args) < 0) {
+            return -1;
+        }
+
+        pw.println(mService.isBlobAvailable(args.blobId, args.userId) ? 1 : 0);
+        return 0;
+    }
+
     @Override
     public void onHelp() {
         final PrintWriter pw = getOutPrintWriter();
@@ -121,6 +133,8 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         pw.println("      --tag: Tag of the blob to delete.");
         pw.println("idle-maintenance");
         pw.println("    Run idle maintenance which takes care of removing stale data.");
+        pw.println("query-blob-existence [-b BLOB_ID]");
+        pw.println("    Prints 1 if blob exists, otherwise 0.");
         pw.println();
     }
 
@@ -147,6 +161,9 @@ class BlobStoreManagerShellCommand extends ShellCommand {
                 case "--tag":
                     args.tag = getNextArgRequired();
                     break;
+                case "-b":
+                    args.blobId = Long.parseLong(getNextArgRequired());
+                    break;
                 default:
                     pw.println("Error: unknown option '" + opt + "'");
                     return -1;
@@ -166,6 +183,7 @@ class BlobStoreManagerShellCommand extends ShellCommand {
         public long expiryTimeMillis;
         public CharSequence label;
         public String tag;
+        public long blobId;
 
         public BlobHandle getBlobHandle() {
             return BlobHandle.create(algorithm, digest, label, expiryTimeMillis, tag);

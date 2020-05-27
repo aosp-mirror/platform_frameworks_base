@@ -18,7 +18,6 @@ package com.android.utils.blob;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import android.app.Instrumentation;
 import android.app.blob.BlobHandle;
 import android.app.blob.BlobStoreManager;
 import android.app.blob.LeaseInfo;
@@ -27,6 +26,7 @@ import android.content.res.Resources;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.uiautomator.UiDevice;
 
 import java.io.FileInputStream;
@@ -149,14 +149,14 @@ public class Utils {
         assertThat(leaseInfo.getDescription()).isEqualTo(description);
     }
 
-    public static void triggerIdleMaintenance(Instrumentation instrumentation) throws IOException {
-        runShellCmd(instrumentation, "cmd blob_store idle-maintenance");
+    public static void triggerIdleMaintenance() throws IOException {
+        runShellCmd("cmd blob_store idle-maintenance");
     }
 
-    private static String runShellCmd(Instrumentation instrumentation,
-            String cmd) throws IOException {
-        final UiDevice uiDevice = UiDevice.getInstance(instrumentation);
-        final String result = uiDevice.executeShellCommand(cmd);
+    public static String runShellCmd(String cmd) throws IOException {
+        final UiDevice uiDevice = UiDevice.getInstance(
+                InstrumentationRegistry.getInstrumentation());
+        final String result = uiDevice.executeShellCommand(cmd).trim();
         Log.i(TAG, "Output of '" + cmd + "': '" + result + "'");
         return result;
     }
