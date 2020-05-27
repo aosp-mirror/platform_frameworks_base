@@ -29,9 +29,9 @@ import org.junit.runner.RunWith
 class BubblePersistentRepositoryTest : SysuiTestCase() {
 
     private val bubbles = listOf(
-            BubbleEntity(0, "com.example.messenger", "shortcut-1"),
-            BubbleEntity(10, "com.example.chat", "alice and bob"),
-            BubbleEntity(0, "com.example.messenger", "shortcut-2")
+            BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1"),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2"),
+            BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3")
     )
     private lateinit var repository: BubblePersistentRepository
 
