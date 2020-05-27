@@ -518,9 +518,6 @@ public class ImsMmTelManager implements RegistrationManager {
      * @param executor The executor the callback events should be run on.
      * @param c The MmTel {@link CapabilityCallback} to be registered.
      * @see #unregisterMmTelCapabilityCallback(CapabilityCallback)
-     * @throws IllegalArgumentException if the subscription associated with this callback is not
-     * active (SIM is not inserted, ESIM inactive) or invalid, or a null {@link Executor} or
-     * {@link CapabilityCallback} callback.
      * @throws ImsException if the subscription associated with this callback is valid, but
      * the {@link ImsService} associated with the subscription is not available. This can happen if
      * the service crashed, for example. See {@link ImsException#getCode()} for a more detailed
@@ -543,18 +540,13 @@ public class ImsMmTelManager implements RegistrationManager {
         ITelephony iTelephony = getITelephony();
         if (iTelephony == null) {
             throw new ImsException("Could not find Telephony Service.",
-                    ImsException.CODE_ERROR_INVALID_SUBSCRIPTION);
+                    ImsException.CODE_ERROR_SERVICE_UNAVAILABLE);
         }
 
         try {
             iTelephony.registerMmTelCapabilityCallback(mSubId, c.getBinder());
         } catch (ServiceSpecificException e) {
-            if (e.errorCode == ImsException.CODE_ERROR_INVALID_SUBSCRIPTION) {
-                // Rethrow as runtime error to keep API compatible.
-                throw new IllegalArgumentException(e.getMessage());
-            } else {
-                throw new ImsException(e.getMessage(), e.errorCode);
-            }
+            throw new ImsException(e.getMessage(), e.errorCode);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }  catch (IllegalStateException e) {
