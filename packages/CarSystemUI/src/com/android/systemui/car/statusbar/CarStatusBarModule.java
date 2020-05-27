@@ -33,7 +33,6 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.car.CarDeviceProvisionedController;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -148,7 +147,6 @@ public class CarStatusBarModule {
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
             @UiBackground Executor uiBgExecutor,
-            @Main Executor mainExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -228,7 +226,6 @@ public class CarStatusBarModule {
                 displayMetrics,
                 metricsLogger,
                 uiBgExecutor,
-                mainExecutor,
                 notificationMediaManager,
                 lockScreenUserManager,
                 remoteInputManager,

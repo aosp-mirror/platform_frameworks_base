@@ -45,7 +45,6 @@ import com.android.systemui.car.bluetooth.CarBatteryController;
 import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.classifier.FalsingLog;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
@@ -173,7 +172,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
             @UiBackground Executor uiBgExecutor,
-            @Main Executor mainExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -254,7 +252,6 @@ public class CarStatusBar extends StatusBar implements CarBatteryController.Batt
                 displayMetrics,
                 metricsLogger,
                 uiBgExecutor,
-                mainExecutor,
                 notificationMediaManager,
                 lockScreenUserManager,
                 remoteInputManager,
