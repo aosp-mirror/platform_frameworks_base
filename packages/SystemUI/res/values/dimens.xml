@@ -221,7 +221,7 @@
     <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>
 
     <dimen name="notification_guts_conversation_header_height">84dp</dimen>
-    <dimen name="notification_guts_conversation_icon_size">52dp</dimen>
+    <dimen name="notification_guts_conversation_icon_size">56dp</dimen>
     <dimen name="notification_guts_conversation_action_height">56dp</dimen>
     <dimen name="notification_guts_conversation_action_text_padding_start">32dp</dimen>
 
