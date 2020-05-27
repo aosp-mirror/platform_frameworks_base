@@ -24,25 +24,4 @@
     android:paddingEnd="0dp"
     android:focusable="true"
     android:clickable="true"
->
-
-    <!-- Background views required by ActivatableNotificationView. -->
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
-        android:id="@+id/backgroundNormal"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-    />
-
-    <com.android.systemui.statusbar.notification.row.NotificationBackgroundView
-        android:id="@+id/backgroundDimmed"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-    />
-
-    <com.android.systemui.statusbar.notification.FakeShadowView
-        android:id="@+id/fake_shadow"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-    />
-
-</com.android.systemui.statusbar.notification.stack.MediaHeaderView>
+/>
