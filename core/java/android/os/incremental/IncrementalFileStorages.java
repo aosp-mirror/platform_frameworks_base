@@ -65,7 +65,9 @@ public final class IncrementalFileStorages {
     public static IncrementalFileStorages initialize(Context context,
             @NonNull File stageDir,
             @NonNull DataLoaderParams dataLoaderParams,
-            @Nullable IDataLoaderStatusListener dataLoaderStatusListener,
+            @Nullable IDataLoaderStatusListener statusListener,
+            @Nullable StorageHealthCheckParams healthCheckParams,
+            @Nullable IStorageHealthListener healthListener,
             List<InstallationFileParcel> addedFiles) throws IOException {
         // TODO(b/136132412): sanity check if session should not be incremental
         IncrementalManager incrementalManager = (IncrementalManager) context.getSystemService(
@@ -75,9 +77,9 @@ public final class IncrementalFileStorages {
             throw new IOException("Failed to obtain incrementalManager.");
         }
 
-        final IncrementalFileStorages result =
-                new IncrementalFileStorages(stageDir, incrementalManager, dataLoaderParams,
-                                            dataLoaderStatusListener);
+        final IncrementalFileStorages result = new IncrementalFileStorages(stageDir,
+                incrementalManager, dataLoaderParams, statusListener, healthCheckParams,
+                healthListener);
         for (InstallationFileParcel file : addedFiles) {
             if (file.location == LOCATION_DATA_APP) {
                 try {
@@ -100,7 +102,9 @@ public final class IncrementalFileStorages {
     private IncrementalFileStorages(@NonNull File stageDir,
             @NonNull IncrementalManager incrementalManager,
             @NonNull DataLoaderParams dataLoaderParams,
-            @Nullable IDataLoaderStatusListener dataLoaderStatusListener) throws IOException {
+            @Nullable IDataLoaderStatusListener statusListener,
+            @Nullable StorageHealthCheckParams healthCheckParams,
+            @Nullable IStorageHealthListener healthListener) throws IOException {
         try {
             mStageDir = stageDir;
             mIncrementalManager = incrementalManager;
@@ -117,10 +121,9 @@ public final class IncrementalFileStorages {
                 mDefaultStorage.bind(stageDir.getAbsolutePath());
             } else {
                 mDefaultStorage = mIncrementalManager.createStorage(stageDir.getAbsolutePath(),
-                        dataLoaderParams,
-                        dataLoaderStatusListener,
-                        IncrementalManager.CREATE_MODE_CREATE
-                                | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false);
+                        dataLoaderParams, IncrementalManager.CREATE_MODE_CREATE
+                                | IncrementalManager.CREATE_MODE_TEMPORARY_BIND, false,
+                        statusListener, healthCheckParams, healthListener);
                 if (mDefaultStorage == null) {
                     throw new IOException(
                             "Couldn't create incremental storage at " + stageDir);
