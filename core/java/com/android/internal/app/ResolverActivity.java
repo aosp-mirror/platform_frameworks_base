@@ -179,6 +179,17 @@ public class ResolverActivity extends Activity implements
     // Intent extra for connected audio devices
     public static final String EXTRA_IS_AUDIO_CAPTURE_DEVICE = "is_audio_capture_device";
 
+    /**
+     * Integer extra to indicate which profile should be automatically selected.
+     * <p>Can only be used if there is a work profile.
+     * <p>Possible values can be either {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}.
+     */
+    static final String EXTRA_SELECTED_PROFILE =
+            "com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE";
+
+    static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
+    static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
+
     private BroadcastReceiver mWorkProfileStateReceiver;
     private UserHandle mHeaderCreatorUser;
 
@@ -475,6 +486,10 @@ public class ResolverActivity extends Activity implements
                 selectedProfile = PROFILE_WORK;
             }
         }
+        int selectedProfileExtra = getSelectedProfileExtra();
+        if (selectedProfileExtra != -1) {
+            selectedProfile = selectedProfileExtra;
+        }
         // We only show the default app for the profile of the current user. The filterLastUsed
         // flag determines whether to show a default app and that app is not shown in the
         // resolver list. So filterLastUsed should be false for the other profile.
@@ -509,6 +524,25 @@ public class ResolverActivity extends Activity implements
 
     protected int appliedThemeResId() {
         return R.style.Theme_DeviceDefault_Resolver;
+    }
+
+    /**
+     * Returns {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK} if the {@link
+     * #EXTRA_SELECTED_PROFILE} extra was supplied, or {@code -1} if no extra was supplied.
+     * @throws IllegalArgumentException if the value passed to the {@link #EXTRA_SELECTED_PROFILE}
+     * extra is not {@link #PROFILE_PERSONAL} or {@link #PROFILE_WORK}
+     */
+    int getSelectedProfileExtra() {
+        int selectedProfile = -1;
+        if (getIntent().hasExtra(EXTRA_SELECTED_PROFILE)) {
+            selectedProfile = getIntent().getIntExtra(EXTRA_SELECTED_PROFILE, /* defValue = */ -1);
+            if (selectedProfile != PROFILE_PERSONAL && selectedProfile != PROFILE_WORK) {
+                throw new IllegalArgumentException(EXTRA_SELECTED_PROFILE + " has invalid value "
+                        + selectedProfile + ". Must be either ResolverActivity.PROFILE_PERSONAL or "
+                        + "ResolverActivity.PROFILE_WORK.");
+            }
+        }
+        return selectedProfile;
     }
 
     /**
