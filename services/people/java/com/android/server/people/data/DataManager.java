@@ -294,14 +294,14 @@ public class DataManager {
             if (notificationListener != null) {
                 String packageName = packageData.getPackageName();
                 packageData.forAllConversations(conversationInfo -> {
-                    if (conversationInfo.isShortcutCached()
+                    if (conversationInfo.isShortcutCachedForNotification()
                             && conversationInfo.getNotificationChannelId() == null
                             && !notificationListener.hasActiveNotifications(
                                     packageName, conversationInfo.getShortcutId())) {
                         mShortcutServiceInternal.uncacheShortcuts(userId,
                                 mContext.getPackageName(), packageName,
                                 Collections.singletonList(conversationInfo.getShortcutId()),
-                                userId);
+                                userId, ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
                     }
                 });
             }
@@ -821,12 +821,12 @@ public class DataManager {
                         // The shortcut was cached by Notification Manager synchronously when the
                         // associated notification was posted. Uncache it here when all the
                         // associated notifications are removed.
-                        if (conversationInfo.isShortcutCached()
+                        if (conversationInfo.isShortcutCachedForNotification()
                                 && conversationInfo.getNotificationChannelId() == null) {
                             mShortcutServiceInternal.uncacheShortcuts(mUserId,
                                     mContext.getPackageName(), sbn.getPackageName(),
                                     Collections.singletonList(conversationInfo.getShortcutId()),
-                                    mUserId);
+                                    mUserId, ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
                         }
                     } else {
                         mActiveNotifCounts.put(conversationKey, count);
@@ -891,12 +891,12 @@ public class DataManager {
                 ConversationInfo conversationInfo =
                         packageData != null ? packageData.getConversationInfo(shortcutId) : null;
                 if (conversationInfo != null
-                        && conversationInfo.isShortcutCached()
+                        && conversationInfo.isShortcutCachedForNotification()
                         && conversationInfo.getNotificationChannelId() == null) {
                     mShortcutServiceInternal.uncacheShortcuts(mUserId,
                             mContext.getPackageName(), packageName,
                             Collections.singletonList(shortcutId),
-                            mUserId);
+                            mUserId, ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
                 }
             }
         }
