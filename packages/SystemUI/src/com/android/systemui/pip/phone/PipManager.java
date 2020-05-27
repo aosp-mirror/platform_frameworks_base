@@ -95,8 +95,21 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
         final boolean changed = mPipBoundsHandler.onDisplayRotationChanged(mTmpNormalBounds,
-                mPipTaskOrganizer.getLastReportedBounds(), displayId, fromRotation, toRotation, t);
+                mPipTaskOrganizer.getLastReportedBounds(), mTmpInsetBounds, displayId, fromRotation,
+                toRotation, t);
         if (changed) {
+            // If the pip was in the offset zone earlier, adjust the new bounds to the bottom of the
+            // movement bounds
+            mTouchHandler.adjustBoundsForRotation(mTmpNormalBounds,
+                    mPipTaskOrganizer.getLastReportedBounds(), mTmpInsetBounds);
+
+            // The bounds are being applied to a specific snap fraction, so reset any known offsets
+            // for the previous orientation before updating the movement bounds
+            mPipBoundsHandler.setShelfHeight(false , 0);
+            mPipBoundsHandler.onImeVisibilityChanged(false, 0);
+            mTouchHandler.onShelfVisibilityChanged(false, 0);
+            mTouchHandler.onImeVisibilityChanged(false, 0);
+
             updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
         }
@@ -290,9 +303,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     @Override
     public void setShelfHeight(boolean visible, int height) {
         mHandler.post(() -> {
-            final boolean changed = mPipBoundsHandler.setShelfHeight(visible, height);
+            final int shelfHeight = visible ? height : 0;
+            final boolean changed = mPipBoundsHandler.setShelfHeight(visible, shelfHeight);
             if (changed) {
-                mTouchHandler.onShelfVisibilityChanged(visible, height);
+                mTouchHandler.onShelfVisibilityChanged(visible, shelfHeight);
                 updateMovementBounds(mPipTaskOrganizer.getLastReportedBounds(),
                         false /* fromRotation */, false /* fromImeAdjustment */,
                         true /* fromShelfAdjustment */);

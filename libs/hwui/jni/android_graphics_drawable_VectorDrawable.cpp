@@ -102,7 +102,7 @@ static void setAntiAlias(JNIEnv*, jobject, jlong treePtr, jboolean aa) {
 /**
  * Draw
  */
-static int draw(JNIEnv* env, jobject, jlong treePtr, jlong canvasPtr,
+static jint draw(JNIEnv* env, jobject, jlong treePtr, jlong canvasPtr,
         jlong colorFilterPtr, jobject jrect, jboolean needsMirroring, jboolean canReuseCache) {
     VectorDrawable::Tree* tree = reinterpret_cast<VectorDrawable::Tree*>(treePtr);
     Canvas* canvas = reinterpret_cast<Canvas*>(canvasPtr);

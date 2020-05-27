@@ -17,9 +17,11 @@
 package com.android.systemui.car.navigationbar;
 
 import android.app.ActivityOptions;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.UserHandle;
 import android.util.AttributeSet;
@@ -29,6 +31,7 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.AlphaOptimizedImageButton;
 import com.android.systemui.R;
 
@@ -62,6 +65,8 @@ public class CarNavigationButton extends LinearLayout {
     private float mUnselectedAlpha;
     private int mSelectedIconResourceId;
     private int mIconResourceId;
+    private Drawable mAppIcon;
+    private boolean mIsDefaultAppIconForRoleEnabled;
     private String[] mComponentNames;
     /** App categories that are to be used with this widget */
     private String[] mButtonCategories;
@@ -92,7 +97,9 @@ public class CarNavigationButton extends LinearLayout {
         super.setSelected(selected);
         mSelected = selected;
         if (mHighlightWhenSelected) {
-            setAlpha(mSelected ? mSelectedAlpha : mUnselectedAlpha);
+            // Always apply selected alpha if the button does not toggle alpha based on selection
+            // state.
+            setAlpha(!mHighlightWhenSelected || mSelected ? mSelectedAlpha : mUnselectedAlpha);
         }
         if (mShowMoreWhenSelected && mMoreIcon != null) {
             mMoreIcon.setVisibility(selected ? VISIBLE : GONE);
@@ -106,6 +113,20 @@ public class CarNavigationButton extends LinearLayout {
     public void setUnseen(boolean hasUnseen) {
         mHasUnseen = hasUnseen;
         updateImage();
+    }
+
+    /**
+     * Sets the current icon of the default application associated with this button.
+     */
+    public void setAppIcon(Drawable appIcon) {
+        mAppIcon = appIcon;
+        updateImage();
+    }
+
+    /** Gets the icon of the app currently associated to the role of this button. */
+    @VisibleForTesting
+    protected Drawable getAppIcon() {
+        return mAppIcon;
     }
 
     /** Gets whether the icon is in an unseen state. */
@@ -141,6 +162,22 @@ public class CarNavigationButton extends LinearLayout {
             return new String[0];
         }
         return mComponentNames;
+    }
+
+    /**
+     * Subclasses should override this method to return the {@link RoleManager} role associated
+     * with this button.
+     */
+    protected String getRoleName() {
+        return null;
+    }
+
+    /**
+     * @return true if this button should show the icon of the default application for the
+     * role returned by {@link #getRoleName()}.
+     */
+    protected boolean isDefaultAppIconForRoleEnabled() {
+        return mIsDefaultAppIconForRoleEnabled;
     }
 
     /**
@@ -240,7 +277,6 @@ public class CarNavigationButton extends LinearLayout {
         };
     }
 
-
     /**
      * Initializes view-related aspects of the button.
      */
@@ -256,28 +292,27 @@ public class CarNavigationButton extends LinearLayout {
                 R.styleable.CarNavigationButton_showMoreWhenSelected,
                 mShowMoreWhenSelected);
 
-        mSelectedIconResourceId = typedArray.getResourceId(
-                R.styleable.CarNavigationButton_selectedIcon, mIconResourceId);
         mIconResourceId = typedArray.getResourceId(
                 R.styleable.CarNavigationButton_icon, 0);
-
+        mSelectedIconResourceId = typedArray.getResourceId(
+                R.styleable.CarNavigationButton_selectedIcon, mIconResourceId);
+        mIsDefaultAppIconForRoleEnabled = typedArray.getBoolean(
+                R.styleable.CarNavigationButton_useDefaultAppIconForRole, false);
         mIcon = findViewById(R.id.car_nav_button_icon_image);
-        mIcon.setScaleType(ImageView.ScaleType.CENTER);
         // Always apply selected alpha if the button does not toggle alpha based on selection state.
         mIcon.setAlpha(mHighlightWhenSelected ? mUnselectedAlpha : mSelectedAlpha);
-        mIcon.setImageResource(mIconResourceId);
-
         mMoreIcon = findViewById(R.id.car_nav_button_more_icon);
         mMoreIcon.setAlpha(mSelectedAlpha);
-        mMoreIcon.setVisibility(GONE);
-
         mUnseenIcon = findViewById(R.id.car_nav_button_unseen_icon);
-
-        mUnseenIcon.setVisibility(mHasUnseen ? VISIBLE : GONE);
+        updateImage();
     }
 
     private void updateImage() {
-        mIcon.setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
+        if (mIsDefaultAppIconForRoleEnabled && mAppIcon != null) {
+            mIcon.setImageDrawable(mAppIcon);
+        } else {
+            mIcon.setImageResource(mSelected ? mSelectedIconResourceId : mIconResourceId);
+        }
         mUnseenIcon.setVisibility(mHasUnseen ? VISIBLE : GONE);
     }
 

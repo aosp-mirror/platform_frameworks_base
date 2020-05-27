@@ -797,24 +797,6 @@ class ControlsControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testListingCallbackNotListeningWhileReadingFavorites() {
-        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
-            putExtra(Intent.EXTRA_USER_HANDLE, otherUser)
-        }
-        val pendingResult = mock(BroadcastReceiver.PendingResult::class.java)
-        `when`(pendingResult.sendingUserId).thenReturn(otherUser)
-        broadcastReceiverCaptor.value.pendingResult = pendingResult
-
-        broadcastReceiverCaptor.value.onReceive(mContext, intent)
-
-        val inOrder = inOrder(persistenceWrapper, listingController)
-
-        inOrder.verify(listingController).removeCallback(listingCallbackCaptor.value)
-        inOrder.verify(persistenceWrapper).readFavorites()
-        inOrder.verify(listingController).addCallback(listingCallbackCaptor.value)
-    }
-
-    @Test
     fun testSeedFavoritesForComponent() {
         var succeeded = false
         val control = statelessBuilderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure)

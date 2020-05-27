@@ -554,6 +554,5 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"പ്രവർത്തനക്ഷമമാക്കി"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ഈ മാറ്റം ബാധകമാകുന്നതിന് നിങ്ങളുടെ ഉപകരണം റീബൂട്ട് ചെയ്യേണ്ടതുണ്ട്. ഇപ്പോൾ റീബൂട്ട് ചെയ്യുകയോ റദ്ദാക്കുകയോ ചെയ്യുക."</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"ഔദ്യോഗികം <xliff:g id="APP_NAME">%s</xliff:g>"</string>
-    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
-    <skip />
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"വയർ മുഖേന ബന്ധിപ്പിച്ച ഹെഡ്ഫോൺ"</string>
 </resources>

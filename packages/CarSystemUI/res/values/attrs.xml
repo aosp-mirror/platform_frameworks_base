@@ -65,6 +65,10 @@
         <attr name="showMoreWhenSelected" format="boolean" />
         <!-- whether to highlight the button when selected. Defaults false -->
         <attr name="highlightWhenSelected" format="boolean" />
+        <!-- whether to show the icon of the app currently associated this button's role. Only
+             relevant for buttons associated to specific roles (e.g.: AssistantButton).
+             Defaults false -->
+        <attr name="useDefaultAppIconForRole" format="boolean"/>
     </declare-styleable>
 
     <!-- Custom attributes to configure hvac values -->

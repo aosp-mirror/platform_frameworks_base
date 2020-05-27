@@ -72,6 +72,9 @@ class ControlsControllerImpl @Inject constructor (
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
         private const val DEFAULT_ENABLED = 1
         private const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
+
+        private fun isAvailable(userId: Int, cr: ContentResolver) = Settings.Secure.getIntForUser(
+            cr, CONTROLS_AVAILABLE, DEFAULT_ENABLED, userId) != 0
     }
 
     private var userChanging: Boolean = true
@@ -85,8 +88,7 @@ class ControlsControllerImpl @Inject constructor (
 
     private val contentResolver: ContentResolver
         get() = context.contentResolver
-    override var available = Settings.Secure.getIntForUser(
-            contentResolver, CONTROLS_AVAILABLE, DEFAULT_ENABLED, currentUserId) != 0
+    override var available = isAvailable(currentUserId, contentResolver)
         private set
 
     private val persistenceWrapper: ControlsFavoritePersistenceWrapper
@@ -119,8 +121,7 @@ class ControlsControllerImpl @Inject constructor (
                 BackupManager(userStructure.userContext)
         )
         auxiliaryPersistenceWrapper.changeFile(userStructure.auxiliaryFile)
-        available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                DEFAULT_ENABLED, newUser.identifier) != 0
+        available = isAvailable(newUser.identifier, contentResolver)
         resetFavorites(available)
         bindingController.changeUser(newUser)
         listingController.changeUser(newUser)
@@ -131,7 +132,6 @@ class ControlsControllerImpl @Inject constructor (
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action == Intent.ACTION_USER_SWITCHED) {
                 userChanging = true
-                listingController.removeCallback(listingCallback)
                 val newUser =
                         UserHandle.of(intent.getIntExtra(Intent.EXTRA_USER_HANDLE, sendingUserId))
                 if (currentUser == newUser) {
@@ -151,7 +151,6 @@ class ControlsControllerImpl @Inject constructor (
                 executor.execute {
                     Log.d(TAG, "Restore finished, storing auxiliary favorites")
                     auxiliaryPersistenceWrapper.initialize()
-                    listingController.removeCallback(listingCallback)
                     persistenceWrapper.storeFavorites(auxiliaryPersistenceWrapper.favorites)
                     resetFavorites(available)
                 }
@@ -172,8 +171,7 @@ class ControlsControllerImpl @Inject constructor (
             if (userChanging || userId != currentUserId) {
                 return
             }
-            available = Settings.Secure.getIntForUser(contentResolver, CONTROLS_AVAILABLE,
-                DEFAULT_ENABLED, currentUserId) != 0
+            available = isAvailable(currentUserId, contentResolver)
             resetFavorites(available)
         }
     }
@@ -244,6 +242,7 @@ class ControlsControllerImpl @Inject constructor (
             null
         )
         contentResolver.registerContentObserver(URI, false, settingObserver, UserHandle.USER_ALL)
+        listingController.addCallback(listingCallback)
     }
 
     fun destroy() {
@@ -258,7 +257,6 @@ class ControlsControllerImpl @Inject constructor (
 
         if (shouldLoad) {
             Favorites.load(persistenceWrapper.readFavorites())
-            listingController.addCallback(listingCallback)
         }
     }
 
@@ -569,12 +567,12 @@ class UserStructure(context: Context, user: UserHandle) {
     val userContext = context.createContextAsUser(user, 0)
 
     val file = Environment.buildPath(
-            context.filesDir,
+            userContext.filesDir,
             ControlsFavoritePersistenceWrapper.FILE_NAME
     )
 
     val auxiliaryFile = Environment.buildPath(
-            context.filesDir,
+            userContext.filesDir,
             AuxiliaryPersistenceWrapper.AUXILIARY_FILE_NAME
     )
 }
