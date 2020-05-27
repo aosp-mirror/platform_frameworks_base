@@ -18,6 +18,7 @@
 
 #include "Sound.h"
 
+#include <android-base/thread_annotations.h>
 #include <audio_utils/clock.h>
 #include <media/AudioTrack.h>
 
@@ -104,47 +105,55 @@ public:
 
     // The following getters are not locked and have weak consistency.
     // These are considered advisory only - being stale is of nuisance.
-    int32_t getPriority() const { return mPriority; }
-    int32_t getPairPriority() const { return getPairStream()->getPriority(); }
-    int64_t getStopTimeNs() const { return mStopTimeNs; }
+    int32_t getPriority() const NO_THREAD_SAFETY_ANALYSIS { return mPriority; }
+    int32_t getPairPriority() const NO_THREAD_SAFETY_ANALYSIS {
+        return getPairStream()->getPriority();
+    }
+    int64_t getStopTimeNs() const NO_THREAD_SAFETY_ANALYSIS { return mStopTimeNs; }
 
-    int32_t getStreamID() const { return mStreamID; }  // Can change with setPlay()
-    int32_t getSoundID() const { return mSoundID; }    // Can change with play_l()
-    bool hasSound() const { return mSound.get() != nullptr; }
+    // Can change with setPlay()
+    int32_t getStreamID() const NO_THREAD_SAFETY_ANALYSIS { return mStreamID; }
 
-    Stream* getPairStream() const;  // this never changes.  See top of header.
+    // Can change with play_l()
+    int32_t getSoundID() const NO_THREAD_SAFETY_ANALYSIS { return mSoundID; }
+
+    bool hasSound() const NO_THREAD_SAFETY_ANALYSIS { return mSound.get() != nullptr; }
+
+    // This never changes.  See top of header.
+    Stream* getPairStream() const;
 
 private:
     void play_l(const std::shared_ptr<Sound>& sound, int streamID,
             float leftVolume, float rightVolume, int priority, int loop, float rate,
-            sp<AudioTrack> releaseTracks[2]);
-    void stop_l();
-    void setVolume_l(float leftVolume, float rightVolume);
+            sp<AudioTrack> releaseTracks[2]) REQUIRES(mLock);
+    void stop_l() REQUIRES(mLock);
+    void setVolume_l(float leftVolume, float rightVolume) REQUIRES(mLock);
 
     // For use with AudioTrack callback.
     static void staticCallback(int event, void* user, void* info);
-    void callback(int event, void* info, int toggle, int tries);
+    void callback(int event, void* info, int toggle, int tries)
+            NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
 
     // StreamManager should be set on construction and not changed.
     // release mLock before calling into StreamManager
     StreamManager*     mStreamManager = nullptr;
 
     mutable std::mutex  mLock;
-    std::atomic_int32_t mStreamID = 0;          // Note: valid streamIDs are always positive.
-    int                 mState = IDLE;
-    std::shared_ptr<Sound> mSound;              // Non-null if playing.
-    int32_t             mSoundID = 0;           // The sound ID associated with the AudioTrack.
-    float               mLeftVolume = 0.f;
-    float               mRightVolume = 0.f;
-    int32_t             mPriority = INT32_MIN;
-    int32_t             mLoop = 0;
-    float               mRate = 0.f;
-    bool                mAutoPaused = false;
-    bool                mMuted = false;
+    std::atomic_int32_t mStreamID GUARDED_BY(mLock) = 0; // Valid streamIDs are always positive.
+    int                 mState GUARDED_BY(mLock) = IDLE;
+    std::shared_ptr<Sound> mSound GUARDED_BY(mLock);    // Non-null if playing.
+    int32_t             mSoundID GUARDED_BY(mLock) = 0; // SoundID associated with AudioTrack.
+    float               mLeftVolume GUARDED_BY(mLock) = 0.f;
+    float               mRightVolume GUARDED_BY(mLock) = 0.f;
+    int32_t             mPriority GUARDED_BY(mLock) = INT32_MIN;
+    int32_t             mLoop GUARDED_BY(mLock) = 0;
+    float               mRate GUARDED_BY(mLock) = 0.f;
+    bool                mAutoPaused GUARDED_BY(mLock) = false;
+    bool                mMuted GUARDED_BY(mLock) = false;
 
-    sp<AudioTrack>      mAudioTrack;
-    int                 mToggle = 0;
-    int64_t             mStopTimeNs = 0;        // if nonzero, time to wait for stop.
+    sp<AudioTrack>      mAudioTrack GUARDED_BY(mLock);
+    int                 mToggle GUARDED_BY(mLock) = 0;
+    int64_t             mStopTimeNs GUARDED_BY(mLock) = 0;  // if nonzero, time to wait for stop.
 };
 
 } // namespace android::soundpool
