@@ -16,7 +16,7 @@
   -->
 
 <!-- Layout for media controls inside QSPanel carousel -->
-<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.android.systemui.util.animation.TransitionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/qs_media_controls"
     android:layout_width="match_parent"
@@ -24,18 +24,7 @@
     android:clipChildren="false"
     android:clipToPadding="false"
     android:gravity="center_horizontal|fill_vertical"
-    app:layoutDescription="@xml/media_scene">
-
-    <View
-        android:id="@+id/media_background"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/qs_media_background"
-        app:layout_constraintEnd_toEndOf="@id/view_width"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+    android:background="@drawable/qs_media_background">
 
     <FrameLayout
         android:id="@+id/notification_media_progress_time"
@@ -185,15 +174,5 @@
     <!-- Buttons to remove this view when no longer needed -->
     <include
         layout="@layout/qs_media_panel_options"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/view_width"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/view_width"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="300dp" />
-</androidx.constraintlayout.motion.widget.MotionLayout>
+        android:visibility="gone" />
+</com.android.systemui.util.animation.TransitionLayout>
