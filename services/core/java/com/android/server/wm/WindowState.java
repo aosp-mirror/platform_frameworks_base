@@ -5506,7 +5506,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     long getFrameNumber() {
-        return mFrameNumber;
+        // Return the frame number in which changes requested in this layout will be rendered or
+        // -1 if we do not expect the frame to be rendered.
+        return getFrameLw().isEmpty() ? -1 : mFrameNumber;
     }
 
     void setFrameNumber(long frameNumber) {
