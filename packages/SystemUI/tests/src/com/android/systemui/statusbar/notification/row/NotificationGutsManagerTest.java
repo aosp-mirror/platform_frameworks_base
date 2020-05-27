@@ -144,7 +144,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
         when(mAccessibilityManager.isTouchExplorationEnabled()).thenReturn(false);
 
         mGutsManager = new NotificationGutsManager(mContext, mVisualStabilityManager,
-                () -> mStatusBar, mHandler, mAccessibilityManager, mHighPriorityProvider,
+                () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
                 mINotificationManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mProvider);
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
