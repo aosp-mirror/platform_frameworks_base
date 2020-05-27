@@ -447,7 +447,7 @@ public class Tuner implements AutoCloseable  {
     private native DvrRecorder nativeOpenDvrRecorder(long bufferSize);
     private native DvrPlayback nativeOpenDvrPlayback(long bufferSize);
 
-    private static native DemuxCapabilities nativeGetDemuxCapabilities();
+    private native DemuxCapabilities nativeGetDemuxCapabilities();
 
     private native int nativeCloseDemux(int handle);
     private native int nativeCloseFrontend(int handle);
@@ -939,8 +939,7 @@ public class Tuner implements AutoCloseable  {
         Filter filter = nativeOpenFilter(
                 mainType, TunerUtils.getFilterSubtype(mainType, subType), bufferSize);
         if (filter != null) {
-            filter.setMainType(mainType);
-            filter.setSubtype(subType);
+            filter.setType(mainType, subType);
             filter.setCallback(cb, executor);
             if (mHandler == null) {
                 mHandler = createEventHandler();
@@ -1147,8 +1146,11 @@ public class Tuner implements AutoCloseable  {
     }
 
     /* package */ void releaseLnb() {
-        mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
-        mLnbHandle = null;
+        if (mLnbHandle != null) {
+            // LNB handle can be null if it's opened by name.
+            mTunerResourceManager.releaseLnb(mLnbHandle, mClientId);
+            mLnbHandle = null;
+        }
         mLnb = null;
     }
 }
