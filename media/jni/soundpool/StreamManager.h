@@ -183,9 +183,9 @@ private:
     std::atomic_size_t      mActiveThreadCount = 0;
 
     std::mutex              mThreadLock;
-    bool                    mQuit = false;           // GUARDED_BY(mThreadLock)
-    int32_t                 mNextThreadId = 0;       // GUARDED_BY(mThreadLock)
-    std::list<std::unique_ptr<JavaThread>> mThreads; // GUARDED_BY(mThreadLock)
+    bool                    mQuit GUARDED_BY(mThreadLock) = false;
+    int32_t                 mNextThreadId GUARDED_BY(mThreadLock) = 0;
+    std::list<std::unique_ptr<JavaThread>> mThreads GUARDED_BY(mThreadLock);
 };
 
 /**
@@ -263,7 +263,7 @@ private:
     mutable std::mutex          mHashLock;
     const size_t                mHashCapacity; // size of mK2V no lock needed.
     std::unique_ptr<std::atomic<V>[]> mK2V;    // no lock needed for read access.
-    K                           mNextKey{};    // GUARDED_BY(mHashLock)
+    K                           mNextKey GUARDED_BY(mHashLock) {};
 };
 
 /**
@@ -392,7 +392,8 @@ public:
     // Returns positive streamID on success, 0 on failure.  This is locked.
     int32_t queueForPlay(const std::shared_ptr<Sound> &sound,
             int32_t soundID, float leftVolume, float rightVolume,
-            int32_t priority, int32_t loop, float rate);
+            int32_t priority, int32_t loop, float rate)
+            NO_THREAD_SAFETY_ANALYSIS; // uses unique_lock
 
     ///////////////////////////////////////////////////////////////////////
     // Called from soundpool::Stream
@@ -407,11 +408,11 @@ public:
 
 private:
 
-    void run(int32_t id);                        // worker thread, takes lock internally.
+    void run(int32_t id) NO_THREAD_SAFETY_ANALYSIS; // worker thread, takes unique_lock.
     void dump() const;                           // no lock needed
 
     // returns true if more worker threads are needed.
-    bool needMoreThreads_l() {
+    bool needMoreThreads_l() REQUIRES(mStreamManagerLock) {
         return mRestartStreams.size() > 0 &&
                 (mThreadPool->getActiveThreadCount() == 0
                 || std::distance(mRestartStreams.begin(),
@@ -420,14 +421,16 @@ private:
     }
 
     // returns true if the stream was added.
-    bool moveToRestartQueue_l(Stream* stream, int32_t activeStreamIDToMatch = 0);
+    bool moveToRestartQueue_l(
+            Stream* stream, int32_t activeStreamIDToMatch = 0) REQUIRES(mStreamManagerLock);
     // returns number of queues the stream was removed from (should be 0 or 1);
     // a special code of -1 is returned if activeStreamIDToMatch is > 0 and
     // the stream wasn't found on the active queue.
-    ssize_t removeFromQueues_l(Stream* stream, int32_t activeStreamIDToMatch = 0);
-    void addToRestartQueue_l(Stream *stream);
-    void addToActiveQueue_l(Stream *stream);
-    void sanityCheckQueue_l() const;
+    ssize_t removeFromQueues_l(
+            Stream* stream, int32_t activeStreamIDToMatch = 0) REQUIRES(mStreamManagerLock);
+    void addToRestartQueue_l(Stream *stream) REQUIRES(mStreamManagerLock);
+    void addToActiveQueue_l(Stream *stream) REQUIRES(mStreamManagerLock);
+    void sanityCheckQueue_l() const REQUIRES(mStreamManagerLock);
 
     const audio_attributes_t mAttributes;
     std::unique_ptr<ThreadPool> mThreadPool;                  // locked internally
@@ -436,9 +439,9 @@ private:
     // 4 stream queues by the Manager Thread or by the user initiated play().
     // A stream pair has exactly one stream on exactly one of the queues.
     std::mutex                  mStreamManagerLock;
-    std::condition_variable     mStreamManagerCondition;
+    std::condition_variable     mStreamManagerCondition GUARDED_BY(mStreamManagerLock);
 
-    bool                        mQuit = false;      // GUARDED_BY(mStreamManagerLock)
+    bool                        mQuit GUARDED_BY(mStreamManagerLock) = false;
 
     // There are constructor arg "streams" pairs of streams, only one of each
     // pair on the 4 stream queues below.  The other stream in the pair serves as
@@ -452,24 +455,24 @@ private:
     // The paired stream may be active (but with no AudioTrack), and will be restarted
     // with an active AudioTrack when the current stream is stopped.
     std::multimap<int64_t /* stopTimeNs */, Stream*>
-                                mRestartStreams;    // GUARDED_BY(mStreamManagerLock)
+                                mRestartStreams GUARDED_BY(mStreamManagerLock);
 
     // 2) mActiveStreams: Streams that are active.
     // The paired stream will be inactive.
     // This is in order of specified by kStealActiveStream_OldestFirst
-    std::list<Stream*>          mActiveStreams;     // GUARDED_BY(mStreamManagerLock)
+    std::list<Stream*>          mActiveStreams GUARDED_BY(mStreamManagerLock);
 
     // 3) mAvailableStreams: Streams that are inactive.
     // The paired stream will also be inactive.
     // No particular order.
-    std::unordered_set<Stream*> mAvailableStreams;  // GUARDED_BY(mStreamManagerLock)
+    std::unordered_set<Stream*> mAvailableStreams GUARDED_BY(mStreamManagerLock);
 
     // 4) mProcessingStreams: Streams that are being processed by the ManagerThreads
     // When on this queue, the stream and its pair are not available for stealing.
     // Each ManagerThread will have at most one stream on the mProcessingStreams queue.
     // The paired stream may be active or restarting.
     // No particular order.
-    std::unordered_set<Stream*> mProcessingStreams; // GUARDED_BY(mStreamManagerLock)
+    std::unordered_set<Stream*> mProcessingStreams GUARDED_BY(mStreamManagerLock);
 };
 
 } // namespace android::soundpool
