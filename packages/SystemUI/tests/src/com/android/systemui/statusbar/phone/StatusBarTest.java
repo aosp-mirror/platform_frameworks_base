@@ -251,7 +251,6 @@ public class StatusBarTest extends SysuiTestCase {
     @Mock private Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
     private ShadeController mShadeController;
     private FakeExecutor mUiBgExecutor = new FakeExecutor(new FakeSystemClock());
-    private FakeExecutor mMainExecutor = new FakeExecutor(new FakeSystemClock());
     private InitController mInitController = new InitController();
 
     @Before
@@ -354,7 +353,6 @@ public class StatusBarTest extends SysuiTestCase {
                 new DisplayMetrics(),
                 mMetricsLogger,
                 mUiBgExecutor,
-                mMainExecutor,
                 mNotificationMediaManager,
                 mLockscreenUserManager,
                 mRemoteInputManager,
