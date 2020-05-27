@@ -12716,7 +12716,6 @@ public class TelephonyManager {
             @Nullable String mvnoMatchData) {
         try {
             if (!mccmnc.equals(getSimOperator())) {
-                Log.d(TAG, "The mccmnc does not match");
                 return false;
             }
             ITelephony service = getITelephony();
