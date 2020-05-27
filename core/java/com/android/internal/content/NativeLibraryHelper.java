@@ -506,7 +506,8 @@ public class NativeLibraryHelper {
         }
 
         for (int i = 0; i < apkPaths.length; i++) {
-            if (!incrementalStorage.configureNativeBinaries(apkPaths[i], libRelativeDir, abi)) {
+            if (!incrementalStorage.configureNativeBinaries(apkPaths[i], libRelativeDir, abi,
+                    handle.extractNativeLibs)) {
                 return PackageManager.INSTALL_FAILED_INTERNAL_ERROR;
             }
         }
