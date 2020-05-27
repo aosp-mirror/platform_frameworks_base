@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -292,6 +293,27 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Reset display frozen state
         mWm.mDisplayFrozen = false;
+    }
+
+    @Test
+    public void testRespectTopFullscreenOrientation() {
+        final Configuration displayConfig = mActivity.mDisplayContent.getConfiguration();
+        final Configuration activityConfig = mActivity.getConfiguration();
+        mActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, displayConfig.orientation);
+        assertEquals(Configuration.ORIENTATION_PORTRAIT, activityConfig.orientation);
+
+        final ActivityRecord topActivity = WindowTestUtils.createTestActivityRecord(mStack);
+        topActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, displayConfig.orientation);
+        // Although the activity requested portrait, it is not the top activity that determines
+        // the display orientation. So it should be able to inherit the orientation from parent.
+        // Otherwise its configuration will be inconsistent that its orientation is portrait but
+        // other screen configurations are in landscape, e.g. screenWidthDp, screenHeightDp, and
+        // window configuration.
+        assertEquals(Configuration.ORIENTATION_LANDSCAPE, activityConfig.orientation);
     }
 
     @Test

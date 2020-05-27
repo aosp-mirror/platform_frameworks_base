@@ -145,7 +145,8 @@ public class SizeCompatTests extends ActivityTestsBase {
         final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
 
         // The parent configuration doesn't change since the first resolved configuration, so the
-        // activity should fit in the parent naturally. (size=583x700).
+        // activity should fit in the parent naturally (size=583x700, appBounds=[9, 100 - 592, 800],
+        // horizontal offset = round((600 - 583) / 2) = 9)).
         assertFitted();
         final int offsetX = (int) ((1f + displayBounds.width() - appBounds.width()) / 2);
         // The bounds must be horizontal centered.
@@ -160,7 +161,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         assertFitted();
 
         // After the orientation of activity is changed, even display is not rotated, the aspect
-        // ratio should be the same (appBounds=[9, 100 - 592, 800], x-offset=round((600-583)/2)=9).
+        // ratio should be the same (bounds=[0, 0 - 600, 600], appBounds=[0, 100 - 600, 600]).
         assertEquals(appBounds.width(), appBounds.height() * aspectRatio, 0.5f /* delta */);
         // The notch is still on top.
         assertEquals(mActivity.getBounds().height(), appBounds.height() + notchHeight);
