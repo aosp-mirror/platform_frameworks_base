@@ -1725,6 +1725,15 @@ package android.media.audiopolicy {
 
 }
 
+package android.media.tv {
+
+  public final class TvInputManager {
+    method public void addHardwareDevice(int);
+    method public void removeHardwareDevice(int);
+  }
+
+}
+
 package android.metrics {
 
   public class LogMaker {

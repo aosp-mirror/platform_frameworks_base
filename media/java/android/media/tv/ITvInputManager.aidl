@@ -111,4 +111,8 @@ interface ITvInputManager {
     // For preview channels and programs
     void sendTvInputNotifyIntent(in Intent intent, int userId);
     void requestChannelBrowsable(in Uri channelUri, int userId);
+
+    // For CTS purpose only. Add/remove a TvInputHardware device
+    void addHardwareDevice(in int deviceId);
+    void removeHardwareDevice(in int deviceId);
 }
