@@ -35,6 +35,7 @@
 static const char* kPathWhitelist[] = {
         "/apex/com.android.conscrypt/javalib/conscrypt.jar",
         "/apex/com.android.ipsec/javalib/ike.jar",
+        "/apex/com.android.i18n/javalib/core-icu4j.jar",
         "/apex/com.android.media/javalib/updatable-media.jar",
         "/apex/com.android.sdkext/javalib/framework-sdkextensions.jar",
         "/apex/com.android.tethering/javalib/framework-tethering.jar",
@@ -81,11 +82,18 @@ bool FileDescriptorWhitelist::IsAllowed(const std::string& path) const {
   }
 
   // Framework jars are allowed.
-  static const char* kFrameworksPrefix = "/system/framework/";
+  static const char* kFrameworksPrefix[] = {
+          "/system/framework/",
+          "/system_ext/framework/",
+  };
+
   static const char* kJarSuffix = ".jar";
-  if (android::base::StartsWith(path, kFrameworksPrefix)
-      && android::base::EndsWith(path, kJarSuffix)) {
-    return true;
+
+  for (const auto& frameworks_prefix : kFrameworksPrefix) {
+    if (android::base::StartsWith(path, frameworks_prefix)
+        && android::base::EndsWith(path, kJarSuffix)) {
+      return true;
+    }
   }
 
   // Jars from the ART APEX are allowed.

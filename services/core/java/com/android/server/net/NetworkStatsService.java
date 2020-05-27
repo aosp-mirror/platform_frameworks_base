@@ -46,7 +46,6 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStatsHistory.FIELD_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileWildcard;
 import static android.net.NetworkTemplate.buildTemplateWifiWildcard;
-import static android.net.NetworkTemplate.getCollapsedRatType;
 import static android.net.TrafficStats.KB_IN_BYTES;
 import static android.net.TrafficStats.MB_IN_BYTES;
 import static android.os.Trace.TRACE_TAG_NETWORK;
@@ -67,9 +66,6 @@ import static android.provider.Settings.Global.NETSTATS_UID_TAG_BUCKET_DURATION;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_DELETE_AGE;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_PERSIST_BYTES;
 import static android.provider.Settings.Global.NETSTATS_UID_TAG_ROTATE_AGE;
-import static android.telephony.PhoneStateListener.LISTEN_NONE;
-import static android.telephony.PhoneStateListener.LISTEN_SERVICE_STATE;
-import static android.telephony.TelephonyManager.NETWORK_TYPE_UNKNOWN;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.MINUTE_IN_MILLIS;
@@ -123,7 +119,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Messenger;
 import android.os.PowerManager;
-import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
@@ -133,9 +128,7 @@ import android.provider.Settings.Global;
 import android.service.NetworkInterfaceProto;
 import android.service.NetworkStatsServiceDumpProto;
 import android.telephony.PhoneStateListener;
-import android.telephony.ServiceState;
 import android.telephony.SubscriptionPlan;
-import android.telephony.TelephonyManager;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -166,6 +159,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -184,6 +178,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     // Perform polling, persist network, and register the global alert again.
     private static final int MSG_PERFORM_POLL_REGISTER_ALERT = 2;
     private static final int MSG_UPDATE_IFACES = 3;
+    // A message for broadcasting ACTION_NETWORK_STATS_UPDATED in handler thread to prevent
+    // deadlock.
+    private static final int MSG_BROADCAST_NETWORK_STATS_UPDATED = 4;
 
     /** Flags to control detail level of poll event. */
     private static final int FLAG_PERSIST_NETWORK = 0x1;
@@ -206,7 +203,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final NetworkStatsFactory mStatsFactory;
     private final AlarmManager mAlarmManager;
     private final Clock mClock;
-    private final TelephonyManager mTeleManager;
     private final NetworkStatsSettings mSettings;
     private final NetworkStatsObservers mStatsObservers;
 
@@ -229,12 +225,6 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private static final String PREFIX_XT = "xt";
     private static final String PREFIX_UID = "uid";
     private static final String PREFIX_UID_TAG = "uid_tag";
-
-    /**
-     * Virtual network interface for video telephony. This is for VT data usage counting purpose.
-     */
-    // TODO: Remove this after no one is using it.
-    public static final String VT_INTERFACE = NetworkStats.IFACE_VT;
 
     /**
      * Settings that can be changed externally.
@@ -308,8 +298,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             new DropBoxNonMonotonicObserver();
 
     private static final int MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS = 100;
-    private final RemoteCallbackList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList =
-            new RemoteCallbackList<>();
+    private final CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList =
+            new CopyOnWriteArrayList<>();
     /** Semaphore used to wait for stats provider to respond to request stats update. */
     private final Semaphore mStatsProviderSem = new Semaphore(0, true);
 
@@ -352,6 +342,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @NonNull
     private final Dependencies mDeps;
 
+    @NonNull
+    private final NetworkStatsSubscriptionsMonitor mNetworkStatsSubscriptionsMonitor;
+
     private static @NonNull File getDefaultSystemDir() {
         return new File(Environment.getDataDirectory(), "system");
     }
@@ -390,6 +383,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                     registerGlobalAlert();
                     break;
                 }
+                case MSG_BROADCAST_NETWORK_STATS_UPDATED: {
+                    final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
+                    updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
+                    mContext.sendBroadcastAsUser(updatedIntent, UserHandle.ALL,
+                            READ_NETWORK_USAGE_HISTORY);
+                    break;
+                }
             }
         }
     }
@@ -401,8 +401,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         PowerManager.WakeLock wakeLock =
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
 
-        NetworkStatsService service = new NetworkStatsService(context, networkManager, alarmManager,
-                wakeLock, getDefaultClock(), context.getSystemService(TelephonyManager.class),
+        final NetworkStatsService service = new NetworkStatsService(context, networkManager,
+                alarmManager, wakeLock, getDefaultClock(),
                 new DefaultNetworkStatsSettings(context), new NetworkStatsFactory(),
                 new NetworkStatsObservers(), getDefaultSystemDir(), getDefaultBaseDir(),
                 new Dependencies());
@@ -416,16 +416,15 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     @VisibleForTesting
     NetworkStatsService(Context context, INetworkManagementService networkManager,
             AlarmManager alarmManager, PowerManager.WakeLock wakeLock, Clock clock,
-            TelephonyManager teleManager, NetworkStatsSettings settings,
-            NetworkStatsFactory factory, NetworkStatsObservers statsObservers, File systemDir,
-            File baseDir, @NonNull Dependencies deps) {
+            NetworkStatsSettings settings, NetworkStatsFactory factory,
+            NetworkStatsObservers statsObservers, File systemDir, File baseDir,
+            @NonNull Dependencies deps) {
         mContext = Objects.requireNonNull(context, "missing Context");
         mNetworkManager = Objects.requireNonNull(networkManager,
-            "missing INetworkManagementService");
+                "missing INetworkManagementService");
         mAlarmManager = Objects.requireNonNull(alarmManager, "missing AlarmManager");
         mClock = Objects.requireNonNull(clock, "missing Clock");
         mSettings = Objects.requireNonNull(settings, "missing NetworkStatsSettings");
-        mTeleManager = Objects.requireNonNull(teleManager, "missing TelephonyManager");
         mWakeLock = Objects.requireNonNull(wakeLock, "missing WakeLock");
         mStatsFactory = Objects.requireNonNull(factory, "missing factory");
         mStatsObservers = Objects.requireNonNull(statsObservers, "missing NetworkStatsObservers");
@@ -437,7 +436,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final HandlerThread handlerThread = mDeps.makeHandlerThread();
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
-        mPhoneListener = new NetworkTypeListener(new HandlerExecutor(mHandler));
+        mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
+                new HandlerExecutor(mHandler), this);
     }
 
     /**
@@ -452,6 +452,19 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @NonNull
         public HandlerThread makeHandlerThread() {
             return new HandlerThread(TAG);
+        }
+
+        /**
+         * Create a {@link NetworkStatsSubscriptionsMonitor}, can be used to monitor RAT change
+         * event in NetworkStatsService.
+         */
+        @NonNull
+        public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(@NonNull Context context,
+                @NonNull Executor executor, @NonNull NetworkStatsService service) {
+            // TODO: Update RatType passively in NSS, instead of querying into the monitor
+            //  when forceUpdateIface.
+            return new NetworkStatsSubscriptionsMonitor(context, executor, (subscriberId, type) ->
+                    service.handleOnCollapsedRatTypeChanged());
         }
     }
 
@@ -517,11 +530,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
                 mSettings.getPollInterval(), pollIntent);
 
-        // TODO: 1. listen to changes from all subscriptions.
-        //       2. listen to settings changed to support dynamically enable/disable.
+        // TODO: listen to settings changed to support dynamically enable/disable.
         // watch for networkType changes
         if (!mSettings.getCombineSubtypeEnabled()) {
-            mTeleManager.listen(mPhoneListener, LISTEN_SERVICE_STATE);
+            mNetworkStatsSubscriptionsMonitor.start();
         }
 
         registerGlobalAlert();
@@ -544,7 +556,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mContext.unregisterReceiver(mUserReceiver);
         mContext.unregisterReceiver(mShutdownReceiver);
 
-        mTeleManager.listen(mPhoneListener, LISTEN_NONE);
+        if (!mSettings.getCombineSubtypeEnabled()) {
+            mNetworkStatsSubscriptionsMonitor.stop();
+        }
 
         final long currentTime = mClock.millis();
 
@@ -1197,35 +1211,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     };
 
     /**
-     * Receiver that watches for {@link TelephonyManager} changes, such as
-     * transitioning between Radio Access Technology(RAT) types.
+     * Handle collapsed RAT type changed event.
      */
-    @NonNull
-    private final NetworkTypeListener mPhoneListener;
-
-    class NetworkTypeListener extends PhoneStateListener {
-        private volatile int mLastCollapsedRatType = NETWORK_TYPE_UNKNOWN;
-
-        NetworkTypeListener(@NonNull Executor executor) {
-            super(executor);
-        }
-
-        @Override
-        public void onServiceStateChanged(@NonNull ServiceState ss) {
-            final int networkType = ss.getDataNetworkType();
-            final int collapsedRatType = getCollapsedRatType(networkType);
-            if (collapsedRatType == mLastCollapsedRatType) return;
-
-            if (LOGD) {
-                Log.d(TAG, "subtype changed for mobile: "
-                        + mLastCollapsedRatType + " -> " + collapsedRatType);
-            }
-            // Protect service from frequently updating. Remove pending messages if any.
-            mHandler.removeMessages(MSG_UPDATE_IFACES);
-            mLastCollapsedRatType = collapsedRatType;
-            mHandler.sendMessageDelayed(
-                    mHandler.obtainMessage(MSG_UPDATE_IFACES), mSettings.getPollDelay());
-        }
+    @VisibleForTesting
+    public void handleOnCollapsedRatTypeChanged() {
+        // Protect service from frequently updating. Remove pending messages if any.
+        mHandler.removeMessages(MSG_UPDATE_IFACES);
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(MSG_UPDATE_IFACES), mSettings.getPollDelay());
     }
 
     private void updateIfaces(
@@ -1352,8 +1345,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             return 0;
         }
 
-        // TODO: return different subType for different subscriptions.
-        return mPhoneListener.mLastCollapsedRatType;
+        return mNetworkStatsSubscriptionsMonitor.getRatTypeForSubscriberId(state.subscriberId);
     }
 
     private static <K> NetworkIdentitySet findOrCreateNetworkIdentitySet(
@@ -1463,10 +1455,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         final boolean persistForce = (flags & FLAG_PERSIST_FORCE) != 0;
 
         // Request asynchronous stats update from all providers for next poll. And wait a bit of
-        // time to allow providers report-in given that normally binder call should be fast.
+        // time to allow providers report-in given that normally binder call should be fast. Note
+        // that size of list might be changed because addition/removing at the same time. For
+        // addition, the stats of the missed provider can only be collected in next poll;
+        // for removal, wait might take up to MAX_STATS_PROVIDER_POLL_WAIT_TIME_MS
+        // once that happened.
         // TODO: request with a valid token.
         Trace.traceBegin(TRACE_TAG_NETWORK, "provider.requestStatsUpdate");
-        final int registeredCallbackCount = mStatsProviderCbList.getRegisteredCallbackCount();
+        final int registeredCallbackCount = mStatsProviderCbList.size();
         mStatsProviderSem.drainPermits();
         invokeForAllStatsProviderCallbacks(
                 (cb) -> cb.mProvider.onRequestStatsUpdate(0 /* unused */));
@@ -1520,10 +1516,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         }
 
         // finally, dispatch updated event to any listeners
-        final Intent updatedIntent = new Intent(ACTION_NETWORK_STATS_UPDATED);
-        updatedIntent.setFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-        mContext.sendBroadcastAsUser(updatedIntent, UserHandle.ALL,
-                READ_NETWORK_USAGE_HISTORY);
+        mHandler.sendMessage(mHandler.obtainMessage(MSG_BROADCAST_NETWORK_STATS_UPDATED));
 
         Trace.traceEnd(TRACE_TAG_NETWORK);
     }
@@ -1643,7 +1636,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
         @Override
         public void setStatsProviderLimitAsync(@NonNull String iface, long quota) {
-            Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
+            if (LOGV) Slog.v(TAG, "setStatsProviderLimitAsync(" + iface + "," + quota + ")");
             invokeForAllStatsProviderCallbacks((cb) -> cb.mProvider.onSetLimit(iface, quota));
         }
     }
@@ -1934,7 +1927,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
             NetworkStatsProviderCallbackImpl callback = new NetworkStatsProviderCallbackImpl(
                     tag, provider, mStatsProviderSem, mAlertObserver,
                     mStatsProviderCbList);
-            mStatsProviderCbList.register(callback);
+            mStatsProviderCbList.add(callback);
             Log.d(TAG, "registerNetworkStatsProvider from " + callback.mTag + " uid/pid="
                     + getCallingUid() + "/" + getCallingPid());
             return callback;
@@ -1958,20 +1951,11 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
 
     private void invokeForAllStatsProviderCallbacks(
             @NonNull ThrowingConsumer<NetworkStatsProviderCallbackImpl, RemoteException> task) {
-        synchronized (mStatsLock) {
-            final int length = mStatsProviderCbList.beginBroadcast();
+        for (final NetworkStatsProviderCallbackImpl cb : mStatsProviderCbList) {
             try {
-                for (int i = 0; i < length; i++) {
-                    final NetworkStatsProviderCallbackImpl cb =
-                            mStatsProviderCbList.getBroadcastItem(i);
-                    try {
-                        task.accept(cb);
-                    } catch (RemoteException e) {
-                        Log.e(TAG, "Fail to broadcast to provider: " + cb.mTag, e);
-                    }
-                }
-            } finally {
-                mStatsProviderCbList.finishBroadcast();
+                task.accept(cb);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Fail to broadcast to provider: " + cb.mTag, e);
             }
         }
     }
@@ -1983,7 +1967,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @NonNull final INetworkStatsProvider mProvider;
         @NonNull private final Semaphore mSemaphore;
         @NonNull final INetworkManagementEventObserver mAlertObserver;
-        @NonNull final RemoteCallbackList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList;
+        @NonNull final CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> mStatsProviderCbList;
 
         @NonNull private final Object mProviderStatsLock = new Object();
 
@@ -1997,7 +1981,7 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
                 @NonNull String tag, @NonNull INetworkStatsProvider provider,
                 @NonNull Semaphore semaphore,
                 @NonNull INetworkManagementEventObserver alertObserver,
-                @NonNull RemoteCallbackList<NetworkStatsProviderCallbackImpl> cbList)
+                @NonNull CopyOnWriteArrayList<NetworkStatsProviderCallbackImpl> cbList)
                 throws RemoteException {
             mTag = tag;
             mProvider = provider;
@@ -2054,13 +2038,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         @Override
         public void binderDied() {
             Log.d(TAG, mTag + ": binderDied");
-            mStatsProviderCbList.unregister(this);
+            mStatsProviderCbList.remove(this);
         }
 
         @Override
         public void unregister() {
             Log.d(TAG, mTag + ": unregister");
-            mStatsProviderCbList.unregister(this);
+            mStatsProviderCbList.remove(this);
         }
 
     }

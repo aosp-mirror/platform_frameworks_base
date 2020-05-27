@@ -456,6 +456,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
+    static final String SYSTEM_USER_HOME_NEEDED = "ro.system_user_home_needed";
+
     public static final String ANR_TRACE_DIR = "/data/anr";
 
     // Maximum number of receivers an app can register.
@@ -3595,7 +3597,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void crashApplication(int uid, int initialPid, String packageName, int userId,
-            String message) {
+            String message, boolean force) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -3607,7 +3609,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized(this) {
-            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId, message);
+            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
+                    message, force);
         }
     }
 
@@ -4786,7 +4789,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    private final boolean attachApplicationLocked(IApplicationThread thread,
+    private boolean attachApplicationLocked(@NonNull IApplicationThread thread,
             int pid, int callingUid, long startSeq) {
 
         // Find the application record that is being attached...  either via
@@ -5209,6 +5212,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public final void attachApplication(IApplicationThread thread, long startSeq) {
+        if (thread == null) {
+            throw new SecurityException("Invalid application interface");
+        }
         synchronized (this) {
             int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
@@ -9111,7 +9117,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // to handle home activity in this case.
             if (UserManager.isSplitSystemUser() &&
                     Settings.Secure.getInt(mContext.getContentResolver(),
-                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0) {
+                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0
+                    || SystemProperties.getBoolean(SYSTEM_USER_HOME_NEEDED, false)) {
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
@@ -12850,7 +12857,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
-                kernelUsed += ionUnmapped;
+                // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
+                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
+                kernelUsed += ionHeap;
             }
             final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
@@ -13587,7 +13596,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
-            kernelUsed += ionUnmapped;
+            // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
+            // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
+            kernelUsed += ionHeap;
         }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(

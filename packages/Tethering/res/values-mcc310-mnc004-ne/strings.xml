@@ -16,13 +16,9 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <!-- no translation found for no_upstream_notification_title (5030042590486713460) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_message (3843613362272973447) -->
-    <skip />
-    <!-- no translation found for no_upstream_notification_disable_button (6385491461813507624) -->
-    <skip />
-    <!-- no translation found for upstream_roaming_notification_title (3015912166812283303) -->
-    <skip />
+    <string name="no_upstream_notification_title" msgid="5030042590486713460">"टेदरिङमार्फत इन्टरनेट कनेक्सन प्राप्त हुन सकेन"</string>
+    <string name="no_upstream_notification_message" msgid="3843613362272973447">"यन्त्रहरू कनेक्ट गर्न सकिएन"</string>
+    <string name="no_upstream_notification_disable_button" msgid="6385491461813507624">"टेदरिङ निष्क्रिय पार्नुहोस्"</string>
+    <string name="upstream_roaming_notification_title" msgid="3015912166812283303">"हटस्पट वा टेदरिङ सक्रिय छ"</string>
     <string name="upstream_roaming_notification_message" msgid="6724434706748439902">"रोमिङ सेवा प्रयोग गर्दा अतिरिक्त शुल्क लाग्न सक्छ"</string>
 </resources>

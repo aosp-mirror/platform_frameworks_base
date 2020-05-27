@@ -2259,7 +2259,7 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Specify how the buffer assosciated with this Surface is mapped in to the
+         * Specify how the buffer associated with this Surface is mapped in to the
          * parent coordinate space. The source frame will be scaled to fit the destination
          * frame, after being rotated according to the orientation parameter.
          *

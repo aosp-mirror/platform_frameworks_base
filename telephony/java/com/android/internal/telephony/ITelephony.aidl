@@ -2248,4 +2248,9 @@ interface ITelephony {
     int setIccLockEnabled(int subId, boolean enabled, String password);
 
     int changeIccLockPassword(int subId, String oldPassword, String newPassword);
+
+    /**
+     * Whether device can connect to 5G network when two SIMs are active.
+     */
+    boolean canConnectTo5GInDsdsMode();
 }

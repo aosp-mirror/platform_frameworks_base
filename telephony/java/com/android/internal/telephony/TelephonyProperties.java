@@ -240,5 +240,5 @@ public interface TelephonyProperties
      * two.
      * Type: int
      */
-    static final String PROPERTY_MAX_ACTIVE_MODEMS = "ro.telephony.max.active.modems";
+    static final String PROPERTY_MAX_ACTIVE_MODEMS = "telephony.active_modems.max_count";
 }

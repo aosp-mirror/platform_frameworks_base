@@ -6572,6 +6572,7 @@ package android.provider {
     field public static final String NAMESPACE_APP_COMPAT = "app_compat";
     field public static final String NAMESPACE_ATTENTION_MANAGER_SERVICE = "attention_manager_service";
     field public static final String NAMESPACE_AUTOFILL = "autofill";
+    field public static final String NAMESPACE_BLUETOOTH = "bluetooth";
     field public static final String NAMESPACE_CONNECTIVITY = "connectivity";
     field public static final String NAMESPACE_CONTENT_CAPTURE = "content_capture";
     field public static final String NAMESPACE_DEX_BOOT = "dex_boot";
@@ -10320,6 +10321,7 @@ package android.telephony.mbms.vendor {
   public class MbmsDownloadServiceBase extends android.os.Binder implements android.os.IInterface {
     ctor public MbmsDownloadServiceBase();
     method public int addProgressListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadProgressListener) throws android.os.RemoteException;
+    method public int addServiceAnnouncementFile(int, @NonNull byte[]);
     method public int addStatusListener(android.telephony.mbms.DownloadRequest, android.telephony.mbms.DownloadStatusListener) throws android.os.RemoteException;
     method public android.os.IBinder asBinder();
     method public int cancelDownload(android.telephony.mbms.DownloadRequest) throws android.os.RemoteException;

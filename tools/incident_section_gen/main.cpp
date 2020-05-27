@@ -368,10 +368,13 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const Destination
         // Don't generate a variable twice
         if (!hasDefaultFlags[i]) variableNames[fieldName] = false;
     }
+    // hasDefaultFlags[i] has been initialized in the above for-loop,
+    // but clang-tidy analyzer still report uninitized values.
+    // So we use NOLINT to suppress those false positives.
 
     bool allDefaults = true;
     for (size_t i=0; i<fieldsInOrder.size(); i++) {
-        allDefaults &= hasDefaultFlags[i];
+        allDefaults &= hasDefaultFlags[i];  // NOLINT(clang-analyzer-core.uninitialized.Assign)
     }
 
     parents->erase(messageName); // erase the message type name when exit the message.
@@ -384,7 +387,7 @@ static bool generatePrivacyFlags(const Descriptor* descriptor, const Destination
     printf("Privacy* %s[] = {\n", messageName.c_str());
     for (size_t i=0; i<fieldsInOrder.size(); i++) {
         const FieldDescriptor* field = fieldsInOrder[i];
-        if (hasDefaultFlags[i]) continue;
+        if (hasDefaultFlags[i]) continue; // NOLINT(clang-analyzer-core.uninitialized.Branch)
         printf("    &%s,\n", getFieldName(field).c_str());
         policyCount++;
     }

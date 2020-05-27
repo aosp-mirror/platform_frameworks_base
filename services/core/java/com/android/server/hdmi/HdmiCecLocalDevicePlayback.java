@@ -24,6 +24,7 @@ import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.os.SystemProperties;
 import android.provider.Settings.Global;
+import android.sysprop.HdmiProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -43,11 +44,10 @@ import java.util.Locale;
 public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
     private static final String TAG = "HdmiCecLocalDevicePlayback";
 
-    private static final boolean WAKE_ON_HOTPLUG =
-            SystemProperties.getBoolean(Constants.PROPERTY_WAKE_ON_HOTPLUG, true);
+    private static final boolean WAKE_ON_HOTPLUG = false;
 
     private static final boolean SET_MENU_LANGUAGE =
-            SystemProperties.getBoolean(Constants.PROPERTY_SET_MENU_LANGUAGE, false);
+            HdmiProperties.set_menu_language_enabled().orElse(false);
 
     // Used to keep the device awake while it is the active source. For devices that
     // cannot wake up via CEC commands, this address the inconvenience of having to

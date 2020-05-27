@@ -5,4 +5,4 @@ service bootanim /system/bin/bootanimation
     disabled
     oneshot
     ioprio rt 0
-    writepid /dev/stune/top-app/tasks
+    task_profiles MaxPerformance

@@ -22,7 +22,7 @@ import android.os.Parcelable;
 /**
  * A class representing Wi-Fi Protected Setup
  *
- * {@see WifiP2pConfig}
+ * {@see android.net.wifi.p2p.WifiP2pConfig}
  */
 public class WpsInfo implements Parcelable {
 

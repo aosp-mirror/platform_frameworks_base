@@ -40,6 +40,7 @@
 #include <linux/rtc.h>
 
 #include <array>
+#include <limits>
 #include <memory>
 
 namespace android {
@@ -213,22 +214,20 @@ int AlarmImpl::waitForAlarm()
 static jint android_server_AlarmManagerService_setKernelTime(JNIEnv*, jobject, jlong nativeData, jlong millis)
 {
     AlarmImpl *impl = reinterpret_cast<AlarmImpl *>(nativeData);
-    struct timeval tv;
-    int ret;
 
-    if (millis <= 0 || millis / 1000LL >= INT_MAX) {
+    if (millis <= 0 || millis / 1000LL >= std::numeric_limits<time_t>::max()) {
         return -1;
     }
 
-    tv.tv_sec = (time_t) (millis / 1000LL);
-    tv.tv_usec = (suseconds_t) ((millis % 1000LL) * 1000LL);
+    struct timeval tv;
+    tv.tv_sec = (millis / 1000LL);
+    tv.tv_usec = ((millis % 1000LL) * 1000LL);
 
-    ALOGD("Setting time of day to sec=%d\n", (int) tv.tv_sec);
+    ALOGD("Setting time of day to sec=%ld", tv.tv_sec);
 
-    ret = impl->setTime(&tv);
-
-    if(ret < 0) {
-        ALOGW("Unable to set rtc to %ld: %s\n", tv.tv_sec, strerror(errno));
+    int ret = impl->setTime(&tv);
+    if (ret < 0) {
+        ALOGW("Unable to set rtc to %ld: %s", tv.tv_sec, strerror(errno));
         ret = -1;
     }
     return ret;

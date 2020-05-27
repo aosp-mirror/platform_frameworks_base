@@ -21,7 +21,6 @@ import android.util.TimeFormatException;
 import libcore.timezone.ZoneInfoDb;
 import libcore.util.ZoneInfo;
 
-import java.io.IOException;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -1106,19 +1105,14 @@ public class Time {
         }
 
         private static ZoneInfo lookupZoneInfo(String timezoneId) {
-            try {
-                ZoneInfo zoneInfo = ZoneInfoDb.getInstance().makeTimeZone(timezoneId);
-                if (zoneInfo == null) {
-                    zoneInfo = ZoneInfoDb.getInstance().makeTimeZone("GMT");
-                }
-                if (zoneInfo == null) {
-                    throw new AssertionError("GMT not found: \"" + timezoneId + "\"");
-                }
-                return zoneInfo;
-            } catch (IOException e) {
-                // This should not ever be thrown.
-                throw new AssertionError("Error loading timezone: \"" + timezoneId + "\"", e);
+            ZoneInfo zoneInfo = ZoneInfoDb.getInstance().makeTimeZone(timezoneId);
+            if (zoneInfo == null) {
+                zoneInfo = ZoneInfoDb.getInstance().makeTimeZone("GMT");
             }
+            if (zoneInfo == null) {
+                throw new AssertionError("GMT not found: \"" + timezoneId + "\"");
+            }
+            return zoneInfo;
         }
 
         public void switchTimeZone(String timezone) {

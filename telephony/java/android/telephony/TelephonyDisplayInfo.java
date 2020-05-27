@@ -62,8 +62,6 @@ public final class TelephonyDisplayInfo implements Parcelable {
      * {@link TelephonyManager#NETWORK_TYPE_LTE} network and has E-UTRA-NR Dual Connectivity(EN-DC)
      * capability or is currently connected to the secondary
      * {@link TelephonyManager#NETWORK_TYPE_NR} cellular network on millimeter wave bands.
-     *
-     * @see AccessNetworkConstants.NgranBands#FREQUENCY_RANGE_GROUP_2
      */
     public static final int OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE = 4;
 
@@ -154,7 +152,14 @@ public final class TelephonyDisplayInfo implements Parcelable {
         return Objects.hash(mNetworkType, mOverrideNetworkType);
     }
 
-    private static String overrideNetworkTypeToString(@OverrideNetworkType int type) {
+    /**
+     * Convert override network type to string.
+     *
+     * @param type Override network type
+     * @return Override network type in string format
+     * @hide
+     */
+    public static String overrideNetworkTypeToString(@OverrideNetworkType int type) {
         switch (type) {
             case OVERRIDE_NETWORK_TYPE_NONE: return "NONE";
             case OVERRIDE_NETWORK_TYPE_LTE_CA: return "LTE_CA";
@@ -168,6 +173,6 @@ public final class TelephonyDisplayInfo implements Parcelable {
     @Override
     public String toString() {
         return "TelephonyDisplayInfo {network=" + TelephonyManager.getNetworkTypeName(mNetworkType)
-                + ", override=" + overrideNetworkTypeToString(mOverrideNetworkType);
+                + ", override=" + overrideNetworkTypeToString(mOverrideNetworkType) + "}";
     }
 }
