@@ -49,6 +49,7 @@ stubs_defaults {
         ":opt-net-voip-srcs",
         ":art-module-public-api-stubs-source",
         ":android_icu4j_public_api_files",
+        "**/package.html",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
