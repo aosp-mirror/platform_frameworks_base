@@ -219,6 +219,33 @@ public class InfoMediaManager extends MediaManager {
     }
 
     /**
+     * Get the MediaDevice list that can be removed from current media session.
+     *
+     * @return list of MediaDevice
+     */
+    List<MediaDevice> getDeselectableMediaDevice() {
+        final List<MediaDevice> deviceList = new ArrayList<>();
+        if (TextUtils.isEmpty(mPackageName)) {
+            Log.d(TAG, "getDeselectableMediaDevice() package name is null or empty!");
+            return deviceList;
+        }
+
+        final RoutingSessionInfo info = getRoutingSessionInfo();
+        if (info != null) {
+            for (MediaRoute2Info route : mRouterManager.getDeselectableRoutes(info)) {
+                deviceList.add(new InfoMediaDevice(mContext, mRouterManager,
+                        route, mPackageName));
+                Log.d(TAG, route.getName() + " is deselectable for " + mPackageName);
+            }
+            return deviceList;
+        }
+        Log.d(TAG, "getDeselectableMediaDevice() cannot found deselectable MediaDevice from : "
+                + mPackageName);
+
+        return deviceList;
+    }
+
+    /**
      * Get the MediaDevice list that has been selected to current media.
      *
      * @return list of MediaDevice
