@@ -427,7 +427,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     (ViewGroup.MarginLayoutParams) hostView.getLayoutParams();
             float targetPosition = absoluteBottomPosition - params.bottomMargin
                     - hostView.getHeight();
-            float currentPosition = mediaHost.getCurrentState().getBoundsOnScreen().top
+            float currentPosition = mediaHost.getCurrentBounds().top
                     - hostView.getTranslationY();
             hostView.setTranslationY(targetPosition - currentPosition);
         } else {

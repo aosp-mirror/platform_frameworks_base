@@ -16,8 +16,8 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.VisualStabilityManager
-import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.UniqueObjectHostView
+import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -36,16 +36,51 @@ class MediaViewManager @Inject constructor(
     @Background private val backgroundExecutor: DelayableExecutor,
     private val visualStabilityManager: VisualStabilityManager,
     private val activityStarter: ActivityStarter,
+    private val mediaHostStatesManager: MediaHostStatesManager,
     mediaManager: MediaDataCombineLatest
 ) {
-    private var playerWidth: Int = 0
+
+    /**
+     * The desired location where we'll be at the end of the transformation. Usually this matches
+     * the end location, except when we're still waiting on a state update call.
+     */
+    @MediaLocation
+    private var desiredLocation: Int = -1
+
+    /**
+     * The ending location of the view where it ends when all animations and transitions have
+     * finished
+     */
+    @MediaLocation
+    private var currentEndLocation: Int = -1
+
+    /**
+     * The ending location of the view where it ends when all animations and transitions have
+     * finished
+     */
+    @MediaLocation
+    private var currentStartLocation: Int = -1
+
+    /**
+     * The progress of the transition or 1.0 if there is no transition happening
+     */
+    private var currentTransitionProgress: Float = 1.0f
+
+    /**
+     * The measured width of the carousel
+     */
+    private var carouselMeasureWidth: Int = 0
+
+    /**
+     * The measured height of the carousel
+     */
+    private var carouselMeasureHeight: Int = 0
     private var playerWidthPlusPadding: Int = 0
-    private var desiredState: MediaHost.MediaHostState? = null
-    private var currentState: MediaState? = null
+    private var desiredHostState: MediaHostState? = null
     private val mediaCarousel: HorizontalScrollView
     val mediaFrame: ViewGroup
+    val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
     private val mediaContent: ViewGroup
-    private val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
     private val pageIndicator: PageIndicator
     private val gestureDetector: GestureDetectorCompat
     private val visualStabilityCallback: VisualStabilityManager.Callback
@@ -115,6 +150,7 @@ class MediaViewManager @Inject constructor(
             override fun onMediaDataLoaded(key: String, data: MediaData) {
                 updateView(key, data)
                 updatePlayerVisibilities()
+                mediaCarousel.requiresRemeasuring = true
             }
 
             override fun onMediaDataRemoved(key: String) {
@@ -134,6 +170,13 @@ class MediaViewManager @Inject constructor(
                     }
                     updatePlayerVisibilities()
                     updatePageIndicator()
+                }
+            }
+        })
+        mediaHostStatesManager.addCallback(object : MediaHostStatesManager.Callback {
+            override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
+                if (location == desiredLocation) {
+                    onDesiredLocationChanged(desiredLocation, mediaHostState, animate = false)
                 }
             }
         })
@@ -220,7 +263,7 @@ class MediaViewManager @Inject constructor(
         var existingPlayer = mediaPlayers[key]
         if (existingPlayer == null) {
             existingPlayer = MediaControlPanel(context, foregroundExecutor, backgroundExecutor,
-                    activityStarter)
+                    activityStarter, mediaHostStatesManager)
             existingPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context),
                     mediaContent))
             mediaPlayers[key] = existingPlayer
@@ -228,14 +271,14 @@ class MediaViewManager @Inject constructor(
                     ViewGroup.LayoutParams.WRAP_CONTENT)
             existingPlayer.view?.player?.setLayoutParams(lp)
             existingPlayer.setListening(currentlyExpanded)
+            updatePlayerToState(existingPlayer, noAnimation = true)
             if (existingPlayer.isPlaying) {
                 mediaContent.addView(existingPlayer.view?.player, 0)
             } else {
                 mediaContent.addView(existingPlayer.view?.player)
             }
-            updatePlayerToCurrentState(existingPlayer)
         } else if (existingPlayer.isPlaying &&
-                    mediaContent.indexOfChild(existingPlayer.view?.player) != 0) {
+                mediaContent.indexOfChild(existingPlayer.view?.player) != 0) {
             if (visualStabilityManager.isReorderingAllowed) {
                 mediaContent.removeView(existingPlayer.view?.player)
                 mediaContent.addView(existingPlayer.view?.player, 0)
@@ -244,18 +287,8 @@ class MediaViewManager @Inject constructor(
             }
         }
         existingPlayer.bind(data)
-        // Resetting the progress to make sure it's taken into account for the latest
-        // motion model
-        existingPlayer.view?.player?.progress = currentState?.expansion ?: 0.0f
         updateMediaPaddings()
         updatePageIndicator()
-    }
-
-    private fun updatePlayerToCurrentState(existingPlayer: MediaControlPanel) {
-        if (desiredState != null && desiredState!!.measurementInput != null) {
-            // make sure the player width is set to the current state
-            existingPlayer.setPlayerWidth(playerWidth)
-        }
     }
 
     private fun updateMediaPaddings() {
@@ -281,19 +314,38 @@ class MediaViewManager @Inject constructor(
     }
 
     /**
-     * Set the current state of a view. This is updated often during animations and we shouldn't
-     * do anything expensive.
+     * Set a new interpolated state for all players. This is a state that is usually controlled
+     * by a finger movement where the user drags from one state to the next.
      */
-    fun setCurrentState(state: MediaState) {
-        currentState = state
-        currentlyExpanded = state.expansion > 0
+    fun setCurrentState(
+        @MediaLocation startLocation: Int,
+        @MediaLocation endLocation: Int,
+        progress: Float,
+        immediately: Boolean
+    ) {
         // Hack: Since the indicator doesn't move with the player expansion, just make it disappear
         // and then reappear at the end.
-        pageIndicator.alpha = if (state.expansion == 1f || state.expansion == 0f) 1f else 0f
-        for (mediaPlayer in mediaPlayers.values) {
-            val view = mediaPlayer.view?.player
-            view?.progress = state.expansion
+        pageIndicator.alpha = if (progress == 1f || progress == 0f) 1f else 0f
+        if (startLocation != currentStartLocation ||
+                endLocation != currentEndLocation ||
+                progress != currentTransitionProgress ||
+                immediately
+        ) {
+            currentStartLocation = startLocation
+            currentEndLocation = endLocation
+            currentTransitionProgress = progress
+            for (mediaPlayer in mediaPlayers.values) {
+                updatePlayerToState(mediaPlayer, immediately)
+            }
         }
+    }
+
+    private fun updatePlayerToState(mediaPlayer: MediaControlPanel, noAnimation: Boolean) {
+        mediaPlayer.mediaViewController.setCurrentState(
+                startLocation = currentStartLocation,
+                endLocation = currentEndLocation,
+                transitionProgress = currentTransitionProgress,
+                applyImmediately = noAnimation)
     }
 
     /**
@@ -302,96 +354,61 @@ class MediaViewManager @Inject constructor(
      * If an animation is happening, an animation is kicked of externally, which sets a new
      * current state until we reach the targetState.
      *
-     * @param desiredState the target state we're transitioning to
+     * @param desiredLocation the location we're going to
+     * @param desiredHostState the target state we're transitioning to
      * @param animate should this be animated
      */
     fun onDesiredLocationChanged(
-        desiredState: MediaState?,
+        desiredLocation: Int,
+        desiredHostState: MediaHostState?,
         animate: Boolean,
-        duration: Long,
-        startDelay: Long
+        duration: Long = 200,
+        startDelay: Long = 0
     ) {
-        if (desiredState is MediaHost.MediaHostState) {
+        desiredHostState?.let {
             // This is a hosting view, let's remeasure our players
-            this.desiredState = desiredState
-            val width = desiredState.boundsOnScreen.width()
-            if (playerWidth != width) {
-                setPlayerWidth(width)
-                for (mediaPlayer in mediaPlayers.values) {
-                    if (animate && mediaPlayer.view?.player?.visibility == View.VISIBLE) {
-                        mediaPlayer.animatePendingSizeChange(duration, startDelay)
-                    }
-                }
-                val widthSpec = desiredState.measurementInput?.widthMeasureSpec ?: 0
-                val heightSpec = desiredState.measurementInput?.heightMeasureSpec ?: 0
-                var left = 0
-                for (i in 0 until mediaContent.childCount) {
-                    val view = mediaContent.getChildAt(i)
-                    view.measure(widthSpec, heightSpec)
-                    view.layout(left, 0, left + width, view.measuredHeight)
-                    left = left + playerWidthPlusPadding
-                }
-            }
-        }
-    }
-
-    fun setPlayerWidth(width: Int) {
-        if (width != playerWidth) {
-            playerWidth = width
-            playerWidthPlusPadding = playerWidth + context.resources.getDimensionPixelSize(
-                    R.dimen.qs_media_padding)
+            this.desiredLocation = desiredLocation
+            this.desiredHostState = it
+            currentlyExpanded = it.expansion > 0
             for (mediaPlayer in mediaPlayers.values) {
-                mediaPlayer.setPlayerWidth(width)
+                if (animate) {
+                    mediaPlayer.mediaViewController.animatePendingStateChange(
+                            duration = duration,
+                            delay = startDelay)
+                }
+                mediaPlayer.mediaViewController.onLocationPreChange(desiredLocation)
             }
-            // The player width has changed, let's update the scroll position to make sure
-            // it's still at the same place
-            var newScroll = activeMediaIndex * playerWidthPlusPadding
-            if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
-                newScroll += playerWidthPlusPadding
-                - (scrollIntoCurrentMedia - playerWidthPlusPadding)
-            } else {
-                newScroll += scrollIntoCurrentMedia
-            }
-            mediaCarousel.scrollX = newScroll
+            updateCarouselSize()
         }
     }
 
     /**
-     * Get a measurement for the given input state. This measures the first player and returns
-     * its bounds as if it were measured with the given measurement dimensions
+     * Update the size of the carousel, remeasuring it if necessary.
      */
-    fun obtainMeasurement(input: MediaMeasurementInput): MeasurementOutput? {
-        val firstPlayer = mediaPlayers.values.firstOrNull() ?: return null
-        var result: MeasurementOutput? = null
-        firstPlayer.view?.player?.let {
-            // Let's measure the size of the first player and return its height
-            val previousProgress = it.progress
-            val previousRight = it.right
-            val previousBottom = it.bottom
-            it.progress = input.expansion
-            firstPlayer.measure(input)
-            // Relayouting is necessary in motionlayout to obtain its size properly ....
-            it.layout(0, 0, it.measuredWidth, it.measuredHeight)
-            result = MeasurementOutput(it.measuredWidth, it.measuredHeight)
-            it.progress = previousProgress
-            if (desiredState != null) {
-                // remeasure it to the old size again!
-                firstPlayer.measure(desiredState!!.measurementInput)
-                it.layout(0, 0, previousRight, previousBottom)
+    private fun updateCarouselSize() {
+        val width = desiredHostState?.measurementInput?.width ?: 0
+        val height = desiredHostState?.measurementInput?.height ?: 0
+        if (width != carouselMeasureWidth && width != 0 ||
+                height != carouselMeasureWidth && height != 0) {
+            carouselMeasureWidth = width
+            carouselMeasureHeight = height
+            playerWidthPlusPadding = carouselMeasureWidth + context.resources.getDimensionPixelSize(
+                    R.dimen.qs_media_padding)
+            // The player width has changed, let's update the scroll position to make sure
+            // it's still at the same place
+            var newScroll = activeMediaIndex * playerWidthPlusPadding
+            if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
+                newScroll += playerWidthPlusPadding -
+                        (scrollIntoCurrentMedia - playerWidthPlusPadding)
+            } else {
+                newScroll += scrollIntoCurrentMedia
             }
-        }
-        return result
-    }
-
-    fun onViewReattached() {
-        if (desiredState is MediaHost.MediaHostState) {
-            // HACK: MotionLayout doesn't always properly reevalate the state, let's kick of
-            // a measure to force it.
-            val widthSpec = desiredState!!.measurementInput?.widthMeasureSpec ?: 0
-            val heightSpec = desiredState!!.measurementInput?.heightMeasureSpec ?: 0
-            for (mediaPlayer in mediaPlayers.values) {
-                mediaPlayer.view?.player?.measure(widthSpec, heightSpec)
-            }
+            mediaCarousel.scrollX = newScroll
+            // Let's remeasure the carousel
+            val widthSpec = desiredHostState?.measurementInput?.widthMeasureSpec ?: 0
+            val heightSpec = desiredHostState?.measurementInput?.heightMeasureSpec ?: 0
+            mediaCarousel.measure(widthSpec, heightSpec)
+            mediaCarousel.layout(0, 0, width, mediaCarousel.measuredHeight)
         }
     }
 }

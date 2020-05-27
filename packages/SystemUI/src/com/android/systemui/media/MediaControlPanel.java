@@ -43,12 +43,9 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
-import androidx.constraintlayout.motion.widget.Key;
-import androidx.constraintlayout.motion.widget.KeyAttributes;
-import androidx.constraintlayout.motion.widget.KeyFrames;
-import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
@@ -59,11 +56,11 @@ import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSMediaBrowser;
+import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -87,16 +84,15 @@ public class MediaControlPanel {
     private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
-    private LayoutAnimationHelper mLayoutAnimationHelper;
 
     private Context mContext;
     private PlayerViewHolder mViewHolder;
+    private MediaViewController mMediaViewController;
     private MediaSession.Token mToken;
     private MediaController mController;
     private int mBackgroundColor;
     protected ComponentName mServiceComponent;
     private boolean mIsRegistered = false;
-    private List<KeyFrames> mKeyFrames;
     private String mKey;
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
@@ -133,12 +129,14 @@ public class MediaControlPanel {
      * @param activityStarter activity starter
      */
     public MediaControlPanel(Context context, Executor foregroundExecutor,
-            DelayableExecutor backgroundExecutor, ActivityStarter activityStarter) {
+            DelayableExecutor backgroundExecutor, ActivityStarter activityStarter,
+            MediaHostStatesManager mediaHostStatesManager) {
         mContext = context;
         mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
         mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
+        mMediaViewController = new MediaViewController(context, mediaHostStatesManager);
         loadDimens();
     }
 
@@ -147,6 +145,7 @@ public class MediaControlPanel {
             mSeekBarViewModel.getProgress().removeObserver(mSeekBarObserver);
         }
         mSeekBarViewModel.onDestroy();
+        mMediaViewController.onDestroy();
     }
 
     private void loadDimens() {
@@ -162,6 +161,15 @@ public class MediaControlPanel {
     @Nullable
     public PlayerViewHolder getView() {
         return mViewHolder;
+    }
+
+    /**
+     * Get the view controller used to display media controls
+     * @return the media view controller
+     */
+    @NonNull
+    public MediaViewController getMediaViewController() {
+        return mMediaViewController;
     }
 
     /**
@@ -187,15 +195,13 @@ public class MediaControlPanel {
     /** Attaches the player to the view holder. */
     public void attach(PlayerViewHolder vh) {
         mViewHolder = vh;
-        MotionLayout motionView = vh.getPlayer();
-        mLayoutAnimationHelper = new LayoutAnimationHelper(motionView);
-        GoneChildrenHideHelper.clipGoneChildrenOnLayout(motionView);
-        mKeyFrames = motionView.getDefinedTransitions().get(0).getKeyFrameList();
+        TransitionLayout player = vh.getPlayer();
         mSeekBarObserver = new SeekBarObserver(vh);
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
         SeekBar bar = vh.getSeekBar();
         bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
         bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
+        mMediaViewController.attach(player);
     }
 
     /**
@@ -220,8 +226,8 @@ public class MediaControlPanel {
 
         mController = new MediaController(mContext, mToken);
 
-        ConstraintSet expandedSet = mViewHolder.getPlayer().getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = mViewHolder.getPlayer().getConstraintSet(R.id.collapsed);
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
 
         // Try to find a browser service component for this app
         // TODO also check for a media button receiver intended for restarting (b/154127084)
@@ -247,7 +253,7 @@ public class MediaControlPanel {
 
         mController.registerCallback(mSessionCallback);
 
-        mViewHolder.getBackground().setBackgroundTintList(
+        mViewHolder.getPlayer().setBackgroundTintList(
                 ColorStateList.valueOf(mBackgroundColor));
 
         // Click action
@@ -356,7 +362,6 @@ public class MediaControlPanel {
                 }
             });
             boolean visibleInCompat = actionsWhenCollapsed.contains(i);
-            updateKeyFrameVisibility(actionId, visibleInCompat);
             setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
             setVisibleAndAlpha(expandedSet, actionId, true /*visible */);
         }
@@ -374,9 +379,9 @@ public class MediaControlPanel {
         // Set up long press menu
         // TODO: b/156036025 bring back media guts
 
-        // Update both constraint sets to regenerate the animation.
-        mViewHolder.getPlayer().updateState(R.id.collapsed, collapsedSet);
-        mViewHolder.getPlayer().updateState(R.id.expanded, expandedSet);
+        // TODO: We don't need to refresh this state constantly, only if the state actually changed
+        // to something which might impact the measurement
+        mMediaViewController.refreshState();
     }
 
     @UiThread
@@ -409,30 +414,6 @@ public class MediaControlPanel {
                 mContext.getResources(), scaled);
         artwork.setCornerRadius(mAlbumArtRadius);
         return artwork;
-    }
-
-    /**
-     * Updates the keyframe visibility such that only views that are not visible actually go
-     * through a transition and fade in.
-     *
-     * @param actionId the id to change
-     * @param visible is the view visible
-     */
-    private void updateKeyFrameVisibility(int actionId, boolean visible) {
-        if (mKeyFrames == null) {
-            return;
-        }
-        for (int i = 0; i < mKeyFrames.size(); i++) {
-            KeyFrames keyframe = mKeyFrames.get(i);
-            ArrayList<Key> viewKeyFrames = keyframe.getKeyFramesForView(actionId);
-            for (int j = 0; j < viewKeyFrames.size(); j++) {
-                Key key = viewKeyFrames.get(j);
-                if (key instanceof KeyAttributes) {
-                    KeyAttributes attributes = (KeyAttributes) key;
-                    attributes.setValue("alpha", visible ? 1.0f : 0.0f);
-                }
-            }
-        }
     }
 
     /**
@@ -528,8 +509,8 @@ public class MediaControlPanel {
         }
         // Hide all the old buttons
 
-        ConstraintSet expandedSet = mViewHolder.getPlayer().getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = mViewHolder.getPlayer().getConstraintSet(R.id.collapsed);
+        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
+        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
         for (int i = 1; i < ACTION_IDS.length; i++) {
             setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
             setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
@@ -571,6 +552,7 @@ public class MediaControlPanel {
             options.setVisibility(View.VISIBLE);
             return true; // consumed click
         });
+        mMediaViewController.refreshState();
     }
 
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
@@ -649,33 +631,4 @@ public class MediaControlPanel {
      * Called when a player can't be resumed to give it an opportunity to hide or remove itself
      */
     protected void removePlayer() { }
-
-    public void measure(@Nullable MediaMeasurementInput input) {
-        if (mViewHolder == null) {
-            return;
-        }
-        if (input != null) {
-            int width = input.getWidth();
-            setPlayerWidth(width);
-            mViewHolder.getPlayer().measure(input.getWidthMeasureSpec(),
-                    input.getHeightMeasureSpec());
-        }
-    }
-
-    public void setPlayerWidth(int width) {
-        if (mViewHolder == null) {
-            return;
-        }
-        MotionLayout view = mViewHolder.getPlayer();
-        ConstraintSet expandedSet = view.getConstraintSet(R.id.expanded);
-        ConstraintSet collapsedSet = view.getConstraintSet(R.id.collapsed);
-        collapsedSet.setGuidelineBegin(R.id.view_width, width);
-        expandedSet.setGuidelineBegin(R.id.view_width, width);
-        view.updateState(R.id.collapsed, collapsedSet);
-        view.updateState(R.id.expanded, expandedSet);
-    }
-
-    public void animatePendingSizeChange(long duration, long startDelay) {
-        mLayoutAnimationHelper.animatePendingSizeChange(duration, startDelay);
-    }
 }
