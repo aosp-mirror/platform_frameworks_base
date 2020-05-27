@@ -51,6 +51,7 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  * Holder for state of system windows that cause window insets for all other windows in the system.
@@ -600,10 +601,16 @@ public class InsetsState implements Parcelable {
 
     @Override
     public String toString() {
+        StringJoiner joiner = new StringJoiner(", ");
+        for (InsetsSource source : mSources.values()) {
+            if (source != null) {
+                joiner.add(source.toString());
+            }
+        }
         return "InsetsState: {"
                 + "mDisplayFrame=" + mDisplayFrame
-                + ", mSources=" + mSources
-                + "}";
+                + ", mSources= { " + joiner
+                + " }";
     }
 }
 
