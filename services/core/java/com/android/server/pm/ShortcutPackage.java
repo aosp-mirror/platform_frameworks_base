@@ -287,7 +287,7 @@ class ShortcutPackage extends ShortcutPackageItem {
         if (shortcut != null) {
             mShortcutUser.mService.removeIconLocked(shortcut);
             shortcut.clearFlags(ShortcutInfo.FLAG_DYNAMIC | ShortcutInfo.FLAG_PINNED
-                    | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED);
+                    | ShortcutInfo.FLAG_MANIFEST | ShortcutInfo.FLAG_CACHED_ALL);
         }
         return shortcut;
     }
@@ -323,36 +323,18 @@ class ShortcutPackage extends ShortcutPackageItem {
         newShortcut.addFlags(ShortcutInfo.FLAG_DYNAMIC);
 
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
-
-        final boolean replaced;
-
-        final boolean wasPinned;
-        final boolean wasCached;
-
-        if (oldShortcut == null) {
-            replaced = false;
-            wasPinned = false;
-            wasCached = false;
-        } else {
+        if (oldShortcut != null) {
             // It's an update case.
             // Make sure the target is updatable. (i.e. should be mutable.)
             oldShortcut.ensureUpdatableWith(newShortcut, /*isUpdating=*/ false);
-            replaced = true;
 
-            wasPinned = oldShortcut.isPinned();
-            wasCached = oldShortcut.isCached();
-        }
-
-        // If it was originally pinned, the new one should be pinned too.
-        if (wasPinned) {
-            newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
-        }
-        if (wasCached) {
-            newShortcut.addFlags(ShortcutInfo.FLAG_CACHED);
+            // If it was originally pinned or cached, the new one should be pinned or cached too.
+            newShortcut.addFlags(oldShortcut.getFlags()
+                    & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
         forceReplaceShortcutInner(newShortcut);
-        return replaced;
+        return oldShortcut != null;
     }
 
     /**
@@ -373,9 +355,6 @@ class ShortcutPackage extends ShortcutPackageItem {
 
         changedShortcuts.clear();
         final ShortcutInfo oldShortcut = mShortcuts.get(newShortcut.getId());
-        boolean wasPinned = false;
-        boolean wasCached = false;
-
         boolean deleted = false;
 
         if (oldShortcut == null) {
@@ -408,16 +387,9 @@ class ShortcutPackage extends ShortcutPackageItem {
             // Make sure the target is updatable. (i.e. should be mutable.)
             oldShortcut.ensureUpdatableWith(newShortcut, /*isUpdating=*/ false);
 
-            wasPinned = oldShortcut.isPinned();
-            wasCached = oldShortcut.isCached();
-        }
-
-        // If it was originally pinned or cached, the new one should be pinned or cached too.
-        if (wasPinned) {
-            newShortcut.addFlags(ShortcutInfo.FLAG_PINNED);
-        }
-        if (wasCached) {
-            newShortcut.addFlags(ShortcutInfo.FLAG_CACHED);
+            // If it was originally pinned or cached, the new one should be pinned or cached too.
+            newShortcut.addFlags(oldShortcut.getFlags()
+                    & (ShortcutInfo.FLAG_PINNED | ShortcutInfo.FLAG_CACHED_ALL));
         }
 
         forceReplaceShortcutInner(newShortcut);
@@ -511,7 +483,7 @@ class ShortcutPackage extends ShortcutPackageItem {
     public ShortcutInfo deleteLongLivedWithId(@NonNull String shortcutId, boolean ignoreInvisible) {
         final ShortcutInfo shortcut = mShortcuts.get(shortcutId);
         if (shortcut != null) {
-            shortcut.clearFlags(ShortcutInfo.FLAG_CACHED);
+            shortcut.clearFlags(ShortcutInfo.FLAG_CACHED_ALL);
         }
         return deleteOrDisableWithId(
                 shortcutId, /* disable =*/ false, /* overrideImmutable=*/ false, ignoreInvisible,
