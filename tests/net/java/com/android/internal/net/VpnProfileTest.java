@@ -33,13 +33,18 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /** Unit tests for {@link VpnProfile}. */
 @SmallTest
 @RunWith(JUnit4.class)
 public class VpnProfileTest {
     private static final String DUMMY_PROFILE_KEY = "Test";
+
+    private static final int ENCODED_INDEX_AUTH_PARAMS_INLINE = 23;
+    private static final int ENCODED_INDEX_RESTRICTED_TO_TEST_NETWORKS = 24;
 
     @Test
     public void testDefaults() throws Exception {
@@ -67,10 +72,11 @@ public class VpnProfileTest {
         assertFalse(p.isMetered);
         assertEquals(1360, p.maxMtu);
         assertFalse(p.areAuthParamsInline);
+        assertFalse(p.isRestrictedToTestNetworks);
     }
 
     private VpnProfile getSampleIkev2Profile(String key) {
-        final VpnProfile p = new VpnProfile(key);
+        final VpnProfile p = new VpnProfile(key, true /* isRestrictedToTestNetworks */);
 
         p.name = "foo";
         p.type = VpnProfile.TYPE_IKEV2_IPSEC_USER_PASS;
@@ -116,7 +122,7 @@ public class VpnProfileTest {
 
     @Test
     public void testParcelUnparcel() {
-        assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 22);
+        assertParcelSane(getSampleIkev2Profile(DUMMY_PROFILE_KEY), 23);
     }
 
     @Test
@@ -159,14 +165,41 @@ public class VpnProfileTest {
         assertNull(VpnProfile.decode(DUMMY_PROFILE_KEY, tooManyValues));
     }
 
+    private String getEncodedDecodedIkev2ProfileMissingValues(int... missingIndices) {
+        // Sort to ensure when we remove, we can do it from greatest first.
+        Arrays.sort(missingIndices);
+
+        final String encoded = new String(getSampleIkev2Profile(DUMMY_PROFILE_KEY).encode());
+        final List<String> parts =
+                new ArrayList<>(Arrays.asList(encoded.split(VpnProfile.VALUE_DELIMITER)));
+
+        // Remove from back first to ensure indexing is consistent.
+        for (int i = missingIndices.length - 1; i >= 0; i--) {
+            parts.remove(missingIndices[i]);
+        }
+
+        return String.join(VpnProfile.VALUE_DELIMITER, parts.toArray(new String[0]));
+    }
+
     @Test
     public void testEncodeDecodeInvalidNumberOfValues() {
-        final VpnProfile profile = getSampleIkev2Profile(DUMMY_PROFILE_KEY);
-        final String encoded = new String(profile.encode());
-        final byte[] tooFewValues =
-                encoded.substring(0, encoded.lastIndexOf(VpnProfile.VALUE_DELIMITER)).getBytes();
+        final String tooFewValues =
+                getEncodedDecodedIkev2ProfileMissingValues(
+                        ENCODED_INDEX_AUTH_PARAMS_INLINE,
+                        ENCODED_INDEX_RESTRICTED_TO_TEST_NETWORKS /* missingIndices */);
 
-        assertNull(VpnProfile.decode(DUMMY_PROFILE_KEY, tooFewValues));
+        assertNull(VpnProfile.decode(DUMMY_PROFILE_KEY, tooFewValues.getBytes()));
+    }
+
+    @Test
+    public void testEncodeDecodeMissingIsRestrictedToTestNetworks() {
+        final String tooFewValues =
+                getEncodedDecodedIkev2ProfileMissingValues(
+                        ENCODED_INDEX_RESTRICTED_TO_TEST_NETWORKS /* missingIndices */);
+
+        // Verify decoding without isRestrictedToTestNetworks defaults to false
+        final VpnProfile decoded = VpnProfile.decode(DUMMY_PROFILE_KEY, tooFewValues.getBytes());
+        assertFalse(decoded.isRestrictedToTestNetworks);
     }
 
     @Test
