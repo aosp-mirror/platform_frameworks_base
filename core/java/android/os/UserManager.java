@@ -4102,12 +4102,25 @@ public class UserManager {
     }
 
     /**
-     * Returns true if the user switcher should be shown, this will be if device supports multi-user
-     * and there are at least 2 users available that are not managed profiles.
-     * @hide
+     * Returns true if the user switcher should be shown.
+     * I.e., returns whether the user switcher is enabled and there is something actionable to show.
+     *
      * @return true if user switcher should be shown.
+     * @hide
      */
     public boolean isUserSwitcherEnabled() {
+        return isUserSwitcherEnabled(false);
+    }
+
+    /**
+     * Returns true if the user switcher should be shown.
+     *
+     * @param showEvenIfNotActionable value to return if the feature is enabled but there is nothing
+     *                                actionable for the user to do anyway
+     * @return true if user switcher should be shown.
+     * @hide
+     */
+    public boolean isUserSwitcherEnabled(boolean showEvenIfNotActionable) {
         if (!supportsMultipleUsers()) {
             return false;
         }
@@ -4118,15 +4131,26 @@ public class UserManager {
         if (isDeviceInDemoMode(mContext)) {
             return false;
         }
-        // If user disabled this feature, don't show switcher
-        final boolean userSwitcherEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.USER_SWITCHER_ENABLED, 1) != 0;
-        if (!userSwitcherEnabled) {
+        // Check the Settings.Global.USER_SWITCHER_ENABLED that the user can toggle on/off.
+        final boolean userSwitcherSettingOn = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.USER_SWITCHER_ENABLED,
+                Resources.getSystem().getBoolean(R.bool.config_showUserSwitcherByDefault) ? 1 : 0)
+                != 0;
+        if (!userSwitcherSettingOn) {
             return false;
         }
-        List<UserInfo> users = getUsers(true);
+
+        // The feature is enabled. But is it worth showing?
+        return showEvenIfNotActionable
+                || areThereUsersToWhichToSwitch() // There are switchable users.
+                || !hasUserRestriction(UserManager.DISALLOW_ADD_USER); // New users can be added.
+    }
+
+    /** Returns whether there are any users (other than the current user) to which to switch. */
+    private boolean areThereUsersToWhichToSwitch() {
+        final List<UserInfo> users = getUsers(true);
         if (users == null) {
-           return false;
+            return false;
         }
         int switchableUserCount = 0;
         for (UserInfo user : users) {
@@ -4134,9 +4158,7 @@ public class UserManager {
                 ++switchableUserCount;
             }
         }
-        final boolean guestEnabled = !mContext.getSystemService(DevicePolicyManager.class)
-                .getGuestUserDisabled(null);
-        return switchableUserCount > 1 || guestEnabled;
+        return switchableUserCount > 1;
     }
 
     /**
