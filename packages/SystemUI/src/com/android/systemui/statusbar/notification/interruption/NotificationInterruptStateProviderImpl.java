@@ -146,14 +146,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        if (!entry.isBubble()) {
-            if (DEBUG) {
-                Log.d(TAG, "No bubble up: notification " + sbn.getKey()
-                        + " is bubble? " + entry.isBubble());
-            }
-            return false;
-        }
-
         if (entry.getBubbleMetadata() == null
                 || (entry.getBubbleMetadata().getShortcutId() == null
                     && entry.getBubbleMetadata().getIntent() == null)) {
