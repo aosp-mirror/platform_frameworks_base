@@ -18,6 +18,7 @@ java_library {
   static_libs: [
     "truth-prebuilt",
     "androidx.test.uiautomator_uiautomator",
+    "androidx.test.ext.junit",
   ],
   sdk_version: "test_current",
 }
