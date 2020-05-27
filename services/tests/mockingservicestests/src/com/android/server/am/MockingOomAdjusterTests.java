@@ -63,6 +63,7 @@ import static com.android.server.am.ProcessList.VISIBLE_APP_ADJ;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.answer;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.anyLong;
@@ -170,6 +171,7 @@ public class MockingOomAdjusterTests {
                 mock(OomAdjProfiler.class));
         doReturn(new ActivityManagerService.ProcessChangeItem()).when(sService)
                 .enqueueProcessChangeItemLocked(anyInt(), anyInt());
+        doReturn(true).when(sService).containsTopUiOrRunningRemoteAnimOrEmptyLocked(any());
         sService.mOomAdjuster = new OomAdjuster(sService, sService.mProcessList,
                 mock(ActiveUids.class));
         sService.mOomAdjuster.mAdjSeq = 10000;
@@ -262,6 +264,21 @@ public class MockingOomAdjusterTests {
         doReturn(PROCESS_STATE_TOP).when(sService.mAtmInternal).getTopProcessState();
 
         assertProcStates(app, PROCESS_STATE_TOP_SLEEPING, VISIBLE_APP_ADJ, SCHED_GROUP_TOP_APP);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void testUpdateOomAdj_DoOne_TopApp_PreemptedByTopUi() {
+        ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
+        doReturn(PROCESS_STATE_TOP).when(sService.mAtmInternal).getTopProcessState();
+        doReturn(app).when(sService).getTopAppLocked();
+        doReturn(false).when(sService).containsTopUiOrRunningRemoteAnimOrEmptyLocked(eq(app));
+        sService.mWakefulness = PowerManagerInternal.WAKEFULNESS_AWAKE;
+        sService.mOomAdjuster.updateOomAdjLocked(app, false, OomAdjuster.OOM_ADJ_REASON_NONE);
+        doReturn(null).when(sService).getTopAppLocked();
+
+        assertProcStates(app, PROCESS_STATE_TOP, FOREGROUND_APP_ADJ, SCHED_GROUP_DEFAULT);
     }
 
     @SuppressWarnings("GuardedBy")
