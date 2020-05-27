@@ -16,7 +16,6 @@
 package com.android.server.blob;
 
 import static com.android.server.blob.BlobStoreConfig.IDLE_JOB_ID;
-import static com.android.server.blob.BlobStoreConfig.IDLE_JOB_PERIOD_MILLIS;
 import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 
@@ -60,7 +59,7 @@ public class BlobStoreIdleJobService extends JobService {
                 new ComponentName(context, BlobStoreIdleJobService.class))
                         .setRequiresDeviceIdle(true)
                         .setRequiresCharging(true)
-                        .setPeriodic(IDLE_JOB_PERIOD_MILLIS)
+                        .setPeriodic(BlobStoreConfig.getIdleJobPeriodMs())
                         .build();
         jobScheduler.schedule(job);
         if (LOGV) {
