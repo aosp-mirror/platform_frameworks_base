@@ -115,6 +115,7 @@ import android.os.UserHandle;
 import android.sysprop.DisplayProperties;
 import android.util.AndroidRuntimeException;
 import android.util.DisplayMetrics;
+import android.util.EventLog;
 import android.util.Log;
 import android.util.LongArray;
 import android.util.MergedConfiguration;
@@ -7946,6 +7947,19 @@ public final class ViewRootImpl implements ViewParent,
             InputEventReceiver receiver, int flags, boolean processImmediately) {
         QueuedInputEvent q = obtainQueuedInputEvent(event, receiver, flags);
 
+        if (event instanceof MotionEvent) {
+            MotionEvent me = (MotionEvent) event;
+            if (me.getAction() == MotionEvent.ACTION_CANCEL) {
+                EventLog.writeEvent(EventLogTags.VIEW_ENQUEUE_INPUT_EVENT, "Motion - Cancel",
+                        getTitle());
+            }
+        } else if (event instanceof KeyEvent) {
+            KeyEvent ke = (KeyEvent) event;
+            if (ke.isCanceled()) {
+                EventLog.writeEvent(EventLogTags.VIEW_ENQUEUE_INPUT_EVENT, "Key - Cancel",
+                        getTitle());
+            }
+        }
         // Always enqueue the input event in order, regardless of its time stamp.
         // We do this because the application or the IME may inject key events
         // in response to touch events and we want to ensure that the injected keys
