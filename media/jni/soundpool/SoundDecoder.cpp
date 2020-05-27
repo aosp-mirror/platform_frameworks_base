@@ -57,7 +57,7 @@ void SoundDecoder::quit()
     mThreadPool->quit();
 }
 
-void SoundDecoder::run(int32_t id __unused /* ALOGV only */)
+void SoundDecoder::run(int32_t id)
 {
     ALOGV("%s(%d): entering", __func__, id);
     std::unique_lock lock(mLock);
