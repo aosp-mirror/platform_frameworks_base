@@ -21,7 +21,6 @@ import android.content.rollback.PackageRollbackInfo;
 import android.content.rollback.PackageRollbackInfo.RestoreInfo;
 import android.os.storage.StorageManager;
 import android.util.Slog;
-import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -130,20 +129,15 @@ public class AppDataRollbackHelper {
             if ((flags & Installer.FLAG_STORAGE_CE) != 0) {
                 long ceSnapshotInode = mApexManager.snapshotCeData(
                         userId, rollbackId, packageRollbackInfo.getPackageName());
-                if (ceSnapshotInode > 0) {
-                    packageRollbackInfo.putCeSnapshotInode(userId, ceSnapshotInode);
-                } else {
+                if (ceSnapshotInode <= 0) {
                     return false;
                 }
             }
         } else {
             // APK
             try {
-                long ceSnapshotInode = mInstaller.snapshotAppData(
+                mInstaller.snapshotAppData(
                         packageRollbackInfo.getPackageName(), userId, rollbackId, flags);
-                if ((flags & Installer.FLAG_STORAGE_CE) != 0) {
-                    packageRollbackInfo.putCeSnapshotInode(userId, ceSnapshotInode);
-                }
             } catch (InstallerException ie) {
                 Slog.e(TAG, "Unable to create app data snapshot for: "
                         + packageRollbackInfo.getPackageName() + ", userId: " + userId, ie);
@@ -204,18 +198,10 @@ public class AppDataRollbackHelper {
     // TODO(b/136241838): Move into Rollback and synchronize there.
     public void destroyAppDataSnapshot(int rollbackId, PackageRollbackInfo packageRollbackInfo,
             int user) {
-        int storageFlags = Installer.FLAG_STORAGE_DE;
-        final SparseLongArray ceSnapshotInodes = packageRollbackInfo.getCeSnapshotInodes();
-        long ceSnapshotInode = ceSnapshotInodes.get(user);
-        if (ceSnapshotInode > 0) {
-            storageFlags |= Installer.FLAG_STORAGE_CE;
-        }
         try {
+            // Delete both DE and CE snapshots if any
             mInstaller.destroyAppDataSnapshot(packageRollbackInfo.getPackageName(), user,
-                    ceSnapshotInode, rollbackId, storageFlags);
-            if ((storageFlags & Installer.FLAG_STORAGE_CE) != 0) {
-                ceSnapshotInodes.delete(user);
-            }
+                    0, rollbackId, Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE);
         } catch (InstallerException ie) {
             Slog.e(TAG, "Unable to delete app data snapshot for "
                         + packageRollbackInfo.getPackageName(), ie);

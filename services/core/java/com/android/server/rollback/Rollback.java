@@ -40,7 +40,6 @@ import android.os.ext.SdkExtensions;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -373,8 +372,7 @@ class Rollback {
                 new VersionedPackage(packageName, newVersion),
                 new VersionedPackage(packageName, installedVersion),
                 new ArrayList<>() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                isApex, false /* isApkInApex */, new ArrayList<>(),
-                new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
+                isApex, false /* isApkInApex */, new ArrayList<>(), rollbackDataPolicy);
 
         synchronized (mLock) {
             info.getPackages().add(packageRollbackInfo);
@@ -399,8 +397,7 @@ class Rollback {
                 new VersionedPackage(packageName, 0 /* newVersion */),
                 new VersionedPackage(packageName, installedVersion),
                 new ArrayList<>() /* pendingBackups */, new ArrayList<>() /* pendingRestores */,
-                false /* isApex */, true /* isApkInApex */, new ArrayList<>(),
-                new SparseLongArray() /* ceSnapshotInodes */, rollbackDataPolicy);
+                false /* isApex */, true /* isApkInApex */, new ArrayList<>(), rollbackDataPolicy);
         synchronized (mLock) {
             info.getPackages().add(packageRollbackInfo);
         }

@@ -31,11 +31,9 @@ import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 
 import com.android.server.pm.PackageList;
 import com.android.server.pm.parsing.pkg.PackageImpl;
-
 import com.google.common.collect.Range;
 
 import org.junit.Before;
@@ -457,8 +455,7 @@ public class RollbackUnitTest {
             String packageName, long fromVersion, long toVersion, boolean isApex) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
                 new VersionedPackage(packageName, toVersion),
-                new ArrayList<>(), new ArrayList<>(), isApex, false, new ArrayList<>(),
-                new SparseLongArray());
+                new ArrayList<>(), new ArrayList<>(), isApex, false, new ArrayList<>());
     }
 
     /**
@@ -471,8 +468,7 @@ public class RollbackUnitTest {
             String packageName, long fromVersion, long toVersion) {
         return new PackageRollbackInfo(new VersionedPackage(packageName, fromVersion),
                 new VersionedPackage(packageName, toVersion),
-                new ArrayList<>(), new ArrayList<>(), false, true, new ArrayList<>(),
-                new SparseLongArray());
+                new ArrayList<>(), new ArrayList<>(), false, true, new ArrayList<>());
     }
 
     private static class PackageRollbackInfoForPackage implements
