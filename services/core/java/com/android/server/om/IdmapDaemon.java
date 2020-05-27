@@ -30,6 +30,7 @@ import android.util.Slog;
 
 import com.android.server.FgThread;
 
+import java.io.File;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -124,9 +125,13 @@ class IdmapDaemon {
         }
     }
 
-    String getIdmapPath(String overlayPath, int userId) throws TimeoutException, RemoteException {
+    boolean idmapExists(String overlayPath, int userId) {
         try (Connection c = connect()) {
-            return mService.getIdmapPath(overlayPath, userId);
+            return new File(mService.getIdmapPath(overlayPath, userId)).isFile();
+        } catch (Exception e) {
+            Slog.wtf(TAG, "failed to check if idmap exists for " + overlayPath + ": "
+                    + e.getMessage());
+            return false;
         }
     }
 

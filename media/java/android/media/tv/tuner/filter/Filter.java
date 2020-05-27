@@ -221,12 +221,9 @@ public class Filter implements AutoCloseable {
     }
 
     /** @hide */
-    public void setMainType(@Type int mainType) {
+    public void setType(@Type int mainType, @Subtype int subtype) {
         mMainType = mainType;
-    }
-    /** @hide */
-    public void setSubtype(@Subtype int subtype) {
-        mSubtype = subtype;
+        mSubtype = TunerUtils.getFilterSubtype(mainType, subtype);
     }
 
     /** @hide */

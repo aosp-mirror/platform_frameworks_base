@@ -146,14 +146,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
             return false;
         }
 
-        if (!entry.isBubble()) {
-            if (DEBUG) {
-                Log.d(TAG, "No bubble up: notification " + sbn.getKey()
-                        + " is bubble? " + entry.isBubble());
-            }
-            return false;
-        }
-
         if (entry.getBubbleMetadata() == null
                 || (entry.getBubbleMetadata().getShortcutId() == null
                     && entry.getBubbleMetadata().getIntent() == null)) {
@@ -203,6 +195,13 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
         }
 
         if (!canAlertAwakeCommon(entry)) {
+            return false;
+        }
+
+        if (isSnoozedPackage(sbn)) {
+            if (DEBUG_HEADS_UP) {
+                Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
+            }
             return false;
         }
 
@@ -365,14 +364,6 @@ public class NotificationInterruptStateProviderImpl implements NotificationInter
                 return false;
             }
         }
-
-        if (isSnoozedPackage(sbn)) {
-            if (DEBUG_HEADS_UP) {
-                Log.d(TAG, "No alerting: snoozed package: " + sbn.getKey());
-            }
-            return false;
-        }
-
         return true;
     }
 

@@ -39,18 +39,18 @@ static void parseStringForPath(JNIEnv* env, jobject, jlong skPathHandle, jstring
     }
 }
 
-static long createEmptyPathData(JNIEnv*, jobject) {
+static jlong createEmptyPathData(JNIEnv*, jobject) {
     PathData* pathData = new PathData();
     return reinterpret_cast<jlong>(pathData);
 }
 
-static long createPathData(JNIEnv*, jobject, jlong pathDataPtr) {
+static jlong createPathData(JNIEnv*, jobject, jlong pathDataPtr) {
     PathData* pathData = reinterpret_cast<PathData*>(pathDataPtr);
     PathData* newPathData = new PathData(*pathData);
     return reinterpret_cast<jlong>(newPathData);
 }
 
-static long createPathDataFromStringPath(JNIEnv* env, jobject, jstring inputStr, jint strLength) {
+static jlong createPathDataFromStringPath(JNIEnv* env, jobject, jstring inputStr, jint strLength) {
     const char* pathString = env->GetStringUTFChars(inputStr, NULL);
     PathData* pathData = new PathData();
     PathParser::ParseResult result;
@@ -65,7 +65,7 @@ static long createPathDataFromStringPath(JNIEnv* env, jobject, jstring inputStr,
     }
 }
 
-static bool interpolatePathData(JNIEnv*, jobject, jlong outPathDataPtr, jlong fromPathDataPtr,
+static jboolean interpolatePathData(JNIEnv*, jobject, jlong outPathDataPtr, jlong fromPathDataPtr,
         jlong toPathDataPtr, jfloat fraction) {
     PathData* outPathData = reinterpret_cast<PathData*>(outPathDataPtr);
     PathData* fromPathData = reinterpret_cast<PathData*>(fromPathDataPtr);
@@ -79,7 +79,7 @@ static void deletePathData(JNIEnv*, jobject, jlong pathDataHandle) {
     delete pathData;
 }
 
-static bool canMorphPathData(JNIEnv*, jobject, jlong fromPathDataPtr, jlong toPathDataPtr) {
+static jboolean canMorphPathData(JNIEnv*, jobject, jlong fromPathDataPtr, jlong toPathDataPtr) {
     PathData* fromPathData = reinterpret_cast<PathData*>(fromPathDataPtr);
     PathData* toPathData = reinterpret_cast<PathData*>(toPathDataPtr);
     return VectorDrawableUtils::canMorph(*fromPathData, *toPathData);

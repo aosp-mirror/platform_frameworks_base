@@ -66,7 +66,7 @@ public abstract class CustomInterpolatorTransformation
             return false;
         }
         View view = ownState.getTransformedView();
-        CrossFadeHelper.fadeIn(view, transformationAmount);
+        CrossFadeHelper.fadeIn(view, transformationAmount, true /* remap */);
         ownState.transformViewFullyFrom(otherState, this, transformationAmount);
         otherState.recycle();
         return true;

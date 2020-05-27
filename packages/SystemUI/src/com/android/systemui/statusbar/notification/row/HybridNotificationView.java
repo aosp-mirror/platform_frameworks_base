@@ -92,7 +92,7 @@ public class HybridNotificationView extends AlphaOptimizedLinearLayout
                         // We want to transform from the same y location as the title
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
-                        CrossFadeHelper.fadeIn(mTextView, transformationAmount);
+                        CrossFadeHelper.fadeIn(mTextView, transformationAmount, true /* remap */);
                         if (otherState != null) {
                             ownState.transformViewVerticalFrom(otherState, transformationAmount);
                             otherState.recycle();

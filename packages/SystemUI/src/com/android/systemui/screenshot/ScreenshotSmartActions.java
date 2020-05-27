@@ -26,6 +26,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -48,7 +49,7 @@ public class ScreenshotSmartActions {
     static CompletableFuture<List<Notification.Action>> getSmartActionsFuture(
             String screenshotId, Uri screenshotUri, Bitmap image,
             ScreenshotNotificationSmartActionsProvider smartActionsProvider,
-            boolean smartActionsEnabled, boolean isManagedProfile) {
+            boolean smartActionsEnabled, UserHandle userHandle) {
         if (!smartActionsEnabled) {
             Slog.i(TAG, "Screenshot Intelligence not enabled, returning empty list.");
             return CompletableFuture.completedFuture(Collections.emptyList());
@@ -60,7 +61,7 @@ public class ScreenshotSmartActions {
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
 
-        Slog.d(TAG, "Screenshot from a managed profile: " + isManagedProfile);
+        Slog.d(TAG, "Screenshot from user profile: " + userHandle.getIdentifier());
         CompletableFuture<List<Notification.Action>> smartActionsFuture;
         long startTimeMs = SystemClock.uptimeMillis();
         try {
@@ -71,7 +72,7 @@ public class ScreenshotSmartActions {
                             ? runningTask.topActivity
                             : new ComponentName("", "");
             smartActionsFuture = smartActionsProvider.getActions(
-                    screenshotId, screenshotUri, image, componentName, isManagedProfile);
+                    screenshotId, screenshotUri, image, componentName, userHandle);
         } catch (Throwable e) {
             long waitTimeMs = SystemClock.uptimeMillis() - startTimeMs;
             smartActionsFuture = CompletableFuture.completedFuture(Collections.emptyList());

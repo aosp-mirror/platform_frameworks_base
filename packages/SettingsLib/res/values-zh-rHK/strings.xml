@@ -554,6 +554,5 @@
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"已啟用"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"您的裝置必須重新開機，才能套用此變更。請立即重新開機或取消。"</string>
     <string name="accessibility_work_profile_app_description" msgid="5470883112342119165">"工作設定檔入面嘅「<xliff:g id="APP_NAME">%s</xliff:g>」"</string>
-    <!-- no translation found for media_transfer_wired_usb_device_name (7699141088423210903) -->
-    <skip />
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"有線耳機"</string>
 </resources>

@@ -175,6 +175,7 @@
     <dimen name="car_user_switcher_margin_top">@*android:dimen/car_padding_4</dimen>
 
     <dimen name="car_navigation_button_width">64dp</dimen>
+    <dimen name="car_navigation_button_icon_height">44dp</dimen>
     <dimen name="car_navigation_bar_width">760dp</dimen>
     <dimen name="car_left_navigation_bar_width">96dp</dimen>
     <dimen name="car_right_navigation_bar_width">96dp</dimen>

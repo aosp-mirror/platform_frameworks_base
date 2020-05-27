@@ -133,7 +133,7 @@ public class CrossFadeHelper {
     }
 
     public static void fadeIn(View view, float fadeInAmount) {
-        fadeIn(view, fadeInAmount, true /* remap */);
+        fadeIn(view, fadeInAmount, false /* remap */);
     }
 
     /**

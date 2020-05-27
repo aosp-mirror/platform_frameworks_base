@@ -71,6 +71,11 @@ java_defaults {
     // stubs libraries.
     libs: ["framework-annotations-lib"],
 
+    // Framework modules are not generally shared libraries, i.e. they are not
+    // intended, and must not be allowed, to be used in a <uses-library> manifest
+    // entry.
+    shared_library: false,
+
     // Enable api lint. This will eventually become the default for java_sdk_library
     // but it cannot yet be turned on because some usages have not been cleaned up.
     // TODO(b/156126315) - Remove when no longer needed.

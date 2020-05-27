@@ -32,6 +32,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
 import android.app.Notification;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -48,7 +49,7 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
 import android.os.Bundle;
-import android.os.Vibrator;
+import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
@@ -186,7 +187,6 @@ public class BubbleStackView extends FrameLayout
     private final SpringAnimation mExpandedViewYAnim;
     private final BubbleData mBubbleData;
 
-    private final Vibrator mVibrator;
     private final ValueAnimator mDesaturateAndDarkenAnimator;
     private final Paint mDesaturateAndDarkenPaint = new Paint();
 
@@ -699,8 +699,6 @@ public class BubbleStackView extends FrameLayout
         // We use the real size & subtract screen decorations / window insets ourselves when needed
         wm.getDefaultDisplay().getRealSize(mDisplaySize);
 
-        mVibrator = (Vibrator) context.getSystemService(Context.VIBRATOR_SERVICE);
-
         mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
         int elevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
 
@@ -763,9 +761,13 @@ public class BubbleStackView extends FrameLayout
         targetView.setTranslationY(
                 getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height));
 
+        final ContentResolver contentResolver = getContext().getContentResolver();
+        final int dismissRadius = Settings.Secure.getInt(
+                contentResolver, "bubble_dismiss_radius", mBubbleSize * 2 /* default */);
+
         // Save the MagneticTarget instance for the newly set up view - we'll add this to the
         // MagnetizedObjects.
-        mMagneticTarget = new MagnetizedObject.MagneticTarget(targetView, mBubbleSize * 2);
+        mMagneticTarget = new MagnetizedObject.MagneticTarget(targetView, dismissRadius);
 
         mExpandedViewXAnim =
                 new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
@@ -1027,6 +1029,7 @@ public class BubbleStackView extends FrameLayout
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
             mBubbleContainer.removeView(mBubbleOverflow.getBtn());
+            mBubbleOverflow.updateDimensions();
             mBubbleOverflow.updateIcon(mContext,this);
             overflowBtnIndex = mBubbleContainer.getChildCount();
         }
@@ -2327,7 +2330,7 @@ public class BubbleStackView extends FrameLayout
                 getNormalizedXPosition(),
                 getNormalizedYPosition(),
                 bubble.showInShade(),
-                bubble.isOngoing(),
+                false /* isOngoing (unused) */,
                 false /* isAppForeground (unused) */);
     }
 }

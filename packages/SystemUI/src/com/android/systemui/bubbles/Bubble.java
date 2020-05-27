@@ -57,7 +57,6 @@ class Bubble implements BubbleViewProvider {
 
     private NotificationEntry mEntry;
     private final String mKey;
-    private final String mGroupId;
 
     private long mLastUpdated;
     private long mLastAccessed;
@@ -69,6 +68,8 @@ class Bubble implements BubbleViewProvider {
 
     /** Whether flyout text should be suppressed, regardless of any other flags or state. */
     private boolean mSuppressFlyout;
+    /** Whether this bubble should auto expand regardless of the normal flag, used for overflow. */
+    private boolean mShouldAutoExpand;
 
     // Items that are typically loaded later
     private String mAppName;
@@ -96,17 +97,10 @@ class Bubble implements BubbleViewProvider {
     private int mDotColor;
     private Path mDotPath;
 
-
-    public static String groupId(NotificationEntry entry) {
-        UserHandle user = entry.getSbn().getUser();
-        return user.getIdentifier() + "|" + entry.getSbn().getPackageName();
-    }
-
     // TODO: Decouple Bubble from NotificationEntry and transform ShortcutInfo into Bubble
     Bubble(ShortcutInfo shortcutInfo) {
         mShortcutInfo = shortcutInfo;
         mKey = shortcutInfo.getId();
-        mGroupId = shortcutInfo.getId();
     }
 
     /** Used in tests when no UI is required. */
@@ -116,7 +110,6 @@ class Bubble implements BubbleViewProvider {
         mEntry = e;
         mKey = e.getKey();
         mLastUpdated = e.getSbn().getPostTime();
-        mGroupId = groupId(e);
         mSuppressionListener = listener;
     }
 
@@ -127,10 +120,6 @@ class Bubble implements BubbleViewProvider {
 
     public NotificationEntry getEntry() {
         return mEntry;
-    }
-
-    public String getGroupId() {
-        return mGroupId;
     }
 
     public String getPackageName() {
@@ -297,17 +286,10 @@ class Bubble implements BubbleViewProvider {
     }
 
     /**
-     * @return the newer of {@link #getLastUpdateTime()} and {@link #getLastAccessTime()}
+     * @return the last time this bubble was updated or accessed, whichever is most recent.
      */
     long getLastActivity() {
         return Math.max(mLastUpdated, mLastAccessed);
-    }
-
-    /**
-     * @return the timestamp in milliseconds of the most recent notification entry for this bubble
-     */
-    long getLastUpdateTime() {
-        return mLastUpdated;
     }
 
     /**
@@ -411,15 +393,6 @@ class Bubble implements BubbleViewProvider {
         return mFlyoutMessage;
     }
 
-    /**
-     * Returns whether the notification for this bubble is a foreground service. It shows that this
-     * is an ongoing bubble.
-     */
-    boolean isOngoing() {
-        int flags = mEntry.getSbn().getNotification().flags;
-        return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
-    }
-
     float getDesiredHeight(Context context) {
         Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
         boolean useRes = data.getDesiredHeightResId() != 0;
@@ -499,7 +472,11 @@ class Bubble implements BubbleViewProvider {
 
     boolean shouldAutoExpand() {
         Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
-        return metadata != null && metadata.getAutoExpandBubble();
+        return (metadata != null && metadata.getAutoExpandBubble()) ||  mShouldAutoExpand;
+    }
+
+    void setShouldAutoExpand(boolean shouldAutoExpand) {
+        mShouldAutoExpand = shouldAutoExpand;
     }
 
     @Override
@@ -562,7 +539,7 @@ class Bubble implements BubbleViewProvider {
                     normalX,
                     normalY,
                     this.showInShade(),
-                    this.isOngoing(),
+                    false /* isOngoing (unused) */,
                     false /* isAppForeground (unused) */);
         }
     }

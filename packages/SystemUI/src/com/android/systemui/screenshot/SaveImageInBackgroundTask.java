@@ -26,7 +26,6 @@ import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Icon;
@@ -146,7 +145,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
             CompletableFuture<List<Notification.Action>> smartActionsFuture =
                     ScreenshotSmartActions.getSmartActionsFuture(
                             mScreenshotId, uri, image, mSmartActionsProvider,
-                            mSmartActionsEnabled, isManagedProfile(mContext));
+                            mSmartActionsEnabled, getUserHandle(mContext));
 
             try {
                 // First, write the actual data for our screenshot
@@ -382,10 +381,9 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         }
     }
 
-    private boolean isManagedProfile(Context context) {
+    private UserHandle getUserHandle(Context context) {
         UserManager manager = UserManager.get(context);
-        UserInfo info = manager.getUserInfo(getUserHandleOfForegroundApplication(context));
-        return info.isManagedProfile();
+        return manager.getUserInfo(getUserHandleOfForegroundApplication(context)).getUserHandle();
     }
 
     private List<Notification.Action> buildSmartActions(

@@ -113,7 +113,7 @@ static void restoreUnclippedLayer(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle, 
     get_canvas(canvasHandle)->restoreUnclippedLayer(saveCount, *paint);
 }
 
-static bool restore(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
+static jboolean restore(CRITICAL_JNI_PARAMS_COMMA jlong canvasHandle) {
     Canvas* canvas = get_canvas(canvasHandle);
     if (canvas->getSaveCount() <= 1) {
         return false; // cannot restore anymore

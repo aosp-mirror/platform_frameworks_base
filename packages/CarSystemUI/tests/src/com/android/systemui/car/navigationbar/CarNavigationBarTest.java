@@ -89,6 +89,8 @@ public class CarNavigationBarTest extends SysuiTestCase {
     @Mock
     private ButtonSelectionStateListener mButtonSelectionStateListener;
     @Mock
+    private ButtonRoleHolderController mButtonRoleHolderController;
+    @Mock
     private IStatusBarService mBarService;
     @Mock
     private KeyguardStateController mKeyguardStateController;
@@ -137,8 +139,8 @@ public class CarNavigationBarTest extends SysuiTestCase {
                 mCarNavigationBarController, mLightBarController, mStatusBarIconController,
                 mWindowManager, mDeviceProvisionedController, new CommandQueue(mContext),
                 mAutoHideController, mButtonSelectionStateListener, mHandler, mUiBgExecutor,
-                mBarService, () -> mKeyguardStateController, mButtonSelectionStateController,
-                () -> mIconPolicy, () -> mIconController);
+                mBarService, () -> mKeyguardStateController, () -> mIconPolicy,
+                () -> mIconController);
     }
 
     @Test

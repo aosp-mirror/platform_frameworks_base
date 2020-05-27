@@ -262,10 +262,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         setClipToOutline(mAlwaysRoundBothCorners);
     }
 
-    /**
-     * Set the topRoundness of this view.
-     * @return Whether the roundness was changed.
-     */
+    @Override
     public boolean setTopRoundness(float topRoundness, boolean animate) {
         if (mTopRoundness != topRoundness) {
             mTopRoundness = topRoundness;
@@ -302,10 +299,7 @@ public abstract class ExpandableOutlineView extends ExpandableView {
         return mCurrentBottomRoundness * mOutlineRadius;
     }
 
-    /**
-     * Set the bottom roundness of this view.
-     * @return Whether the roundness was changed.
-     */
+    @Override
     public boolean setBottomRoundness(float bottomRoundness, boolean animate) {
         if (mBottomRoundness != bottomRoundness) {
             mBottomRoundness = bottomRoundness;
