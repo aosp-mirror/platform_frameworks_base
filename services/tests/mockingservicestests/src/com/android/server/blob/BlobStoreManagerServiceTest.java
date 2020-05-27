@@ -19,7 +19,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealM
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.server.blob.BlobStoreConfig.SESSION_EXPIRY_TIMEOUT_MILLIS;
+import static com.android.server.blob.BlobStoreConfig.DeviceConfigProperties.SESSION_EXPIRY_TIMEOUT_MS;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -93,6 +93,7 @@ public class BlobStoreManagerServiceTest {
         doReturn(true).when(mBlobsDir).exists();
         doReturn(new File[0]).when(mBlobsDir).listFiles();
         doReturn(true).when(() -> BlobStoreConfig.hasLeaseWaitTimeElapsed(anyLong()));
+        doCallRealMethod().when(() -> BlobStoreConfig.hasSessionExpired(anyLong()));
 
         mContext = InstrumentationRegistry.getTargetContext();
         mHandler = new TestHandler(Looper.getMainLooper());
@@ -236,7 +237,7 @@ public class BlobStoreManagerServiceTest {
     public void testHandleIdleMaintenance_deleteStaleSessions() throws Exception {
         // Setup sessions
         final File sessionFile1 = mock(File.class);
-        doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MILLIS + 1000)
+        doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MS + 1000)
                 .when(sessionFile1).lastModified();
         final long sessionId1 = 342;
         final BlobHandle blobHandle1 = BlobHandle.createWithSha256("digest1".getBytes(),
@@ -256,7 +257,7 @@ public class BlobStoreManagerServiceTest {
         mUserSessions.append(sessionId2, session2);
 
         final File sessionFile3 = mock(File.class);
-        doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MILLIS - 2000)
+        doReturn(System.currentTimeMillis() - SESSION_EXPIRY_TIMEOUT_MS - 2000)
                 .when(sessionFile3).lastModified();
         final long sessionId3 = 9484;
         final BlobHandle blobHandle3 = BlobHandle.createWithSha256("digest3".getBytes(),
