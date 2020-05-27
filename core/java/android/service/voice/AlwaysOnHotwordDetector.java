@@ -19,6 +19,7 @@ package android.service.voice;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.Intent;
@@ -32,6 +33,7 @@ import android.hardware.soundtrigger.SoundTrigger.KeyphraseRecognitionExtra;
 import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.AudioFormat;
+import android.media.permission.Identity;
 import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
@@ -39,6 +41,7 @@ import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.app.IVoiceInteractionManagerService;
+import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -228,6 +231,7 @@ public class AlwaysOnHotwordDetector {
     private KeyphraseMetadata mKeyphraseMetadata;
     private final KeyphraseEnrollmentInfo mKeyphraseEnrollmentInfo;
     private final IVoiceInteractionManagerService mModelManagementService;
+    private final IVoiceInteractionSoundTriggerSession mSoundTriggerSession;
     private final SoundTriggerListener mInternalCallback;
     private final Callback mExternalCallback;
     private final Object mLock = new Object();
@@ -425,6 +429,14 @@ public class AlwaysOnHotwordDetector {
         mHandler = new MyHandler();
         mInternalCallback = new SoundTriggerListener(mHandler);
         mModelManagementService = modelManagementService;
+        try {
+            Identity identity = new Identity();
+            identity.packageName = ActivityThread.currentOpPackageName();
+            mSoundTriggerSession = mModelManagementService.createSoundTriggerSessionAsOriginator(
+                    identity);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
+        }
         new RefreshAvailabiltyTask().execute();
     }
 
@@ -485,7 +497,7 @@ public class AlwaysOnHotwordDetector {
     private int getSupportedAudioCapabilitiesLocked() {
         try {
             ModuleProperties properties =
-                    mModelManagementService.getDspModuleProperties();
+                    mSoundTriggerSession.getDspModuleProperties();
             if (properties != null) {
                 return properties.getAudioCapabilities();
             }
@@ -782,7 +794,7 @@ public class AlwaysOnHotwordDetector {
 
         int code;
         try {
-            code = mModelManagementService.startRecognition(
+            code = mSoundTriggerSession.startRecognition(
                     mKeyphraseMetadata.getId(), mLocale.toLanguageTag(), mInternalCallback,
                     new RecognitionConfig(captureTriggerAudio, allowMultipleTriggers,
                             recognitionExtra, null /* additional data */, audioCapabilities));
@@ -799,7 +811,7 @@ public class AlwaysOnHotwordDetector {
     private int stopRecognitionLocked() {
         int code;
         try {
-            code = mModelManagementService.stopRecognition(mKeyphraseMetadata.getId(),
+            code = mSoundTriggerSession.stopRecognition(mKeyphraseMetadata.getId(),
                     mInternalCallback);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -813,7 +825,7 @@ public class AlwaysOnHotwordDetector {
 
     private int setParameterLocked(@ModelParams int modelParam, int value) {
         try {
-            int code = mModelManagementService.setParameter(mKeyphraseMetadata.getId(), modelParam,
+            int code = mSoundTriggerSession.setParameter(mKeyphraseMetadata.getId(), modelParam,
                     value);
 
             if (code != STATUS_OK) {
@@ -828,7 +840,7 @@ public class AlwaysOnHotwordDetector {
 
     private int getParameterLocked(@ModelParams int modelParam) {
         try {
-            return mModelManagementService.getParameter(mKeyphraseMetadata.getId(), modelParam);
+            return mSoundTriggerSession.getParameter(mKeyphraseMetadata.getId(), modelParam);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -838,7 +850,7 @@ public class AlwaysOnHotwordDetector {
     private ModelParamRange queryParameterLocked(@ModelParams int modelParam) {
         try {
             SoundTrigger.ModelParamRange modelParamRange =
-                    mModelManagementService.queryParameter(mKeyphraseMetadata.getId(), modelParam);
+                    mSoundTriggerSession.queryParameter(mKeyphraseMetadata.getId(), modelParam);
 
             if (modelParamRange == null) {
                 return null;
@@ -972,7 +984,7 @@ public class AlwaysOnHotwordDetector {
             ModuleProperties dspModuleProperties;
             try {
                 dspModuleProperties =
-                        mModelManagementService.getDspModuleProperties();
+                        mSoundTriggerSession.getDspModuleProperties();
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

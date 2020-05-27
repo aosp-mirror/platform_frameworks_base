@@ -51,6 +51,8 @@ import android.hardware.soundtrigger.SoundTrigger.ModuleProperties;
 import android.hardware.soundtrigger.SoundTrigger.RecognitionConfig;
 import android.media.permission.ClearCallingIdentityContext;
 import android.media.permission.Identity;
+import android.media.permission.IdentityContext;
+import android.media.permission.PermissionUtil;
 import android.media.permission.SafeCloseable;
 import android.os.Binder;
 import android.os.Bundle;
@@ -73,6 +75,7 @@ import android.service.voice.VoiceInteractionServiceInfo;
 import android.service.voice.VoiceInteractionSession;
 import android.speech.RecognitionService;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
@@ -82,6 +85,7 @@ import com.android.internal.app.IVoiceActionCheckCallback;
 import com.android.internal.app.IVoiceInteractionManagerService;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
+import com.android.internal.app.IVoiceInteractionSoundTriggerSession;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.os.BackgroundThread;
@@ -97,7 +101,10 @@ import com.android.server.wm.ActivityTaskManagerInternal;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -115,10 +122,10 @@ public class VoiceInteractionManagerService extends SystemService {
     final ActivityManagerInternal mAmInternal;
     final ActivityTaskManagerInternal mAtmInternal;
     final UserManagerInternal mUserManagerInternal;
-    final ArraySet<Integer> mLoadedKeyphraseIds = new ArraySet<>();
+    final ArrayMap<Integer, VoiceInteractionManagerServiceStub.SoundTriggerSession>
+            mLoadedKeyphraseIds = new ArrayMap<>();
     ShortcutServiceInternal mShortcutServiceInternal;
     SoundTriggerInternal mSoundTriggerInternal;
-    SoundTriggerInternal.Session mSoundTriggerSession;
 
     private final RemoteCallbackList<IVoiceInteractionSessionListener>
             mVoiceInteractionSessionListeners = new RemoteCallbackList<>();
@@ -163,14 +170,7 @@ public class VoiceInteractionManagerService extends SystemService {
         if (PHASE_SYSTEM_SERVICES_READY == phase) {
             mShortcutServiceInternal = Objects.requireNonNull(
                     LocalServices.getService(ShortcutServiceInternal.class));
-            // TODO(ytai): temporary hack
-            Identity identity = new Identity();
-            identity.packageName = ActivityThread.currentOpPackageName();
-            try (SafeCloseable ignored = ClearCallingIdentityContext.create()) {
-                mSoundTriggerInternal = LocalServices.getService(
-                        SoundTriggerInternal.class);
-                mSoundTriggerSession = mSoundTriggerInternal.attachAsOriginator(identity);
-            }
+            mSoundTriggerInternal = LocalServices.getService(SoundTriggerInternal.class);
         } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
             mServiceStub.systemRunning(isSafeMode());
         }
@@ -248,10 +248,26 @@ public class VoiceInteractionManagerService extends SystemService {
         private boolean mTemporarilyDisabled;
 
         private final boolean mEnableService;
+        private final List<WeakReference<SoundTriggerSession>> mSessions = new LinkedList<>();
 
         VoiceInteractionManagerServiceStub() {
             mEnableService = shouldEnableService(mContext);
             new RoleObserver(mContext.getMainExecutor());
+        }
+
+        @Override
+        public @NonNull IVoiceInteractionSoundTriggerSession createSoundTriggerSessionAsOriginator(
+                @NonNull Identity originatorIdentity) {
+            Objects.requireNonNull(originatorIdentity);
+            try (SafeCloseable ignored = PermissionUtil.establishIdentityDirect(
+                    originatorIdentity)) {
+                SoundTriggerSession session = new SoundTriggerSession(
+                        mSoundTriggerInternal.attachAsOriginator(IdentityContext.getNonNull()));
+                synchronized (mSessions) {
+                    mSessions.add(new WeakReference<>(session));
+                }
+                return session;
+            }
         }
 
         // TODO: VI Make sure the caller is the current user or profile
@@ -1026,12 +1042,15 @@ public class VoiceInteractionManagerService extends SystemService {
             final long caller = Binder.clearCallingIdentity();
             boolean deleted = false;
             try {
-                int unloadStatus = mSoundTriggerSession.unloadKeyphraseModel(keyphraseId);
-                if (unloadStatus != SoundTriggerInternal.STATUS_OK) {
-                    Slog.w(TAG, "Unable to unload keyphrase sound model:" + unloadStatus);
+                SoundTriggerSession session = mLoadedKeyphraseIds.get(keyphraseId);
+                if (session != null) {
+                    int unloadStatus = session.unloadKeyphraseModel(keyphraseId);
+                    if (unloadStatus != SoundTriggerInternal.STATUS_OK) {
+                        Slog.w(TAG, "Unable to unload keyphrase sound model:" + unloadStatus);
+                    }
+                    deleted = mDbHelper.deleteKeyphraseSoundModel(keyphraseId, callingUserId,
+                            bcp47Locale);
                 }
-                deleted = mDbHelper.deleteKeyphraseSoundModel(
-                        keyphraseId, callingUserId, bcp47Locale);
                 return deleted ? SoundTriggerInternal.STATUS_OK : SoundTriggerInternal.STATUS_ERROR;
             } finally {
                 if (deleted) {
@@ -1104,130 +1123,143 @@ public class VoiceInteractionManagerService extends SystemService {
             return null;
         }
 
-        @Override
-        public ModuleProperties getDspModuleProperties() {
-            // Allow the call if this is the current voice interaction service.
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
+        class SoundTriggerSession extends IVoiceInteractionSoundTriggerSession.Stub {
+            final SoundTriggerInternal.Session mSession;
 
+            SoundTriggerSession(
+                    SoundTriggerInternal.Session session) {
+                mSession = session;
+            }
+
+            @Override
+            public ModuleProperties getDspModuleProperties() {
+                // Allow the call if this is the current voice interaction service.
+                synchronized (VoiceInteractionManagerServiceStub.this) {
+                    enforceIsCurrentVoiceInteractionService();
+
+                    final long caller = Binder.clearCallingIdentity();
+                    try {
+                        return mSession.getModuleProperties();
+                    } finally {
+                        Binder.restoreCallingIdentity(caller);
+                    }
+                }
+            }
+
+            @Override
+            public int startRecognition(int keyphraseId, String bcp47Locale,
+                    IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
+                // Allow the call if this is the current voice interaction service.
+                synchronized (VoiceInteractionManagerServiceStub.this) {
+                    enforceIsCurrentVoiceInteractionService();
+
+                    if (callback == null || recognitionConfig == null || bcp47Locale == null) {
+                        throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
+                    }
+                }
+
+                final int callingUserId = UserHandle.getCallingUserId();
                 final long caller = Binder.clearCallingIdentity();
                 try {
-                    return mSoundTriggerSession.getModuleProperties();
+                    KeyphraseSoundModel soundModel =
+                            mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUserId, bcp47Locale);
+                    if (soundModel == null
+                            || soundModel.getUuid() == null
+                            || soundModel.getKeyphrases() == null) {
+                        Slog.w(TAG, "No matching sound model found in startRecognition");
+                        return SoundTriggerInternal.STATUS_ERROR;
+                    } else {
+                        // Regardless of the status of the start recognition, we need to make sure
+                        // that we unload this model if needed later.
+                        synchronized (VoiceInteractionManagerServiceStub.this) {
+                            mLoadedKeyphraseIds.put(keyphraseId, this);
+                        }
+                        return mSession.startRecognition(
+                                keyphraseId, soundModel, callback, recognitionConfig);
+                    }
                 } finally {
                     Binder.restoreCallingIdentity(caller);
                 }
             }
-        }
 
-        @Override
-        public int startRecognition(int keyphraseId, String bcp47Locale,
-                IRecognitionStatusCallback callback, RecognitionConfig recognitionConfig) {
-            // Allow the call if this is the current voice interaction service.
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
+            @Override
+            public int stopRecognition(int keyphraseId, IRecognitionStatusCallback callback) {
+                // Allow the call if this is the current voice interaction service.
+                synchronized (VoiceInteractionManagerServiceStub.this) {
+                    enforceIsCurrentVoiceInteractionService();
+                }
 
-                if (callback == null || recognitionConfig == null || bcp47Locale == null) {
-                    throw new IllegalArgumentException("Illegal argument(s) in startRecognition");
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSession.stopRecognition(keyphraseId, callback);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
                 }
             }
 
-            final int callingUserId = UserHandle.getCallingUserId();
-            final long caller = Binder.clearCallingIdentity();
-            try {
-                KeyphraseSoundModel soundModel =
-                        mDbHelper.getKeyphraseSoundModel(keyphraseId, callingUserId, bcp47Locale);
-                if (soundModel == null
-                        || soundModel.getUuid() == null
-                        || soundModel.getKeyphrases() == null) {
-                    Slog.w(TAG, "No matching sound model found in startRecognition");
-                    return SoundTriggerInternal.STATUS_ERROR;
-                } else {
-                    // Regardless of the status of the start recognition, we need to make sure
-                    // that we unload this model if needed later.
-                    synchronized (this) {
-                        mLoadedKeyphraseIds.add(keyphraseId);
-                    }
-                    return mSoundTriggerSession.startRecognition(
-                            keyphraseId, soundModel, callback, recognitionConfig);
+            @Override
+            public int setParameter(int keyphraseId, @ModelParams int modelParam, int value) {
+                // Allow the call if this is the current voice interaction service.
+                synchronized (VoiceInteractionManagerServiceStub.this) {
+                    enforceIsCurrentVoiceInteractionService();
                 }
-            } finally {
-                Binder.restoreCallingIdentity(caller);
-            }
-        }
 
-        @Override
-        public int stopRecognition(int keyphraseId, IRecognitionStatusCallback callback) {
-            // Allow the call if this is the current voice interaction service.
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSession.setParameter(keyphraseId, modelParam, value);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
             }
 
-            final long caller = Binder.clearCallingIdentity();
-            try {
-                return mSoundTriggerSession.stopRecognition(keyphraseId, callback);
-            } finally {
-                Binder.restoreCallingIdentity(caller);
-            }
-        }
+            @Override
+            public int getParameter(int keyphraseId, @ModelParams int modelParam) {
+                // Allow the call if this is the current voice interaction service.
+                synchronized (VoiceInteractionManagerServiceStub.this) {
+                    enforceIsCurrentVoiceInteractionService();
+                }
 
-        @Override
-        public int setParameter(int keyphraseId, @ModelParams int modelParam, int value) {
-            // Allow the call if this is the current voice interaction service.
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
-            }
-
-            final long caller = Binder.clearCallingIdentity();
-            try {
-                return mSoundTriggerSession.setParameter(keyphraseId, modelParam, value);
-            } finally {
-                Binder.restoreCallingIdentity(caller);
-            }
-        }
-
-        @Override
-        public int getParameter(int keyphraseId, @ModelParams int modelParam) {
-            // Allow the call if this is the current voice interaction service.
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSession.getParameter(keyphraseId, modelParam);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
             }
 
-            final long caller = Binder.clearCallingIdentity();
-            try {
-                return mSoundTriggerSession.getParameter(keyphraseId, modelParam);
-            } finally {
-                Binder.restoreCallingIdentity(caller);
-            }
-        }
+            @Override
+            @Nullable
+            public ModelParamRange queryParameter(int keyphraseId, @ModelParams int modelParam) {
+                // Allow the call if this is the current voice interaction service.
+                synchronized (VoiceInteractionManagerServiceStub.this) {
+                    enforceIsCurrentVoiceInteractionService();
+                }
 
-        @Override
-        @Nullable
-        public ModelParamRange queryParameter(int keyphraseId, @ModelParams int modelParam) {
-            // Allow the call if this is the current voice interaction service.
-            synchronized (this) {
-                enforceIsCurrentVoiceInteractionService();
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSession.queryParameter(keyphraseId, modelParam);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
             }
 
-            final long caller = Binder.clearCallingIdentity();
-            try {
-                return mSoundTriggerSession.queryParameter(keyphraseId, modelParam);
-            } finally {
-                Binder.restoreCallingIdentity(caller);
+            private int unloadKeyphraseModel(int keyphraseId) {
+                final long caller = Binder.clearCallingIdentity();
+                try {
+                    return mSession.unloadKeyphraseModel(keyphraseId);
+                } finally {
+                    Binder.restoreCallingIdentity(caller);
+                }
             }
         }
 
         private synchronized void unloadAllKeyphraseModels() {
             for (int i = 0; i < mLoadedKeyphraseIds.size(); i++) {
-                final long caller = Binder.clearCallingIdentity();
-                try {
-                    int status = mSoundTriggerSession.unloadKeyphraseModel(
-                            mLoadedKeyphraseIds.valueAt(i));
-                    if (status != SoundTriggerInternal.STATUS_OK) {
-                        Slog.w(TAG, "Failed to unload keyphrase " + mLoadedKeyphraseIds.valueAt(i)
-                                + ":" + status);
-                    }
-                } finally {
-                    Binder.restoreCallingIdentity(caller);
+                int id = mLoadedKeyphraseIds.keyAt(i);
+                SoundTriggerSession session = mLoadedKeyphraseIds.valueAt(i);
+                int status = session.unloadKeyphraseModel(id);
+                if (status != SoundTriggerInternal.STATUS_OK) {
+                    Slog.w(TAG, "Failed to unload keyphrase " + id + ":" + status);
                 }
             }
             mLoadedKeyphraseIds.clear();
@@ -1432,8 +1464,24 @@ public class VoiceInteractionManagerService extends SystemService {
                     mImpl.dumpLocked(fd, pw, args);
                 }
             }
+
             mSoundTriggerInternal.dump(fd, pw, args);
-            mSoundTriggerSession.dump(fd, pw, args);
+
+            // Dump all sessions.
+            synchronized (mSessions) {
+                ListIterator<WeakReference<SoundTriggerSession>> iter =
+                        mSessions.listIterator();
+                while (iter.hasNext()) {
+                    SoundTriggerSession session = iter.next().get();
+                    if (session != null) {
+                        session.dump(fd, args);
+                    } else {
+                        // Session is obsolete, now is a good chance to remove it from the list.
+                        iter.remove();
+                    }
+                }
+            }
+
         }
 
         @Override
