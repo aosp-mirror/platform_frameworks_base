@@ -31,29 +31,23 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
-
-import androidx.constraintlayout.motion.widget.MotionLayout
-import androidx.constraintlayout.motion.widget.MotionScene
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.filters.SmallTest
-
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
-
 import com.google.common.truth.Truth.assertThat
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentCaptor
 import org.mockito.Mock
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
-
-import java.util.ArrayList
 
 private const val KEY = "TEST_KEY"
 private const val APP = "APP"
@@ -78,8 +72,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
 
     @Mock private lateinit var holder: PlayerViewHolder
-    @Mock private lateinit var motion: MotionLayout
-    private lateinit var background: TextView
+    @Mock private lateinit var view: TransitionLayout
+    @Mock private lateinit var mediaHostStatesManager: MediaHostStatesManager
     private lateinit var appIcon: ImageView
     private lateinit var appName: TextView
     private lateinit var albumView: ImageView
@@ -107,21 +101,15 @@ public class MediaControlPanelTest : SysuiTestCase() {
         bgExecutor = FakeExecutor(FakeSystemClock())
 
         activityStarter = mock(ActivityStarter::class.java)
+        mediaHostStatesManager = mock(MediaHostStatesManager::class.java)
 
-        player = MediaControlPanel(context, fgExecutor, bgExecutor, activityStarter)
+        player = MediaControlPanel(context, fgExecutor, bgExecutor, activityStarter,
+                mediaHostStatesManager)
 
         // Mock out a view holder for the player to attach to.
         holder = mock(PlayerViewHolder::class.java)
-        motion = mock(MotionLayout::class.java)
-        val trans: ArrayList<MotionScene.Transition> = ArrayList()
-        trans.add(mock(MotionScene.Transition::class.java))
-        whenever(motion.definedTransitions).thenReturn(trans)
-        val constraintSet = mock(ConstraintSet::class.java)
-        whenever(motion.getConstraintSet(R.id.expanded)).thenReturn(constraintSet)
-        whenever(motion.getConstraintSet(R.id.collapsed)).thenReturn(constraintSet)
-        whenever(holder.player).thenReturn(motion)
-        background = TextView(context)
-        whenever(holder.background).thenReturn(background)
+        view = mock(TransitionLayout::class.java)
+        whenever(holder.player).thenReturn(view)
         appIcon = ImageView(context)
         whenever(holder.appIcon).thenReturn(appIcon)
         appName = TextView(context)
@@ -205,7 +193,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
                 emptyList(), PACKAGE, session.getSessionToken(), null, device)
         player.bind(state)
-        assertThat(background.getBackgroundTintList()).isEqualTo(ColorStateList.valueOf(BG_COLOR))
+        val list = ArgumentCaptor.forClass(ColorStateList::class.java)
+        verify(view).setBackgroundTintList(list.capture())
+        assertThat(list.value).isEqualTo(ColorStateList.valueOf(BG_COLOR))
     }
 
     @Test

@@ -1,20 +1,22 @@
 package com.android.systemui.media
 
 import android.graphics.Rect
-import android.util.MathUtils
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
-import android.view.ViewGroup
-import com.android.systemui.media.MediaHierarchyManager.MediaLocation
 import com.android.systemui.util.animation.MeasurementInput
+import com.android.systemui.util.animation.MeasurementOutput
+import com.android.systemui.util.animation.UniqueObjectHostView
+import java.util.Objects
 import javax.inject.Inject
 
 class MediaHost @Inject constructor(
-    private val state: MediaHostState,
+    private val state: MediaHostStateHolder,
     private val mediaHierarchyManager: MediaHierarchyManager,
-    private val mediaDataManager: MediaDataManager
-) : MediaState by state {
-    lateinit var hostView: ViewGroup
+    private val mediaDataManager: MediaDataManager,
+    private val mediaDataManagerCombineLatest: MediaDataCombineLatest,
+    private val mediaHostStatesManager: MediaHostStatesManager
+) : MediaHostState by state {
+    lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
         private set
     var visibleChangedListener: ((Boolean) -> Unit)? = null
@@ -24,9 +26,9 @@ class MediaHost @Inject constructor(
     private val tmpLocationOnScreen: IntArray = intArrayOf(0, 0)
 
     /**
-     * Get the current Media state. This also updates the location on screen
+     * Get the current bounds on the screen. This makes sure the state is fresh and up to date
      */
-    val currentState: MediaState
+    val currentBounds: Rect = Rect()
         get() {
             hostView.getLocationOnScreen(tmpLocationOnScreen)
             var left = tmpLocationOnScreen[0] + hostView.paddingLeft
@@ -43,8 +45,8 @@ class MediaHost @Inject constructor(
                 bottom = 0
                 top = 0
             }
-            state.boundsOnScreen.set(left, top, right, bottom)
-            return state
+            field.set(left, top, right, bottom)
+            return field
         }
 
     private val listener = object : MediaDataManager.Listener {
@@ -59,6 +61,8 @@ class MediaHost @Inject constructor(
 
     /**
      * Initialize this MediaObject and create a host view.
+     * All state should already be set on this host before calling this method in order to avoid
+     * unnecessary state changes which lead to remeasurings later on.
      *
      * @param location the location this host name has. Used to identify the host during
      *                 transitions.
@@ -68,14 +72,39 @@ class MediaHost @Inject constructor(
         hostView = mediaHierarchyManager.register(this)
         hostView.addOnAttachStateChangeListener(object : OnAttachStateChangeListener {
             override fun onViewAttachedToWindow(v: View?) {
-                mediaDataManager.addListener(listener)
+                // we should listen to the combined state change, since otherwise there might
+                // be a delay until the views and the controllers are initialized, leaving us
+                // with either a blank view or the controllers not yet initialized and the
+                // measuring wrong
+                mediaDataManagerCombineLatest.addListener(listener)
                 updateViewVisibility()
             }
 
             override fun onViewDetachedFromWindow(v: View?) {
-                mediaDataManager.removeListener(listener)
+                mediaDataManagerCombineLatest.removeListener(listener)
             }
         })
+
+        // Listen to measurement updates and update our state with it
+        hostView.measurementManager = object : UniqueObjectHostView.MeasurementManager {
+            override fun onMeasure(input: MeasurementInput): MeasurementOutput {
+                // Modify the measurement to exactly match the dimensions
+                if (View.MeasureSpec.getMode(input.widthMeasureSpec) == View.MeasureSpec.AT_MOST) {
+                    input.widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(
+                            View.MeasureSpec.getSize(input.widthMeasureSpec),
+                            View.MeasureSpec.EXACTLY)
+                }
+                // This will trigger a state change that ensures that we now have a state available
+                state.measurementInput = input
+                return mediaHostStatesManager.getPlayerDimensions(state)
+            }
+        }
+
+        // Whenever the state changes, let our state manager know
+        state.changedListener = {
+            mediaHostStatesManager.updateHostState(location, state)
+        }
+
         updateViewVisibility()
     }
 
@@ -89,71 +118,93 @@ class MediaHost @Inject constructor(
         visibleChangedListener?.invoke(visible)
     }
 
-    class MediaHostState @Inject constructor() : MediaState {
-        var measurementInput: MediaMeasurementInput? = null
-        override var expansion: Float = 0.0f
-        override var showsOnlyActiveMedia: Boolean = false
-        override val boundsOnScreen: Rect = Rect()
+    class MediaHostStateHolder @Inject constructor() : MediaHostState {
 
-        override fun copy(): MediaState {
-            val mediaHostState = MediaHostState()
+        override var measurementInput: MeasurementInput? = null
+            set(value) {
+                if (value?.equals(field) != true) {
+                    field = value
+                    changedListener?.invoke()
+                }
+            }
+
+        override var expansion: Float = 0.0f
+            set(value) {
+                if (!value.equals(field)) {
+                    field = value
+                    changedListener?.invoke()
+                }
+            }
+
+        override var showsOnlyActiveMedia: Boolean = false
+            set(value) {
+                if (!value.equals(field)) {
+                    field = value
+                    changedListener?.invoke()
+                }
+            }
+
+        /**
+         * A listener for all changes. This won't be copied over when invoking [copy]
+         */
+        var changedListener: (() -> Unit)? = null
+
+        /**
+         * Get a copy of this state. This won't copy any listeners it may have set
+         */
+        override fun copy(): MediaHostState {
+            val mediaHostState = MediaHostStateHolder()
             mediaHostState.expansion = expansion
             mediaHostState.showsOnlyActiveMedia = showsOnlyActiveMedia
-            mediaHostState.boundsOnScreen.set(boundsOnScreen)
-            mediaHostState.measurementInput = measurementInput
+            mediaHostState.measurementInput = measurementInput?.copy()
             return mediaHostState
         }
 
-        override fun interpolate(other: MediaState, amount: Float): MediaState {
-            val result = MediaHostState()
-            result.expansion = MathUtils.lerp(expansion, other.expansion, amount)
-            val left = MathUtils.lerp(boundsOnScreen.left.toFloat(),
-                    other.boundsOnScreen.left.toFloat(), amount).toInt()
-            val top = MathUtils.lerp(boundsOnScreen.top.toFloat(),
-                    other.boundsOnScreen.top.toFloat(), amount).toInt()
-            val right = MathUtils.lerp(boundsOnScreen.right.toFloat(),
-                    other.boundsOnScreen.right.toFloat(), amount).toInt()
-            val bottom = MathUtils.lerp(boundsOnScreen.bottom.toFloat(),
-                    other.boundsOnScreen.bottom.toFloat(), amount).toInt()
-            result.boundsOnScreen.set(left, top, right, bottom)
-            result.showsOnlyActiveMedia = other.showsOnlyActiveMedia || showsOnlyActiveMedia
-            if (amount > 0.0f) {
-                if (other is MediaHostState) {
-                    result.measurementInput = other.measurementInput
-                }
-            } else {
-                result.measurementInput
+        override fun equals(other: Any?): Boolean {
+            if (!(other is MediaHostState)) {
+                return false
             }
+            if (!Objects.equals(measurementInput, other.measurementInput)) {
+                return false
+            }
+            if (expansion != other.expansion) {
+                return false
+            }
+            if (showsOnlyActiveMedia != other.showsOnlyActiveMedia) {
+                return false
+            }
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = measurementInput?.hashCode() ?: 0
+            result = 31 * result + expansion.hashCode()
+            result = 31 * result + showsOnlyActiveMedia.hashCode()
             return result
         }
-
-        override fun getMeasuringInput(input: MeasurementInput): MediaMeasurementInput {
-            measurementInput = MediaMeasurementInput(input, expansion)
-            return measurementInput as MediaMeasurementInput
-        }
     }
 }
 
-interface MediaState {
+interface MediaHostState {
+
+    /**
+     * The last measurement input that this state was measured with. Infers with and height of
+     * the players.
+     */
+    var measurementInput: MeasurementInput?
+
+    /**
+     * The expansion of the player, 0 for fully collapsed, 1 for fully expanded
+     */
     var expansion: Float
-    var showsOnlyActiveMedia: Boolean
-    val boundsOnScreen: Rect
-    fun copy(): MediaState
-    fun interpolate(other: MediaState, amount: Float): MediaState
-    fun getMeasuringInput(input: MeasurementInput): MediaMeasurementInput
-}
-/**
- * The measurement input for a Media View
- */
-data class MediaMeasurementInput(
-    private val viewInput: MeasurementInput,
-    val expansion: Float
-) : MeasurementInput by viewInput {
 
-    override fun sameAs(input: MeasurementInput?): Boolean {
-        if (!(input is MediaMeasurementInput)) {
-            return false
-        }
-        return width == input.width && expansion == input.expansion
-    }
+    /**
+     * Is this host only showing active media or is it showing all of them including resumption?
+     */
+    var showsOnlyActiveMedia: Boolean
+
+    /**
+     * Get a copy of this view state, deepcopying all appropriate members
+     */
+    fun copy(): MediaHostState
 }
