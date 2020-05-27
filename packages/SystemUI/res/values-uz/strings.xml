@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ekranga moslashtirish"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ekran hajmida cho‘zish"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinshot"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Boshqa parametrlar uchun telefoningiz qulfini oching"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Boshqa parametrlar uchun planshetingiz qulfini oching"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Boshqa parametrlar uchun qurilmangiz qulfini oching"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"rasm yuborildi"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinshot saqlanmoqda…"</string>
