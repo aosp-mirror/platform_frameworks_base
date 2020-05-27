@@ -3507,7 +3507,7 @@ public class UserManagerService extends IUserManager.Stub {
                     Slog.w(LOG_TAG, "could not start pre-created user " + userId, e);
                 }
             } else {
-                dispatchUserAddedIntent(userInfo);
+                dispatchUserAdded(userInfo);
             }
 
         } finally {
@@ -3568,7 +3568,7 @@ public class UserManagerService extends IUserManager.Stub {
             // Could not read the existing permissions, re-grant them.
             mPm.onNewUserCreated(preCreatedUser.id);
         }
-        dispatchUserAddedIntent(preCreatedUser);
+        dispatchUserAdded(preCreatedUser);
         return preCreatedUser;
     }
 
@@ -3600,7 +3600,7 @@ public class UserManagerService extends IUserManager.Stub {
         return (now > EPOCH_PLUS_30_YEARS) ? now : 0;
     }
 
-    private void dispatchUserAddedIntent(@NonNull UserInfo userInfo) {
+    private void dispatchUserAdded(@NonNull UserInfo userInfo) {
         Intent addedIntent = new Intent(Intent.ACTION_USER_ADDED);
         addedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userInfo.id);
         // Also, add the UserHandle for mainline modules which can't use the @hide
@@ -3610,6 +3610,15 @@ public class UserManagerService extends IUserManager.Stub {
                 android.Manifest.permission.MANAGE_USERS);
         MetricsLogger.count(mContext, userInfo.isGuest() ? TRON_GUEST_CREATED
                 : (userInfo.isDemo() ? TRON_DEMO_CREATED : TRON_USER_CREATED), 1);
+
+        if (!userInfo.isProfile()) {
+            // If the user switch hasn't been explicitly toggled on or off by the user, turn it on.
+            if (android.provider.Settings.Global.getString(mContext.getContentResolver(),
+                    android.provider.Settings.Global.USER_SWITCHER_ENABLED) == null) {
+                android.provider.Settings.Global.putInt(mContext.getContentResolver(),
+                        android.provider.Settings.Global.USER_SWITCHER_ENABLED, 1);
+            }
+        }
     }
 
     /**
