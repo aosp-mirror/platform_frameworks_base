@@ -35,6 +35,7 @@ import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
@@ -47,6 +48,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -388,6 +390,46 @@ public class AppWindowTokenTests extends WindowTestsBase {
                 mock(OnAnimationFinishedCallback.class);
         assertTrue(activity2.applyAnimation(null, TRANSIT_ACTIVITY_OPEN, true, false,
                 onAnimationFinishedCallback));
+    }
+
+    @Test
+    public void testTransferStartingWindowFromFinishingActivity() {
+        mActivity.addStartingWindow(mPackageName, android.R.style.Theme, null /* compatInfo */,
+                "Test", 0 /* labelRes */, 0 /* icon */, 0 /* logo */, 0 /* windowFlags */,
+                null /* transferFrom */, true /* newTask */, true /* taskSwitch */,
+                false /* processRunning */, false /* allowTaskSnapshot */,
+                false /* activityCreate */);
+        waitUntilHandlersIdle();
+        assertHasStartingWindow(mActivity);
+        mActivity.mStartingWindowState = ActivityRecord.STARTING_WINDOW_SHOWN;
+
+        doCallRealMethod().when(mStack).startActivityLocked(
+                any(), any(), anyBoolean(), anyBoolean(), any());
+        // Make mVisibleSetFromTransferredStartingWindow true.
+        final ActivityRecord middle = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setTask(mTask).build();
+        mStack.startActivityLocked(middle, null /* focusedTopActivity */,
+                false /* newTask */, false /* keepCurTransition */, null /* options */);
+        middle.makeFinishingLocked();
+
+        assertNull(mActivity.startingWindow);
+        assertHasStartingWindow(middle);
+
+        final ActivityRecord top = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setTask(mTask).build();
+        // Expect the visibility should be updated to true when transferring starting window from
+        // a visible activity.
+        top.setVisible(false);
+        // The finishing middle should be able to transfer starting window to top.
+        mStack.startActivityLocked(top, null /* focusedTopActivity */,
+                false /* newTask */, false /* keepCurTransition */, null /* options */);
+
+        assertNull(middle.startingWindow);
+        assertHasStartingWindow(top);
+        assertTrue(top.isVisible());
+        // The activity was visible by mVisibleSetFromTransferredStartingWindow, so after its
+        // starting window is transferred, it should restore to invisible.
+        assertFalse(middle.isVisible());
     }
 
     private ActivityRecord createIsolatedTestActivityRecord() {
