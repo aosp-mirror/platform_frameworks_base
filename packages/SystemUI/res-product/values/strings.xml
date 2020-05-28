@@ -122,4 +122,12 @@
        Try again in <xliff:g id="number">%3$d</xliff:g> seconds.
     </string>
 
+
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="default">Unlock your phone for more options</string>
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="tablet">Unlock your tablet for more options</string>
+    <!-- Text shown when viewing global actions while phone is locked and additional controls are hidden [CHAR LIMIT=NONE] -->
+    <string name="global_action_lock_message" product="device">Unlock your device for more options</string>
+
 </resources>
