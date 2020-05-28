@@ -187,9 +187,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     protected void addMediaHostView() {
-        mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         mMediaHost.setExpansion(1.0f);
         mMediaHost.setShowsOnlyActiveMedia(false);
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         ViewGroup hostView = mMediaHost.getHostView();
         addView(hostView);
         int sidePaddings = getResources().getDimensionPixelSize(

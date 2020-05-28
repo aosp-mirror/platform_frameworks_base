@@ -221,7 +221,7 @@
     <dimen name="notification_guts_button_horizontal_spacing">8dp</dimen>
 
     <dimen name="notification_guts_conversation_header_height">84dp</dimen>
-    <dimen name="notification_guts_conversation_icon_size">52dp</dimen>
+    <dimen name="notification_guts_conversation_icon_size">56dp</dimen>
     <dimen name="notification_guts_conversation_action_height">56dp</dimen>
     <dimen name="notification_guts_conversation_action_text_padding_start">32dp</dimen>
 
@@ -908,6 +908,8 @@
     <dimen name="screen_pinning_nav_highlight_size">56dp</dimen>
     <!-- Screen pinning inner nav bar outer circle size -->
     <dimen name="screen_pinning_nav_highlight_outer_size">84dp</dimen>
+    <!-- Screen pinning description bullet gap width -->
+    <dimen name="screen_pinning_description_bullet_gap_width">6sp</dimen>
 
     <!-- Padding to be used on the bottom of the fingerprint icon on Keyguard so it better aligns
          with the other icons. -->

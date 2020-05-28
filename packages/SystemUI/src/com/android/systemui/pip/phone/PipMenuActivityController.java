@@ -262,6 +262,9 @@ public class PipMenuActivityController {
      */
     public void showMenuWithDelay(int menuState, Rect stackBounds, boolean allowMenuTimeout,
             boolean willResizeMenu, boolean showResizeHandle) {
+        // hide all visible controls including close button and etc. first, this is to ensure
+        // menu is totally invisible during the transition to eliminate unpleasant artifacts
+        fadeOutMenu();
         showMenuInternal(menuState, stackBounds, allowMenuTimeout, willResizeMenu,
                 true /* withDelay */, showResizeHandle);
     }
@@ -343,6 +346,23 @@ public class PipMenuActivityController {
                 mToActivityMessenger.send(m);
             } catch (RemoteException e) {
                 Log.e(TAG, "Could not notify poke menu", e);
+            }
+        }
+    }
+
+    private void fadeOutMenu() {
+        if (DEBUG) {
+            Log.d(TAG, "fadeOutMenu() state=" + mMenuState
+                    + " hasActivity=" + (mToActivityMessenger != null)
+                    + " callers=\n" + Debug.getCallers(5, "    "));
+        }
+        if (mToActivityMessenger != null) {
+            Message m = Message.obtain();
+            m.what = PipMenuActivity.MESSAGE_FADE_OUT_MENU;
+            try {
+                mToActivityMessenger.send(m);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Could not notify menu to fade out", e);
             }
         }
     }
@@ -513,7 +533,8 @@ public class PipMenuActivityController {
     private void onMenuStateChanged(int menuState, boolean resize, Runnable callback) {
         if (DEBUG) {
             Log.d(TAG, "onMenuStateChanged() mMenuState=" + mMenuState
-                    + " menuState=" + menuState + " resize=" + resize);
+                    + " menuState=" + menuState + " resize=" + resize
+                    + " callers=\n" + Debug.getCallers(5, "    "));
         }
 
         if (menuState != mMenuState) {

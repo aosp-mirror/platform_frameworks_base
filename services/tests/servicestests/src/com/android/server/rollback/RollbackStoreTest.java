@@ -21,7 +21,6 @@ import static com.google.common.truth.Truth.assertThat;
 import android.content.pm.VersionedPackage;
 import android.content.rollback.PackageRollbackInfo;
 import android.util.SparseIntArray;
-import android.util.SparseLongArray;
 
 import com.google.common.truth.Correspondence;
 
@@ -193,13 +192,10 @@ public class RollbackStoreTest {
         PackageRollbackInfo pkgInfo1 =
                 new PackageRollbackInfo(new VersionedPackage("com.made.up", 18),
                         new VersionedPackage("com.something.else", 5), new ArrayList<>(),
-                        new ArrayList<>(), false, false, new ArrayList<>(), new SparseLongArray());
+                        new ArrayList<>(), false, false, new ArrayList<>());
         pkgInfo1.getPendingBackups().add(8);
         pkgInfo1.getPendingBackups().add(888);
         pkgInfo1.getPendingBackups().add(88885);
-        pkgInfo1.getCeSnapshotInodes().put(12, 424);
-        pkgInfo1.getCeSnapshotInodes().put(222772, 10000000000L);
-        pkgInfo1.getCeSnapshotInodes().put(10, -67);
 
         pkgInfo1.getPendingRestores().add(
                 new PackageRollbackInfo.RestoreInfo(4980, 3442322, "seInfo"));
@@ -213,7 +209,7 @@ public class RollbackStoreTest {
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(
                 new VersionedPackage("another.package", 2),
                 new VersionedPackage("com.test.ing", 48888), new ArrayList<>(), new ArrayList<>(),
-                false, false, new ArrayList<>(), new SparseLongArray());
+                false, false, new ArrayList<>());
         pkgInfo2.getPendingBackups().add(57);
 
         pkgInfo2.getPendingRestores().add(
@@ -244,13 +240,10 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo1 = new PackageRollbackInfo(new VersionedPackage("blah", 55),
                 new VersionedPackage("blah1", 50), new ArrayList<>(), new ArrayList<>(),
-                false, false, new ArrayList<>(), new SparseLongArray());
+                false, false, new ArrayList<>());
         pkgInfo1.getPendingBackups().add(59);
         pkgInfo1.getPendingBackups().add(1245);
         pkgInfo1.getPendingBackups().add(124544);
-        pkgInfo1.getCeSnapshotInodes().put(546546, 345689375);
-        pkgInfo1.getCeSnapshotInodes().put(2222, 81641654445L);
-        pkgInfo1.getCeSnapshotInodes().put(1, -6);
 
         pkgInfo1.getPendingRestores().add(
                 new PackageRollbackInfo.RestoreInfo(498, 32322, "wombles"));
@@ -263,7 +256,7 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(new VersionedPackage("chips", 28),
                 new VersionedPackage("com.chips.test", 48), new ArrayList<>(), new ArrayList<>(),
-                false, false, new ArrayList<>(), new SparseLongArray());
+                false, false, new ArrayList<>());
         pkgInfo2.getPendingBackups().add(5);
 
         pkgInfo2.getPendingRestores().add(
@@ -297,13 +290,10 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo1 = new PackageRollbackInfo(new VersionedPackage("blah", 55),
                 new VersionedPackage("blah1", 50), new ArrayList<>(), new ArrayList<>(),
-                false, false, new ArrayList<>(), new SparseLongArray());
+                false, false, new ArrayList<>());
         pkgInfo1.getPendingBackups().add(59);
         pkgInfo1.getPendingBackups().add(1245);
         pkgInfo1.getPendingBackups().add(124544);
-        pkgInfo1.getCeSnapshotInodes().put(546546, 345689375);
-        pkgInfo1.getCeSnapshotInodes().put(2222, 81641654445L);
-        pkgInfo1.getCeSnapshotInodes().put(1, -6);
 
         pkgInfo1.getPendingRestores().add(
                 new PackageRollbackInfo.RestoreInfo(498, 32322, "wombles"));
@@ -316,7 +306,7 @@ public class RollbackStoreTest {
 
         PackageRollbackInfo pkgInfo2 = new PackageRollbackInfo(new VersionedPackage("chips", 28),
                 new VersionedPackage("com.chips.test", 48), new ArrayList<>(), new ArrayList<>(),
-                false, false, new ArrayList<>(), new SparseLongArray());
+                false, false, new ArrayList<>());
         pkgInfo2.getPendingBackups().add(5);
 
         pkgInfo2.getPendingRestores().add(
@@ -408,9 +398,6 @@ public class RollbackStoreTest {
         assertThat(b.isApex()).isEqualTo(a.isApex());
 
         assertThat(b.getSnapshottedUsers().toArray()).isEqualTo(a.getSnapshottedUsers().toArray());
-
-        assertThat(b.getCeSnapshotInodes().toString())
-                .isEqualTo(a.getCeSnapshotInodes().toString());
     }
 
 }

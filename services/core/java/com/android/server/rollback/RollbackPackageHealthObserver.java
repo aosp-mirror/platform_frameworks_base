@@ -83,7 +83,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         mContext = context;
         HandlerThread handlerThread = new HandlerThread("RollbackPackageHealthObserver");
         handlerThread.start();
-        mHandler = handlerThread.getThreadHandler();
+        mHandler = new Handler(handlerThread.getLooper());
         File dataDir = new File(Environment.getDataDirectory(), "rollback-observer");
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");

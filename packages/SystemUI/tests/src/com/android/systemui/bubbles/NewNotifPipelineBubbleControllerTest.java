@@ -46,6 +46,7 @@ import android.hardware.face.FaceManager;
 import android.os.Handler;
 import android.os.PowerManager;
 import android.service.dreams.IDreamManager;
+import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -62,6 +63,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -285,7 +287,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
         verify(mNotifCallback, times(1)).invalidateNotifications(anyString());
 
-        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleController.removeBubble(
+                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
         assertNull(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         verify(mNotifCallback, times(2)).invalidateNotifications(anyString());
     }
@@ -302,7 +305,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).setSuppressNotification(true);
 
         // Now remove the bubble
-        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+        mBubbleController.removeBubble(
+                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
         assertTrue(mBubbleData.hasOverflowBubbleWithKey(mRow.getEntry().getKey()));
 
         // We don't remove the notification since the bubble is still in overflow.
@@ -322,7 +326,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()).setSuppressNotification(true);
 
         // Now remove the bubble
-        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_NOTIF_CANCEL);
+        mBubbleController.removeBubble(
+                mRow.getEntry().getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
         assertFalse(mBubbleData.hasOverflowBubbleWithKey(mRow.getEntry().getKey()));
 
         // Since the notif is dismissed and not in overflow, once the bubble is removed,
@@ -502,7 +507,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         // Dismiss currently expanded
         mBubbleController.removeBubble(
-                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
+                mBubbleData.getBubbleInStackWithKey(
+                        stackView.getExpandedBubble().getKey()).getEntry().getKey(),
                 BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
@@ -513,7 +519,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         // Dismiss that one
         mBubbleController.removeBubble(
-                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry(),
+                mBubbleData.getBubbleInStackWithKey(
+                        stackView.getExpandedBubble().getKey()).getEntry().getKey(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
@@ -613,7 +620,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     @Test
     public void testDeleteIntent_removeBubble_aged() throws PendingIntent.CanceledException {
         mBubbleController.updateBubble(mRow.getEntry());
-        mBubbleController.removeBubble(mRow.getEntry(), BubbleController.DISMISS_AGED);
+        mBubbleController.removeBubble(mRow.getEntry().getKey(), BubbleController.DISMISS_AGED);
         verify(mDeleteIntent, never()).send();
     }
 
@@ -621,7 +628,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     public void testDeleteIntent_removeBubble_user() throws PendingIntent.CanceledException {
         mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.removeBubble(
-                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
         verify(mDeleteIntent, times(1)).send();
     }
 
@@ -640,6 +647,9 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         assertTrue(mBubbleController.hasBubbles());
 
         mRow.getEntry().getSbn().getNotification().flags &= ~FLAG_BUBBLE;
+        NotificationListenerService.Ranking ranking = new RankingBuilder(
+                mRow.getEntry().getRanking()).setCanBubble(false).build();
+        mRow.getEntry().setRanking(ranking);
         mEntryListener.onEntryUpdated(mRow.getEntry());
 
         assertFalse(mBubbleController.hasBubbles());
@@ -686,7 +696,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         // Dismiss the bubble
         mBubbleController.removeBubble(
-                mRow.getEntry(), BubbleController.DISMISS_USER_GESTURE);
+                mRow.getEntry().getKey(), BubbleController.DISMISS_USER_GESTURE);
         assertFalse(mBubbleController.hasBubbles());
 
         // Dismiss the notification
@@ -707,7 +717,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         // Dismiss the bubble
         mBubbleController.removeBubble(
-                mRow.getEntry(), BubbleController.DISMISS_NOTIF_CANCEL);
+                mRow.getEntry().getKey(), BubbleController.DISMISS_NOTIF_CANCEL);
         assertFalse(mBubbleController.hasBubbles());
 
         // Dismiss the notification

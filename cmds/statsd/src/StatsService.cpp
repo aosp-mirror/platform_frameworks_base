@@ -1288,7 +1288,6 @@ Status StatsService::getRegisteredExperimentIds(std::vector<int64_t>* experiment
     return Status::ok();
 }
 
-
 void StatsService::statsCompanionServiceDied(void* cookie) {
     auto thiz = static_cast<StatsService*>(cookie);
     thiz->statsCompanionServiceDiedImpl();

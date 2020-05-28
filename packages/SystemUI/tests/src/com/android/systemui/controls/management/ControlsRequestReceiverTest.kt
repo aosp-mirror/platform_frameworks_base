@@ -66,6 +66,7 @@ class ControlsRequestReceiverTest : SysuiTestCase() {
         MockitoAnnotations.initMocks(this)
 
         mContext.setMockPackageManager(packageManager)
+        `when`(packageManager.hasSystemFeature(PackageManager.FEATURE_CONTROLS)).thenReturn(true)
         mContext.addMockSystemService(ActivityManager::class.java, activityManager)
 
         receiver = ControlsRequestReceiver()
@@ -143,6 +144,14 @@ class ControlsRequestReceiverTest : SysuiTestCase() {
 
             assertEquals(componentName, it.getParcelableExtra(Intent.EXTRA_COMPONENT_NAME))
         } ?: run { fail("Null start intent") }
+    }
+
+    @Test
+    fun testFeatureDisabled_activityNotStarted() {
+        `when`(packageManager.hasSystemFeature(PackageManager.FEATURE_CONTROLS)).thenReturn(false)
+        receiver.onReceive(wrapper, intent)
+
+        assertNull(wrapper.intent)
     }
 
     class MyWrapper(context: Context) : ContextWrapper(context) {

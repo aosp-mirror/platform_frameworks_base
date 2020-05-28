@@ -19,7 +19,9 @@ package com.android.systemui.util.animation
 import android.annotation.SuppressLint
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import android.widget.FrameLayout
+import com.android.systemui.R
 
 /**
  * A special view that is designed to host a single "unique object". The unique object is
@@ -34,8 +36,7 @@ import android.widget.FrameLayout
 class UniqueObjectHostView(
     context: Context
 ) : FrameLayout(context) {
-    lateinit var measurementCache : GuaranteedMeasurementCache
-    var onMeasureListener: ((MeasurementInput) -> Unit)? = null
+    lateinit var measurementManager: MeasurementManager
 
     @SuppressLint("DrawAllocation")
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -45,64 +46,63 @@ class UniqueObjectHostView(
         val widthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.getMode(widthMeasureSpec))
         val height = MeasureSpec.getSize(heightMeasureSpec) - paddingVertical
         val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.getMode(heightMeasureSpec))
-        val measurementInput = MeasurementInputData(widthSpec, heightSpec)
-        onMeasureListener?.apply {
-            invoke(measurementInput)
-        }
+        val measurementInput = MeasurementInput(widthSpec, heightSpec)
+
+        // Let's make sure the measurementManager knows about our size, to ensure that we have
+        // a value available. This might perform a measure internally if we don't have a cached
+        // size.
+        val (cachedWidth, cachedHeight) = measurementManager.onMeasure(measurementInput)
+
         if (!isCurrentHost()) {
-            // We're not currently the host, let's get the dimension from our cache (this might
-            // perform a measuring if the cache doesn't have it yet)
+            // We're not currently the host, let's use the dimension from our cache
             // The goal here is that the view will always have a consistent measuring, regardless
             // if it's attached or not.
             // The behavior is therefore very similar to the view being persistently attached to
             // this host, which can prevent flickers. It also makes sure that we always know
             // the size of the view during transitions even if it has never been attached here
             // before.
-            val (cachedWidth, cachedHeight) = measurementCache.obtainMeasurement(measurementInput)
             setMeasuredDimension(cachedWidth + paddingHorizontal, cachedHeight + paddingVertical)
         } else {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec)
             // Let's update our cache
-            val child = getChildAt(0)!!
-            val output = MeasurementOutput(child.measuredWidth, child.measuredHeight)
-            measurementCache.putMeasurement(measurementInput, output)
+            getChildAt(0)?.requiresRemeasuring = false
         }
+    }
+
+    override fun addView(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
+        if (child?.measuredWidth == 0 || measuredWidth == 0 || child?.requiresRemeasuring == true) {
+            super.addView(child, index, params)
+            return
+        }
+        // Suppress layouts when adding a view. The view should already be laid out with the
+        // right size when being attached to this view
+        invalidate()
+        addViewInLayout(child, index, params, true /* preventRequestLayout */)
+        val left = paddingLeft
+        val top = paddingTop
+        val paddingHorizontal = paddingStart + paddingEnd
+        val paddingVertical = paddingTop + paddingBottom
+        child!!.layout(left,
+                top,
+                left + measuredWidth - paddingHorizontal,
+                top + measuredHeight - paddingVertical)
     }
 
     private fun isCurrentHost() = childCount != 0
-}
 
-/**
- * A basic view measurement input
- */
-interface MeasurementInput {
-    fun sameAs(input: MeasurementInput?): Boolean {
-        return equals(input)
+    interface MeasurementManager {
+        fun onMeasure(input: MeasurementInput): MeasurementOutput
     }
-    val width : Int
-        get() {
-            return View.MeasureSpec.getSize(widthMeasureSpec)
-        }
-    val height : Int
-        get() {
-            return View.MeasureSpec.getSize(heightMeasureSpec)
-        }
-    var widthMeasureSpec: Int
-    var heightMeasureSpec: Int
 }
 
 /**
- * The output of a view measurement
+ * Does this view require remeasuring currently outside of the regular measure flow?
  */
-data class MeasurementOutput(
-    val measuredWidth: Int,
-    val measuredHeight: Int
-)
-
-/**
- * The data object holding a basic view measurement input
- */
-data class MeasurementInputData(
-    override var widthMeasureSpec: Int,
-    override var heightMeasureSpec: Int
-) : MeasurementInput
+var View.requiresRemeasuring: Boolean
+    get() {
+        val required = getTag(R.id.requires_remeasuring)
+        return required?.equals(true) ?: false
+    }
+    set(value) {
+        setTag(R.id.requires_remeasuring, value)
+    }

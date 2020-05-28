@@ -405,7 +405,7 @@ public final class DataManagerTest {
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
-        shortcut.setCached();
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         mDataManager.addOrUpdateConversationInfo(shortcut);
 
         NotificationListenerService listenerService =
@@ -419,7 +419,8 @@ public final class DataManagerTest {
         assertEquals(1, activeNotificationOpenTimeSlots.size());
         verify(mShortcutServiceInternal).uncacheShortcuts(
                 anyInt(), any(), eq(TEST_PKG_NAME),
-                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test
@@ -434,7 +435,7 @@ public final class DataManagerTest {
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
 
         // Post one notification.
-        shortcut.setCached();
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         mDataManager.addOrUpdateConversationInfo(shortcut);
         listenerService.onNotificationPosted(mStatusBarNotification);
 
@@ -445,14 +446,15 @@ public final class DataManagerTest {
         listenerService.onNotificationRemoved(mStatusBarNotification, null,
                 NotificationListenerService.REASON_CANCEL);
         verify(mShortcutServiceInternal, never()).uncacheShortcuts(
-                anyInt(), any(), anyString(), any(), anyInt());
+                anyInt(), any(), anyString(), any(), anyInt(), anyInt());
 
         // Removing the second notification un-caches the shortcut.
         listenerService.onNotificationRemoved(mStatusBarNotification, null,
                 NotificationListenerService.REASON_CANCEL_ALL);
         verify(mShortcutServiceInternal).uncacheShortcuts(
                 anyInt(), any(), eq(TEST_PKG_NAME),
-                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test
@@ -467,7 +469,7 @@ public final class DataManagerTest {
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
 
         listenerService.onNotificationPosted(mStatusBarNotification);
-        shortcut.setCached();
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         mDataManager.addOrUpdateConversationInfo(shortcut);
 
         listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
@@ -477,7 +479,8 @@ public final class DataManagerTest {
                 NotificationListenerService.REASON_CANCEL_ALL);
         verify(mShortcutServiceInternal, never()).uncacheShortcuts(
                 anyInt(), any(), eq(TEST_PKG_NAME),
-                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test
@@ -569,13 +572,14 @@ public final class DataManagerTest {
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
 
         listenerService.onNotificationPosted(mStatusBarNotification);
-        shortcut.setCached();
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         mDataManager.addOrUpdateConversationInfo(shortcut);
 
         mShutdownBroadcastReceiver.onReceive(mContext, new Intent());
         verify(mShortcutServiceInternal).uncacheShortcuts(
                 anyInt(), any(), eq(TEST_PKG_NAME),
-                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test
@@ -590,7 +594,7 @@ public final class DataManagerTest {
                 mDataManager.getNotificationListenerServiceForTesting(USER_ID_PRIMARY);
 
         listenerService.onNotificationPosted(mStatusBarNotification);
-        shortcut.setCached();
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         mDataManager.addOrUpdateConversationInfo(shortcut);
 
         listenerService.onNotificationChannelModified(TEST_PKG_NAME, UserHandle.of(USER_ID_PRIMARY),
@@ -599,7 +603,8 @@ public final class DataManagerTest {
         mShutdownBroadcastReceiver.onReceive(mContext, new Intent());
         verify(mShortcutServiceInternal, never()).uncacheShortcuts(
                 anyInt(), any(), eq(TEST_PKG_NAME),
-                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test
@@ -767,14 +772,15 @@ public final class DataManagerTest {
 
         ShortcutInfo shortcut = buildShortcutInfo(TEST_PKG_NAME, USER_ID_PRIMARY, TEST_SHORTCUT_ID,
                 buildPerson());
-        shortcut.setCached();
+        shortcut.setCached(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS);
         mDataManager.addOrUpdateConversationInfo(shortcut);
 
         mDataManager.pruneDataForUser(USER_ID_PRIMARY, mCancellationSignal);
 
         verify(mShortcutServiceInternal).uncacheShortcuts(
                 anyInt(), any(), eq(TEST_PKG_NAME),
-                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY));
+                eq(Collections.singletonList(TEST_SHORTCUT_ID)), eq(USER_ID_PRIMARY),
+                eq(ShortcutInfo.FLAG_CACHED_NOTIFICATIONS));
     }
 
     @Test

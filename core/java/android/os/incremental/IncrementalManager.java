@@ -110,11 +110,15 @@ public final class IncrementalManager {
      */
     @Nullable
     public IncrementalStorage createStorage(@NonNull String path,
-            @NonNull DataLoaderParams params, @Nullable IDataLoaderStatusListener listener,
+            @NonNull DataLoaderParams params,
             @CreateMode int createMode,
-            boolean autoStartDataLoader) {
+            boolean autoStartDataLoader,
+            @Nullable IDataLoaderStatusListener statusListener,
+            @Nullable StorageHealthCheckParams healthCheckParams,
+            @Nullable IStorageHealthListener healthListener) {
         try {
-            final int id = mService.createStorage(path, params.getData(), listener, createMode);
+            final int id = mService.createStorage(path, params.getData(), createMode,
+                    statusListener, healthCheckParams, healthListener);
             if (id < 0) {
                 return null;
             }
