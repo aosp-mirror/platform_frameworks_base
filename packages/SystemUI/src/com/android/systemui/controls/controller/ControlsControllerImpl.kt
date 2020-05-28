@@ -362,29 +362,47 @@ class ControlsControllerImpl @Inject constructor (
         return true
     }
 
-    override fun seedFavoritesForComponent(
-        componentName: ComponentName,
-        callback: Consumer<Boolean>
+    override fun seedFavoritesForComponents(
+        componentNames: List<ComponentName>,
+        callback: Consumer<SeedResponse>
     ) {
-        if (seedingInProgress) return
+        if (seedingInProgress || componentNames.isEmpty()) return
 
-        Log.i(TAG, "Beginning request to seed favorites for: $componentName")
         if (!confirmAvailability()) {
             if (userChanging) {
                 // Try again later, userChanging should not last forever. If so, we have bigger
                 // problems. This will return a runnable that allows to cancel the delayed version,
                 // it will not be able to cancel the load if
                 executor.executeDelayed(
-                    { seedFavoritesForComponent(componentName, callback) },
+                    { seedFavoritesForComponents(componentNames, callback) },
                     USER_CHANGE_RETRY_DELAY,
                     TimeUnit.MILLISECONDS
                 )
             } else {
-                callback.accept(false)
+                componentNames.forEach {
+                    callback.accept(SeedResponse(it.packageName, false))
+                }
             }
             return
         }
         seedingInProgress = true
+        startSeeding(componentNames, callback, false)
+    }
+
+    private fun startSeeding(
+        remainingComponentNames: List<ComponentName>,
+        callback: Consumer<SeedResponse>,
+        didAnyFail: Boolean
+    ) {
+        if (remainingComponentNames.isEmpty()) {
+            endSeedingCall(!didAnyFail)
+            return
+        }
+
+        val componentName = remainingComponentNames[0]
+        Log.d(TAG, "Beginning request to seed favorites for: $componentName")
+
+        val remaining = remainingComponentNames.drop(1)
         bindingController.bindAndLoadSuggested(
             componentName,
             object : ControlsBindingController.LoadCallback {
@@ -410,16 +428,16 @@ class ControlsControllerImpl @Inject constructor (
                         }
 
                         persistenceWrapper.storeFavorites(Favorites.getAllStructures())
-                        callback.accept(true)
-                        endSeedingCall(true)
+                        callback.accept(SeedResponse(componentName.packageName, true))
+                        startSeeding(remaining, callback, didAnyFail)
                     }
                 }
 
                 override fun error(message: String) {
                     Log.e(TAG, "Unable to seed favorites: $message")
                     executor.execute {
-                        callback.accept(false)
-                        endSeedingCall(false)
+                        callback.accept(SeedResponse(componentName.packageName, false))
+                        startSeeding(remaining, callback, true)
                     }
                 }
             }

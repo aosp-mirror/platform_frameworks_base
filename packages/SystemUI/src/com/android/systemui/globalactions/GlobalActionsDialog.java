@@ -139,8 +139,11 @@ import com.android.systemui.util.RingerModeTracker;
 import com.android.systemui.util.leak.RotationUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -180,8 +183,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
     static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
 
-    private static final String PREFS_CONTROLS_SEEDING_COMPLETED = "ControlsSeedingCompleted";
+    private static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
     private static final String PREFS_CONTROLS_FILE = "controls_prefs";
+    private static final int SEEDING_MAX = 2;
 
     private final Context mContext;
     private final GlobalActionsManager mWindowManagerFuncs;
@@ -409,47 +413,55 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 });
     }
 
+    /**
+     * See if any available control service providers match one of the preferred components. If
+     * they do, and there are no current favorites for that component, query the preferred
+     * component for a limited number of suggested controls.
+     */
     private void seedFavorites() {
-        if (!mControlsControllerOptional.isPresent()) return;
-        if (mControlsServiceInfos.isEmpty()
-                || mControlsControllerOptional.get().getFavorites().size() > 0) {
+        if (!mControlsControllerOptional.isPresent()
+                || mControlsServiceInfos.isEmpty()) {
             return;
         }
 
-        // Need to be user-specific with the context to make sure we read the correct prefs
+        String[] preferredControlsPackages = mContext.getResources()
+                .getStringArray(com.android.systemui.R.array.config_controlsPreferredPackages);
+
         SharedPreferences prefs = mCurrentUserContextTracker.getCurrentUserContext()
                 .getSharedPreferences(PREFS_CONTROLS_FILE, Context.MODE_PRIVATE);
-        if (prefs.getBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, false)) {
-            return;
-        }
+        Set<String> seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
+                Collections.emptySet());
 
-        /*
-         * See if any service providers match the preferred component. If they do,
-         * and there are no current favorites, and we haven't successfully loaded favorites to
-         * date, query the preferred component for a limited number of suggested controls.
-         */
-        String preferredControlsPackage = mContext.getResources()
-                .getString(com.android.systemui.R.string.config_controlsPreferredPackage);
-
-        ComponentName preferredComponent = null;
+        List<ComponentName> componentsToSeed = new ArrayList<>();
         for (ControlsServiceInfo info : mControlsServiceInfos) {
-            if (info.componentName.getPackageName().equals(preferredControlsPackage)) {
-                preferredComponent = info.componentName;
-                break;
+            String pkg = info.componentName.getPackageName();
+            if (seededPackages.contains(pkg)
+                    || mControlsControllerOptional.get().countFavoritesForComponent(
+                            info.componentName) > 0) {
+                continue;
+            }
+
+            for (int i = 0; i < Math.min(SEEDING_MAX, preferredControlsPackages.length); i++) {
+                if (pkg.equals(preferredControlsPackages[i])) {
+                    componentsToSeed.add(info.componentName);
+                    break;
+                }
             }
         }
 
-        if (preferredComponent == null) {
-            Log.i(TAG, "Controls seeding: No preferred component has been set, will not seed");
-            prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, true).apply();
-            return;
-        }
+        if (componentsToSeed.isEmpty()) return;
 
-        mControlsControllerOptional.get().seedFavoritesForComponent(
-                preferredComponent,
-                (accepted) -> {
-                    Log.i(TAG, "Controls seeded: " + accepted);
-                    prefs.edit().putBoolean(PREFS_CONTROLS_SEEDING_COMPLETED, accepted).apply();
+        mControlsControllerOptional.get().seedFavoritesForComponents(
+                componentsToSeed,
+                (response) -> {
+                    Log.d(TAG, "Controls seeded: " + response);
+                    Set<String> completedPkgs = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
+                                                                   new HashSet<String>());
+                    if (response.getAccepted()) {
+                        completedPkgs.add(response.getPackageName());
+                        prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
+                                                  completedPkgs).apply();
+                    }
                 });
     }
 
