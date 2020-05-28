@@ -1614,7 +1614,7 @@ public class ChooserActivity extends ResolverActivity implements
             targetList = Collections.singletonList(ti);
         }
 
-        ResolverTargetActionsDialogFragment f = new ResolverTargetActionsDialogFragment(
+        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment(
                 targetList, mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
 
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
@@ -1674,15 +1674,9 @@ public class ChooserActivity extends ResolverActivity implements
         if (targetInfo instanceof MultiDisplayResolveInfo) {
             MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
             if (!mti.hasSelected()) {
-                // Stacked apps get a disambiguation first
-                CharSequence[] labels = new CharSequence[mti.getTargets().size()];
-                int i = 0;
-                for (TargetInfo ti : mti.getTargets()) {
-                    labels[i++] = ti.getResolveInfo().loadLabel(getPackageManager());
-                }
                 ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment(
-                        targetInfo.getDisplayLabel(),
-                        ((MultiDisplayResolveInfo) targetInfo), labels, which);
+                        mti, which,
+                        mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
 
                 f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
                 return;
@@ -2973,16 +2967,16 @@ public class ChooserActivity extends ResolverActivity implements
                 itemView.setOnClickListener(v -> startSelected(mListPosition,
                         false/* always */, true/* filterd */));
 
-                TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                        .targetInfoForPosition(mListPosition, /* filtered */ true);
+                itemView.setOnLongClickListener(v -> {
+                    final TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
+                            .targetInfoForPosition(mListPosition, /* filtered */ true);
 
-                // This should always be the case for ItemViewHolder, check for sanity
-                if (ti instanceof DisplayResolveInfo) {
-                    itemView.setOnLongClickListener(v -> {
+                    // This should always be the case for ItemViewHolder, check for sanity
+                    if (ti instanceof DisplayResolveInfo) {
                         showTargetDetails((DisplayResolveInfo) ti);
-                        return true;
-                    });
-                }
+                    }
+                    return true;
+                });
             }
         }
     }
@@ -3310,16 +3304,15 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // Direct Share targets should not show any menu
                 if (!isDirectShare) {
-                    final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                            holder.getItemIndex(column), true);
-
-                    // This should always be the case for non-DS targets, check for sanity
-                    if (ti instanceof DisplayResolveInfo) {
-                        v.setOnLongClickListener(v1 -> {
+                    v.setOnLongClickListener(v1 -> {
+                        final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
+                                holder.getItemIndex(column), true);
+                        // This should always be the case for non-DS targets, check for sanity
+                        if (ti instanceof DisplayResolveInfo) {
                             showTargetDetails((DisplayResolveInfo) ti);
-                            return true;
-                        });
-                    }
+                        }
+                        return true;
+                    });
                 }
 
                 holder.addView(i, v);
