@@ -54,8 +54,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
 
     // True if the current share is a link.
     private final boolean mHttp;
-    // can be null if mHttp == false or current user has no default browser package
-    private final String mDefaultBrowserPackageName;
 
     // message types
     static final int RANKER_SERVICE_RESULT = 0;
@@ -102,9 +100,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         getContentAnnotations(intent);
         mPm = context.getPackageManager();
         mUsm = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-        mDefaultBrowserPackageName = mHttp
-                ? mPm.getDefaultBrowserPackageNameAsUser(UserHandle.myUserId())
-                : null;
         mAzComparator = new AzInfoComparator(context);
     }
 
@@ -157,17 +152,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         }
 
         if (mHttp) {
-            // Special case: we want filters that match URI paths/schemes to be
-            // ordered before others.  This is for the case when opening URIs,
-            // to make native apps go above browsers - except for 1 even more special case
-            // which is the default browser, as we want that to go above them all.
-            if (isDefaultBrowser(lhs)) {
-                return -1;
-            }
-
-            if (isDefaultBrowser(rhs)) {
-                return 1;
-            }
             final boolean lhsSpecific = ResolverActivity.isSpecificUriMatch(lhs.match);
             final boolean rhsSpecific = ResolverActivity.isSpecificUriMatch(rhs.match);
             if (lhsSpecific != rhsSpecific) {
@@ -271,21 +255,6 @@ public abstract class AbstractResolverComparator implements Comparator<ResolvedC
         afterCompute();
         mAfterCompute = null;
     }
-
-    private boolean isDefaultBrowser(ResolveInfo ri) {
-        // It makes sense to prefer the default browser
-        // only if the targeted user is the current user
-        if (ri.targetUserId != UserHandle.USER_CURRENT) {
-            return false;
-        }
-
-        if (ri.activityInfo.packageName != null
-                    && ri.activityInfo.packageName.equals(mDefaultBrowserPackageName)) {
-            return true;
-        }
-        return false;
-    }
-
 
     /**
      * Sort intents alphabetically based on package name.
