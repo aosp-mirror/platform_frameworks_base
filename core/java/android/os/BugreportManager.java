@@ -26,7 +26,6 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.app.ActivityManager;
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.Toast;
@@ -52,8 +51,6 @@ import java.util.concurrent.Executor;
 public final class BugreportManager {
 
     private static final String TAG = "BugreportManager";
-    private static final String INTENT_UI_INTENSIVE_BUGREPORT_DUMPS_FINISHED =
-            "com.android.internal.intent.action.UI_INTENSIVE_BUGREPORT_DUMPS_FINISHED";
 
     private final Context mContext;
     private final IDumpstate mBinder;
@@ -126,6 +123,12 @@ public final class BugreportManager {
          * Called when taking bugreport finishes successfully.
          */
         public void onFinished() {}
+
+        /**
+         * Called when it is ready for calling app to show UI, showing any extra UI before this
+         * callback can interfere with bugreport generation.
+         */
+        public void onEarlyReportFinished() {}
     }
 
     /**
@@ -288,21 +291,12 @@ public final class BugreportManager {
         }
 
         @Override
-        public void onUiIntensiveBugreportDumpsFinished(String callingPackage)
+        public void onUiIntensiveBugreportDumpsFinished()
                 throws RemoteException {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mExecutor.execute(() -> {
-                    // Send intent to let calling app to show UI safely without interfering with
-                    // the bugreport/screenshot generation.
-                    // TODO(b/154298410): When S is ready for API change, add a method in
-                    // BugreportCallback so we can just call the callback instead of using
-                    // broadcast.
-                    Intent intent = new Intent(INTENT_UI_INTENSIVE_BUGREPORT_DUMPS_FINISHED);
-                    intent.setPackage(callingPackage);
-                    intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-                    intent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-                    mContext.sendBroadcast(intent, android.Manifest.permission.DUMP);
+                    mCallback.onEarlyReportFinished();
                 });
             } finally {
                 Binder.restoreCallingIdentity(identity);
