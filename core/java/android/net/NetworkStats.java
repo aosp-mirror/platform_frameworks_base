@@ -16,8 +16,6 @@
 
 package android.net;
 
-import static android.os.Process.CLAT_UID;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1095,12 +1093,6 @@ public final class NetworkStats implements Parcelable {
             entry.txBytes += entry.txPackets * IPV4V6_HEADER_DELTA;
             stackedTraffic.setValues(i, entry);
         }
-
-        // Theoretically there should be no traffic accounted to the clat daemon's uid:
-        //   see ebpf program 'netd.c's early returns
-        //   and iptables '-m owner --uid-owner clat -j RETURN' rules prior to accounting
-        // TODO: remove this - should definitely be safe once ebpf only.
-        baseTraffic.removeUids(new int[] {CLAT_UID});
     }
 
     /**
