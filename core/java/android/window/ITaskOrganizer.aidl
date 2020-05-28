@@ -27,7 +27,8 @@ import android.window.WindowContainerToken;
 oneway interface ITaskOrganizer {
     /**
      * A callback when the Task is available for the registered organizer. The client is responsible
-     * for releasing the SurfaceControl in the callback.
+     * for releasing the SurfaceControl in the callback. For non-root tasks, the leash may initially
+     * be hidden so it is up to the organizer to show this task.
      *
      * @param taskInfo The information about the Task that's available
      * @param leash A persistent leash for this Task.

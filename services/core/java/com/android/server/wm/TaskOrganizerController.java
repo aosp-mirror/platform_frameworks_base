@@ -98,11 +98,14 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         final ITaskOrganizer mTaskOrganizer;
         final Consumer<Runnable> mDeferTaskOrgCallbacksConsumer;
 
+        private final SurfaceControl.Transaction mTransaction;
+
         TaskOrganizerCallbacks(WindowManagerService wm, ITaskOrganizer taskOrg,
                 Consumer<Runnable> deferTaskOrgCallbacksConsumer) {
             mService = wm;
             mDeferTaskOrgCallbacksConsumer = deferTaskOrgCallbacksConsumer;
             mTaskOrganizer = taskOrg;
+            mTransaction = wm.mTransactionFactory.get();
         }
 
         IBinder getBinder() {
@@ -110,10 +113,17 @@ class TaskOrganizerController extends ITaskOrganizerController.Stub {
         }
 
         void onTaskAppeared(Task task) {
+            final boolean visible = task.isVisible();
             final RunningTaskInfo taskInfo = task.getTaskInfo();
             mDeferTaskOrgCallbacksConsumer.accept(() -> {
                 try {
                     SurfaceControl outSurfaceControl = new SurfaceControl(task.getSurfaceControl());
+                    if (!task.mCreatedByOrganizer && !visible) {
+                        // To prevent flashes, we hide the task prior to sending the leash to the
+                        // task org if the task has previously hidden (ie. when entering PIP)
+                        mTransaction.hide(outSurfaceControl);
+                        mTransaction.apply();
+                    }
                     mTaskOrganizer.onTaskAppeared(taskInfo, outSurfaceControl);
                 } catch (RemoteException e) {
                     Slog.e(TAG, "Exception sending onTaskAppeared callback", e);
