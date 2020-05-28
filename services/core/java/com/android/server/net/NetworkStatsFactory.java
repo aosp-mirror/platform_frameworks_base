@@ -152,12 +152,10 @@ public class NetworkStatsFactory {
 
     /**
      * Applies 464xlat adjustments with ifaces noted with {@link #noteStackedIface(String, String)}.
-     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map, boolean)
+     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map)
      */
-    public void apply464xlatAdjustments(NetworkStats baseTraffic,
-            NetworkStats stackedTraffic, boolean useBpfStats) {
-        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, mStackedIfaces,
-                useBpfStats);
+    public void apply464xlatAdjustments(NetworkStats baseTraffic, NetworkStats stackedTraffic) {
+        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, mStackedIfaces);
     }
 
     public NetworkStatsFactory() {
@@ -380,7 +378,7 @@ public class NetworkStatsFactory {
         // network, the overhead is their fault.
         // No locking here: apply464xlatAdjustments behaves fine with an add-only
         // ConcurrentHashMap.
-        delta.apply464xlatAdjustments(mStackedIfaces, mUseBpfStats);
+        delta.apply464xlatAdjustments(mStackedIfaces);
 
         // Migrate data usage over a VPN to the TUN network.
         for (VpnInfo info : vpnArray) {
