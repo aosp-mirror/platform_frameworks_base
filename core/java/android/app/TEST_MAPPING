@@ -50,7 +50,7 @@
             "file_patterns": ["INotificationManager\\.aidl"]
         },
         {
-            "name": "FrameworksInstantAppResolverTests",
+            "name": "CtsInstantAppTests",
             "file_patterns": ["(/|^)InstantAppResolve[^/]*"]
         }
     ],
