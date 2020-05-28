@@ -456,12 +456,12 @@
         days the profile is allowed to be off and this number is at least 3. [CHAR LIMIT=NONE] -->
     <string name="personal_apps_suspension_soon_text">
         Personal apps will be blocked on <xliff:g id="date" example="May 29">%1$s</xliff:g> at
-        <xliff:g id="time" example="5:20 PM">%2$s</xliff:g>. Your work profile can\u2019t stay off
-        for more than <xliff:g id="number" example="3">%3$d</xliff:g> days.
+        <xliff:g id="time" example="5:20 PM">%2$s</xliff:g>. Your IT admin doesn\u2019t allow your
+        work profile to stay off for more than <xliff:g id="number" example="3">%3$d</xliff:g> days.
     </string>
     <!-- Title for the button that turns work profile on. To be used in a notification
         [CHAR LIMIT=NONE] -->
-    <string name="personal_apps_suspended_turn_profile_on">Turn on work profile</string>
+    <string name="personal_apps_suspended_turn_profile_on">Turn on</string>
 
     <!-- Display name for any time a piece of data refers to the owner of the phone. For example, this could be used in place of the phone's phone number. -->
     <string name="me">Me</string>
