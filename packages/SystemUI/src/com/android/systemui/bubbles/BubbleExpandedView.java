@@ -311,7 +311,9 @@ public class BubbleExpandedView extends LinearLayout {
      * if a view has been added or removed from on top of the ActivityView, such as the manage menu.
      */
     void updateObscuredTouchableRegion() {
-        mActivityView.onLocationChanged();
+        if (mActivityView != null) {
+            mActivityView.onLocationChanged();
+        }
     }
 
     void applyThemeAttrs() {
