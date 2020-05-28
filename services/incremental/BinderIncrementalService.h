@@ -77,7 +77,8 @@ public:
 
     binder::Status configureNativeBinaries(int32_t storageId, const std::string& apkFullPath,
                                            const std::string& libDirRelativePath,
-                                           const std::string& abi, bool* _aidl_return) final;
+                                           const std::string& abi, bool extractNativeLibs,
+                                           bool* _aidl_return) final;
     binder::Status waitForNativeBinariesExtraction(int storageId, bool* _aidl_return) final;
 
 private:
