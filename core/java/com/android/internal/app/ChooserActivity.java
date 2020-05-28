@@ -875,7 +875,6 @@ public class ChooserActivity extends ResolverActivity implements
                 initialIntents,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ UserHandle.of(UserHandle.myUserId()));
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
@@ -896,7 +895,6 @@ public class ChooserActivity extends ResolverActivity implements
                 selectedProfile == PROFILE_PERSONAL ? initialIntents : null,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ getPersonalProfileUserHandle());
         ChooserGridAdapter workAdapter = createChooserGridAdapter(
                 /* context */ this,
@@ -904,7 +902,6 @@ public class ChooserActivity extends ResolverActivity implements
                 selectedProfile == PROFILE_WORK ? initialIntents : null,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ getWorkProfileUserHandle());
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
@@ -2486,10 +2483,10 @@ public class ChooserActivity extends ResolverActivity implements
     @VisibleForTesting
     public ChooserGridAdapter createChooserGridAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
+            boolean filterLastUsed, UserHandle userHandle) {
         ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
                 initialIntents, rList, filterLastUsed,
-                useLayoutForBrowsables, createListController(userHandle));
+                createListController(userHandle));
         AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
@@ -2500,11 +2497,10 @@ public class ChooserActivity extends ResolverActivity implements
     @VisibleForTesting
     public ChooserListAdapter createChooserListAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables,
-            ResolverListController resolverListController) {
+            boolean filterLastUsed, ResolverListController resolverListController) {
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, resolverListController, useLayoutForBrowsables,
-                this, this, context.getPackageManager());
+                filterLastUsed, resolverListController, this,
+                this, context.getPackageManager());
     }
 
     @VisibleForTesting
