@@ -67,7 +67,7 @@ import java.util.Set;
  *
  * @hide
  */
-public final class RollbackPackageHealthObserver implements PackageHealthObserver {
+final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private static final String TAG = "RollbackPackageHealthObserver";
     private static final String NAME = "rollback-observer";
 
@@ -136,14 +136,14 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
      * Start observing health of {@code packages} for {@code durationMs}.
      * This may cause {@code packages} to be rolled back if they crash too freqeuntly.
      */
-    public void startObservingHealth(List<String> packages, long durationMs) {
+    void startObservingHealth(List<String> packages, long durationMs) {
         PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
     /** Verifies the rollback state after a reboot and schedules polling for sometime after reboot
      * to check for native crashes and mitigate them if needed.
      */
-    public void onBootCompletedAsync() {
+    void onBootCompletedAsync() {
         mHandler.post(()->onBootCompleted());
     }
 

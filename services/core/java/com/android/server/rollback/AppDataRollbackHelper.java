@@ -43,7 +43,7 @@ public class AppDataRollbackHelper {
     private final Installer mInstaller;
     private final ApexManager mApexManager;
 
-    public AppDataRollbackHelper(Installer installer) {
+    AppDataRollbackHelper(Installer installer) {
         mInstaller = installer;
         mApexManager = ApexManager.getInstance();
     }
