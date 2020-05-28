@@ -5061,6 +5061,10 @@ public class AudioService extends IAudioService.Stub
                 profile, suppressNoisyIntent, a2dpVolume);
     }
 
+    /*package*/ void setMusicMute(boolean mute) {
+        mStreamStates[AudioSystem.STREAM_MUSIC].muteInternally(mute);
+    }
+
     /**
      * See AudioManager.handleBluetoothA2dpDeviceConfigChange()
      * @param device
@@ -5463,6 +5467,7 @@ public class AudioService extends IAudioService.Stub
         private int mIndexMax;
 
         private boolean mIsMuted;
+        private boolean mIsMutedInternally;
         private String mVolumeIndexSettingName;
         private int mObservedDevices;
 
@@ -5636,7 +5641,8 @@ public class AudioService extends IAudioService.Stub
             // Only set audio policy BT SCO stream volume to 0 when the stream is actually muted.
             // This allows RX path muting by the audio HAL only when explicitly muted but not when
             // index is just set to 0 to repect BT requirements
-            if (mStreamType == AudioSystem.STREAM_BLUETOOTH_SCO && index == 0 && !mIsMuted) {
+            if (mStreamType == AudioSystem.STREAM_BLUETOOTH_SCO && index == 0
+                    && !isFullyMuted()) {
                 index = 1;
             }
             AudioSystem.setStreamVolumeIndexAS(mStreamType, index, device);
@@ -5645,7 +5651,7 @@ public class AudioService extends IAudioService.Stub
         // must be called while synchronized VolumeStreamState.class
         /*package*/ void applyDeviceVolume_syncVSS(int device, boolean isAvrcpAbsVolSupported) {
             int index;
-            if (mIsMuted) {
+            if (isFullyMuted()) {
                 index = 0;
             } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
                     && isAvrcpAbsVolSupported) {
@@ -5668,7 +5674,7 @@ public class AudioService extends IAudioService.Stub
                 for (int i = 0; i < mIndexMap.size(); i++) {
                     final int device = mIndexMap.keyAt(i);
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
-                        if (mIsMuted) {
+                        if (isFullyMuted()) {
                             index = 0;
                         } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
                                 && isAvrcpAbsVolSupported) {
@@ -5685,7 +5691,7 @@ public class AudioService extends IAudioService.Stub
                 }
                 // apply default volume last: by convention , default device volume will be used
                 // by audio policy manager if no explicit volume is present for a given device type
-                if (mIsMuted) {
+                if (isFullyMuted()) {
                     index = 0;
                 } else {
                     index = (getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5)/10;
@@ -5867,6 +5873,41 @@ public class AudioService extends IAudioService.Stub
             return changed;
         }
 
+        /**
+         * Mute/unmute the stream by AudioService
+         * @param state the new mute state
+         * @return true if the mute state was changed
+         */
+        public boolean muteInternally(boolean state) {
+            boolean changed = false;
+            synchronized (VolumeStreamState.class) {
+                if (state != mIsMutedInternally) {
+                    changed = true;
+                    mIsMutedInternally = state;
+
+                    // Set the new mute volume. This propagates the values to
+                    // the audio system, otherwise the volume won't be changed
+                    // at the lower level.
+                    sendMsg(mAudioHandler,
+                            MSG_SET_ALL_VOLUMES,
+                            SENDMSG_QUEUE,
+                            0,
+                            0,
+                            this, 0);
+                }
+            }
+            if (changed) {
+                sVolumeLogger.log(new VolumeEvent(
+                        VolumeEvent.VOL_MUTE_STREAM_INT, mStreamType, state));
+            }
+            return changed;
+        }
+
+        @GuardedBy("VolumeStreamState.class")
+        public boolean isFullyMuted() {
+            return mIsMuted || mIsMutedInternally;
+        }
+
         public int getStreamType() {
             return mStreamType;
         }
@@ -5903,6 +5944,8 @@ public class AudioService extends IAudioService.Stub
         private void dump(PrintWriter pw) {
             pw.print("   Muted: ");
             pw.println(mIsMuted);
+            pw.print("   Muted Internally: ");
+            pw.println(mIsMutedInternally);
             pw.print("   Min: ");
             pw.print((mIndexMin + 5) / 10);
             if (mIndexMin != mIndexMinNoPerm) {
