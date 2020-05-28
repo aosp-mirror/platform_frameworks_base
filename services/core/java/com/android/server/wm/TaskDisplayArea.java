@@ -765,6 +765,32 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         onStackOrderChanged(stack);
     }
 
+    /**
+     * Moves/reparents `task` to the back of whatever container the home stack is in. This is for
+     * when we just want to move a task to "the back" vs. a specific place. The primary use-case
+     * is to make sure that moved-to-back apps go into secondary split when in split-screen mode.
+     */
+    void positionTaskBehindHome(ActivityStack task) {
+        final ActivityStack home = getOrCreateRootHomeTask();
+        final WindowContainer homeParent = home.getParent();
+        final Task homeParentTask = homeParent != null ? homeParent.asTask() : null;
+        if (homeParentTask == null) {
+            // reparent throws if parent didn't change...
+            if (task.getParent() == this) {
+                positionStackAtBottom(task);
+            } else {
+                task.reparent(this, false /* onTop */);
+            }
+        } else if (homeParentTask == task.getParent()) {
+            // Apparently reparent early-outs if same stack, so we have to explicitly reorder.
+            ((ActivityStack) homeParentTask).positionChildAtBottom(task);
+        } else {
+            task.reparent((ActivityStack) homeParentTask, false /* toTop */,
+                    Task.REPARENT_LEAVE_STACK_IN_PLACE, false /* animate */,
+                    false /* deferResume */, "positionTaskBehindHome");
+        }
+    }
+
     ActivityStack getStack(int rootTaskId) {
         for (int i = getStackCount() - 1; i >= 0; --i) {
             final ActivityStack stack = getStackAt(i);
