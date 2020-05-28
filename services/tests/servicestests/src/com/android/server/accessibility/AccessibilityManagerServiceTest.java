@@ -17,6 +17,7 @@
 package com.android.server.accessibility;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -38,14 +39,17 @@ import android.content.pm.ServiceInfo;
 import android.graphics.drawable.Icon;
 import android.os.IBinder;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.test.AndroidTestCase;
 import android.test.suitebuilder.annotation.SmallTest;
+import android.view.Display;
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 
 import androidx.test.InstrumentationRegistry;
 
 import com.android.server.LocalServices;
 import com.android.server.accessibility.AccessibilityManagerService.AccessibilityDisplayListener;
+import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.accessibility.test.MessageCapturingHandler;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -89,6 +93,7 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
     @Mock private ActivityTaskManagerInternal mMockActivityTaskManagerInternal;
     @Mock private IBinder mMockBinder;
     @Mock private IAccessibilityServiceClient mMockServiceClient;
+    @Mock private WindowMagnificationManager mMockWindowMagnificationMgr;
     private AccessibilityUserState mUserState;
 
     private MessageCapturingHandler mHandler = new MessageCapturingHandler(null);
@@ -111,7 +116,12 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
             mMockSecurityPolicy,
             mMockSystemActionPerformer,
             mMockA11yWindowManager,
-            mMockA11yDisplayListener);
+            mMockA11yDisplayListener,
+            mMockWindowMagnificationMgr);
+
+        final AccessibilityUserState userState = new AccessibilityUserState(
+                mA11yms.getCurrentUserIdLocked(), mMockContext, mA11yms);
+        mA11yms.mUserStates.put(mA11yms.getCurrentUserIdLocked(), userState);
     }
 
     private void setupAccessibilityServiceConnection() {
@@ -191,5 +201,33 @@ public class AccessibilityManagerServiceTest extends AndroidTestCase {
         mA11yms.notifySystemActionsChangedLocked(mUserState);
         InstrumentationRegistry.getInstrumentation().waitForIdleSync();
         verify(mMockServiceClient).onSystemActionsChanged();
+    }
+
+    @SmallTest
+    public void testOnMagnificationScaleChanged_MagnificationCapabilitiesAll_showButton() {
+        // Request showing magnification button if the magnification capability is all mode.
+        mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked()).setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL);
+
+        mA11yms.onMagnificationScaleChanged(Display.DEFAULT_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mMockWindowMagnificationMgr).showMagnificationButton(Display.DEFAULT_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+    }
+
+    @SmallTest
+    public void testOnMagnificationScaleChanged_MagnificationCapabilitiesNotAll_NoAction() {
+        // Do nothing if the magnification capability is not all mode.
+        mA11yms.mUserStates.get(
+                mA11yms.getCurrentUserIdLocked()).setMagnificationCapabilitiesLocked(
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        mA11yms.onMagnificationScaleChanged(Display.DEFAULT_DISPLAY,
+                Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
+
+        verify(mMockWindowMagnificationMgr, never()).showMagnificationButton(anyInt(),
+                anyInt());
     }
 }
