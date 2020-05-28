@@ -42,7 +42,7 @@ import com.android.server.statusbar.StatusBarManagerInternal;
  * create by {@link #setConnection(IWindowMagnificationConnection)}. To set the connection with
  * SysUI, call {@code StatusBarManagerInternal#requestWindowMagnificationConnection(boolean)}.
  */
-public final class WindowMagnificationManager implements
+public class WindowMagnificationManager implements
         PanningScalingHandler.MagnificationDelegate {
 
     private static final boolean DBG = false;
