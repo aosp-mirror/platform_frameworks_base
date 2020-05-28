@@ -100,6 +100,7 @@ public class AudioServiceEvents {
         static final int VOL_VOICE_ACTIVITY_HEARING_AID = 6;
         static final int VOL_MODE_CHANGE_HEARING_AID = 7;
         static final int VOL_SET_GROUP_VOL = 8;
+        static final int VOL_MUTE_STREAM_INT = 9;
 
         final int mOp;
         final int mStream;
@@ -185,6 +186,18 @@ public class AudioServiceEvents {
             mCaller = caller;
             mGroupName = group;
             mAudioAttributes = aa;
+            logMetricEvent();
+        }
+
+        /** used for VOL_MUTE_STREAM_INT */
+        VolumeEvent(int op, int stream, boolean state) {
+            mOp = op;
+            mStream = stream;
+            mVal1 = state ? 1 : 0;
+            mVal2 = 0;
+            mCaller = null;
+            mGroupName = null;
+            mAudioAttributes = null;
             logMetricEvent();
         }
 
@@ -278,6 +291,9 @@ public class AudioServiceEvents {
                             .set(MediaMetrics.Property.INDEX, mVal1)
                             .record();
                     return;
+                case VOL_MUTE_STREAM_INT:
+                    // No value in logging metrics for this internal event
+                    return;
                 default:
                     return;
             }
@@ -342,6 +358,11 @@ public class AudioServiceEvents {
                             .append(" index:").append(mVal1)
                             .append(" flags:0x").append(Integer.toHexString(mVal2))
                             .append(") from ").append(mCaller)
+                            .toString();
+                case VOL_MUTE_STREAM_INT:
+                    return new StringBuilder("VolumeStreamState.muteInternally(stream:")
+                            .append(AudioSystem.streamToString(mStream))
+                            .append(mVal1 == 1 ? ", muted)" : ", unmuted)")
                             .toString();
                 default: return new StringBuilder("FIXME invalid op:").append(mOp).toString();
             }
