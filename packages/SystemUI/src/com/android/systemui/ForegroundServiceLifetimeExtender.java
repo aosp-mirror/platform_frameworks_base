@@ -66,6 +66,12 @@ public class ForegroundServiceLifetimeExtender implements NotificationLifetimeEx
             return false;
         }
 
+        // Entry has triggered a HUN or some other interruption, therefore it has been seen and the
+        // interrupter might be retaining it anyway.
+        if (entry.hasInterrupted()) {
+            return false;
+        }
+
         boolean hasInteracted = mInteractionTracker.hasUserInteractedWith(entry.key);
         long aliveTime = mSystemClock.uptimeMillis() - entry.getCreationTime();
         return aliveTime < MIN_FGS_TIME_MS && !hasInteracted;

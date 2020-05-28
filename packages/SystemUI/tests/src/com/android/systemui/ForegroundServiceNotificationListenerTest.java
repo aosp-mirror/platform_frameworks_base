@@ -100,4 +100,16 @@ public class ForegroundServiceNotificationListenerTest extends SysuiTestCase {
         mClock.advanceTime(MIN_FGS_TIME_MS + 1);
         assertFalse(mExtender.shouldExtendLifetime(mEntry));
     }
+
+    @Test
+    public void testShouldExtendLifetime_shouldNot_interruped() {
+        // GIVEN a notification that would trigger lifetime extension
+        mNotif.flags |= Notification.FLAG_FOREGROUND_SERVICE;
+
+        // GIVEN the notification has alerted
+        mEntry.setInterruption();
+
+        // THEN the notification does not need to have its lifetime extended by this extender
+        assertFalse(mExtender.shouldExtendLifetime(mEntry));
+    }
 }
