@@ -33,7 +33,7 @@ java_defaults {
         "net-utils-framework-common",
     ],
     libs: [
-        "framework-tethering",
+        "framework-tethering.impl",
         "unsupportedappusage",
     ],
     plugins: ["java_api_finder"],
@@ -96,7 +96,7 @@ java_defaults {
         "res",
     ],
     libs: [
-        "framework-tethering",
+        "framework-tethering.impl",
     ],
     jarjar_rules: "jarjar-rules.txt",
     optimize: {

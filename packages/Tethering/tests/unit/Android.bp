@@ -29,7 +29,7 @@ java_library {
     sdk_version: "core_platform",
     libs: [
         "framework-minus-apex",
-        "framework-tethering",
+        "framework-tethering.impl",
     ],
     visibility: ["//cts/tests/tests/tethering"],
 }
@@ -59,7 +59,7 @@ java_defaults {
         "ext",
         "framework-minus-apex",
         "framework-res",
-        "framework-tethering",
+        "framework-tethering.impl",
     ],
     jni_libs: [
         // For mockito extended
