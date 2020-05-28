@@ -46,11 +46,15 @@ filegroup {
         "//frameworks/base/apex/statsd:__subpackages__",
     ],
 }
-java_library {
+java_sdk_library {
     name: "framework-statsd",
+    defaults: ["framework-module-defaults"],
     installable: true,
-    sdk_version: "module_current",
-    libs: [ "framework-annotations-lib" ],
+
+    // TODO(b/155480189) - Remove naming_scheme once references have been resolved.
+    // Temporary java_sdk_library component naming scheme to use to ease the transition from separate
+    // modules to java_sdk_library.
+    naming_scheme: "framework-modules",
 
     srcs: [
         ":framework-statsd-sources",
@@ -64,123 +68,26 @@ java_library {
         "com.android.internal.util",
     ],
 
-    plugins: ["java_api_finder"],
+    api_packages: [
+        "android.app",
+        "android.os",
+        "android.util",
+    ],
 
     hostdex: true, // for hiddenapi check
     visibility: [
         "//frameworks/base/apex/statsd:__subpackages__",
     ],
-    apex_available: [
-        "com.android.os.statsd",
-        "test_com.android.os.statsd",
-    ],
-}
-
-stubs_defaults {
-    name: "framework-statsd-stubs-srcs-defaults",
-    srcs: [
-        ":framework-statsd-sources",
-    ],
-
-    libs: [
-        "framework-annotations-lib",
-    ],
-    sdk_version: "system_current",
-    dist: { dest: "framework-statsd.txt" },
-}
-
-droidstubs {
-    name: "framework-statsd-stubs-srcs-publicapi",
-    defaults: [
-        "framework-module-stubs-defaults-publicapi",
-        "framework-statsd-stubs-srcs-defaults",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-statsd.api.public.latest",
-            removed_api_file: ":framework-statsd-removed.api.public.latest",
-        },
-        api_lint: {
-            new_since: ":framework-statsd.api.public.latest",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-statsd-stubs-srcs-systemapi",
-    defaults: [
-        "framework-module-stubs-defaults-systemapi",
-        "framework-statsd-stubs-srcs-defaults",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-statsd.api.system.latest",
-            removed_api_file: ":framework-statsd-removed.api.system.latest",
-        },
-        api_lint: {
-            new_since: ":framework-statsd.api.system.latest",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-statsd-api-module_libs_api",
-    defaults: [
-        "framework-module-api-defaults-module_libs_api",
-        "framework-statsd-stubs-srcs-defaults",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-statsd.api.module-lib.latest",
-            removed_api_file: ":framework-statsd-removed.api.module-lib.latest",
-        },
-        api_lint: {
-            new_since: ":framework-statsd.api.module-lib.latest",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-statsd-stubs-srcs-module_libs_api",
-    defaults: [
-        "framework-module-stubs-defaults-module_libs_api",
-        "framework-statsd-stubs-srcs-defaults",
-    ],
-}
-
-java_library {
-    name: "framework-statsd-stubs-publicapi",
-    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
-    srcs: [ ":framework-statsd-stubs-srcs-publicapi" ],
-    visibility: [
-        "//frameworks/base", // Framework
-        "//frameworks/base/apex/statsd", // statsd apex
-    ],
-    dist: { dest: "framework-statsd.jar" },
-}
-
-java_library {
-    name: "framework-statsd-stubs-systemapi",
-    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
-    srcs: [ ":framework-statsd-stubs-srcs-systemapi" ],
-    visibility: [
-        "//frameworks/base", // Framework
-        "//frameworks/base/apex/statsd", // statsd apex
-    ],
-    dist: { dest: "framework-statsd.jar" },
-}
-
-java_library {
-    name: "framework-statsd-stubs-module_libs_api",
-    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
-    srcs: [ ":framework-statsd-stubs-srcs-module_libs_api" ],
-    visibility: [
+    stubs_library_visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd", // statsd apex
         "//frameworks/opt/net/wifi/service", // wifi service
         "//packages/providers/MediaProvider", // MediaProvider apk
     ],
-    dist: { dest: "framework-statsd.jar" },
+    apex_available: [
+        "com.android.os.statsd",
+        "test_com.android.os.statsd",
+    ],
 }
 
 android_test {
