@@ -95,11 +95,13 @@ public class InfoMediaDeviceTest {
     public void getDrawableResId_returnCorrectResId() {
         when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_TV);
 
-        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_device);
+        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(
+                R.drawable.ic_media_display_device);
 
         when(mRouteInfo.getType()).thenReturn(TYPE_REMOTE_SPEAKER);
 
-        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_media_device);
+        assertThat(mInfoMediaDevice.getDrawableResId()).isEqualTo(
+                R.drawable.ic_media_speaker_device);
 
         when(mRouteInfo.getType()).thenReturn(TYPE_GROUP);
 
