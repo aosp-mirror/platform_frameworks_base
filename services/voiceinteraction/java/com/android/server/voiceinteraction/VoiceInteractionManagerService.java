@@ -56,6 +56,8 @@ import android.os.Parcel;
 import android.os.RemoteCallback;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
@@ -1388,6 +1390,13 @@ public class VoiceInteractionManagerService extends SystemService {
                 }
             }
             mSoundTriggerInternal.dump(fd, pw, args);
+        }
+
+        @Override
+        public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+                String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+            new VoiceInteractionManagerServiceShellCommand(mServiceStub)
+                    .exec(this, in, out, err, args, callback, resultReceiver);
         }
 
         @Override
