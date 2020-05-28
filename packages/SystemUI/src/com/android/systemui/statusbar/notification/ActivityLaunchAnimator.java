@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
-import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.graphics.Matrix;
 import android.graphics.Rect;
@@ -42,8 +41,6 @@ import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 
-import java.util.concurrent.Executor;
-
 /**
  * A class that allows activities to be launched in a seamless way where the notification
  * transforms nicely into the starting window.
@@ -62,7 +59,6 @@ public class ActivityLaunchAnimator {
     private final float mWindowCornerRadius;
     private final NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final NotificationShadeDepthController mDepthController;
-    private final Executor mMainExecutor;
     private Callback mCallback;
     private final Runnable mTimeoutRunnable = () -> {
         setAnimationPending(false);
@@ -77,14 +73,12 @@ public class ActivityLaunchAnimator {
             Callback callback,
             NotificationPanelViewController notificationPanel,
             NotificationShadeDepthController depthController,
-            NotificationListContainer container,
-            Executor mainExecutor) {
+            NotificationListContainer container) {
         mNotificationPanel = notificationPanel;
         mNotificationContainer = container;
         mDepthController = depthController;
         mNotificationShadeWindowViewController = notificationShadeWindowViewController;
         mCallback = callback;
-        mMainExecutor = mainExecutor;
         mWindowCornerRadius = ScreenDecorationsUtils
                 .getWindowCornerRadius(mNotificationShadeWindowViewController.getView()
                         .getResources());
@@ -97,7 +91,7 @@ public class ActivityLaunchAnimator {
             return null;
         }
         AnimationRunner animationRunner = new AnimationRunner(
-                (ExpandableNotificationRow) sourceView, mMainExecutor);
+                (ExpandableNotificationRow) sourceView);
         return new RemoteAnimationAdapter(animationRunner, ANIMATION_DURATION,
                 ANIMATION_DURATION - 150 /* statusBarTransitionDelay */);
     }
@@ -140,18 +134,17 @@ public class ActivityLaunchAnimator {
 
     class AnimationRunner extends IRemoteAnimationRunner.Stub {
 
-        private final ExpandAnimationParameters mParams = new ExpandAnimationParameters();
+        private final ExpandableNotificationRow mSourceNotification;
+        private final ExpandAnimationParameters mParams;
         private final Rect mWindowCrop = new Rect();
         private final float mNotificationCornerRadius;
-        private final Executor mMainExecutor;
-        @Nullable private ExpandableNotificationRow mSourceNotification;
-        @Nullable private SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
         private float mCornerRadius;
         private boolean mIsFullScreenLaunch = true;
+        private final SyncRtSurfaceTransactionApplier mSyncRtTransactionApplier;
 
-        AnimationRunner(ExpandableNotificationRow sourceNotification, Executor mainExecutor) {
-            mMainExecutor = mainExecutor;
-            mSourceNotification = sourceNotification;
+        public AnimationRunner(ExpandableNotificationRow sourceNofitication) {
+            mSourceNotification = sourceNofitication;
+            mParams = new ExpandAnimationParameters();
             mSyncRtTransactionApplier = new SyncRtSurfaceTransactionApplier(mSourceNotification);
             mNotificationCornerRadius = Math.max(mSourceNotification.getCurrentTopRoundness(),
                     mSourceNotification.getCurrentBottomRoundness());
@@ -162,15 +155,13 @@ public class ActivityLaunchAnimator {
                 RemoteAnimationTarget[] remoteAnimationWallpaperTargets,
                 IRemoteAnimationFinishedCallback iRemoteAnimationFinishedCallback)
                     throws RemoteException {
-            mMainExecutor.execute(() -> {
+            mSourceNotification.post(() -> {
                 RemoteAnimationTarget primary = getPrimaryRemoteAnimationTarget(
                         remoteAnimationTargets);
-                if (primary == null || mSourceNotification == null) {
+                if (primary == null) {
                     setAnimationPending(false);
                     invokeCallback(iRemoteAnimationFinishedCallback);
                     mNotificationPanel.collapse(false /* delayed */, 1.0f /* speedUpFactor */);
-                    mSourceNotification = null;
-                    mSyncRtTransactionApplier = null;
                     return;
                 }
 
@@ -181,14 +172,28 @@ public class ActivityLaunchAnimator {
                 if (!mIsFullScreenLaunch) {
                     mNotificationPanel.collapseWithDuration(ANIMATION_DURATION);
                 }
-                mParams.initFrom(mSourceNotification);
-                final int targetWidth = primary.sourceContainerBounds.width();
-                final int notificationHeight;
-                final int notificationWidth;
-                notificationHeight = mSourceNotification.getActualHeight()
-                        - mSourceNotification.getClipBottomAmount();
-                notificationWidth = mSourceNotification.getWidth();
                 ValueAnimator anim = ValueAnimator.ofFloat(0, 1);
+                mParams.startPosition = mSourceNotification.getLocationOnScreen();
+                mParams.startTranslationZ = mSourceNotification.getTranslationZ();
+                mParams.startClipTopAmount = mSourceNotification.getClipTopAmount();
+                if (mSourceNotification.isChildInGroup()) {
+                    int parentClip = mSourceNotification
+                            .getNotificationParent().getClipTopAmount();
+                    mParams.parentStartClipTopAmount = parentClip;
+                    // We need to calculate how much the child is clipped by the parent
+                    // because children always have 0 clipTopAmount
+                    if (parentClip != 0) {
+                        float childClip = parentClip
+                                - mSourceNotification.getTranslationY();
+                        if (childClip > 0.0f) {
+                            mParams.startClipTopAmount = (int) Math.ceil(childClip);
+                        }
+                    }
+                }
+                int targetWidth = primary.sourceContainerBounds.width();
+                int notificationHeight = mSourceNotification.getActualHeight()
+                        - mSourceNotification.getClipBottomAmount();
+                int notificationWidth = mSourceNotification.getWidth();
                 anim.setDuration(ANIMATION_DURATION);
                 anim.setInterpolator(Interpolators.LINEAR);
                 anim.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -226,11 +231,6 @@ public class ActivityLaunchAnimator {
             });
         }
 
-        @Nullable
-        ExpandableNotificationRow getRow() {
-            return mSourceNotification;
-        }
-
         private void invokeCallback(IRemoteAnimationFinishedCallback callback) {
             try {
                 callback.onAnimationFinished();
@@ -253,9 +253,7 @@ public class ActivityLaunchAnimator {
 
         private void setExpandAnimationRunning(boolean running) {
             mNotificationPanel.setLaunchingNotification(running);
-            if (mSourceNotification != null) {
-                mSourceNotification.setExpandAnimationRunning(running);
-            }
+            mSourceNotification.setExpandAnimationRunning(running);
             mNotificationShadeWindowViewController.setExpandAnimationRunning(running);
             mNotificationContainer.setExpandingNotification(running ? mSourceNotification : null);
             mAnimationRunning = running;
@@ -263,8 +261,6 @@ public class ActivityLaunchAnimator {
                 mCallback.onExpandAnimationFinished(mIsFullScreenLaunch);
                 applyParamsToNotification(null);
                 applyParamsToNotificationShade(null);
-                mSourceNotification = null;
-                mSyncRtTransactionApplier = null;
             }
 
         }
@@ -276,9 +272,7 @@ public class ActivityLaunchAnimator {
         }
 
         private void applyParamsToNotification(ExpandAnimationParameters params) {
-            if (mSourceNotification != null) {
-                mSourceNotification.applyExpandAnimationParams(params);
-            }
+            mSourceNotification.applyExpandAnimationParams(params);
         }
 
         private void applyParamsToWindow(RemoteAnimationTarget app) {
@@ -293,18 +287,14 @@ public class ActivityLaunchAnimator {
                     .withCornerRadius(mCornerRadius)
                     .withVisibility(true)
                     .build();
-            if (mSyncRtTransactionApplier != null) {
-                mSyncRtTransactionApplier.scheduleApply(true /* earlyWakeup */, params);
-            }
+            mSyncRtTransactionApplier.scheduleApply(true /* earlyWakeup */, params);
         }
 
         @Override
         public void onAnimationCancelled() throws RemoteException {
-            mMainExecutor.execute(() -> {
+            mSourceNotification.post(() -> {
                 setAnimationPending(false);
                 mCallback.onLaunchAnimationCancelled();
-                mSourceNotification = null;
-                mSyncRtTransactionApplier = null;
             });
         }
     };
@@ -368,28 +358,6 @@ public class ActivityLaunchAnimator {
 
         public float getStartTranslationZ() {
             return startTranslationZ;
-        }
-
-        /** Initialize with data pulled from the row. */
-        void initFrom(@Nullable ExpandableNotificationRow row) {
-            if (row == null) {
-                return;
-            }
-            startPosition = row.getLocationOnScreen();
-            startTranslationZ = row.getTranslationZ();
-            startClipTopAmount = row.getClipTopAmount();
-            if (row.isChildInGroup()) {
-                int parentClip = row.getNotificationParent().getClipTopAmount();
-                parentStartClipTopAmount = parentClip;
-                // We need to calculate how much the child is clipped by the parent
-                // because children always have 0 clipTopAmount
-                if (parentClip != 0) {
-                    float childClip = parentClip - row.getTranslationY();
-                    if (childClip > 0.0f) {
-                        startClipTopAmount = (int) Math.ceil(childClip);
-                    }
-                }
-            }
         }
     }
 
