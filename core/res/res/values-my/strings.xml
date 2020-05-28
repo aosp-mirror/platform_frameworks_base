@@ -1091,7 +1091,7 @@
     <string name="elapsed_time_short_format_h_mm_ss" msgid="2302144714803345056">"<xliff:g id="HOURS">%1$d</xliff:g>:<xliff:g id="MINUTES">%2$02d</xliff:g>:<xliff:g id="SECONDS">%3$02d</xliff:g>"</string>
     <string name="selectAll" msgid="1532369154488982046">"အားလုံးရွေးရန်"</string>
     <string name="cut" msgid="2561199725874745819">"ဖြတ်ခြင်း"</string>
-    <string name="copy" msgid="5472512047143665218">"ကူးခြင်း"</string>
+    <string name="copy" msgid="5472512047143665218">"ကူးရန်"</string>
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"ကလစ်ဘုတ်သို့ မိတ္တူကူးခြင်း မအောင်မြင်ပါ"</string>
     <string name="paste" msgid="461843306215520225">"Paste"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"စာသားအတိုင်း ကူးထည့်ပါ"</string>
