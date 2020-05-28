@@ -231,7 +231,10 @@ cc_library_shared {
         "system/media/private/camera/include",
     ],
 
-    header_libs: ["bionic_libc_platform_headers"],
+    header_libs: [
+        "bionic_libc_platform_headers",
+        "dnsproxyd_protocol_headers",
+    ],
 
     static_libs: [
         "libasync_safe",
