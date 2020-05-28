@@ -11951,11 +11951,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     user);
             mInjector.getLocationManager().setLocationEnabledForUser(locationEnabled, user);
 
-            // make a best effort to only show the notification if the admin is actually changing
-            // something. this is subject to race conditions with settings changes, but those are
+            // make a best effort to only show the notification if the admin is actually enabling
+            // location. this is subject to race conditions with settings changes, but those are
             // unlikely to realistically interfere
-            if (wasLocationEnabled != locationEnabled) {
-                showLocationSettingsChangedNotification(user);
+            if (locationEnabled && (wasLocationEnabled != locationEnabled)) {
+                showLocationSettingsEnabledNotification(user);
             }
         });
 
@@ -11968,7 +11968,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .write();
     }
 
-    private void showLocationSettingsChangedNotification(UserHandle user) {
+    private void showLocationSettingsEnabledNotification(UserHandle user) {
         Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // Fill the component explicitly to prevent the PendingIntent from being intercepted
@@ -12100,8 +12100,11 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                     saveSettingsLocked(callingUserId);
                 }
                 mInjector.settingsSecurePutStringForUser(setting, value, callingUserId);
-                if (setting.equals(Settings.Secure.LOCATION_MODE)) {
-                    showLocationSettingsChangedNotification(UserHandle.of(callingUserId));
+                // Notify the user if it's the location mode setting that's been set, to any value
+                // other than 'off'.
+                if (setting.equals(Settings.Secure.LOCATION_MODE)
+                        && (Integer.parseInt(value) != 0)) {
+                    showLocationSettingsEnabledNotification(UserHandle.of(callingUserId));
                 }
             });
         }
