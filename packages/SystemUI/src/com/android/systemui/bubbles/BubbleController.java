@@ -658,7 +658,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         try {
             mAddedToWindowManager = false;
-            mWindowManager.removeView(mStackView);
+            if (mStackView != null) {
+                mWindowManager.removeView(mStackView);
+                mStackView.removeView(mBubbleScrim);
+                mStackView = null;
+            } else {
+                Log.w(TAG, "StackView added to WindowManager, but was null when removing!");
+            }
         } catch (IllegalArgumentException e) {
             // This means the stack has already been removed - it shouldn't happen, but ignore if it
             // does, since we wanted it removed anyway.
