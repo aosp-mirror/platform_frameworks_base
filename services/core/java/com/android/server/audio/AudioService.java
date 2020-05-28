@@ -109,6 +109,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
@@ -3186,10 +3187,17 @@ public class AudioService extends IAudioService.Stub
         return (mStreamStates[streamType].getMaxIndex() + 5) / 10;
     }
 
-    /** @see AudioManager#getStreamMinVolumeInt(int) */
+    /** @see AudioManager#getStreamMinVolumeInt(int)
+     * Part of service interface, check permissions here */
     public int getStreamMinVolume(int streamType) {
         ensureValidStreamType(streamType);
-        return (mStreamStates[streamType].getMinIndex() + 5) / 10;
+        final boolean isPrivileged =
+                Binder.getCallingUid() == Process.SYSTEM_UID
+                 || (mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                        == PackageManager.PERMISSION_GRANTED)
+                 || (mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
+                        == PackageManager.PERMISSION_GRANTED);
+        return (mStreamStates[streamType].getMinIndex(isPrivileged) + 5) / 10;
     }
 
     /** Get last audible volume before stream was muted. */
@@ -5790,8 +5798,20 @@ public class AudioService extends IAudioService.Stub
             return mIndexMax;
         }
 
+        /**
+         * @return the lowest index regardless of permissions
+         */
         public int getMinIndex() {
             return mIndexMin;
+        }
+
+        /**
+         * @param isPrivileged true if the caller is privileged and not subject to minimum
+         *                     volume index thresholds
+         * @return the lowest index that this caller can set or adjust to
+         */
+        public int getMinIndex(boolean isPrivileged) {
+            return isPrivileged ? mIndexMin : mIndexMinNoPerm;
         }
 
         /**
