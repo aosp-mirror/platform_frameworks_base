@@ -2325,6 +2325,18 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
+    protected boolean shouldExpandToTopOfClearAll(float targetHeight) {
+        boolean perform = super.shouldExpandToTopOfClearAll(targetHeight);
+        if (!perform) {
+            return false;
+        }
+        // Let's make sure we're not appearing but the animation will end below the appear.
+        // Otherwise quick settings would jump at the end of the animation.
+        float fraction = mNotificationStackScroller.calculateAppearFraction(targetHeight);
+        return fraction >= 1.0f;
+    }
+
+    @Override
     protected boolean shouldUseDismissingAnimation() {
         return mBarState != StatusBarState.SHADE && (mKeyguardStateController.canDismissLockScreen()
                 || !isTracking());
