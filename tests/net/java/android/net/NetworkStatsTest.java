@@ -926,21 +926,14 @@ public class NetworkStatsTest {
                 3 /* txPackets */,
                 0 /* operations */);
 
-        final NetworkStats statsXt = new NetworkStats(TEST_START, 3)
+        final NetworkStats stats = new NetworkStats(TEST_START, 3)
                 .insertEntry(appEntry)
                 .insertEntry(rootUidEntry)
                 .insertEntry(otherEntry);
 
-        final NetworkStats statsEbpf = new NetworkStats(TEST_START, 3)
-                .insertEntry(appEntry)
-                .insertEntry(rootUidEntry)
-                .insertEntry(otherEntry);
+        stats.apply464xlatAdjustments(stackedIface);
 
-        statsXt.apply464xlatAdjustments(stackedIface, false);
-        statsEbpf.apply464xlatAdjustments(stackedIface, true);
-
-        assertEquals(3, statsXt.size());
-        assertEquals(3, statsEbpf.size());
+        assertEquals(3, stats.size());
         final NetworkStats.Entry expectedAppUid = new NetworkStats.Entry(
                 v4Iface, appUid, SET_DEFAULT, TAG_NONE,
                 30949510,
@@ -955,12 +948,9 @@ public class NetworkStatsTest {
                 17607,
                 97,
                 0);
-        assertEquals(expectedAppUid, statsXt.getValues(0, null));
-        assertEquals(expectedRootUid, statsXt.getValues(1, null));
-        assertEquals(otherEntry, statsXt.getValues(2, null));
-        assertEquals(expectedAppUid, statsEbpf.getValues(0, null));
-        assertEquals(expectedRootUid, statsEbpf.getValues(1, null));
-        assertEquals(otherEntry, statsEbpf.getValues(2, null));
+        assertEquals(expectedAppUid, stats.getValues(0, null));
+        assertEquals(expectedRootUid, stats.getValues(1, null));
+        assertEquals(otherEntry, stats.getValues(2, null));
     }
 
     @Test
@@ -985,7 +975,7 @@ public class NetworkStatsTest {
                 .insertEntry(secondEntry);
 
         // Empty map: no adjustment
-        stats.apply464xlatAdjustments(new ArrayMap<>(), false);
+        stats.apply464xlatAdjustments(new ArrayMap<>());
 
         assertEquals(2, stats.size());
         assertEquals(firstEntry, stats.getValues(0, null));

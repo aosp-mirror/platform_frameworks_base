@@ -1882,14 +1882,13 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         // fold tethering stats and operations into uid snapshot
         final NetworkStats tetherSnapshot = getNetworkStatsTethering(STATS_PER_UID);
         tetherSnapshot.filter(UID_ALL, ifaces, TAG_ALL);
-        mStatsFactory.apply464xlatAdjustments(uidSnapshot, tetherSnapshot,
-                mUseBpfTrafficStats);
+        mStatsFactory.apply464xlatAdjustments(uidSnapshot, tetherSnapshot);
         uidSnapshot.combineAllValues(tetherSnapshot);
 
         // get a stale copy of uid stats snapshot provided by providers.
         final NetworkStats providerStats = getNetworkStatsFromProviders(STATS_PER_UID);
         providerStats.filter(UID_ALL, ifaces, TAG_ALL);
-        mStatsFactory.apply464xlatAdjustments(uidSnapshot, providerStats, mUseBpfTrafficStats);
+        mStatsFactory.apply464xlatAdjustments(uidSnapshot, providerStats);
         uidSnapshot.combineAllValues(providerStats);
 
         uidSnapshot.combineAllValues(mUidOperations);
