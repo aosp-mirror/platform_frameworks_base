@@ -75,9 +75,19 @@ public class BubbleExtractor implements NotificationSignalExtractor {
                 mConfig.getBubblePreference(
                         record.getSbn().getPackageName(), record.getSbn().getUid());
         NotificationChannel recordChannel = record.getChannel();
+        boolean canPresentAsBubble = canPresentAsBubble(record)
+                && !mActivityManager.isLowRamDevice()
+                && record.isConversation()
+                && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
 
-        if (!mConfig.bubblesEnabled() || bubblePreference == BUBBLE_PREFERENCE_NONE) {
+        if (!mConfig.bubblesEnabled()
+                || bubblePreference == BUBBLE_PREFERENCE_NONE
+                || !canPresentAsBubble) {
             record.setAllowBubble(false);
+            if (!canPresentAsBubble) {
+                // clear out bubble metadata since it can't be used
+                record.getNotification().setBubbleMetadata(null);
+            }
         } else if (recordChannel == null) {
             // the app is allowed but there's no channel to check
             record.setAllowBubble(true);
@@ -86,14 +96,15 @@ public class BubbleExtractor implements NotificationSignalExtractor {
         } else if (bubblePreference == BUBBLE_PREFERENCE_SELECTED) {
             record.setAllowBubble(recordChannel.canBubble());
         }
+        if (DBG) {
+            Slog.d(TAG, "record: " + record.getKey()
+                    + " appPref: " + bubblePreference
+                    + " canBubble: " + record.canBubble()
+                    + " canPresentAsBubble: " + canPresentAsBubble
+                    + " flagRemoved: " + record.isFlagBubbleRemoved());
+        }
 
-        final boolean fulfillsPolicy = record.canBubble()
-                && record.isConversation()
-                && !mActivityManager.isLowRamDevice()
-                && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
-        final boolean applyFlag = fulfillsPolicy
-                && canPresentAsBubble(record)
-                && !record.isFlagBubbleRemoved();
+        final boolean applyFlag = record.canBubble() && !record.isFlagBubbleRemoved();
         if (applyFlag) {
             record.getNotification().flags |= FLAG_BUBBLE;
         } else {

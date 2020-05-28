@@ -118,14 +118,18 @@ binder::Status BinderIncrementalService::openStorage(const std::string& path,
 }
 
 binder::Status BinderIncrementalService::createStorage(
-        const std::string& path, const content::pm::DataLoaderParamsParcel& params,
-        const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& listener,
-        int32_t createMode, int32_t* _aidl_return) {
+        const ::std::string& path, const ::android::content::pm::DataLoaderParamsParcel& params,
+        int32_t createMode,
+        const ::android::sp<::android::content::pm::IDataLoaderStatusListener>& statusListener,
+        const ::android::os::incremental::StorageHealthCheckParams& healthCheckParams,
+        const ::android::sp<::android::os::incremental::IStorageHealthListener>& healthListener,
+        int32_t* _aidl_return) {
     *_aidl_return =
             mImpl.createStorage(path, const_cast<content::pm::DataLoaderParamsParcel&&>(params),
-                                listener,
-                                android::incremental::IncrementalService::CreateOptions(
-                                        createMode));
+                                android::incremental::IncrementalService::CreateOptions(createMode),
+                                statusListener,
+                                const_cast<StorageHealthCheckParams&&>(healthCheckParams),
+                                healthListener);
     return ok();
 }
 
@@ -276,8 +280,9 @@ binder::Status BinderIncrementalService::startLoading(int32_t storageId, bool* _
 
 binder::Status BinderIncrementalService::configureNativeBinaries(
         int32_t storageId, const std::string& apkFullPath, const std::string& libDirRelativePath,
-        const std::string& abi, bool* _aidl_return) {
-    *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi);
+        const std::string& abi, bool extractNativeLibs, bool* _aidl_return) {
+    *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi,
+                                                  extractNativeLibs);
     return ok();
 }
 

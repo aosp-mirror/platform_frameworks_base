@@ -19,6 +19,8 @@ package android.os.incremental;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IDataLoaderStatusListener;
 import android.os.incremental.IncrementalNewFileParams;
+import android.os.incremental.IStorageHealthListener;
+import android.os.incremental.StorageHealthCheckParams;
 
 /** @hide */
 interface IIncrementalService {
@@ -34,7 +36,10 @@ interface IIncrementalService {
      * Opens or creates a storage given a target path and data loader params. Returns the storage ID.
      */
     int openStorage(in @utf8InCpp String path);
-    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, in IDataLoaderStatusListener listener, int createMode);
+    int createStorage(in @utf8InCpp String path, in DataLoaderParamsParcel params, int createMode,
+                      in IDataLoaderStatusListener statusListener,
+                      in StorageHealthCheckParams healthCheckParams,
+                      in IStorageHealthListener healthListener);
     int createLinkedStorage(in @utf8InCpp String path, int otherStorageId, int createMode);
 
     /**
@@ -106,9 +111,9 @@ interface IIncrementalService {
     void deleteStorage(int storageId);
 
     /**
-     * Setting up native library directories and extract native libs onto a storage.
+     * Setting up native library directories and extract native libs onto a storage if needed.
      */
-    boolean configureNativeBinaries(int storageId, in @utf8InCpp String apkFullPath, in @utf8InCpp String libDirRelativePath, in @utf8InCpp String abi);
+    boolean configureNativeBinaries(int storageId, in @utf8InCpp String apkFullPath, in @utf8InCpp String libDirRelativePath, in @utf8InCpp String abi, boolean extractNativeLibs);
 
     /**
      * Waits until all native library extraction is done for the storage

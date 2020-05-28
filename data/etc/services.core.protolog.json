@@ -253,6 +253,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/DisplayRotation.java"
     },
+    "-1554521902": {
+      "message": "showInsets(ime) was requested by different window: %s ",
+      "level": "WARN",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
+    },
     "-1545962566": {
       "message": "View server did not start",
       "level": "WARN",
@@ -366,6 +372,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "-1312861660": {
+      "message": "notifyInsetsControlChanged for %s ",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/WindowState.java"
     },
     "-1292329638": {
       "message": "Added starting %s: startingWindow=%s startingView=%s",
@@ -817,6 +829,12 @@
       "group": "WM_DEBUG_STARTING_WINDOW",
       "at": "com\/android\/server\/wm\/TaskSnapshotSurface.java"
     },
+    "-395922585": {
+      "message": "InsetsSource setWin %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
     "-393505149": {
       "message": "unable to update pointer icon",
       "level": "WARN",
@@ -858,6 +876,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
+    "-322743468": {
+      "message": "setInputMethodInputTarget %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "-322035974": {
       "message": "App freeze timeout expired.",
@@ -924,6 +948,12 @@
       "level": "INFO",
       "group": "WM_DEBUG_SCREEN_ON",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "-112805366": {
+      "message": "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
     "-106400104": {
       "message": "Preload recents with %s",
@@ -1003,6 +1033,12 @@
       "group": "WM_DEBUG_RECENTS_ANIMATIONS",
       "at": "com\/android\/server\/wm\/RecentsAnimationController.java"
     },
+    "29780972": {
+      "message": "InsetsSource Control %s for target %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
     "38267433": {
       "message": "Attempted to reset replacing window on non-existing app token %s",
       "level": "WARN",
@@ -1026,6 +1062,18 @@
       "level": "WARN",
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
+    "73987756": {
+      "message": "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
+    },
+    "75707221": {
+      "message": "ControlAdapter startAnimation mSource: %s controlTarget: %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/InsetsSourceProvider.java"
     },
     "83950285": {
       "message": "removeAnimation(%d)",
@@ -1285,12 +1333,6 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
-    "438102669": {
-      "message": "call showInsets(ime) on %s",
-      "level": "DEBUG",
-      "group": "WM_DEBUG_IME",
-      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
-    },
     "457951957": {
       "message": "\tNot visible=%s",
       "level": "DEBUG",
@@ -1368,6 +1410,12 @@
       "level": "INFO",
       "group": "WM_SHOW_TRANSACTIONS",
       "at": "com\/android\/server\/wm\/WindowSurfaceController.java"
+    },
+    "585839596": {
+      "message": "call showInsets(ime) on %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/ImeInsetsSourceProvider.java"
     },
     "594260577": {
       "message": "createWallpaperAnimations()",
@@ -1873,6 +1921,12 @@
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "1533154777": {
+      "message": "notifyInsetsChanged for %s ",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/WindowState.java"
+    },
     "1563755163": {
       "message": "Permission Denial: %s from pid=%d, uid=%d requires %s",
       "level": "WARN",
@@ -1896,6 +1950,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS_ANIM",
       "at": "com\/android\/server\/wm\/AppTransition.java"
+    },
+    "1591969812": {
+      "message": "updateImeControlTarget %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1628345525": {
       "message": "Now opening app %s",
@@ -1926,6 +1986,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_APP_TRANSITIONS",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
+    },
+    "1658605381": {
+      "message": "onImeControlTargetChanged %s",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/InsetsStateController.java"
     },
     "1671994402": {
       "message": "Nulling last startingData",
@@ -2172,6 +2238,12 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ADD_REMOVE",
       "at": "com\/android\/server\/wm\/WindowState.java"
+    },
+    "2119122320": {
+      "message": "setInputMethodTarget %s",
+      "level": "INFO",
+      "group": "WM_DEBUG_IME",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "2128604122": {
       "message": "findFocusedWindow: No focusable windows.",

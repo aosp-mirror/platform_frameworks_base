@@ -16,6 +16,7 @@
 
 package com.android.server.tv;
 
+import static android.media.AudioManager.DEVICE_NONE;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED;
 import static android.media.tv.TvInputManager.INPUT_STATE_CONNECTED_STANDBY;
 
@@ -2045,6 +2046,36 @@ public final class TvInputManagerService extends SystemService {
                 Binder.restoreCallingIdentity(identity);
             }
             return clientPid;
+        }
+
+        /**
+         * Add a hardware device in the TvInputHardwareManager for CTS testing
+         * purpose.
+         *
+         * @param device id of the adding hardware device.
+         */
+        @Override
+        public void addHardwareDevice(int deviceId) {
+            TvInputHardwareInfo info = new TvInputHardwareInfo.Builder()
+                        .deviceId(deviceId)
+                        .type(TvInputHardwareInfo.TV_INPUT_TYPE_HDMI)
+                        .audioType(DEVICE_NONE)
+                        .audioAddress("0")
+                        .hdmiPortId(0)
+                        .build();
+            mTvInputHardwareManager.onDeviceAvailable(info, null);
+            return;
+        }
+
+        /**
+         * Remove a hardware device in the TvInputHardwareManager for CTS testing
+         * purpose.
+         *
+         * @param device id of the removing hardware device.
+         */
+        @Override
+        public void removeHardwareDevice(int deviceId) {
+            mTvInputHardwareManager.onDeviceUnavailable(deviceId);
         }
 
         private int getClientPidLocked(String sessionId)

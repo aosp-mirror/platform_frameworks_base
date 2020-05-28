@@ -500,6 +500,20 @@ public class ApplicationsState {
         }
     }
 
+    /**
+     * To generate and cache the label description.
+     *
+     * @param entry contain the entries of an app
+     */
+    public void ensureLabelDescription(AppEntry entry) {
+        if (entry.labelDescription != null) {
+            return;
+        }
+        synchronized (entry) {
+            entry.ensureLabelDescriptionLocked(mContext);
+        }
+    }
+
     public void requestSize(String packageName, int userId) {
         if (DEBUG_LOCKING) Log.v(TAG, "requestSize about to acquire lock...");
         synchronized (mEntriesMap) {
@@ -1524,6 +1538,7 @@ public class ApplicationsState {
         public long size;
         public long internalSize;
         public long externalSize;
+        public String labelDescription;
 
         public boolean mounted;
 
@@ -1614,6 +1629,24 @@ public class ApplicationsState {
                 return context.getPackageManager().getPackageInfo(info.packageName, 0).versionName;
             } catch (PackageManager.NameNotFoundException e) {
                 return "";
+            }
+        }
+
+        /**
+         * Get the label description which distinguishes a personal app from a work app for
+         * accessibility purpose. If the app is in a work profile, then add a "work" prefix to the
+         * app label.
+         *
+         * @param context The application context
+         */
+        public void ensureLabelDescriptionLocked(Context context) {
+            final int userId = UserHandle.getUserId(this.info.uid);
+            if (UserManager.get(context).isManagedProfile(userId)) {
+                this.labelDescription = context.getString(
+                        com.android.settingslib.R.string.accessibility_work_profile_app_description,
+                        this.label);
+            } else {
+                this.labelDescription = this.label;
             }
         }
     }

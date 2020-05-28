@@ -60,7 +60,6 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.globalactions.GlobalActionsPopupMenu
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.phone.ShadeController
-import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
 import dagger.Lazy
 import java.text.Collator
@@ -80,7 +79,6 @@ class ControlsUiControllerImpl @Inject constructor (
     @Main val sharedPreferences: SharedPreferences,
     val controlActionCoordinator: ControlActionCoordinator,
     private val activityStarter: ActivityStarter,
-    private val keyguardStateController: KeyguardStateController,
     private val shadeController: ShadeController
 ) : ControlsUiController {
 
