@@ -55,7 +55,7 @@ StreamMap::StreamMap(int32_t streams) {
         streams = 1;
     }
     mStreamPoolSize = streams * 2;
-    mStreamPool.reset(new Stream[mStreamPoolSize]);
+    mStreamPool = std::make_unique<Stream[]>(mStreamPoolSize); // create array of streams.
     // we use a perfect hash table with 2x size to map StreamIDs to Stream pointers.
     mPerfectHash = std::make_unique<PerfectHash<int32_t, Stream *>>(roundup(mStreamPoolSize * 2));
 }
@@ -69,7 +69,7 @@ Stream* StreamMap::findStream(int32_t streamID) const
 size_t StreamMap::streamPosition(const Stream* stream) const
 {
     ptrdiff_t index = stream - mStreamPool.get();
-    LOG_ALWAYS_FATAL_IF(index < 0 || index >= mStreamPoolSize,
+    LOG_ALWAYS_FATAL_IF(index < 0 || (size_t)index >= mStreamPoolSize,
             "%s: stream position out of range: %td", __func__, index);
     return (size_t)index;
 }
@@ -92,6 +92,11 @@ int32_t StreamMap::getNextIdForStream(Stream* stream) const {
 
 ////////////
 
+// Thread safety analysis is supposed to be disabled for constructors and destructors
+// but clang in R seems to have a bug.  We use pragma to disable.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wthread-safety-analysis"
+
 StreamManager::StreamManager(
         int32_t streams, size_t threads, const audio_attributes_t* attributes)
     : StreamMap(streams)
@@ -109,6 +114,8 @@ StreamManager::StreamManager(
             std::min(threads, (size_t)std::thread::hardware_concurrency()),
             "SoundPool_");
 }
+
+#pragma clang diagnostic pop
 
 StreamManager::~StreamManager()
 {

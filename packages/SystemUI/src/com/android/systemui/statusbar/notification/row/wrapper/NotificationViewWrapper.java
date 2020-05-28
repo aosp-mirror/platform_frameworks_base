@@ -284,7 +284,7 @@ public abstract class NotificationViewWrapper implements TransformableView {
 
     @Override
     public void transformFrom(TransformableView notification, float transformationAmount) {
-        CrossFadeHelper.fadeIn(mView, transformationAmount);
+        CrossFadeHelper.fadeIn(mView, transformationAmount, true /* remap */);
     }
 
     @Override

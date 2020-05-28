@@ -1059,6 +1059,18 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
+    boolean isBlobAvailable(long blobId, int userId) {
+        synchronized (mBlobsLock) {
+            final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(userId);
+            for (BlobMetadata blobMetadata : userBlobs.values()) {
+                if (blobMetadata.getBlobId() == blobId) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
     @GuardedBy("mBlobsLock")
     private void dumpSessionsLocked(IndentingPrintWriter fout, DumpArgs dumpArgs) {
         for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {

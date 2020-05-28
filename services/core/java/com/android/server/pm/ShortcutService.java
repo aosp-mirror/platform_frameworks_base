@@ -2407,7 +2407,7 @@ public class ShortcutService extends IShortcutService.Stub {
             final int shortcutFlags = (matchDynamic ? ShortcutInfo.FLAG_DYNAMIC : 0)
                     | (matchPinned ? ShortcutInfo.FLAG_PINNED : 0)
                     | (matchManifest ? ShortcutInfo.FLAG_MANIFEST : 0)
-                    | (matchCached ? ShortcutInfo.FLAG_CACHED : 0);
+                    | (matchCached ? ShortcutInfo.FLAG_CACHED_ALL : 0);
 
             return getShortcutsWithQueryLocked(
                     packageName, userId, ShortcutInfo.CLONE_REMOVE_FOR_CREATOR,
@@ -3045,17 +3045,17 @@ public class ShortcutService extends IShortcutService.Stub {
         @Override
         public void cacheShortcuts(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
-                @NonNull List<String> shortcutIds, int userId) {
+                @NonNull List<String> shortcutIds, int userId, int cacheFlags) {
             updateCachedShortcutsInternal(launcherUserId, callingPackage, packageName, shortcutIds,
-                    userId, /* doCache= */ true);
+                    userId, cacheFlags, /* doCache= */ true);
         }
 
         @Override
         public void uncacheShortcuts(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
-                @NonNull List<String> shortcutIds, int userId) {
+                @NonNull List<String> shortcutIds, int userId, int cacheFlags) {
             updateCachedShortcutsInternal(launcherUserId, callingPackage, packageName, shortcutIds,
-                    userId, /* doCache= */ false);
+                    userId, cacheFlags, /* doCache= */ false);
         }
 
         @Override
@@ -3079,10 +3079,12 @@ public class ShortcutService extends IShortcutService.Stub {
 
         private void updateCachedShortcutsInternal(int launcherUserId,
                 @NonNull String callingPackage, @NonNull String packageName,
-                @NonNull List<String> shortcutIds, int userId, boolean doCache) {
+                @NonNull List<String> shortcutIds, int userId, int cacheFlags, boolean doCache) {
             // Calling permission must be checked by LauncherAppsImpl.
             Preconditions.checkStringNotEmpty(packageName, "packageName");
             Objects.requireNonNull(shortcutIds, "shortcutIds");
+            Preconditions.checkState(
+                    (cacheFlags & ShortcutInfo.FLAG_CACHED_ALL) != 0, "invalid cacheFlags");
 
             List<ShortcutInfo> changedShortcuts = null;
             List<ShortcutInfo> removedShortcuts = null;
@@ -3101,13 +3103,13 @@ public class ShortcutService extends IShortcutService.Stub {
                 for (int i = 0; i < idSize; i++) {
                     final String id = Preconditions.checkStringNotEmpty(shortcutIds.get(i));
                     final ShortcutInfo si = sp.findShortcutById(id);
-                    if (si == null || doCache == si.isCached()) {
+                    if (si == null || doCache == si.hasFlags(cacheFlags)) {
                         continue;
                     }
 
                     if (doCache) {
                         if (si.isLongLived()) {
-                            si.addFlags(ShortcutInfo.FLAG_CACHED);
+                            si.addFlags(cacheFlags);
                             if (changedShortcuts == null) {
                                 changedShortcuts = new ArrayList<>(1);
                             }
@@ -3118,9 +3120,8 @@ public class ShortcutService extends IShortcutService.Stub {
                         }
                     } else {
                         ShortcutInfo removed = null;
-                        if (si.isDynamic()) {
-                            si.clearFlags(ShortcutInfo.FLAG_CACHED);
-                        } else {
+                        si.clearFlags(cacheFlags);
+                        if (!si.isDynamic() && !si.isCached()) {
                             removed = sp.deleteLongLivedWithId(id, /*ignoreInvisible=*/ true);
                         }
                         if (removed != null) {

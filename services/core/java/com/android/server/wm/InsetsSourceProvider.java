@@ -24,6 +24,7 @@ import static android.view.ViewRootImpl.NEW_INSETS_MODE_IME;
 import static android.view.ViewRootImpl.NEW_INSETS_MODE_NONE;
 import static android.view.ViewRootImpl.sNewInsetsMode;
 
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_INSETS_CONTROL;
 import static com.android.server.wm.WindowManagerService.H.LAYOUT_AND_ASSIGN_WINDOW_LAYERS_IF_NEEDED;
 
@@ -40,6 +41,7 @@ import android.view.SurfaceControl.Transaction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.function.TriConsumer;
+import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
@@ -134,6 +136,7 @@ class InsetsSourceProvider {
             // animate-out as new one animates-in.
             mWin.cancelAnimation();
         }
+        ProtoLog.d(WM_DEBUG_IME, "InsetsSource setWin %s", win);
         mWin = win;
         mFrameProvider = frameProvider;
         mImeFrameProvider = imeFrameProvider;
@@ -299,6 +302,8 @@ class InsetsSourceProvider {
         updateVisibility();
         mControl = new InsetsSourceControl(mSource.getType(), leash,
                 new Point(mWin.getWindowFrames().mFrame.left, mWin.getWindowFrames().mFrame.top));
+        ProtoLog.d(WM_DEBUG_IME,
+                "InsetsSource Control %s for target %s", mControl, mControlTarget);
     }
 
     void startSeamlessRotation() {
@@ -349,6 +354,9 @@ class InsetsSourceProvider {
         final boolean isClientControlled = mControlTarget != null
                 && mControlTarget.isClientControlled();
         mSource.setVisible(mServerVisible && (!isClientControlled || mClientVisible));
+        ProtoLog.d(WM_DEBUG_IME,
+                "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
+                mServerVisible, mClientVisible);
     }
 
     InsetsSourceControl getControl(InsetsControlTarget target) {
@@ -391,6 +399,44 @@ class InsetsSourceProvider {
         return mImeOverrideFrame;
     }
 
+    public void dump(PrintWriter pw, String prefix) {
+        pw.println(prefix + "InsetsSourceProvider");
+        pw.print(prefix + " mSource="); mSource.dump(prefix + "  ", pw);
+        if (mControl != null) {
+            pw.print(prefix + " mControl=");
+            mControl.dump(prefix + "  ", pw);
+        }
+        pw.print(prefix + " mFakeControl="); mFakeControl.dump(prefix + "  ", pw);
+        pw.print(" mIsLeashReadyForDispatching="); pw.print(mIsLeashReadyForDispatching);
+        pw.print(" mImeOverrideFrame="); pw.print(mImeOverrideFrame.toString());
+        if (mWin != null) {
+            pw.print(prefix + " mWin=");
+            mWin.dump(pw, prefix + "  ", false /* dumpAll */);
+        }
+        if (mAdapter != null) {
+            pw.print(prefix + " mAdapter=");
+            mAdapter.dump(pw, prefix + "  ");
+        }
+        if (mControlTarget != null) {
+            pw.print(prefix + " mControlTarget=");
+            if (mControlTarget.getWindow() != null) {
+                mControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
+            }
+        }
+        if (mPendingControlTarget != null) {
+            pw.print(prefix + " mPendingControlTarget=");
+            if (mPendingControlTarget.getWindow() != null) {
+                mPendingControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
+            }
+        }
+        if (mFakeControlTarget != null) {
+            pw.print(prefix + " mFakeControlTarget=");
+            if (mFakeControlTarget.getWindow() != null) {
+                mFakeControlTarget.getWindow().dump(pw, prefix + "  ", false /* dumpAll */);
+            }
+        }
+    }
+
     private class ControlAdapter implements AnimationAdapter {
 
         private SurfaceControl mCapturedLeash;
@@ -410,6 +456,9 @@ class InsetsSourceProvider {
                 t.setAlpha(animationLeash, 1 /* alpha */);
                 t.hide(animationLeash);
             }
+            ProtoLog.i(WM_DEBUG_IME,
+                    "ControlAdapter startAnimation mSource: %s controlTarget: %s", mSource,
+                    mControlTarget);
 
             mCapturedLeash = animationLeash;
             final Rect frame = mWin.getWindowFrames().mFrame;
@@ -424,6 +473,9 @@ class InsetsSourceProvider {
                 mControlTarget = null;
                 mAdapter = null;
                 setClientVisible(InsetsState.getDefaultVisibility(mSource.getType()));
+                ProtoLog.i(WM_DEBUG_IME,
+                        "ControlAdapter onAnimationCancelled mSource: %s mControlTarget: %s",
+                        mSource, mControlTarget);
             }
         }
 
@@ -439,6 +491,8 @@ class InsetsSourceProvider {
 
         @Override
         public void dump(PrintWriter pw, String prefix) {
+            pw.println(prefix + "ControlAdapter");
+            pw.print(prefix + " mCapturedLeash="); pw.print(mCapturedLeash);
         }
 
         @Override

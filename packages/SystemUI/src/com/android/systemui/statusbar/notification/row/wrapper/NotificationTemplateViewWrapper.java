@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -107,7 +106,7 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                         TransformState otherState = notification.getCurrentState(
                                 TRANSFORMING_VIEW_TITLE);
                         final View text = ownState.getTransformedView();
-                        CrossFadeHelper.fadeIn(text, transformationAmount);
+                        CrossFadeHelper.fadeIn(text, transformationAmount, true /* remap */);
                         if (otherState != null) {
                             ownState.transformViewVerticalFrom(otherState, this,
                                     transformationAmount);

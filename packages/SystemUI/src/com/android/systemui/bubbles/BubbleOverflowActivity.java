@@ -21,7 +21,6 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.Activity;
-import android.app.Notification;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -260,12 +259,9 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
             mPromoteBubbleFromOverflow.accept(b);
         });
 
-        final CharSequence titleCharSeq =
-                b.getEntry().getSbn().getNotification().extras.getCharSequence(
-                        Notification.EXTRA_TITLE);
-        String titleStr = mContext.getResources().getString(R.string.notification_bubble_title);
-        if (titleCharSeq != null) {
-            titleStr = titleCharSeq.toString();
+        String titleStr = b.getTitle();
+        if (titleStr == null) {
+            titleStr = mContext.getResources().getString(R.string.notification_bubble_title);
         }
         vh.iconView.setContentDescription(mContext.getResources().getString(
                 R.string.bubble_content_description_single, titleStr, b.getAppName()));
