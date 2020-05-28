@@ -57,6 +57,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.same;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.times;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_FIXED_TRANSFORM;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
@@ -1060,6 +1061,11 @@ public class DisplayContentTests extends WindowTestsBase {
     @Test
     public void testApplyTopFixedRotationTransform() {
         mWm.mIsFixedRotationTransformEnabled = true;
+        final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
+        // Only non-movable (gesture) navigation bar will be animated by fixed rotation animation.
+        doReturn(false).when(displayPolicy).navigationBarCanMove();
+        displayPolicy.addWindowLw(mStatusBarWindow, mStatusBarWindow.mAttrs);
+        displayPolicy.addWindowLw(mNavBarWindow, mNavBarWindow.mAttrs);
         final Configuration config90 = new Configuration();
         mDisplayContent.computeScreenConfiguration(config90, ROTATION_90);
 
@@ -1079,6 +1085,12 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(mDisplayContent.getDisplayRotation().shouldRotateSeamlessly(
                 ROTATION_0 /* oldRotation */, ROTATION_90 /* newRotation */,
                 false /* forceUpdate */));
+
+        assertNotNull(mDisplayContent.getFixedRotationAnimationController());
+        assertTrue(mStatusBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
+                ANIMATION_TYPE_FIXED_TRANSFORM));
+        assertTrue(mNavBarWindow.getParent().isAnimating(WindowContainer.AnimationFlags.PARENTS,
+                ANIMATION_TYPE_FIXED_TRANSFORM));
 
         final Rect outFrame = new Rect();
         final Rect outInsets = new Rect();
@@ -1132,6 +1144,25 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(app.hasFixedRotationTransform());
         assertFalse(app2.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
+        assertNull(mDisplayContent.getFixedRotationAnimationController());
+    }
+
+    @Test
+    public void testRotateSeamlesslyWithFixedRotation() {
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        final ActivityRecord app = mAppWindow.mActivityRecord;
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
+        mAppWindow.mAttrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
+
+        // Use seamless rotation if the top app is rotated.
+        assertTrue(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
+                ROTATION_90 /* newRotation */, false /* forceUpdate */));
+
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(app);
+
+        // Use normal rotation because animating recents is an intermediate state.
+        assertFalse(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
+                ROTATION_90 /* newRotation */, false /* forceUpdate */));
     }
 
     @Test
@@ -1310,7 +1341,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     private static int getRotatedOrientation(DisplayContent dc) {
-        return dc.getLastOrientation() == SCREEN_ORIENTATION_LANDSCAPE
+        return dc.mBaseDisplayWidth > dc.mBaseDisplayHeight
                 ? SCREEN_ORIENTATION_PORTRAIT
                 : SCREEN_ORIENTATION_LANDSCAPE;
     }

@@ -30,6 +30,7 @@ private const val TAG_BUBBLE = "bb"
 private const val ATTR_USER_ID = "uid"
 private const val ATTR_PACKAGE = "pkg"
 private const val ATTR_SHORTCUT_ID = "sid"
+private const val ATTR_KEY = "key"
 
 /**
  * Writes the bubbles in xml format into given output stream.
@@ -48,7 +49,7 @@ fun writeXml(stream: OutputStream, bubbles: List<BubbleEntity>) {
 /**
  * Creates a xml entry for given bubble in following format:
  * ```
- * <bb uid="0" pkg="com.example.messenger" sid="my-shortcut" />
+ * <bb uid="0" pkg="com.example.messenger" sid="my-shortcut" key="my-key" />
  * ```
  */
 private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleEntity) {
@@ -57,6 +58,7 @@ private fun writeXmlEntry(serializer: XmlSerializer, bubble: BubbleEntity) {
         serializer.attribute(null, ATTR_USER_ID, bubble.userId.toString())
         serializer.attribute(null, ATTR_PACKAGE, bubble.packageName)
         serializer.attribute(null, ATTR_SHORTCUT_ID, bubble.shortcutId)
+        serializer.attribute(null, ATTR_KEY, bubble.key)
         serializer.endTag(null, TAG_BUBBLE)
     } catch (e: IOException) {
         throw RuntimeException(e)
@@ -83,7 +85,8 @@ private fun readXmlEntry(parser: XmlPullParser): BubbleEntity? {
     return BubbleEntity(
             parser.getAttributeWithName(ATTR_USER_ID)?.toInt() ?: return null,
             parser.getAttributeWithName(ATTR_PACKAGE) ?: return null,
-            parser.getAttributeWithName(ATTR_SHORTCUT_ID) ?: return null
+            parser.getAttributeWithName(ATTR_SHORTCUT_ID) ?: return null,
+            parser.getAttributeWithName(ATTR_KEY) ?: return null
     )
 }
 

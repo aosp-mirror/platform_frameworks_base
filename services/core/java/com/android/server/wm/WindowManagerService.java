@@ -6191,6 +6191,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int displayId = dc.getDisplayId();
             final WindowState inputMethodTarget = dc.mInputMethodTarget;
             final WindowState inputMethodInputTarget = dc.mInputMethodInputTarget;
+            final InsetsControlTarget inputMethodControlTarget = dc.mInputMethodControlTarget;
             if (inputMethodTarget != null) {
                 pw.print("  mInputMethodTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodTarget);
@@ -6198,6 +6199,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (inputMethodInputTarget != null) {
                 pw.print("  mInputMethodInputTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodInputTarget);
+            }
+            if (inputMethodControlTarget != null) {
+                pw.print("  inputMethodControlTarget in display# "); pw.print(displayId);
+                pw.print(' '); pw.println(inputMethodControlTarget.getWindow());
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
@@ -7748,6 +7753,33 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final WindowState w = mWindowMap.get(binder);
                 return w != null ? w.getName() : null;
+            }
+        }
+
+        @Override
+        public String getImeControlTargetNameForLogging(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                final InsetsControlTarget target = dc.mInputMethodControlTarget;
+                if (target == null) {
+                    return null;
+                }
+                final WindowState win = target.getWindow();
+                return win != null ? win.getName() : target.toString();
+            }
+        }
+
+        @Override
+        public String getImeTargetNameForLogging(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                return dc.mInputMethodTarget != null ? dc.mInputMethodTarget.getName() : null;
             }
         }
     }

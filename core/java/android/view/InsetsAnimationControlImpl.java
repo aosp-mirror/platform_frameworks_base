@@ -17,6 +17,7 @@
 package android.view;
 
 import static android.view.InsetsController.AnimationType;
+import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsState.ISIDE_BOTTOM;
 import static android.view.InsetsState.ISIDE_FLOATING;
 import static android.view.InsetsState.ISIDE_LEFT;
@@ -30,6 +31,7 @@ import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.util.ArraySet;
+import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.util.SparseSetArray;
@@ -51,6 +53,8 @@ import java.util.ArrayList;
 @VisibleForTesting
 public class InsetsAnimationControlImpl implements WindowInsetsAnimationController,
         InsetsAnimationControlRunner {
+
+    private static final String TAG = "InsetsAnimationCtrlImpl";
 
     private final Rect mTmpFrame = new Rect();
 
@@ -165,6 +169,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
      */
     public boolean applyChangeInsets(InsetsState state) {
         if (mCancelled) {
+            if (DEBUG) Log.d(TAG, "applyChangeInsets canceled");
             return false;
         }
         final Insets offset = Insets.subtract(mShownInsets, mPendingInsets);
@@ -186,9 +191,13 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mCurrentAlpha = mPendingAlpha;
         mAnimation.setAlpha(mPendingAlpha);
         if (mFinished) {
+            if (DEBUG) Log.d(TAG, String.format(
+                    "notifyFinished shown: %s, currentAlpha: %f, currentInsets: %s",
+                    mShownOnFinish, mCurrentAlpha, mCurrentInsets));
             mController.notifyFinished(this, mShownOnFinish);
             releaseLeashes();
         }
+        if (DEBUG) Log.d(TAG, "Animation finished abruptly.");
         return mFinished;
     }
 
@@ -203,12 +212,15 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     @Override
     public void finish(boolean shown) {
         if (mCancelled || mFinished) {
+            if (DEBUG) Log.d(TAG, "Animation already canceled or finished, not notifying.");
             return;
         }
         mShownOnFinish = shown;
         mFinished = true;
         setInsetsAndAlpha(shown ? mShownInsets : mHiddenInsets, 1f /* alpha */, 1f /* fraction */,
                 true /* allowWhenFinished */);
+
+        if (DEBUG) Log.d(TAG, "notify control request finished for types: " + mTypes);
         mListener.onFinished(this);
     }
 
@@ -225,6 +237,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         }
         mCancelled = true;
         mListener.onCancelled(mReadyDispatched ? this : null);
+        if (DEBUG) Log.d(TAG, "notify Control request cancelled for types: " + mTypes);
 
         releaseLeashes();
     }

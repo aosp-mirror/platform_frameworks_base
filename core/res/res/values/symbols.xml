@@ -2916,7 +2916,6 @@
   <java-symbol type="string" name="status_bar_camera" />
   <java-symbol type="string" name="status_bar_sensors_off" />
   <java-symbol type="string" name="status_bar_screen_record" />
-  <java-symbol type="string" name="status_bar_media" />
 
   <!-- Locale picker -->
   <java-symbol type="id" name="locale_search_menu" />
@@ -4006,6 +4005,9 @@
   <!-- Set to true to enable the user switcher on the keyguard. -->
   <java-symbol type="bool" name="config_keyguardUserSwitcher" />
 
+  <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
+  <java-symbol type="bool" name="config_showUserSwitcherByDefault" />
+
   <!-- Set to true to make assistant show in front of the dream/screensaver. -->
   <java-symbol type="bool" name="config_assistantOnTopOfDream"/>
 
@@ -4027,4 +4029,6 @@
 
   <java-symbol type="string" name="config_overlayableConfigurator" />
   <java-symbol type="array" name="config_overlayableConfiguratorTargets" />
+
+  <java-symbol type="array" name="config_notificationMsgPkgsAllowedAsConvos" />
 </resources>

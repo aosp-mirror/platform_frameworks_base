@@ -22,6 +22,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -40,18 +41,31 @@ import com.android.settingslib.R;
  * also includes shadows, which are only appropriate on top of wallpaper, not embedded in UI.
  */
 public class ConversationIconFactory extends BaseIconFactory {
-    // Geometry of the various parts of the design. All values are 1dp on a 48x48dp icon grid.
+    // Geometry of the various parts of the design. All values are 1dp on a 56x56dp icon grid.
     // Space is left around the "head" (main avatar) for
     // ........
     // .HHHHHH.
     // .HHHrrrr
     // .HHHrBBr
     // ....rrrr
+    // This is trying to recreate the view layout in notification_template_material_conversation.xml
 
-    private static final float BASE_ICON_SIZE = 48f;
-    private static final float RING_STROKE_WIDTH = 2f;
-    private static final float HEAD_SIZE = BASE_ICON_SIZE - RING_STROKE_WIDTH * 2 - 2; // 40
-    private static final float BADGE_SIZE = HEAD_SIZE * 0.4f; // 16
+    private static final float HEAD_SIZE = 52f;
+    private static final float BADGE_SIZE = 12f;
+    private static final float BADGE_CENTER = 46f;
+    private static final float CIRCLE_MARGIN = 36f;
+    private static final float BADGE_ORIGIN = HEAD_SIZE - BADGE_SIZE; // 40f
+    private static final float BASE_ICON_SIZE = 56f;
+
+    private static final float OUT_CIRCLE_DIA = (BASE_ICON_SIZE - CIRCLE_MARGIN); // 20f
+    private static final float INN_CIRCLE_DIA = (float) Math.sqrt(2 * BADGE_SIZE * BADGE_SIZE) ;
+    private static final float OUT_CIRCLE_RAD = OUT_CIRCLE_DIA / 2;
+    private static final float INN_CIRCLE_RAD = INN_CIRCLE_DIA / 2;
+    // Android draws strokes centered on the radius, so our actual radius is an avg of the outside
+    // and inside of the ring stroke
+    private static final float CIRCLE_RADIUS =
+            INN_CIRCLE_RAD + ((OUT_CIRCLE_RAD - INN_CIRCLE_RAD) / 2);
+    private static final float RING_STROKE_WIDTH = (OUT_CIRCLE_DIA - INN_CIRCLE_DIA) / 2;
 
     final LauncherApps mLauncherApps;
     final PackageManager mPackageManager;
@@ -125,6 +139,7 @@ public class ConversationIconFactory extends BaseIconFactory {
         private int mIconSize;
         private Paint mRingPaint;
         private boolean mShowRing;
+        private Paint mPaddingPaint;
 
         public ConversationIconDrawable(Drawable baseIcon,
                 Drawable badgeIcon,
@@ -138,6 +153,9 @@ public class ConversationIconFactory extends BaseIconFactory {
             mRingPaint = new Paint();
             mRingPaint.setStyle(Paint.Style.STROKE);
             mRingPaint.setColor(ringColor);
+            mPaddingPaint = new Paint();
+            mPaddingPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            mPaddingPaint.setColor(Color.WHITE);
         }
 
         /**
@@ -165,40 +183,38 @@ public class ConversationIconFactory extends BaseIconFactory {
         public void draw(Canvas canvas) {
             final Rect bounds = getBounds();
 
-            // scale to our internal 48x48 grid
+            // scale to our internal grid
             final float scale = bounds.width() / BASE_ICON_SIZE;
-            final int centerX = bounds.centerX();
-            final int centerY = bounds.centerX();
             final int ringStrokeWidth = (int) (RING_STROKE_WIDTH * scale);
             final int headSize = (int) (HEAD_SIZE * scale);
-            final int badgeSize = (int) (BADGE_SIZE * scale);
+            final int badgePadding = (int) (BADGE_ORIGIN * scale);
+            final int badgeCenter = (int) (BADGE_CENTER * scale);
 
+            mPaddingPaint.setStrokeWidth(ringStrokeWidth);
+            final float radius = (int) (CIRCLE_RADIUS * scale); // stroke outside
             if (mBaseIcon != null) {
-                mBaseIcon.setBounds(
-                        centerX - headSize / 2,
-                        centerY - headSize / 2,
-                        centerX + headSize / 2,
-                        centerY + headSize / 2);
+                mBaseIcon.setBounds(0,
+                        0,
+                        headSize ,
+                        headSize);
                 mBaseIcon.draw(canvas);
             } else {
                 Log.w("ConversationIconFactory", "ConversationIconDrawable has null base icon");
             }
             if (mBadgeIcon != null) {
+                canvas.drawCircle(badgeCenter, badgeCenter, radius, mPaddingPaint);
                 mBadgeIcon.setBounds(
-                        bounds.right - badgeSize - ringStrokeWidth,
-                        bounds.bottom - badgeSize - ringStrokeWidth,
-                        bounds.right - ringStrokeWidth,
-                        bounds.bottom - ringStrokeWidth);
+                        badgePadding,
+                        badgePadding,
+                        headSize,
+                        headSize);
                 mBadgeIcon.draw(canvas);
             } else {
                 Log.w("ConversationIconFactory", "ConversationIconDrawable has null badge icon");
             }
             if (mShowRing) {
                 mRingPaint.setStrokeWidth(ringStrokeWidth);
-                final float radius = badgeSize * 0.5f + ringStrokeWidth * 0.5f; // stroke outside
-                final float cx = bounds.right - badgeSize * 0.5f - ringStrokeWidth;
-                final float cy = bounds.bottom - badgeSize * 0.5f - ringStrokeWidth;
-                canvas.drawCircle(cx, cy, radius, mRingPaint);
+                canvas.drawCircle(badgeCenter, badgeCenter, radius, mRingPaint);
             }
         }
 

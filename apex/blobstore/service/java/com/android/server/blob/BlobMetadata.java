@@ -212,7 +212,10 @@ class BlobMetadata {
     }
 
     boolean isAccessAllowedForCaller(@NonNull String callingPackage, int callingUid) {
-        // TODO: verify blob is still valid (expiryTime is not elapsed)
+        // Don't allow the blob to be accessed after it's expiry time has passed.
+        if (getBlobHandle().isExpired()) {
+            return false;
+        }
         synchronized (mMetadataLock) {
             // Check if packageName already holds a lease on the blob.
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {

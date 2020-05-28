@@ -138,7 +138,8 @@ public:
     bool startLoading(StorageId storage) const;
 
     bool configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
-                                 std::string_view libDirRelativePath, std::string_view abi);
+                                 std::string_view libDirRelativePath, std::string_view abi,
+                                 bool extractNativeLibs);
     bool waitForNativeBinariesExtraction(StorageId storage);
 
     class AppOpsListener : public android::BnAppOpsCallback {

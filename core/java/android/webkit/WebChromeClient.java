@@ -202,9 +202,9 @@ public class WebChromeClient {
      * <p>To suppress the dialog and allow JavaScript execution to
      * continue, call {@code JsResult.confirm()} immediately and then return
      * {@code true}.
-     * <p>Note that if the {@link WebChromeClient} is {@code null}, the default
-     * dialog will be suppressed and Javascript execution will continue
-     * immediately.
+     * <p>Note that if the {@link WebChromeClient} is set to be {@code null},
+     * or if {@link WebChromeClient} is not set at all, the default dialog will
+     * be suppressed and Javascript execution will continue immediately.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
@@ -236,9 +236,10 @@ public class WebChromeClient {
      * <p>To suppress the dialog and allow JavaScript execution to continue,
      * call {@code JsResult.confirm()} or {@code JsResult.cancel()} immediately
      * and then return {@code true}.
-     * <p>Note that if the {@link WebChromeClient} is {@code null}, the default
-     * dialog will be suppressed and the default value of {@code false} will be
-     * returned to the JavaScript code immediately.
+     * <p>Note that if the {@link WebChromeClient} is set to be {@code null},
+     * or if {@link WebChromeClient} is not set at all, the default dialog will
+     * be suppressed and the default value of {@code false} will be returned to
+     * the JavaScript code immediately.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
@@ -269,9 +270,10 @@ public class WebChromeClient {
      * <p>To suppress the dialog and allow JavaScript execution to continue,
      * call {@code JsPromptResult.confirm(result)} immediately and then
      * return {@code true}.
-     * <p>Note that if the {@link WebChromeClient} is {@code null}, the default
-     * dialog will be suppressed and {@code null} will be returned to the
-     * JavaScript code immediately.
+     * <p>Note that if the {@link WebChromeClient} is set to be {@code null},
+     * or if {@link WebChromeClient} is not set at all, the default dialog will
+     * be suppressed and {@code null} will be returned to the JavaScript code
+     * immediately.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
@@ -288,20 +290,32 @@ public class WebChromeClient {
     }
 
     /**
-     * Tell the client to display a dialog to confirm navigation away from the
-     * current page. This is the result of the onbeforeunload javascript event.
-     * If the client returns {@code true}, WebView will assume that the client will
-     * handle the confirm dialog and call the appropriate JsResult method. If
-     * the client returns {@code false}, a default value of {@code true} will be returned to
-     * javascript to accept navigation away from the current page. The default
-     * behavior is to return {@code false}. Setting the JsResult to {@code true} will navigate
-     * away from the current page, {@code false} will cancel the navigation.
+     * Notify the host application that the web page wants to confirm navigation
+     * from JavaScript {@code onbeforeunload}.
+     * <p>The default behavior if this method returns {@code false} or is not
+     * overridden is to show a dialog containing the message and suspend
+     * JavaScript execution until the dialog is dismissed. The default dialog
+     * will continue the navigation if the user confirms the navigation, and
+     * will stop the navigation if the user wants to stay on the current page.
+     * <p>To show a custom dialog, the app should return {@code true} from this
+     * method, in which case the default dialog will not be shown and JavaScript
+     * execution will be suspended. When the custom dialog is dismissed, the
+     * app should call {@code JsResult.confirm()} to continue the navigation or,
+     * {@code JsResult.cancel()} to stay on the current page.
+     * <p>To suppress the dialog and allow JavaScript execution to continue,
+     * call {@code JsResult.confirm()} or {@code JsResult.cancel()} immediately
+     * and then return {@code true}.
+     * <p>Note that if the {@link WebChromeClient} is set to be {@code null},
+     * or if {@link WebChromeClient} is not set at all, the default dialog will
+     * be suppressed and the navigation will be resumed immediately.
+     *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
      * @param message Message to be displayed in the window.
      * @param result A JsResult used to send the user's response to
      *               javascript.
-     * @return boolean Whether the client will handle the confirm dialog.
+     * @return boolean {@code true} if the request is handled or ignored.
+     * {@code false} if WebView needs to show the default dialog.
      */
     public boolean onJsBeforeUnload(WebView view, String url, String message,
             JsResult result) {

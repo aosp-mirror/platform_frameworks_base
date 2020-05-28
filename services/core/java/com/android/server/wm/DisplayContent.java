@@ -99,6 +99,7 @@ import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_ORIENTATION;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_SCREEN_ON;
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
@@ -497,6 +498,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see DisplayRotation#shouldRotateSeamlessly
      */
     private ActivityRecord mFixedRotationLaunchingApp;
+
+    private FixedRotationAnimationController mFixedRotationAnimationController;
 
     final FixedRotationTransitionListener mFixedRotationTransitionListener =
             new FixedRotationTransitionListener();
@@ -1483,8 +1486,21 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     }
 
-    @Nullable ActivityRecord getFixedRotationLaunchingApp() {
-        return mFixedRotationLaunchingApp;
+    /** Returns {@code true} if the top activity is transformed with the new rotation of display. */
+    boolean hasTopFixedRotationLaunchingApp() {
+        return mFixedRotationLaunchingApp != null
+                // Ignore animating recents because it hasn't really become the top.
+                && mFixedRotationLaunchingApp != mFixedRotationTransitionListener.mAnimatingRecents;
+    }
+
+    @VisibleForTesting
+    boolean isFixedRotationLaunchingApp(ActivityRecord r) {
+        return mFixedRotationLaunchingApp == r;
+    }
+
+    @VisibleForTesting
+    @Nullable FixedRotationAnimationController getFixedRotationAnimationController() {
+        return mFixedRotationAnimationController;
     }
 
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r) {
@@ -1494,8 +1510,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     void setFixedRotationLaunchingAppUnchecked(@Nullable ActivityRecord r, int rotation) {
         if (mFixedRotationLaunchingApp == null && r != null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationStarted(this, rotation);
+            if (mFixedRotationAnimationController == null) {
+                mFixedRotationAnimationController = new FixedRotationAnimationController(this);
+                mFixedRotationAnimationController.hide();
+            }
         } else if (mFixedRotationLaunchingApp != null && r == null) {
             mWmService.mDisplayNotificationController.dispatchFixedRotationFinished(this);
+            finishFixedRotationAnimationIfPossible();
         }
         mFixedRotationLaunchingApp = r;
     }
@@ -1581,6 +1602,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         int rotation = rotationForActivityInDifferentOrientation(activityRecord);
         if (rotation != ROTATION_UNDEFINED) {
             startFixedRotationTransform(activityRecord, rotation);
+        }
+    }
+
+    /** Re-show the previously hidden windows if all seamless rotated windows are done. */
+    void finishFixedRotationAnimationIfPossible() {
+        final FixedRotationAnimationController controller = mFixedRotationAnimationController;
+        if (controller != null && !mDisplayRotation.hasSeamlessRotatingWindow()) {
+            controller.show();
+            mFixedRotationAnimationController = null;
         }
     }
 
@@ -3496,7 +3526,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (target == mInputMethodTarget && mInputMethodTargetWaitingAnim == targetWaitingAnim) {
             return;
         }
-
+        ProtoLog.i(WM_DEBUG_IME, "setInputMethodTarget %s", target);
         mInputMethodTarget = target;
         mInputMethodTargetWaitingAnim = targetWaitingAnim;
         assignWindowLayers(true /* setLayoutNeeded */);
@@ -3510,6 +3540,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void setInputMethodInputTarget(WindowState target) {
         if (mInputMethodInputTarget != target) {
+            ProtoLog.i(WM_DEBUG_IME, "setInputMethodInputTarget %s", target);
             mInputMethodInputTarget = target;
             updateImeControlTarget();
         }
@@ -3517,6 +3548,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private void updateImeControlTarget() {
         mInputMethodControlTarget = computeImeControlTarget();
+        ProtoLog.i(WM_DEBUG_IME, "updateImeControlTarget %s",
+                mInputMethodControlTarget.getWindow());
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 

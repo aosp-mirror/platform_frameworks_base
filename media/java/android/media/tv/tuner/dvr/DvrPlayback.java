@@ -105,28 +105,33 @@ public class DvrPlayback implements AutoCloseable {
 
 
     /**
-     * Attaches a filter to DVR interface for recording.
+     * Attaches a filter to DVR interface for playback.
      *
-     * <p>There can be multiple filters attached. Attached filters are independent, so the order
-     * doesn't matter.
+     * <p>This method will be deprecated. Now it's a no-op.
+     * <p>Filters opened by {@link Tuner#openFilter} are used for DVR playback.
      *
      * @param filter the filter to be attached.
      * @return result status of the operation.
      */
     @Result
     public int attachFilter(@NonNull Filter filter) {
-        return nativeAttachFilter(filter);
+        // no-op
+        return Tuner.RESULT_UNAVAILABLE;
     }
 
     /**
      * Detaches a filter from DVR interface.
+     *
+     * <p>This method will be deprecated. Now it's a no-op.
+     * <p>Filters opened by {@link Tuner#openFilter} are used for DVR playback.
      *
      * @param filter the filter to be detached.
      * @return result status of the operation.
      */
     @Result
     public int detachFilter(@NonNull Filter filter) {
-        return nativeDetachFilter(filter);
+        // no-op
+        return Tuner.RESULT_UNAVAILABLE;
     }
 
     /**
