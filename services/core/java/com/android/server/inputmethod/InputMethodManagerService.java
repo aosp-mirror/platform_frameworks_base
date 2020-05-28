@@ -820,10 +820,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             final EditorInfo mEditorInfo;
             @NonNull
             final String mRequestWindowName;
+            @Nullable
+            final String mImeControlTargetName;
+            @Nullable
+            final String mImeTargetNameFromWm;
 
             Entry(ClientState client, EditorInfo editorInfo, String focusedWindowName,
                     @SoftInputModeFlags int softInputMode, @SoftInputShowHideReason int reason,
-                    boolean inFullscreenMode, String requestWindowName) {
+                    boolean inFullscreenMode, String requestWindowName,
+                    @Nullable String imeControlTargetName, @Nullable String imeTargetName) {
                 mClientState = client;
                 mEditorInfo = editorInfo;
                 mFocusedWindowName = focusedWindowName;
@@ -833,6 +838,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mWallTime = System.currentTimeMillis();
                 mInFullscreenMode = inFullscreenMode;
                 mRequestWindowName = requestWindowName;
+                mImeControlTargetName = imeControlTargetName;
+                mImeTargetNameFromWm = imeTargetName;
             }
         }
 
@@ -871,6 +878,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
                 pw.print(prefix);
                 pw.println(" requestWindowName=" + entry.mRequestWindowName);
+
+                pw.print(prefix);
+                pw.println(" imeControlTargetName=" + entry.mImeControlTargetName);
+
+                pw.print(prefix);
+                pw.println(" imeTargetNameFromWm=" + entry.mImeTargetNameFromWm);
 
                 pw.print(prefix);
                 pw.print(" editorInfo: ");
@@ -4123,7 +4136,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mWindowManagerInternal.getWindowName(mCurFocusedWindow),
                             mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                             mWindowManagerInternal.getWindowName(
-                                    mShowRequestWindowMap.get(args.arg3))));
+                                    mShowRequestWindowMap.get(args.arg3)),
+                            mWindowManagerInternal.getImeControlTargetNameForLogging(
+                                    mCurTokenDisplayId),
+                            mWindowManagerInternal.getImeTargetNameForLogging(
+                                    mCurTokenDisplayId)));
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4142,7 +4159,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             mWindowManagerInternal.getWindowName(mCurFocusedWindow),
                             mCurFocusedWindowSoftInputMode, reason, mInFullscreenMode,
                             mWindowManagerInternal.getWindowName(
-                                    mHideRequestWindowMap.get(args.arg3))));
+                                    mHideRequestWindowMap.get(args.arg3)),
+                            mWindowManagerInternal.getImeControlTargetNameForLogging(
+                                    mCurTokenDisplayId),
+                            mWindowManagerInternal.getImeTargetNameForLogging(
+                                    mCurTokenDisplayId)));
                 } catch (RemoteException e) {
                 }
                 args.recycle();
