@@ -60,6 +60,8 @@ java_library {
         "android.app",
         "android.os",
         "android.util",
+        // From :statslog-statsd-java-gen
+        "com.android.internal.util",
     ],
 
     plugins: ["java_api_finder"],
