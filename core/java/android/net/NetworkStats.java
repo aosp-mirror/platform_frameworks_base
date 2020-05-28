@@ -1047,22 +1047,22 @@ public final class NetworkStats implements Parcelable {
     }
 
     /**
-     * Calculate and apply adjustments to captured statistics for 464xlat traffic counted twice.
+     * Calculate and apply adjustments to captured statistics for 464xlat traffic.
      *
-     * <p>This mutates both base and stacked traffic stats, to account respectively for
-     * double-counted traffic and IPv4/IPv6 header size difference.
+     * <p>This mutates stacked traffic stats, to account for IPv4/IPv6 header size difference.
      *
-     * <p>For 464xlat traffic, xt_qtaguid sees every IPv4 packet twice, once as a native IPv4
-     * packet on the stacked interface, and once as translated to an IPv6 packet on the
-     * base interface. For correct stats accounting on the base interface, if using xt_qtaguid,
-     * every rx 464xlat packet needs to be subtracted from the root UID on the base interface
-     * (http://b/12249687, http:/b/33681750), and every tx 464xlat packet which was counted onto
-     * clat uid should be ignored.
+     * <p>UID stats, which are only accounted on the stacked interface, need to be increased
+     * by 20 bytes/packet to account for translation overhead.
      *
-     * As for eBPF, the per uid stats is collected by different hook, the rx packets on base
-     * interface will not be counted. Thus, the adjustment on root uid is not needed. However, the
-     * tx traffic counted in the same way xt_qtaguid does, so the traffic on clat uid still
-     * needs to be ignored.
+     * <p>The potential additional overhead of 8 bytes/packet for ip fragments is ignored.
+     *
+     * <p>Interface stats need to sum traffic on both stacked and base interface because:
+     *   - eBPF offloaded packets appear only on the stacked interface
+     *   - Non-offloaded ingress packets appear only on the stacked interface
+     *     (due to iptables raw PREROUTING drop rules)
+     *   - Non-offloaded egress packets appear only on the stacked interface
+     *     (due to ignoring traffic from clat daemon by uid match)
+     * (and of course the 20 bytes/packet overhead needs to be applied to stacked interface stats)
      *
      * <p>This method will behave fine if {@code stackedIfaces} is an non-synchronized but add-only
      * {@code ConcurrentHashMap}
@@ -1074,46 +1074,34 @@ public final class NetworkStats implements Parcelable {
      */
     public static void apply464xlatAdjustments(NetworkStats baseTraffic,
             NetworkStats stackedTraffic, Map<String, String> stackedIfaces, boolean useBpfStats) {
-        // Total 464xlat traffic to subtract from uid 0 on all base interfaces.
-        // stackedIfaces may grow afterwards, but NetworkStats will just be resized automatically.
-        final NetworkStats adjustments = new NetworkStats(0, stackedIfaces.size());
-
         // For recycling
         Entry entry = null;
-        Entry adjust = new NetworkStats.Entry(IFACE_ALL, 0, 0, 0, 0, 0, 0, 0L, 0L, 0L, 0L, 0L);
-
         for (int i = 0; i < stackedTraffic.size; i++) {
             entry = stackedTraffic.getValues(i, entry);
-            if (entry.iface == null || !entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) {
-                continue;
-            }
-            final String baseIface = stackedIfaces.get(entry.iface);
-            if (baseIface == null) {
-                continue;
-            }
-            // Subtract xt_qtaguid 464lat rx traffic seen for the root UID on the current base
-            // interface. As for eBPF, the per uid stats is collected by different hook, the rx
-            // packets on base interface will not be counted.
-            adjust.iface = baseIface;
-            if (!useBpfStats) {
-                adjust.rxBytes = -(entry.rxBytes + entry.rxPackets * IPV4V6_HEADER_DELTA);
-                adjust.rxPackets = -entry.rxPackets;
-            }
-            adjustments.combineValues(adjust);
+            if (entry == null) continue;
+            if (entry.iface == null) continue;
+            if (!entry.iface.startsWith(CLATD_INTERFACE_PREFIX)) continue;
 
             // For 464xlat traffic, per uid stats only counts the bytes of the native IPv4 packet
             // sent on the stacked interface with prefix "v4-" and drops the IPv6 header size after
             // unwrapping. To account correctly for on-the-wire traffic, add the 20 additional bytes
             // difference for all packets (http://b/12249687, http:/b/33681750).
+            //
+            // Note: this doesn't account for LRO/GRO/GSO/TSO (ie. >mtu) traffic correctly, nor
+            // does it correctly account for the 8 extra bytes in the IPv6 fragmentation header.
+            //
+            // While the ebpf code path does try to simulate proper post segmentation packet
+            // counts, we have nothing of the sort of xt_qtaguid stats.
             entry.rxBytes += entry.rxPackets * IPV4V6_HEADER_DELTA;
             entry.txBytes += entry.txPackets * IPV4V6_HEADER_DELTA;
             stackedTraffic.setValues(i, entry);
         }
 
-        // Traffic on clat uid is v6 tx traffic that is already counted with app uid on the stacked
-        // v4 interface, so it needs to be removed to avoid double-counting.
+        // Theoretically there should be no traffic accounted to the clat daemon's uid:
+        //   see ebpf program 'netd.c's early returns
+        //   and iptables '-m owner --uid-owner clat -j RETURN' rules prior to accounting
+        // TODO: remove this - should definitely be safe once ebpf only.
         baseTraffic.removeUids(new int[] {CLAT_UID});
-        baseTraffic.combineAllValues(adjustments);
     }
 
     /**
