@@ -435,6 +435,7 @@ java_defaults {
     plugins: [
         "view-inspector-annotation-processor",
         "staledataclass-annotation-processor",
+        "error_prone_android_framework",
     ],
 
     required: [
