@@ -238,7 +238,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             mSplitLayout.mSecondary = new Rect(mRotateSplitLayout.mSecondary);
             mRotateSplitLayout = null;
         }
-        update(newConfig);
+
+        if (isSplitActive()) {
+            update(newConfig);
+        }
     }
 
     Handler getHandler() {
@@ -311,11 +314,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void onTaskVanished() {
         mHandler.post(this::removeDivider);
-    }
-
-    void onTasksReady() {
-        mHandler.post(() -> update(mDisplayController.getDisplayContext(
-                mContext.getDisplayId()).getResources().getConfiguration()));
     }
 
     private void updateVisibility(final boolean visible) {
