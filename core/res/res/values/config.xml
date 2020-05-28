@@ -4311,6 +4311,10 @@
     (default 2MB) -->
     <integer name="config_notificationStripRemoteViewSizeBytes">5000000</integer>
 
+    <!-- List of packages that can use the Conversation space for their category messages
+    notifications until they target R -->
+    <string-array name="config_notificationMsgPkgsAllowedAsConvos" translatable="false"/>
+
     <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
          grants, even if the UICC claims that the app should be privileged. See b/138150105 -->
     <string-array name="config_restrictedPreinstalledCarrierApps" translatable="false"/>
