@@ -523,27 +523,23 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             int x,
             int y,
             NotificationMenuRowPlugin.MenuItem menuItem) {
-        if (menuItem.getGutsView() instanceof NotificationGuts.GutsContent) {
-            NotificationGuts.GutsContent gutsView =
-                    (NotificationGuts.GutsContent)  menuItem.getGutsView();
-            if (gutsView.needsFalsingProtection()) {
-                if (mStatusBarStateController instanceof StatusBarStateControllerImpl) {
-                    ((StatusBarStateControllerImpl) mStatusBarStateController)
-                            .setLeaveOpenOnKeyguardHide(true);
-                }
-
-                Runnable r = () -> mMainHandler.post(
-                        () -> openGutsInternal(view, x, y, menuItem));
-
-                mStatusBarLazy.get().executeRunnableDismissingKeyguard(
-                        r,
-                        null /* cancelAction */,
-                        false /* dismissShade */,
-                        true /* afterKeyguardGone */,
-                        true /* deferred */);
-
-                return true;
+        if (menuItem.getGutsView() instanceof NotificationInfo) {
+            if (mStatusBarStateController instanceof StatusBarStateControllerImpl) {
+                ((StatusBarStateControllerImpl) mStatusBarStateController)
+                        .setLeaveOpenOnKeyguardHide(true);
             }
+
+            Runnable r = () -> mMainHandler.post(
+                    () -> openGutsInternal(view, x, y, menuItem));
+
+            mStatusBarLazy.get().executeRunnableDismissingKeyguard(
+                    r,
+                    null /* cancelAction */,
+                    false /* dismissShade */,
+                    true /* afterKeyguardGone */,
+                    true /* deferred */);
+
+            return true;
         }
         return openGutsInternal(view, x, y, menuItem);
     }

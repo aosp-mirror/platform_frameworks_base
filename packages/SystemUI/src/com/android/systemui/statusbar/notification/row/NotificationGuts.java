@@ -104,12 +104,6 @@ public class NotificationGuts extends FrameLayout {
          * Called when the guts view has finished its close animation.
          */
         default void onFinishedClosing() {}
-
-        /**
-         * Returns whether falsing protection is needed before showing the contents of this
-         * view on the lockscreen
-         */
-        boolean needsFalsingProtection();
     }
 
     public interface OnGutsClosedListener {

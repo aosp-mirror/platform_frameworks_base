@@ -301,11 +301,6 @@ public class PartialConversationInfo extends LinearLayout implements
     }
 
     @Override
-    public boolean needsFalsingProtection() {
-        return true;
-    }
-
-    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         if (mGutsContainer != null &&

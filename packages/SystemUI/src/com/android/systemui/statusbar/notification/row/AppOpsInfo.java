@@ -189,11 +189,6 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     }
 
     @Override
-    public boolean needsFalsingProtection() {
-        return false;
-    }
-
-    @Override
     public View getContentView() {
         return this;
     }

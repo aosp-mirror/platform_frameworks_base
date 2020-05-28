@@ -442,11 +442,6 @@ public class NotificationSnooze extends LinearLayout
         return true;
     }
 
-    @Override
-    public boolean needsFalsingProtection() {
-        return false;
-    }
-
     public class NotificationSnoozeOption implements SnoozeOption {
         private SnoozeCriterion mCriterion;
         private int mMinutesToSnoozeFor;
