@@ -31,7 +31,7 @@ constexpr size_t   kDefaultHeapSize = 1024 * 1024; // 1MB (compatible with low m
 
 Sound::Sound(int32_t soundID, int fd, int64_t offset, int64_t length)
     : mSoundID(soundID)
-    , mFd(dup(fd))
+    , mFd(fcntl(fd, F_DUPFD_CLOEXEC)) // like dup(fd) but closes on exec to prevent leaks.
     , mOffset(offset)
     , mLength(length)
 {
@@ -47,7 +47,7 @@ Sound::~Sound()
 
 static status_t decode(int fd, int64_t offset, int64_t length,
         uint32_t *rate, int32_t *channelCount, audio_format_t *audioFormat,
-        audio_channel_mask_t *channelMask, sp<MemoryHeapBase> heap,
+        audio_channel_mask_t *channelMask, const sp<MemoryHeapBase>& heap,
         size_t *sizeInBytes) {
     ALOGV("%s(fd=%d, offset=%lld, length=%lld, ...)",
             __func__, fd, (long long)offset, (long long)length);
@@ -81,7 +81,7 @@ static status_t decode(int fd, int64_t offset, int64_t length,
 
             bool sawInputEOS = false;
             bool sawOutputEOS = false;
-            uint8_t* writePos = static_cast<uint8_t*>(heap->getBase());
+            auto writePos = static_cast<uint8_t*>(heap->getBase());
             size_t available = heap->getSize();
             size_t written = 0;
             format.reset(AMediaCodec_getOutputFormat(codec.get())); // update format.
@@ -204,7 +204,7 @@ status_t Sound::doLoad()
         int32_t channelCount;
         audio_format_t format;
         audio_channel_mask_t channelMask;
-        status_t status = decode(mFd.get(), mOffset, mLength, &sampleRate, &channelCount, &format,
+        status = decode(mFd.get(), mOffset, mLength, &sampleRate, &channelCount, &format,
                         &channelMask, mHeap, &mSizeInBytes);
         ALOGV("%s: close(%d)", __func__, mFd.get());
         mFd.reset();  // close

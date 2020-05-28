@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.testutils.shadow;
 
+import android.annotation.NonNull;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
 import android.media.RoutingSessionInfo;
@@ -31,6 +32,7 @@ public class ShadowRouter2Manager {
 
     private List<MediaRoute2Info> mAvailableRoutes;
     private List<MediaRoute2Info> mAllRoutes;
+    private List<MediaRoute2Info> mDeselectableRoutes;
     private List<RoutingSessionInfo> mActiveSessions;
     private List<RoutingSessionInfo> mRoutingSessions;
 
@@ -68,6 +70,15 @@ public class ShadowRouter2Manager {
 
     public void setRoutingSessions(List<RoutingSessionInfo> infos) {
         mRoutingSessions = infos;
+    }
+
+    @Implementation
+    public List<MediaRoute2Info> getDeselectableRoutes(@NonNull RoutingSessionInfo sessionInfo) {
+        return mDeselectableRoutes;
+    }
+
+    public void setDeselectableRoutes(List<MediaRoute2Info> routes) {
+        mDeselectableRoutes = routes;
     }
 
     public static ShadowRouter2Manager getShadow() {

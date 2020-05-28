@@ -35,7 +35,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageParser;
 import android.content.pm.ParceledListSlice;
-import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.parsing.ApkLiteParseUtils;
 import android.content.pm.parsing.result.ParseResult;
@@ -160,7 +159,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     private final RollbackStore mRollbackStore;
 
     private final Context mContext;
-    private final HandlerThread mHandlerThread;
+    private final Handler mHandler;
     private final Executor mExecutor;
     private final Installer mInstaller;
     private final RollbackPackageHealthObserver mPackageHealthObserver;
@@ -205,13 +204,15 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         }
 
         // Kick off and start monitoring the handler thread.
-        mHandlerThread = new HandlerThread("RollbackManagerServiceHandler");
-        mHandlerThread.start();
+        HandlerThread handlerThread = new HandlerThread("RollbackManagerServiceHandler");
+        handlerThread.start();
+        mHandler = new Handler(handlerThread.getLooper());
         Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
         mExecutor = new HandlerExecutor(getHandler());
 
-        for (UserInfo userInfo : UserManager.get(mContext).getUsers(true)) {
-            registerUserCallbacks(userInfo.getUserHandle());
+        UserManager userManager = mContext.getSystemService(UserManager.class);
+        for (UserHandle user : userManager.getUserHandles(true)) {
+            registerUserCallbacks(user);
         }
 
         IntentFilter enableRollbackFilter = new IntentFilter();
@@ -317,11 +318,11 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
     }
 
     private void assertInWorkerThread() {
-        Preconditions.checkState(mHandlerThread.getLooper().isCurrentThread());
+        Preconditions.checkState(getHandler().getLooper().isCurrentThread());
     }
 
     private void assertNotInWorkerThread() {
-        Preconditions.checkState(!mHandlerThread.getLooper().isCurrentThread());
+        Preconditions.checkState(!getHandler().getLooper().isCurrentThread());
     }
 
     @AnyThread
@@ -739,7 +740,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
 
     @AnyThread
     private Handler getHandler() {
-        return mHandlerThread.getThreadHandler();
+        return mHandler;
     }
 
     @AnyThread
@@ -1321,7 +1322,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         int rollbackId = allocateRollbackId();
         final int userId;
         if (parentSession.getUser() == UserHandle.ALL) {
-            userId = UserHandle.USER_SYSTEM;
+            userId = UserHandle.SYSTEM.getIdentifier();
         } else {
             userId = parentSession.getUser().getIdentifier();
         }

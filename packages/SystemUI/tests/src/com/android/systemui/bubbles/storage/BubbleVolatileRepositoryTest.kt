@@ -28,9 +28,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidTestingRunner::class)
 class BubbleVolatileRepositoryTest : SysuiTestCase() {
 
-    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1")
-    private val bubble2 = BubbleEntity(10, "com.example.chat", "alice and bob")
-    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2")
+    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1", "k1")
+    private val bubble2 = BubbleEntity(10, "com.example.chat", "alice and bob", "k2")
+    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2", "k3")
     private val bubbles = listOf(bubble1, bubble2, bubble3)
 
     private lateinit var repository: BubbleVolatileRepository

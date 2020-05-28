@@ -308,6 +308,15 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Get the MediaDevice list that can be removed from current media session.
+     *
+     * @return list of MediaDevice
+     */
+    public List<MediaDevice> getDeselectableMediaDevice() {
+        return mInfoMediaManager.getDeselectableMediaDevice();
+    }
+
+    /**
      * Release session to stop playing media on MediaDevice.
      */
     public boolean releaseSession() {

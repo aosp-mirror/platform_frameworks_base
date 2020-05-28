@@ -6192,6 +6192,7 @@ public class WindowManagerService extends IWindowManager.Stub
             final int displayId = dc.getDisplayId();
             final WindowState inputMethodTarget = dc.mInputMethodTarget;
             final WindowState inputMethodInputTarget = dc.mInputMethodInputTarget;
+            final InsetsControlTarget inputMethodControlTarget = dc.mInputMethodControlTarget;
             if (inputMethodTarget != null) {
                 pw.print("  mInputMethodTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodTarget);
@@ -6199,6 +6200,10 @@ public class WindowManagerService extends IWindowManager.Stub
             if (inputMethodInputTarget != null) {
                 pw.print("  mInputMethodInputTarget in display# "); pw.print(displayId);
                 pw.print(' '); pw.println(inputMethodInputTarget);
+            }
+            if (inputMethodControlTarget != null) {
+                pw.print("  inputMethodControlTarget in display# "); pw.print(displayId);
+                pw.print(' '); pw.println(inputMethodControlTarget.getWindow());
             }
         });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);

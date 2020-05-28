@@ -33,6 +33,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiPortInfo;
+import android.hardware.hdmi.IHdmiCecVolumeControlFeatureListener;
 import android.os.IPowerManager;
 import android.os.IThermalService;
 import android.os.Looper;
@@ -262,5 +263,90 @@ public class HdmiControlServiceTest {
 
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isTrue();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_emitsCurrentState_enabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isTrue();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_emitsCurrentState_disabled() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isFalse();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_notifiesStateUpdate() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isTrue();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_honorsUnregistration() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+        mTestLooper.dispatchAll();
+
+        mHdmiControlService.removeHdmiControlVolumeControlStatusChangeListener(callback);
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isFalse();
+    }
+
+    @Test
+    public void addHdmiCecVolumeControlFeatureListener_notifiesStateUpdate_multiple() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        VolumeControlFeatureCallback callback1 = new VolumeControlFeatureCallback();
+        VolumeControlFeatureCallback callback2 = new VolumeControlFeatureCallback();
+
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback1);
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback2);
+
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        mTestLooper.dispatchAll();
+
+        assertThat(callback1.mCallbackReceived).isTrue();
+        assertThat(callback2.mCallbackReceived).isTrue();
+        assertThat(callback1.mVolumeControlEnabled).isTrue();
+        assertThat(callback2.mVolumeControlEnabled).isTrue();
+    }
+
+    private static class VolumeControlFeatureCallback extends
+            IHdmiCecVolumeControlFeatureListener.Stub {
+        boolean mCallbackReceived = false;
+        boolean mVolumeControlEnabled = false;
+
+        @Override
+        public void onHdmiCecVolumeControlFeature(boolean enabled) throws RemoteException {
+            this.mCallbackReceived = true;
+            this.mVolumeControlEnabled = enabled;
+        }
     }
 }

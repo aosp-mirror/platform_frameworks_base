@@ -31,6 +31,7 @@ import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
 
 import static com.android.server.notification.PreferencesHelper.DEFAULT_BUBBLE_PREFERENCE;
 import static com.android.server.notification.PreferencesHelper.NOTIFICATION_CHANNEL_COUNT_LIMIT;
+import static com.android.server.notification.PreferencesHelper.UNKNOWN_UID;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -2508,6 +2509,26 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         assertEquals(BUBBLE_PREFERENCE_SELECTED, mHelper.getBubblePreference(PKG_O, UID_O));
         assertEquals(PreferencesHelper.LockableAppFields.USER_LOCKED_BUBBLE,
                 mHelper.getAppLockedFields(PKG_O, UID_O));
+    }
+
+    @Test
+    public void testBubblePrefence_noSAWCheckForUnknownUid() throws Exception {
+        final String xml = "<ranking version=\"1\">\n"
+                + "<package name=\"" + PKG_O + "\" uid=\"" + UNKNOWN_UID + "\">\n"
+                + "<channel id=\"someId\" name=\"hi\""
+                + " importance=\"3\"/>"
+                + "</package>"
+                + "</ranking>";
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(new BufferedInputStream(new ByteArrayInputStream(xml.getBytes())),
+                null);
+        parser.nextTag();
+        mHelper.readXml(parser, false, UserHandle.USER_ALL);
+
+        assertEquals(DEFAULT_BUBBLE_PREFERENCE, mHelper.getBubblePreference(PKG_O, UID_O));
+        assertEquals(0, mHelper.getAppLockedFields(PKG_O, UID_O));
+        verify(mAppOpsManager, never()).noteOpNoThrow(eq(OP_SYSTEM_ALERT_WINDOW), anyInt(),
+                anyString(), eq(null), anyString());
     }
 
     @Test

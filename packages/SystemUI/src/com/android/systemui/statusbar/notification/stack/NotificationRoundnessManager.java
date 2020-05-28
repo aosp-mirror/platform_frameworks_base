@@ -20,7 +20,6 @@ import android.util.MathUtils;
 
 import com.android.systemui.statusbar.notification.NotificationSectionsFeatureManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
@@ -37,10 +36,10 @@ import javax.inject.Singleton;
 @Singleton
 public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
 
-    private final ActivatableNotificationView[] mFirstInSectionViews;
-    private final ActivatableNotificationView[] mLastInSectionViews;
-    private final ActivatableNotificationView[] mTmpFirstInSectionViews;
-    private final ActivatableNotificationView[] mTmpLastInSectionViews;
+    private final ExpandableView[] mFirstInSectionViews;
+    private final ExpandableView[] mLastInSectionViews;
+    private final ExpandableView[] mTmpFirstInSectionViews;
+    private final ExpandableView[] mTmpLastInSectionViews;
     private final KeyguardBypassController mBypassController;
     private boolean mExpanded;
     private HashSet<ExpandableView> mAnimatedChildren;
@@ -53,10 +52,10 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
             KeyguardBypassController keyguardBypassController,
             NotificationSectionsFeatureManager sectionsFeatureManager) {
         int numberOfSections = sectionsFeatureManager.getNumberOfBuckets();
-        mFirstInSectionViews = new ActivatableNotificationView[numberOfSections];
-        mLastInSectionViews = new ActivatableNotificationView[numberOfSections];
-        mTmpFirstInSectionViews = new ActivatableNotificationView[numberOfSections];
-        mTmpLastInSectionViews = new ActivatableNotificationView[numberOfSections];
+        mFirstInSectionViews = new ExpandableView[numberOfSections];
+        mLastInSectionViews = new ExpandableView[numberOfSections];
+        mTmpFirstInSectionViews = new ExpandableView[numberOfSections];
+        mTmpLastInSectionViews = new ExpandableView[numberOfSections];
         mBypassController = keyguardBypassController;
     }
 
@@ -80,14 +79,14 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         updateView(entry.getRow(), false /* animate */);
     }
 
-    private void updateView(ActivatableNotificationView view, boolean animate) {
+    private void updateView(ExpandableView view, boolean animate) {
         boolean changed = updateViewWithoutCallback(view, animate);
         if (changed) {
             mRoundingChangedCallback.run();
         }
     }
 
-    private boolean updateViewWithoutCallback(ActivatableNotificationView view,
+    private boolean updateViewWithoutCallback(ExpandableView view,
             boolean animate) {
         float topRoundness = getRoundness(view, true /* top */);
         float bottomRoundness = getRoundness(view, false /* top */);
@@ -100,8 +99,7 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         return (firstInSection || lastInSection) && (topChanged || bottomChanged);
     }
 
-    private boolean isFirstInSection(ActivatableNotificationView view,
-            boolean includeFirstSection) {
+    private boolean isFirstInSection(ExpandableView view, boolean includeFirstSection) {
         int numNonEmptySections = 0;
         for (int i = 0; i < mFirstInSectionViews.length; i++) {
             if (view == mFirstInSectionViews[i]) {
@@ -114,7 +112,7 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         return false;
     }
 
-    private boolean isLastInSection(ActivatableNotificationView view, boolean includeLastSection) {
+    private boolean isLastInSection(ExpandableView view, boolean includeLastSection) {
         int numNonEmptySections = 0;
         for (int i = mLastInSectionViews.length - 1; i >= 0; i--) {
             if (view == mLastInSectionViews[i]) {
@@ -127,7 +125,7 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
         return false;
     }
 
-    private float getRoundness(ActivatableNotificationView view, boolean top) {
+    private float getRoundness(ExpandableView view, boolean top) {
         if ((view.isPinned() || view.isHeadsUpAnimatingAway()) && !mExpanded) {
             return 1.0f;
         }
@@ -174,14 +172,14 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     }
 
     private boolean handleRemovedOldViews(NotificationSection[] sections,
-            ActivatableNotificationView[] oldViews, boolean first) {
+            ExpandableView[] oldViews, boolean first) {
         boolean anyChanged = false;
-        for (ActivatableNotificationView oldView : oldViews) {
+        for (ExpandableView oldView : oldViews) {
             if (oldView != null) {
                 boolean isStillPresent = false;
                 boolean adjacentSectionChanged = false;
                 for (NotificationSection section : sections) {
-                    ActivatableNotificationView newView =
+                    ExpandableView newView =
                             (first ? section.getFirstVisibleChild()
                                     : section.getLastVisibleChild());
                     if (newView == oldView) {
@@ -207,14 +205,14 @@ public class NotificationRoundnessManager implements OnHeadsUpChangedListener {
     }
 
     private boolean handleAddedNewViews(NotificationSection[] sections,
-            ActivatableNotificationView[] oldViews, boolean first) {
+            ExpandableView[] oldViews, boolean first) {
         boolean anyChanged = false;
         for (NotificationSection section : sections) {
-            ActivatableNotificationView newView =
+            ExpandableView newView =
                     (first ? section.getFirstVisibleChild() : section.getLastVisibleChild());
             if (newView != null) {
                 boolean wasAlreadyPresent = false;
-                for (ActivatableNotificationView oldView : oldViews) {
+                for (ExpandableView oldView : oldViews) {
                     if (oldView == newView) {
                         wasAlreadyPresent = true;
                         break;

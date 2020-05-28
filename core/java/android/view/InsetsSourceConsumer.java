@@ -19,11 +19,13 @@ package android.view;
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.getDefaultVisibility;
+import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsState.toPublicType;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.util.Log;
 import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowInsets.Type.InsetsType;
@@ -64,6 +66,7 @@ public class InsetsSourceConsumer {
     protected final InsetsState mState;
     protected final @InternalInsetsType int mType;
 
+    private static final String TAG = "InsetsSourceConsumer";
     private final Supplier<Transaction> mTransactionSupplier;
     private @Nullable InsetsSourceControl mSourceControl;
     private boolean mHasWindowFocus;
@@ -103,7 +106,11 @@ public class InsetsSourceConsumer {
 
         final InsetsSourceControl lastControl = mSourceControl;
         mSourceControl = control;
-
+        if (control != null) {
+            if (DEBUG) Log.d(TAG, String.format("setControl -> %s on %s",
+                    InsetsState.typeToString(control.getType()),
+                    mController.getHost().getRootViewTitle()));
+        }
         // We are loosing control
         if (mSourceControl == null) {
             mController.notifyControlRevoked(this);
@@ -118,6 +125,8 @@ public class InsetsSourceConsumer {
             final boolean requestedVisible = isRequestedVisibleAwaitingControl();
             final boolean needAnimation = requestedVisible != mState.getSource(mType).isVisible();
             if (control.getLeash() != null && (needAnimation || mIsAnimationPending)) {
+                if (DEBUG) Log.d(TAG, String.format("Gaining control in %s, requestedVisible: %b",
+                        mController.getHost().getRootViewTitle(), requestedVisible));
                 if (requestedVisible) {
                     showTypes[0] |= toPublicType(getType());
                 } else {
@@ -170,11 +179,15 @@ public class InsetsSourceConsumer {
 
     @VisibleForTesting
     public void show(boolean fromIme) {
+        if (DEBUG) Log.d(TAG, String.format("Call show() for type: %s fromIme: %b ",
+                InsetsState.typeToString(mType), fromIme));
         setRequestedVisible(true);
     }
 
     @VisibleForTesting
     public void hide() {
+        if (DEBUG) Log.d(TAG, String.format("Call hide for %s on %s",
+                InsetsState.typeToString(mType), mController.getHost().getRootViewTitle()));
         setRequestedVisible(false);
     }
 
@@ -212,11 +225,16 @@ public class InsetsSourceConsumer {
 
         // If we don't have control, we are not able to change the visibility.
         if (!hasControl) {
+            if (DEBUG) Log.d(TAG, "applyLocalVisibilityOverride: No control in "
+                    + mController.getHost().getRootViewTitle()
+                    + " requestedVisible " + mRequestedVisible);
             return false;
         }
         if (isVisible == mRequestedVisible) {
             return false;
         }
+        if (DEBUG) Log.d(TAG, String.format("applyLocalVisibilityOverride: %s requestedVisible: %b",
+                mController.getHost().getRootViewTitle(), mRequestedVisible));
         mState.getSource(mType).setVisible(mRequestedVisible);
         return true;
     }
@@ -271,6 +289,7 @@ public class InsetsSourceConsumer {
         newSource.setFrame(source.getFrame());
         newSource.setVisibleFrame(source.getVisibleFrame());
         mState.addSource(newSource);
+        if (DEBUG) Log.d(TAG, "updateSource: " + newSource);
     }
 
     boolean notifyAnimationFinished() {
@@ -293,6 +312,7 @@ public class InsetsSourceConsumer {
         if (mRequestedVisible != requestedVisible) {
             mRequestedVisible = requestedVisible;
             mIsAnimationPending = false;
+            if (DEBUG) Log.d(TAG, "setRequestedVisible: " + requestedVisible);
         }
         if (applyLocalVisibilityOverride()) {
             mController.notifyVisibilityChanged();
@@ -305,6 +325,7 @@ public class InsetsSourceConsumer {
         }
 
         final Transaction t = mTransactionSupplier.get();
+        if (DEBUG) Log.d(TAG, "applyHiddenToControl: " + mRequestedVisible);
         if (mRequestedVisible) {
             t.show(mSourceControl.getLeash());
         } else {

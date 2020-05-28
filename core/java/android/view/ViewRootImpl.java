@@ -4990,6 +4990,11 @@ public final class ViewRootImpl implements ViewParent,
                     break;
                 }
                 case MSG_SHOW_INSETS: {
+                    if (mView == null) {
+                        Log.e(TAG,
+                                String.format("Calling showInsets(%d,%b) on window that no longer"
+                                        + " has views.", msg.arg1, msg.arg2 == 1));
+                    }
                     mInsetsController.show(msg.arg1, msg.arg2 == 1);
                     break;
                 }

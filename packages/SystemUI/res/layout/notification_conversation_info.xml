@@ -21,33 +21,33 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:focusable="true"
-    android:clipChildren="false"
+    android:clipChildren="true"
     android:clipToPadding="true"
     android:orientation="vertical"
     android:background="@color/notification_material_background_color"
-    android:paddingStart="@*android:dimen/notification_content_margin_start">
+    android:paddingStart="12dp">
 
     <!-- Package Info -->
     <LinearLayout
         android:id="@+id/header"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/notification_guts_conversation_header_height"
+        android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:clipToPadding="false">
+        android:paddingTop="8dp"
+        android:clipToPadding="true">
         <ImageView
             android:id="@+id/conversation_icon"
             android:layout_width="@dimen/notification_guts_conversation_icon_size"
             android:layout_height="@dimen/notification_guts_conversation_icon_size"
-            android:layout_centerVertical="true"
+            android:layout_centerVertical="false"
             android:layout_alignParentStart="true"
-            android:layout_marginEnd="15dp" />
+            android:layout_marginEnd="12dp" />
         <LinearLayout
             android:id="@+id/names"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:orientation="vertical"
-
             android:layout_height="wrap_content"
             android:minHeight="@dimen/notification_guts_conversation_icon_size"
             android:layout_centerVertical="true"
@@ -63,6 +63,8 @@
                     android:id="@+id/parent_channel_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:textDirection="locale"
                     android:layout_weight="1"
                     style="@style/TextAppearance.NotificationImportanceChannel"/>
                 <TextView
