@@ -193,8 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Ишканаңыз бул түзмөктү башкарат жана тармак трафигин көзөмөлдөшү мүмкүн. Чоо-жайын билгиңиз келсе, таптап коюңуз."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Колдонмолор кайда жүргөнүңүздү көрө алат"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Толук маалыматты IT администраторуңуздан ала аласыз"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"Географиялык аймактарга бөлүштүрүү кызматы"</string>
     <string name="country_detector" msgid="7023275114706088854">"Өлкөнү аныктагыч"</string>
     <string name="location_service" msgid="2439187616018455546">"Жайгашкан жерди аныктоо кызматы"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS кызматы"</string>

@@ -193,8 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"سازمانتان این دستگاه را مدیریت می‌کند و ممکن است ترافیک شبکه را پایش کند. برای اطلاع از جزئیات، ضربه بزنید."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"برنامه‌ها می‌توانند به مکانتان دسترسی پیدا کنند"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"برای کسب اطلاعات بیشتر با سرپرست فناوری اطلاعات تماس بگیرید"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"سرویس حصارکشی جغرافیایی"</string>
     <string name="country_detector" msgid="7023275114706088854">"کشوریاب"</string>
     <string name="location_service" msgid="2439187616018455546">"خدمات مکان"</string>
     <string name="gnss_service" msgid="8907781262179951385">"‏سرویس GNSS"</string>

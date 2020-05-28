@@ -193,8 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"तपाईंको संगठनले यस यन्त्रको व्यवस्थापन गर्दछ र नेटवर्क ट्राफिकको अनुगमन गर्न सक्छ। विवरणहरूका लागि ट्याप गर्नुहोस्।"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"एपहरूले तपाईंको स्थान प्रयोग गर्न सक्छन्"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"थप जानकारी प्राप्त गर्न आफ्ना IT प्रशासकसँग सम्पर्क गर्नुहोस्"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"जियोफेन्सिङ सेवा"</string>
     <string name="country_detector" msgid="7023275114706088854">"देश पत्ता लगाउने सुविधा"</string>
     <string name="location_service" msgid="2439187616018455546">"स्थानसम्बन्धी सेवा"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS सेवा"</string>
