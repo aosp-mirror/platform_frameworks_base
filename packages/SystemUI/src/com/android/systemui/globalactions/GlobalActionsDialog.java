@@ -306,7 +306,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             RingerModeTracker ringerModeTracker, SysUiState sysUiState, @Main Handler handler,
             ControlsComponent controlsComponent,
             CurrentUserContextTracker currentUserContextTracker) {
-        mContext = new ContextThemeWrapper(context, com.android.systemui.R.style.qs_theme);
+        mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
         mDreamManager = iDreamManager;
@@ -564,8 +564,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mItems.clear();
         mOverflowItems.clear();
-        String[] defaultActions = getDefaultActions();
 
+        String[] defaultActions = getDefaultActions();
         // make sure emergency affordance action is first, if needed
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
             addActionItem(new EmergencyAffordanceAction());
@@ -1341,17 +1341,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             View view = convertView != null ? convertView
                     : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
             TextView textView = (TextView) view;
-            textView.setOnClickListener(v -> onClickItem(position));
             if (action.getMessageResId() != 0) {
                 textView.setText(action.getMessageResId());
             } else {
                 textView.setText(action.getMessage());
-            }
-
-            if (action instanceof LongPressAction) {
-                textView.setOnLongClickListener(v -> onLongClickItem(position));
-            } else {
-                textView.setOnLongClickListener(null);
             }
             return textView;
         }
@@ -2064,11 +2057,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private ListPopupWindow createPowerOverflowPopup() {
-            ListPopupWindow popup = new GlobalActionsPopupMenu(
+            GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
                     new ContextThemeWrapper(
-                        mContext,
-                        com.android.systemui.R.style.Control_ListPopupWindow
+                            mContext,
+                            com.android.systemui.R.style.Control_ListPopupWindow
                     ), false /* isDropDownMode */);
+            popup.setOnItemClickListener(
+                    (parent, view, position, id) -> mOverflowAdapter.onClickItem(position));
+            popup.setOnItemLongClickListener(
+                    (parent, view, position, id) -> mOverflowAdapter.onLongClickItem(position));
             View overflowButton =
                     findViewById(com.android.systemui.R.id.global_actions_overflow_button);
             popup.setAnchorView(overflowButton);
