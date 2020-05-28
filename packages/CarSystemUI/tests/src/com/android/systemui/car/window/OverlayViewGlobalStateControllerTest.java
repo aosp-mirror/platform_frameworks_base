@@ -491,6 +491,81 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void setOccludedTrue_viewToHideWhenOccludedVisible_viewHidden() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        when(mOverlayViewController1.shouldShowWhenOccluded()).thenReturn(false);
+
+        mOverlayViewGlobalStateController.setOccluded(true);
+
+        assertThat(mOverlayViewGlobalStateController.mZOrderVisibleSortedMap.containsValue(
+                mOverlayViewController1)).isFalse();
+    }
+
+    @Test
+    public void setOccludedTrue_viewToNotHideWhenOccludedVisible_viewShown() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        when(mOverlayViewController1.shouldShowWhenOccluded()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.setOccluded(true);
+
+        assertThat(mOverlayViewGlobalStateController.mZOrderVisibleSortedMap.containsValue(
+                mOverlayViewController1)).isTrue();
+    }
+
+    @Test
+    public void hideViewAndThenSetOccludedTrue_viewHiddenForOcclusion_viewHiddenAfterOcclusion() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        when(mOverlayViewController1.shouldShowWhenOccluded()).thenReturn(false);
+        mOverlayViewGlobalStateController.setOccluded(true);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController1, /* runnable= */ null);
+        mOverlayViewGlobalStateController.setOccluded(false);
+
+        assertThat(mOverlayViewGlobalStateController.mZOrderVisibleSortedMap.containsValue(
+                mOverlayViewController1)).isFalse();
+    }
+
+    @Test
+    public void setOccludedTrueAndThenShowView_viewToNotHideForOcclusion_viewShown() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.shouldShowWhenOccluded()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.setOccluded(true);
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+
+        assertThat(mOverlayViewGlobalStateController.mZOrderVisibleSortedMap.containsValue(
+                mOverlayViewController1)).isTrue();
+    }
+
+    @Test
+    public void setOccludedTrueAndThenShowView_viewToHideForOcclusion_viewHidden() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.shouldShowWhenOccluded()).thenReturn(false);
+
+        mOverlayViewGlobalStateController.setOccluded(true);
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+
+        assertThat(mOverlayViewGlobalStateController.mZOrderVisibleSortedMap.containsValue(
+                mOverlayViewController1)).isFalse();
+    }
+
+    @Test
+    public void setOccludedFalse_viewShownAfterSetOccludedTrue_viewToHideForOcclusion_viewShown() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.shouldShowWhenOccluded()).thenReturn(false);
+        mOverlayViewGlobalStateController.setOccluded(true);
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+
+        mOverlayViewGlobalStateController.setOccluded(false);
+
+        assertThat(mOverlayViewGlobalStateController.mZOrderVisibleSortedMap.containsValue(
+                mOverlayViewController1)).isTrue();
+    }
+
+    @Test
     public void inflateView_notInflated_inflates() {
         when(mOverlayViewController2.isInflated()).thenReturn(false);
 
