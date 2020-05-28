@@ -436,7 +436,12 @@ class Task extends WindowContainer<WindowContainer> {
     static final int FLAG_FORCE_HIDDEN_FOR_TASK_ORG = 1 << 1;
     private int mForceHiddenFlags = 0;
 
+    // When non-null, this is a transaction that will get applied on the next frame returned after
+    // a relayout is requested from the client. While this is only valid on a leaf task; since the
+    // transaction can effect an ancestor task, this also needs to keep track of the ancestor task
+    // that this transaction manipulates because deferUntilFrame acts on individual surfaces.
     SurfaceControl.Transaction mMainWindowSizeChangeTransaction;
+    Task mMainWindowSizeChangeTask;
 
     private final FindRootHelper mFindRootHelper = new FindRootHelper();
     private class FindRootHelper {
@@ -1745,7 +1750,7 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         if (isOrganized()) {
-            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, true /* force */);
+            mAtmService.mTaskOrganizerController.dispatchTaskInfoChanged(this, false /* force */);
         }
     }
 
@@ -4510,11 +4515,30 @@ class Task extends WindowContainer<WindowContainer> {
      * to resize, and it will defer the transaction until that resize frame completes.
      */
     void setMainWindowSizeChangeTransaction(SurfaceControl.Transaction t) {
+        setMainWindowSizeChangeTransaction(t, this);
+    }
+
+    private void setMainWindowSizeChangeTransaction(SurfaceControl.Transaction t, Task origin) {
+        // This is only meaningful on an activity's task, so put it on the top one.
+        ActivityRecord topActivity = getTopNonFinishingActivity();
+        Task leaf = topActivity != null ? topActivity.getTask() : null;
+        if (leaf == null) {
+            return;
+        }
+        if (leaf != this) {
+            leaf.setMainWindowSizeChangeTransaction(t, origin);
+            return;
+        }
         mMainWindowSizeChangeTransaction = t;
+        mMainWindowSizeChangeTask = t == null ? null : origin;
     }
 
     SurfaceControl.Transaction getMainWindowSizeChangeTransaction() {
         return mMainWindowSizeChangeTransaction;
+    }
+
+    Task getMainWindowSizeChangeTask() {
+        return mMainWindowSizeChangeTask;
     }
 
     void setActivityWindowingMode(int windowingMode) {
