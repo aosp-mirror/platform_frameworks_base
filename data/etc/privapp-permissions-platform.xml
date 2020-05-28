@@ -411,6 +411,8 @@ applications that come with the platform
         <permission name="android.permission.TUNER_RESOURCE_ACCESS" />
         <!-- Permissions required for CTS test - TVInputManagerTest -->
         <permission name="android.permission.TV_INPUT_HARDWARE" />
+        <!-- Permission required for CTS test - PrivilegedLocationPermissionTest -->
+        <permission name="android.permission.LOCATION_HARDWARE" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
