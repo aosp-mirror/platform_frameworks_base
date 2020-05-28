@@ -46,8 +46,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.qualifiers.DisplayId;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
-import com.android.systemui.media.MediaData;
-import com.android.systemui.media.MediaDataManager;
 import com.android.systemui.qs.tiles.DndTile;
 import com.android.systemui.qs.tiles.RotationLockTile;
 import com.android.systemui.screenrecord.RecordingController;
@@ -82,14 +80,14 @@ import javax.inject.Inject;
  */
 public class PhoneStatusBarPolicy
         implements BluetoothController.Callback,
-        CommandQueue.Callbacks,
-        RotationLockControllerCallback,
-        Listener,
-        ZenModeController.Callback,
-        DeviceProvisionedListener,
-        KeyguardStateController.Callback,
-        LocationController.LocationChangeCallback,
-        RecordingController.RecordingStateChangeCallback, MediaDataManager.Listener {
+                CommandQueue.Callbacks,
+                RotationLockControllerCallback,
+                Listener,
+                ZenModeController.Callback,
+                DeviceProvisionedListener,
+                KeyguardStateController.Callback,
+                LocationController.LocationChangeCallback,
+                RecordingController.RecordingStateChangeCallback {
     private static final String TAG = "PhoneStatusBarPolicy";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -110,7 +108,6 @@ public class PhoneStatusBarPolicy
     private final String mSlotLocation;
     private final String mSlotSensorsOff;
     private final String mSlotScreenRecord;
-    private final String mSlotMedia;
     private final int mDisplayId;
     private final SharedPreferences mSharedPreferences;
     private final DateFormatUtil mDateFormatUtil;
@@ -138,7 +135,6 @@ public class PhoneStatusBarPolicy
     private final SensorPrivacyController mSensorPrivacyController;
     private final RecordingController mRecordingController;
     private final RingerModeTracker mRingerModeTracker;
-    private final MediaDataManager mMediaDataManager;
 
     private boolean mZenVisible;
     private boolean mVolumeVisible;
@@ -163,7 +159,6 @@ public class PhoneStatusBarPolicy
             SensorPrivacyController sensorPrivacyController, IActivityManager iActivityManager,
             AlarmManager alarmManager, UserManager userManager,
             RecordingController recordingController,
-            MediaDataManager mediaDataManager,
             @Nullable TelecomManager telecomManager, @DisplayId int displayId,
             @Main SharedPreferences sharedPreferences, DateFormatUtil dateFormatUtil,
             RingerModeTracker ringerModeTracker) {
@@ -190,7 +185,6 @@ public class PhoneStatusBarPolicy
         mUiBgExecutor = uiBgExecutor;
         mTelecomManager = telecomManager;
         mRingerModeTracker = ringerModeTracker;
-        mMediaDataManager = mediaDataManager;
 
         mSlotCast = resources.getString(com.android.internal.R.string.status_bar_cast);
         mSlotHotspot = resources.getString(com.android.internal.R.string.status_bar_hotspot);
@@ -208,7 +202,6 @@ public class PhoneStatusBarPolicy
         mSlotSensorsOff = resources.getString(com.android.internal.R.string.status_bar_sensors_off);
         mSlotScreenRecord = resources.getString(
                 com.android.internal.R.string.status_bar_screen_record);
-        mSlotMedia = resources.getString(com.android.internal.R.string.status_bar_media);
 
         mDisplayId = displayId;
         mSharedPreferences = sharedPreferences;
@@ -287,11 +280,6 @@ public class PhoneStatusBarPolicy
         mIconController.setIconVisibility(mSlotSensorsOff,
                 mSensorPrivacyController.isSensorPrivacyEnabled());
 
-        // play/pause icon when media is active
-        mIconController.setIcon(mSlotMedia, R.drawable.stat_sys_media,
-                mResources.getString(R.string.accessibility_media_active));
-        mIconController.setIconVisibility(mSlotMedia, mMediaDataManager.hasActiveMedia());
-
         // screen record
         mIconController.setIcon(mSlotScreenRecord, R.drawable.stat_sys_screen_record, null);
         mIconController.setIconVisibility(mSlotScreenRecord, false);
@@ -308,7 +296,6 @@ public class PhoneStatusBarPolicy
         mSensorPrivacyController.addCallback(mSensorPrivacyListener);
         mLocationController.addCallback(this);
         mRecordingController.addCallback(this);
-        mMediaDataManager.addListener(this);
 
         mCommandQueue.addCallback(this);
     }
@@ -712,19 +699,5 @@ public class PhoneStatusBarPolicy
         // Ensure this is on the main thread
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
-    }
-
-    @Override
-    public void onMediaDataLoaded(String key, MediaData data) {
-        updateMediaIcon();
-    }
-
-    @Override
-    public void onMediaDataRemoved(String key) {
-        updateMediaIcon();
-    }
-
-    private void updateMediaIcon() {
-        mIconController.setIconVisibility(mSlotMedia, mMediaDataManager.hasActiveMedia());
     }
 }
