@@ -351,6 +351,11 @@ public class WindowManagerShellCommand extends ShellCommand {
     }
 
     private int runDumpVisibleWindowViews(PrintWriter pw) {
+        if (!mInternal.checkCallingPermission(android.Manifest.permission.DUMP,
+                "runDumpVisibleWindowViews()")) {
+            throw new SecurityException("Requires DUMP permission");
+        }
+
         try (ZipOutputStream out = new ZipOutputStream(getRawOutputStream())) {
             ArrayList<Pair<String, ByteTransferPipe>> requestList = new ArrayList<>();
             synchronized (mInternal.mGlobalLock) {
