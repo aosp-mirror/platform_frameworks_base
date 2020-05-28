@@ -195,7 +195,10 @@ public class Surface implements Parcelable {
 
     // From native_window.h. Keep these in sync.
     /**
-     * There are no inherent restrictions on the frame rate of this surface.
+     * There are no inherent restrictions on the frame rate of this surface. When the
+     * system selects a frame rate other than what the app requested, the app will be able
+     * to run at the system frame rate without requiring pull down. This value should be
+     * used when displaying game content, UIs, and anything that isn't video.
      */
     public static final int FRAME_RATE_COMPATIBILITY_DEFAULT = 0;
 
@@ -205,7 +208,7 @@ public class Surface implements Parcelable {
      * other than what the app requested, the app will need to do pull down or use some
      * other technique to adapt to the system's frame rate. The user experience is likely
      * to be worse (e.g. more frame stuttering) than it would be if the system had chosen
-     * the app's requested frame rate.
+     * the app's requested frame rate. This value should be used for video content.
      */
     public static final int FRAME_RATE_COMPATIBILITY_FIXED_SOURCE = 1;
 
