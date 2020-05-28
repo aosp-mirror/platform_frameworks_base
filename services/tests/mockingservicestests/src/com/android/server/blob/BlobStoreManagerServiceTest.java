@@ -372,6 +372,7 @@ public class BlobStoreManagerServiceTest {
         doReturn(sessionId).when(session).getSessionId();
         doReturn(sessionFile).when(session).getSessionFile();
         doReturn(blobHandle).when(session).getBlobHandle();
+        doCallRealMethod().when(session).isExpired();
         return session;
     }
 

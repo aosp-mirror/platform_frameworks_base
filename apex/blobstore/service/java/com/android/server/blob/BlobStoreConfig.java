@@ -45,8 +45,9 @@ class BlobStoreConfig {
     public static final int XML_VERSION_ADD_STRING_DESC = 2;
     public static final int XML_VERSION_ADD_DESC_RES_NAME = 3;
     public static final int XML_VERSION_ADD_COMMIT_TIME = 4;
+    public static final int XML_VERSION_ADD_SESSION_CREATION_TIME = 5;
 
-    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_COMMIT_TIME;
+    public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_SESSION_CREATION_TIME;
 
     private static final String ROOT_DIR_NAME = "blobstore";
     private static final String BLOBS_DIR_NAME = "blobs";
