@@ -909,22 +909,11 @@ public class NetworkStatsTest {
                 13805 /* txPackets */,
                 0 /* operations */);
 
-        // Traffic measured for the root uid on the base interface if eBPF is in use.
-        final NetworkStats.Entry ebpfRootUidEntry = new NetworkStats.Entry(
+        // Traffic measured for the root uid on the base interface.
+        final NetworkStats.Entry rootUidEntry = new NetworkStats.Entry(
                 baseIface, rootUid, SET_DEFAULT, TAG_NONE,
                 163577 /* rxBytes */,
                 187 /* rxPackets */,
-                17607 /* txBytes */,
-                97 /* txPackets */,
-                0 /* operations */);
-
-        // Traffic measured for the root uid on the base interface if xt_qtaguid is in use.
-        // Incorrectly includes appEntry's bytes and packets, plus IPv4-IPv6 translation
-        // overhead (20 bytes per packet), in rx direction.
-        final NetworkStats.Entry xtRootUidEntry = new NetworkStats.Entry(
-                baseIface, rootUid, SET_DEFAULT, TAG_NONE,
-                31113087 /* rxBytes */,
-                22588 /* rxPackets */,
                 17607 /* txBytes */,
                 97 /* txPackets */,
                 0 /* operations */);
@@ -939,12 +928,12 @@ public class NetworkStatsTest {
 
         final NetworkStats statsXt = new NetworkStats(TEST_START, 3)
                 .insertEntry(appEntry)
-                .insertEntry(xtRootUidEntry)
+                .insertEntry(rootUidEntry)
                 .insertEntry(otherEntry);
 
         final NetworkStats statsEbpf = new NetworkStats(TEST_START, 3)
                 .insertEntry(appEntry)
-                .insertEntry(ebpfRootUidEntry)
+                .insertEntry(rootUidEntry)
                 .insertEntry(otherEntry);
 
         statsXt.apply464xlatAdjustments(stackedIface, false);
