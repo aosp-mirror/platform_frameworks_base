@@ -596,7 +596,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
         String message = mContext.getString(R.string.instant_apps_message);
         PendingIntent appInfoAction = PendingIntent.getActivity(mContext, 0,
                 new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-                        .setData(Uri.fromParts("package", pkg, null)), 0);
+                        .setData(Uri.fromParts("package", pkg, null)),
+                        PendingIntent.FLAG_IMMUTABLE);
         Action action = new Notification.Action.Builder(null, mContext.getString(R.string.app_info),
                 appInfoAction).build();
 
@@ -610,7 +611,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
             PendingIntent pendingIntent = PendingIntent.getActivity(mContext,
-                    0 /* requestCode */, browserIntent, 0 /* flags */);
+                    0 /* requestCode */, browserIntent, PendingIntent.FLAG_IMMUTABLE);
             ComponentName aiaComponent = null;
             try {
                 aiaComponent = AppGlobals.getPackageManager().getInstantAppInstallerComponent();
@@ -628,7 +629,8 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
                     .putExtra(Intent.EXTRA_EPHEMERAL_FAILURE, pendingIntent)
                     .putExtra(Intent.EXTRA_INSTANT_APP_FAILURE, pendingIntent);
 
-            PendingIntent webPendingIntent = PendingIntent.getActivity(mContext, 0, goToWebIntent, 0);
+            PendingIntent webPendingIntent = PendingIntent.getActivity(
+                    mContext, 0, goToWebIntent, PendingIntent.FLAG_IMMUTABLE);
             Action webAction = new Notification.Action.Builder(null, mContext.getString(R.string.go_to_web),
                     webPendingIntent).build();
             builder.addAction(webAction);
