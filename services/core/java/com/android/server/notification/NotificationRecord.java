@@ -190,6 +190,7 @@ public final class NotificationRecord {
     private boolean mPostSilently;
     private boolean mHasSentValidMsg;
     private boolean mAppDemotedFromConvo;
+    private boolean mPkgAllowedAsConvo;
     /**
      * Whether this notification (and its channels) should be considered user locked. Used in
      * conjunction with user sentiment calculation.
@@ -1387,30 +1388,39 @@ public final class NotificationRecord {
         mAppDemotedFromConvo = userDemoted;
     }
 
+    public void setPkgAllowedAsConvo(boolean allowedAsConvo) {
+        mPkgAllowedAsConvo = allowedAsConvo;
+    }
+
     /**
      * Whether this notification is a conversation notification.
      */
     public boolean isConversation() {
         Notification notification = getNotification();
-        if (!Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
-            // very common; don't bother logging
+        // user kicked it out of convo space
+        if (mChannel.isDemoted() || mAppDemotedFromConvo) {
             return false;
         }
-        if (mChannel.isDemoted()) {
-            return false;
-        }
+        // NAS kicked it out of notification space
         if (mIsNotConversationOverride) {
             return false;
         }
+        if (!Notification.MessagingStyle.class.equals(notification.getNotificationStyle())) {
+            // some non-msgStyle notifs can temporarily appear in the conversation space if category
+            // is right
+            if (mPkgAllowedAsConvo && mTargetSdkVersion < Build.VERSION_CODES.R
+                && Notification.CATEGORY_MESSAGE.equals(getNotification().category)) {
+                return true;
+            }
+            return false;
+        }
+
         if (mTargetSdkVersion >= Build.VERSION_CODES.R
             && Notification.MessagingStyle.class.equals(notification.getNotificationStyle())
             && mShortcutInfo == null) {
             return false;
         }
         if (mHasSentValidMsg && mShortcutInfo == null) {
-            return false;
-        }
-        if (mAppDemotedFromConvo) {
             return false;
         }
         return true;
