@@ -2128,7 +2128,7 @@ class ActivityStack extends Task {
                 // window manager to keep the previous window it had previously
                 // created, if it still had one.
                 Task prevTask = r.getTask();
-                ActivityRecord prev = prevTask.topRunningActivityWithStartingWindowLocked();
+                ActivityRecord prev = prevTask.topActivityWithStartingWindow();
                 if (prev != null) {
                     // We don't want to reuse the previous starting preview if:
                     // (1) The current activity is in a different task.
