@@ -2452,7 +2452,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int numShownItems = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mMaxDisplayedNotifications;
-
+        ExpandableView previousView = null;
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
             boolean footerViewOnLockScreen = expandableView == mFooterView && onKeyguard();
@@ -2493,9 +2493,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (height != 0) {
                     height += padding;
                 }
+                height += mStackScrollAlgorithm.getGapHeightForChild(mSectionsManager,
+                        mAmbientState.getAnchorViewIndex(), numShownItems, expandableView,
+                        previousView);
                 previousPaddingAmount = increasedPaddingAmount;
                 height += expandableView.getIntrinsicHeight();
                 numShownItems++;
+                previousView = expandableView;
                 if (finish) {
                     break;
                 }
