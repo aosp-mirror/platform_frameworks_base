@@ -1117,6 +1117,9 @@ public class BubbleStackView extends FrameLayout
         super.onDetachedFromWindow();
         getViewTreeObserver().removeOnPreDrawListener(mViewUpdater);
         getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
+        if (mBubbleOverflow != null && mBubbleOverflow.getExpandedView() != null) {
+            mBubbleOverflow.getExpandedView().cleanUpExpandedState();
+        }
     }
 
     @Override
@@ -1334,21 +1337,12 @@ public class BubbleStackView extends FrameLayout
         Log.d(TAG, "was asked to remove Bubble, but didn't find the view! " + bubble);
     }
 
-    private void updateOverflowBtnVisibility() {
-        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
+    private void updateOverflowVisibility() {
+        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)
+                || mBubbleOverflow == null) {
             return;
         }
-        if (mIsExpanded) {
-            if (DEBUG_BUBBLE_STACK_VIEW) {
-                Log.d(TAG, "Show overflow button.");
-            }
-            mBubbleOverflow.setBtnVisible(VISIBLE);
-        } else {
-            if (DEBUG_BUBBLE_STACK_VIEW) {
-                Log.d(TAG, "Collapsed. Hide overflow button.");
-            }
-            mBubbleOverflow.setBtnVisible(GONE);
-        }
+        mBubbleOverflow.setVisible(mIsExpanded ? VISIBLE : GONE);
     }
 
     // via BubbleData.Listener
@@ -1602,7 +1596,7 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, BubbleDebugConfig.formatBubblesString(getBubblesOnScreen(),
                     mExpandedBubble));
         }
-        updateOverflowBtnVisibility();
+        updateOverflowVisibility();
         mBubbleContainer.cancelAllAnimations();
         mExpandedAnimationController.collapseBackToStack(
                 mStackAnimationController.getStackPositionAlongNearestHorizontalEdge()
@@ -1626,7 +1620,7 @@ public class BubbleStackView extends FrameLayout
         beforeExpandedViewAnimation();
 
         mBubbleContainer.setActiveController(mExpandedAnimationController);
-        updateOverflowBtnVisibility();
+        updateOverflowVisibility();
         mExpandedAnimationController.expandFromStack(() -> {
             updatePointerPosition();
             afterExpandedViewAnimation();
