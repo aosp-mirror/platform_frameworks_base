@@ -3831,6 +3831,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             for (int i = 0; i < responseCount; i++) {
                 if (mResponses.keyAt(i) > lastResponseId) {
                     lastResponseIdx = i;
+                    lastResponseId = mResponses.keyAt(i);
                 }
             }
         }
