@@ -4131,16 +4131,8 @@
     <string name="activity_resolver_use_always">Always</string>
 
     <!-- Title for a button to choose the currently selected activity
-         as the default in the activity resolver. [CHAR LIMIT=50] -->
-    <string name="activity_resolver_set_always">Set to always open</string>
-
-    <!-- Title for a button to choose the currently selected activity
          from the activity resolver to use just this once. [CHAR LIMIT=25] -->
     <string name="activity_resolver_use_once">Just once</string>
-
-    <!-- Title for a button to choose to go to
-          'Open by Default' app settings. [CHAR LIMIT=25] -->
-    <string name="activity_resolver_app_settings">Settings</string>
 
     <!-- Text for the toast that is shown when the user clicks on a launcher that
          doesn't support the work profile. [CHAR LIMIT=100] -->

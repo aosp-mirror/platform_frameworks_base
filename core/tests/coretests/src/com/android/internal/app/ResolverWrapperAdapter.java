@@ -35,11 +35,10 @@ public class ResolverWrapperAdapter extends ResolverListAdapter {
             List<Intent> payloadIntents,
             Intent[] initialIntents,
             List<ResolveInfo> rList, boolean filterLastUsed,
-            ResolverListController resolverListController, boolean useLayoutForBrowsables,
+            ResolverListController resolverListController,
             ResolverListCommunicator resolverListCommunicator) {
         super(context, payloadIntents, initialIntents, rList, filterLastUsed,
-                resolverListController,
-                useLayoutForBrowsables, resolverListCommunicator, false);
+                resolverListController, resolverListCommunicator, false);
     }
 
     public CountingIdlingResource getLabelIdlingResource() {
