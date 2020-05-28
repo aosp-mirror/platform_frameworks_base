@@ -105,7 +105,7 @@ public class IpMemoryStoreTest {
 
     private static NetworkAttributes buildTestNetworkAttributes(String hint, int mtu) {
         return new NetworkAttributes.Builder()
-                .setGroupHint(hint)
+                .setCluster(hint)
                 .setMtu(mtu)
                 .build();
     }
