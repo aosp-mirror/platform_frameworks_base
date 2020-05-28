@@ -384,6 +384,10 @@ protected:
     // If no state map exists, keep the original state value.
     void mapStateValue(const int32_t atomId, FieldValue* value);
 
+    // Returns a HashableDimensionKey with unknown state value for each state
+    // atom.
+    HashableDimensionKey getUnknownStateKey();
+
     DropEvent buildDropEvent(const int64_t dropTimeNs, const BucketDropReason reason);
 
     // Returns true if the number of drop events in the current bucket has
