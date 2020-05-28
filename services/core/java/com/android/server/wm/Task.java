@@ -1309,12 +1309,12 @@ class Task extends WindowContainer<WindowContainer> {
         return isUidPresent;
     }
 
-    ActivityRecord topRunningActivityWithStartingWindowLocked() {
+    ActivityRecord topActivityWithStartingWindow() {
         if (getParent() == null) {
             return null;
         }
         return getActivity((r) -> r.mStartingWindowState == STARTING_WINDOW_SHOWN
-                && r.canBeTopRunning());
+                && r.okToShowLocked());
     }
 
     /**
