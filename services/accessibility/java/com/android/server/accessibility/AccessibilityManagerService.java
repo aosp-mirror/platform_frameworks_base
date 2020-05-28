@@ -1136,6 +1136,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userState.mEnabledServices,
                 UserHandle.USER_SYSTEM);
         onUserStateChangedLocked(userState);
+        migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null);
     }
 
     private int getClientStateLocked(AccessibilityUserState userState) {
