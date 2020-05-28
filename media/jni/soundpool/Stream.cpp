@@ -105,7 +105,7 @@ void Stream::setRate(int32_t streamID, float rate)
     if (streamID == mStreamID) {
         mRate = rate;
         if (mAudioTrack != nullptr && mSound != nullptr) {
-            const uint32_t sampleRate = uint32_t(float(mSound->getSampleRate()) * rate + 0.5);
+            const auto sampleRate = (uint32_t)lround(double(mSound->getSampleRate()) * rate);
             mAudioTrack->setSampleRate(sampleRate);
         }
     }
@@ -214,8 +214,11 @@ void Stream::stop_l()
 
 void Stream::clearAudioTrack()
 {
+    sp<AudioTrack> release;  // release outside of lock.
+    std::lock_guard lock(mLock);
     // This will invoke the destructor which waits for the AudioTrack thread to join,
     // and is currently the only safe way to ensure there are no callbacks afterwards.
+    release = mAudioTrack;  // or std::swap if we had move semantics.
     mAudioTrack.clear();
 }
 
@@ -288,7 +291,7 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
         const audio_stream_type_t streamType =
                 AudioSystem::attributesToStreamType(*mStreamManager->getAttributes());
         const int32_t channelCount = sound->getChannelCount();
-        const uint32_t sampleRate = uint32_t(float(sound->getSampleRate()) * rate + 0.5);
+        const auto sampleRate = (uint32_t)lround(double(sound->getSampleRate()) * rate);
         size_t frameCount = 0;
 
         if (loop) {
@@ -307,7 +310,7 @@ void Stream::play_l(const std::shared_ptr<Sound>& sound, int32_t nextStreamID,
                         __func__, mAudioTrack.get(), sound->getSoundID());
             }
         }
-        if (newTrack == 0) {
+        if (newTrack == nullptr) {
             // mToggle toggles each time a track is started on a given stream.
             // The toggle is concatenated with the Stream address and passed to AudioTrack
             // as callback user data. This enables the detection of callbacks received from the old
@@ -380,9 +383,9 @@ exit:
 /* static */
 void Stream::staticCallback(int event, void* user, void* info)
 {
-    const uintptr_t userAsInt = (uintptr_t)user;
-    Stream* stream = reinterpret_cast<Stream*>(userAsInt & ~1);
-    stream->callback(event, info, userAsInt & 1, 0 /* tries */);
+    const auto userAsInt = (uintptr_t)user;
+    auto stream = reinterpret_cast<Stream*>(userAsInt & ~1);
+    stream->callback(event, info, int(userAsInt & 1), 0 /* tries */);
 }
 
 void Stream::callback(int event, void* info, int toggle, int tries)

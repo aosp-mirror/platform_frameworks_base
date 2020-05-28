@@ -69,10 +69,10 @@ public class BubbleDebugConfig {
                         && selected.getKey() != BubbleOverflow.KEY
                         && bubble == selected);
                 String arrow = isSelected ? "=>" : "  ";
-                sb.append(String.format("%s Bubble{act=%12d, ongoing=%d, key=%s}\n",
+                sb.append(String.format("%s Bubble{act=%12d, showInShade=%d, key=%s}\n",
                         arrow,
                         bubble.getLastActivity(),
-                        (bubble.isOngoing() ? 1 : 0),
+                        (bubble.showInShade() ? 1 : 0),
                         bubble.getKey()));
             }
         }

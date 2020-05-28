@@ -22,6 +22,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.view.InsetsState.InternalInsetsType;
 
+import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -99,6 +100,14 @@ public class InsetsSourceControl implements Parcelable {
         if (mLeash != null) {
             surfaceReleaseConsumer.accept(mLeash);
         }
+    }
+
+    public void dump(String prefix, PrintWriter pw) {
+        pw.print(prefix);
+        pw.print("InsetsSourceControl type="); pw.print(InsetsState.typeToString(mType));
+        pw.print(" mLeash="); pw.print(mLeash);
+        pw.print(" mSurfacePosition="); pw.print(mSurfacePosition);
+        pw.println();
     }
 
     public static final @android.annotation.NonNull Creator<InsetsSourceControl> CREATOR

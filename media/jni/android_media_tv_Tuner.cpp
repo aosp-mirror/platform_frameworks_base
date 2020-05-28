@@ -2975,7 +2975,7 @@ static jint copyData(JNIEnv *env, std::unique_ptr<MQ>& mq, EventFlag* flag, jbyt
     jbyte *dst = env->GetByteArrayElements(buffer, &isCopy);
     ALOGD("copyData, isCopy=%d", isCopy);
     if (dst == nullptr) {
-        ALOGD("Failed to GetByteArrayElements");
+        jniThrowRuntimeException(env, "Failed to GetByteArrayElements");
         return 0;
     }
 
@@ -2983,7 +2983,7 @@ static jint copyData(JNIEnv *env, std::unique_ptr<MQ>& mq, EventFlag* flag, jbyt
         env->ReleaseByteArrayElements(buffer, dst, 0);
         flag->wake(static_cast<uint32_t>(DemuxQueueNotifyBits::DATA_CONSUMED));
     } else {
-        ALOGD("Failed to read FMQ");
+        jniThrowRuntimeException(env, "Failed to read FMQ");
         env->ReleaseByteArrayElements(buffer, dst, 0);
         return 0;
     }

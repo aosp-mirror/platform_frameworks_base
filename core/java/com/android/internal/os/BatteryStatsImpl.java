@@ -9875,6 +9875,10 @@ public class BatteryStatsImpl extends BatteryStats {
         mPlatformIdleStateCallback = cb;
         mRailEnergyDataCallback = railStatsCb;
         mUserInfoProvider = userInfoProvider;
+
+        // Notify statsd that the system is initially not in doze.
+        mDeviceIdleMode = DEVICE_IDLE_MODE_OFF;
+        FrameworkStatsLog.write(FrameworkStatsLog.DEVICE_IDLE_MODE_STATE_CHANGED, mDeviceIdleMode);
     }
 
     @UnsupportedAppUsage

@@ -190,9 +190,9 @@ public class QuickQSPanel extends QSPanel {
             switchTileLayout();
             return null;
         });
-        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
         mMediaHost.setExpansion(0.0f);
         mMediaHost.setShowsOnlyActiveMedia(true);
+        mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
         reAttachMediaHost();
     }
 

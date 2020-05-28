@@ -179,6 +179,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.function.BiConsumer;
 
 /**
  * SystemService containing PullAtomCallbacks that are registered with statsd.
@@ -325,6 +326,7 @@ public class StatsPullAtomService extends SystemService {
                     case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
                     case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
+                    case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
                         return pullDataBytesTransfer(atomTag, data);
                     case FrameworkStatsLog.BLUETOOTH_BYTES_TRANSFER:
                         return pullBluetoothBytesTransfer(atomTag, data);
@@ -641,11 +643,14 @@ public class StatsPullAtomService extends SystemService {
                 collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.MOBILE_BYTES_TRANSFER));
         mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
                 FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG));
+        mNetworkStatsBaselines.addAll(collectNetworkStatsSnapshotForAtom(
+                FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED));
 
         registerWifiBytesTransfer();
         registerWifiBytesTransferBackground();
         registerMobileBytesTransfer();
         registerMobileBytesTransferBackground();
+        registerBytesTransferByTagAndMetered();
     }
 
     /**
@@ -787,49 +792,93 @@ public class StatsPullAtomService extends SystemService {
     private static class NetworkStatsExt {
         @NonNull
         public final NetworkStats stats;
-        public final int transport;
-        public final boolean withFgbg;
+        public final int[] transports;
+        public final boolean slicedByFgbg;
+        public final boolean slicedByTag;
+        public final boolean slicedByMetered;
 
-        NetworkStatsExt(@NonNull NetworkStats stats, int transport, boolean withFgbg) {
+        NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg) {
+            this(stats, transports, slicedByFgbg, /*slicedByTag=*/false, /*slicedByMetered=*/false);
+        }
+
+        NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg,
+                boolean slicedByTag, boolean slicedByMetered) {
             this.stats = stats;
-            this.transport = transport;
-            this.withFgbg = withFgbg;
+
+            // Sort transports array so that we can test for equality without considering order.
+            this.transports = Arrays.copyOf(transports, transports.length);
+            Arrays.sort(this.transports);
+
+            this.slicedByFgbg = slicedByFgbg;
+            this.slicedByTag = slicedByTag;
+            this.slicedByMetered = slicedByMetered;
+        }
+
+        public boolean hasSameSlicing(@NonNull NetworkStatsExt other) {
+            return Arrays.equals(transports, other.transports) && slicedByFgbg == other.slicedByFgbg
+                    && slicedByTag == other.slicedByTag && slicedByMetered == other.slicedByMetered;
         }
     }
 
     @NonNull
     private List<NetworkStatsExt> collectNetworkStatsSnapshotForAtom(int atomTag) {
+        List<NetworkStatsExt> ret = new ArrayList<>();
         switch(atomTag) {
-            case FrameworkStatsLog.WIFI_BYTES_TRANSFER:
-                return collectUidNetworkStatsSnapshot(TRANSPORT_WIFI, /*withFgbg=*/false);
-            case  FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG:
-                return collectUidNetworkStatsSnapshot(TRANSPORT_WIFI, /*withFgbg=*/true);
-            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER:
-                return collectUidNetworkStatsSnapshot(TRANSPORT_CELLULAR, /*withFgbg=*/false);
-            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG:
-                return collectUidNetworkStatsSnapshot(TRANSPORT_CELLULAR, /*withFgbg=*/true);
+            case FrameworkStatsLog.WIFI_BYTES_TRANSFER: {
+                final NetworkStats stats = getUidNetworkStatsSnapshot(TRANSPORT_WIFI,
+                        /*includeTags=*/false);
+                if (stats != null) {
+                    ret.add(new NetworkStatsExt(stats.groupedByUid(), new int[] {TRANSPORT_WIFI},
+                                    /*slicedByFgbg=*/false));
+                }
+                break;
+            }
+            case FrameworkStatsLog.WIFI_BYTES_TRANSFER_BY_FG_BG: {
+                final NetworkStats stats = getUidNetworkStatsSnapshot(TRANSPORT_WIFI,
+                        /*includeTags=*/false);
+                if (stats != null) {
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                                    new int[] {TRANSPORT_WIFI}, /*slicedByFgbg=*/true));
+                }
+                break;
+            }
+            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER: {
+                final NetworkStats stats = getUidNetworkStatsSnapshot(TRANSPORT_CELLULAR,
+                        /*includeTags=*/false);
+                if (stats != null) {
+                    ret.add(new NetworkStatsExt(stats.groupedByUid(),
+                                    new int[] {TRANSPORT_CELLULAR}, /*slicedByFgbg=*/false));
+                }
+                break;
+            }
+            case FrameworkStatsLog.MOBILE_BYTES_TRANSFER_BY_FG_BG: {
+                final NetworkStats stats = getUidNetworkStatsSnapshot(TRANSPORT_CELLULAR,
+                        /*includeTags=*/false);
+                if (stats != null) {
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidAndFgbg(stats),
+                                    new int[] {TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true));
+                }
+                break;
+            }
+            case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED: {
+                final NetworkStats wifiStats = getUidNetworkStatsSnapshot(TRANSPORT_WIFI,
+                        /*includeTags=*/true);
+                final NetworkStats cellularStats = getUidNetworkStatsSnapshot(TRANSPORT_CELLULAR,
+                        /*includeTags=*/true);
+                if (wifiStats != null && cellularStats != null) {
+                    final NetworkStats stats = wifiStats.add(cellularStats);
+                    ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
+                                    new int[] {TRANSPORT_WIFI, TRANSPORT_CELLULAR},
+                                    /*slicedByFgbg=*/false, /*slicedByTag=*/true,
+                                    /*slicedByMetered=*/true));
+                }
+                break;
+            }
             default:
                 throw new IllegalArgumentException("Unknown atomTag " + atomTag);
         }
-    }
-
-    // Get a snapshot of Uid NetworkStats. The snapshot contains NetworkStats with its associated
-    // information, and wrapped by a list since multiple NetworkStatsExt objects might be collected.
-    @NonNull
-    private List<NetworkStatsExt> collectUidNetworkStatsSnapshot(int transport, boolean withFgbg) {
-        final List<NetworkStatsExt> ret = new ArrayList<>();
-        final NetworkTemplate template = (transport == TRANSPORT_CELLULAR
-                ? NetworkTemplate.buildTemplateMobileWithRatType(
-                        /*subscriptionId=*/null, NETWORK_TYPE_ALL)
-                : NetworkTemplate.buildTemplateWifiWildcard());
-
-        final NetworkStats stats = getUidNetworkStatsSnapshot(template, withFgbg);
-        if (stats != null) {
-            ret.add(new NetworkStatsExt(stats, transport, withFgbg));
-        }
         return ret;
     }
-
 
     private int pullDataBytesTransfer(
             int atomTag, @NonNull List<StatsEvent> pulledData) {
@@ -842,22 +891,28 @@ public class StatsPullAtomService extends SystemService {
 
         for (final NetworkStatsExt item : current) {
             final NetworkStatsExt baseline = CollectionUtils.find(mNetworkStatsBaselines,
-                    it -> it.withFgbg == item.withFgbg && it.transport == item.transport);
+                    it -> it.hasSameSlicing(item));
 
             // No matched baseline indicates error has occurred during initialization stage,
             // skip reporting anything since the snapshot is invalid.
             if (baseline == null) {
-                Slog.e(TAG, "baseline is null for " + atomTag + ", transport="
-                        + item.transport + " , withFgbg=" + item.withFgbg + ", return.");
+                Slog.e(TAG, "baseline is null for " + atomTag + ", return.");
                 return StatsManager.PULL_SKIP;
             }
-            final NetworkStatsExt diff = new NetworkStatsExt(item.stats.subtract(
-                    baseline.stats).removeEmptyEntries(), item.transport, item.withFgbg);
+            final NetworkStatsExt diff = new NetworkStatsExt(
+                    item.stats.subtract(baseline.stats).removeEmptyEntries(), item.transports,
+                    item.slicedByFgbg, item.slicedByTag, item.slicedByMetered);
 
             // If no diff, skip.
             if (diff.stats.size() == 0) continue;
 
-            addNetworkStats(atomTag, pulledData, diff);
+            switch (atomTag) {
+                case FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED:
+                    addBytesTransferByTagAndMeteredAtoms(diff, pulledData);
+                    break;
+                default:
+                    addNetworkStats(atomTag, pulledData, diff);
+            }
         }
         return StatsManager.PULL_SUCCESS;
     }
@@ -879,7 +934,7 @@ public class StatsPullAtomService extends SystemService {
             }
             e.writeInt(entry.uid);
             e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
-            if (statsExt.withFgbg) {
+            if (statsExt.slicedByFgbg) {
                 e.writeInt(entry.set);
             }
             e.writeLong(entry.rxBytes);
@@ -890,14 +945,38 @@ public class StatsPullAtomService extends SystemService {
         }
     }
 
+    private void addBytesTransferByTagAndMeteredAtoms(@NonNull NetworkStatsExt statsExt,
+            @NonNull List<StatsEvent> pulledData) {
+        final NetworkStats.Entry entry = new NetworkStats.Entry(); // for recycling
+        for (int i = 0; i < statsExt.stats.size(); i++) {
+            statsExt.stats.getValues(i, entry);
+            StatsEvent e = StatsEvent.newBuilder()
+                    .setAtomId(FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED)
+                    .addBooleanAnnotation(ANNOTATION_ID_TRUNCATE_TIMESTAMP, true)
+                    .writeInt(entry.uid)
+                    .addBooleanAnnotation(ANNOTATION_ID_IS_UID, true)
+                    .writeBoolean(entry.metered == NetworkStats.METERED_YES)
+                    .writeInt(entry.tag)
+                    .writeLong(entry.rxBytes)
+                    .writeLong(entry.rxPackets)
+                    .writeLong(entry.txBytes)
+                    .writeLong(entry.txPackets)
+                    .build();
+            pulledData.add(e);
+        }
+    }
+
     /**
      * Create a snapshot of NetworkStats since boot, but add 1 bucket duration before boot as a
      * buffer to ensure at least one full bucket will be included.
      * Note that this should be only used to calculate diff since the snapshot might contains
      * some traffic before boot.
      */
-    @Nullable private NetworkStats getUidNetworkStatsSnapshot(
-            @NonNull NetworkTemplate template, boolean withFgbg) {
+    @Nullable private NetworkStats getUidNetworkStatsSnapshot(int transport, boolean includeTags) {
+        final NetworkTemplate template = (transport == TRANSPORT_CELLULAR)
+                ? NetworkTemplate.buildTemplateMobileWithRatType(
+                        /*subscriptionId=*/null, NETWORK_TYPE_ALL)
+                : NetworkTemplate.buildTemplateWifiWildcard();
 
         final long elapsedMillisSinceBoot = SystemClock.elapsedRealtime();
         final long currentTimeInMillis = MICROSECONDS.toMillis(SystemClock.currentTimeMicro());
@@ -906,38 +985,72 @@ public class StatsPullAtomService extends SystemService {
         try {
             final NetworkStats stats = getNetworkStatsSession().getSummaryForAllUid(template,
                     currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
-                    currentTimeInMillis, /*includeTags=*/false);
-            return withFgbg ? rollupNetworkStatsByFgbg(stats) : stats.groupedByUid();
+                    currentTimeInMillis, includeTags);
+            return stats;
         } catch (RemoteException | NullPointerException e) {
-            Slog.e(TAG, "Pulling netstats for " + template
-                    + " fgbg= " + withFgbg + " bytes has error", e);
+            Slog.e(TAG, "Pulling netstats for template=" + template + " and includeTags="
+                    + includeTags  + " causes error", e);
         }
         return null;
     }
 
+    @NonNull private NetworkStats sliceNetworkStatsByUidAndFgbg(@NonNull NetworkStats stats) {
+        return sliceNetworkStats(stats,
+                (newEntry, oldEntry) -> {
+                    newEntry.uid = oldEntry.uid;
+                    newEntry.set = oldEntry.set;
+                });
+    }
+
+    @NonNull private NetworkStats sliceNetworkStatsByUidTagAndMetered(@NonNull NetworkStats stats) {
+        return sliceNetworkStats(stats,
+                (newEntry, oldEntry) -> {
+                    newEntry.uid = oldEntry.uid;
+                    newEntry.tag = oldEntry.tag;
+                    newEntry.metered = oldEntry.metered;
+                });
+    }
+
     /**
-     * Allows rollups per UID but keeping the set (foreground/background) slicing.
-     * Adapted from groupedByUid in frameworks/base/core/java/android/net/NetworkStats.java
+     * Slices NetworkStats along the dimensions specified in the slicer lambda and aggregates over
+     * non-sliced dimensions.
+     *
+     * This function iterates through each NetworkStats.Entry, sets its dimensions equal to the
+     * default state (with the presumption that we don't want to slice on anything), and then
+     * applies the slicer lambda to allow users to control which dimensions to slice on. This is
+     * adapted from groupedByUid within NetworkStats.java
+     *
+     * @param slicer An operation taking into two parameters, new NetworkStats.Entry and old
+     *               NetworkStats.Entry, that should be used to copy state from the old to the new.
+     *               This is useful for slicing by particular dimensions. For example, if we wished
+     *               to slice by uid and tag, we could write the following lambda:
+     *                  (new, old) -> {
+     *                          new.uid = old.uid;
+     *                          new.tag = old.tag;
+     *                  }
+     *               If no slicer is provided, the data is not sliced by any dimensions.
+     * @return new NeworkStats object appropriately sliced
      */
-    @NonNull private NetworkStats rollupNetworkStatsByFgbg(@NonNull NetworkStats stats) {
+    @NonNull private NetworkStats sliceNetworkStats(@NonNull NetworkStats stats,
+            @Nullable BiConsumer<NetworkStats.Entry, NetworkStats.Entry> slicer) {
         final NetworkStats ret = new NetworkStats(stats.getElapsedRealtime(), 1);
 
         final NetworkStats.Entry entry = new NetworkStats.Entry();
+        entry.uid = NetworkStats.UID_ALL;
         entry.iface = NetworkStats.IFACE_ALL;
+        entry.set = NetworkStats.SET_ALL;
         entry.tag = NetworkStats.TAG_NONE;
         entry.metered = NetworkStats.METERED_ALL;
         entry.roaming = NetworkStats.ROAMING_ALL;
+        entry.defaultNetwork = NetworkStats.DEFAULT_NETWORK_ALL;
 
-        int size = stats.size();
-        final NetworkStats.Entry recycle = new NetworkStats.Entry(); // Used for retrieving values
-        for (int i = 0; i < size; i++) {
+        final NetworkStats.Entry recycle = new NetworkStats.Entry(); // used for retrieving values
+        for (int i = 0; i < stats.size(); i++) {
             stats.getValues(i, recycle);
+            if (slicer != null) {
+                slicer.accept(entry, recycle);
+            }
 
-            // Skip specific tags, since already counted in TAG_NONE
-            if (recycle.tag != NetworkStats.TAG_NONE) continue;
-
-            entry.set = recycle.set; // Allows slicing by background/foreground
-            entry.uid = recycle.uid;
             entry.rxBytes = recycle.rxBytes;
             entry.rxPackets = recycle.rxPackets;
             entry.txBytes = recycle.txBytes;
@@ -983,6 +1096,19 @@ public class StatsPullAtomService extends SystemService {
                 tagId,
                 metadata,
                 DIRECT_EXECUTOR,
+                mStatsCallbackImpl
+        );
+    }
+
+    private void registerBytesTransferByTagAndMetered() {
+        int tagId = FrameworkStatsLog.BYTES_TRANSFER_BY_TAG_AND_METERED;
+        PullAtomMetadata metadata = new PullAtomMetadata.Builder()
+                .setAdditiveFields(new int[] {4, 5, 6, 7})
+                .build();
+        mStatsManager.setPullAtomCallback(
+                tagId,
+                metadata,
+                BackgroundThread.getExecutor(),
                 mStatsCallbackImpl
         );
     }

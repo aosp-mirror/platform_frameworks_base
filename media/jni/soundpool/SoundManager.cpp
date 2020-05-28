@@ -43,7 +43,7 @@ SoundManager::~SoundManager()
     mSounds.clear();
 }
 
-int32_t SoundManager::load(int fd, int64_t offset, int64_t length, int32_t priority __unused)
+int32_t SoundManager::load(int fd, int64_t offset, int64_t length, int32_t priority)
 {
     ALOGV("%s(fd=%d, offset=%lld, length=%lld, priority=%d)",
             __func__, fd, (long long)offset, (long long)length, priority);
