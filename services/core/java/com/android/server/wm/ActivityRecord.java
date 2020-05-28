@@ -3366,8 +3366,6 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 ProtoLog.v(WM_DEBUG_ADD_REMOVE,
                         "Removing starting %s from %s", tStartingWindow, fromActivity);
                 fromActivity.removeChild(tStartingWindow);
-                fromActivity.postWindowRemoveStartingWindowCleanup(tStartingWindow);
-                fromActivity.mVisibleSetFromTransferredStartingWindow = false;
                 addWindow(tStartingWindow);
 
                 // Propagate other interesting state between the tokens. If the old token is displayed,
@@ -3394,6 +3392,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     // we've transferred the animation.
                     mUseTransferredAnimation = true;
                 }
+                // Post cleanup after the visibility and animation are transferred.
+                fromActivity.postWindowRemoveStartingWindowCleanup(tStartingWindow);
+                fromActivity.mVisibleSetFromTransferredStartingWindow = false;
 
                 mWmService.updateFocusedWindowLocked(
                         UPDATE_FOCUS_WILL_PLACE_SURFACES, true /*updateInputWindows*/);
