@@ -26,7 +26,6 @@ import android.hardware.usb.IUsbManager;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.Log;
 
 import com.android.settingslib.R;
@@ -112,17 +111,8 @@ public class AppUtils {
     /** Returns the label for a given package. */
     public static CharSequence getApplicationLabel(
             PackageManager packageManager, String packageName) {
-        try {
-            final ApplicationInfo appInfo =
-                    packageManager.getApplicationInfo(
-                            packageName,
-                            PackageManager.MATCH_DISABLED_COMPONENTS
-                                    | PackageManager.MATCH_ANY_USER);
-            return appInfo.loadLabel(packageManager);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Unable to find info for package: " + packageName);
-        }
-        return null;
+        return com.android.settingslib.utils.applications.AppUtils
+                .getApplicationLabel(packageManager, packageName);
     }
 
     /**
@@ -160,9 +150,7 @@ public class AppUtils {
      */
     public static String getAppContentDescription(Context context, String packageName,
             int userId) {
-        final CharSequence appLabel = getApplicationLabel(context.getPackageManager(), packageName);
-        return UserManager.get(context).isManagedProfile(userId)
-                ? context.getString(R.string.accessibility_work_profile_app_description, appLabel)
-                : appLabel.toString();
+        return com.android.settingslib.utils.applications.AppUtils.getAppContentDescription(context,
+                packageName, userId);
     }
 }
