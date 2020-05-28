@@ -1069,11 +1069,10 @@ public final class NetworkStats implements Parcelable {
      * @param baseTraffic Traffic on the base interfaces. Will be mutated.
      * @param stackedTraffic Stats with traffic stacked on top of our ifaces. Will also be mutated.
      * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
-     * @param useBpfStats True if eBPF is in use.
      * @hide
      */
     public static void apply464xlatAdjustments(NetworkStats baseTraffic,
-            NetworkStats stackedTraffic, Map<String, String> stackedIfaces, boolean useBpfStats) {
+            NetworkStats stackedTraffic, Map<String, String> stackedIfaces) {
         // For recycling
         Entry entry = null;
         for (int i = 0; i < stackedTraffic.size; i++) {
@@ -1113,8 +1112,8 @@ public final class NetworkStats implements Parcelable {
      * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
      * @hide
      */
-    public void apply464xlatAdjustments(Map<String, String> stackedIfaces, boolean useBpfStats) {
-        apply464xlatAdjustments(this, this, stackedIfaces, useBpfStats);
+    public void apply464xlatAdjustments(Map<String, String> stackedIfaces) {
+        apply464xlatAdjustments(this, this, stackedIfaces);
     }
 
     /**
