@@ -1,0 +1,25 @@
+// Baseline format: 1.0
+ActionValue: android.net.TetheringManager#ACTION_TETHER_STATE_CHANGED:
+    Inconsistent action value; expected `android.net.action.TETHER_STATE_CHANGED`, was `android.net.conn.TETHER_STATE_CHANGED`
+ActionValue: android.net.TetheringManager#EXTRA_ACTIVE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ACTIVE_TETHER`, was `tetherArray`
+ActionValue: android.net.TetheringManager#EXTRA_AVAILABLE_TETHER:
+    Inconsistent extra value; expected `android.net.extra.AVAILABLE_TETHER`, was `availableArray`
+ActionValue: android.net.TetheringManager#EXTRA_ERRORED_TETHER:
+    Inconsistent extra value; expected `android.net.extra.ERRORED_TETHER`, was `erroredArray`
+
+
+CallbackInterface: android.net.TetheringManager.StartTetheringCallback:
+    Callbacks must be abstract class instead of interface to enable extension in future API levels: StartTetheringCallback
+CallbackInterface: android.net.TetheringManager.TetheringEventCallback:
+    Callbacks must be abstract class instead of interface to enable extension in future API levels: TetheringEventCallback
+
+
+MissingGetterMatchingBuilder: android.net.TetheringManager.TetheringRequest.Builder#setShouldShowEntitlementUi(boolean):
+    android.net.TetheringManager.TetheringRequest does not declare a `shouldShowEntitlementUi()` method matching method android.net.TetheringManager.TetheringRequest.Builder.setShouldShowEntitlementUi(boolean)
+MissingGetterMatchingBuilder: android.net.TetheringManager.TetheringRequest.Builder#setStaticIpv4Addresses(android.net.LinkAddress, android.net.LinkAddress):
+    android.net.TetheringManager.TetheringRequest does not declare a `getStaticIpv4Addresses()` method matching method android.net.TetheringManager.TetheringRequest.Builder.setStaticIpv4Addresses(android.net.LinkAddress,android.net.LinkAddress)
+
+
+StaticFinalBuilder: android.net.TetheringManager.TetheringRequest.Builder:
+    Builder must be final: android.net.TetheringManager.TetheringRequest.Builder
