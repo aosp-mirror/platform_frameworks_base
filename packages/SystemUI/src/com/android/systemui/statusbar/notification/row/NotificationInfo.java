@@ -490,6 +490,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     @Override
+    public boolean needsFalsingProtection() {
+        return true;
+    }
+
+    @Override
     public void onInitializeAccessibilityEvent(AccessibilityEvent event) {
         super.onInitializeAccessibilityEvent(event);
         if (mGutsContainer != null &&
