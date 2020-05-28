@@ -19,6 +19,7 @@ package com.android.server.media;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.media.session.ISessionManager;
 import android.media.session.MediaSession;
 import android.os.Binder;
@@ -76,6 +77,9 @@ public abstract class MediaKeyDispatcher {
     /**
      * Implement this to customize the logic for which MediaSession should consume which key event.
      *
+     * Note: This session will have greater priority over the {@link PendingIntent} returned from
+     * {@link #getCustomMediaButtonReceiver()}.
+     *
      * @param keyEvent a non-null KeyEvent whose key code is one of the supported media buttons.
      * @param uid the uid value retrieved by calling {@link Binder#getCallingUid()} from
      *         {@link ISessionManager#dispatchMediaKeyEvent(String, boolean, KeyEvent, boolean)}
@@ -84,8 +88,22 @@ public abstract class MediaKeyDispatcher {
      * @return a {@link MediaSession.Token} instance that should consume the given key event.
      */
     @Nullable
-    MediaSession.Token getSessionForKeyEvent(@NonNull KeyEvent keyEvent, int uid,
+    MediaSession.Token getCustomMediaSession(@NonNull KeyEvent keyEvent, int uid,
             boolean asSystemService) {
+        return null;
+    }
+
+    /**
+     * Implement this to customize the logic for which MediaButtonReceiver should consume a
+     * dispatched key event.
+     *
+     * Note: This pending intent will have lower priority over the {@link MediaSession.Token}
+     * returned from {@link #getCustomMediaButtonReceiver()}.
+     *
+     * @return a {@link PendingIntent} instance that should receive the dispatched key event.
+     */
+    @Nullable
+    PendingIntent getCustomMediaButtonReceiver() {
         return null;
     }
 
