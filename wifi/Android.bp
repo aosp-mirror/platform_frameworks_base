@@ -120,6 +120,8 @@ java_library {
         "android.hardware.wifi",
         "android.net.wifi",
         "android.x.net.wifi",
+        // Created by jarjar rules.
+        "com.android.wifi.x",
     ],
 }
 
