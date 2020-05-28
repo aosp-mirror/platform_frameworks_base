@@ -426,8 +426,8 @@ class NotificationSwipeHelper extends SwipeHelper implements NotificationSwipeAc
         final int height = (view instanceof ExpandableView)
                 ? ((ExpandableView) view).getActualHeight()
                 : view.getHeight();
-        final int rx = (int) ev.getRawX();
-        final int ry = (int) ev.getRawY();
+        final int rx = (int) ev.getX();
+        final int ry = (int) ev.getY();
         int[] temp = new int[2];
         view.getLocationOnScreen(temp);
         final int x = temp[0];
