@@ -41,5 +41,3 @@ idx iface acct_tag_hex uid_tag_int cnt_set rx_bytes rx_packets tx_bytes tx_packe
 41 dummy0 0x0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 42 lo 0x0 0 0 1288 16 1288 16 0 0 532 8 756 8 0 0 532 8 756 8
 43 lo 0x0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
-44 wlan0 0x0 1029 0 0 0 312046 5113 0 0 0 0 0 0 306544 5046 3230 38 2272 29
-45 wlan0 0x0 1029 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
