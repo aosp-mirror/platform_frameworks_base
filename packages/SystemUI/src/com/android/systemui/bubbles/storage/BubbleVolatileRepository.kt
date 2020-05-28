@@ -15,6 +15,10 @@
  */
 package com.android.systemui.bubbles.storage
 
+import android.content.pm.LauncherApps
+import android.os.UserHandle
+import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.bubbles.ShortcutKey
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -25,11 +29,19 @@ private const val CAPACITY = 16
  * manipulation.
  */
 @Singleton
-class BubbleVolatileRepository @Inject constructor() {
+class BubbleVolatileRepository @Inject constructor(
+    private val launcherApps: LauncherApps
+) {
     /**
      * An ordered set of bubbles based on their natural ordering.
      */
-    private val entities = mutableSetOf<BubbleEntity>()
+    private var entities = mutableSetOf<BubbleEntity>()
+
+    /**
+     * The capacity of the cache.
+     */
+    @VisibleForTesting
+    var capacity = CAPACITY
 
     /**
      * Returns a snapshot of all the bubbles.
@@ -45,15 +57,34 @@ class BubbleVolatileRepository @Inject constructor() {
     @Synchronized
     fun addBubbles(bubbles: List<BubbleEntity>) {
         if (bubbles.isEmpty()) return
-        bubbles.forEach { entities.remove(it) }
-        if (entities.size + bubbles.size >= CAPACITY) {
-            entities.drop(entities.size + bubbles.size - CAPACITY)
+        // Verify the size of given bubbles is within capacity, otherwise trim down to capacity
+        val bubblesInRange = bubbles.takeLast(capacity)
+        // To ensure natural ordering of the bubbles, removes bubbles which already exist
+        val uniqueBubbles = bubblesInRange.filterNot { entities.remove(it) }
+        val overflowCount = entities.size + bubblesInRange.size - capacity
+        if (overflowCount > 0) {
+            // Uncache ShortcutInfo of bubbles that will be removed due to capacity
+            uncache(entities.take(overflowCount))
+            entities = entities.drop(overflowCount).toMutableSet()
         }
-        entities.addAll(bubbles)
+        entities.addAll(bubblesInRange)
+        cache(uniqueBubbles)
     }
 
     @Synchronized
-    fun removeBubbles(bubbles: List<BubbleEntity>) {
-        bubbles.forEach { entities.remove(it) }
+    fun removeBubbles(bubbles: List<BubbleEntity>) = uncache(bubbles.filter { entities.remove(it) })
+
+    private fun cache(bubbles: List<BubbleEntity>) {
+        bubbles.groupBy { ShortcutKey(it.userId, it.packageName) }.forEach { (key, bubbles) ->
+            launcherApps.cacheShortcuts(key.pkg, bubbles.map { it.shortcutId },
+                    UserHandle.of(key.userId), LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS)
+        }
+    }
+
+    private fun uncache(bubbles: List<BubbleEntity>) {
+        bubbles.groupBy { ShortcutKey(it.userId, it.packageName) }.forEach { (key, bubbles) ->
+            launcherApps.uncacheShortcuts(key.pkg, bubbles.map { it.shortcutId },
+                    UserHandle.of(key.userId), LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS)
+        }
     }
 }
