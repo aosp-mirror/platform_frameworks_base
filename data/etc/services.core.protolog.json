@@ -847,6 +847,12 @@
       "group": "WM_ERROR",
       "at": "com\/android\/server\/wm\/WindowManagerService.java"
     },
+    "-381475323": {
+      "message": "DisplayContent: boot is waiting for window of type %d to be drawn",
+      "level": "DEBUG",
+      "group": "WM_DEBUG_BOOT",
+      "at": "com\/android\/server\/wm\/DisplayContent.java"
+    },
     "-379068494": {
       "message": "unknownApps is not empty: %s",
       "level": "VERBOSE",
@@ -1387,6 +1393,12 @@
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/ActivityRecord.java"
     },
+    "544101314": {
+      "message": "performEnableScreen: Waited %dms for all windows to be drawn",
+      "level": "INFO",
+      "group": "WM_DEBUG_BOOT",
+      "at": "com\/android\/server\/wm\/WindowManagerService.java"
+    },
     "557227556": {
       "message": "onAnimationFinished(): Notify animation finished:",
       "level": "DEBUG",
@@ -1794,12 +1806,6 @@
       "level": "VERBOSE",
       "group": "WM_DEBUG_ORIENTATION",
       "at": "com\/android\/server\/wm\/TaskDisplayArea.java"
-    },
-    "1389009035": {
-      "message": "NonAppWindowContainer cannot set orientation: %s",
-      "level": "WARN",
-      "group": "WM_DEBUG_ORIENTATION",
-      "at": "com\/android\/server\/wm\/DisplayContent.java"
     },
     "1401700824": {
       "message": "Window drawn win=%s",
