@@ -61,12 +61,12 @@ public class ChooserWrapperActivity extends ChooserActivity {
     @Override
     public ChooserListAdapter createChooserListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList, boolean filterLastUsed,
-            boolean useLayoutForBrowsables, ResolverListController resolverListController) {
+            ResolverListController resolverListController) {
         PackageManager packageManager =
                 sOverrides.packageManager == null ? context.getPackageManager()
                         : sOverrides.packageManager;
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, resolverListController, useLayoutForBrowsables,
+                filterLastUsed, resolverListController,
                 this, this, packageManager);
     }
 

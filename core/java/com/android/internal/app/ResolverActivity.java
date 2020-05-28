@@ -133,9 +133,6 @@ public class ResolverActivity extends Activity implements
     private CharSequence mTitle;
     private int mDefaultTitleResId;
 
-    @VisibleForTesting
-    protected boolean mUseLayoutForBrowsables;
-
     // Whether or not this activity supports choosing a default handler for the intent.
     @VisibleForTesting
     protected boolean mSupportsAlwaysUseOption;
@@ -364,10 +361,6 @@ public class ResolverActivity extends Activity implements
         mTitle = title;
         mDefaultTitleResId = defaultTitleRes;
 
-        mUseLayoutForBrowsables = getTargetIntent() == null
-                ? false
-                : isHttpSchemeAndViewAction(getTargetIntent());
-
         mSupportsAlwaysUseOption = supportsAlwaysUseOption;
         mWorkProfileUserHandle = fetchWorkProfileUserProfile();
 
@@ -461,7 +454,6 @@ public class ResolverActivity extends Activity implements
                 initialIntents,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ UserHandle.of(UserHandle.myUserId()));
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
@@ -500,7 +492,6 @@ public class ResolverActivity extends Activity implements
                 rList,
                 (filterLastUsed && UserHandle.myUserId()
                         == getPersonalProfileUserHandle().getIdentifier()),
-                mUseLayoutForBrowsables,
                 /* userHandle */ getPersonalProfileUserHandle());
         UserHandle workProfileUserHandle = getWorkProfileUserHandle();
         ResolverListAdapter workAdapter = createResolverListAdapter(
@@ -510,7 +501,6 @@ public class ResolverActivity extends Activity implements
                 rList,
                 (filterLastUsed && UserHandle.myUserId()
                         == workProfileUserHandle.getIdentifier()),
-                mUseLayoutForBrowsables,
                 /* userHandle */ workProfileUserHandle);
         return new ResolverMultiProfilePagerAdapter(
                 /* context */ this,
@@ -775,26 +765,6 @@ public class ResolverActivity extends Activity implements
                 mMultiProfilePagerAdapter.getActiveListAdapter().getFilteredPosition() >= 0;
         if (title == ActionTitle.DEFAULT && defaultTitleRes != 0) {
             return getString(defaultTitleRes);
-        } else if (isHttpSchemeAndViewAction(intent)) {
-            // If the Intent's scheme is http(s) then we need to warn the user that
-            // they're giving access for the activity to open URLs from this specific host
-            String dialogTitle = null;
-            if (named && !mUseLayoutForBrowsables) {
-                dialogTitle = getString(ActionTitle.BROWSABLE_APP_TITLE_RES,
-                        mMultiProfilePagerAdapter.getActiveListAdapter().getFilteredItem()
-                                .getDisplayLabel());
-            } else if (named && mUseLayoutForBrowsables) {
-                dialogTitle = getString(ActionTitle.BROWSABLE_HOST_APP_TITLE_RES,
-                        intent.getData().getHost(),
-                        mMultiProfilePagerAdapter.getActiveListAdapter().getFilteredItem()
-                                .getDisplayLabel());
-            } else if (mMultiProfilePagerAdapter.getActiveListAdapter().areAllTargetsBrowsers()) {
-                dialogTitle = getString(ActionTitle.BROWSABLE_TITLE_RES);
-            } else {
-                dialogTitle = getString(ActionTitle.BROWSABLE_HOST_TITLE_RES,
-                        intent.getData().getHost());
-            }
-            return dialogTitle;
         } else {
             return named
                     ? getString(title.namedTitleRes, mMultiProfilePagerAdapter
@@ -907,12 +877,6 @@ public class ResolverActivity extends Activity implements
         mMultiProfilePagerAdapter.clearInactiveProfileCache();
     }
 
-    private boolean isHttpSchemeAndViewAction(Intent intent) {
-        return (IntentFilter.SCHEME_HTTP.equals(intent.getScheme())
-                || IntentFilter.SCHEME_HTTPS.equals(intent.getScheme()))
-                && Intent.ACTION_VIEW.equals(intent.getAction());
-    }
-
     private boolean hasManagedProfile() {
         UserManager userManager = (UserManager) getSystemService(Context.USER_SERVICE);
         if (userManager == null) {
@@ -963,13 +927,9 @@ public class ResolverActivity extends Activity implements
             } else {
                 enabled = true;
             }
-            if (mUseLayoutForBrowsables && !ri.handleAllWebDataURI) {
-                mAlwaysButton.setText(getResources()
-                        .getString(R.string.activity_resolver_set_always));
-            } else {
-                mAlwaysButton.setText(getResources()
-                        .getString(R.string.activity_resolver_use_always));
-            }
+
+            mAlwaysButton.setText(getResources()
+                    .getString(R.string.activity_resolver_use_always));
         }
 
         if (ri != null) {
@@ -999,31 +959,7 @@ public class ResolverActivity extends Activity implements
                 ? currentListAdapter.getFilteredPosition()
                 : listView.getCheckedItemPosition();
         boolean hasIndexBeenFiltered = !currentListAdapter.hasFilteredItem();
-        ResolveInfo ri = currentListAdapter.resolveInfoForPosition(which, hasIndexBeenFiltered);
-        if (mUseLayoutForBrowsables
-                && !ri.handleAllWebDataURI && id == R.id.button_always) {
-            showSettingsForSelected(ri);
-        } else {
-            startSelected(which, id == R.id.button_always, hasIndexBeenFiltered);
-        }
-    }
-
-    private void showSettingsForSelected(ResolveInfo ri) {
-        Intent intent = new Intent();
-
-        final String packageName = ri.activityInfo.packageName;
-        Bundle showFragmentArgs = new Bundle();
-        showFragmentArgs.putString(EXTRA_FRAGMENT_ARG_KEY, OPEN_LINKS_COMPONENT_KEY);
-        showFragmentArgs.putString("package", packageName);
-
-        // For regular apps, we open the Open by Default page
-        intent.setAction(Settings.ACTION_APP_OPEN_BY_DEFAULT_SETTINGS)
-                .setData(Uri.fromParts("package", packageName, null))
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_DOCUMENT)
-                .putExtra(EXTRA_FRAGMENT_ARG_KEY, OPEN_LINKS_COMPONENT_KEY)
-                .putExtra(EXTRA_SHOW_FRAGMENT_ARGS, showFragmentArgs);
-
-        startActivity(intent);
+        startSelected(which, id == R.id.button_always, hasIndexBeenFiltered);
     }
 
     public void startSelected(int which, boolean always, boolean hasIndexBeenFiltered) {
@@ -1415,12 +1351,12 @@ public class ResolverActivity extends Activity implements
     @VisibleForTesting
     protected ResolverListAdapter createResolverListAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
+            boolean filterLastUsed, UserHandle userHandle) {
         Intent startIntent = getIntent();
         boolean isAudioCaptureDevice =
                 startIntent.getBooleanExtra(EXTRA_IS_AUDIO_CAPTURE_DEVICE, false);
         return new ResolverListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, createListController(userHandle), useLayoutForBrowsables, this,
+                filterLastUsed, createListController(userHandle), this,
                 isAudioCaptureDevice);
     }
 
@@ -1794,7 +1730,7 @@ public class ResolverActivity extends Activity implements
         listView.setOnItemClickListener(listener);
         listView.setOnItemLongClickListener(listener);
 
-        if (mSupportsAlwaysUseOption || mUseLayoutForBrowsables) {
+        if (mSupportsAlwaysUseOption) {
             listView.setChoiceMode(AbsListView.CHOICE_MODE_SINGLE);
         }
     }
@@ -1835,7 +1771,7 @@ public class ResolverActivity extends Activity implements
     }
 
     protected void resetButtonBar() {
-        if (!mSupportsAlwaysUseOption && !mUseLayoutForBrowsables) {
+        if (!mSupportsAlwaysUseOption) {
             return;
         }
         final ViewGroup buttonLayout = findViewById(R.id.button_bar);
