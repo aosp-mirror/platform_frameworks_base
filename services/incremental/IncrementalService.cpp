@@ -1379,7 +1379,7 @@ static long elapsedMcs(Duration start, Duration end) {
 // Extract lib files from zip, create new files in incfs and write data to them
 bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_view apkFullPath,
                                                  std::string_view libDirRelativePath,
-                                                 std::string_view abi) {
+                                                 std::string_view abi, bool extractNativeLibs) {
     auto start = Clock::now();
 
     const auto ifs = getIfs(storage);
@@ -1420,6 +1420,21 @@ bool IncrementalService::configureNativeBinaries(StorageId storage, std::string_
     std::string_view fileName;
     while (!Next(cookie, &entry, &fileName)) {
         if (fileName.empty()) {
+            continue;
+        }
+
+        if (!extractNativeLibs) {
+            // ensure the file is properly aligned and unpacked
+            if (entry.method != kCompressStored) {
+                LOG(WARNING) << "Library " << fileName << " must be uncompressed to mmap it";
+                return false;
+            }
+            if ((entry.offset & (constants().blockSize - 1)) != 0) {
+                LOG(WARNING) << "Library " << fileName
+                             << " must be page-aligned to mmap it, offset = 0x" << std::hex
+                             << entry.offset;
+                return false;
+            }
             continue;
         }
 
