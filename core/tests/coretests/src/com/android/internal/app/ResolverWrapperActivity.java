@@ -42,9 +42,9 @@ public class ResolverWrapperActivity extends ResolverActivity {
     @Override
     public ResolverListAdapter createResolverListAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
+            boolean filterLastUsed, UserHandle userHandle) {
         return new ResolverWrapperAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, createListController(userHandle), useLayoutForBrowsables, this);
+                filterLastUsed, createListController(userHandle), this);
     }
 
     @Override
