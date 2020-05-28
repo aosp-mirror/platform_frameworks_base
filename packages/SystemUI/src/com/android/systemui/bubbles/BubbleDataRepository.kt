@@ -162,9 +162,9 @@ internal class BubbleDataRepository @Inject constructor(
         }
         uiScope.launch { cb(bubbles) }
     }
-
-    private data class ShortcutKey(val userId: Int, val pkg: String)
 }
+
+data class ShortcutKey(val userId: Int, val pkg: String)
 
 private const val TAG = "BubbleDataRepository"
 private const val DEBUG = false
