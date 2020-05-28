@@ -33,7 +33,7 @@ java_defaults {
         "net-utils-framework-common",
     ],
     libs: [
-        "framework-tethering",
+        "framework-tethering.impl",
         "framework-wifi-stubs-systemapi",
         "unsupportedappusage",
     ],
