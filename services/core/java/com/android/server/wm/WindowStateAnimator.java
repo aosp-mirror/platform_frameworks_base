@@ -904,8 +904,8 @@ class WindowStateAnimator {
         }
 
         if (shouldConsumeMainWindowSizeTransaction()) {
-            task.getSurfaceControl().deferTransactionUntil(mWin.getClientViewRootSurface(),
-                    mWin.getFrameNumber());
+            task.getMainWindowSizeChangeTask().getSurfaceControl().deferTransactionUntil(
+                    mWin.getClientViewRootSurface(), mWin.getFrameNumber());
             mSurfaceController.deferTransactionUntil(mWin.getClientViewRootSurface(),
                     mWin.getFrameNumber());
             SurfaceControl.mergeToGlobalTransaction(task.getMainWindowSizeChangeTransaction());
