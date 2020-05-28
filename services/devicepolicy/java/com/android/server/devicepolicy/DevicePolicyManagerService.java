@@ -2616,6 +2616,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         mSetupContentObserver = new SetupContentObserver(mHandler);
 
         mUserManagerInternal.addUserRestrictionsListener(new RestrictionsListener(mContext));
+
+        loadOwners();
     }
 
     /**
@@ -2676,12 +2678,23 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
     }
 
+    /**
+     * Load information about device and profile owners of the device, populating mOwners and
+     * pushing owner info to other system services. This is called at a fairly early stage of
+     * system server initialiation (via DevicePolicyManagerService's ctor), so care should to
+     * be taken to not interact with system services that are initialiated after DPMS.
+     * onLockSettingsReady() is a safer place to do initialization work not critical during
+     * the first boot stage.
+     * Note this only loads the list of owners, and not their actual policy (DevicePolicyData).
+     * The policy is normally loaded lazily when it's first accessed. In several occasions
+     * the list of owners is necessary for providing callers with aggregated policies across
+     * multiple owners, hence the owner list is loaded as part of DPMS's construction here.
+     */
     void loadOwners() {
         synchronized (getLockObject()) {
             mOwners.load();
             setDeviceOwnershipSystemPropertyLocked();
             findOwnerComponentIfNecessaryLocked();
-            migrateUserRestrictionsIfNecessaryLocked();
 
             // TODO PO may not have a class name either due to b/17652534.  Address that too.
             updateDeviceOwnerLocked();
@@ -4104,8 +4117,10 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void onLockSettingsReady() {
+        synchronized (getLockObject()) {
+            migrateUserRestrictionsIfNecessaryLocked();
+        }
         getUserData(UserHandle.USER_SYSTEM);
-        loadOwners();
         cleanUpOldUsers();
         maybeSetDefaultProfileOwnerUserRestrictions();
         handleStartUser(UserHandle.USER_SYSTEM);
