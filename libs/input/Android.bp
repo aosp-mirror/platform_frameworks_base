@@ -17,6 +17,7 @@ cc_library_shared {
     srcs: [
         "PointerController.cpp",
         "SpriteController.cpp",
+        "SpriteIcon.cpp",
     ],
 
     shared_libs: [
