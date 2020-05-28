@@ -59,12 +59,18 @@ public class BluetoothMediaDevice extends MediaDevice {
     public Drawable getIcon() {
         final Pair<Drawable, String> pair = BluetoothUtils
                 .getBtRainbowDrawableWithDescription(mContext, mCachedDevice);
-        return pair.first;
+        return isFastPairDevice()
+                ? pair.first
+                : BluetoothUtils.buildBtRainbowDrawable(mContext,
+                        mContext.getDrawable(R.drawable.ic_headphone),
+                        mCachedDevice.getAddress().hashCode());
     }
 
     @Override
     public Drawable getIconWithoutBackground() {
-        return BluetoothUtils.getBtDrawableWithDescription(mContext, mCachedDevice).first;
+        return isFastPairDevice()
+                ? BluetoothUtils.getBtDrawableWithDescription(mContext, mCachedDevice).first
+                : mContext.getDrawable(R.drawable.ic_headphone);
     }
 
     @Override
