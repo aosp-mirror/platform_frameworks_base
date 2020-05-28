@@ -80,6 +80,7 @@ public class SettingsHelper {
         sBroadcastOnRestore.add(Settings.Secure.UI_NIGHT_MODE);
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_START_TIME);
         sBroadcastOnRestore.add(Settings.Secure.DARK_THEME_CUSTOM_END_TIME);
+        sBroadcastOnRestore.add(Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED);
     }
 
     private interface SettingsLookup {
