@@ -337,7 +337,11 @@ JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID defaultCtor) : env_(
 
 JavaObject::JavaObject(JNIEnv* env, jclass clazz, jmethodID stringCtor, const char * sz_arg_1)
         : env_(env), clazz_(clazz) {
-    object_ = env_->NewObject(clazz_, stringCtor, env->NewStringUTF(sz_arg_1));
+    jstring szArg = env->NewStringUTF(sz_arg_1);
+    object_ = env_->NewObject(clazz_, stringCtor, szArg);
+    if (szArg) {
+        env_->DeleteLocalRef(szArg);
+    }
 }
 
 
@@ -724,6 +728,9 @@ Return<void> GnssCallback::gnssNameCb(const android::hardware::hidl_string& name
     JNIEnv* env = getJniEnv();
     jstring jstringName = env->NewStringUTF(name.c_str());
     env->CallVoidMethod(mCallbacksObj, method_setGnssHardwareModelName, jstringName);
+    if (jstringName) {
+        env->DeleteLocalRef(jstringName);
+    }
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
 
     return Void();
@@ -826,6 +833,13 @@ Return<void> GnssCallback::gnssSvStatusCbImpl(const T& svStatus) {
     env->CallVoidMethod(mCallbacksObj, method_reportSvStatus,
             static_cast<jint>(listSize), svidWithFlagArray, cn0Array, elevArray, azimArray,
             carrierFreqArray, basebandCn0Array);
+
+    env->DeleteLocalRef(svidWithFlagArray);
+    env->DeleteLocalRef(cn0Array);
+    env->DeleteLocalRef(elevArray);
+    env->DeleteLocalRef(azimArray);
+    env->DeleteLocalRef(carrierFreqArray);
+    env->DeleteLocalRef(basebandCn0Array);
 
     checkAndClearExceptionFromCallback(env, __FUNCTION__);
     return Void();
@@ -1429,13 +1443,18 @@ void GnssMeasurementCallback::translateSingleGnssMeasurement
     JNIEnv* env = getJniEnv();
     translateSingleGnssMeasurement(&(measurement_V2_0->v1_1), object);
 
-    SET(CodeType, env->NewStringUTF(measurement_V2_0->codeType.c_str()));
+    jstring codeType = env->NewStringUTF(measurement_V2_0->codeType.c_str());
+    SET(CodeType, codeType);
 
     // Overwrite with v2_0.state since v2_0->v1_1->v1_0.state is deprecated.
     SET(State, static_cast<int32_t>(measurement_V2_0->state));
 
     // Overwrite with v2_0.constellation since v2_0->v1_1->v1_0.constellation is deprecated.
     SET(ConstellationType, static_cast<int32_t>(measurement_V2_0->constellation));
+
+    if (codeType) {
+        env->DeleteLocalRef(codeType);
+    }
 }
 
 // Preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
@@ -1515,10 +1534,16 @@ void GnssMeasurementCallback::translateGnssClock(
     SET(ReferenceConstellationTypeForIsb,
             static_cast<int32_t>(clock.referenceSignalTypeForIsb.constellation));
     SET(ReferenceCarrierFrequencyHzForIsb, clock.referenceSignalTypeForIsb.carrierFrequencyHz);
-    SET(ReferenceCodeTypeForIsb,
-            env->NewStringUTF(clock.referenceSignalTypeForIsb.codeType.c_str()));
+
+    jstring referenceCodeTypeForIsb =
+            env->NewStringUTF(clock.referenceSignalTypeForIsb.codeType.c_str());
+    SET(ReferenceCodeTypeForIsb, referenceCodeTypeForIsb);
 
     translateGnssClock(object, clock.v1_0);
+
+    if (referenceCodeTypeForIsb) {
+        env->DeleteLocalRef(referenceCodeTypeForIsb);
+    }
 }
 
 template<>
@@ -1565,7 +1590,9 @@ jobjectArray GnssMeasurementCallback::translateAllGnssMeasurements(JNIEnv* env,
     for (uint16_t i = 0; i < count; ++i) {
         JavaObject object(env, class_gnssMeasurement, method_gnssMeasurementCtor);
         translateSingleGnssMeasurement(&(measurements[i]), object);
-        env->SetObjectArrayElement(gnssMeasurementArray, i, object.get());
+        jobject gnssMeasurement = object.get();
+        env->SetObjectArrayElement(gnssMeasurementArray, i, gnssMeasurement);
+        env->DeleteLocalRef(gnssMeasurement);
     }
 
     return gnssMeasurementArray;
