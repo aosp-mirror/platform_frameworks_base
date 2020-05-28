@@ -5533,10 +5533,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                     pw.println(AppOpsManager.getUidStateName(uidState.pendingState));
                 }
                 pw.print("    capability=");
-                pw.println(uidState.capability);
+                ActivityManager.printCapabilitiesFull(pw, uidState.capability);
+                pw.println();
                 if (uidState.capability != uidState.pendingCapability) {
                     pw.print("    pendingCapability=");
-                    pw.println(uidState.pendingCapability);
+                    ActivityManager.printCapabilitiesFull(pw, uidState.pendingCapability);
+                    pw.println();
                 }
                 pw.print("    appWidgetVisible=");
                 pw.println(uidState.appWidgetVisible);
