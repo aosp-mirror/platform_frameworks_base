@@ -1441,11 +1441,7 @@ public class ActivityStackSupervisor implements RecentTasks.Callbacks {
         try {
             stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
             stack.setBounds(null);
-            if (toDisplay.getDisplayId() != stack.getDisplayId()) {
-                stack.reparent(toDisplay.getDefaultTaskDisplayArea(), false /* onTop */);
-            } else {
-                toDisplay.getDefaultTaskDisplayArea().positionStackAtBottom(stack);
-            }
+            toDisplay.getDefaultTaskDisplayArea().positionTaskBehindHome(stack);
 
             // Follow on the workaround: activities are kept force hidden till the new windowing
             // mode is set.
