@@ -16,8 +16,6 @@
 
 package android.net;
 
-import static android.os.Process.CLAT_UID;
-
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -1069,11 +1067,10 @@ public final class NetworkStats implements Parcelable {
      * @param baseTraffic Traffic on the base interfaces. Will be mutated.
      * @param stackedTraffic Stats with traffic stacked on top of our ifaces. Will also be mutated.
      * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
-     * @param useBpfStats True if eBPF is in use.
      * @hide
      */
     public static void apply464xlatAdjustments(NetworkStats baseTraffic,
-            NetworkStats stackedTraffic, Map<String, String> stackedIfaces, boolean useBpfStats) {
+            NetworkStats stackedTraffic, Map<String, String> stackedIfaces) {
         // For recycling
         Entry entry = null;
         for (int i = 0; i < stackedTraffic.size; i++) {
@@ -1096,12 +1093,6 @@ public final class NetworkStats implements Parcelable {
             entry.txBytes += entry.txPackets * IPV4V6_HEADER_DELTA;
             stackedTraffic.setValues(i, entry);
         }
-
-        // Theoretically there should be no traffic accounted to the clat daemon's uid:
-        //   see ebpf program 'netd.c's early returns
-        //   and iptables '-m owner --uid-owner clat -j RETURN' rules prior to accounting
-        // TODO: remove this - should definitely be safe once ebpf only.
-        baseTraffic.removeUids(new int[] {CLAT_UID});
     }
 
     /**
@@ -1113,8 +1104,8 @@ public final class NetworkStats implements Parcelable {
      * @param stackedIfaces Mapping ipv6if -> ipv4if interface where traffic is counted on both.
      * @hide
      */
-    public void apply464xlatAdjustments(Map<String, String> stackedIfaces, boolean useBpfStats) {
-        apply464xlatAdjustments(this, this, stackedIfaces, useBpfStats);
+    public void apply464xlatAdjustments(Map<String, String> stackedIfaces) {
+        apply464xlatAdjustments(this, this, stackedIfaces);
     }
 
     /**
