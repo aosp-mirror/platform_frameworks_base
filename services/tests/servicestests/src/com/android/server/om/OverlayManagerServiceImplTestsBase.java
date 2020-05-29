@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Base class for creating {@link OverlayManagerServiceImplTests} tests. */
@@ -53,6 +52,9 @@ class OverlayManagerServiceImplTestsBase {
     private DummyPackageManagerHelper mPackageManager;
     private DummyIdmapDaemon mIdmapDaemon;
     private OverlayConfig mOverlayConfig;
+    private OverlayManagerSettings mSettings;
+    String mOverlayableConfigurator;
+    String[] mOverlayableConfiguratorTargets;
 
     @Before
     public void setUp() {
@@ -60,20 +62,26 @@ class OverlayManagerServiceImplTestsBase {
         mListener = new DummyListener();
         mPackageManager = new DummyPackageManagerHelper(mState);
         mIdmapDaemon = new DummyIdmapDaemon(mState);
+        mSettings = new OverlayManagerSettings();
         mOverlayConfig = mock(OverlayConfig.class);
         when(mOverlayConfig.getPriority(any())).thenReturn(OverlayConfig.DEFAULT_PRIORITY);
         when(mOverlayConfig.isEnabled(any())).thenReturn(false);
         when(mOverlayConfig.isMutable(any())).thenReturn(true);
+        mOverlayableConfigurator = null;
+        mOverlayableConfiguratorTargets = null;
         reinitializeImpl();
     }
 
-    void reinitializeImpl() {
+    OverlayManagerServiceImpl reinitializeImpl() {
         mImpl = new OverlayManagerServiceImpl(mPackageManager,
                 new IdmapManager(mIdmapDaemon, mPackageManager),
-                new OverlayManagerSettings(),
+                mSettings,
                 mOverlayConfig,
                 new String[0],
-                mListener);
+                mListener,
+                mOverlayableConfigurator,
+                mOverlayableConfiguratorTargets);
+        return mImpl;
     }
 
     OverlayManagerServiceImpl getImpl() {
@@ -84,12 +92,12 @@ class OverlayManagerServiceImplTestsBase {
         return mListener;
     }
 
-    DummyPackageManagerHelper getPackageManager() {
-        return mPackageManager;
-    }
-
     DummyIdmapDaemon getIdmapDaemon() {
         return mIdmapDaemon;
+    }
+
+    OverlayManagerSettings getSettings() {
+        return mSettings;
     }
 
     void assertState(@State int expected, final String overlayPackageName, int userId) {
@@ -314,8 +322,6 @@ class OverlayManagerServiceImplTestsBase {
     static final class DummyPackageManagerHelper implements PackageManagerHelper,
             OverlayableInfoCallback {
         private final DummyDeviceState mState;
-        String[] overlayableConfiguratorTargets = new String[0];
-        String overlayableConfigurator = "";
 
         private DummyPackageManagerHelper(DummyDeviceState state) {
             mState = state;
@@ -387,16 +393,6 @@ class OverlayManagerServiceImplTestsBase {
         public void enforcePermission(String permission, String message) throws SecurityException {
             throw new UnsupportedOperationException();
         }
-
-        @Override
-        public String[] getOverlayableConfiguratorTargets() {
-            return overlayableConfiguratorTargets;
-        }
-
-        @Override
-        public String getOverlayableConfigurator() {
-            return overlayableConfigurator;
-        }
     }
 
     static class DummyIdmapDaemon extends IdmapDaemon {
@@ -433,7 +429,8 @@ class OverlayManagerServiceImplTestsBase {
             if (idmap == null) {
                 return false;
             }
-            return idmap.isUpToDate(getCrc(targetPath), getCrc(overlayPath), targetPath);
+            return idmap.isUpToDate(getCrc(targetPath), getCrc(overlayPath), targetPath, policies,
+                    enforce);
         }
 
         @Override
@@ -462,9 +459,11 @@ class OverlayManagerServiceImplTestsBase {
             }
 
             private boolean isUpToDate(int expectedTargetCrc, int expectedOverlayCrc,
-                    String expectedTargetPath) {
+                    String expectedTargetPath, int expectedPolicies,
+                    boolean expectedEnforceOverlayable) {
                 return expectedTargetCrc == targetCrc && expectedOverlayCrc == overlayCrc
-                        && expectedTargetPath.equals(targetPath);
+                        && expectedTargetPath.equals(targetPath) && expectedPolicies == policies
+                        && expectedEnforceOverlayable == enforceOverlayable;
             }
         }
     }
