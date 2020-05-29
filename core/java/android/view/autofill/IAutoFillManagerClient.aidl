@@ -79,6 +79,18 @@ oneway interface IAutoFillManagerClient {
     void notifyNoFillUi(int sessionId, in AutofillId id, int sessionFinishedState);
 
     /**
+     * Notifies that the fill UI was shown by the system (e.g. as inline chips in the keyboard).
+     */
+    void notifyFillUiShown(int sessionId, in AutofillId id);
+
+    /**
+     * Notifies that the fill UI previously shown by the system has been hidden by the system.
+     *
+     * @see #notifyFillUiShown
+     */
+    void notifyFillUiHidden(int sessionId, in AutofillId id);
+
+    /**
      * Dispatches unhandled keyevent from autofill ui. Autofill ui handles DPAD and ENTER events,
      * other unhandled keyevents are dispatched to app's window to filter autofill result.
      * Note this method is not called when autofill ui is in fullscreen mode (TV only).
