@@ -1877,7 +1877,7 @@ public class TetheringTest {
                 0,
                 upstreamNetwork);
         mLooper.dispatchAll();
-        // verify trun off usb tethering
+        // verify turn off usb tethering
         verify(mUsbManager).setCurrentFunctions(UsbManager.FUNCTION_NONE);
         mTethering.interfaceRemoved(TEST_USB_IFNAME);
         mLooper.dispatchAll();
@@ -1915,9 +1915,9 @@ public class TetheringTest {
                 0,
                 upstreamNetwork);
         mLooper.dispatchAll();
-        // verify trun off usb tethering
+        // verify turn off usb tethering
         verify(mUsbManager).setCurrentFunctions(UsbManager.FUNCTION_NONE);
-        // verify trun off ethernet tethering
+        // verify turn off ethernet tethering
         verify(mockRequest).release();
         mTethering.interfaceRemoved(TEST_USB_IFNAME);
         ethCallback.onUnavailable();

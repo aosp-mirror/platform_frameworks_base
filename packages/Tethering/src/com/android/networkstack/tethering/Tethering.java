@@ -1695,6 +1695,7 @@ public class Tethering {
                     return;
                 }
 
+                mPrivateAddressCoordinator.maybeRemoveDeprecatedUpstreams();
                 mUpstreamNetworkMonitor.startObserveAllNetworks();
 
                 // TODO: De-duplicate with updateUpstreamWanted() below.
