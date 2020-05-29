@@ -38,6 +38,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.RankingBuilder;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -45,16 +46,22 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 public class HighPriorityProviderTest extends SysuiTestCase {
     @Mock private PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    @Mock private NotificationGroupManager mGroupManager;
     private HighPriorityProvider mHighPriorityProvider;
 
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-        mHighPriorityProvider = new HighPriorityProvider(mPeopleNotificationIdentifier);
+        mHighPriorityProvider = new HighPriorityProvider(
+                mPeopleNotificationIdentifier,
+                mGroupManager);
     }
 
     @Test
@@ -166,6 +173,22 @@ public class HighPriorityProviderTest extends SysuiTestCase {
     }
 
     @Test
+    public void testIsHighPriority_checkChildrenToCalculatePriority() {
+        // GIVEN: a summary with low priority has a highPriorityChild and a lowPriorityChild
+        final NotificationEntry summary = createNotifEntry(false);
+        final NotificationEntry lowPriorityChild = createNotifEntry(false);
+        final NotificationEntry highPriorityChild = createNotifEntry(true);
+        when(mGroupManager.isGroupSummary(summary.getSbn())).thenReturn(true);
+        when(mGroupManager.getChildren(summary.getSbn())).thenReturn(
+                new ArrayList<>(Arrays.asList(lowPriorityChild, highPriorityChild)));
+
+        // THEN the summary is high priority since it has a high priority child
+        assertTrue(mHighPriorityProvider.isHighPriority(summary));
+    }
+
+    // Tests below here are only relevant to the NEW notification pipeline which uses GroupEntry
+
+    @Test
     public void testIsHighPriority_summaryUpdated() {
         // GIVEN a GroupEntry with a lowPrioritySummary and no children
         final GroupEntry parentEntry = new GroupEntry("test_group_key");
@@ -186,7 +209,7 @@ public class HighPriorityProviderTest extends SysuiTestCase {
     }
 
     @Test
-    public void testIsHighPriority_checkChildrenToCalculatePriority() {
+    public void testIsHighPriority_checkChildrenToCalculatePriorityOf() {
         // GIVEN:
         // GroupEntry = parentEntry, summary = lowPrioritySummary
         //      NotificationEntry = lowPriorityChild

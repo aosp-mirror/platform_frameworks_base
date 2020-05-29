@@ -61,7 +61,11 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
 
     private final Handler mHandler;
 
-    /** Re-usable map of top-level notifications to their sorted children if any.*/
+    /**
+     * Re-usable map of top-level notifications to their sorted children if any.
+     * If the top-level notification doesn't have children, its key will still exist in this map
+     * with its value explicitly set to null.
+     */
     private final HashMap<NotificationEntry, List<NotificationEntry>> mTmpChildOrderMap =
             new HashMap<>();
 
@@ -215,10 +219,19 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
                 }
                 orderedChildren.add(ent);
             } else {
-                // Top-level notif
-                mTmpChildOrderMap.put(ent, null);
+                // Top-level notif (either a summary or single notification)
+
+                // A child may have already added its summary to mTmpChildOrderMap with a
+                // list of children. This can happen since there's no guarantee summaries are
+                // sorted before its children.
+                if (!mTmpChildOrderMap.containsKey(ent)) {
+                    // mTmpChildOrderMap's keyset is used to iterate through all entries, so it's
+                    // necessary to add each top-level notif as a key
+                    mTmpChildOrderMap.put(ent, null);
+                }
                 toShow.add(ent.getRow());
             }
+
         }
 
         ArrayList<ExpandableNotificationRow> viewsToRemove = new ArrayList<>();
