@@ -453,7 +453,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         }
         final Rect destinationBounds = mPipBoundsHandler.getDestinationBounds(
                 info.topActivity, getAspectRatioOrDefault(newParams),
-                null /* bounds */, getMinimalSize(info.topActivityInfo));
+                mLastReportedBounds, getMinimalSize(info.topActivityInfo),
+                true /* userCurrentMinEdgeSize */);
         Objects.requireNonNull(destinationBounds, "Missing destination bounds");
         scheduleAnimateResizePip(destinationBounds, mEnterExitAnimationDuration,
                 null /* updateBoundsCallback */);
