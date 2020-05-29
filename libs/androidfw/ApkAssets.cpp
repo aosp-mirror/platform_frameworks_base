@@ -496,6 +496,11 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadImpl(
   const StringPiece data(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
       loaded_apk->resources_asset_->getLength());
+  if (data.data() == nullptr || data.empty()) {
+    LOG(ERROR) << "Failed to read '" << kResourcesArsc << "' data in APK '" << path << "'.";
+    return {};
+  }
+
   loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, loaded_apk->loaded_idmap_.get(),
                                               property_flags);
   if (!loaded_apk->loaded_arsc_) {
@@ -523,9 +528,14 @@ std::unique_ptr<const ApkAssets> ApkAssets::LoadTableImpl(
   const StringPiece data(
       reinterpret_cast<const char*>(loaded_apk->resources_asset_->getBuffer(true /*wordAligned*/)),
       loaded_apk->resources_asset_->getLength());
+  if (data.data() == nullptr || data.empty()) {
+    LOG(ERROR) << "Failed to read resources table data in '" << path << "'.";
+    return {};
+  }
+
   loaded_apk->loaded_arsc_ = LoadedArsc::Load(data, nullptr, property_flags);
   if (loaded_apk->loaded_arsc_ == nullptr) {
-    LOG(ERROR) << "Failed to load '" << kResourcesArsc << path;
+    LOG(ERROR) << "Failed to read resources table in '" << path << "'.";
     return {};
   }
 
