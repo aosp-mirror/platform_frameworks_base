@@ -3201,8 +3201,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    SurfaceControl.Builder makeSurface() {
-        return super.makeSurface().setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        b.setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
+        super.setInitialSurfaceControlProperties(b);
     }
 
     boolean isTaskAnimating() {
