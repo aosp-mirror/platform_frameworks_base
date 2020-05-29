@@ -2590,8 +2590,26 @@ public final class AutofillManager {
 
     private void notifyNoFillUi(int sessionId, AutofillId id, int sessionFinishedState) {
         if (sVerbose) {
-            Log.v(TAG, "notifyNoFillUi(): sessionId=" + sessionId + ", autofillId=" + id
-                    + ", sessionFinishedState=" + sessionFinishedState);
+            Log.v(TAG, "notifyNoFillUi(): sessionFinishedState=" + sessionFinishedState);
+        }
+        final View anchor = findView(id);
+        if (anchor == null) {
+            return;
+        }
+
+        notifyCallback(sessionId, id, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+
+        if (sessionFinishedState != STATE_UNKNOWN) {
+            // Callback call was "hijacked" to also update the session state.
+            setSessionFinished(sessionFinishedState, /* autofillableIds= */ null);
+        }
+    }
+
+    private void notifyCallback(
+            int sessionId, AutofillId id, @AutofillCallback.AutofillEventType int event) {
+        if (sVerbose) {
+            Log.v(TAG, "notifyCallback(): sessionId=" + sessionId + ", autofillId=" + id
+                    + ", event=" + event);
         }
         final View anchor = findView(id);
         if (anchor == null) {
@@ -2607,16 +2625,11 @@ public final class AutofillManager {
 
         if (callback != null) {
             if (id.isVirtualInt()) {
-                callback.onAutofillEvent(anchor, id.getVirtualChildIntId(),
-                        AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+                callback.onAutofillEvent(
+                        anchor, id.getVirtualChildIntId(), event);
             } else {
-                callback.onAutofillEvent(anchor, AutofillCallback.EVENT_INPUT_UNAVAILABLE);
+                callback.onAutofillEvent(anchor, event);
             }
-        }
-
-        if (sessionFinishedState != STATE_UNKNOWN) {
-            // Callback call was "hijacked" to also update the session state.
-            setSessionFinished(sessionFinishedState, /* autofillableIds= */ null);
         }
     }
 
@@ -3364,6 +3377,26 @@ public final class AutofillManager {
             final AutofillManager afm = mAfm.get();
             if (afm != null) {
                 afm.post(() -> afm.notifyNoFillUi(sessionId, id, sessionFinishedState));
+            }
+        }
+
+        @Override
+        public void notifyFillUiShown(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(
+                        () -> afm.notifyCallback(
+                                sessionId, id, AutofillCallback.EVENT_INPUT_SHOWN));
+            }
+        }
+
+        @Override
+        public void notifyFillUiHidden(int sessionId, AutofillId id) {
+            final AutofillManager afm = mAfm.get();
+            if (afm != null) {
+                afm.post(
+                        () -> afm.notifyCallback(
+                                sessionId, id, AutofillCallback.EVENT_INPUT_HIDDEN));
             }
         }
 
