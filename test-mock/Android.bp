@@ -37,6 +37,7 @@ java_sdk_library {
         "android.test.mock",
     ],
     compile_dex: true,
+    default_to_stubs: true,
 }
 
 // Make the current.txt available for use by the cts/tests/signature tests.
