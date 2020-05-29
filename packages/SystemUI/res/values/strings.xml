@@ -1863,7 +1863,7 @@
     <string name="notification_priority_title">Priority</string>
 
     <!-- Text shown in notification guts for conversation notifications that don't implement the full feature -->
-    <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> does not support conversation specific settings</string>
+    <string name="no_shortcut"><xliff:g id="app_name" example="YouTube">%1$s</xliff:g> doesn\u2019t support conversation features</string>
 
     <!-- [CHAR LIMIT=NONE] Empty overflow title -->
     <string name="bubble_overflow_empty_title">No recent bubbles</string>
