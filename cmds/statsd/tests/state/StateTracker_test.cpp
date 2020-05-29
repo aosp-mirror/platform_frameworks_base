@@ -16,6 +16,7 @@
 #include "state/StateTracker.h"
 
 #include <gtest/gtest.h>
+#include <private/android_filesystem_config.h>
 
 #include "state/StateListener.h"
 #include "state/StateManager.h"
@@ -112,6 +113,55 @@ TEST(StateManagerTest, TestStateManagerGetInstance) {
     mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1);
     EXPECT_EQ(1, mgr.getStateTrackersCount());
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+}
+
+TEST(StateManagerTest, TestOnLogEvent) {
+    sp<MockUidMap> uidMap = makeMockUidMapForPackage("com.android.systemui", {10111});
+    sp<TestStateListener> listener1 = new TestStateListener();
+    StateManager mgr;
+    mgr.updateLogSources(uidMap);
+    // Add StateTracker by registering a listener.
+    mgr.registerListener(util::SCREEN_STATE_CHANGED, listener1);
+
+    // log event using AID_ROOT
+    std::unique_ptr<LogEvent> event = CreateScreenStateChangedEvent(
+            timestampNs, android::view::DisplayStateEnum::DISPLAY_STATE_ON);
+    mgr.onLogEvent(*event);
+
+    // check StateTracker was updated by querying for state
+    HashableDimensionKey queryKey = DEFAULT_DIMENSION_KEY;
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              getStateInt(mgr, util::SCREEN_STATE_CHANGED, queryKey));
+
+    // log event using mocked uid
+    event = CreateScreenStateChangedEvent(
+            timestampNs, android::view::DisplayStateEnum::DISPLAY_STATE_OFF, 10111);
+    mgr.onLogEvent(*event);
+
+    // check StateTracker was updated by querying for state
+    queryKey = DEFAULT_DIMENSION_KEY;
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              getStateInt(mgr, util::SCREEN_STATE_CHANGED, queryKey));
+
+    // log event using non-whitelisted uid
+    event = CreateScreenStateChangedEvent(timestampNs,
+                                          android::view::DisplayStateEnum::DISPLAY_STATE_ON, 10112);
+    mgr.onLogEvent(*event);
+
+    // check StateTracker was NOT updated by querying for state
+    queryKey = DEFAULT_DIMENSION_KEY;
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              getStateInt(mgr, util::SCREEN_STATE_CHANGED, queryKey));
+
+    // log event using AID_SYSTEM
+    event = CreateScreenStateChangedEvent(
+            timestampNs, android::view::DisplayStateEnum::DISPLAY_STATE_ON, AID_SYSTEM);
+    mgr.onLogEvent(*event);
+
+    // check StateTracker was updated by querying for state
+    queryKey = DEFAULT_DIMENSION_KEY;
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              getStateInt(mgr, util::SCREEN_STATE_CHANGED, queryKey));
 }
 
 /**
