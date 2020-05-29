@@ -483,11 +483,8 @@ static void nativeSetMetadata(JNIEnv* env, jclass clazz, jlong transactionObj,
 
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
 
-    std::vector<uint8_t> byteData(parcel->dataSize());
-    memcpy(byteData.data(), parcel->data(), parcel->dataSize());
-
     SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl*>(nativeObject);
-    transaction->setMetadata(ctrl, id, std::move(byteData));
+    transaction->setMetadata(ctrl, id, *parcel);
 }
 
 static void nativeSetColor(JNIEnv* env, jclass clazz, jlong transactionObj,

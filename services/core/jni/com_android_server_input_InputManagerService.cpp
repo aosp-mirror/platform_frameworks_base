@@ -166,6 +166,7 @@ static void loadSystemIconAsSpriteWithPointerIcon(JNIEnv* env, jobject contextOb
             outPointerIcon->bitmap.readPixels(bitmapCopy->info(), bitmapCopy->getPixels(),
                     bitmapCopy->rowBytes(), 0, 0);
         }
+        outSpriteIcon->style = outPointerIcon->style;
         outSpriteIcon->hotSpotX = outPointerIcon->hotSpotX;
         outSpriteIcon->hotSpotY = outPointerIcon->hotSpotY;
     }
@@ -318,7 +319,6 @@ private:
     void updateInactivityTimeoutLocked();
     void handleInterceptActions(jint wmActions, nsecs_t when, uint32_t& policyFlags);
     void ensureSpriteControllerLocked();
-    const DisplayViewport* findDisplayViewportLocked(int32_t displayId);
     int32_t getPointerDisplayId();
     void updatePointerDisplayLocked();
     static bool checkAndClearExceptionFromCallback(JNIEnv* env, const char* methodName);
@@ -394,16 +394,6 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
         return true;
     }
     return false;
-}
-
-const DisplayViewport* NativeInputManager::findDisplayViewportLocked(int32_t displayId)
-        REQUIRES(mLock) {
-    for (const DisplayViewport& v : mLocked.viewports) {
-        if (v.displayId == displayId) {
-            return &v;
-        }
-    }
-    return nullptr;
 }
 
 void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray) {
@@ -554,6 +544,8 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->setDisplayViewports(mLocked.viewports);
 
+        outConfig->defaultPointerDisplayId = mLocked.pointerDisplayId;
+
         outConfig->disabledDevices = mLocked.disabledInputDevices;
     } // release lock
 }
@@ -571,8 +563,6 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
         updateInactivityTimeoutLocked();
     }
 
-    updatePointerDisplayLocked();
-
     return controller;
 }
 
@@ -585,23 +575,6 @@ int32_t NativeInputManager::getPointerDisplayId() {
     }
 
     return pointerDisplayId;
-}
-
-void NativeInputManager::updatePointerDisplayLocked() REQUIRES(mLock) {
-    ATRACE_CALL();
-
-    sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller != nullptr) {
-        const DisplayViewport* viewport = findDisplayViewportLocked(mLocked.pointerDisplayId);
-        if (viewport == nullptr) {
-            ALOGW("Can't find pointer display viewport, fallback to default display.");
-            viewport = findDisplayViewportLocked(ADISPLAY_ID_DEFAULT);
-        }
-
-        if (viewport != nullptr) {
-            controller->setDisplayViewport(*viewport);
-        }
-    }
 }
 
 void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
@@ -1252,7 +1225,8 @@ void NativeInputManager::loadPointerIcon(SpriteIcon* icon, int32_t displayId) {
     status_t status = android_view_PointerIcon_load(env, pointerIconObj.get(),
             displayContext.get(), &pointerIcon);
     if (!status && !pointerIcon.isNullIcon()) {
-        *icon = SpriteIcon(pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
+        *icon = SpriteIcon(
+                pointerIcon.bitmap, pointerIcon.style, pointerIcon.hotSpotX, pointerIcon.hotSpotY);
     } else {
         *icon = SpriteIcon();
     }
@@ -1293,10 +1267,12 @@ void NativeInputManager::loadAdditionalMouseResources(std::map<int32_t, SpriteIc
                     milliseconds_to_nanoseconds(pointerIcon.durationPerFrame);
             animationData.animationFrames.reserve(numFrames);
             animationData.animationFrames.push_back(SpriteIcon(
-                    pointerIcon.bitmap, pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+                    pointerIcon.bitmap, pointerIcon.style,
+                    pointerIcon.hotSpotX, pointerIcon.hotSpotY));
             for (size_t i = 0; i < numFrames - 1; ++i) {
               animationData.animationFrames.push_back(SpriteIcon(
-                      pointerIcon.bitmapFrames[i], pointerIcon.hotSpotX, pointerIcon.hotSpotY));
+                      pointerIcon.bitmapFrames[i], pointerIcon.style,
+                      pointerIcon.hotSpotX, pointerIcon.hotSpotY));
             }
         }
     }
@@ -1732,6 +1708,7 @@ static void nativeSetCustomPointerIcon(JNIEnv* env, jclass /* clazz */,
         pointerIcon.bitmap.readPixels(spriteInfo, spriteIcon.bitmap.getPixels(),
                 spriteIcon.bitmap.rowBytes(), 0, 0);
     }
+    spriteIcon.style = pointerIcon.style;
     spriteIcon.hotSpotX = pointerIcon.hotSpotX;
     spriteIcon.hotSpotY = pointerIcon.hotSpotY;
     im->setCustomPointerIcon(spriteIcon);
