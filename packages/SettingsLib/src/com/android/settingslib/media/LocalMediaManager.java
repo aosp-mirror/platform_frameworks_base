@@ -639,7 +639,7 @@ public class LocalMediaManager implements BluetoothCallback {
                     .isBusy()
                     && !mOnTransferBluetoothDevice.isConnected()) {
                 // Failed to connect
-                mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_DISCONNECTED);
+                mOnTransferBluetoothDevice.setState(MediaDeviceState.STATE_CONNECTING_FAILED);
                 mOnTransferBluetoothDevice = null;
                 dispatchOnRequestFailed(REASON_UNKNOWN_ERROR);
             }
