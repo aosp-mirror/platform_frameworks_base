@@ -709,7 +709,7 @@ public class CrossProfileAppsServiceImplRoboTest {
         }
 
         @Override
-        public void killUid(String packageName, int uid) {
+        public void killUid(int uid) {
             mKilledUids.add(uid);
         }
     }
