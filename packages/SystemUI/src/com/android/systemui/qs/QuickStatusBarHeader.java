@@ -17,7 +17,6 @@ package com.android.systemui.qs;
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
-import static com.android.systemui.util.Utils.useQsMediaPlayer;
 
 import android.annotation.ColorInt;
 import android.app.ActivityManager;
@@ -42,7 +41,6 @@ import android.view.ContextThemeWrapper;
 import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -477,7 +475,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         } else {
             mZenController.removeCallback(this);
             mAlarmController.removeCallback(this);
-            mLifecycle.setCurrentState(Lifecycle.State.DESTROYED);
+            mLifecycle.setCurrentState(Lifecycle.State.CREATED);
         }
     }
 
