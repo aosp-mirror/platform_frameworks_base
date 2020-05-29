@@ -137,7 +137,7 @@ public class Camera {
      * @param matrix The matrix to copy the current transforms into
      */
     public void getMatrix(Matrix matrix) {
-        nativeGetMatrix(matrix.native_instance);
+        nativeGetMatrix(matrix.ni());
     }
 
     /**
