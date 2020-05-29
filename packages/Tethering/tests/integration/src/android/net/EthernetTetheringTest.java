@@ -339,7 +339,7 @@ public class EthernetTetheringTest {
     private MyTetheringEventCallback enableEthernetTethering(String iface) throws Exception {
         return enableEthernetTethering(iface,
                 new TetheringRequest.Builder(TETHERING_ETHERNET)
-                .setExemptFromEntitlementCheck(true).build());
+                .setShouldShowEntitlementUi(false).build());
     }
 
     private int getMTU(TestNetworkInterface iface) throws SocketException {
@@ -510,7 +510,7 @@ public class EthernetTetheringTest {
         LinkAddress clientAddr = client == null ? null : new LinkAddress(client);
         return new TetheringRequest.Builder(TETHERING_ETHERNET)
                 .setStaticIpv4Addresses(localAddr, clientAddr)
-                .setExemptFromEntitlementCheck(true).build();
+                .setShouldShowEntitlementUi(false).build();
     }
 
     private void assertInvalidStaticIpv4Request(String iface, String local, String client)

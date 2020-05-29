@@ -281,22 +281,33 @@ public final class TetheringServiceTest {
         });
     }
 
+    private void runStartTetheringAndVerifyNoPermission(final TestTetheringResult result)
+            throws Exception {
+        final TetheringRequestParcel request = new TetheringRequestParcel();
+        request.tetheringType = TETHERING_WIFI;
+        request.exemptFromEntitlementCheck = true;
+        mTetheringConnector.startTethering(request, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG,
+                result);
+        result.assertResult(TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION);
+        verifyNoMoreInteractionsForTethering();
+    }
+
     @Test
-    public void testStartTetheringWithExemptFromEntitlementCheck() throws Exception {
+    public void testFailToBypassEntitlementWithoutNeworkStackPermission() throws Exception {
         final TetheringRequestParcel request = new TetheringRequestParcel();
         request.tetheringType = TETHERING_WIFI;
         request.exemptFromEntitlementCheck = true;
 
+        runAsNoPermission((result) -> {
+            runStartTetheringAndVerifyNoPermission(result);
+        });
+
         runAsTetherPrivileged((result) -> {
-            runStartTethering(result, request);
-            verifyNoMoreInteractionsForTethering();
+            runStartTetheringAndVerifyNoPermission(result);
         });
 
         runAsWriteSettings((result) -> {
-            mTetheringConnector.startTethering(request, TEST_CALLER_PKG, TEST_ATTRIBUTION_TAG,
-                    result);
-            result.assertResult(TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION);
-            verifyNoMoreInteractionsForTethering();
+            runStartTetheringAndVerifyNoPermission(result);
         });
     }
 
