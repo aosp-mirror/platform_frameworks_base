@@ -624,6 +624,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         pw.println("  mIsBackGestureAllowed=" + mIsBackGestureAllowed);
         pw.println("  mAllowGesture=" + mAllowGesture);
         pw.println("  mDisabledForQuickstep=" + mDisabledForQuickstep);
+        pw.println("  mStartingQuickstepRotation=" + mStartingQuickstepRotation);
         pw.println("  mInRejectedExclusion" + mInRejectedExclusion);
         pw.println("  mExcludeRegion=" + mExcludeRegion);
         pw.println("  mUnrestrictedExcludeRegion=" + mUnrestrictedExcludeRegion);

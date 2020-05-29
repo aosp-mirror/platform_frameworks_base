@@ -27,6 +27,7 @@ public final class XmlTags {
     public static final String ATTR_ID = "id";
     public static final String ATTR_PACKAGE = "p";
     public static final String ATTR_UID = "u";
+    public static final String ATTR_CREATION_TIME_MS = "crt";
 
     // For BlobMetadata
     public static final String TAG_BLOB = "b";

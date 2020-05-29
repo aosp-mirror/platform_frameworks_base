@@ -32,7 +32,6 @@ import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_CURRENT;
 import static com.android.server.blob.BlobStoreConfig.getAdjustedCommitTimeMs;
-import static com.android.server.blob.BlobStoreConfig.hasSessionExpired;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
 import static com.android.server.blob.BlobStoreSession.STATE_COMMITTED;
 import static com.android.server.blob.BlobStoreSession.STATE_VERIFIED_INVALID;
@@ -986,9 +985,8 @@ public class BlobStoreManagerService extends SystemService {
             userSessions.removeIf((sessionId, blobStoreSession) -> {
                 boolean shouldRemove = false;
 
-                // TODO: handle the case where no content has been written to session yet.
                 // Cleanup sessions which haven't been modified in a while.
-                if (hasSessionExpired(blobStoreSession.getSessionFile().lastModified())) {
+                if (blobStoreSession.isExpired()) {
                     shouldRemove = true;
                 }
 

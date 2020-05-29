@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‏‎‎‎‏‎‏‎‏‎‎‏‎‏‎‎‎‎‎‏‏‎‏‎‎‏‏‏‎‏‏‎‏‎‏‏‎‎‏‏‎‎‎‏‏‏‎‏‏‏‎‏‎‎‎Zoom to fill screen‎‏‎‎‏‎"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‎‏‎‎‏‏‏‎‏‏‎‎‏‎‏‎‎‎‏‏‏‎‎‎‎‎‎‎‎‏‎‎‏‎‏‏‎‏‏‏‏‏‎‎‎‏‏‎‏‏‏‎‎‏‎‎‏‎Stretch to fill screen‎‏‎‎‏‎"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‎‎‏‏‏‎‎‏‏‏‎‎‎‎‏‎‏‏‏‎‏‎‎‏‏‎‎‏‏‎‎‏‏‎‏‎‎‏‏‏‎‏‎‎‎‏‏‎‎‎‎‏‏‎‎Screenshot‎‏‎‎‏‎"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‏‏‏‏‏‏‎‏‎‏‎‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‎‎‏‎‎‏‏‎‎‎‏‎‎‏‎‏‎‏‏‏‎‏‏‏‎‎‏‏‎‎‎‎Unlock your phone for more options‎‏‎‎‏‎"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‎‏‏‏‎‎‎‎‏‏‏‏‎‏‎‎‏‏‏‎‎‎‏‏‎‏‎‎‎‎‏‏‏‏‎‎‏‏‏‎‏‎‎‎‏‏‎‎‏‎‏‎‏‏‏‎‏‎‎Unlock your tablet for more options‎‏‎‎‏‎"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‏‏‎‏‏‏‏‎‏‎‎‎‏‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‎‎‎‏‎‎‎‎‎‎‏‏‏‎‎‎‏‎‏‎Unlock your device for more options‎‏‎‎‏‎"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‎‎‏‏‎‏‎‏‎‎‎‏‎‏‏‏‏‎‎‏‎‏‎‎‏‎‏‎‏‏‏‏‎‎‏‎‎‎‏‏‎‎‎‎‎‎‏‏‎‏‎‎‏‎‏‎‎‎‏‏‎sent an image‎‏‎‎‏‎"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‏‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‏‎‏‎‎‎‎‏‏‏‎‎‎‎‏‏‎‏‎‎‎‏‎‏‎‎‎Saving screenshot…‎‏‎‎‏‎"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‏‏‏‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‎‏‏‏‏‎‎‏‏‏‏‎‎‎‎‏‏‎‏‎‏‏‎‏‎‎‎‎‏‏‎‎‎‏‎‏‎‎‏‎‏‎Saving screenshot…‎‏‎‎‏‎"</string>

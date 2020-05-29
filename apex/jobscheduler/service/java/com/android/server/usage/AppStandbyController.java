@@ -1322,6 +1322,8 @@ public class AppStandbyController implements AppStandbyInternal {
 
     private void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             int reason, long elapsedRealtime, boolean resetTimeout) {
+        if (!mAppIdleEnabled) return;
+
         synchronized (mAppIdleLock) {
             // If the package is not installed, don't allow the bucket to be set.
             if (!mInjector.isPackageInstalled(packageName, 0, userId)) {

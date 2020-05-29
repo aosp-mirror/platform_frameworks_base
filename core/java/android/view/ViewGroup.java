@@ -7298,7 +7298,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
         boolean isOptionalFitSystemWindows = (mViewFlags & OPTIONAL_FITS_SYSTEM_WINDOWS) != 0
                 || isFrameworkOptionalFitsSystemWindows();
         if (isOptionalFitSystemWindows && mAttachInfo != null
-                && mAttachInfo.mContentOnApplyWindowInsetsListener != null) {
+                && mAttachInfo.mContentOnApplyWindowInsetsListener != null
+                && (getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
             return false;
         }
 
@@ -7322,7 +7323,8 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
                 || isFrameworkOptionalFitsSystemWindows();
         if (isOptionalFitSystemWindows && mAttachInfo != null
                 && getListenerInfo().mWindowInsetsAnimationCallback == null
-                && mAttachInfo.mContentOnApplyWindowInsetsListener != null) {
+                && mAttachInfo.mContentOnApplyWindowInsetsListener != null
+                && (getWindowSystemUiVisibility() & SYSTEM_UI_LAYOUT_FLAGS) == 0) {
             mInsetsAnimationDispatchMode = DISPATCH_MODE_STOP;
             return;
         }

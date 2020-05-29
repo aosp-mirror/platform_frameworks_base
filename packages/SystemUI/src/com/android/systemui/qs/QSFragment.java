@@ -94,6 +94,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     private int mState;
     private QSContainerImplController mQSContainerImplController;
     private int[] mTmpLocation = new int[2];
+    private int mLastViewHeight;
+    private float mLastHeaderTranslation;
 
     @Inject
     public QSFragment(RemoteInputQuickSettingsDisabler remoteInputQsDisabler,
@@ -148,6 +150,13 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         setHost(mHost);
         mStatusBarStateController.addCallback(this);
         onStateChanged(mStatusBarStateController.getState());
+        view.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    boolean sizeChanged = (oldTop - oldBottom) != (top - bottom);
+                    if (sizeChanged) {
+                        setQsExpansion(mLastQSExpansion, mLastQSExpansion);
+                    }
+                });
     }
 
     @Override
@@ -374,11 +383,15 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                             ? translationScaleY * mHeader.getHeight()
                             : headerTranslation);
         }
-        if (expansion == mLastQSExpansion && mLastKeyguardAndExpanded == onKeyguardAndExpanded) {
+        int currentHeight = getView().getHeight();
+        mLastHeaderTranslation = headerTranslation;
+        if (expansion == mLastQSExpansion && mLastKeyguardAndExpanded == onKeyguardAndExpanded
+                && mLastViewHeight == currentHeight) {
             return;
         }
         mLastQSExpansion = expansion;
         mLastKeyguardAndExpanded = onKeyguardAndExpanded;
+        mLastViewHeight = currentHeight;
 
         boolean fullyExpanded = expansion == 1;
         int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom();
