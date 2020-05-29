@@ -65,6 +65,7 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.systemui.Dumpable;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.onehanded.OneHandedUI;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipUI;
 import com.android.systemui.recents.OverviewProxyService.OverviewProxyListener;
@@ -127,6 +128,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private final List<OverviewProxyListener> mConnectionCallbacks = new ArrayList<>();
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
+    private final OneHandedUI mOneHandedUI;
 
     private Region mActiveNavBarRegion;
 
@@ -434,6 +436,36 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
         }
 
+        @Override
+        public void startOneHandedMode() {
+            if (!verifyCaller("startOneHandedMode")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                if (mOneHandedUI != null) {
+                    mOneHandedUI.startOneHanded();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void stopOneHandedMode()  {
+            if (!verifyCaller("stopOneHandedMode")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                if (mOneHandedUI != null) {
+                    mOneHandedUI.stopOneHanded();
+                }
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -552,7 +584,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             NavigationBarController navBarController, NavigationModeController navModeController,
             NotificationShadeWindowController statusBarWinController, SysUiState sysUiState,
             PipUI pipUI, Optional<Divider> dividerOptional,
-            Optional<Lazy<StatusBar>> statusBarOptionalLazy) {
+            Optional<Lazy<StatusBar>> statusBarOptionalLazy, OneHandedUI oneHandedUI) {
         mContext = context;
         mPipUI = pipUI;
         mStatusBarOptionalLazy = statusBarOptionalLazy;
@@ -571,6 +603,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                 .supportsRoundedCornersOnWindows(mContext.getResources());
         mSysUiState = sysUiState;
         mSysUiState.addCallback(this::notifySystemUiStateFlags);
+        mOneHandedUI = oneHandedUI;
 
         // Assumes device always starts with back button until launcher tells it that it does not
         mNavBarButtonAlpha = 1.0f;
