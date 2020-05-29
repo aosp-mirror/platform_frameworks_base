@@ -679,13 +679,14 @@ public final class NetworkCapabilities implements Parcelable {
      */
     public void restrictCapabilitesForTestNetwork(int creatorUid) {
         final long originalCapabilities = mNetworkCapabilities;
+        final long originalTransportTypes = mTransportTypes;
         final NetworkSpecifier originalSpecifier = mNetworkSpecifier;
         final int originalSignalStrength = mSignalStrength;
         final int originalOwnerUid = getOwnerUid();
         final int[] originalAdministratorUids = getAdministratorUids();
         clearAll();
-        // Reset the transports to only contain TRANSPORT_TEST.
-        mTransportTypes = (1 << TRANSPORT_TEST);
+        mTransportTypes = (originalTransportTypes & TEST_NETWORKS_ALLOWED_TRANSPORTS)
+                | (1 << TRANSPORT_TEST);
         mNetworkCapabilities = originalCapabilities & TEST_NETWORKS_ALLOWED_CAPABILITIES;
         mNetworkSpecifier = originalSpecifier;
         mSignalStrength = originalSignalStrength;
@@ -785,6 +786,13 @@ public final class NetworkCapabilities implements Parcelable {
         "LOWPAN",
         "TEST"
     };
+
+    /**
+     * Allowed transports on a test network, in addition to TRANSPORT_TEST.
+     */
+    private static final int TEST_NETWORKS_ALLOWED_TRANSPORTS = 1 << TRANSPORT_TEST
+            // Test ethernet networks can be created with EthernetManager#setIncludeTestInterfaces
+            | 1 << TRANSPORT_ETHERNET;
 
     /**
      * Adds the given transport type to this {@code NetworkCapability} instance.
