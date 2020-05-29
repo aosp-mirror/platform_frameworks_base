@@ -27,8 +27,8 @@
         android:id="@+id/resolver_empty_state_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="48dp"
-        android:paddingBottom="48dp"
+        android:paddingTop="@dimen/resolver_empty_state_container_padding_top"
+        android:paddingBottom="@dimen/resolver_empty_state_container_padding_bottom"
         android:gravity="center_horizontal">
         <ImageView
             android:id="@+id/resolver_empty_state_icon"
