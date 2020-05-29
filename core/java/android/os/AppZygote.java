@@ -92,10 +92,9 @@ public class AppZygote {
     @GuardedBy("mLock")
     private void stopZygoteLocked() {
         if (mZygote != null) {
-            // Close the connection and kill the zygote process. This will not cause
-            // child processes to be killed by itself.
             mZygote.close();
-            Process.killProcess(mZygote.getPid());
+            // use killProcessGroup() here, so we kill all untracked children as well.
+            Process.killProcessGroup(mZygoteUid, mZygote.getPid());
             mZygote = null;
         }
     }
