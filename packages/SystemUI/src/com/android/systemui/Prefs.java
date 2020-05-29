@@ -75,8 +75,10 @@ public final class Prefs {
             Key.HAS_SEEN_BUBBLES_EDUCATION,
             Key.HAS_SEEN_BUBBLES_MANAGE_EDUCATION,
             Key.HAS_SEEN_REVERSE_BOTTOM_SHEET,
-            Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT
+            Key.CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT,
+            Key.HAS_SEEN_PRIORITY_ONBOARDING
     })
+    // TODO: annotate these with their types so {@link PrefsCommandLine} can know how to set them
     public @interface Key {
         @Deprecated
         String OVERVIEW_LAST_STACK_TASK_ACTIVE_TIME = "OverviewLastStackTaskActiveTime";

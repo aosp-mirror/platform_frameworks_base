@@ -56,6 +56,7 @@ import android.view.WindowInsetsController.Appearance;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.SoftInputShowHideReason;
+import com.android.internal.os.TransferPipe;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -1508,6 +1509,23 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
 
     public String[] getStatusBarIcons() {
         return mContext.getResources().getStringArray(R.array.config_statusBarIcons);
+    }
+
+    /** @hide */
+    public void passThroughShellCommand(String[] args, FileDescriptor fd) {
+        enforceStatusBarOrShell();
+        if (mBar == null)  return;
+
+        try (TransferPipe tp = new TransferPipe()) {
+            // Sending the command to the remote, which needs to execute async to avoid blocking
+            // See Binder#dumpAsync() for inspiration
+            tp.setBufferPrefix("  ");
+            mBar.passThroughShellCommand(args, tp.getWriteFd());
+            // Times out after 5s
+            tp.go(fd);
+        } catch (Throwable t) {
+            Slog.e(TAG, "Error sending command to IStatusBar", t);
+        }
     }
 
     // ================================================================================

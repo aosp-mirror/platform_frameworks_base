@@ -58,12 +58,14 @@ import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.view.AppearanceRegion;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.CallbackController;
 import com.android.systemui.tracing.ProtoTracer;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * This class takes the functions from IStatusBar that come in on
@@ -159,6 +161,7 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
      */
     private int mLastUpdatedImeDisplayId = INVALID_DISPLAY;
     private ProtoTracer mProtoTracer;
+    private final @Nullable CommandRegistry mRegistry;
 
     /**
      * These methods are called back on the main thread.
@@ -368,11 +371,12 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
     }
 
     public CommandQueue(Context context) {
-        this(context, null);
+        this(context, null, null);
     }
 
-    public CommandQueue(Context context, ProtoTracer protoTracer) {
+    public CommandQueue(Context context, ProtoTracer protoTracer, CommandRegistry registry) {
         mProtoTracer = protoTracer;
+        mRegistry = registry;
         context.getSystemService(DisplayManager.class).registerDisplayListener(this, mHandler);
         // We always have default display.
         setDisabled(DEFAULT_DISPLAY, DISABLE_NONE, DISABLE2_NONE);
@@ -1011,6 +1015,34 @@ public class CommandQueue extends IStatusBar.Stub implements CallbackController<
         synchronized (mLock) {
             mHandler.obtainMessage(MSG_SUPPRESS_AMBIENT_DISPLAY, suppress).sendToTarget();
         }
+    }
+
+    @Override
+    public void passThroughShellCommand(String[] args, ParcelFileDescriptor pfd) {
+        final FileOutputStream fos = new FileOutputStream(pfd.getFileDescriptor());
+        final PrintWriter pw = new PrintWriter(fos);
+        // This is mimicking Binder#dumpAsync, but on this side of the binder. Might be possible
+        // to just throw this work onto the handler just like the other messages
+        Thread thr = new Thread("Sysui.passThroughShellCommand") {
+            public void run() {
+                try {
+                    if (mRegistry == null) {
+                        return;
+                    }
+
+                    // Registry blocks this thread until finished
+                    mRegistry.onShellCommand(pw, args);
+                } finally {
+                    pw.flush();
+                    try {
+                        // Close the file descriptor so the TransferPipe finishes its thread
+                        pfd.close();
+                    } catch (Exception e) {
+                    }
+                }
+            }
+        };
+        thr.start();
     }
 
     private final class H extends Handler {
