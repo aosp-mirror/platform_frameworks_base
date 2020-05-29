@@ -81,12 +81,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
 
     private PipBoundsHandler mPipBoundsHandler;
     private InputConsumerController mInputConsumerController;
-    private PipMenuActivityController mMenuController;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
     private PipAppOpsListener mAppOpsListener;
     private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
 
+    protected PipMenuActivityController mMenuController;
     protected PipTaskOrganizer mPipTaskOrganizer;
 
     /**
