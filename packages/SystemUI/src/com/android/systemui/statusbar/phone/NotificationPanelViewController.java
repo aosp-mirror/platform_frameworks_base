@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.view.View.GONE;
+
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout.ROWS_ALL;
 
@@ -102,6 +104,7 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
+import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
@@ -848,34 +851,25 @@ public class NotificationPanelViewController extends PanelViewController {
                         mIndicationBottomPadding, mAmbientIndicationBottomPadding)
                         - mKeyguardStatusView.getLogoutButtonHeight();
         int count = 0;
+        ExpandableView previousView = null;
         for (int i = 0; i < mNotificationStackScroller.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mNotificationStackScroller.getChildAt(i);
-            if (!(child instanceof ExpandableNotificationRow)) {
+            if (!canShowViewOnLockscreen(child)) {
                 continue;
             }
-            ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            boolean
-                    suppressedSummary =
-                    mGroupManager != null && mGroupManager.isSummaryOfSuppressedGroup(
-                            row.getEntry().getSbn());
-            if (suppressedSummary) {
-                continue;
-            }
-            if (!mLockscreenUserManager.shouldShowOnKeyguard(row.getEntry())) {
-                continue;
-            }
-            if (row.isRemoved()) {
-                continue;
-            }
-            availableSpace -= child.getMinHeight(true /* ignoreTemporaryStates */)
-                    + notificationPadding;
+            availableSpace -= child.getMinHeight(true /* ignoreTemporaryStates */);
+            availableSpace -= count == 0 ? 0 : notificationPadding;
+            availableSpace -= mNotificationStackScroller.calculateGapHeight(previousView, child,
+                    count);
+            previousView = child;
             if (availableSpace >= 0 && count < maximum) {
                 count++;
             } else if (availableSpace > -shelfSize) {
                 // if we are exactly the last view, then we can show us still!
                 for (int j = i + 1; j < mNotificationStackScroller.getChildCount(); j++) {
-                    if (mNotificationStackScroller.getChildAt(
-                            j) instanceof ExpandableNotificationRow) {
+                    ExpandableView view = (ExpandableView) mNotificationStackScroller.getChildAt(j);
+                    if (view instanceof ExpandableNotificationRow &&
+                            canShowViewOnLockscreen(view)) {
                         return count;
                     }
                 }
@@ -886,6 +880,51 @@ public class NotificationPanelViewController extends PanelViewController {
             }
         }
         return count;
+    }
+
+    /**
+     * Can a view be shown on the lockscreen when calculating the number of allowed notifications
+     * to show?
+     *
+     * @param child the view in question
+     * @return true if it can be shown
+     */
+    private boolean canShowViewOnLockscreen(ExpandableView child) {
+        if (child.hasNoContentHeight()) {
+            return false;
+        }
+        if (child instanceof ExpandableNotificationRow &&
+                !canShowRowOnLockscreen((ExpandableNotificationRow) child)) {
+            return false;
+        } else if (child.getVisibility() == GONE) {
+            // ENRs can be gone and count because their visibility is only set after
+            // this calculation, but all other views should be up to date
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Can a row be shown on the lockscreen when calculating the number of allowed notifications
+     * to show?
+     *
+     * @param row the row in question
+     * @return true if it can be shown
+     */
+    private boolean canShowRowOnLockscreen(ExpandableNotificationRow row) {
+        boolean suppressedSummary =
+                mGroupManager != null && mGroupManager.isSummaryOfSuppressedGroup(
+                        row.getEntry().getSbn());
+        if (suppressedSummary) {
+            return false;
+        }
+        if (!mLockscreenUserManager.shouldShowOnKeyguard(row.getEntry())) {
+            return false;
+        }
+        if (row.isRemoved()) {
+            return false;
+        }
+        return true;
     }
 
     private void updateClock() {
