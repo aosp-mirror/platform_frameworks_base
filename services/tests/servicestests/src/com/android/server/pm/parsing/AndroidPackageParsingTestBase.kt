@@ -19,6 +19,7 @@ package com.android.server.pm.parsing
 import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.ApplicationInfo
+import android.content.pm.ComponentInfo
 import android.content.pm.ConfigurationInfo
 import android.content.pm.FeatureInfo
 import android.content.pm.InstrumentationInfo
@@ -27,6 +28,8 @@ import android.content.pm.PackageParser
 import android.content.pm.PackageUserState
 import android.content.pm.PermissionInfo
 import android.content.pm.ProviderInfo
+import android.content.pm.ServiceInfo
+import android.os.Bundle
 import android.os.Debug
 import android.os.Environment
 import android.util.SparseArray
@@ -38,8 +41,10 @@ import com.android.server.pm.pkg.PackageStateUnserialized
 import com.android.server.testutils.mockThrowOnUnmocked
 import com.android.server.testutils.whenever
 import org.junit.BeforeClass
-import org.mockito.Mockito
+import org.mockito.Mockito.any
+import org.mockito.Mockito.anyBoolean
 import org.mockito.Mockito.anyInt
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.mock
 import java.io.File
 
@@ -47,7 +52,7 @@ open class AndroidPackageParsingTestBase {
 
     companion object {
 
-        private const val VERIFY_ALL_APKS = false
+        private const val VERIFY_ALL_APKS = true
 
         /** For auditing memory usage differences */
         private const val DUMP_HPROF_TO_EXTERNAL = false
@@ -81,10 +86,14 @@ open class AndroidPackageParsingTestBase {
                             .filter { file -> file.name.endsWith(".apk") }
                             .toList()
                 }
+                .distinct()
 
         private val dummyUserState = mock(PackageUserState::class.java).apply {
             installed = true
-            Mockito.`when`(isAvailable(anyInt())).thenReturn(true)
+            whenever(isAvailable(anyInt())) { true }
+            whenever(isMatch(any<ComponentInfo>(), anyInt())) { true }
+            whenever(isMatch(anyBoolean(), anyBoolean(), anyBoolean(), anyBoolean(),
+                    anyString(), anyInt())) { true }
         }
 
         lateinit var oldPackages: List<PackageParser.Package>
@@ -145,6 +154,7 @@ open class AndroidPackageParsingTestBase {
         private fun mockPkgSetting(aPkg: AndroidPackage) = mockThrowOnUnmocked<PackageSetting> {
             this.pkg = aPkg
             whenever(pkgState) { PackageStateUnserialized() }
+            whenever(readUserState(anyInt())) { dummyUserState }
         }
     }
 
@@ -156,19 +166,10 @@ open class AndroidPackageParsingTestBase {
     // The following methods prepend "this." because @hide APIs can cause an IDE to auto-import
     // the R.attr constant instead of referencing the field in an attempt to fix the error.
 
-    /**
-     * Known exclusions:
-     *   - [ApplicationInfo.credentialProtectedDataDir]
-     *   - [ApplicationInfo.dataDir]
-     *   - [ApplicationInfo.deviceProtectedDataDir]
-     *   - [ApplicationInfo.processName]
-     *   - [ApplicationInfo.publicSourceDir]
-     *   - [ApplicationInfo.scanPublicSourceDir]
-     *   - [ApplicationInfo.scanSourceDir]
-     *   - [ApplicationInfo.sourceDir]
-     * These attributes used to be assigned post-package-parsing as part of another component,
-     * but are now adjusted directly inside [PackageImpl].
-     */
+    // It's difficult to comment out a line in a triple quoted string, so this is used instead
+    // to ignore specific fields. A comment is required to explain why a field was ignored.
+    private fun Any?.ignored(comment: String): String = "IGNORED"
+
     protected fun ApplicationInfo.dumpToString() = """
             appComponentFactory=${this.appComponentFactory}
             backupAgentName=${this.backupAgentName}
@@ -179,22 +180,31 @@ open class AndroidPackageParsingTestBase {
             compatibleWidthLimitDp=${this.compatibleWidthLimitDp}
             compileSdkVersion=${this.compileSdkVersion}
             compileSdkVersionCodename=${this.compileSdkVersionCodename}
+            credentialProtectedDataDir=${this.credentialProtectedDataDir
+            .ignored("Deferred pre-R, but assigned immediately in R")}
+            crossProfile=${this.crossProfile.ignored("Added in R")}
+            dataDir=${this.dataDir.ignored("Deferred pre-R, but assigned immediately in R")}
             descriptionRes=${this.descriptionRes}
+            deviceProtectedDataDir=${this.deviceProtectedDataDir
+            .ignored("Deferred pre-R, but assigned immediately in R")}
             enabled=${this.enabled}
             enabledSetting=${this.enabledSetting}
             flags=${Integer.toBinaryString(this.flags)}
             fullBackupContent=${this.fullBackupContent}
+            gwpAsanMode=${this.gwpAsanMode.ignored("Added in R")}
             hiddenUntilInstalled=${this.hiddenUntilInstalled}
             icon=${this.icon}
             iconRes=${this.iconRes}
             installLocation=${this.installLocation}
+            labelRes=${this.labelRes}
             largestWidthLimitDp=${this.largestWidthLimitDp}
             logo=${this.logo}
             longVersionCode=${this.longVersionCode}
+            ${"".ignored("mHiddenApiPolicy is a private field")}
             manageSpaceActivityName=${this.manageSpaceActivityName}
-            maxAspectRatio.compareTo(that.maxAspectRatio)=${this.maxAspectRatio}
-            metaData=${this.metaData}
-            minAspectRatio.compareTo(that.minAspectRatio)=${this.minAspectRatio}
+            maxAspectRatio=${this.maxAspectRatio}
+            metaData=${this.metaData.dumpToString()}
+            minAspectRatio=${this.minAspectRatio}
             minSdkVersion=${this.minSdkVersion}
             name=${this.name}
             nativeLibraryDir=${this.nativeLibraryDir}
@@ -206,18 +216,27 @@ open class AndroidPackageParsingTestBase {
             permission=${this.permission}
             primaryCpuAbi=${this.primaryCpuAbi}
             privateFlags=${Integer.toBinaryString(this.privateFlags)}
+            processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
+            publicSourceDir=${this.publicSourceDir
+            .ignored("Deferred pre-R, but assigned immediately in R")}
             requiresSmallestWidthDp=${this.requiresSmallestWidthDp}
             resourceDirs=${this.resourceDirs?.contentToString()}
             roundIconRes=${this.roundIconRes}
-            secondaryCpuAbi=${this.secondaryCpuAbi}
-            secondaryNativeLibraryDir=${this.secondaryNativeLibraryDir}
+            scanPublicSourceDir=${this.scanPublicSourceDir
+            .ignored("Deferred pre-R, but assigned immediately in R")}
+            scanSourceDir=${this.scanSourceDir
+            .ignored("Deferred pre-R, but assigned immediately in R")}
             seInfo=${this.seInfo}
             seInfoUser=${this.seInfoUser}
+            secondaryCpuAbi=${this.secondaryCpuAbi}
+            secondaryNativeLibraryDir=${this.secondaryNativeLibraryDir}
             sharedLibraryFiles=${this.sharedLibraryFiles?.contentToString()}
             sharedLibraryInfos=${this.sharedLibraryInfos}
             showUserIcon=${this.showUserIcon}
+            sourceDir=${this.sourceDir
+            .ignored("Deferred pre-R, but assigned immediately in R")}
             splitClassLoaderNames=${this.splitClassLoaderNames?.contentToString()}
-            splitDependencies=${this.splitDependencies}
+            splitDependencies=${this.splitDependencies.dumpToString()}
             splitNames=${this.splitNames?.contentToString()}
             splitPublicSourceDirs=${this.splitPublicSourceDirs?.contentToString()}
             splitSourceDirs=${this.splitSourceDirs?.contentToString()}
@@ -226,8 +245,8 @@ open class AndroidPackageParsingTestBase {
             targetSdkVersion=${this.targetSdkVersion}
             taskAffinity=${this.taskAffinity}
             theme=${this.theme}
-            uid=${this.uid}
             uiOptions=${this.uiOptions}
+            uid=${this.uid}
             versionCode=${this.versionCode}
             volumeUuid=${this.volumeUuid}
             zygotePreloadName=${this.zygotePreloadName}
@@ -241,19 +260,27 @@ open class AndroidPackageParsingTestBase {
             """.trimIndent()
 
     protected fun InstrumentationInfo.dumpToString() = """
+            banner=${this.banner}
             credentialProtectedDataDir=${this.credentialProtectedDataDir}
             dataDir=${this.dataDir}
             deviceProtectedDataDir=${this.deviceProtectedDataDir}
             functionalTest=${this.functionalTest}
             handleProfiling=${this.handleProfiling}
+            icon=${this.icon}
+            labelRes=${this.labelRes}
+            logo=${this.logo}
+            metaData=${this.metaData}
+            name=${this.name}
             nativeLibraryDir=${this.nativeLibraryDir}
+            nonLocalizedLabel=${this.nonLocalizedLabel}
+            packageName=${this.packageName}
             primaryCpuAbi=${this.primaryCpuAbi}
             publicSourceDir=${this.publicSourceDir}
             secondaryCpuAbi=${this.secondaryCpuAbi}
             secondaryNativeLibraryDir=${this.secondaryNativeLibraryDir}
+            showUserIcon=${this.showUserIcon}
             sourceDir=${this.sourceDir}
-            splitDependencies=${this.splitDependencies.sequence()
-            .map { it.first to it.second?.contentToString() }.joinToString()}
+            splitDependencies=${this.splitDependencies.dumpToString()}
             splitNames=${this.splitNames?.contentToString()}
             splitPublicSourceDirs=${this.splitPublicSourceDirs?.contentToString()}
             splitSourceDirs=${this.splitSourceDirs?.contentToString()}
@@ -262,25 +289,40 @@ open class AndroidPackageParsingTestBase {
             """.trimIndent()
 
     protected fun ActivityInfo.dumpToString() = """
+            banner=${this.banner}
             colorMode=${this.colorMode}
             configChanges=${this.configChanges}
+            descriptionRes=${this.descriptionRes}
+            directBootAware=${this.directBootAware}
             documentLaunchMode=${this.documentLaunchMode}
+            enabled=${this.enabled}
+            exported=${this.exported}
             flags=${Integer.toBinaryString(this.flags)}
+            icon=${this.icon}
+            labelRes=${this.labelRes}
             launchMode=${this.launchMode}
             launchToken=${this.launchToken}
             lockTaskLaunchMode=${this.lockTaskLaunchMode}
+            logo=${this.logo}
             maxAspectRatio=${this.maxAspectRatio}
             maxRecents=${this.maxRecents}
+            metaData=${this.metaData.dumpToString()}
             minAspectRatio=${this.minAspectRatio}
+            name=${this.name}
+            nonLocalizedLabel=${this.nonLocalizedLabel}
+            packageName=${this.packageName}
             parentActivityName=${this.parentActivityName}
             permission=${this.permission}
-            persistableMode=${this.persistableMode}
-            privateFlags=${Integer.toBinaryString(this.privateFlags)}
+            persistableMode=${this.persistableMode.ignored("Could be dropped pre-R, fixed in R")}
+            privateFlags=${this.privateFlags}
+            processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
             requestedVrComponent=${this.requestedVrComponent}
             resizeMode=${this.resizeMode}
             rotationAnimation=${this.rotationAnimation}
             screenOrientation=${this.screenOrientation}
+            showUserIcon=${this.showUserIcon}
             softInputMode=${this.softInputMode}
+            splitName=${this.splitName}
             targetActivity=${this.targetActivity}
             taskAffinity=${this.taskAffinity}
             theme=${this.theme}
@@ -300,28 +342,75 @@ open class AndroidPackageParsingTestBase {
 
     protected fun PermissionInfo.dumpToString() = """
             backgroundPermission=${this.backgroundPermission}
+            banner=${this.banner}
             descriptionRes=${this.descriptionRes}
             flags=${Integer.toBinaryString(this.flags)}
             group=${this.group}
+            icon=${this.icon}
+            labelRes=${this.labelRes}
+            logo=${this.logo}
+            metaData=${this.metaData.dumpToString()}
+            name=${this.name}
             nonLocalizedDescription=${this.nonLocalizedDescription}
+            nonLocalizedLabel=${this.nonLocalizedLabel}
+            packageName=${this.packageName}
             protectionLevel=${this.protectionLevel}
             requestRes=${this.requestRes}
+            showUserIcon=${this.showUserIcon}
             """.trimIndent()
 
     protected fun ProviderInfo.dumpToString() = """
+            applicationInfo=${this.applicationInfo.ignored("Already checked")}
             authority=${this.authority}
+            banner=${this.banner}
+            descriptionRes=${this.descriptionRes}
+            directBootAware=${this.directBootAware}
+            enabled=${this.enabled}
+            exported=${this.exported}
             flags=${Integer.toBinaryString(this.flags)}
             forceUriPermissions=${this.forceUriPermissions}
             grantUriPermissions=${this.grantUriPermissions}
+            icon=${this.icon}
             initOrder=${this.initOrder}
             isSyncable=${this.isSyncable}
+            labelRes=${this.labelRes}
+            logo=${this.logo}
+            metaData=${this.metaData.dumpToString()}
             multiprocess=${this.multiprocess}
+            name=${this.name}
+            nonLocalizedLabel=${this.nonLocalizedLabel}
+            packageName=${this.packageName}
             pathPermissions=${this.pathPermissions?.joinToString {
         "readPermission=${it.readPermission}\nwritePermission=${it.writePermission}"
     }}
+            processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
             readPermission=${this.readPermission}
+            showUserIcon=${this.showUserIcon}
+            splitName=${this.splitName}
             uriPermissionPatterns=${this.uriPermissionPatterns?.contentToString()}
             writePermission=${this.writePermission}
+            """.trimIndent()
+
+    protected fun ServiceInfo.dumpToString() = """
+            applicationInfo=${this.applicationInfo.ignored("Already checked")}
+            banner=${this.banner}
+            descriptionRes=${this.descriptionRes}
+            directBootAware=${this.directBootAware}
+            enabled=${this.enabled}
+            exported=${this.exported}
+            flags=${Integer.toBinaryString(this.flags)}
+            icon=${this.icon}
+            labelRes=${this.labelRes}
+            logo=${this.logo}
+            mForegroundServiceType"${this.mForegroundServiceType}
+            metaData=${this.metaData.dumpToString()}
+            name=${this.name}
+            nonLocalizedLabel=${this.nonLocalizedLabel}
+            packageName=${this.packageName}
+            permission=${this.permission}
+            processName=${this.processName.ignored("Deferred pre-R, but assigned immediately in R")}
+            showUserIcon=${this.showUserIcon}
+            splitName=${this.splitName}
             """.trimIndent()
 
     protected fun ConfigurationInfo.dumpToString() = """
@@ -333,8 +422,10 @@ open class AndroidPackageParsingTestBase {
             """.trimIndent()
 
     protected fun PackageInfo.dumpToString() = """
-            activities=${this.activities?.joinToString { it.dumpToString() }}
-            applicationInfo=${this.applicationInfo.dumpToString()}
+            activities=${this.activities?.joinToString { it.dumpToString() }
+            .ignored("Checked separately in test")}
+            applicationInfo=${this.applicationInfo.dumpToString()
+            .ignored("Checked separately in test")}
             baseRevisionCode=${this.baseRevisionCode}
             compileSdkVersion=${this.compileSdkVersion}
             compileSdkVersionCodename=${this.compileSdkVersionCodename}
@@ -356,15 +447,18 @@ open class AndroidPackageParsingTestBase {
             overlayTarget=${this.overlayTarget}
             packageName=${this.packageName}
             permissions=${this.permissions?.joinToString { it.dumpToString() }}
-            providers=${this.providers?.joinToString { it.dumpToString() }}
-            receivers=${this.receivers?.joinToString { it.dumpToString() }}
+            providers=${this.providers?.joinToString { it.dumpToString() }
+            .ignored("Checked separately in test")}
+            receivers=${this.receivers?.joinToString { it.dumpToString() }
+            .ignored("Checked separately in test")}
             reqFeatures=${this.reqFeatures?.joinToString { it.dumpToString() }}
             requestedPermissions=${this.requestedPermissions?.contentToString()}
             requestedPermissionsFlags=${this.requestedPermissionsFlags?.contentToString()}
             requiredAccountType=${this.requiredAccountType}
             requiredForAllUsers=${this.requiredForAllUsers}
             restrictedAccountType=${this.restrictedAccountType}
-            services=${this.services?.contentToString()}
+            services=${this.services?.joinToString { it.dumpToString() }
+            .ignored("Checked separately in test")}
             sharedUserId=${this.sharedUserId}
             sharedUserLabel=${this.sharedUserLabel}
             signatures=${this.signatures?.joinToString { it.toCharsString() }}
@@ -378,11 +472,17 @@ open class AndroidPackageParsingTestBase {
             versionName=${this.versionName}
             """.trimIndent()
 
-    @Suppress("unused")
-    private fun <T> SparseArray<T>.sequence(): Sequence<Pair<Int, T>> {
-        var index = 0
-        return generateSequence {
-            index++.takeIf { it < size() }?.let { keyAt(it) to valueAt(index) }
+    private fun Bundle?.dumpToString() = this?.keySet()?.associateWith { get(it) }?.toString()
+
+    private fun <T> SparseArray<T>?.dumpToString(): String {
+        if (this == null) {
+            return "EMPTY"
         }
+
+        val list = mutableListOf<Pair<Int, T>>()
+        for (index in (0 until size())) {
+            list += keyAt(index) to valueAt(index)
+        }
+        return list.toString()
     }
 }
