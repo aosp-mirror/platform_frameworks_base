@@ -2452,7 +2452,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         int numShownItems = 0;
         boolean finish = false;
         int maxDisplayedNotifications = mMaxDisplayedNotifications;
-
+        ExpandableView previousView = null;
         for (int i = 0; i < getChildCount(); i++) {
             ExpandableView expandableView = (ExpandableView) getChildAt(i);
             boolean footerViewOnLockScreen = expandableView == mFooterView && onKeyguard();
@@ -2460,9 +2460,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     && !expandableView.hasNoContentHeight() && !footerViewOnLockScreen) {
                 boolean limitReached = maxDisplayedNotifications != -1
                         && numShownItems >= maxDisplayedNotifications;
+                final float viewHeight;
                 if (limitReached) {
-                    expandableView = mShelf;
+                    viewHeight = mShelf.getIntrinsicHeight();
                     finish = true;
+                } else {
+                    viewHeight = expandableView.getIntrinsicHeight();
                 }
                 float increasedPaddingAmount = expandableView.getIncreasedPaddingAmount();
                 float padding;
@@ -2493,9 +2496,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 if (height != 0) {
                     height += padding;
                 }
+                height += calculateGapHeight(previousView, expandableView, numShownItems);
                 previousPaddingAmount = increasedPaddingAmount;
-                height += expandableView.getIntrinsicHeight();
+                height += viewHeight;
                 numShownItems++;
+                previousView = expandableView;
                 if (finish) {
                     break;
                 }
@@ -2509,6 +2514,25 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         updateScrollability();
         clampScrollPosition();
         mAmbientState.setLayoutMaxHeight(mContentHeight);
+    }
+
+    /**
+     * Calculate the gap height between two different views
+     *
+     * @param previous the previousView
+     * @param current the currentView
+     * @param visibleIndex the visible index in the list
+     *
+     * @return the gap height needed before the current view
+     */
+    public float calculateGapHeight(
+            ExpandableView previous,
+            ExpandableView current,
+            int visibleIndex
+    ) {
+       return mStackScrollAlgorithm.getGapHeightForChild(mSectionsManager,
+                mAmbientState.getAnchorViewIndex(), visibleIndex, current,
+                previous);
     }
 
     @Override

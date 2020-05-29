@@ -402,7 +402,8 @@ public class StackScrollAlgorithm {
         ExpandableView previousChild = i > 0 ? algorithmState.visibleChildren.get(i - 1) : null;
         final boolean applyGapHeight =
                 childNeedsGapHeight(
-                        ambientState.getSectionProvider(), algorithmState, i, child, previousChild);
+                        ambientState.getSectionProvider(), algorithmState.anchorViewIndex, i,
+                        child, previousChild);
         ExpandableViewState childViewState = child.getViewState();
         childViewState.location = ExpandableViewState.LOCATION_UNKNOWN;
 
@@ -463,9 +464,44 @@ public class StackScrollAlgorithm {
         return currentYPosition;
     }
 
+    /**
+     * Get the gap height needed for before a view
+     *
+     * @param sectionProvider the sectionProvider used to understand the sections
+     * @param anchorViewIndex the anchorView index when anchor scrolling, can be 0 if not
+     * @param visibleIndex the visible index of this view in the list
+     * @param child the child asked about
+     * @param previousChild the child right before it or null if none
+     * @return the size of the gap needed or 0 if none is needed
+     */
+    public float getGapHeightForChild(
+            SectionProvider sectionProvider,
+            int anchorViewIndex,
+            int visibleIndex,
+            View child,
+            View previousChild) {
+
+        if (childNeedsGapHeight(sectionProvider, anchorViewIndex, visibleIndex, child,
+                previousChild)) {
+            return mGapHeight;
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Does a given child need a gap, i.e spacing before a view?
+     *
+     * @param sectionProvider the sectionProvider used to understand the sections
+     * @param anchorViewIndex the anchorView index when anchor scrolling, can be 0 if not
+     * @param visibleIndex the visible index of this view in the list
+     * @param child the child asked about
+     * @param previousChild the child right before it or null if none
+     * @return if the child needs a gap height
+     */
     private boolean childNeedsGapHeight(
             SectionProvider sectionProvider,
-            StackScrollAlgorithmState algorithmState,
+            int anchorViewIndex,
             int visibleIndex,
             View child,
             View previousChild) {
@@ -473,7 +509,7 @@ public class StackScrollAlgorithm {
         boolean needsGapHeight = sectionProvider.beginsSection(child, previousChild)
                 && visibleIndex > 0;
         if (ANCHOR_SCROLLING) {
-            needsGapHeight &= visibleIndex != algorithmState.anchorViewIndex;
+            needsGapHeight &= visibleIndex != anchorViewIndex;
         }
         return needsGapHeight;
     }
