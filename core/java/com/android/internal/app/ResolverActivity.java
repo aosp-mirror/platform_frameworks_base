@@ -642,11 +642,30 @@ public class ResolverActivity extends Activity implements
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+        if (isIntentPicker() && shouldShowTabs() && !useLayoutWithDefault()) {
+            updateIntentPickerPaddings();
+        }
 
         if (mSystemWindowInsets != null) {
             mResolverDrawerLayout.setPadding(mSystemWindowInsets.left, mSystemWindowInsets.top,
                     mSystemWindowInsets.right, 0);
         }
+    }
+
+    private void updateIntentPickerPaddings() {
+        View titleCont = findViewById(R.id.title_container);
+        titleCont.setPadding(
+                titleCont.getPaddingLeft(),
+                titleCont.getPaddingTop(),
+                titleCont.getPaddingRight(),
+                getResources().getDimensionPixelSize(R.dimen.resolver_title_padding_bottom));
+        View buttonBar = findViewById(R.id.button_bar);
+        buttonBar.setPadding(
+                buttonBar.getPaddingLeft(),
+                getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing),
+                buttonBar.getPaddingRight(),
+                getResources().getDimensionPixelSize(R.dimen.resolver_button_bar_spacing));
+        mMultiProfilePagerAdapter.updateAfterConfigChange();
     }
 
     @Override // ResolverListCommunicator
