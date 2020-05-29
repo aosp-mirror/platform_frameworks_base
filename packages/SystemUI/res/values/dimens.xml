@@ -973,7 +973,9 @@
     <dimen name="recents_quick_scrub_onboarding_margin_start">8dp</dimen>
 
     <!-- The height of the gradient indicating the dismiss edge when moving a PIP. -->
-    <dimen name="floating_dismiss_gradient_height">176dp</dimen>
+    <dimen name="floating_dismiss_gradient_height">250dp</dimen>
+
+    <dimen name="floating_dismiss_bottom_margin">50dp</dimen>
 
     <!-- The bottom margin of the PIP drag to dismiss info text shown when moving a PIP. -->
     <dimen name="pip_dismiss_text_bottom_margin">24dp</dimen>

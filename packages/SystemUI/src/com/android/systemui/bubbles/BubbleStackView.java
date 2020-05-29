@@ -47,6 +47,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -132,6 +133,9 @@ public class BubbleStackView extends FrameLayout
 
     /** Percent to darken the bubbles when they're in the dismiss target. */
     private static final float DARKEN_PERCENT = 0.3f;
+
+    /** Duration of the dismiss scrim fading in/out. */
+    private static final int DISMISS_TRANSITION_DURATION_MS = 200;
 
     /** How long to wait, in milliseconds, before hiding the flyout. */
     @VisibleForTesting
@@ -741,7 +745,7 @@ public class BubbleStackView extends FrameLayout
         final View targetView = new DismissCircleView(context);
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(targetSize, targetSize);
-        newParams.gravity = Gravity.CENTER;
+        newParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
         targetView.setLayoutParams(newParams);
         mDismissTargetAnimator = PhysicsAnimator.getInstance(targetView);
 
@@ -750,9 +754,16 @@ public class BubbleStackView extends FrameLayout
                 MATCH_PARENT,
                 getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height),
                 Gravity.BOTTOM));
+
+        final int bottomMargin =
+                getResources().getDimensionPixelSize(R.dimen.floating_dismiss_bottom_margin);
+        mDismissTargetContainer.setPadding(0, 0, 0, bottomMargin);
+        mDismissTargetContainer.setClipToPadding(false);
         mDismissTargetContainer.setClipChildren(false);
         mDismissTargetContainer.addView(targetView);
         mDismissTargetContainer.setVisibility(View.INVISIBLE);
+        mDismissTargetContainer.setBackgroundResource(
+                R.drawable.floating_dismiss_gradient_transition);
         addView(mDismissTargetContainer);
 
         // Start translated down so the target springs up.
@@ -1856,6 +1867,9 @@ public class BubbleStackView extends FrameLayout
         mDismissTargetContainer.setZ(Short.MAX_VALUE - 1);
         mDismissTargetContainer.setVisibility(VISIBLE);
 
+        ((TransitionDrawable) mDismissTargetContainer.getBackground()).startTransition(
+                DISMISS_TRANSITION_DURATION_MS);
+
         mDismissTargetAnimator.cancel();
         mDismissTargetAnimator
                 .spring(DynamicAnimation.TRANSLATION_Y, 0f, mDismissTargetSpring)
@@ -1872,6 +1886,9 @@ public class BubbleStackView extends FrameLayout
         }
 
         mShowingDismiss = false;
+
+        ((TransitionDrawable) mDismissTargetContainer.getBackground()).reverseTransition(
+                DISMISS_TRANSITION_DURATION_MS);
 
         mDismissTargetAnimator
                 .spring(DynamicAnimation.TRANSLATION_Y, mDismissTargetContainer.getHeight(),
