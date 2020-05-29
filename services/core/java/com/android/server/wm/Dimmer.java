@@ -53,7 +53,7 @@ class Dimmer {
 
         @Override
         public SurfaceControl.Transaction getPendingTransaction() {
-            return mHost.getPendingTransaction();
+            return mHost.getSyncTransaction();
         }
 
         @Override
