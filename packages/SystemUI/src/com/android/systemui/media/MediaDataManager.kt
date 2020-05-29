@@ -35,6 +35,8 @@ import com.android.internal.graphics.ColorUtils
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
+import com.android.systemui.statusbar.notification.NotificationEntryManager
+import com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
@@ -77,12 +79,20 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 class MediaDataManager @Inject constructor(
     private val context: Context,
     private val mediaControllerFactory: MediaControllerFactory,
+    private val mediaTimeoutListener: MediaTimeoutListener,
+    private val notificationEntryManager: NotificationEntryManager,
     @Background private val backgroundExecutor: Executor,
     @Main private val foregroundExecutor: Executor
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
+
+    init {
+        mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
+            setTimedOut(token, timedOut) }
+        addListener(mediaTimeoutListener)
+    }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
         if (Utils.useQsMediaPlayer(context) && isMediaNotification(sbn)) {
@@ -111,6 +121,16 @@ class MediaDataManager @Inject constructor(
      * Remove a listener for changes in this class
      */
     fun removeListener(listener: Listener) = listeners.remove(listener)
+
+    private fun setTimedOut(token: String, timedOut: Boolean) {
+        if (!timedOut) {
+            return
+        }
+        mediaEntries[token]?.let {
+            notificationEntryManager.removeNotification(it.notificationKey, null /* ranking */,
+                    UNDEFINED_DISMISS_REASON)
+        }
+    }
 
     private fun loadMediaDataInBg(key: String, sbn: StatusBarNotification) {
         val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
@@ -223,7 +243,7 @@ class MediaDataManager @Inject constructor(
         foregroundExecutor.execute {
             onMediaDataLoaded(key, MediaData(true, bgColor, app, smallIconDrawable, artist, song,
                     artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
-                    notif.contentIntent, null))
+                    notif.contentIntent, null, key))
         }
     }
 

@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar;
 
 import static com.android.systemui.statusbar.StatusBarState.KEYGUARD;
-import static com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON;
 import static com.android.systemui.statusbar.phone.StatusBar.DEBUG_MEDIA_FAKE_ARTWORK;
 import static com.android.systemui.statusbar.phone.StatusBar.ENABLE_LOCKSCREEN_WALLPAPER;
 import static com.android.systemui.statusbar.phone.StatusBar.SHOW_LOCKSCREEN_MEDIA_ARTWORK;
@@ -36,7 +35,6 @@ import android.media.session.MediaSession;
 import android.media.session.MediaSessionManager;
 import android.media.session.PlaybackState;
 import android.os.AsyncTask;
-import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
@@ -80,7 +78,6 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import dagger.Lazy;
 
@@ -91,8 +88,6 @@ import dagger.Lazy;
 public class NotificationMediaManager implements Dumpable {
     private static final String TAG = "NotificationMediaManager";
     public static final boolean DEBUG_MEDIA = false;
-    private static final long PAUSED_MEDIA_TIMEOUT = SystemProperties
-            .getLong("debug.sysui.media_timeout", TimeUnit.MINUTES.toMillis(10));
 
     private final StatusBarStateController mStatusBarStateController
             = Dependency.get(StatusBarStateController.class);
@@ -134,7 +129,6 @@ public class NotificationMediaManager implements Dumpable {
     private MediaController mMediaController;
     private String mMediaNotificationKey;
     private MediaMetadata mMediaMetadata;
-    private Runnable mMediaTimeoutCancellation;
 
     private BackDropView mBackdrop;
     private ImageView mBackdropFront;
@@ -164,47 +158,11 @@ public class NotificationMediaManager implements Dumpable {
             if (DEBUG_MEDIA) {
                 Log.v(TAG, "DEBUG_MEDIA: onPlaybackStateChanged: " + state);
             }
-            if (mMediaTimeoutCancellation != null) {
-                if (DEBUG_MEDIA) {
-                    Log.v(TAG, "DEBUG_MEDIA: media timeout cancelled");
-                }
-                mMediaTimeoutCancellation.run();
-                mMediaTimeoutCancellation = null;
-            }
             if (state != null) {
                 if (!isPlaybackActive(state.getState())) {
                     clearCurrentMediaNotification();
                 }
                 findAndUpdateMediaNotifications();
-                scheduleMediaTimeout(state);
-            }
-        }
-
-        private void scheduleMediaTimeout(PlaybackState state) {
-            final NotificationEntry entry;
-            synchronized (mEntryManager) {
-                entry = mEntryManager.getActiveNotificationUnfiltered(mMediaNotificationKey);
-            }
-            if (entry != null) {
-                if (!isPlayingState(state.getState())) {
-                    if (DEBUG_MEDIA) {
-                        Log.v(TAG, "DEBUG_MEDIA: schedule timeout for "
-                                + mMediaNotificationKey);
-                    }
-                    mMediaTimeoutCancellation = mMainExecutor.executeDelayed(() -> {
-                        synchronized (mEntryManager) {
-                            if (DEBUG_MEDIA) {
-                                Log.v(TAG, "DEBUG_MEDIA: execute timeout for "
-                                        + mMediaNotificationKey);
-                            }
-                            if (mMediaNotificationKey == null) {
-                                return;
-                            }
-                            mEntryManager.removeNotification(mMediaNotificationKey, null,
-                                    UNDEFINED_DISMISS_REASON);
-                        }
-                    }, PAUSED_MEDIA_TIMEOUT);
-                }
             }
         }
 
