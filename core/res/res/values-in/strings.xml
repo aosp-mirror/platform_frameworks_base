@@ -1850,9 +1850,9 @@
     <string name="stk_cc_ussd_to_dial" msgid="3139884150741157610">"Permintaan USSD diubah ke panggilan reguler"</string>
     <string name="stk_cc_ussd_to_ss" msgid="4826846653052609738">"Permintaan USSD diubah ke permintaan SS"</string>
     <string name="stk_cc_ussd_to_ussd" msgid="8343001461299302472">"Diubah ke permintaan USSD baru"</string>
-    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"Permintaan USSD diubah ke video call"</string>
+    <string name="stk_cc_ussd_to_dial_video" msgid="429118590323618623">"Permintaan USSD diubah ke panggilan video"</string>
     <string name="stk_cc_ss_to_dial" msgid="4087396658768717077">"Permintaan SS diubah ke panggilan reguler"</string>
-    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Permintaan SS diubah ke video call"</string>
+    <string name="stk_cc_ss_to_dial_video" msgid="1324194624384312664">"Permintaan SS diubah ke panggilan video"</string>
     <string name="stk_cc_ss_to_ussd" msgid="8417905193112944760">"Permintaan SS diubah ke permintaan USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="132040645206514450">"Diubah ke permintaan SS baru"</string>
     <string name="notification_work_profile_content_description" msgid="5296477955677725799">"Profil kerja"</string>

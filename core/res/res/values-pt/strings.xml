@@ -2032,7 +2032,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> arquivo</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> arquivos</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Ninguém recomendado para compartilhamento"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Não há sugestões de pessoas para compartilhar"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista de apps"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Este app não tem permissão de gravação, mas pode capturar áudio pelo dispositivo USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Início"</string>

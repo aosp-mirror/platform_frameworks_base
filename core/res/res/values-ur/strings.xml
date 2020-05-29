@@ -193,8 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"آپ کی تنظیم اس آلے کا نظم کرتی ہے اور وہ نیٹ ورک ٹریفک کی نگرانی کر سکتی ہے۔ تفاصیل کیلئے تھپتھپائیں۔"</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"ایپس آپ کے مقام تک رسائی حاصل کر سکتی ہیں"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"‏مزید جاننے کے لیے اپنے IT منتظم سے رابطہ کریں"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"جغرافیائی حد بندی کی سروس"</string>
     <string name="country_detector" msgid="7023275114706088854">"ملک کا ڈیٹیکٹر"</string>
     <string name="location_service" msgid="2439187616018455546">"مقام کی سروس"</string>
     <string name="gnss_service" msgid="8907781262179951385">"‏GNSS سروس"</string>
@@ -2033,7 +2032,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> فائلز</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> فائل</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"اس کے ساتھ اشتراک کرنے کے لیے کوئی تجویز کردہ لوگ نہیں"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"اشتراک کرنے کے لیے کوئی تجویز کردہ لوگ نہیں"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ایپس کی فہرست"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"‏اس ایپ کو ریکارڈ کرنے کی اجازت عطا نہیں کی گئی ہے مگر اس USB آلہ کے ذریعے آڈیو کیپچر کر سکتی ہے۔"</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"گھر"</string>
