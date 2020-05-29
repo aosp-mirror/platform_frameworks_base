@@ -24,15 +24,19 @@ import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_ERROR;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 
+import android.annotation.Nullable;
+import android.util.ArrayMap;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.Preconditions;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A builder for instantiating a complex {@link DisplayAreaPolicy}
@@ -51,7 +55,7 @@ import java.util.Map;
  *             .build(...)
  *
  *     // Builds a policy with the following hierarchy:
- *      - DisplayArea.Root
+ *      - RootDisplayArea
  *        - Magnification
  *          - DisplayArea.Tokens (Wallpapers are attached here)
  *          - TaskDisplayArea
@@ -62,11 +66,200 @@ import java.util.Map;
  *
  * </pre>
  *
- * // TODO(display-area): document more complex scenarios where we need multiple areas per feature.
+ * // TODO(b/157683117): document more complex scenarios where we need multiple areas per feature.
  */
 class DisplayAreaPolicyBuilder {
+    @Nullable private HierarchyBuilder mRootHierarchyBuilder;
 
-    private final ArrayList<Feature> mFeatures = new ArrayList<>();
+    /** Defines the root hierarchy. */
+    DisplayAreaPolicyBuilder setRootHierarchy(HierarchyBuilder rootHierarchyBuilder) {
+        // TODO(b/157683117): Add method to add sub root and root choosing func.
+        mRootHierarchyBuilder = rootHierarchyBuilder;
+        return this;
+    }
+
+    Result build(WindowManagerService wmService) {
+        Objects.requireNonNull(mRootHierarchyBuilder,
+                "Root must be set for the display area policy.");
+        Objects.requireNonNull(mRootHierarchyBuilder.mImeContainer, "Ime must not be null");
+        Preconditions.checkCollectionNotEmpty(mRootHierarchyBuilder.mTaskDisplayAreas,
+                "TaskDisplayAreas must not be empty");
+        mRootHierarchyBuilder.build();
+        return new Result(wmService, mRootHierarchyBuilder.mRoot);
+    }
+
+    /**
+     *  Builder to define {@link Feature} and {@link DisplayArea} hierarchy under a
+     * {@link RootDisplayArea}
+     */
+    static class HierarchyBuilder {
+        private static final int LEAF_TYPE_TASK_CONTAINERS = 1;
+        private static final int LEAF_TYPE_IME_CONTAINERS = 2;
+        private static final int LEAF_TYPE_TOKENS = 0;
+
+        private final RootDisplayArea mRoot;
+        private final ArrayList<DisplayAreaPolicyBuilder.Feature> mFeatures = new ArrayList<>();
+        private final ArrayList<TaskDisplayArea> mTaskDisplayAreas = new ArrayList<>();
+        @Nullable
+        private DisplayArea<? extends WindowContainer> mImeContainer;
+
+        HierarchyBuilder(RootDisplayArea root) {
+            mRoot = root;
+        }
+
+        /** Adds {@link Feature} that applies to layers under this container. */
+        HierarchyBuilder addFeature(DisplayAreaPolicyBuilder.Feature feature) {
+            mFeatures.add(feature);
+            return this;
+        }
+
+        /**
+         * Sets {@link TaskDisplayArea} that are children of this hierarchy root.
+         * {@link DisplayArea} group must have at least one {@link TaskDisplayArea}.
+         */
+        HierarchyBuilder setTaskDisplayAreas(List<TaskDisplayArea> taskDisplayAreas) {
+            mTaskDisplayAreas.clear();
+            mTaskDisplayAreas.addAll(taskDisplayAreas);
+            return this;
+        }
+
+        /** Sets IME container as a child of this hierarchy root. */
+        HierarchyBuilder setImeContainer(DisplayArea<? extends WindowContainer> imeContainer) {
+            mImeContainer = imeContainer;
+            return this;
+        }
+
+        /** Builds the {@link DisplayArea} hierarchy below root. */
+        private void build() {
+            final WindowManagerPolicy policy = mRoot.mWmService.mPolicy;
+            final int maxWindowLayerCount = policy.getMaxWindowLayer();
+            final DisplayArea.Tokens[] displayAreaForLayer =
+                    new DisplayArea.Tokens[maxWindowLayerCount];
+            final Map<Feature, List<DisplayArea<? extends WindowContainer>>> featureAreas =
+                    new ArrayMap<>(mFeatures.size());
+            for (int i = 0; i < mFeatures.size(); i++) {
+                featureAreas.put(mFeatures.get(i), new ArrayList<>());
+            }
+
+            // This method constructs the layer hierarchy with the following properties:
+            // (1) Every feature maps to a set of DisplayAreas
+            // (2) After adding a window, for every feature the window's type belongs to,
+            //     it is a descendant of one of the corresponding DisplayAreas of the feature.
+            // (3) Z-order is maintained, i.e. if z-range(area) denotes the set of layers of windows
+            //     within a DisplayArea:
+            //      for every pair of DisplayArea siblings (a,b), where a is below b, it holds that
+            //      max(z-range(a)) <= min(z-range(b))
+            //
+            // The algorithm below iteratively creates such a hierarchy:
+            //  - Initially, all windows are attached to the root.
+            //  - For each feature we create a set of DisplayAreas, by looping over the layers
+            //    - if the feature does apply to the current layer, we need to find a DisplayArea
+            //      for it to satisfy (2)
+            //      - we can re-use the previous layer's area if:
+            //         the current feature also applies to the previous layer, (to satisfy (3))
+            //         and the last feature that applied to the previous layer is the same as
+            //           the last feature that applied to the current layer (to satisfy (2))
+            //      - otherwise we create a new DisplayArea below the last feature that applied
+            //        to the current layer
+
+            PendingArea[] areaForLayer = new PendingArea[maxWindowLayerCount];
+            final PendingArea root = new PendingArea(null, 0, null);
+            Arrays.fill(areaForLayer, root);
+
+            // Create DisplayAreas to cover all defined features.
+            final int size = mFeatures.size();
+            for (int i = 0; i < size; i++) {
+                // Traverse the features with the order they are defined, so that the early defined
+                // feature will be on the top in the hierarchy.
+                final Feature feature = mFeatures.get(i);
+                PendingArea featureArea = null;
+                for (int layer = 0; layer < maxWindowLayerCount; layer++) {
+                    if (feature.mWindowLayers[layer]) {
+                        // This feature will be applied to this window layer.
+                        //
+                        // We need to find a DisplayArea for it:
+                        // We can reuse the existing one if it was created for this feature for the
+                        // previous layer AND the last feature that applied to the previous layer is
+                        // the same as the feature that applied to the current layer (so they are ok
+                        // to share the same parent DisplayArea).
+                        if (featureArea == null || featureArea.mParent != areaForLayer[layer]) {
+                            // No suitable DisplayArea:
+                            // Create a new one under the previous area (as parent) for this layer.
+                            featureArea = new PendingArea(feature, layer, areaForLayer[layer]);
+                            areaForLayer[layer].mChildren.add(featureArea);
+                        }
+                        areaForLayer[layer] = featureArea;
+                    } else {
+                        // This feature won't be applied to this window layer. If it needs to be
+                        // applied to the next layer, we will need to create a new DisplayArea for
+                        // that.
+                        featureArea = null;
+                    }
+                }
+            }
+
+            // Create Tokens as leaf for every layer.
+            PendingArea leafArea = null;
+            int leafType = LEAF_TYPE_TOKENS;
+            for (int layer = 0; layer < maxWindowLayerCount; layer++) {
+                int type = typeOfLayer(policy, layer);
+                // Check whether we can reuse the same Tokens with the previous layer. This happens
+                // if the previous layer is the same type as the current layer AND there is no
+                // feature that applies to only one of them.
+                if (leafArea == null || leafArea.mParent != areaForLayer[layer]
+                        || type != leafType) {
+                    // Create a new Tokens for this layer.
+                    leafArea = new PendingArea(null /* feature */, layer, areaForLayer[layer]);
+                    areaForLayer[layer].mChildren.add(leafArea);
+                    leafType = type;
+                    if (leafType == LEAF_TYPE_TASK_CONTAINERS) {
+                        // We use the passed in TaskDisplayAreas for task container type of layer.
+                        // Skip creating Tokens even if there is no TDA.
+                        addTaskDisplayAreasToLayer(areaForLayer[layer]);
+                        leafArea.mSkipTokens = true;
+                    } else if (leafType == LEAF_TYPE_IME_CONTAINERS) {
+                        // We use the passed in ImeContainer for ime container type of layer.
+                        // Skip creating Tokens even if there is no ime container.
+                        leafArea.mExisting = mImeContainer;
+                        leafArea.mSkipTokens = true;
+                    }
+                }
+                leafArea.mMaxLayer = layer;
+            }
+            root.computeMaxLayer();
+
+            // We built a tree of PendingAreas above with all the necessary info to represent the
+            // hierarchy, now create and attach real DisplayAreas to the root.
+            root.instantiateChildren(mRoot, displayAreaForLayer, 0, featureAreas);
+
+            // Notify the root that we have finished attaching all the DisplayAreas. Cache all the
+            // feature related collections there for fast access.
+            mRoot.onHierarchyBuilt(mFeatures, displayAreaForLayer, featureAreas, mTaskDisplayAreas);
+        }
+
+        /** Adds all {@link TaskDisplayArea} to the specified layer */
+        private void addTaskDisplayAreasToLayer(PendingArea parentPendingArea) {
+            final int count = mTaskDisplayAreas.size();
+            for (int i = 0; i < count; i++) {
+                PendingArea leafArea =
+                        new PendingArea(null /* feature */, APPLICATION_LAYER, parentPendingArea);
+                leafArea.mExisting = mTaskDisplayAreas.get(i);
+                leafArea.mMaxLayer = APPLICATION_LAYER;
+                parentPendingArea.mChildren.add(leafArea);
+            }
+        }
+
+        private static int typeOfLayer(WindowManagerPolicy policy, int layer) {
+            if (layer == APPLICATION_LAYER) {
+                return LEAF_TYPE_TASK_CONTAINERS;
+            } else if (layer == policy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD)
+                    || layer == policy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD_DIALOG)) {
+                return LEAF_TYPE_IME_CONTAINERS;
+            } else {
+                return LEAF_TYPE_TOKENS;
+            }
+        }
+    }
 
     /** Supplier interface to provide a new created {@link DisplayArea}. */
     interface NewDisplayAreaSupplier {
@@ -116,8 +309,8 @@ class DisplayAreaPolicyBuilder {
             private NewDisplayAreaSupplier mNewDisplayAreaSupplier = DisplayArea::new;
 
             /**
-             * Build a new feature that applies to a set of window types as specified by the builder
-             * methods.
+             * Builds a new feature that applies to a set of window types as specified by the
+             * builder methods.
              *
              * <p>The set of types is updated iteratively in the order of the method invocations.
              * For example, {@code all().except(TYPE_STATUS_BAR)} expresses that a feature should
@@ -208,104 +401,9 @@ class DisplayAreaPolicyBuilder {
     }
 
     static class Result extends DisplayAreaPolicy {
-        private static final int LEAF_TYPE_TASK_CONTAINERS = 1;
-        private static final int LEAF_TYPE_IME_CONTAINERS = 2;
-        private static final int LEAF_TYPE_TOKENS = 0;
 
-        private final int mMaxWindowLayer = mWmService.mPolicy.getMaxWindowLayer();
-
-        private final ArrayList<Feature> mFeatures;
-        private final Map<Feature, List<DisplayArea<? extends WindowContainer>>> mAreas;
-        private final DisplayArea.Tokens[] mAreaForLayer = new DisplayArea.Tokens[mMaxWindowLayer];
-
-        Result(WindowManagerService wmService, DisplayContent content, DisplayArea.Root root,
-                DisplayArea<? extends WindowContainer> imeContainer,
-                List<TaskDisplayArea> taskDisplayAreas, ArrayList<Feature> features) {
-            super(wmService, content, root, imeContainer, taskDisplayAreas);
-            mFeatures = features;
-            mAreas = new HashMap<>(features.size());
-            for (int i = 0; i < mFeatures.size(); i++) {
-                mAreas.put(mFeatures.get(i), new ArrayList<>());
-            }
-        }
-
-        @Override
-        public void attachDisplayAreas() {
-            // This method constructs the layer hierarchy with the following properties:
-            // (1) Every feature maps to a set of DisplayAreas
-            // (2) After adding a window, for every feature the window's type belongs to,
-            //     it is a descendant of one of the corresponding DisplayAreas of the feature.
-            // (3) Z-order is maintained, i.e. if z-range(area) denotes the set of layers of windows
-            //     within a DisplayArea:
-            //      for every pair of DisplayArea siblings (a,b), where a is below b, it holds that
-            //      max(z-range(a)) <= min(z-range(b))
-            //
-            // The algorithm below iteratively creates such a hierarchy:
-            //  - Initially, all windows are attached to the root.
-            //  - For each feature we create a set of DisplayAreas, by looping over the layers
-            //    - if the feature does apply to the current layer, we need to find a DisplayArea
-            //      for it to satisfy (2)
-            //      - we can re-use the previous layer's area if:
-            //         the current feature also applies to the previous layer, (to satisfy (3))
-            //         and the last feature that applied to the previous layer is the same as
-            //           the last feature that applied to the current layer (to satisfy (2))
-            //      - otherwise we create a new DisplayArea below the last feature that applied
-            //        to the current layer
-
-
-            PendingArea[] areaForLayer = new PendingArea[mMaxWindowLayer];
-            final PendingArea root = new PendingArea(null, 0, null);
-            Arrays.fill(areaForLayer, root);
-
-            final int size = mFeatures.size();
-            for (int i = 0; i < size; i++) {
-                PendingArea featureArea = null;
-                for (int layer = 0; layer < mMaxWindowLayer; layer++) {
-                    final Feature feature = mFeatures.get(i);
-                    if (feature.mWindowLayers[layer]) {
-                        if (featureArea == null || featureArea.mParent != areaForLayer[layer]) {
-                            // No suitable DisplayArea - create a new one under the previous area
-                            // for this layer.
-                            featureArea = new PendingArea(feature, layer, areaForLayer[layer]);
-                            areaForLayer[layer].mChildren.add(featureArea);
-                        }
-                        areaForLayer[layer] = featureArea;
-                    } else {
-                        featureArea = null;
-                    }
-                }
-            }
-
-            PendingArea leafArea = null;
-            int leafType = LEAF_TYPE_TOKENS;
-            for (int layer = 0; layer < mMaxWindowLayer; layer++) {
-                int type = typeOfLayer(mWmService.mPolicy, layer);
-                if (leafArea == null || leafArea.mParent != areaForLayer[layer]
-                        || type != leafType) {
-                    leafArea = new PendingArea(null, layer, areaForLayer[layer]);
-                    areaForLayer[layer].mChildren.add(leafArea);
-                    leafType = type;
-                    if (leafType == LEAF_TYPE_TASK_CONTAINERS) {
-                        addTaskDisplayAreasToLayer(areaForLayer[layer], layer);
-                    } else if (leafType == LEAF_TYPE_IME_CONTAINERS) {
-                        leafArea.mExisting = mImeContainer;
-                    }
-                }
-                leafArea.mMaxLayer = layer;
-            }
-            root.computeMaxLayer();
-            root.instantiateChildren(mRoot, mAreaForLayer, 0, mAreas);
-        }
-
-        /** Adds all task display areas to the specified layer */
-        private void addTaskDisplayAreasToLayer(PendingArea parentPendingArea, int layer) {
-            final int count = mTaskDisplayAreas.size();
-            for (int i = 0; i < count; i++) {
-                PendingArea leafArea = new PendingArea(null, layer, parentPendingArea);
-                leafArea.mExisting = mTaskDisplayAreas.get(i);
-                leafArea.mMaxLayer = layer;
-                parentPendingArea.mChildren.add(leafArea);
-            }
+        Result(WindowManagerService wmService, RootDisplayArea root) {
+            super(wmService, root);
         }
 
         @Override
@@ -316,64 +414,40 @@ class DisplayAreaPolicyBuilder {
 
         @VisibleForTesting
         DisplayArea.Tokens findAreaForToken(WindowToken token) {
-            int windowLayerFromType = token.getWindowLayerFromType();
-            if (windowLayerFromType == APPLICATION_LAYER) {
-                throw new IllegalArgumentException(
-                        "There shouldn't be WindowToken on APPLICATION_LAYER");
-            } else if (token.mRoundedCornerOverlay) {
-                windowLayerFromType = mMaxWindowLayer - 1;
-            }
-            return mAreaForLayer[windowLayerFromType];
+            // TODO(b/157683117): Choose root/sub root from OEM provided func.
+            return mRoot.findAreaForToken(token);
         }
 
         @VisibleForTesting
-        ArrayList<Feature> getFeatures() {
-            return mFeatures;
+        List<Feature> getFeatures() {
+            // TODO(b/157683117): Also get feature from sub root.
+            return new ArrayList<>(mRoot.mFeatures);
         }
 
         @Override
         public List<DisplayArea<? extends WindowContainer>> getDisplayAreas(int featureId) {
-            for (int i = 0; i < mFeatures.size(); i++) {
-                Feature feature = mFeatures.get(i);
-                if (feature.getId() == featureId) {
-                    return getDisplayAreas(feature);
+            // TODO(b/157683117): Also get display areas from sub root.
+            List<Feature> features = getFeatures();
+            for (int i = 0; i < features.size(); i++) {
+                Feature feature = features.get(i);
+                if (feature.mId == featureId) {
+                    return new ArrayList<>(mRoot.mFeatureToDisplayAreas.get(feature));
                 }
             }
             return new ArrayList<>();
         }
 
-        public List<DisplayArea<? extends WindowContainer>> getDisplayAreas(Feature feature) {
-            return mAreas.get(feature);
+        @Override
+        public int getTaskDisplayAreaCount() {
+            // TODO(b/157683117): Also add TDA from sub root.
+            return mRoot.mTaskDisplayAreas.size();
         }
 
-        private static int typeOfLayer(WindowManagerPolicy policy, int layer) {
-            if (layer == APPLICATION_LAYER) {
-                return LEAF_TYPE_TASK_CONTAINERS;
-            } else if (layer == policy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD)
-                    || layer == policy.getWindowLayerFromTypeLw(TYPE_INPUT_METHOD_DIALOG)) {
-                return LEAF_TYPE_IME_CONTAINERS;
-            } else {
-                return LEAF_TYPE_TOKENS;
-            }
+        @Override
+        public TaskDisplayArea getTaskDisplayAreaAt(int index) {
+            // TODO(b/157683117): Get TDA from root/sub root based on their z-order.
+            return mRoot.mTaskDisplayAreas.get(index);
         }
-    }
-
-    DisplayAreaPolicyBuilder addFeature(Feature feature) {
-        mFeatures.add(feature);
-        return this;
-    }
-
-    protected List<Feature> getFeatures() {
-        return mFeatures;
-    }
-
-    Result build(WindowManagerService wmService,
-            DisplayContent content, DisplayArea.Root root,
-            DisplayArea<? extends WindowContainer> imeContainer,
-            List<TaskDisplayArea> taskDisplayAreas) {
-
-        return new Result(wmService, content, root, imeContainer, taskDisplayAreas, new ArrayList<>(
-                mFeatures));
     }
 
     static class PendingArea {
@@ -382,11 +456,21 @@ class DisplayAreaPolicyBuilder {
         final Feature mFeature;
         final PendingArea mParent;
         int mMaxLayer;
-        DisplayArea mExisting;
 
-        PendingArea(Feature feature,
-                int minLayer,
-                PendingArea parent) {
+        /** If not {@code null}, use this instead of creating a {@link DisplayArea.Tokens}. */
+        @Nullable DisplayArea mExisting;
+
+        /**
+         * Whether to skip creating a {@link DisplayArea.Tokens} if {@link #mExisting} is
+         * {@code null}.
+         *
+         * This will be set for {@link HierarchyBuilder#LEAF_TYPE_IME_CONTAINERS} and
+         * {@link HierarchyBuilder#LEAF_TYPE_TASK_CONTAINERS}, because we don't want to create
+         * {@link DisplayArea.Tokens} for them even if they are not set.
+         */
+        boolean mSkipTokens = false;
+
+        PendingArea(Feature feature, int minLayer, PendingArea parent) {
             mMinLayer = minLayer;
             mFeature = feature;
             mParent = parent;
@@ -399,13 +483,17 @@ class DisplayAreaPolicyBuilder {
             return mMaxLayer;
         }
 
-        void instantiateChildren(DisplayArea<DisplayArea> parent,
-                DisplayArea.Tokens[] areaForLayer, int level, Map<Feature, List<DisplayArea<?
-                extends WindowContainer>>> areas) {
+        void instantiateChildren(DisplayArea<DisplayArea> parent, DisplayArea.Tokens[] areaForLayer,
+                int level, Map<Feature, List<DisplayArea<? extends WindowContainer>>> areas) {
             mChildren.sort(Comparator.comparingInt(pendingArea -> pendingArea.mMinLayer));
             for (int i = 0; i < mChildren.size(); i++) {
                 final PendingArea child = mChildren.get(i);
                 final DisplayArea area = child.createArea(parent, areaForLayer);
+                if (area == null) {
+                    // TaskDisplayArea and ImeContainer can be set at different hierarchy, so it can
+                    // be null.
+                    continue;
+                }
                 parent.addChild(area, WindowContainer.POSITION_TOP);
                 if (child.mFeature != null) {
                     areas.get(child.mFeature).add(area);
@@ -414,10 +502,14 @@ class DisplayAreaPolicyBuilder {
             }
         }
 
+        @Nullable
         private DisplayArea createArea(DisplayArea<DisplayArea> parent,
                 DisplayArea.Tokens[] areaForLayer) {
             if (mExisting != null) {
                 return mExisting;
+            }
+            if (mSkipTokens) {
+                return null;
             }
             DisplayArea.Type type;
             if (mMinLayer > APPLICATION_LAYER) {

@@ -34,54 +34,22 @@ import java.util.List;
  */
 public abstract class DisplayAreaPolicy {
     protected final WindowManagerService mWmService;
-    protected final DisplayContent mContent;
 
     /**
      * The root DisplayArea. Attach all DisplayAreas to this area (directly or indirectly).
      */
-    protected final DisplayArea.Root mRoot;
-
-    /**
-     * The IME container. The IME's windows are automatically added to this container.
-     */
-    protected final DisplayArea<? extends WindowContainer> mImeContainer;
-
-    /**
-     * The task display areas. Tasks etc. are automatically added to these containers.
-     */
-    protected final List<TaskDisplayArea> mTaskDisplayAreas;
+    protected final RootDisplayArea mRoot;
 
     /**
      * Construct a new {@link DisplayAreaPolicy}
      *
      * @param wmService the window manager service instance
-     * @param content the display content for which the policy applies
      * @param root the root display area under which the policy operates
-     * @param imeContainer the ime container that the policy must attach
-     * @param taskDisplayAreas the task display areas that the policy must attach
-     *
-     * @see #attachDisplayAreas()
      */
-    protected DisplayAreaPolicy(WindowManagerService wmService,
-            DisplayContent content, DisplayArea.Root root,
-            DisplayArea<? extends WindowContainer> imeContainer,
-            List<TaskDisplayArea> taskDisplayAreas) {
+    protected DisplayAreaPolicy(WindowManagerService wmService, RootDisplayArea root) {
         mWmService = wmService;
-        mContent = content;
         mRoot = root;
-        mImeContainer = imeContainer;
-        mTaskDisplayAreas = taskDisplayAreas;
     }
-
-    /**
-     * Called to ask the policy to set up the DisplayArea hierarchy. At a minimum this must:
-     *
-     * - attach mImeContainer to mRoot (or one of its descendants)
-     * - attach mTaskStacks to mRoot (or one of its descendants)
-     *
-     * Additionally, this is the right place to set up any other DisplayAreas as desired.
-     */
-    public abstract void attachDisplayAreas();
 
     /**
      * Called to ask the policy to attach the given WindowToken to the DisplayArea hierarchy.
@@ -98,28 +66,28 @@ public abstract class DisplayAreaPolicy {
     /**
      * @return the number of task display areas on the display.
      */
-    public int getTaskDisplayAreaCount() {
-        return mTaskDisplayAreas.size();
-    }
+    public abstract int getTaskDisplayAreaCount();
 
     /**
      * @return the task display area at index.
      */
-    public TaskDisplayArea getTaskDisplayAreaAt(int index) {
-        return mTaskDisplayAreas.get(index);
-    }
+    public abstract TaskDisplayArea getTaskDisplayAreaAt(int index);
 
     /** Provider for platform-default display area policy. */
     static final class DefaultProvider implements DisplayAreaPolicy.Provider {
         @Override
         public DisplayAreaPolicy instantiate(WindowManagerService wmService,
-                DisplayContent content, DisplayArea.Root root,
+                DisplayContent content, RootDisplayArea root,
                 DisplayArea<? extends WindowContainer> imeContainer) {
             final TaskDisplayArea defaultTaskDisplayArea = new TaskDisplayArea(content, wmService,
                     "DefaultTaskDisplayArea", FEATURE_DEFAULT_TASK_CONTAINER);
             final List<TaskDisplayArea> tdaList = new ArrayList<>();
             tdaList.add(defaultTaskDisplayArea);
-            return new DisplayAreaPolicyBuilder()
+
+            // Define the features that will be supported under the root of the whole logical
+            // display. The policy will build the DisplayArea hierarchy based on this.
+            DisplayAreaPolicyBuilder.HierarchyBuilder rootHierarchy =
+                    new DisplayAreaPolicyBuilder.HierarchyBuilder(root)
                     .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
                             "WindowedMagnification", FEATURE_WINDOWED_MAGNIFICATION)
                             .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
@@ -133,7 +101,12 @@ public abstract class DisplayAreaPolicy {
                             .all()
                             .except(TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
                             .build())
-                    .build(wmService, content, root, imeContainer, tdaList);
+                    .setImeContainer(imeContainer)
+                    .setTaskDisplayAreas(tdaList);
+
+            // Instantiate the policy with the hierarchy defined above. This will create and attach
+            // all the necessary DisplayAreas to the root.
+            return new DisplayAreaPolicyBuilder().setRootHierarchy(rootHierarchy).build(wmService);
         }
     }
 
@@ -146,16 +119,15 @@ public abstract class DisplayAreaPolicy {
      */
     public interface Provider {
         /**
-         * Instantiate a new DisplayAreaPolicy.
+         * Instantiates a new DisplayAreaPolicy. It should set up the {@link DisplayArea} hierarchy.
          *
          * @see DisplayAreaPolicy#DisplayAreaPolicy
          */
-        DisplayAreaPolicy instantiate(WindowManagerService wmService,
-                DisplayContent content, DisplayArea.Root root,
-                DisplayArea<? extends WindowContainer> imeContainer);
+        DisplayAreaPolicy instantiate(WindowManagerService wmService, DisplayContent content,
+                RootDisplayArea root, DisplayArea<? extends WindowContainer> imeContainer);
 
         /**
-         * Instantiate the device-specific {@link Provider}.
+         * Instantiates the device-specific {@link Provider}.
          */
         static Provider fromResources(Resources res) {
             String name = res.getString(
