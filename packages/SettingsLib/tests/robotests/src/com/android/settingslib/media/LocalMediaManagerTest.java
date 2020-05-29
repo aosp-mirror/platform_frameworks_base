@@ -506,7 +506,7 @@ public class LocalMediaManagerTest {
         mLocalMediaManager.connectDevice(device);
 
         mLocalMediaManager.mDeviceAttributeChangeCallback.onDeviceAttributesChanged();
-        verify(device).setState(LocalMediaManager.MediaDeviceState.STATE_DISCONNECTED);
+        verify(device).setState(LocalMediaManager.MediaDeviceState.STATE_CONNECTING_FAILED);
     }
 
     @Test
