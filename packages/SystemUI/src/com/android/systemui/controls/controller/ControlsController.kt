@@ -114,12 +114,12 @@ interface ControlsController : UserAwareController {
     /**
      * Send a request to seed favorites into the persisted XML file
      *
-     * @param componentName the component to seed controls from
-     * @param callback true if the favorites were persisted
+     * @param componentNames the list of components to seed controls from
+     * @param callback one [SeedResponse] per componentName
      */
-    fun seedFavoritesForComponent(
-        componentName: ComponentName,
-        callback: Consumer<Boolean>
+    fun seedFavoritesForComponents(
+        componentNames: List<ComponentName>,
+        callback: Consumer<SeedResponse>
     )
 
     /**
@@ -235,3 +235,5 @@ fun createLoadDataObject(
         override val errorOnLoad = error
     }
 }
+
+data class SeedResponse(val packageName: String, val accepted: Boolean)
