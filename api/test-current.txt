@@ -793,6 +793,13 @@ package android.companion {
 
 package android.content {
 
+  public class ApexEnvironment {
+    method @NonNull public static android.content.ApexEnvironment getApexEnvironment(@NonNull String);
+    method @NonNull public java.io.File getCredentialProtectedDataDirForUser(@NonNull android.os.UserHandle);
+    method @NonNull public java.io.File getDeviceProtectedDataDir();
+    method @NonNull public java.io.File getDeviceProtectedDataDirForUser(@NonNull android.os.UserHandle);
+  }
+
   public final class AutofillOptions implements android.os.Parcelable {
     ctor public AutofillOptions(int, boolean);
     method public int describeContents();
