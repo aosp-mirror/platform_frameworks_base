@@ -664,13 +664,13 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public long[] getAuthenticatorIds() {
+        public long[] getAuthenticatorIds(int callingUserId) {
             checkInternalPermission();
 
             final List<Long> ids = new ArrayList<>();
             for (BiometricSensor sensor : mSensors) {
                 try {
-                    final long id = sensor.impl.getAuthenticatorId();
+                    final long id = sensor.impl.getAuthenticatorId(callingUserId);
                     if (Utils.isAtLeastStrength(sensor.getCurrentStrength(),
                             Authenticators.BIOMETRIC_STRONG) && id != 0) {
                         ids.add(id);
