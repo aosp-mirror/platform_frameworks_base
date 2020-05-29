@@ -237,10 +237,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     }
 
     protected void maySendActiveSource(int dest) {
-        if (mIsActiveSource) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
-                    mAddress, mService.getPhysicalAddress()));
+        if (!mIsActiveSource) {
+            return;
         }
+        addAndStartAction(new ActiveSourceAction(this, dest));
     }
 
     /**
