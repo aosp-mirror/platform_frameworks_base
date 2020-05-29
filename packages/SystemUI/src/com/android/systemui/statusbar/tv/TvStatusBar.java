@@ -20,18 +20,21 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SystemUI;
+import com.android.systemui.assist.AssistManager;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.tv.micdisclosure.AudioRecordingDisclosureBar;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
+import dagger.Lazy;
 
 /**
  * Status bar implementation for "large screen" products that mostly present no on-screen nav.
@@ -49,11 +52,14 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
             "com.android.tv.action.OPEN_NOTIFICATIONS_PANEL";
 
     private final CommandQueue mCommandQueue;
+    private final Lazy<AssistManager> mAssistManagerLazy;
 
     @Inject
-    public TvStatusBar(Context context, CommandQueue commandQueue) {
+    public TvStatusBar(Context context, CommandQueue commandQueue,
+            Lazy<AssistManager> assistManagerLazy) {
         super(context);
         mCommandQueue = commandQueue;
+        mAssistManagerLazy = assistManagerLazy;
     }
 
     @Override
@@ -83,5 +89,10 @@ public class TvStatusBar extends SystemUI implements CommandQueue.Callbacks {
             intent.setPackage(ri.activityInfo.packageName);
             mContext.startActivityAsUser(intent, UserHandle.CURRENT);
         }
+    }
+
+    @Override
+    public void startAssist(Bundle args) {
+        mAssistManagerLazy.get().startAssist(args);
     }
 }
