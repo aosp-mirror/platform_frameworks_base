@@ -26,6 +26,7 @@
     android:id="@id/contentPanel">
 
     <RelativeLayout
+        android:id="@+id/title_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alwaysShow="true"
@@ -33,7 +34,7 @@
         android:paddingTop="@dimen/resolver_small_margin"
         android:paddingStart="@dimen/resolver_edge_margin"
         android:paddingEnd="@dimen/resolver_edge_margin"
-        android:paddingBottom="@dimen/resolver_edge_margin"
+        android:paddingBottom="@dimen/resolver_title_padding_bottom"
         android:background="@drawable/bottomsheet_background">
 
         <TextView
