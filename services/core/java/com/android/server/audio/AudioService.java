@@ -5904,16 +5904,8 @@ public class AudioService extends IAudioService.Stub
                 if (state != mIsMutedInternally) {
                     changed = true;
                     mIsMutedInternally = state;
-
-                    // Set the new mute volume. This propagates the values to
-                    // the audio system, otherwise the volume won't be changed
-                    // at the lower level.
-                    sendMsg(mAudioHandler,
-                            MSG_SET_ALL_VOLUMES,
-                            SENDMSG_QUEUE,
-                            0,
-                            0,
-                            this, 0);
+                    // mute immediately to avoid delay and preemption when using a message.
+                    applyAllVolumes();
                 }
             }
             if (changed) {
