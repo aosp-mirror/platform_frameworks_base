@@ -122,7 +122,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.artistText).thenReturn(artistText)
         seamless = FrameLayout(context)
         val seamlessBackground = mock(RippleDrawable::class.java)
-        seamless.setBackground(seamlessBackground)
+        seamless.foreground = seamlessBackground
         whenever(seamlessBackground.getDrawable(0)).thenReturn(mock(GradientDrawable::class.java))
         whenever(holder.seamless).thenReturn(seamless)
         seamlessIcon = ImageView(context)
