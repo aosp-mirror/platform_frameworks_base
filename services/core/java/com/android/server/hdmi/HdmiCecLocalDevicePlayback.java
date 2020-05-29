@@ -251,17 +251,6 @@ public class HdmiCecLocalDevicePlayback extends HdmiCecLocalDeviceSource {
         }
     }
 
-    @Override
-    protected void maySendActiveSource(int dest) {
-        if (mIsActiveSource) {
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildActiveSource(
-                    mAddress, mService.getPhysicalAddress()));
-            // Always reports menu-status active to receive RCP.
-            mService.sendCecCommand(HdmiCecMessageBuilder.buildReportMenuStatus(
-                    mAddress, dest, Constants.MENU_STATE_ACTIVATED));
-        }
-    }
-
     @ServiceThreadOnly
     protected boolean handleSetMenuLanguage(HdmiCecMessage message) {
         assertRunOnServiceThread();
