@@ -177,6 +177,9 @@ public class PackageWatchdog {
     // 0 if no prune is scheduled.
     @GuardedBy("mLock")
     private long mUptimeAtLastStateSync;
+    // If true, sync explicit health check packages with the ExplicitHealthCheckController.
+    @GuardedBy("mLock")
+    private boolean mSyncRequired = false;
 
     @FunctionalInterface
     @VisibleForTesting
@@ -252,6 +255,7 @@ public class PackageWatchdog {
      */
     public void registerHealthObserver(PackageHealthObserver observer) {
         synchronized (mLock) {
+            mSyncRequired = true;
             ObserverInternal internalObserver = mAllObservers.get(observer.getName());
             if (internalObserver != null) {
                 internalObserver.registeredObserver = observer;
@@ -638,7 +642,7 @@ public class PackageWatchdog {
         synchronized (mLock) {
             if (mIsPackagesReady) {
                 Set<String> packages = getPackagesPendingHealthChecksLocked();
-                if (!packages.equals(mRequestedHealthCheckPackages) || packages.isEmpty()) {
+                if (!packages.equals(mRequestedHealthCheckPackages) || mSyncRequired) {
                     syncRequired = true;
                     mRequestedHealthCheckPackages = packages;
                 }
@@ -650,6 +654,7 @@ public class PackageWatchdog {
             Slog.i(TAG, "Syncing health check requests for packages: "
                     + mRequestedHealthCheckPackages);
             mHealthCheckController.syncRequests(mRequestedHealthCheckPackages);
+            mSyncRequired = false;
         }
     }
 
