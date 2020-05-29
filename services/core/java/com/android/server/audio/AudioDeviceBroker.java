@@ -63,7 +63,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
     /*package*/ static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
 
     // Delay before checking it music should be unmuted after processing an A2DP message
-    private static final int BTA2DP_MUTE_CHECK_DELAY_MS = 50;
+    private static final int BTA2DP_MUTE_CHECK_DELAY_MS = 100;
 
     private final @NonNull AudioService mAudioService;
     private final @NonNull Context mContext;
@@ -160,8 +160,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
         synchronized (mDeviceStateLock) {
             AudioSystem.setParameters(
                     "BT_SCO=" + (mForcedUseForComm == AudioSystem.FORCE_BT_SCO ? "on" : "off"));
-            onSetForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm, "onAudioServerDied");
-            onSetForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm, "onAudioServerDied");
+            onSetForceUse(AudioSystem.FOR_COMMUNICATION, mForcedUseForComm,
+                          false /*fromA2dp*/, "onAudioServerDied");
+            onSetForceUse(AudioSystem.FOR_RECORD, mForcedUseForComm,
+                          false /*fromA2dp*/, "onAudioServerDied");
         }
         // restore devices
         sendMsgNoDelay(MSG_RESTORE_DEVICES, SENDMSG_REPLACE);
@@ -667,7 +669,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     // Handles request to override default use of A2DP for media.
     //@GuardedBy("mConnectedDevices")
-    /*package*/ void setBluetoothA2dpOnInt(boolean on, String source) {
+    /*package*/ void setBluetoothA2dpOnInt(boolean on, boolean fromA2dp, String source) {
         // for logging only
         final String eventSource = new StringBuilder("setBluetoothA2dpOn(").append(on)
                 .append(") from u/pid:").append(Binder.getCallingUid()).append("/")
@@ -679,6 +681,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
             onSetForceUse(
                     AudioSystem.FOR_MEDIA,
                     mBluetoothA2dpEnabled ? AudioSystem.FORCE_NONE : AudioSystem.FORCE_NO_BT_A2DP,
+                    fromA2dp,
                     eventSource);
         }
     }
@@ -705,8 +708,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
         mBrokerHandler.removeMessages(MSG_BT_HEADSET_CNCT_FAILED);
     }
 
-    /*package*/ void postReportNewRoutes() {
-        sendMsgNoDelay(MSG_REPORT_NEW_ROUTES, SENDMSG_NOOP);
+    /*package*/ void postReportNewRoutes(boolean fromA2dp) {
+        sendMsgNoDelay(fromA2dp ? MSG_REPORT_NEW_ROUTES_A2DP : MSG_REPORT_NEW_ROUTES, SENDMSG_NOOP);
     }
 
     /*package*/ void postA2dpActiveDeviceChange(
@@ -774,9 +777,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
     // These methods are ALL synchronous, in response to message handling in BrokerHandler
     // Blocking in any of those will block the message queue
 
-    private void onSetForceUse(int useCase, int config, String eventSource) {
+    private void onSetForceUse(int useCase, int config, boolean fromA2dp, String eventSource) {
         if (useCase == AudioSystem.FOR_MEDIA) {
-            postReportNewRoutes();
+            postReportNewRoutes(fromA2dp);
         }
         AudioService.sForceUseLogger.log(
                 new AudioServiceEvents.ForceUseEvent(useCase, config, eventSource));
@@ -870,9 +873,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     break;
                 case MSG_IIL_SET_FORCE_USE: // intended fall-through
                 case MSG_IIL_SET_FORCE_BT_A2DP_USE:
-                    onSetForceUse(msg.arg1, msg.arg2, (String) msg.obj);
+                    onSetForceUse(msg.arg1, msg.arg2,
+                                  (msg.what == MSG_IIL_SET_FORCE_BT_A2DP_USE), (String) msg.obj);
                     break;
                 case MSG_REPORT_NEW_ROUTES:
+                case MSG_REPORT_NEW_ROUTES_A2DP:
                     synchronized (mDeviceStateLock) {
                         mDeviceInventory.onReportNewRoutes();
                     }
@@ -1057,7 +1062,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     mDeviceInventory.onSaveRemovePreferredDevice(strategy);
                 } break;
                 case MSG_CHECK_MUTE_MUSIC:
-                    checkMessagesMuteMusic();
+                    checkMessagesMuteMusic(0);
                     break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
@@ -1133,6 +1138,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     private static final int MSG_L_SPEAKERPHONE_CLIENT_DIED = 35;
     private static final int MSG_CHECK_MUTE_MUSIC = 36;
+    private static final int MSG_REPORT_NEW_ROUTES_A2DP = 37;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
@@ -1224,6 +1230,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
             Binder.restoreCallingIdentity(identity);
         }
 
+        if (MESSAGES_MUTE_MUSIC.contains(msg)) {
+            checkMessagesMuteMusic(msg);
+        }
+
         synchronized (sLastDeviceConnectionMsgTimeLock) {
             long time = SystemClock.uptimeMillis() + delay;
 
@@ -1245,12 +1255,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
                 default:
                     break;
             }
-
             mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj),
                     time);
-        }
-        if (MESSAGES_MUTE_MUSIC.contains(msg)) {
-            checkMessagesMuteMusic();
         }
     }
 
@@ -1264,19 +1270,24 @@ import java.util.concurrent.atomic.AtomicBoolean;
         MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE);
         MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION);
         MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION);
+        MESSAGES_MUTE_MUSIC.add(MSG_IIL_SET_FORCE_BT_A2DP_USE);
+        MESSAGES_MUTE_MUSIC.add(MSG_REPORT_NEW_ROUTES_A2DP);
     }
 
     private AtomicBoolean mMusicMuted = new AtomicBoolean(false);
 
     /** Mutes or unmutes music according to pending A2DP messages */
-    private void checkMessagesMuteMusic() {
-        boolean mute = false;
-        for (int msg : MESSAGES_MUTE_MUSIC) {
-            if (mBrokerHandler.hasMessages(msg)) {
-                mute = true;
-                break;
+    private void checkMessagesMuteMusic(int message) {
+        boolean mute = message != 0;
+        if (!mute) {
+            for (int msg : MESSAGES_MUTE_MUSIC) {
+                if (mBrokerHandler.hasMessages(msg)) {
+                    mute = true;
+                    break;
+                }
             }
         }
+
         if (mute != mMusicMuted.getAndSet(mute)) {
             mAudioService.setMusicMute(mute);
         }
