@@ -24,6 +24,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 
 import android.content.Context;
 import android.graphics.Rect;
@@ -36,6 +37,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.accessibility.EventStreamTransformation;
+import com.android.server.accessibility.magnification.MagnificationGestureHandler.ScaleChangedListener;
 import com.android.server.accessibility.utils.TouchEventGenerator;
 
 import org.junit.After;
@@ -69,7 +71,6 @@ public class WindowMagnificationGestureHandlerTest {
     private Context mContext;
     private WindowMagnificationManager mWindowMagnificationManager;
     private MockWindowMagnificationConnection mMockConnection;
-
     private WindowMagnificationGestureHandler mWindowMagnificationGestureHandler;
 
     @Before
@@ -78,7 +79,7 @@ public class WindowMagnificationGestureHandlerTest {
         mWindowMagnificationManager = new WindowMagnificationManager(mContext, 0);
         mMockConnection = new MockWindowMagnificationConnection();
         mWindowMagnificationGestureHandler = new WindowMagnificationGestureHandler(
-                mContext, mWindowMagnificationManager, DISPLAY_0);
+                mContext, mWindowMagnificationManager, mock(ScaleChangedListener.class), DISPLAY_0);
         mWindowMagnificationManager.setConnection(mMockConnection.getConnection());
         mMockConnection.getConnectionCallback().onWindowMagnifierBoundsChanged(DISPLAY_0,
                 DEFAULT_WINDOW_FRAME);

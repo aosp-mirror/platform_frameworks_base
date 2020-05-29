@@ -2839,7 +2839,13 @@ public class Activity extends ContextThemeWrapper
                 throw new IllegalStateException("Activity must be resumed to enter"
                         + " picture-in-picture");
             }
-            return ActivityTaskManager.getService().enterPictureInPictureMode(mToken, params);
+            // Set mIsInPictureInPictureMode earlier and don't wait for
+            // onPictureInPictureModeChanged callback here. This is to ensure that
+            // isInPictureInPictureMode returns true in the following onPause callback.
+            // See https://developer.android.com/guide/topics/ui/picture-in-picture for guidance.
+            mIsInPictureInPictureMode = ActivityTaskManager.getService().enterPictureInPictureMode(
+                    mToken, params);
+            return mIsInPictureInPictureMode;
         } catch (RemoteException e) {
             return false;
         }

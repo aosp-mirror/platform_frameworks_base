@@ -42,7 +42,6 @@
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_media</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_screen_record</xliff:g></item>
@@ -97,7 +96,6 @@
     <string translatable="false" name="status_bar_airplane">airplane</string>
     <string translatable="false" name="status_bar_sensors_off">sensors_off</string>
     <string translatable="false" name="status_bar_screen_record">screen_record</string>
-    <string translatable="false" name="status_bar_media">media</string>
 
     <!-- Flag indicating whether the surface flinger has limited
          alpha compositing functionality in hardware.  If set, the window
@@ -4310,6 +4308,10 @@
     <!-- Strip notification RemoteView objects that are larger in bytes than this value (also log)
     (default 2MB) -->
     <integer name="config_notificationStripRemoteViewSizeBytes">5000000</integer>
+
+    <!-- List of packages that can use the Conversation space for their category messages
+    notifications until they target R -->
+    <string-array name="config_notificationMsgPkgsAllowedAsConvos" translatable="false"/>
 
     <!-- Contains a blacklist of apps that should not get pre-installed carrier app permission
          grants, even if the UICC claims that the app should be privileged. See b/138150105 -->

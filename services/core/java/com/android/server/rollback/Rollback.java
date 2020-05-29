@@ -151,7 +151,7 @@ class Rollback {
     /**
      * The user that performed the install with rollback enabled.
      */
-    public final int mUserId;
+    private final int mUserId;
 
     /**
      * The installer package name from the install session that enabled the rollback. May be null if
@@ -160,7 +160,7 @@ class Rollback {
      * If this is an empty string then the installer package name will be resolved by
      * PackageManager.
      */
-    @Nullable public final String mInstallerPackageName;
+    @Nullable private final String mInstallerPackageName;
 
     /**
      * Session ids for all packages in the install. For multi-package sessions, this is the list

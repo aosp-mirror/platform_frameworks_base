@@ -96,6 +96,7 @@ import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATIO
 import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
 import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
+import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_IME;
@@ -1485,8 +1486,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     }
 
-    @Nullable ActivityRecord getFixedRotationLaunchingApp() {
-        return mFixedRotationLaunchingApp;
+    /** Returns {@code true} if the top activity is transformed with the new rotation of display. */
+    boolean hasTopFixedRotationLaunchingApp() {
+        return mFixedRotationLaunchingApp != null
+                // Ignore animating recents because it hasn't really become the top.
+                && mFixedRotationLaunchingApp != mFixedRotationTransitionListener.mAnimatingRecents;
+    }
+
+    @VisibleForTesting
+    boolean isFixedRotationLaunchingApp(ActivityRecord r) {
+        return mFixedRotationLaunchingApp == r;
     }
 
     @VisibleForTesting
@@ -3676,6 +3685,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             boolean isVisible = w.mViewVisibility == View.VISIBLE && !w.mObscured;
             boolean hasDrawn = w.isDrawnLw() && w.hasDrawnLw();
             if (isVisible && !hasDrawn) {
+                ProtoLog.d(WM_DEBUG_BOOT,
+                        "DisplayContent: boot is waiting for window of type %d to be drawn",
+                        w.mAttrs.type);
                 return true;
             }
             if (hasDrawn) {

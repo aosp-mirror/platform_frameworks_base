@@ -33,7 +33,6 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
-import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dagger.qualifiers.UiBackground;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -146,7 +145,6 @@ public interface StatusBarPhoneModule {
             DisplayMetrics displayMetrics,
             MetricsLogger metricsLogger,
             @UiBackground Executor uiBgExecutor,
-            @Main Executor mainExecutor,
             NotificationMediaManager notificationMediaManager,
             NotificationLockscreenUserManager lockScreenUserManager,
             NotificationRemoteInputManager remoteInputManager,
@@ -226,7 +224,6 @@ public interface StatusBarPhoneModule {
                 displayMetrics,
                 metricsLogger,
                 uiBgExecutor,
-                mainExecutor,
                 notificationMediaManager,
                 lockScreenUserManager,
                 remoteInputManager,

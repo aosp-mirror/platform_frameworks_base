@@ -173,15 +173,16 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
      */
     FullScreenMagnificationGestureHandler(Context context,
             MagnificationController magnificationController,
+            MagnificationGestureHandler.ScaleChangedListener listener,
             boolean detectTripleTap,
             boolean detectShortcutTrigger,
             int displayId) {
+        super(listener);
         if (DEBUG_ALL) {
             Log.i(LOG_TAG,
                     "FullScreenMagnificationGestureHandler(detectTripleTap = " + detectTripleTap
                             + ", detectShortcutTrigger = " + detectShortcutTrigger + ")");
         }
-
         mMagnificationController = magnificationController;
         mDisplayId = displayId;
 
@@ -452,7 +453,6 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
                 mScaling = abs(deltaScale) > mScalingThreshold;
                 return mScaling;
             }
-
             final float initialScale = mMagnificationController.getScale(mDisplayId);
             final float targetScale = initialScale * detector.getScaleFactor();
 
@@ -477,6 +477,7 @@ class FullScreenMagnificationGestureHandler extends MagnificationGestureHandler 
             if (DEBUG_PANNING_SCALING) Slog.i(LOG_TAG, "Scaled content to: " + scale + "x");
             mMagnificationController.setScale(mDisplayId, scale, pivotX, pivotY, false,
                     AccessibilityManagerService.MAGNIFICATION_GESTURE_HANDLER_ID);
+            mListener.onMagnificationScaleChanged(mDisplayId, getMode());
             return /* handled: */ true;
         }
 

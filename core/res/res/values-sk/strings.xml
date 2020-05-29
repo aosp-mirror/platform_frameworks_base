@@ -197,8 +197,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Vaša organizácia spravuje toto zariadenie a môže sledovať sieťovú premávku. Klepnutím zobrazíte podrobnosti."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikácie majú prístup k vašej polohe"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Viac sa dozviete od svojho správcu IT"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"Služba geozón"</string>
     <string name="country_detector" msgid="7023275114706088854">"Detektor krajiny"</string>
     <string name="location_service" msgid="2439187616018455546">"Služba určovania polohy"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Služba GNSS"</string>
