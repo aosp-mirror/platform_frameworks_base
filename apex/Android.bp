@@ -84,6 +84,10 @@ java_defaults {
     // entry.
     shared_library: false,
 
+    // Prevent dependencies that do not specify an sdk_version from accessing the
+    // implementation library by default and force them to use stubs instead.
+    default_to_stubs: true,
+
     // Enable api lint. This will eventually become the default for java_sdk_library
     // but it cannot yet be turned on because some usages have not been cleaned up.
     // TODO(b/156126315) - Remove when no longer needed.
