@@ -478,6 +478,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 userFileExists = mAppIdleHistory.userFileExists(UserHandle.USER_SYSTEM);
             }
 
+            loadHeadlessSystemAppCache();
+
             if (mPendingInitializeDefaults || !userFileExists) {
                 initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
             }
@@ -1701,6 +1703,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 clearCarrierPrivilegedApps();
                 // ACTION_PACKAGE_ADDED is called even for system app downgrades.
                 evaluateSystemAppException(pkgName, userId);
+                mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE, userId, -1, pkgName)
+                    .sendToTarget();
             }
             if ((Intent.ACTION_PACKAGE_REMOVED.equals(action) ||
                     Intent.ACTION_PACKAGE_ADDED.equals(action))) {
@@ -1715,7 +1719,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
     private void evaluateSystemAppException(String packageName, int userId) {
         if (!mSystemServicesReady) {
-            // The app will be evaluated in initializeDefaultsForSystemApps() when possible.
+            // The app will be evaluated in when services are ready.
             return;
         }
         try {
@@ -1741,6 +1745,7 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
+    /** Call on a system version update to temporarily reset system app buckets. */
     @Override
     public void initializeDefaultsForSystemApps(int userId) {
         if (!mSystemServicesReady) {
@@ -1752,7 +1757,7 @@ public class AppStandbyController implements AppStandbyInternal {
                 + "appIdleEnabled=" + mAppIdleEnabled);
         final long elapsedRealtime = mInjector.elapsedRealtime();
         List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
-                PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS,
+                PackageManager.MATCH_DISABLED_COMPONENTS,
                 userId);
         final int packageCount = packages.size();
         synchronized (mAppIdleLock) {
@@ -1765,12 +1770,22 @@ public class AppStandbyController implements AppStandbyInternal {
                     mAppIdleHistory.reportUsage(packageName, userId, STANDBY_BUCKET_ACTIVE,
                             REASON_SUB_USAGE_SYSTEM_UPDATE, 0,
                             elapsedRealtime + mSystemUpdateUsageTimeoutMillis);
-
-                    evaluateSystemAppException(pi);
                 }
             }
             // Immediately persist defaults to disk
             mAppIdleHistory.writeAppIdleTimes(userId);
+        }
+    }
+
+    /** Call on a system update to temporarily reset system app buckets. */
+    private void loadHeadlessSystemAppCache() {
+        Slog.d(TAG, "Loading headless system app cache. appIdleEnabled=" + mAppIdleEnabled);
+        final List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
+                PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS,
+                UserHandle.USER_SYSTEM);
+        final int packageCount = packages.size();
+        for (int i = 0; i < packageCount; i++) {
+            evaluateSystemAppException(packages.get(i));
         }
     }
 
@@ -1863,6 +1878,14 @@ public class AppStandbyController implements AppStandbyInternal {
         pw.println();
         pw.print("mScreenThresholds="); pw.println(Arrays.toString(mAppStandbyScreenThresholds));
         pw.print("mElapsedThresholds="); pw.println(Arrays.toString(mAppStandbyElapsedThresholds));
+        pw.println();
+
+        pw.println("mHeadlessSystemApps=[");
+        for (int i = mHeadlessSystemApps.size() - 1; i >= 0; --i) {
+            pw.print(mHeadlessSystemApps.keyAt(i));
+            pw.println(",");
+        }
+        pw.println("]");
         pw.println();
     }
 
