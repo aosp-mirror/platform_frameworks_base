@@ -47,6 +47,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
                 android:maxLines="1"
+                android:ellipsize="end"
                 android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 
             <TextView
@@ -55,6 +56,7 @@
                 android:layout_height="wrap_content"
                 android:fontFamily="@*android:string/config_bodyFontFamily"
                 android:maxLines="2"
+                android:ellipsize="end"
                 android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 
         </LinearLayout>
