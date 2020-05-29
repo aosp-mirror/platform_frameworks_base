@@ -38,7 +38,7 @@
             "file_patterns": ["NotificationManagerService\\.java"]
         },
         {
-            "name": "FuseDaemonHostTest",
+            "name": "CtsScopedStorageHostTest",
             "file_patterns": ["StorageManagerService\\.java"]
         }
     ]
