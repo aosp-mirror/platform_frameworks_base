@@ -290,9 +290,10 @@ public class AuthService extends SystemService {
             // The permission check should be restored once Android Keystore no longer invokes this
             // method from inside app processes.
 
+            final int callingUserId = UserHandle.getCallingUserId();
             final long identity = Binder.clearCallingIdentity();
             try {
-                return mBiometricService.getAuthenticatorIds();
+                return mBiometricService.getAuthenticatorIds(callingUserId);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

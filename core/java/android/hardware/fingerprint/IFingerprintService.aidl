@@ -89,7 +89,7 @@ interface IFingerprintService {
     // long getHardwareDevice(int i);
 
     // Gets the authenticator ID for fingerprint
-    long getAuthenticatorId();
+    long getAuthenticatorId(int callingUserId);
 
     // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetTimeout(in byte [] cryptoToken);
