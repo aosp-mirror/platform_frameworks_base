@@ -329,7 +329,10 @@ void OringDurationTracker::onConditionChanged(bool condition, const int64_t time
 
 void OringDurationTracker::onStateChanged(const int64_t timestamp, const int32_t atomId,
                                           const FieldValue& newState) {
-    // If no keys are being tracked, update the current state key and return.
+    // Nothing needs to be done on a state change if we have not seen a start
+    // event, the metric is currently not active, or condition is false.
+    // For these cases, no keys are being tracked in mStarted, so update
+    // the current state key and return.
     if (mStarted.empty()) {
         updateCurrentStateKey(atomId, newState);
         return;
