@@ -22,6 +22,7 @@ import android.content.res.Resources;
 import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListPopupWindow;
 import android.widget.ListView;
@@ -37,10 +38,10 @@ import com.android.systemui.R;
 public class GlobalActionsPopupMenu extends ListPopupWindow {
     private Context mContext;
     private boolean mIsDropDownMode;
-    private int mMenuHorizontalPadding = 0;
     private int mMenuVerticalPadding = 0;
     private int mGlobalActionsSidePadding = 0;
     private ListAdapter mAdapter;
+    private AdapterView.OnItemLongClickListener mOnItemLongClickListener;
 
     public GlobalActionsPopupMenu(@NonNull Context context, boolean isDropDownMode) {
         super(context);
@@ -57,8 +58,6 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
         mGlobalActionsSidePadding = res.getDimensionPixelSize(R.dimen.global_actions_side_margin);
         if (!isDropDownMode) {
             mMenuVerticalPadding = res.getDimensionPixelSize(R.dimen.control_menu_vertical_padding);
-            mMenuHorizontalPadding =
-                res.getDimensionPixelSize(R.dimen.control_menu_horizontal_padding);
         }
     }
 
@@ -76,6 +75,9 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
     public void show() {
         // need to call show() first in order to construct the listView
         super.show();
+        if (mOnItemLongClickListener != null) {
+            getListView().setOnItemLongClickListener(mOnItemLongClickListener);
+        }
 
         ListView listView = getListView();
         Resources res = mContext.getResources();
@@ -92,7 +94,7 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
             // width should be between [.5, .9] of screen
             int parentWidth = res.getSystem().getDisplayMetrics().widthPixels;
             int widthSpec = MeasureSpec.makeMeasureSpec(
-                    (int) (parentWidth * 0.9) - 2 * mMenuHorizontalPadding, MeasureSpec.AT_MOST);
+                    (int) (parentWidth * 0.9), MeasureSpec.AT_MOST);
             int maxWidth = 0;
             for (int i = 0; i < mAdapter.getCount(); i++) {
                 View child = mAdapter.getView(i, null, listView);
@@ -100,15 +102,17 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
                 int w = child.getMeasuredWidth();
                 maxWidth = Math.max(w, maxWidth);
             }
-            int width = Math.max(maxWidth, (int) (parentWidth * 0.5) - 2 * mMenuHorizontalPadding)
-                    + 2 * mMenuHorizontalPadding;
-            listView.setPadding(mMenuHorizontalPadding, mMenuVerticalPadding,
-                    mMenuHorizontalPadding, mMenuVerticalPadding);
+            int width = Math.max(maxWidth, (int) (parentWidth * 0.5));
+            listView.setPadding(0, mMenuVerticalPadding, 0, mMenuVerticalPadding);
 
             setWidth(width);
             setHorizontalOffset(getAnchorView().getWidth() - mGlobalActionsSidePadding - width);
         }
 
         super.show();
+    }
+
+    public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener) {
+        mOnItemLongClickListener = listener;
     }
 }

@@ -16,6 +16,7 @@
 package com.android.server.blob;
 
 import static android.app.blob.BlobStoreManager.COMMIT_RESULT_ERROR;
+import static android.app.blob.XmlTags.ATTR_CREATION_TIME_MS;
 import static android.app.blob.XmlTags.ATTR_ID;
 import static android.app.blob.XmlTags.ATTR_PACKAGE;
 import static android.app.blob.XmlTags.ATTR_UID;
@@ -29,6 +30,8 @@ import static android.system.OsConstants.SEEK_SET;
 
 import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
+import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_SESSION_CREATION_TIME;
+import static com.android.server.blob.BlobStoreConfig.hasSessionExpired;
 
 import android.annotation.BytesLong;
 import android.annotation.NonNull;
@@ -89,6 +92,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     private final long mSessionId;
     private final int mOwnerUid;
     private final String mOwnerPackageName;
+    private final long mCreationTimeMs;
 
     // Do not access this directly, instead use getSessionFile().
     private File mSessionFile;
@@ -109,14 +113,22 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     @GuardedBy("mSessionLock")
     private IBlobCommitCallback mBlobCommitCallback;
 
-    BlobStoreSession(Context context, long sessionId, BlobHandle blobHandle,
-            int ownerUid, String ownerPackageName, SessionStateChangeListener listener) {
+    private BlobStoreSession(Context context, long sessionId, BlobHandle blobHandle,
+            int ownerUid, String ownerPackageName, long creationTimeMs,
+            SessionStateChangeListener listener) {
         this.mContext = context;
         this.mBlobHandle = blobHandle;
         this.mSessionId = sessionId;
         this.mOwnerUid = ownerUid;
         this.mOwnerPackageName = ownerPackageName;
+        this.mCreationTimeMs = creationTimeMs;
         this.mListener = listener;
+    }
+
+    BlobStoreSession(Context context, long sessionId, BlobHandle blobHandle,
+            int ownerUid, String ownerPackageName, SessionStateChangeListener listener) {
+        this(context, sessionId, blobHandle, ownerUid, ownerPackageName,
+                System.currentTimeMillis(), listener);
     }
 
     public BlobHandle getBlobHandle() {
@@ -176,6 +188,12 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         synchronized (mSessionLock) {
             return mState == STATE_COMMITTED || mState == STATE_ABANDONED;
         }
+    }
+
+    boolean isExpired() {
+        final long lastModifiedTimeMs = getSessionFile().lastModified();
+        return hasSessionExpired(lastModifiedTimeMs == 0
+                ? mCreationTimeMs : lastModifiedTimeMs);
     }
 
     @Override
@@ -491,6 +509,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             fout.println("state: " + stateToString(mState));
             fout.println("ownerUid: " + mOwnerUid);
             fout.println("ownerPkg: " + mOwnerPackageName);
+            fout.println("creation time: " + BlobStoreUtils.formatTime(mCreationTimeMs));
 
             fout.println("blobHandle:");
             fout.increaseIndent();
@@ -511,6 +530,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             XmlUtils.writeLongAttribute(out, ATTR_ID, mSessionId);
             XmlUtils.writeStringAttribute(out, ATTR_PACKAGE, mOwnerPackageName);
             XmlUtils.writeIntAttribute(out, ATTR_UID, mOwnerUid);
+            XmlUtils.writeLongAttribute(out, ATTR_CREATION_TIME_MS, mCreationTimeMs);
 
             out.startTag(null, TAG_BLOB_HANDLE);
             mBlobHandle.writeToXml(out);
@@ -529,6 +549,9 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         final long sessionId = XmlUtils.readLongAttribute(in, ATTR_ID);
         final String ownerPackageName = XmlUtils.readStringAttribute(in, ATTR_PACKAGE);
         final int ownerUid = XmlUtils.readIntAttribute(in, ATTR_UID);
+        final long creationTimeMs = version >= XML_VERSION_ADD_SESSION_CREATION_TIME
+                ? XmlUtils.readLongAttribute(in, ATTR_CREATION_TIME_MS)
+                : System.currentTimeMillis();
 
         final int depth = in.getDepth();
         BlobHandle blobHandle = null;
@@ -551,7 +574,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         }
 
         final BlobStoreSession blobStoreSession = new BlobStoreSession(context, sessionId,
-                blobHandle, ownerUid, ownerPackageName, stateChangeListener);
+                blobHandle, ownerUid, ownerPackageName, creationTimeMs, stateChangeListener);
         blobStoreSession.mBlobAccessMode.allow(blobAccessMode);
         return blobStoreSession;
     }
