@@ -532,11 +532,8 @@ public abstract class PanelViewController {
         // Hack to make the expand transition look nice when clear all button is visible - we make
         // the animation only to the last notification, and then jump to the maximum panel height so
         // clear all just fades in and the decelerating motion is towards the last notification.
-        final boolean
-                clearAllExpandHack =
-                expand && fullyExpandedClearAllVisible()
-                        && mExpandedHeight < getMaxPanelHeight() - getClearAllHeight()
-                        && !isClearAllVisible();
+        final boolean clearAllExpandHack = expand &&
+                shouldExpandToTopOfClearAll(getMaxPanelHeight() - getClearAllHeight());
         if (clearAllExpandHack) {
             target = getMaxPanelHeight() - getClearAllHeight();
         }
@@ -599,6 +596,21 @@ public abstract class PanelViewController {
         });
         setAnimator(animator);
         animator.start();
+    }
+
+    /**
+     * When expanding, should we expand to the top of clear all and expand immediately?
+     * This will make sure that the animation will stop smoothly at the end of the last notification
+     * before the clear all affordance.
+     *
+     * @param targetHeight the height that we would animate to, right above clear all
+     *
+     * @return true if we can expand to the top of clear all
+     */
+    protected boolean shouldExpandToTopOfClearAll(float targetHeight) {
+        return fullyExpandedClearAllVisible()
+                && mExpandedHeight < targetHeight
+                && !isClearAllVisible();
     }
 
     protected abstract boolean shouldUseDismissingAnimation();

@@ -17,64 +17,50 @@
 
 package com.android.internal.app;
 
-import android.app.AlertDialog.Builder;
-import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.DialogInterface;
-import android.content.res.Configuration;
-import android.os.Bundle;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.os.UserHandle;
 
+import com.android.internal.app.chooser.DisplayResolveInfo;
 import com.android.internal.app.chooser.MultiDisplayResolveInfo;
 
 /**
  * Shows individual actions for a "stacked" app target - such as an app with multiple posting
  * streams represented in the Sharesheet.
  */
-public class ChooserStackedAppDialogFragment extends DialogFragment
+public class ChooserStackedAppDialogFragment extends ChooserTargetActionsDialogFragment
         implements DialogInterface.OnClickListener {
-    private static final String TITLE_KEY = "title";
-    private static final String PINNED_KEY = "pinned";
 
-    private MultiDisplayResolveInfo mTargetInfos;
-    private CharSequence[] mLabels;
+    private MultiDisplayResolveInfo mMultiDisplayResolveInfo;
     private int mParentWhich;
 
     public ChooserStackedAppDialogFragment() {
     }
 
-    public ChooserStackedAppDialogFragment(CharSequence title,
-            MultiDisplayResolveInfo targets, CharSequence[] labels, int parentWhich) {
-        Bundle args = new Bundle();
-        args.putCharSequence(TITLE_KEY, title);
-        mTargetInfos = targets;
-        mLabels = labels;
+    public ChooserStackedAppDialogFragment(MultiDisplayResolveInfo targets,
+            int parentWhich, UserHandle userHandle) {
+        super(targets.getTargets(), userHandle);
+        mMultiDisplayResolveInfo = targets;
         mParentWhich = parentWhich;
-        setArguments(args);
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Bundle args = getArguments();
-        return new Builder(getContext())
-                .setCancelable(true)
-                .setItems(mLabels, this)
-                .setTitle(args.getCharSequence(TITLE_KEY))
-                .create();
+    protected CharSequence getItemLabel(DisplayResolveInfo dri) {
+        final PackageManager pm = getContext().getPackageManager();
+        return dri.getResolveInfo().loadLabel(pm);
+    }
+
+    @Override
+    protected Drawable getItemIcon(DisplayResolveInfo dri) {
+        // Show no icon for the group disambig dialog, null hides the imageview
+        return null;
     }
 
     @Override
     public void onClick(DialogInterface dialog, int which) {
-        final Bundle args = getArguments();
-        mTargetInfos.setSelected(which);
+        mMultiDisplayResolveInfo.setSelected(which);
         ((ChooserActivity) getActivity()).startSelected(mParentWhich, false, true);
-        dismiss();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        // Dismiss on config changed (eg: rotation)
-        // TODO: Maintain state on config change
-        super.onConfigurationChanged(newConfig);
         dismiss();
     }
 }

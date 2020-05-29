@@ -12,7 +12,7 @@
   ],
   "presubmit": [
     {
-      "name": "FrameworksInstantAppResolverTests",
+      "name": "CtsInstantAppTests",
       "file_patterns": ["(/|^)InstantApp[^/]*"]
     }
   ],

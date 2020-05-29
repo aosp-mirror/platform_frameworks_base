@@ -2187,6 +2187,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 // up-to-dated pinned stack information on this newly created stack.
                 r.reparent(stack, MAX_VALUE, reason);
             }
+            // The intermediate windowing mode to be set on the ActivityRecord later.
+            // This needs to happen before the re-parenting, otherwise we will always set the
+            // ActivityRecord to be fullscreen.
+            final int intermediateWindowingMode = stack.getWindowingMode();
             if (stack.getParent() != taskDisplayArea) {
                 // stack is nested, but pinned tasks need to be direct children of their
                 // display area, so reparent.
@@ -2195,7 +2199,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             // Defer the windowing mode change until after the transition to prevent the activity
             // from doing work and changing the activity visuals while animating
             // TODO(task-org): Figure-out more structured way to do this long term.
-            r.setWindowingMode(stack.getWindowingMode());
+            r.setWindowingMode(intermediateWindowingMode);
             stack.setWindowingMode(WINDOWING_MODE_PINNED);
 
             // Reset the state that indicates it can enter PiP while pausing after we've moved it

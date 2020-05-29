@@ -1148,6 +1148,24 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRotateSeamlesslyWithFixedRotation() {
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        final ActivityRecord app = mAppWindow.mActivityRecord;
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(app);
+        mAppWindow.mAttrs.rotationAnimation = WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
+
+        // Use seamless rotation if the top app is rotated.
+        assertTrue(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
+                ROTATION_90 /* newRotation */, false /* forceUpdate */));
+
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(app);
+
+        // Use normal rotation because animating recents is an intermediate state.
+        assertFalse(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
+                ROTATION_90 /* newRotation */, false /* forceUpdate */));
+    }
+
+    @Test
     public void testRemoteRotation() {
         DisplayContent dc = createNewDisplay();
 
