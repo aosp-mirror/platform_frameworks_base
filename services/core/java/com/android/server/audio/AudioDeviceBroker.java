@@ -45,7 +45,10 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 
 /** @hide */
@@ -58,6 +61,9 @@ import java.util.NoSuchElementException;
     /*package*/ static final  int BTA2DP_DOCK_TIMEOUT_MS = 8000;
     // Timeout for connection to bluetooth headset service
     /*package*/ static final int BT_HEADSET_CNCT_TIMEOUT_MS = 3000;
+
+    // Delay before checking it music should be unmuted after processing an A2DP message
+    private static final int BTA2DP_MUTE_CHECK_DELAY_MS = 50;
 
     private final @NonNull AudioService mAudioService;
     private final @NonNull Context mContext;
@@ -1050,9 +1056,19 @@ import java.util.NoSuchElementException;
                     final int strategy = msg.arg1;
                     mDeviceInventory.onSaveRemovePreferredDevice(strategy);
                 } break;
+                case MSG_CHECK_MUTE_MUSIC:
+                    checkMessagesMuteMusic();
+                    break;
                 default:
                     Log.wtf(TAG, "Invalid message " + msg.what);
             }
+
+            // Give some time to Bluetooth service to post a connection message
+            // in case of active device switch
+            if (MESSAGES_MUTE_MUSIC.contains(msg.what)) {
+                sendMsg(MSG_CHECK_MUTE_MUSIC, SENDMSG_REPLACE, BTA2DP_MUTE_CHECK_DELAY_MS);
+            }
+
             if (isMessageHandledUnderWakelock(msg.what)) {
                 try {
                     mBrokerEventWakeLock.release();
@@ -1116,6 +1132,7 @@ import java.util.NoSuchElementException;
     private static final int MSG_I_SAVE_REMOVE_PREF_DEVICE_FOR_STRATEGY = 34;
 
     private static final int MSG_L_SPEAKERPHONE_CLIENT_DIED = 35;
+    private static final int MSG_CHECK_MUTE_MUSIC = 36;
 
 
     private static boolean isMessageHandledUnderWakelock(int msgId) {
@@ -1132,6 +1149,7 @@ import java.util.NoSuchElementException;
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION:
             case MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION:
             case MSG_L_HEARING_AID_DEVICE_CONNECTION_CHANGE_EXT:
+            case MSG_CHECK_MUTE_MUSIC:
                 return true;
             default:
                 return false;
@@ -1230,6 +1248,37 @@ import java.util.NoSuchElementException;
 
             mBrokerHandler.sendMessageAtTime(mBrokerHandler.obtainMessage(msg, arg1, arg2, obj),
                     time);
+        }
+        if (MESSAGES_MUTE_MUSIC.contains(msg)) {
+            checkMessagesMuteMusic();
+        }
+    }
+
+    /** List of messages for which music is muted while processing is pending */
+    private static final Set<Integer> MESSAGES_MUTE_MUSIC;
+    static {
+        MESSAGES_MUTE_MUSIC = new HashSet<>();
+        MESSAGES_MUTE_MUSIC.add(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_CONNECTED);
+        MESSAGES_MUTE_MUSIC.add(MSG_IL_SET_A2DP_SINK_CONNECTION_STATE_DISCONNECTED);
+        MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONFIG_CHANGE);
+        MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_ACTIVE_DEVICE_CHANGE);
+        MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_CONNECTION);
+        MESSAGES_MUTE_MUSIC.add(MSG_L_A2DP_DEVICE_CONNECTION_CHANGE_EXT_DISCONNECTION);
+    }
+
+    private AtomicBoolean mMusicMuted = new AtomicBoolean(false);
+
+    /** Mutes or unmutes music according to pending A2DP messages */
+    private void checkMessagesMuteMusic() {
+        boolean mute = false;
+        for (int msg : MESSAGES_MUTE_MUSIC) {
+            if (mBrokerHandler.hasMessages(msg)) {
+                mute = true;
+                break;
+            }
+        }
+        if (mute != mMusicMuted.getAndSet(mute)) {
+            mAudioService.setMusicMute(mute);
         }
     }
 

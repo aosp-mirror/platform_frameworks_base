@@ -2552,7 +2552,6 @@
   <java-symbol type="bool" name="config_allow_ussd_over_ims" />
   <java-symbol type="attr" name="touchscreenBlocksFocus" />
   <java-symbol type="layout" name="resolver_list_with_default" />
-  <java-symbol type="string" name="activity_resolver_set_always" />
   <java-symbol type="string" name="activity_resolver_use_always" />
   <java-symbol type="string" name="whichApplicationNamed" />
   <java-symbol type="string" name="whichApplicationLabel" />
@@ -2748,6 +2747,7 @@
   <java-symbol type="drawable" name="ic_chooser_group_arrow"/>
   <java-symbol type="drawable" name="chooser_group_background"/>
   <java-symbol type="drawable" name="ic_chooser_pin"/>
+  <java-symbol type="drawable" name="ic_chooser_pin_dialog"/>
   <java-symbol type="drawable" name="chooser_pinned_background"/>
   <java-symbol type="integer" name="config_maxShortcutTargetsPerApp" />
   <java-symbol type="layout" name="resolve_grid_item" />
@@ -3834,10 +3834,12 @@
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
 
+  <java-symbol type="layout" name="chooser_dialog_item" />
   <java-symbol type="id" name="chooser_copy_button" />
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />
   <java-symbol type="string" name="config_defaultNearbySharingComponent" />
+  <java-symbol type="drawable" name="ic_close" />
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
 

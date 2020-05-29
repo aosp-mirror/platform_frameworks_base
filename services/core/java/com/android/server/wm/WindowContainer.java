@@ -399,7 +399,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void createSurfaceControl(boolean force) {
-        setSurfaceControl(makeSurface().build());
+        setInitialSurfaceControlProperties(makeSurface().build());
+    }
+
+    private void setInitialSurfaceControlProperties(SurfaceControl surfaceControl) {
+        setSurfaceControl(surfaceControl);
         getPendingTransaction().show(mSurfaceControl);
         onSurfaceShown(getPendingTransaction());
         updateSurfacePosition();
@@ -423,7 +427,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         // Clear the last position so the new SurfaceControl will get correct position
         mLastSurfacePosition.set(0, 0);
 
-        createSurfaceControl(false /* force */);
+        final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(null)
+                .setContainerLayer()
+                .setName(getName());
+
+        setInitialSurfaceControlProperties(b.build());
+
+        // If parent is null, the layer should be placed offscreen so reparent to null. Otherwise,
+        // set to the available parent.
+        t.reparent(mSurfaceControl, mParent == null ? null : mParent.getSurfaceControl());
+
         if (mLastRelativeToLayer != null) {
             t.setRelativeLayer(mSurfaceControl, mLastRelativeToLayer, mLastLayer);
         } else {

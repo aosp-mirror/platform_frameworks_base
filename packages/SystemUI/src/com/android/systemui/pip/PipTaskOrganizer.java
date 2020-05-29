@@ -204,6 +204,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     private WindowContainerToken mToken;
     private SurfaceControl mLeash;
     private boolean mInPip;
+    private boolean mExitingPip;
     private @PipAnimationController.AnimationType int mOneShotAnimationType = ANIM_TYPE_BOUNDS;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
@@ -270,9 +271,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      * @param animationDurationMs duration in millisecond for the exiting PiP transition
      */
     public void exitPip(int animationDurationMs) {
-        if (!mInPip || mToken == null) {
+        if (!mInPip || mExitingPip || mToken == null) {
             Log.wtf(TAG, "Not allowed to exitPip in current state"
-                    + " mInPip=" + mInPip + " mToken=" + mToken);
+                    + " mInPip=" + mInPip + " mExitingPip=" + mExitingPip + " mToken=" + mToken);
             return;
         }
 
@@ -312,15 +313,16 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 }
             });
         }
+        mExitingPip = true;
     }
 
     /**
      * Removes PiP immediately.
      */
     public void removePip() {
-        if (!mInPip || mToken == null) {
+        if (!mInPip || mExitingPip ||  mToken == null) {
             Log.wtf(TAG, "Not allowed to removePip in current state"
-                    + " mInPip=" + mInPip + " mToken=" + mToken);
+                    + " mInPip=" + mInPip + " mExitingPip=" + mExitingPip + " mToken=" + mToken);
             return;
         }
         getUpdateHandler().post(() -> {
@@ -332,6 +334,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             }
         });
         mInitialState.remove(mToken.asBinder());
+        mExitingPip = true;
     }
 
     @Override
@@ -340,6 +343,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mTaskInfo = info;
         mToken = mTaskInfo.token;
         mInPip = true;
+        mExitingPip = false;
         mLeash = leash;
         mInitialState.put(mToken.asBinder(), new Configuration(mTaskInfo.configuration));
         mPictureInPictureParams = mTaskInfo.pictureInPictureParams;
@@ -420,6 +424,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         mShouldDeferEnteringPip = false;
         mPictureInPictureParams = null;
         mInPip = false;
+        mExitingPip = false;
     }
 
     @Override
