@@ -33,12 +33,15 @@ import static android.os.Process.getUidForPid;
 import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
+import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
 import static android.util.MathUtils.abs;
 import static android.util.MathUtils.constrain;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_IS_UID;
 import static com.android.internal.util.FrameworkStatsLog.ANNOTATION_ID_TRUNCATE_TIMESTAMP;
+import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC;
+import static com.android.internal.util.FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.stats.pull.IonMemoryUtil.readProcessSystemIonHeapSizesFromDebugfs;
 import static com.android.server.stats.pull.IonMemoryUtil.readSystemIonHeapSizeFromDebugfs;
@@ -112,7 +115,10 @@ import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.stats.storage.StorageEnums;
 import android.telephony.ModemActivityInfo;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -154,6 +160,7 @@ import com.android.server.notification.NotificationManagerService;
 import com.android.server.role.RoleManagerInternal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -175,10 +182,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -269,6 +278,7 @@ public class StatsPullAtomService extends SystemService {
     private StorageManager mStorageManager;
     private WifiManager mWifiManager;
     private TelephonyManager mTelephony;
+    private SubscriptionManager mSubscriptionManager;
 
     private KernelWakelockReader mKernelWakelockReader;
     private KernelWakelockStats mTmpWakelockStats;
@@ -303,6 +313,11 @@ public class StatsPullAtomService extends SystemService {
     // only be accessed on the background thread.
     @NonNull
     private final List<NetworkStatsExt> mNetworkStatsBaselines = new ArrayList<>();
+
+    // Listener for monitoring subscriptions changed event.
+    private StatsSubscriptionsListener mStatsSubscriptionsListener;
+    // List that store SubInfo of subscriptions that ever appeared since boot.
+    private final CopyOnWriteArrayList<SubInfo> mHistoricalSubs = new CopyOnWriteArrayList<>();
 
     public StatsPullAtomService(Context context) {
         super(context);
@@ -484,6 +499,9 @@ public class StatsPullAtomService extends SystemService {
         mStatsManager = (StatsManager) mContext.getSystemService(Context.STATS_MANAGER);
         mWifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
         mTelephony = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
+        mSubscriptionManager = (SubscriptionManager)
+                mContext.getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        mStatsSubscriptionsListener = new StatsSubscriptionsListener(mSubscriptionManager);
         mStorageManager = (StorageManager) mContext.getSystemService(StorageManager.class);
 
         // Initialize DiskIO
@@ -653,6 +671,11 @@ public class StatsPullAtomService extends SystemService {
         mNetworkStatsBaselines.addAll(
                 collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
 
+        // Listen to subscription changes to record historical subscriptions that activated before
+        // pulling, this is used by {@link #pullMobileBytesTransfer}.
+        mSubscriptionManager.addOnSubscriptionsChangedListener(
+                BackgroundThread.getExecutor(), mStatsSubscriptionsListener);
+
         registerWifiBytesTransfer();
         registerWifiBytesTransferBackground();
         registerMobileBytesTransfer();
@@ -805,14 +828,17 @@ public class StatsPullAtomService extends SystemService {
         public final boolean slicedByTag;
         public final boolean slicedByMetered;
         public final int ratType;
+        @Nullable
+        public final SubInfo subInfo;
 
         NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg) {
             this(stats, transports, slicedByFgbg, /*slicedByTag=*/false, /*slicedByMetered=*/false,
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN);
+                    TelephonyManager.NETWORK_TYPE_UNKNOWN, /*subInfo=*/null);
         }
 
         NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg,
-                boolean slicedByTag, boolean slicedByMetered, int ratType) {
+                boolean slicedByTag, boolean slicedByMetered, int ratType,
+                @Nullable SubInfo subInfo) {
             this.stats = stats;
 
             // Sort transports array so that we can test for equality without considering order.
@@ -823,12 +849,13 @@ public class StatsPullAtomService extends SystemService {
             this.slicedByTag = slicedByTag;
             this.slicedByMetered = slicedByMetered;
             this.ratType = ratType;
+            this.subInfo = subInfo;
         }
 
         public boolean hasSameSlicing(@NonNull NetworkStatsExt other) {
             return Arrays.equals(transports, other.transports) && slicedByFgbg == other.slicedByFgbg
                     && slicedByTag == other.slicedByTag && slicedByMetered == other.slicedByMetered
-                    && ratType == other.ratType;
+                    && ratType == other.ratType && Objects.equals(subInfo, other.subInfo);
         }
     }
 
@@ -880,20 +907,14 @@ public class StatsPullAtomService extends SystemService {
                     ret.add(new NetworkStatsExt(sliceNetworkStatsByUidTagAndMetered(stats),
                             new int[] {TRANSPORT_WIFI, TRANSPORT_CELLULAR},
                             /*slicedByFgbg=*/false, /*slicedByTag=*/true,
-                            /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN));
+                            /*slicedByMetered=*/true, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                            /*subInfo=*/null));
                 }
                 break;
             }
             case FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER: {
-                for (final int ratType : getAllCollapsedRatTypes()) {
-                    final NetworkTemplate template = buildTemplateMobileWithRatType(null, ratType);
-                    final NetworkStats stats =
-                            getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
-                    if (stats != null) {
-                        ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
-                                new int[] {TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
-                                /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType));
-                    }
+                for (final SubInfo subInfo : mHistoricalSubs) {
+                    ret.addAll(getDataUsageBytesTransferSnapshotForSub(subInfo));
                 }
                 break;
             }
@@ -924,7 +945,8 @@ public class StatsPullAtomService extends SystemService {
             }
             final NetworkStatsExt diff = new NetworkStatsExt(
                     item.stats.subtract(baseline.stats).removeEmptyEntries(), item.transports,
-                    item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType);
+                    item.slicedByFgbg, item.slicedByTag, item.slicedByMetered, item.ratType,
+                    item.subInfo);
 
             // If no diff, skip.
             if (diff.stats.size() == 0) continue;
@@ -1006,11 +1028,14 @@ public class StatsPullAtomService extends SystemService {
                     .writeLong(entry.txBytes)
                     .writeLong(entry.txPackets)
                     .writeInt(statsExt.ratType)
-                    // TODO: Fill information about subscription.
-                    .writeString(/*sim_mcc=*/null)
-                    .writeString(/*sim_mnc=*/null)
-                    .writeInt(/*carrier_id=*/0)
-                    .writeInt(/*opportunistic_data_sub=*/0)
+                    // Fill information about subscription, these cannot be null since invalid data
+                    // would be filtered when adding into subInfo list.
+                    .writeString(statsExt.subInfo.mcc)
+                    .writeString(statsExt.subInfo.mnc)
+                    .writeInt(statsExt.subInfo.carrierId)
+                    .writeInt(statsExt.subInfo.isOpportunistic
+                            ? DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__OPPORTUNISTIC
+                            : DATA_USAGE_BYTES_TRANSFER__OPPORTUNISTIC_DATA_SUB__NOT_OPPORTUNISTIC)
                     .build();
             pulledData.add(e);
         }
@@ -1049,6 +1074,23 @@ public class StatsPullAtomService extends SystemService {
                     + includeTags  + " causes error", e);
         }
         return null;
+    }
+
+    @NonNull private List<NetworkStatsExt> getDataUsageBytesTransferSnapshotForSub(
+            @NonNull SubInfo subInfo) {
+        final List<NetworkStatsExt> ret = new ArrayList<>();
+        for (final int ratType : getAllCollapsedRatTypes()) {
+            final NetworkTemplate template =
+                    buildTemplateMobileWithRatType(subInfo.subscriberId, ratType);
+            final NetworkStats stats =
+                    getUidNetworkStatsSnapshotForTemplate(template, /*includeTags=*/false);
+            if (stats != null) {
+                ret.add(new NetworkStatsExt(sliceNetworkStatsByFgbg(stats),
+                        new int[] {TRANSPORT_CELLULAR}, /*slicedByFgbg=*/true,
+                        /*slicedByTag=*/false, /*slicedByMetered=*/false, ratType, subInfo));
+            }
+        }
+        return ret;
     }
 
     @NonNull private NetworkStats sliceNetworkStatsByFgbg(@NonNull NetworkStats stats) {
@@ -3645,4 +3687,46 @@ public class StatsPullAtomService extends SystemService {
                     FrameworkStatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
+
+    private final class StatsSubscriptionsListener
+            extends SubscriptionManager.OnSubscriptionsChangedListener {
+        @NonNull
+        private final SubscriptionManager mSm;
+
+        StatsSubscriptionsListener(@NonNull SubscriptionManager sm) {
+            mSm = sm;
+        }
+
+        @Override
+        public void onSubscriptionsChanged() {
+            final List<SubscriptionInfo> currentSubs = mSm.getCompleteActiveSubscriptionInfoList();
+            for (final SubscriptionInfo sub : currentSubs) {
+                final SubInfo match = CollectionUtils.find(mHistoricalSubs,
+                        (SubInfo it) -> it.subId == sub.getSubscriptionId());
+                // SubInfo exists, ignore.
+                if (match != null) continue;
+
+                // Ignore if no valid mcc, mnc, imsi, carrierId.
+                final int subId = sub.getSubscriptionId();
+                final String mcc = sub.getMccString();
+                final String mnc = sub.getMncString();
+                final String subscriberId = mTelephony.getSubscriberId(subId);
+                if (TextUtils.isEmpty(subscriberId) || TextUtils.isEmpty(mcc)
+                        || TextUtils.isEmpty(mnc) || sub.getCarrierId() == UNKNOWN_CARRIER_ID) {
+                    Slog.e(TAG, "subInfo of subId " + subId + " is invalid, ignored.");
+                    continue;
+                }
+
+                final SubInfo subInfo = new SubInfo(subId, sub.getCarrierId(), mcc, mnc,
+                        subscriberId, sub.isOpportunistic());
+                Slog.i(TAG, "subId " + subId + " added into historical sub list");
+                mHistoricalSubs.add(subInfo);
+
+                // Since getting snapshot when pulling will also include data before boot,
+                // query stats as baseline to prevent double count is needed.
+                mNetworkStatsBaselines.addAll(getDataUsageBytesTransferSnapshotForSub(subInfo));
+            }
+        }
+    }
+
 }
