@@ -340,6 +340,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();
             tx.setAlpha(mLeash, 0f);
+            tx.show(mLeash);
             tx.apply();
             return;
         }
