@@ -399,11 +399,11 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void createSurfaceControl(boolean force) {
-        setInitialSurfaceControlProperties(makeSurface().build());
+        setInitialSurfaceControlProperties(makeSurface());
     }
 
-    private void setInitialSurfaceControlProperties(SurfaceControl surfaceControl) {
-        setSurfaceControl(surfaceControl);
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        setSurfaceControl(b.build());
         getSyncTransaction().show(mSurfaceControl);
         onSurfaceShown(getSyncTransaction());
         updateSurfacePosition();
@@ -431,7 +431,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 .setContainerLayer()
                 .setName(getName());
 
-        setInitialSurfaceControlProperties(b.build());
+        setInitialSurfaceControlProperties(b);
 
         // If parent is null, the layer should be placed offscreen so reparent to null. Otherwise,
         // set to the available parent.
