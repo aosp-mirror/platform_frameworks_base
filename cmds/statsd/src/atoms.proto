@@ -444,6 +444,8 @@ message Atom {
         TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         MediaOutputOpSwitchReported mediaoutput_op_switch_reported =
             277 [(module) = "settings"];
+        CellBroadcastMessageFiltered cb_message_filtered =
+            278 [(module) = "cellbroadcast"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -9117,8 +9119,10 @@ message IntegrityRulesPushed {
 /**
  * Logs when a cell broadcast message is received on the device.
  *
- * Logged from CellBroadcastService module:
+ * Logged from Cell Broadcast module and platform:
  *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ *   packages/apps/CellBroadcastReceiver/
+ *   frameworks/opt/telephony/src/java/com/android/internal/telephony/CellBroadcastServiceManager.java
  */
 message CellBroadcastMessageReported {
     // The type of Cell Broadcast message
@@ -9129,8 +9133,40 @@ message CellBroadcastMessageReported {
         CDMA_SPC = 3;
     }
 
+    // The parts of the cell broadcast message pipeline
+    enum ReportSource {
+        UNKNOWN_SOURCE = 0;
+        FRAMEWORK = 1;
+        CB_SERVICE = 2;
+        CB_RECEIVER_APP = 3;
+    }
+
     // GSM, CDMA, CDMA-SCP
     optional CbType type = 1;
+
+    // The source of the report
+    optional ReportSource source = 2;
+}
+
+/**
+ * Logs when a cell broadcast message is filtered out, or otherwise intentionally not sent to CBR.
+ *
+ * Logged from CellBroadcastService module:
+ *   packages/modules/CellBroadcastService/src/com/android/cellbroadcastservice/
+ */
+message CellBroadcastMessageFiltered {
+    enum FilterReason {
+        NOT_FILTERED = 0;
+        DUPLICATE_MESSAGE = 1;
+        GEOFENCED_MESSAGE = 2;
+        AREA_INFO_MESSAGE = 3;
+    }
+
+    // GSM, CDMA, CDMA-SCP
+    optional CellBroadcastMessageReported.CbType type = 1;
+
+    // The source of the report
+    optional FilterReason filter = 2;
 }
 
 /**
@@ -9157,6 +9193,7 @@ message CellBroadcastMessageError {
         UNEXPECTED_GSM_MESSAGE_TYPE_FROM_FWK = 12;
         UNEXPECTED_CDMA_MESSAGE_TYPE_FROM_FWK = 13;
         UNEXPECTED_CDMA_SCP_MESSAGE_TYPE_FROM_FWK = 14;
+        NO_CONNECTION_TO_CB_SERVICE = 15;
     }
 
     // What kind of error occurred
