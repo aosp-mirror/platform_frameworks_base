@@ -110,13 +110,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             new PipAnimationController.PipAnimationCallback() {
         @Override
         public void onPipAnimationStart(PipAnimationController.PipTransitionAnimator animator) {
-            mMainHandler.post(() -> {
-                for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-                    final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionStarted(mTaskInfo.baseActivity,
-                            animator.getTransitionDirection());
-                }
-            });
+            sendOnPipTransitionStarted(animator.getTransitionDirection());
         }
 
         @Override
@@ -124,24 +118,12 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 PipAnimationController.PipTransitionAnimator animator) {
             finishResize(tx, animator.getDestinationBounds(), animator.getTransitionDirection(),
                     animator.getAnimationType());
-            mMainHandler.post(() -> {
-                for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-                    final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionFinished(mTaskInfo.baseActivity,
-                            animator.getTransitionDirection());
-                }
-            });
+            sendOnPipTransitionFinished(animator.getTransitionDirection());
         }
 
         @Override
         public void onPipAnimationCancel(PipAnimationController.PipTransitionAnimator animator) {
-            mMainHandler.post(() -> {
-                for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
-                    final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
-                    callback.onPipTransitionCanceled(mTaskInfo.baseActivity,
-                            animator.getTransitionDirection());
-                }
-            });
+            sendOnPipTransitionCancelled(animator.getTransitionDirection());
         }
     };
 
@@ -281,18 +263,22 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         final boolean orientationDiffers = initialConfig.windowConfiguration.getRotation()
                 != mPipBoundsHandler.getDisplayRotation();
         final WindowContainerTransaction wct = new WindowContainerTransaction();
+        final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
+        final int direction = syncWithSplitScreenBounds(destinationBounds)
+                ? TRANSITION_DIRECTION_TO_SPLIT_SCREEN
+                : TRANSITION_DIRECTION_TO_FULLSCREEN;
         if (orientationDiffers) {
+            // Send started callback though animation is ignored.
+            sendOnPipTransitionStarted(direction);
             // Don't bother doing an animation if the display rotation differs or if it's in
             // a non-supported windowing mode
             wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
             wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
             WindowOrganizer.applyTransaction(wct);
+            // Send finished callback though animation is ignored.
+            sendOnPipTransitionFinished(direction);
             mInPip = false;
         } else {
-            final Rect destinationBounds = initialConfig.windowConfiguration.getBounds();
-            final int direction = syncWithSplitScreenBounds(destinationBounds)
-                    ? TRANSITION_DIRECTION_TO_SPLIT_SCREEN
-                    : TRANSITION_DIRECTION_TO_FULLSCREEN;
             final SurfaceControl.Transaction tx =
                     mSurfaceControlTransactionFactory.getTransaction();
             mSurfaceTransactionHelper.scale(tx, mLeash, destinationBounds,
@@ -398,6 +384,36 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                         .setPipAnimationCallback(mPipAnimationCallback)
                         .setDuration(durationMs)
                         .start());
+            }
+        });
+    }
+
+    private void sendOnPipTransitionStarted(
+            @PipAnimationController.TransitionDirection int direction) {
+        mMainHandler.post(() -> {
+            for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
+                final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
+                callback.onPipTransitionStarted(mTaskInfo.baseActivity, direction);
+            }
+        });
+    }
+
+    private void sendOnPipTransitionFinished(
+            @PipAnimationController.TransitionDirection int direction) {
+        mMainHandler.post(() -> {
+            for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
+                final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
+                callback.onPipTransitionFinished(mTaskInfo.baseActivity, direction);
+            }
+        });
+    }
+
+    private void sendOnPipTransitionCancelled(
+            @PipAnimationController.TransitionDirection int direction) {
+        mMainHandler.post(() -> {
+            for (int i = mPipTransitionCallbacks.size() - 1; i >= 0; i--) {
+                final PipTransitionCallback callback = mPipTransitionCallbacks.get(i);
+                callback.onPipTransitionCanceled(mTaskInfo.baseActivity, direction);
             }
         });
     }
