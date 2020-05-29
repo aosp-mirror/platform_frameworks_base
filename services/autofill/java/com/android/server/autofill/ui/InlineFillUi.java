@@ -84,6 +84,11 @@ public final class InlineFillUi {
     private String mFilterText;
 
     /**
+     * Whether prefix/regex based filtering is disabled.
+     */
+    private boolean mFilterMatchingDisabled;
+
+    /**
      * Returns an empty inline autofill UI.
      */
     @NonNull
@@ -199,7 +204,7 @@ public final class InlineFillUi {
                 continue;
             }
             if (!inlinePresentation.isPinned()  // don't filter pinned suggestions
-                    && !includeDataset(dataset, fieldIndex, mFilterText)) {
+                    && !includeDataset(dataset, fieldIndex)) {
                 continue;
             }
             inlineSuggestions.add(copy(i, mInlineSuggestions.get(i)));
@@ -235,14 +240,13 @@ public final class InlineFillUi {
     }
 
     // TODO: Extract the shared filtering logic here and in FillUi to a common method.
-    private static boolean includeDataset(Dataset dataset, int fieldIndex,
-            @Nullable String filterText) {
+    private boolean includeDataset(Dataset dataset, int fieldIndex) {
         // Show everything when the user input is empty.
-        if (TextUtils.isEmpty(filterText)) {
+        if (TextUtils.isEmpty(mFilterText)) {
             return true;
         }
 
-        final String constraintLowerCase = filterText.toString().toLowerCase();
+        final String constraintLowerCase = mFilterText.toString().toLowerCase();
 
         // Use the filter provided by the service, if available.
         final Dataset.DatasetFieldFilter filter = dataset.getFilter(fieldIndex);
@@ -252,7 +256,10 @@ public final class InlineFillUi {
                 if (sVerbose) {
                     Slog.v(TAG, "Explicitly disabling filter for dataset id" + dataset.getId());
                 }
-                return true;
+                return false;
+            }
+            if (mFilterMatchingDisabled) {
+                return false;
             }
             return filterPattern.matcher(constraintLowerCase).matches();
         }
@@ -261,8 +268,19 @@ public final class InlineFillUi {
         if (value == null || !value.isText()) {
             return dataset.getAuthentication() == null;
         }
+        if (mFilterMatchingDisabled) {
+            return false;
+        }
         final String valueText = value.getTextValue().toString().toLowerCase();
         return valueText.toLowerCase().startsWith(constraintLowerCase);
+    }
+
+    /**
+     * Disables prefix/regex based filtering. Other filtering rules (see {@link
+     * android.service.autofill.Dataset}) still apply.
+     */
+    public void disableFilterMatching() {
+        mFilterMatchingDisabled = true;
     }
 
     /**
