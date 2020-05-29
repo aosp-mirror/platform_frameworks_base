@@ -3571,6 +3571,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void notifyInsetsControlChanged() {
         ProtoLog.d(WM_DEBUG_IME, "notifyInsetsControlChanged for %s ", this);
+        if (mAppDied || mRemoved) {
+            return;
+        }
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
         try {
