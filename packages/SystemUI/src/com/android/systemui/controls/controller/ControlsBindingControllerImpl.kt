@@ -46,7 +46,9 @@ open class ControlsBindingControllerImpl @Inject constructor(
     companion object {
         private const val TAG = "ControlsBindingControllerImpl"
         private const val MAX_CONTROLS_REQUEST = 100000L
-        private const val SUGGESTED_CONTROLS_REQUEST = 6L
+        private const val SUGGESTED_STRUCTURES = 6L
+        private const val SUGGESTED_CONTROLS_REQUEST =
+            ControlsControllerImpl.SUGGESTED_CONTROLS_PER_STRUCTURE * SUGGESTED_STRUCTURES
     }
 
     private var currentUser = UserHandle.of(ActivityManager.getCurrentUser())
