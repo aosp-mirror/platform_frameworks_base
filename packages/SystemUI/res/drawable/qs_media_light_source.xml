@@ -12,9 +12,9 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License
+  ~ limitations under the License.
   -->
-<com.android.systemui.media.IlluminationDrawable
+<com.android.systemui.media.LightSourceDrawable
     xmlns:systemui="http://schemas.android.com/apk/res-auto"
-    systemui:highlight="15"
-    systemui:cornerRadius="?android:attr/dialogCornerRadius" />
+    systemui:rippleMinSize="25dp"
+    systemui:rippleMaxSize="135dp" />
