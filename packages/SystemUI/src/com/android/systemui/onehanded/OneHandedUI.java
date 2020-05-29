@@ -16,15 +16,22 @@
 
 package com.android.systemui.onehanded;
 
+import static android.os.UserHandle.USER_CURRENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.content.Context;
+import android.content.om.IOverlayManager;
+import android.content.om.OverlayInfo;
 import android.database.ContentObserver;
 import android.inputmethodservice.InputMethodService;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.provider.Settings;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -47,10 +54,13 @@ import javax.inject.Singleton;
 @Singleton
 public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dumpable {
     private static final String TAG = "OneHandedUI";
+    private static final String ONE_HANDED_MODE_GESTURAL_OVERLAY =
+            "com.android.internal.systemui.onehanded.gestural";
 
     private final OneHandedManagerImpl mOneHandedManager;
     private final CommandQueue mCommandQueue;
     private final Handler mMainHandler = new Handler(Looper.getMainLooper());
+    private final IOverlayManager mOverlayManager;
     private final OneHandedSettingsUtil mSettingUtil;
     private final OneHandedTimeoutHandler mTimeoutHandler;
     private final ScreenLifecycle mScreenLifecycle;
@@ -66,6 +76,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             if (mOneHandedManager != null) {
                 mOneHandedManager.setOneHandedEnabled(enabled);
             }
+
+            setEnabledGesturalOverlay(enabled);
         }
     };
 
@@ -129,9 +141,11 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
             boolean supportOneHanded = SystemProperties.getBoolean("support_one_handed_mode");
             if (!supportOneHanded) return; */
         mOneHandedManager = oneHandedManager;
-        mSettingUtil =  settingsUtil;
+        mSettingUtil = settingsUtil;
         mTimeoutHandler = OneHandedTimeoutHandler.get();
         mScreenLifecycle = screenLifecycle;
+        mOverlayManager = IOverlayManager.Stub.asInterface(
+                ServiceManager.getService(Context.OVERLAY_SERVICE));
     }
 
     @Override
@@ -144,7 +158,24 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         setupScreenObserver();
         setupSettingObservers();
         setupTimeoutListener();
+        setupGesturalOverlay();
         updateSettings();
+    }
+
+    private void setupGesturalOverlay() {
+        if (!OneHandedSettingsUtil.getSettingsOneHandedModeEnabled(mContext.getContentResolver())) {
+            return;
+        }
+
+        OverlayInfo info = null;
+        try {
+            info = mOverlayManager.getOverlayInfo(ONE_HANDED_MODE_GESTURAL_OVERLAY, USER_CURRENT);
+        } catch (RemoteException e) { /* Do nothing */ }
+
+        if (info != null && !info.isEnabled()) {
+            // Enable the default gestural one handed overlay.
+            setEnabledGesturalOverlay(true);
+        }
     }
 
     private void setupTimeoutListener() {
@@ -218,6 +249,15 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
         }
     }
 
+    @VisibleForTesting
+    private void setEnabledGesturalOverlay(boolean enabled) {
+        try {
+            mOverlayManager.setEnabled(ONE_HANDED_MODE_GESTURAL_OVERLAY, enabled, USER_CURRENT);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     /**
      * Trigger one handed more
      */
@@ -251,6 +291,19 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
 
         if (mSettingUtil != null) {
             mSettingUtil.dump(pw, innerPrefix, mContext.getContentResolver());
+        }
+
+        if (mOverlayManager != null) {
+            OverlayInfo info = null;
+            try {
+                info = mOverlayManager.getOverlayInfo(ONE_HANDED_MODE_GESTURAL_OVERLAY,
+                        USER_CURRENT);
+            } catch (RemoteException e) { /* Do nothing */ }
+
+            if (info != null && !info.isEnabled()) {
+                pw.print(innerPrefix + "OverlayInfo=");
+                pw.println(info);
+            }
         }
     }
 }
