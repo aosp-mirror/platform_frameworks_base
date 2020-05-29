@@ -1189,7 +1189,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
         mUiEventLogger.log(GlobalActionsEvent.GA_POWER_MENU_CLOSE);
         mWindowManagerFuncs.onGlobalActionsHidden();
-        mLifecycle.setCurrentState(Lifecycle.State.DESTROYED);
+        mLifecycle.setCurrentState(Lifecycle.State.CREATED);
     }
 
     /**
