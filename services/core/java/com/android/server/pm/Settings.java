@@ -1371,7 +1371,8 @@ final class Settings {
         return result;
     }
 
-    boolean removeIntentFilterVerificationLPw(String packageName, int userId) {
+    boolean removeIntentFilterVerificationLPw(String packageName, int userId,
+            boolean alsoResetStatus) {
         PackageSetting ps = mPackages.get(packageName);
         if (ps == null) {
             if (DEBUG_DOMAIN_VERIFICATION) {
@@ -1379,14 +1380,17 @@ final class Settings {
             }
             return false;
         }
-        ps.clearDomainVerificationStatusForUser(userId);
+        if (alsoResetStatus) {
+            ps.clearDomainVerificationStatusForUser(userId);
+        }
+        ps.setIntentFilterVerificationInfo(null);
         return true;
     }
 
     boolean removeIntentFilterVerificationLPw(String packageName, int[] userIds) {
         boolean result = false;
         for (int userId : userIds) {
-            result |= removeIntentFilterVerificationLPw(packageName, userId);
+            result |= removeIntentFilterVerificationLPw(packageName, userId, true);
         }
         return result;
     }
