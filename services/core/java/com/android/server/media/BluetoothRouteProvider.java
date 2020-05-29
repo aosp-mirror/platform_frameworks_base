@@ -16,6 +16,8 @@
 
 package com.android.server.media;
 
+import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_AUDIO;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.bluetooth.BluetoothA2dp;
@@ -100,9 +102,6 @@ class BluetoothRouteProvider {
         // Bluetooth on/off broadcasts
         addEventReceiver(BluetoothAdapter.ACTION_STATE_CHANGED, new AdapterStateChangedReceiver());
 
-        // Pairing broadcasts
-        addEventReceiver(BluetoothDevice.ACTION_BOND_STATE_CHANGED, new BondStateChangedReceiver());
-
         DeviceStateChangedRecevier deviceStateChangedReceiver = new DeviceStateChangedRecevier();
         addEventReceiver(BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED, deviceStateChangedReceiver);
         addEventReceiver(BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED, deviceStateChangedReceiver);
@@ -129,19 +128,12 @@ class BluetoothRouteProvider {
 
         BluetoothRouteInfo btRouteInfo = mBluetoothRoutes.get(routeId);
         if (btRouteInfo == null) {
-            Slog.w(TAG, "setActiveDevice: unknown route id=" + routeId);
+            Slog.w(TAG, "transferTo: unknown route id=" + routeId);
             return;
         }
-        BluetoothA2dp a2dpProfile = mA2dpProfile;
-        BluetoothHearingAid hearingAidProfile = mHearingAidProfile;
 
-        if (a2dpProfile != null
-                && btRouteInfo.connectedProfiles.get(BluetoothProfile.A2DP, false)) {
-            a2dpProfile.setActiveDevice(btRouteInfo.btDevice);
-        }
-        if (hearingAidProfile != null
-                && btRouteInfo.connectedProfiles.get(BluetoothProfile.HEARING_AID, false)) {
-            hearingAidProfile.setActiveDevice(btRouteInfo.btDevice);
+        if (mBluetoothAdapter != null) {
+            mBluetoothAdapter.setActiveDevice(btRouteInfo.btDevice, ACTIVE_DEVICE_AUDIO);
         }
     }
 
@@ -149,13 +141,8 @@ class BluetoothRouteProvider {
      * Clears the active device for all known profiles.
      */
     private void clearActiveDevices() {
-        BluetoothA2dp a2dpProfile = mA2dpProfile;
-        BluetoothHearingAid hearingAidProfile = mHearingAidProfile;
-        if (a2dpProfile != null) {
-            a2dpProfile.setActiveDevice(null);
-        }
-        if (hearingAidProfile != null) {
-            hearingAidProfile.setActiveDevice(null);
+        if (mBluetoothAdapter != null) {
+            mBluetoothAdapter.removeActiveDevice(ACTIVE_DEVICE_AUDIO);
         }
     }
 
@@ -274,7 +261,6 @@ class BluetoothRouteProvider {
             return;
         }
 
-        // Update volume when the connection state is changed.
         MediaRoute2Info.Builder builder = new MediaRoute2Info.Builder(btRoute.route)
                 .setConnectionState(state);
         builder.setType(btRoute.getRouteType());
@@ -321,7 +307,7 @@ class BluetoothRouteProvider {
                 default:
                     return;
             }
-            //TODO: Check a pair of HAP devices whether there exist two or more active devices.
+            //TODO(b/157708273): Handle two active devices in the binaural case.
             for (BluetoothDevice device : proxy.getConnectedDevices()) {
                 BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
                 if (btRoute == null) {
@@ -383,29 +369,12 @@ class BluetoothRouteProvider {
         }
     }
 
-    private class BondStateChangedReceiver implements BluetoothEventReceiver {
-        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
-            int bondState = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE,
-                    BluetoothDevice.ERROR);
-            BluetoothRouteInfo btRoute = mBluetoothRoutes.get(device.getAddress());
-            if (bondState == BluetoothDevice.BOND_BONDED && btRoute == null) {
-                btRoute = createBluetoothRoute(device);
-                if (btRoute.connectedProfiles.size() > 0) {
-                    mBluetoothRoutes.put(device.getAddress(), btRoute);
-                    notifyBluetoothRoutesUpdated();
-                }
-            } else if (bondState == BluetoothDevice.BOND_NONE
-                    && mBluetoothRoutes.remove(device.getAddress()) != null) {
-                notifyBluetoothRoutesUpdated();
-            }
-        }
-    }
-
     private class DeviceStateChangedRecevier implements BluetoothEventReceiver {
         @Override
         public void onReceive(Context context, Intent intent, BluetoothDevice device) {
             switch (intent.getAction()) {
                 case BluetoothA2dp.ACTION_ACTIVE_DEVICE_CHANGED:
+                case BluetoothHearingAid.ACTION_ACTIVE_DEVICE_CHANGED:
                     if (mSelectedRoute == null
                             || !mSelectedRoute.btDevice.equals(device)) {
                         if (mSelectedRoute != null) {
@@ -423,6 +392,9 @@ class BluetoothRouteProvider {
                     break;
                 case BluetoothA2dp.ACTION_CONNECTION_STATE_CHANGED:
                     handleConnectionStateChanged(BluetoothProfile.A2DP, intent, device);
+                    break;
+                case BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED:
+                    handleConnectionStateChanged(BluetoothProfile.HEARING_AID, intent, device);
                     break;
             }
         }
