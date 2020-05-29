@@ -208,6 +208,11 @@ public final class PermissionPolicyService extends SystemService {
                 case android.Manifest.permission.ACCESS_NOTIFICATIONS:
                 case android.Manifest.permission.MANAGE_IPSEC_TUNNELS:
                     continue;
+                case android.Manifest.permission.REQUEST_INSTALL_PACKAGES:
+                    // Settings allows the user to control the app op if it's not in the default
+                    // mode, regardless of whether the app has requested the permission, so we
+                    // should not reset it.
+                    continue;
                 default:
                     final int appOpCode = AppOpsManager.permissionToOpCode(
                             appOpPermissionInfo.name);
