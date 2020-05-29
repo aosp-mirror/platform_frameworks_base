@@ -100,6 +100,7 @@ public:
     virtual int32_t getDisplayId() const;
     virtual void fade(Transition transition);
     virtual void unfade(Transition transition);
+    virtual void setDisplayViewport(const DisplayViewport& viewport);
 
     virtual void setPresentation(Presentation presentation);
     virtual void setSpots(const PointerCoords* spotCoords,
@@ -108,7 +109,6 @@ public:
 
     void updatePointerIcon(int32_t iconId);
     void setCustomPointerIcon(const SpriteIcon& icon);
-    void setDisplayViewport(const DisplayViewport& viewport);
     void setInactivityTimeout(InactivityTimeout inactivityTimeout);
     void reloadPointerResources();
 
