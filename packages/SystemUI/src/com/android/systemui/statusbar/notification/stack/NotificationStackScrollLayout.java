@@ -535,6 +535,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private int mWaterfallTopInset;
 
+    private SysuiColorExtractor.OnColorsChangedListener mOnColorsChangedListener =
+            (colorExtractor, which) -> {
+                final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
+                updateDecorViews(useDarkText);
+            };
+
     @Inject
     public NotificationStackScrollLayout(
             @Named(VIEW_CONTEXT) Context context,
@@ -662,6 +668,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mStatusbarStateController = statusBarStateController;
         initializeForegroundServiceSection(fgsFeatureController);
         mUiEventLogger = uiEventLogger;
+        mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
     }
 
     private void initializeForegroundServiceSection(
@@ -728,9 +735,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onThemeChanged() {
-        final boolean useDarkText = mColorExtractor.getNeutralColors().supportsDarkText();
-        updateDecorViews(useDarkText);
-
         updateFooter();
     }
 
