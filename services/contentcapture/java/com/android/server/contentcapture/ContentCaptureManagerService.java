@@ -960,10 +960,11 @@ public final class ContentCaptureManagerService extends
             mClientAdapter.write(sourceIn);
             serviceAdapter.start(sinkOut);
 
-            // File descriptor received by the client app will be a copy of the current one. Close
-            // the one that belongs to the system server, so there's only 1 open left for the
-            // current pipe.
-            bestEffortCloseFileDescriptor(sourceIn);
+            // File descriptors received by remote apps will be copies of the current one. Close
+            // the ones that belong to the system server, so there's only 1 open left for the
+            // current pipe. Therefore when remote parties decide to close them - all descriptors
+            // pointing to the pipe will be closed.
+            bestEffortCloseFileDescriptors(sourceIn, sinkOut);
 
             mParentService.mDataShareExecutor.execute(() -> {
                 try (InputStream fis =
