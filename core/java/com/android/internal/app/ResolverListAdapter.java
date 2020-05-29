@@ -69,13 +69,11 @@ public class ResolverListAdapter extends BaseAdapter {
     private final PackageManager mPm;
     protected final Context mContext;
     private final ColorMatrixColorFilter mSuspendedMatrixColorFilter;
-    private final boolean mUseLayoutForBrowsables;
     private final int mIconDpi;
     protected ResolveInfo mLastChosen;
     private DisplayResolveInfo mOtherProfile;
     ResolverListController mResolverListController;
     private int mPlaceholderCount;
-    private boolean mAllTargetsAreBrowsers = false;
 
     protected final LayoutInflater mInflater;
 
@@ -94,7 +92,6 @@ public class ResolverListAdapter extends BaseAdapter {
             Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed,
             ResolverListController resolverListController,
-            boolean useLayoutForBrowsables,
             ResolverListCommunicator resolverListCommunicator,
             boolean isAudioCaptureDevice) {
         mContext = context;
@@ -107,7 +104,6 @@ public class ResolverListAdapter extends BaseAdapter {
         mFilterLastUsed = filterLastUsed;
         mResolverListController = resolverListController;
         mSuspendedMatrixColorFilter = createSuspendedColorMatrix();
-        mUseLayoutForBrowsables = useLayoutForBrowsables;
         mResolverListCommunicator = resolverListCommunicator;
         mIsAudioCaptureDevice = isAudioCaptureDevice;
         final ActivityManager am = (ActivityManager) mContext.getSystemService(ACTIVITY_SERVICE);
@@ -183,14 +179,6 @@ public class ResolverListAdapter extends BaseAdapter {
     }
 
     /**
-     * @return true if all items in the display list are defined as browsers by
-     *         ResolveInfo.handleAllWebDataURI
-     */
-    public boolean areAllTargetsBrowsers() {
-        return mAllTargetsAreBrowsers;
-    }
-
-    /**
      * Rebuild the list of resolvers. In some cases some parts will need some asynchronous work
      * to complete.
      *
@@ -207,7 +195,6 @@ public class ResolverListAdapter extends BaseAdapter {
         mOtherProfile = null;
         mLastChosen = null;
         mLastChosenPosition = -1;
-        mAllTargetsAreBrowsers = false;
         mDisplayList.clear();
         mIsTabLoaded = false;
 
@@ -322,8 +309,6 @@ public class ResolverListAdapter extends BaseAdapter {
             boolean doPostProcessing) {
         int n;
         if (sortedComponents != null && (n = sortedComponents.size()) != 0) {
-            mAllTargetsAreBrowsers = mUseLayoutForBrowsables;
-
             // First put the initial items at the top.
             if (mInitialIntents != null) {
                 for (int i = 0; i < mInitialIntents.length; i++) {
@@ -353,7 +338,6 @@ public class ResolverListAdapter extends BaseAdapter {
                         ri.noResourceId = true;
                         ri.icon = 0;
                     }
-                    mAllTargetsAreBrowsers &= ri.handleAllWebDataURI;
 
                     addResolveInfo(new DisplayResolveInfo(ii, ri,
                             ri.loadLabel(mPm), null, ii, makePresentationGetter(ri)));
@@ -364,7 +348,6 @@ public class ResolverListAdapter extends BaseAdapter {
             for (ResolvedComponentInfo rci : sortedComponents) {
                 final ResolveInfo ri = rci.getResolveInfoAt(0);
                 if (ri != null) {
-                    mAllTargetsAreBrowsers &= ri.handleAllWebDataURI;
                     addResolveInfoWithAlternates(rci);
                 }
             }

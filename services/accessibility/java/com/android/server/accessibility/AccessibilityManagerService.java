@@ -115,6 +115,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IntPair;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.accessibility.magnification.MagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationManager;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.WindowManagerInternal;
@@ -147,6 +148,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         AccessibilityUserState.ServiceInfoChangeListener,
         AccessibilityWindowManager.AccessibilityEventSender,
         AccessibilitySecurityPolicy.AccessibilityUserManager,
+        MagnificationGestureHandler.ScaleChangedListener,
         SystemActionPerformer.SystemActionsChangedListener {
 
     private static final boolean DEBUG = false;
@@ -237,7 +239,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private final RemoteCallbackList<IAccessibilityManagerClient> mGlobalClients =
             new RemoteCallbackList<>();
 
-    private final SparseArray<AccessibilityUserState> mUserStates = new SparseArray<>();
+    @VisibleForTesting
+    final SparseArray<AccessibilityUserState> mUserStates = new SparseArray<>();
 
     private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
 
@@ -278,7 +281,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             AccessibilitySecurityPolicy securityPolicy,
             SystemActionPerformer systemActionPerformer,
             AccessibilityWindowManager a11yWindowManager,
-            AccessibilityDisplayListener a11yDisplayListener) {
+            AccessibilityDisplayListener a11yDisplayListener,
+            WindowMagnificationManager windowMagnificationMgr) {
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
         mWindowManagerService = LocalServices.getService(WindowManagerInternal.class);
@@ -289,6 +293,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mSystemActionPerformer = systemActionPerformer;
         mA11yWindowManager = a11yWindowManager;
         mA11yDisplayListener = a11yDisplayListener;
+        mWindowMagnificationMgr = windowMagnificationMgr;
         init();
     }
 
@@ -989,6 +994,17 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         }
     }
 
+    @Override
+    public void onMagnificationScaleChanged(int displayId, int mode) {
+        synchronized (mLock) {
+            final int capabilities =
+                    getCurrentUserStateLocked().getMagnificationCapabilitiesLocked();
+            if (capabilities == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
+                getWindowMagnificationMgr().showMagnificationButton(displayId, mode);
+            }
+        }
+    }
+
     /**
      * Called by AccessibilityInputFilter when it creates or destroys the motionEventInjector.
      * Not using a getter because the AccessibilityInputFilter isn't thread-safe
@@ -1140,6 +1156,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 userState.mEnabledServices,
                 UserHandle.USER_SYSTEM);
         onUserStateChangedLocked(userState);
+        migrateAccessibilityButtonSettingsIfNecessaryLocked(userState, null);
     }
 
     private int getClientStateLocked(AccessibilityUserState userState) {
@@ -3275,6 +3292,18 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             updateMagnificationModeChangeSettingsLocked(userState);
         }
         updateWindowMagnificationConnectionIfNeeded(userState);
+        // Remove magnification button UI when the magnification capability is not all mode or
+        // magnification is disabled.
+        if (!(userState.isDisplayMagnificationEnabledLocked()
+                || userState.isShortcutMagnificationEnabledLocked())
+                || userState.getMagnificationCapabilitiesLocked()
+                != Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL) {
+            final ArrayList<Display> displays = getValidDisplayList();
+            for (int i = 0; i < displays.size(); i++) {
+                final int displayId = displays.get(i).getDisplayId();
+                getWindowMagnificationMgr().removeMagnificationButton(displayId);
+            }
+        }
     }
 
     private boolean fallBackMagnificationModeSettingsLocked(AccessibilityUserState userState) {

@@ -129,7 +129,7 @@ public class BubbleOverflow implements BubbleViewProvider {
         return mOverflowBtn;
     }
 
-    void setBtnVisible(int visible) {
+    void setVisible(int visible) {
         mOverflowBtn.setVisibility(visible);
     }
 

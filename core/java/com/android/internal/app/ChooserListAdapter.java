@@ -120,15 +120,13 @@ public class ChooserListAdapter extends ResolverListAdapter {
     public ChooserListAdapter(Context context, List<Intent> payloadIntents,
             Intent[] initialIntents, List<ResolveInfo> rList,
             boolean filterLastUsed, ResolverListController resolverListController,
-            boolean useLayoutForBrowsables,
             ChooserListCommunicator chooserListCommunicator,
             SelectableTargetInfo.SelectableTargetInfoCommunicator selectableTargetInfoCommunicator,
             PackageManager packageManager) {
         // Don't send the initial intents through the shared ResolverActivity path,
         // we want to separate them into a different section.
         super(context, payloadIntents, null, rList, filterLastUsed,
-                resolverListController, useLayoutForBrowsables,
-                chooserListCommunicator, false);
+                resolverListController, chooserListCommunicator, false);
 
         createPlaceHolders();
         mMaxShortcutTargetsPerApp =

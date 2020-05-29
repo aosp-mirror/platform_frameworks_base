@@ -1191,4 +1191,56 @@ public class NotificationRecordTest extends UiServiceTestCase {
 
         assertFalse(record.isConversation());
     }
+
+    @Test
+    public void isConversation_pkgAllowed_isMsgType() {
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        sbn.getNotification().category = Notification.CATEGORY_MESSAGE;
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        record.setPkgAllowedAsConvo(true);
+
+        assertTrue(record.isConversation());
+    }
+
+    @Test
+    public void isConversation_pkgAllowed_isMNotsgType() {
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        sbn.getNotification().category = Notification.CATEGORY_ALARM;
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        record.setPkgAllowedAsConvo(true);
+
+        assertFalse(record.isConversation());
+    }
+
+    @Test
+    public void isConversation_pkgNotAllowed_isMsgType() {
+        StatusBarNotification sbn = getNotification(PKG_N_MR1, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        sbn.getNotification().category = Notification.CATEGORY_MESSAGE;
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        record.setPkgAllowedAsConvo(false);
+
+        assertFalse(record.isConversation());
+    }
+
+    @Test
+    public void isConversation_pkgAllowed_isMsgType_targetsR() {
+        StatusBarNotification sbn = getNotification(PKG_R, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, null /* group */);
+        sbn.getNotification().category = Notification.CATEGORY_MESSAGE;
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, defaultChannel);
+
+        record.setPkgAllowedAsConvo(true);
+
+        assertFalse(record.isConversation());
+    }
 }

@@ -1906,6 +1906,11 @@ public class VibratorService extends IVibratorService.Stub
                     return 0;
                 }
 
+                int intensity = getIntensityUserSetting();
+                if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+                    return 0;
+                }
+
                 final long duration = Long.parseLong(getNextArgRequired());
                 String description = getNextArg();
                 if (description == null) {
@@ -1915,6 +1920,8 @@ public class VibratorService extends IVibratorService.Stub
                 VibrationEffect effect =
                         VibrationEffect.createOneShot(duration, VibrationEffect.DEFAULT_AMPLITUDE);
                 VibrationAttributes attrs = createVibrationAttributes(commonOptions);
+                ScaleLevel scale = getScaleLevel(intensity);
+                effect = effect.resolve(mDefaultVibrationAmplitude).scale(scale.factor);
                 vibrate(Binder.getCallingUid(), description, effect, attrs, "Shell Command",
                         mToken);
                 return 0;
@@ -1955,6 +1962,11 @@ public class VibratorService extends IVibratorService.Stub
                     return 0;
                 }
 
+                int intensity = getIntensityUserSetting();
+                if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+                    return 0;
+                }
+
                 ArrayList<Long> timingsList = new ArrayList<Long>();
 
                 String arg;
@@ -1976,6 +1988,8 @@ public class VibratorService extends IVibratorService.Stub
                     effect = VibrationEffect.createWaveform(timings, amplitudes, repeat);
                 }
                 VibrationAttributes attrs = createVibrationAttributes(commonOptions);
+                ScaleLevel scale = getScaleLevel(intensity);
+                effect = effect.resolve(mDefaultVibrationAmplitude).scale(scale.factor);
                 vibrate(Binder.getCallingUid(), description, effect, attrs, "Shell Command",
                         mToken);
                 return 0;
@@ -2005,9 +2019,15 @@ public class VibratorService extends IVibratorService.Stub
                     description = "Shell command";
                 }
 
-                VibrationEffect effect =
-                        VibrationEffect.get(id, false);
+                int intensity = getIntensityUserSetting();
+                if (intensity == Vibrator.VIBRATION_INTENSITY_OFF) {
+                    return 0;
+                }
+
+                VibrationEffect.Prebaked effect =
+                        (VibrationEffect.Prebaked) VibrationEffect.get(id, false);
                 VibrationAttributes attrs = createVibrationAttributes(commonOptions);
+                effect.setEffectStrength(intensityToEffectStrength(intensity));
                 vibrate(Binder.getCallingUid(), description, effect, attrs, "Shell Command",
                         mToken);
                 return 0;
@@ -2026,6 +2046,18 @@ public class VibratorService extends IVibratorService.Stub
                     .build();
         }
 
+        private ScaleLevel getScaleLevel(int intensity) {
+            int defaultIntensity = mVibrator.getDefaultHapticFeedbackIntensity();
+            ScaleLevel scale = mScaleLevels.get(intensity - defaultIntensity);
+            return scale == null ? mScaleLevels.get(SCALE_NONE) : scale;
+        }
+
+        private int getIntensityUserSetting() {
+            return Settings.System.getIntForUser(mContext.getContentResolver(),
+                    Settings.System.HAPTIC_FEEDBACK_INTENSITY,
+                    mVibrator.getDefaultHapticFeedbackIntensity(), UserHandle.USER_CURRENT);
+        }
+
         @Override
         public void onHelp() {
             try (PrintWriter pw = getOutPrintWriter();) {
@@ -2034,11 +2066,13 @@ public class VibratorService extends IVibratorService.Stub
                 pw.println("    Prints this help text.");
                 pw.println("");
                 pw.println("  vibrate duration [description]");
-                pw.println("    Vibrates for duration milliseconds; ignored when device is on DND ");
-                pw.println("    (Do Not Disturb) mode.");
+                pw.println("    Vibrates for duration milliseconds; ignored when device is on ");
+                pw.println("    DND (Do Not Disturb) mode; touch feedback strength user setting ");
+                pw.println("    will be used to scale amplitude.");
                 pw.println("  waveform [-d description] [-r index] [-a] duration [amplitude] ...");
-                pw.println("    Vibrates for durations and amplitudes in list;");
-                pw.println("    ignored when device is on DND (Do Not Disturb) mode.");
+                pw.println("    Vibrates for durations and amplitudes in list; ignored when ");
+                pw.println("    device is on DND (Do Not Disturb) mode; touch feedback strength ");
+                pw.println("    user setting will be used to scale amplitude.");
                 pw.println("    If -r is provided, the waveform loops back to the specified");
                 pw.println("    index (e.g. 0 loops from the beginning)");
                 pw.println("    If -a is provided, the command accepts duration-amplitude pairs;");
@@ -2046,7 +2080,8 @@ public class VibratorService extends IVibratorService.Stub
                 pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255.");
                 pw.println("  prebaked effect-id [description]");
                 pw.println("    Vibrates with prebaked effect; ignored when device is on DND ");
-                pw.println("    (Do Not Disturb) mode.");
+                pw.println("    (Do Not Disturb) mode; touch feedback strength user setting ");
+                pw.println("    will be used to scale amplitude.");
                 pw.println("  cancel");
                 pw.println("    Cancels any active vibration");
                 pw.println("Common Options:");

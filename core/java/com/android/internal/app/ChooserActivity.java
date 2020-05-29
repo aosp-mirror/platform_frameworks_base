@@ -875,7 +875,6 @@ public class ChooserActivity extends ResolverActivity implements
                 initialIntents,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ UserHandle.of(UserHandle.myUserId()));
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
@@ -896,7 +895,6 @@ public class ChooserActivity extends ResolverActivity implements
                 selectedProfile == PROFILE_PERSONAL ? initialIntents : null,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ getPersonalProfileUserHandle());
         ChooserGridAdapter workAdapter = createChooserGridAdapter(
                 /* context */ this,
@@ -904,7 +902,6 @@ public class ChooserActivity extends ResolverActivity implements
                 selectedProfile == PROFILE_WORK ? initialIntents : null,
                 rList,
                 filterLastUsed,
-                mUseLayoutForBrowsables,
                 /* userHandle */ getWorkProfileUserHandle());
         return new ChooserMultiProfilePagerAdapter(
                 /* context */ this,
@@ -1617,7 +1614,7 @@ public class ChooserActivity extends ResolverActivity implements
             targetList = Collections.singletonList(ti);
         }
 
-        ResolverTargetActionsDialogFragment f = new ResolverTargetActionsDialogFragment(
+        ChooserTargetActionsDialogFragment f = new ChooserTargetActionsDialogFragment(
                 targetList, mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
 
         f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
@@ -1677,15 +1674,9 @@ public class ChooserActivity extends ResolverActivity implements
         if (targetInfo instanceof MultiDisplayResolveInfo) {
             MultiDisplayResolveInfo mti = (MultiDisplayResolveInfo) targetInfo;
             if (!mti.hasSelected()) {
-                // Stacked apps get a disambiguation first
-                CharSequence[] labels = new CharSequence[mti.getTargets().size()];
-                int i = 0;
-                for (TargetInfo ti : mti.getTargets()) {
-                    labels[i++] = ti.getResolveInfo().loadLabel(getPackageManager());
-                }
                 ChooserStackedAppDialogFragment f = new ChooserStackedAppDialogFragment(
-                        targetInfo.getDisplayLabel(),
-                        ((MultiDisplayResolveInfo) targetInfo), labels, which);
+                        mti, which,
+                        mChooserMultiProfilePagerAdapter.getCurrentUserHandle());
 
                 f.show(getFragmentManager(), TARGET_DETAILS_FRAGMENT_TAG);
                 return;
@@ -2486,10 +2477,10 @@ public class ChooserActivity extends ResolverActivity implements
     @VisibleForTesting
     public ChooserGridAdapter createChooserGridAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables, UserHandle userHandle) {
+            boolean filterLastUsed, UserHandle userHandle) {
         ChooserListAdapter chooserListAdapter = createChooserListAdapter(context, payloadIntents,
                 initialIntents, rList, filterLastUsed,
-                useLayoutForBrowsables, createListController(userHandle));
+                createListController(userHandle));
         AppPredictor.Callback appPredictorCallback = createAppPredictorCallback(chooserListAdapter);
         AppPredictor appPredictor = setupAppPredictorForUser(userHandle, appPredictorCallback);
         chooserListAdapter.setAppPredictor(appPredictor);
@@ -2500,11 +2491,10 @@ public class ChooserActivity extends ResolverActivity implements
     @VisibleForTesting
     public ChooserListAdapter createChooserListAdapter(Context context,
             List<Intent> payloadIntents, Intent[] initialIntents, List<ResolveInfo> rList,
-            boolean filterLastUsed, boolean useLayoutForBrowsables,
-            ResolverListController resolverListController) {
+            boolean filterLastUsed, ResolverListController resolverListController) {
         return new ChooserListAdapter(context, payloadIntents, initialIntents, rList,
-                filterLastUsed, resolverListController, useLayoutForBrowsables,
-                this, this, context.getPackageManager());
+                filterLastUsed, resolverListController, this,
+                this, context.getPackageManager());
     }
 
     @VisibleForTesting
@@ -2977,16 +2967,16 @@ public class ChooserActivity extends ResolverActivity implements
                 itemView.setOnClickListener(v -> startSelected(mListPosition,
                         false/* always */, true/* filterd */));
 
-                TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
-                        .targetInfoForPosition(mListPosition, /* filtered */ true);
+                itemView.setOnLongClickListener(v -> {
+                    final TargetInfo ti = mChooserMultiProfilePagerAdapter.getActiveListAdapter()
+                            .targetInfoForPosition(mListPosition, /* filtered */ true);
 
-                // This should always be the case for ItemViewHolder, check for sanity
-                if (ti instanceof DisplayResolveInfo) {
-                    itemView.setOnLongClickListener(v -> {
+                    // This should always be the case for ItemViewHolder, check for sanity
+                    if (ti instanceof DisplayResolveInfo) {
                         showTargetDetails((DisplayResolveInfo) ti);
-                        return true;
-                    });
-                }
+                    }
+                    return true;
+                });
             }
         }
     }
@@ -3314,16 +3304,15 @@ public class ChooserActivity extends ResolverActivity implements
 
                 // Direct Share targets should not show any menu
                 if (!isDirectShare) {
-                    final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
-                            holder.getItemIndex(column), true);
-
-                    // This should always be the case for non-DS targets, check for sanity
-                    if (ti instanceof DisplayResolveInfo) {
-                        v.setOnLongClickListener(v1 -> {
+                    v.setOnLongClickListener(v1 -> {
+                        final TargetInfo ti = mChooserListAdapter.targetInfoForPosition(
+                                holder.getItemIndex(column), true);
+                        // This should always be the case for non-DS targets, check for sanity
+                        if (ti instanceof DisplayResolveInfo) {
                             showTargetDetails((DisplayResolveInfo) ti);
-                            return true;
-                        });
-                    }
+                        }
+                        return true;
+                    });
                 }
 
                 holder.addView(i, v);

@@ -638,8 +638,9 @@ public class WindowManagerService extends IWindowManager.Stub
     boolean mSystemBooted = false;
     boolean mForceDisplayEnabled = false;
     boolean mShowingBootMessages = false;
-    boolean mBootAnimationStopped = false;
     boolean mSystemReady = false;
+    boolean mBootAnimationStopped = false;
+    long mBootWaitForWindowsStartTime = -1;
 
     // Following variables are for debugging screen wakelock only.
     WindowState mLastWakeLockHoldingWindow = null;
@@ -3446,10 +3447,21 @@ public class WindowManagerService extends IWindowManager.Stub
 
             // Don't enable the screen until all existing windows have been drawn.
             if (!mForceDisplayEnabled) {
+                if (mBootWaitForWindowsStartTime < 0) {
+                    // First time we will start waiting for all windows to be drawn.
+                    mBootWaitForWindowsStartTime = SystemClock.elapsedRealtime();
+                }
                 for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
                     if (mRoot.getChildAt(i).shouldWaitForSystemDecorWindowsOnBoot()) {
                         return;
                     }
+                }
+                long waitTime = SystemClock.elapsedRealtime() - mBootWaitForWindowsStartTime;
+                mBootWaitForWindowsStartTime = -1;
+                if (waitTime > 10) {
+                    ProtoLog.i(WM_DEBUG_BOOT,
+                            "performEnableScreen: Waited %dms for all windows to be drawn",
+                            waitTime);
                 }
             }
 
@@ -7754,6 +7766,33 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized (mGlobalLock) {
                 final WindowState w = mWindowMap.get(binder);
                 return w != null ? w.getName() : null;
+            }
+        }
+
+        @Override
+        public String getImeControlTargetNameForLogging(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                final InsetsControlTarget target = dc.mInputMethodControlTarget;
+                if (target == null) {
+                    return null;
+                }
+                final WindowState win = target.getWindow();
+                return win != null ? win.getName() : target.toString();
+            }
+        }
+
+        @Override
+        public String getImeTargetNameForLogging(int displayId) {
+            synchronized (mGlobalLock) {
+                final DisplayContent dc = mRoot.getDisplayContent(displayId);
+                if (dc == null) {
+                    return null;
+                }
+                return dc.mInputMethodTarget != null ? dc.mInputMethodTarget.getName() : null;
             }
         }
     }

@@ -40,6 +40,7 @@ import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.util.DebugUtils;
 import android.view.InputDevice;
 import android.view.MotionEvent;
@@ -47,6 +48,7 @@ import android.view.MotionEvent;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.accessibility.magnification.MagnificationGestureHandler.ScaleChangedListener;
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
 import com.android.server.wm.WindowManagerInternal;
@@ -55,6 +57,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.function.IntConsumer;
 
@@ -111,6 +115,8 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     private Context mContext;
     MagnificationController mMagnificationController;
+    @Mock
+    ScaleChangedListener mMockScaleChangedListener;
 
     private OffsettableClock mClock;
     private FullScreenMagnificationGestureHandler mMgh;
@@ -120,6 +126,7 @@ public class FullScreenMagnificationGestureHandlerTest {
 
     @Before
     public void setUp() {
+        MockitoAnnotations.initMocks(this);
         mContext = InstrumentationRegistry.getContext();
         final MagnificationController.ControllerContext mockController =
                 mock(MagnificationController.ControllerContext.class);
@@ -157,7 +164,7 @@ public class FullScreenMagnificationGestureHandlerTest {
     private FullScreenMagnificationGestureHandler newInstance(boolean detectTripleTap,
             boolean detectShortcutTrigger) {
         FullScreenMagnificationGestureHandler h = new FullScreenMagnificationGestureHandler(
-                mContext, mMagnificationController,
+                mContext, mMagnificationController, mMockScaleChangedListener,
                 detectTripleTap, detectShortcutTrigger, DISPLAY_0);
         mHandler = new TestHandler(h.mDetectingState, mClock) {
             @Override
@@ -416,6 +423,8 @@ public class FullScreenMagnificationGestureHandlerTest {
                 check(mMgh.mCurrentState == mMgh.mPanningScalingState,
                         state);
                 check(mMgh.mPanningScalingState.mScaling, state);
+                verify(mMockScaleChangedListener).onMagnificationScaleChanged(DISPLAY_0,
+                        Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN);
             } break;
             default: throw new IllegalArgumentException("Illegal state: " + state);
         }
@@ -472,6 +481,7 @@ public class FullScreenMagnificationGestureHandlerTest {
                     goFromStateIdleTo(STATE_PANNING);
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 3));
                     send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 4));
+                    send(pointerEvent(ACTION_MOVE, DEFAULT_X * 2, DEFAULT_Y * 5));
                 } break;
                 default:
                     throw new IllegalArgumentException("Illegal state: " + state);

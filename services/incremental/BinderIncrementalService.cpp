@@ -279,8 +279,9 @@ binder::Status BinderIncrementalService::startLoading(int32_t storageId, bool* _
 
 binder::Status BinderIncrementalService::configureNativeBinaries(
         int32_t storageId, const std::string& apkFullPath, const std::string& libDirRelativePath,
-        const std::string& abi, bool* _aidl_return) {
-    *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi);
+        const std::string& abi, bool extractNativeLibs, bool* _aidl_return) {
+    *_aidl_return = mImpl.configureNativeBinaries(storageId, apkFullPath, libDirRelativePath, abi,
+                                                  extractNativeLibs);
     return ok();
 }
 
