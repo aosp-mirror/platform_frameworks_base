@@ -930,7 +930,7 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void accept(IDataShareReadAdapter serviceAdapter) throws RemoteException {
+        public void accept(@NonNull IDataShareReadAdapter serviceAdapter) throws RemoteException {
             Slog.i(TAG, "Data share request accepted by Content Capture service");
 
             Pair<ParcelFileDescriptor, ParcelFileDescriptor> clientPipe = createPipe();
@@ -967,6 +967,7 @@ public final class ContentCaptureManagerService extends
             bestEffortCloseFileDescriptors(sourceIn, sinkOut);
 
             mParentService.mDataShareExecutor.execute(() -> {
+                boolean receivedData = false;
                 try (InputStream fis =
                              new ParcelFileDescriptor.AutoCloseInputStream(sinkIn);
                      OutputStream fos =
@@ -981,6 +982,8 @@ public final class ContentCaptureManagerService extends
                         }
 
                         fos.write(byteBuffer, 0 /* offset */, readBytes);
+
+                        receivedData = true;
                     }
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to pipe client and service streams", e);
@@ -991,6 +994,22 @@ public final class ContentCaptureManagerService extends
                     synchronized (mParentService.mLock) {
                         mParentService.mPackagesWithShareRequests
                                 .remove(mDataShareRequest.getPackageName());
+                    }
+                    if (receivedData) {
+                        try {
+                            mClientAdapter.finish();
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Failed to call finish() the client operation", e);
+                        }
+                        try {
+                            serviceAdapter.finish();
+                        } catch (RemoteException e) {
+                            Slog.e(TAG, "Failed to call finish() the service operation", e);
+                        }
+                    } else {
+                        // Client or service may have crashed before sending.
+                        sendErrorSignal(mClientAdapter, serviceAdapter,
+                                ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                     }
                 }
             });
