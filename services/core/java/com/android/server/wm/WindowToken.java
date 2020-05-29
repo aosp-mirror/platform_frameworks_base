@@ -128,10 +128,10 @@ class WindowToken extends WindowContainer<WindowState> {
         final Configuration mRotatedOverrideConfiguration;
         final SeamlessRotator mRotator;
         /**
-         * The tokens that share the same transform. Their end time of transform are the same as
-         * {@link #mOwner}.
+         * The tokens that share the same transform. Their end time of transform are the same. The
+         * list should at least contain the token who creates this state.
          */
-        final ArrayList<WindowToken> mAssociatedTokens = new ArrayList<>(1);
+        final ArrayList<WindowToken> mAssociatedTokens = new ArrayList<>(3);
         final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>(3);
         boolean mIsTransforming = true;
 
@@ -531,6 +531,7 @@ class WindowToken extends WindowContainer<WindowState> {
                 mDisplayContent.getConfiguration().uiMode);
         mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
                 insetsState, new Configuration(config), mDisplayContent.getRotation());
+        mFixedRotationTransformState.mAssociatedTokens.add(this);
         onConfigurationChanged(getParent().getConfiguration());
         notifyFixedRotationTransform(true /* enabled */);
     }
@@ -578,14 +579,12 @@ class WindowToken extends WindowContainer<WindowState> {
             for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
                 state.mAssociatedTokens.get(i).cancelFixedRotationTransform();
             }
-            cancelFixedRotationTransform();
         }
         // The state is cleared at the end, because it is used to indicate that other windows can
         // use seamless rotation when applying rotation to display.
         for (int i = state.mAssociatedTokens.size() - 1; i >= 0; i--) {
             state.mAssociatedTokens.get(i).cleanUpFixedRotationTransformState();
         }
-        cleanUpFixedRotationTransformState();
     }
 
     private void cleanUpFixedRotationTransformState() {
