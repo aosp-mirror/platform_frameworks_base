@@ -431,6 +431,25 @@ public class BubbleExtractorTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testFlagBubble_false_noShortcut() {
+        setUpBubblesEnabled(true /* feature */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                DEFAULT_ALLOW_BUBBLE /* channel */);
+        when(mActivityManager.isLowRamDevice()).thenReturn(false);
+        setUpIntentBubble(true /* isValid */);
+
+        NotificationRecord r = getNotificationRecord(true /* bubble */);
+        r.setShortcutInfo(null);
+        r.getNotification().extras.putString(Notification.EXTRA_TEMPLATE, null);
+
+        mBubbleExtractor.process(r);
+
+        assertFalse(r.canBubble());
+        assertNull(r.getNotification().getBubbleMetadata());
+        assertFalse(r.getNotification().isBubbleNotification());
+    }
+
+    @Test
     public void testFlagBubble_false_notConversation() {
         setUpBubblesEnabled(true /* feature */,
                 BUBBLE_PREFERENCE_ALL /* app */,
@@ -439,8 +458,7 @@ public class BubbleExtractorTest extends UiServiceTestCase {
         setUpIntentBubble(true /* isValid */);
 
         NotificationRecord r = getNotificationRecord(true /* bubble */);
-        // No longer a conversation:
-        r.setShortcutInfo(null);
+        r.userDemotedAppFromConvoSpace(true);
         r.getNotification().extras.putString(Notification.EXTRA_TEMPLATE, null);
 
         mBubbleExtractor.process(r);

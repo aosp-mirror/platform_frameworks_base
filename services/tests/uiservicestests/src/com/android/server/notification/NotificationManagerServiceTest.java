@@ -5309,6 +5309,28 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testFlagBubbleNotifs_noFlag_noShortcut() throws RemoteException {
+        setUpPrefsForBubbles(PKG, mUid,
+                true /* global */,
+                BUBBLE_PREFERENCE_ALL /* app */,
+                true /* channel */);
+
+        Notification.Builder nb = getMessageStyleNotifBuilder(true, null, false);
+        nb.setShortcutId(null);
+        StatusBarNotification sbn = new StatusBarNotification(PKG, PKG, 1,
+                null, mUid, 0,
+                nb.build(), new UserHandle(mUid), null, 0);
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, sbn.getTag(),
+                sbn.getId(), sbn.getNotification(), sbn.getUserId());
+        waitForIdle();
+
+        // no shortcut no bubble
+        assertFalse(mService.getNotificationRecord(
+                sbn.getKey()).getNotification().isBubbleNotification());
+    }
+
+    @Test
     public void testFlagBubbleNotifs_noFlag_messaging_appNotAllowed() throws RemoteException {
         setUpPrefsForBubbles(PKG, mUid,
                 true /* global */,

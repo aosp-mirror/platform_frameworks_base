@@ -78,6 +78,7 @@ public class BubbleExtractor implements NotificationSignalExtractor {
         boolean canPresentAsBubble = canPresentAsBubble(record)
                 && !mActivityManager.isLowRamDevice()
                 && record.isConversation()
+                && record.getShortcutInfo() != null
                 && (record.getNotification().flags & FLAG_FOREGROUND_SERVICE) == 0;
 
         if (!mConfig.bubblesEnabled()
