@@ -684,10 +684,14 @@ public class StatsPullAtomService extends SystemService {
     /**
      * Return the {@code INetworkStatsSession} object that holds the necessary properties needed
      * for the subsequent queries to {@link com.android.server.net.NetworkStatsService}. Or
-     * null if the service or binder cannot be obtained.
+     * null if the service or binder cannot be obtained. Calling this method will trigger poll
+     * in NetworkStatsService with once per 15 seconds rate-limit, unless {@code bypassRateLimit}
+     * is set to true. This is needed in {@link #getUidNetworkStatsSnapshotForTemplate}, where
+     * bypassing the limit is necessary for perfd to supply realtime stats to developers looking at
+     * the network usage of their app.
      */
     @Nullable
-    private INetworkStatsSession getNetworkStatsSession(boolean forcePoll) {
+    private INetworkStatsSession getNetworkStatsSession(boolean bypassRateLimit) {
         final INetworkStatsService networkStatsService =
                 INetworkStatsService.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
@@ -695,7 +699,7 @@ public class StatsPullAtomService extends SystemService {
 
         try {
             return networkStatsService.openSessionForUsageStats(
-                    FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN | (forcePoll ? FLAG_POLL_FORCE
+                    FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN | (bypassRateLimit ? FLAG_POLL_FORCE
                             : FLAG_POLL_ON_OPEN), mContext.getOpPackageName());
         } catch (RemoteException e) {
             Slog.e(TAG, "Cannot get NetworkStats session", e);
