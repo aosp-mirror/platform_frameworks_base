@@ -304,7 +304,7 @@ public class MediaControlPanel {
         TextView deviceName = mViewHolder.getSeamlessText();
 
         // Update the outline color
-        RippleDrawable bkgDrawable = (RippleDrawable) mViewHolder.getSeamless().getBackground();
+        RippleDrawable bkgDrawable = (RippleDrawable) mViewHolder.getSeamless().getForeground();
         GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
         rect.setStroke(2, deviceName.getCurrentTextColor());
         rect.setColor(Color.TRANSPARENT);
