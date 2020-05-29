@@ -114,6 +114,7 @@ public class PermissionMonitorTest {
     @Mock private INetd mNetdService;
     @Mock private PackageManagerInternal mMockPmi;
     @Mock private UserManager mUserManager;
+    @Mock private PermissionMonitor.Dependencies mDeps;
 
     private PermissionMonitor mPermissionMonitor;
 
@@ -128,7 +129,7 @@ public class PermissionMonitorTest {
                         new UserInfo(MOCK_USER2, "", 0),
                 }));
 
-        mPermissionMonitor = spy(new PermissionMonitor(mContext, mNetdService));
+        mPermissionMonitor = spy(new PermissionMonitor(mContext, mNetdService, mDeps));
 
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.addService(PackageManagerInternal.class, mMockPmi);
@@ -283,14 +284,14 @@ public class PermissionMonitorTest {
 
     @Test
     public void testHasRestrictedNetworkPermissionSystemUid() {
-        doReturn(VERSION_P).when(mPermissionMonitor).getDeviceFirstSdkInt();
+        doReturn(VERSION_P).when(mDeps).getDeviceFirstSdkInt();
         assertTrue(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CONNECTIVITY_INTERNAL));
         assertTrue(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CONNECTIVITY_USE_RESTRICTED_NETWORKS));
 
-        doReturn(VERSION_Q).when(mPermissionMonitor).getDeviceFirstSdkInt();
+        doReturn(VERSION_Q).when(mDeps).getDeviceFirstSdkInt();
         assertFalse(hasRestrictedNetworkPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID));
         assertFalse(hasRestrictedNetworkPermission(
                 PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CONNECTIVITY_INTERNAL));
