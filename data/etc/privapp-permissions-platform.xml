@@ -27,6 +27,11 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS" />
     </privapp-permissions>
 
+    <!-- Needed for Build.getSerial(), which is used to send a unique number for serial, per HUIG. -->
+    <privapp-permissions package="android.car.usb.handler">
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.angle">
         <permission name="android.permission.WRITE_SECURE_SETTINGS"/>
     </privapp-permissions>
