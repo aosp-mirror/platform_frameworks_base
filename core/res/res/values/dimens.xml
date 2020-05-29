@@ -813,7 +813,7 @@
     <dimen name="chooser_icon_size">56dp</dimen>
     <dimen name="chooser_badge_size">22dp</dimen>
     <dimen name="resolver_icon_size">32dp</dimen>
-    <dimen name="resolver_button_bar_spacing">8dp</dimen>
+    <dimen name="resolver_button_bar_spacing">0dp</dimen>
     <dimen name="resolver_badge_size">18dp</dimen>
     <dimen name="resolver_icon_margin">16dp</dimen>
     <dimen name="resolver_small_margin">18dp</dimen>
@@ -826,6 +826,9 @@
     <dimen name="resolver_max_collapsed_height_with_default">144dp</dimen>
     <dimen name="resolver_max_collapsed_height_with_default_with_tabs">300dp</dimen>
     <dimen name="resolver_tab_text_size">14sp</dimen>
+    <dimen name="resolver_title_padding_bottom">0dp</dimen>
+    <dimen name="resolver_empty_state_container_padding_top">8dp</dimen>
+    <dimen name="resolver_empty_state_container_padding_bottom">8dp</dimen>
 
     <dimen name="chooser_action_button_icon_size">18dp</dimen>
 
