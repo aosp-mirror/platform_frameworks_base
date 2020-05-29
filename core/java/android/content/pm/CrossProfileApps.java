@@ -277,10 +277,11 @@ public class CrossProfileApps {
      *
      * <p>Specifically, returns whether the following are all true:
      * <ul>
-     * <li>{@code UserManager#getEnabledProfileIds(int)} ()} returns at least one other profile for
-     * the calling user.</li>
+     * <li>{@code UserManager#getEnabledProfileIds(int)} returns at least one other profile for the
+     * calling user.</li>
      * <li>The calling app has requested
      * {@code android.Manifest.permission.INTERACT_ACROSS_PROFILES} in its manifest.</li>
+     * <li>The calling app is not a profile owner within the profile group of the calling user.</li>
      * </ul>
      *
      * <p>Note that in order for the user to be able to grant the consent, the requesting package
