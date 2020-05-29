@@ -1527,6 +1527,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void setFixedRotationLaunchingApp(@NonNull ActivityRecord r, @Surface.Rotation int rotation) {
         final WindowToken prevRotatedLaunchingApp = mFixedRotationLaunchingApp;
+        if (prevRotatedLaunchingApp != null && prevRotatedLaunchingApp == r
+                && r.getWindowConfiguration().getRotation() == rotation) {
+            // The given launching app and target rotation are the same as the existing ones.
+            return;
+        }
         if (prevRotatedLaunchingApp != null
                 && prevRotatedLaunchingApp.getWindowConfiguration().getRotation() == rotation
                 // It is animating so we can expect there will have a transition callback.
@@ -1536,6 +1541,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // the heavy operations. This also benefits that the states of multiple activities
             // are handled together.
             r.linkFixedRotationTransform(prevRotatedLaunchingApp);
+            setFixedRotationLaunchingAppUnchecked(r, rotation);
             return;
         }
 

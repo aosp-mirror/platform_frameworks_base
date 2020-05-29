@@ -1134,8 +1134,10 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.mOpeningApps.add(app2);
         app2.setRequestedOrientation(newOrientation);
 
-        // The activity should share the same transform state as the existing one.
+        // The activity should share the same transform state as the existing one. The activity
+        // should also be the fixed rotation launching app because it is the latest top.
         assertTrue(app.hasFixedRotationTransform(app2));
+        assertTrue(mDisplayContent.isFixedRotationLaunchingApp(app2));
 
         // The display should be rotated after the launch is finished.
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
