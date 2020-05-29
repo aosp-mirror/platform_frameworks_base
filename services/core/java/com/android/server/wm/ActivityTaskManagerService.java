@@ -3209,23 +3209,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (TextUtils.equals(pae.intent.getAction(),
-                    android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
-                // Start voice interaction through VoiceInteractionManagerService.
-                mAssistUtils.showSessionForActiveService(pae.extras, SHOW_SOURCE_APPLICATION,
-                        null, null);
-            } else {
-                pae.intent.replaceExtras(pae.extras);
-                pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mInternal.closeSystemDialogs("assist");
+            pae.intent.replaceExtras(pae.extras);
+            pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mInternal.closeSystemDialogs("assist");
 
-                try {
-                    mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
-                } catch (ActivityNotFoundException e) {
-                    Slog.w(TAG, "No activity to handle assist action.", e);
-                }
+            try {
+                mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "No activity to handle assist action.", e);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -3543,14 +3536,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null,
                 receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
                 null, PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT, flags) != null;
-    }
-
-    @Override
-    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
-            Bundle args) {
-        return enqueueAssistContext(requestType, intent, hint, null, null, null,
-                true /* focused */, true /* newSessionId */, userHandle, args,
-                PENDING_ASSIST_EXTRAS_TIMEOUT, 0) != null;
     }
 
     @Override
