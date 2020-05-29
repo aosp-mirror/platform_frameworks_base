@@ -43,6 +43,7 @@ import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowContainerChildProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowContainerProto.CONFIGURATION_CONTAINER;
+import static com.android.server.wm.WindowContainerProto.IDENTIFIER;
 import static com.android.server.wm.WindowContainerProto.ORIENTATION;
 import static com.android.server.wm.WindowContainerProto.SURFACE_ANIMATOR;
 import static com.android.server.wm.WindowContainerProto.VISIBLE;
@@ -1923,6 +1924,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         super.dumpDebug(proto, CONFIGURATION_CONTAINER, logLevel);
         proto.write(ORIENTATION, mOrientation);
         proto.write(VISIBLE, isVisible);
+        writeIdentifierToProto(proto, IDENTIFIER);
         if (mSurfaceAnimator.isAnimating()) {
             mSurfaceAnimator.dumpDebug(proto, SURFACE_ANIMATOR);
         }
