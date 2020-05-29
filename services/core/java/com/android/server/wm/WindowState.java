@@ -1812,7 +1812,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final ActivityRecord atoken = mActivityRecord;
         return mViewVisibility == View.GONE
                 || !mRelayoutCalled
-                || (atoken == null && !mToken.isVisible())
+                // We can't check isVisible here because it will also check the client visibility
+                // for WindowTokens. Even if the client is not visible, we still need to perform
+                // a layout since they can request relayout when client visibility is false.
+                // TODO (b/157682066) investigate if we can clean up isVisible
+                || (atoken == null && !(wouldBeVisibleIfPolicyIgnored() && isVisibleByPolicy()))
                 || (atoken != null && !atoken.mVisibleRequested)
                 || isParentWindowGoneForLayout()
                 || (mAnimatingExit && !isAnimatingLw())
