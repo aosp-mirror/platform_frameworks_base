@@ -3554,8 +3554,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private void updateImeControlTarget() {
         mInputMethodControlTarget = computeImeControlTarget();
-        ProtoLog.i(WM_DEBUG_IME, "updateImeControlTarget %s",
-                mInputMethodControlTarget.getWindow());
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
     }
 
