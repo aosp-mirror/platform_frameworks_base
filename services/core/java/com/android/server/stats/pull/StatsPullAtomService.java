@@ -160,6 +160,7 @@ import com.android.server.notification.NotificationManagerService;
 import com.android.server.role.RoleManagerInternal;
 import com.android.server.stats.pull.IonMemoryUtil.IonAllocations;
 import com.android.server.stats.pull.ProcfsMemoryUtil.MemorySnapshot;
+import com.android.server.stats.pull.netstats.NetworkStatsExt;
 import com.android.server.stats.pull.netstats.SubInfo;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
@@ -182,7 +183,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -815,48 +815,6 @@ public class StatsPullAtomService extends SystemService {
                 DIRECT_EXECUTOR,
                 mStatsCallbackImpl
         );
-    }
-
-    /**
-     * A data class to store a NetworkStats object with information associated to it.
-     */
-    private static class NetworkStatsExt {
-        @NonNull
-        public final NetworkStats stats;
-        public final int[] transports;
-        public final boolean slicedByFgbg;
-        public final boolean slicedByTag;
-        public final boolean slicedByMetered;
-        public final int ratType;
-        @Nullable
-        public final SubInfo subInfo;
-
-        NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg) {
-            this(stats, transports, slicedByFgbg, /*slicedByTag=*/false, /*slicedByMetered=*/false,
-                    TelephonyManager.NETWORK_TYPE_UNKNOWN, /*subInfo=*/null);
-        }
-
-        NetworkStatsExt(@NonNull NetworkStats stats, int[] transports, boolean slicedByFgbg,
-                boolean slicedByTag, boolean slicedByMetered, int ratType,
-                @Nullable SubInfo subInfo) {
-            this.stats = stats;
-
-            // Sort transports array so that we can test for equality without considering order.
-            this.transports = Arrays.copyOf(transports, transports.length);
-            Arrays.sort(this.transports);
-
-            this.slicedByFgbg = slicedByFgbg;
-            this.slicedByTag = slicedByTag;
-            this.slicedByMetered = slicedByMetered;
-            this.ratType = ratType;
-            this.subInfo = subInfo;
-        }
-
-        public boolean hasSameSlicing(@NonNull NetworkStatsExt other) {
-            return Arrays.equals(transports, other.transports) && slicedByFgbg == other.slicedByFgbg
-                    && slicedByTag == other.slicedByTag && slicedByMetered == other.slicedByMetered
-                    && ratType == other.ratType && Objects.equals(subInfo, other.subInfo);
-        }
     }
 
     @NonNull
