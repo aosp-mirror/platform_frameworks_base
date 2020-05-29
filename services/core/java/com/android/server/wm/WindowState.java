@@ -5240,7 +5240,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void applyDims(Dimmer dimmer) {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
-            dimmer.dimAbove(getPendingTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
+            dimmer.dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow() && !mHidden) {
             // Only show a dim behind when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND
@@ -5248,7 +5248,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
             mIsDimming = true;
-            dimmer.dimBelow(getPendingTransaction(), this, mAttrs.dimAmount);
+            dimmer.dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
         }
     }
 
