@@ -1360,6 +1360,86 @@ package android.hardware.soundtrigger {
     field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.KeyphraseMetadata> CREATOR;
   }
 
+  public class SoundTrigger {
+    field public static final int RECOGNITION_MODE_GENERIC = 8; // 0x8
+    field public static final int RECOGNITION_MODE_USER_AUTHENTICATION = 4; // 0x4
+    field public static final int RECOGNITION_MODE_USER_IDENTIFICATION = 2; // 0x2
+    field public static final int RECOGNITION_MODE_VOICE_TRIGGER = 1; // 0x1
+    field public static final int STATUS_OK = 0; // 0x0
+  }
+
+  public static final class SoundTrigger.Keyphrase implements android.os.Parcelable {
+    ctor public SoundTrigger.Keyphrase(int, int, @NonNull java.util.Locale, @NonNull String, @Nullable int[]);
+    method public int getId();
+    method @NonNull public java.util.Locale getLocale();
+    method public int getRecognitionModes();
+    method @NonNull public String getText();
+    method @NonNull public int[] getUsers();
+    method @NonNull public static android.hardware.soundtrigger.SoundTrigger.Keyphrase readFromParcel(@NonNull android.os.Parcel);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.Keyphrase> CREATOR;
+  }
+
+  public static final class SoundTrigger.KeyphraseSoundModel extends android.hardware.soundtrigger.SoundTrigger.SoundModel implements android.os.Parcelable {
+    ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[], int);
+    ctor public SoundTrigger.KeyphraseSoundModel(@NonNull java.util.UUID, @NonNull java.util.UUID, @Nullable byte[], @Nullable android.hardware.soundtrigger.SoundTrigger.Keyphrase[]);
+    method @NonNull public android.hardware.soundtrigger.SoundTrigger.Keyphrase[] getKeyphrases();
+    method @NonNull public static android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel readFromParcel(@NonNull android.os.Parcel);
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.KeyphraseSoundModel> CREATOR;
+  }
+
+  public static final class SoundTrigger.ModelParamRange implements android.os.Parcelable {
+    ctor public SoundTrigger.ModelParamRange(int, int);
+    method public int getEnd();
+    method public int getStart();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModelParamRange> CREATOR;
+  }
+
+  public static final class SoundTrigger.ModuleProperties implements android.os.Parcelable {
+    ctor public SoundTrigger.ModuleProperties(int, @NonNull String, @NonNull String, @NonNull String, int, @NonNull String, int, int, int, int, boolean, int, boolean, int, boolean, int);
+    method public int describeContents();
+    method public int getAudioCapabilities();
+    method @NonNull public String getDescription();
+    method public int getId();
+    method @NonNull public String getImplementor();
+    method public int getMaxBufferMillis();
+    method public int getMaxKeyphrases();
+    method public int getMaxSoundModels();
+    method public int getMaxUsers();
+    method public int getPowerConsumptionMw();
+    method public int getRecognitionModes();
+    method @NonNull public String getSupportedModelArch();
+    method @NonNull public java.util.UUID getUuid();
+    method public int getVersion();
+    method public boolean isCaptureTransitionSupported();
+    method public boolean isConcurrentCaptureSupported();
+    method public boolean isTriggerReturnedInEvent();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final int AUDIO_CAPABILITY_ECHO_CANCELLATION = 1; // 0x1
+    field public static final int AUDIO_CAPABILITY_NOISE_SUPPRESSION = 2; // 0x2
+    field @NonNull public static final android.os.Parcelable.Creator<android.hardware.soundtrigger.SoundTrigger.ModuleProperties> CREATOR;
+  }
+
+  public static class SoundTrigger.RecognitionEvent {
+    ctor public SoundTrigger.RecognitionEvent(int, int, boolean, int, int, int, boolean, @NonNull android.media.AudioFormat, @Nullable byte[]);
+    method @Nullable public android.media.AudioFormat getCaptureFormat();
+    method public int getCaptureSession();
+    method public byte[] getData();
+    method public boolean isCaptureAvailable();
+  }
+
+  public static class SoundTrigger.SoundModel {
+    method @NonNull public byte[] getData();
+    method public int getType();
+    method @NonNull public java.util.UUID getUuid();
+    method @NonNull public java.util.UUID getVendorUuid();
+    method public int getVersion();
+    field public static final int TYPE_GENERIC_SOUND = 1; // 0x1
+    field public static final int TYPE_KEYPHRASE = 0; // 0x0
+  }
+
 }
 
 package android.location {
