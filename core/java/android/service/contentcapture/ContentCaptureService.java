@@ -677,10 +677,6 @@ public abstract class ContentCaptureService extends Service {
                 throws RemoteException {
             synchronized (mLock) {
                 executeAdapterMethodLocked(adapter -> adapter.onStart(fd), "onStart");
-
-                // Client app and Service successfully connected, so this object would be kept alive
-                // until the session has finished.
-                clearHardReferences();
             }
         }
 
@@ -689,6 +685,13 @@ public abstract class ContentCaptureService extends Service {
             synchronized (mLock) {
                 executeAdapterMethodLocked(
                         adapter -> adapter.onError(errorCode), "onError");
+                clearHardReferences();
+            }
+        }
+
+        @Override
+        public void finish() throws RemoteException {
+            synchronized (mLock) {
                 clearHardReferences();
             }
         }
