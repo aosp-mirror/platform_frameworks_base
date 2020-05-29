@@ -561,7 +561,15 @@ public final class StatsManager {
                     try {
                         resultReceiver.pullFinished(atomTag, success, parcels);
                     } catch (RemoteException e) {
-                        Log.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId);
+                        Log.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId
+                                + " due to TransactionTooLarge. Calling pullFinish with no data");
+                        StatsEventParcel[] emptyData = new StatsEventParcel[0];
+                        try {
+                            resultReceiver.pullFinished(atomTag, /*success=*/false, emptyData);
+                        } catch (RemoteException nestedException) {
+                            Log.w(TAG, "StatsPullResultReceiver failed for tag " + mAtomId
+                                    + " with empty payload");
+                        }
                     }
                 });
             } finally {
