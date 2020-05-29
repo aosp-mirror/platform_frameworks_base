@@ -18,6 +18,7 @@ package android.content;
 
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Environment;
 import android.os.UserHandle;
 
@@ -30,6 +31,7 @@ import java.util.Objects;
  * @hide
  */
 @SystemApi
+@TestApi
 public class ApexEnvironment {
 
     private static final String APEX_DATA = "apexdata";
