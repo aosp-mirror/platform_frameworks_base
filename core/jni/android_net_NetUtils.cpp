@@ -27,12 +27,13 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
+#include <DnsProxydProtocol.h> // NETID_USE_LOCAL_NAMESERVERS
 #include <android_runtime/AndroidRuntime.h>
 #include <cutils/properties.h>
-#include <utils/misc.h>
-#include <utils/Log.h>
 #include <nativehelper/JNIHelp.h>
 #include <nativehelper/ScopedLocalRef.h>
+#include <utils/Log.h>
+#include <utils/misc.h>
 
 #include "NetdClient.h"
 #include "core_jni_helpers.h"

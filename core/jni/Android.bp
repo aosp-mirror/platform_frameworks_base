@@ -271,7 +271,10 @@ cc_library_shared {
                 // our headers include libnativewindow's public headers
                 "libnativewindow",
             ],
-            header_libs: ["bionic_libc_platform_headers"],
+            header_libs: [
+                "bionic_libc_platform_headers",
+                "dnsproxyd_protocol_headers",
+            ],
         },
         host: {
             cflags: [
