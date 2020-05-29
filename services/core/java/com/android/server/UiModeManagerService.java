@@ -134,6 +134,7 @@ final class UiModeManagerService extends SystemService {
     int mCurUiMode = 0;
     private int mSetUiMode = 0;
     private boolean mHoldingConfiguration = false;
+    private int mCurrentUser;
 
     private Configuration mConfiguration = new Configuration();
     boolean mSystemReady;
@@ -323,6 +324,7 @@ final class UiModeManagerService extends SystemService {
     @Override
     public void onSwitchUser(int userHandle) {
         super.onSwitchUser(userHandle);
+      	mCurrentUser = userHandle;
         getContext().getContentResolver().unregisterContentObserver(mSetupWizardObserver);
         verifySetupWizardCompleted();
     }
@@ -728,16 +730,30 @@ final class UiModeManagerService extends SystemService {
 
         @Override
         public boolean setNightModeActivated(boolean active) {
+            if (isNightModeLocked() && (getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
+                    != PackageManager.PERMISSION_GRANTED)) {
+                Slog.e(TAG, "Night mode locked, requires MODIFY_DAY_NIGHT_MODE permission");
+                return false;
+            }
+            final int user = Binder.getCallingUserHandle().getIdentifier();
+            if (user != mCurrentUser && getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.INTERACT_ACROSS_USERS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Slog.e(TAG, "Target user is not current user,"
+                        + " INTERACT_ACROSS_USERS permission is required");
+                return false;
+
+            }
             synchronized (mLock) {
-                final int user = UserHandle.getCallingUserId();
                 final long ident = Binder.clearCallingIdentity();
                 try {
                     if (mNightMode == MODE_NIGHT_AUTO || mNightMode == MODE_NIGHT_CUSTOM) {
                         unregisterScreenOffEventLocked();
                         mOverrideNightModeOff = !active;
                         mOverrideNightModeOn = active;
-                        mOverrideNightModeUser = user;
-                        persistNightModeOverrides(user);
+                        mOverrideNightModeUser = mCurrentUser;
+                        persistNightModeOverrides(mCurrentUser);
                     } else if (mNightMode == UiModeManager.MODE_NIGHT_NO
                             && active) {
                         mNightMode = UiModeManager.MODE_NIGHT_YES;
@@ -747,7 +763,7 @@ final class UiModeManagerService extends SystemService {
                     }
                     updateConfigurationLocked();
                     applyConfigurationExternallyLocked();
-                    persistNightMode(user);
+                    persistNightMode(mCurrentUser);
                     return true;
                 } finally {
                     Binder.restoreCallingIdentity(ident);
