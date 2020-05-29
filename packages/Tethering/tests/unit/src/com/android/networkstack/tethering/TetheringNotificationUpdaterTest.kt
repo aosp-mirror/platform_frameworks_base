@@ -130,7 +130,7 @@ class TetheringNotificationUpdaterTest {
         context = TestContext(InstrumentationRegistry.getInstrumentation().context)
         doReturn(notificationManager).`when`(mockContext)
                 .getSystemService(Context.NOTIFICATION_SERVICE)
-        fakeTetheringThread = HandlerThread(this::class.simpleName)
+        fakeTetheringThread = HandlerThread(this::class.java.simpleName)
         fakeTetheringThread.start()
         notificationUpdater = WrappedNotificationUpdater(context, fakeTetheringThread.looper)
         setupResources()
