@@ -1355,7 +1355,7 @@ public class StatsPullAtomService extends SystemService {
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         int tagId = FrameworkStatsLog.CPU_TIME_PER_UID_FREQ;
         PullAtomMetadata metadata = new PullAtomMetadata.Builder()
-                .setAdditiveFields(new int[] {4})
+                .setAdditiveFields(new int[] {3})
                 .build();
         mStatsManager.setPullAtomCallback(
                 tagId,
