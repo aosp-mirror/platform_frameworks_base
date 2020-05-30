@@ -761,10 +761,6 @@ public final class ContentCaptureManager {
         public void write(ParcelFileDescriptor destination)
                 throws RemoteException {
             executeAdapterMethodLocked(adapter -> adapter.onWrite(destination), "onWrite");
-
-            // Client app and Service successfully connected, so this object would be kept alive
-            // until the session has finished.
-            clearHardReferences();
         }
 
         @Override
@@ -776,6 +772,11 @@ public final class ContentCaptureManager {
         @Override
         public void rejected() throws RemoteException {
             executeAdapterMethodLocked(DataShareWriteAdapter::onRejected, "onRejected");
+            clearHardReferences();
+        }
+
+        @Override
+        public void finish() throws RemoteException  {
             clearHardReferences();
         }
 
