@@ -17,9 +17,9 @@
 #define LOG_NAMESPACE "StatsLog.tag."
 #define LOG_TAG "StatsLog_println"
 
-#include "jni.h"
+#include <jni.h>
 #include <log/log.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/scoped_local_ref.h>
 #include "stats_buffer_writer.h"
 
 namespace android {
@@ -54,8 +54,23 @@ static const JNINativeMethod gMethods[] = {
 
 int register_android_util_StatsLog(JNIEnv* env)
 {
-    return jniRegisterNativeMethods(env, "android/util/StatsLog", gMethods, NELEM(gMethods));
+    static const char* kStatsLogClass = "android/util/StatsLog";
+
+    ScopedLocalRef<jclass> cls(env, env->FindClass(kStatsLogClass));
+    if (cls.get() == nullptr) {
+        ALOGE("jni statsd registration failure, class not found '%s'", kStatsLogClass);
+        return JNI_ERR;
+    }
+
+    const jint count = sizeof(gMethods) / sizeof(gMethods[0]);
+    int status = env->RegisterNatives(cls.get(), gMethods, count);
+    if (status < 0) {
+        ALOGE("jni statsd registration failure, status: %d", status);
+        return JNI_ERR;
+    }
+    return JNI_VERSION_1_4;
 }
+
 }; // namespace android
 
 /*
@@ -63,7 +78,6 @@ int register_android_util_StatsLog(JNIEnv* env)
  */
 jint JNI_OnLoad(JavaVM* jvm, void* reserved) {
     JNIEnv* e;
-    int status;
 
     ALOGV("statsd : loading JNI\n");
     // Check JNI version
@@ -71,10 +85,6 @@ jint JNI_OnLoad(JavaVM* jvm, void* reserved) {
         ALOGE("JNI version mismatch error");
         return JNI_ERR;
     }
-    status = android::register_android_util_StatsLog(e);
-    if (status < 0) {
-        ALOGE("jni statsd registration failure, status: %d", status);
-        return JNI_ERR;
-    }
-    return JNI_VERSION_1_4;
+
+    return android::register_android_util_StatsLog(e);
 }
