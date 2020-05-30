@@ -1083,7 +1083,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         if (VDBG) log("listen: call onBarringInfoChanged=" + barringInfo);
                         try {
                             r.callback.onBarringInfoChanged(
-                                    checkFineLocationAccess(r, Build.VERSION_CODES.R)
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
                                             ? barringInfo : biNoLocation);
                         } catch (RemoteException ex) {
                             remove(r.binder);
@@ -2277,7 +2277,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                             && idMatch(r.subId, subId, phoneId)) {
                         try {
                             r.callback.onRegistrationFailed(
-                                    checkFineLocationAccess(r, Build.VERSION_CODES.R)
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
                                             ? cellIdentity : noLocationCi,
                                     chosenPlmn, domain, causeCode,
                                     additionalCauseCode);
@@ -2324,7 +2324,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                                         + barringInfo + " r=" + r);
                             }
                             r.callback.onBarringInfoChanged(
-                                    checkFineLocationAccess(r, Build.VERSION_CODES.R)
+                                    checkFineLocationAccess(r, Build.VERSION_CODES.BASE)
                                         ? barringInfo : biNoLocation);
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
