@@ -10203,8 +10203,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private volatile long mWtfClusterStart;
-    private volatile int mWtfClusterCount;
+    private volatile ArrayMap<String, long[]> mErrorClusterRecords = new ArrayMap<>();
 
     /**
      * Write a description of an error (crash, WTF, ANR) to the drop box.
@@ -10235,13 +10234,18 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         // Rate-limit how often we're willing to do the heavy lifting below to
-        // collect and record logs; currently 5 logs per 10 second period.
+        // collect and record logs; currently 5 logs per 10 second period per eventType.
         final long now = SystemClock.elapsedRealtime();
-        if (now - mWtfClusterStart > 10 * DateUtils.SECOND_IN_MILLIS) {
-            mWtfClusterStart = now;
-            mWtfClusterCount = 1;
+        long[] errRecord = mErrorClusterRecords.get(eventType);
+        if (errRecord == null) {
+            errRecord = new long[2]; // [0]: startTime, [1]: count
+            mErrorClusterRecords.put(eventType, errRecord);
+        }
+        if (now - errRecord[0] > 10 * DateUtils.SECOND_IN_MILLIS) {
+            errRecord[0] = now;
+            errRecord[1] = 1L;
         } else {
-            if (mWtfClusterCount++ >= 5) return;
+            if (errRecord[1]++ >= 5) return;
         }
 
         final StringBuilder sb = new StringBuilder(1024);
