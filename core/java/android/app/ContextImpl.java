@@ -2748,6 +2748,7 @@ class ContextImpl extends Context {
             opPackageName = container.mOpPackageName;
             setResources(container.mResources);
             mDisplay = container.mDisplay;
+            mIsAssociatedWithDisplay = container.mIsAssociatedWithDisplay;
             mIsSystemOrSystemUiContext = container.mIsSystemOrSystemUiContext;
         } else {
             mBasePackageName = packageInfo.mPackageName;
