@@ -252,7 +252,8 @@ public final class OverlayManagerService extends SystemService {
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                     OverlayConfig.getSystemInstance(), getDefaultOverlayPackages(),
-                    new OverlayChangeListener());
+                    new OverlayChangeListener(), getOverlayableConfigurator(),
+                    getOverlayableConfiguratorTargets());
             mActorEnforcer = new OverlayActorEnforcer(mPackageManager);
 
             final IntentFilter packageFilter = new IntentFilter();
@@ -333,6 +334,28 @@ public final class OverlayManagerService extends SystemService {
             }
         }
         return defaultPackages.toArray(new String[defaultPackages.size()]);
+    }
+
+
+    /**
+     * Retrieves the package name that is recognized as an actor for the packages specified by
+     * {@link #getOverlayableConfiguratorTargets()}.
+     */
+    @Nullable
+    private String getOverlayableConfigurator() {
+        return TextUtils.nullIfEmpty(Resources.getSystem()
+                .getString(R.string.config_overlayableConfigurator));
+    }
+
+    /**
+     * Retrieves the target packages that recognize the {@link #getOverlayableConfigurator} as an
+     * actor for itself. Overlays targeting one of the specified targets that are signed with the
+     * same signature as the overlayable configurator will be granted the "actor" policy.
+     */
+    @Nullable
+    private String[] getOverlayableConfiguratorTargets() {
+        return Resources.getSystem().getStringArray(
+                R.array.config_overlayableConfiguratorTargets);
     }
 
     private final class PackageReceiver extends BroadcastReceiver {
@@ -1118,17 +1141,6 @@ public final class OverlayManagerService extends SystemService {
                 // Intentionally left blank
             }
             return false;
-        }
-
-        @Override
-        public String getOverlayableConfigurator() {
-            return Resources.getSystem().getString(R.string.config_overlayableConfigurator);
-        }
-
-        @Override
-        public String[] getOverlayableConfiguratorTargets() {
-            return Resources.getSystem().getStringArray(
-                    R.array.config_overlayableConfiguratorTargets);
         }
 
         @Override

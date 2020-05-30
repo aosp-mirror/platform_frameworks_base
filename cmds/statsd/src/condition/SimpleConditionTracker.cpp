@@ -85,12 +85,6 @@ SimpleConditionTracker::SimpleConditionTracker(
         mInitialValue = ConditionState::kUnknown;
     }
 
-    mNonSlicedConditionState = mInitialValue;
-
-    if (!mSliced) {
-        mUnSlicedPart = mInitialValue;
-    }
-
     mInitialized = true;
 }
 
@@ -141,9 +135,6 @@ void SimpleConditionTracker::handleStopAll(std::vector<ConditionState>& conditio
     mInitialValue = ConditionState::kFalse;
     mSlicedConditionState.clear();
     conditionCache[mIndex] = ConditionState::kFalse;
-    if (!mSliced) {
-        mUnSlicedPart = ConditionState::kFalse;
-    }
 }
 
 bool SimpleConditionTracker::hitGuardRail(const HashableDimensionKey& newKey) {
@@ -305,9 +296,7 @@ void SimpleConditionTracker::evaluateCondition(
                 conditionCache[mIndex] =
                         itr->second > 0 ? ConditionState::kTrue : ConditionState::kFalse;
             }
-            mUnSlicedPart = conditionCache[mIndex];
         }
-
         return;
     }
 
@@ -333,9 +322,6 @@ void SimpleConditionTracker::evaluateCondition(
     }
     conditionCache[mIndex] = overallState;
     conditionChangedCache[mIndex] = overallChanged;
-    if (!mSliced) {
-        mUnSlicedPart = overallState;
-    }
 }
 
 void SimpleConditionTracker::isConditionMet(

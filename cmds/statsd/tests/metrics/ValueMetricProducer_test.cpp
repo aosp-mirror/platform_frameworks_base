@@ -3612,9 +3612,31 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenForceBucketSplitBefor
     ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
 
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 10);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 10, 10));
+                return true;
+            }))
+            // App Update.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 1000);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1000, 15));
+                return true;
+            }));
 
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithCondition(pullerManager, metric);
+
+    // Condition changed event
+    int64_t conditionChangeTimeNs = bucketStartTimeNs + 10;
+    valueProducer->onConditionChanged(true, conditionChangeTimeNs);
 
     // App update event.
     int64_t appUpdateTimeNs = bucket2StartTimeNs + 1000;
@@ -3629,26 +3651,21 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenForceBucketSplitBefor
 
     StatsLogReport report = outputStreamToProto(&output);
     EXPECT_TRUE(report.has_value_metrics());
-    ASSERT_EQ(0, report.value_metrics().data_size());
-    ASSERT_EQ(2, report.value_metrics().skipped_size());
+    ASSERT_EQ(1, report.value_metrics().data_size());
+    ASSERT_EQ(1, report.value_metrics().skipped_size());
 
-    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
-              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().data(0).bucket_info_size());
+    auto data = report.value_metrics().data(0);
+    ASSERT_EQ(0, data.bucket_info(0).bucket_num());
+    EXPECT_EQ(5, data.bucket_info(0).values(0).value_long());
+
     EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(appUpdateTimeNs),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
     ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-    EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
-    EXPECT_EQ(NanoToMillis(appUpdateTimeNs), dropEvent.drop_time_millis());
-
-    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
-              report.value_metrics().skipped(1).start_bucket_elapsed_millis());
-    EXPECT_EQ(NanoToMillis(appUpdateTimeNs),
-              report.value_metrics().skipped(1).end_bucket_elapsed_millis());
-    ASSERT_EQ(1, report.value_metrics().skipped(1).drop_event_size());
-
-    dropEvent = report.value_metrics().skipped(1).drop_event(0);
     EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(appUpdateTimeNs), dropEvent.drop_time_millis());
 }
@@ -3875,6 +3892,7 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithState(
                     pullerManager, metric, {util::SCREEN_STATE_CHANGED}, {});
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
 
     // Set up StateManager and check that StateTrackers are initialized.
     StateManager::getInstance().clear();
@@ -3887,10 +3905,18 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     // Base for dimension key {}
     auto it = valueProducer->mCurrentSlicedBucket.begin();
     auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(3, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, kStateUnknown}
-    EXPECT_EQ(false, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Bucket status after screen state change kStateUnknown->ON.
     auto screenEvent = CreateScreenStateChangedEvent(
@@ -3900,10 +3926,18 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(5, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, kStateUnknown}
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Bucket status after screen state change ON->OFF.
@@ -3914,16 +3948,25 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(9, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, ON}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(4, it->second[0].value.long_value);
     // Value for dimension, state key {{}, kStateUnknown}
     it++;
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Bucket status after screen state change OFF->ON.
@@ -3934,22 +3977,34 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(21, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, OFF}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_OFF,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(12, it->second[0].value.long_value);
     // Value for dimension, state key {{}, ON}
     it++;
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(android::view::DisplayStateEnum::DISPLAY_STATE_ON,
               it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(4, it->second[0].value.long_value);
     // Value for dimension, state key {{}, kStateUnknown}
     it++;
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Start dump report and check output.
@@ -3965,6 +4020,9 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
     auto data = report.value_metrics().data(0);
     ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */, data.slice_by_state(0).value());
 
     data = report.value_metrics().data(1);
     ASSERT_EQ(1, report.value_metrics().data(1).bucket_info_size());
@@ -4058,10 +4116,18 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     // Base for dimension key {}
     auto it = valueProducer->mCurrentSlicedBucket.begin();
     auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(3, itBase->second[0].base.long_value);
-    // Value for dimension, state key {{}, {}}
-    EXPECT_EQ(false, it->second[0].hasValue);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+    // Value for dimension, state key {{}, {kStateUnknown}}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Bucket status after screen state change kStateUnknown->ON.
     auto screenEvent = CreateScreenStateChangedEvent(
@@ -4071,10 +4137,18 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(5, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(screenOnGroup.group_id(),
+              itBase->second[0].currentState.getValues()[0].mValue.long_value);
     // Value for dimension, state key {{}, kStateUnknown}
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Bucket status after screen state change ON->VR.
@@ -4086,10 +4160,18 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(5, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(screenOnGroup.group_id(),
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, kStateUnknown}
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Bucket status after screen state change VR->ON.
@@ -4097,14 +4179,22 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     screenEvent = CreateScreenStateChangedEvent(bucketStartTimeNs + 12,
                                                 android::view::DisplayStateEnum::DISPLAY_STATE_ON);
     StateManager::getInstance().onLogEvent(*screenEvent);
-    EXPECT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(5, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(screenOnGroup.group_id(),
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, kStateUnknown}
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Bucket status after screen state change VR->OFF.
@@ -4115,16 +4205,26 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     // Base for dimension key {}
     it = valueProducer->mCurrentSlicedBucket.begin();
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(21, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(screenOffGroup.group_id(),
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{}, ON GROUP}
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
     EXPECT_EQ(screenOnGroup.group_id(),
               it->first.getStateValuesKey().getValues()[0].mValue.long_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(16, it->second[0].value.long_value);
     // Value for dimension, state key {{}, kStateUnknown}
     it++;
-    EXPECT_EQ(true, it->second[0].hasValue);
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Start dump report and check output.
@@ -4140,6 +4240,9 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
     auto data = report.value_metrics().data(0);
     ASSERT_EQ(1, data.bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(0).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(SCREEN_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /*StateTracker::kStateUnknown*/, data.slice_by_state(0).value());
 
     data = report.value_metrics().data(1);
     ASSERT_EQ(1, report.value_metrics().data(1).bucket_info_size());
@@ -4264,23 +4367,36 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {uid 1}.
     auto it = valueProducer->mCurrentSlicedBucket.begin();
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     auto itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(3, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{uid 1}, kStateUnknown}
-    // TODO(tsaichristine): test equality of state values key
-    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
     // Base for dimension key {uid 2}
     it++;
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(7, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for dimension, state key {{uid 2}, kStateUnknown}
-    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Bucket status after uid 1 process state change kStateUnknown -> Foreground.
     auto uidProcessEvent = CreateUidProcessStateChangedEvent(
@@ -4289,25 +4405,37 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {uid 1}.
     it = valueProducer->mCurrentSlicedBucket.begin();
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(6, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 1, kStateUnknown}.
-    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(3, it->second[0].value.long_value);
 
     // Base for dimension key {uid 2}
     it++;
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(7, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 2, kStateUnknown}
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Bucket status after uid 2 process state change kStateUnknown -> Background.
     uidProcessEvent = CreateUidProcessStateChangedEvent(
@@ -4316,23 +4444,36 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
     // Base for dimension key {uid 1}.
     it = valueProducer->mCurrentSlicedBucket.begin();
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(6, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 1, kStateUnknown}.
-    EXPECT_EQ(true, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(3, it->second[0].value.long_value);
 
     // Base for dimension key {uid 2}
     it++;
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(9, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 2, kStateUnknown}
-    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(2, it->second[0].value.long_value);
 
     // Pull at end of first bucket.
@@ -4350,33 +4491,54 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     it = valueProducer->mCurrentSlicedBucket.begin();
     EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(15, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 2, BACKGROUND}.
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
-    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(false, it->second[0].hasValue);
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Base for dimension key {uid 1}
     it++;
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(10, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 1, kStateUnknown}
-    ASSERT_EQ(0, it->first.getStateValuesKey().getValues().size());
-    // EXPECT_EQ(-1, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* kStateTracker::kUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Value for key {uid 1, FOREGROUND}
     it++;
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
-    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(false, it->second[0].hasValue);
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Value for key {uid 2, kStateUnknown}
     it++;
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* kStateTracker::kUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Bucket status after uid 1 process state change from Foreground -> Background.
     uidProcessEvent = CreateUidProcessStateChangedEvent(
@@ -4388,29 +4550,53 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
     // Base for dimension key {uid 2}.
     it = valueProducer->mCurrentSlicedBucket.begin();
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(15, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 2, BACKGROUND}.
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
     // Base for dimension key {uid 1}
     it++;
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(13, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
     // Value for key {uid 1, kStateUnknown}
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
     // Value for key {uid 1, FOREGROUND}
     it++;
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
     EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
-    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(3, it->second[0].value.long_value);
     // Value for key {uid 2, kStateUnknown}
     it++;
-    EXPECT_EQ(false, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Bucket status after uid 1 process state change Background->Foreground.
     uidProcessEvent = CreateUidProcessStateChangedEvent(
@@ -4421,29 +4607,65 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2UL, valueProducer->mCurrentBaseInfo.size());
     // Base for dimension key {uid 2}
     it = valueProducer->mCurrentSlicedBucket.begin();
-    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
-    EXPECT_EQ(true, itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(15, itBase->second[0].base.long_value);
-    EXPECT_EQ(false, it->second[0].hasValue);
-
-    it++;
-    EXPECT_EQ(false, it->second[0].hasValue);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+    // Value for key {uid 2, BACKGROUND}
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
 
     // Base for dimension key {uid 1}
     it++;
-    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
     itBase = valueProducer->mCurrentBaseInfo.find(it->first.getDimensionKeyInWhat());
+    EXPECT_TRUE(itBase->second[0].hasBase);
     EXPECT_EQ(17, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+    // Value for key {uid 1, kStateUnknown}
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
+
     // Value for key {uid 1, BACKGROUND}
-    EXPECT_EQ(1006, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    it++;
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_BACKGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(4, it->second[0].value.long_value);
+
     // Value for key {uid 1, FOREGROUND}
     it++;
-    EXPECT_EQ(1005, it->first.getStateValuesKey().getValues()[0].mValue.int_value);
-    EXPECT_EQ(true, it->second[0].hasValue);
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(1, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(android::app::PROCESS_STATE_IMPORTANT_FOREGROUND,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
     EXPECT_EQ(3, it->second[0].value.long_value);
+
+    // Value for key {uid 2, kStateUnknown}
+    it++;
+    ASSERT_EQ(1, it->first.getDimensionKeyInWhat().getValues().size());
+    EXPECT_EQ(2, it->first.getDimensionKeyInWhat().getValues()[0].mValue.int_value);
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /* StateTracker::kStateUnknown */,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
 
     // Start dump report and check output.
     ProtoOutputStream output;
@@ -4466,6 +4688,9 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     data = report.value_metrics().data(1);
     ASSERT_EQ(1, report.value_metrics().data(1).bucket_info_size());
     EXPECT_EQ(2, report.value_metrics().data(1).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /*StateTracker::kStateUnknown*/, data.slice_by_state(0).value());
 
     data = report.value_metrics().data(2);
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
@@ -4479,6 +4704,9 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     data = report.value_metrics().data(3);
     ASSERT_EQ(1, report.value_metrics().data(3).bucket_info_size());
     EXPECT_EQ(3, report.value_metrics().data(3).bucket_info(0).values(0).value_long());
+    EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(-1 /*StateTracker::kStateUnknown*/, data.slice_by_state(0).value());
 
     data = report.value_metrics().data(4);
     EXPECT_EQ(UID_PROCESS_STATE_ATOM_ID, data.slice_by_state(0).atom_id());

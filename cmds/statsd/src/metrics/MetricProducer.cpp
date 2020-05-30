@@ -293,6 +293,17 @@ void MetricProducer::mapStateValue(const int32_t atomId, FieldValue* value) {
     }
 }
 
+HashableDimensionKey MetricProducer::getUnknownStateKey() {
+    HashableDimensionKey stateKey;
+    for (auto atom : mSlicedStateAtoms) {
+        FieldValue fieldValue;
+        fieldValue.mField.setTag(atom);
+        fieldValue.mValue.setInt(StateTracker::kStateUnknown);
+        stateKey.addValue(fieldValue);
+    }
+    return stateKey;
+}
+
 DropEvent MetricProducer::buildDropEvent(const int64_t dropTimeNs, const BucketDropReason reason) {
     DropEvent event;
     event.reason = reason;

@@ -34,7 +34,6 @@ import static android.os.storage.VolumeInfo.TYPE_PRIVATE;
 import static android.os.storage.VolumeInfo.TYPE_PUBLIC;
 import static android.provider.Settings.Global.NETSTATS_UID_BUCKET_DURATION;
 import static android.telephony.TelephonyManager.UNKNOWN_CARRIER_ID;
-import static android.util.MathUtils.abs;
 import static android.util.MathUtils.constrain;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
@@ -49,6 +48,7 @@ import static com.android.server.stats.pull.ProcfsMemoryUtil.getProcessCmdlines;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readCmdlineFromProcfs;
 import static com.android.server.stats.pull.ProcfsMemoryUtil.readMemorySnapshotFromProcfs;
 
+import static java.lang.Math.min;
 import static java.util.concurrent.TimeUnit.HOURS;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 
@@ -56,6 +56,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.HistoricalOp;
 import android.app.AppOpsManager.HistoricalOps;
 import android.app.AppOpsManager.HistoricalOpsRequest;
 import android.app.AppOpsManager.HistoricalPackageOps;
@@ -86,6 +87,7 @@ import android.net.NetworkRequest;
 import android.net.NetworkStats;
 import android.net.NetworkTemplate;
 import android.net.wifi.WifiManager;
+import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.Build;
@@ -214,6 +216,11 @@ public class StatsPullAtomService extends SystemService {
      */
     private static final int MIN_APP_UID = 10_000;
 
+    private static final int DIMENSION_KEY_SIZE_HARD_LIMIT = 800;
+    private static final int DIMENSION_KEY_SIZE_SOFT_LIMIT = 500;
+    private static final long APP_OPS_SAMPLING_INITIALIZATION_DELAY_MILLIS = 45000;
+    private static final int APP_OPS_SIZE_ESTIMATE = 5000;
+
     private static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
     /**
      * How long to wait on an individual subsystem to return its stats.
@@ -304,6 +311,8 @@ public class StatsPullAtomService extends SystemService {
 
     private StatsPullAtomCallbackImpl mStatsCallbackImpl;
 
+    private final Object mAppOpsSamplingRateLock = new Object();
+    @GuardedBy("mAppOpsSamplingRateLock")
     private int mAppOpsSamplingRate = 0;
     private final ArraySet<Integer> mDangerousAppOpsList = new ArraySet<>();
 
@@ -3198,6 +3207,24 @@ public class StatsPullAtomService extends SystemService {
         );
     }
 
+    private class AppOpEntry {
+        public final String mPackageName;
+        public final String mAttributionTag;
+        public final int mUid;
+        public final HistoricalOp mOp;
+        public final int mHash;
+
+        AppOpEntry(String packageName, @Nullable String attributionTag, HistoricalOp op, int uid) {
+            mPackageName = packageName;
+            mAttributionTag = attributionTag;
+            mUid = uid;
+            mOp = op;
+            mHash = ((op.getOpCode() * 961
+                    + (attributionTag == null ? 0 : attributionTag.hashCode()) * 31
+                    + packageName.hashCode() + RANDOM_SEED) & 0x7fffffff) % 100;
+        }
+    }
+
     int pullAppOps(int atomTag, List<StatsEvent> pulledData) {
         final long token = Binder.clearCallingIdentity();
         try {
@@ -3206,11 +3233,15 @@ public class StatsPullAtomService extends SystemService {
             CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
             HistoricalOpsRequest histOpsRequest = new HistoricalOpsRequest.Builder(0,
                     Long.MAX_VALUE).setFlags(OP_FLAGS_PULLED).build();
-            appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
-
+            appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR, ops::complete);
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
-            processHistoricalOps(histOps, atomTag, pulledData);
+
+            List<AppOpEntry> opsList = processHistoricalOps(histOps, atomTag, 100);
+            int samplingRate = sampleAppOps(pulledData, opsList, atomTag, 100);
+            if (samplingRate != 100) {
+                Slog.e(TAG, "Atom 10060 downsampled - too many dimensions");
+            }
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);
@@ -3219,6 +3250,46 @@ public class StatsPullAtomService extends SystemService {
             Binder.restoreCallingIdentity(token);
         }
         return StatsManager.PULL_SUCCESS;
+    }
+
+    private int sampleAppOps(List<StatsEvent> pulledData, List<AppOpEntry> opsList, int atomTag,
+            int samplingRate) {
+        int nOps = opsList.size();
+        for (int i = 0; i < nOps; i++) {
+            AppOpEntry entry = opsList.get(i);
+            if (entry.mHash >= samplingRate) {
+                continue;
+            }
+            StatsEvent.Builder e = StatsEvent.newBuilder();
+            e.setAtomId(atomTag);
+            e.writeInt(entry.mUid);
+            e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
+            e.writeString(entry.mPackageName);
+            if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
+                e.writeString(entry.mAttributionTag);
+            }
+            e.writeInt(entry.mOp.getOpCode());
+            e.writeLong(entry.mOp.getForegroundAccessCount(OP_FLAGS_PULLED));
+            e.writeLong(entry.mOp.getBackgroundAccessCount(OP_FLAGS_PULLED));
+            e.writeLong(entry.mOp.getForegroundRejectCount(OP_FLAGS_PULLED));
+            e.writeLong(entry.mOp.getBackgroundRejectCount(OP_FLAGS_PULLED));
+            e.writeLong(entry.mOp.getForegroundAccessDuration(OP_FLAGS_PULLED));
+            e.writeLong(entry.mOp.getBackgroundAccessDuration(OP_FLAGS_PULLED));
+            e.writeBoolean(mDangerousAppOpsList.contains(entry.mOp.getOpCode()));
+
+            if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
+                e.writeInt(samplingRate);
+            }
+            pulledData.add(e.build());
+        }
+        if (pulledData.size() > DIMENSION_KEY_SIZE_HARD_LIMIT) {
+            int adjustedSamplingRate = constrain(
+                    samplingRate * DIMENSION_KEY_SIZE_SOFT_LIMIT / pulledData.size(), 0,
+                    samplingRate - 1);
+            pulledData.clear();
+            return sampleAppOps(pulledData, opsList, atomTag, adjustedSamplingRate);
+        }
+        return samplingRate;
     }
 
     private void registerAttributedAppOps() {
@@ -3235,21 +3306,42 @@ public class StatsPullAtomService extends SystemService {
         final long token = Binder.clearCallingIdentity();
         try {
             AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
-
             CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
             HistoricalOpsRequest histOpsRequest =
                     new HistoricalOpsRequest.Builder(0, Long.MAX_VALUE).setFlags(
                             OP_FLAGS_PULLED).build();
-            appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
+
+            appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR, ops::complete);
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
-            if (mAppOpsSamplingRate == 0) {
-                int appOpsTargetCollectionSize = DeviceConfig.getInt(
-                        DeviceConfig.NAMESPACE_PERMISSIONS, APP_OPS_TARGET_COLLECTION_SIZE, 5000);
-                mAppOpsSamplingRate = constrain(
-                        (appOpsTargetCollectionSize * 100) / estimateAppOpsSize(), 1, 100);
+
+            synchronized (mAppOpsSamplingRateLock) {
+                if (mAppOpsSamplingRate == 0) {
+                    mContext.getMainThreadHandler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                estimateAppOpsSamplingRate();
+                            } catch (Exception e) {
+                                Slog.e(TAG, "AppOps sampling ratio estimation failed");
+                                synchronized (mAppOpsSamplingRateLock) {
+                                    mAppOpsSamplingRate = min(mAppOpsSamplingRate, 10);
+                                }
+                            }
+                        }
+                    }, APP_OPS_SAMPLING_INITIALIZATION_DELAY_MILLIS);
+                    mAppOpsSamplingRate = 100;
+                }
             }
-            processHistoricalOps(histOps, atomTag, pulledData);
+
+            List<AppOpEntry> opsList =
+                    processHistoricalOps(histOps, atomTag, mAppOpsSamplingRate);
+
+            int newSamplingRate = sampleAppOps(pulledData, opsList, atomTag, mAppOpsSamplingRate);
+
+            synchronized (mAppOpsSamplingRateLock) {
+                mAppOpsSamplingRate = min(mAppOpsSamplingRate, newSamplingRate);
+            }
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);
@@ -3260,7 +3352,10 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private int estimateAppOpsSize() throws Exception {
+    private void estimateAppOpsSamplingRate() throws Exception {
+        int appOpsTargetCollectionSize = DeviceConfig.getInt(
+                DeviceConfig.NAMESPACE_PERMISSIONS, APP_OPS_TARGET_COLLECTION_SIZE,
+                APP_OPS_SIZE_ESTIMATE);
         AppOpsManager appOps = mContext.getSystemService(AppOpsManager.class);
 
         CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
@@ -3272,11 +3367,25 @@ public class StatsPullAtomService extends SystemService {
         appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
         HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                 TimeUnit.MILLISECONDS);
-        return processHistoricalOps(histOps, FrameworkStatsLog.ATTRIBUTED_APP_OPS, null);
+        List<AppOpEntry> opsList =
+                processHistoricalOps(histOps, FrameworkStatsLog.ATTRIBUTED_APP_OPS, 100);
+
+        long estimatedSize = 0;
+        int nOps = opsList.size();
+        for (int i = 0; i < nOps; i++) {
+            AppOpEntry entry = opsList.get(i);
+            estimatedSize += 32 + entry.mPackageName.length() + (entry.mAttributionTag == null ? 1
+                    : entry.mAttributionTag.length());
+
+        }
+        int estimatedSamplingRate = (int) constrain(
+                appOpsTargetCollectionSize * 100 / estimatedSize, 0, 100);
+        mAppOpsSamplingRate = min(mAppOpsSamplingRate, estimatedSamplingRate);
     }
 
-    int processHistoricalOps(HistoricalOps histOps, int atomTag, List<StatsEvent> pulledData) {
-        int counter = 1;
+    private List<AppOpEntry> processHistoricalOps(
+            HistoricalOps histOps, int atomTag, int samplingRatio) {
+        List<AppOpEntry> opsList = new ArrayList<>();
         for (int uidIdx = 0; uidIdx < histOps.getUidCount(); uidIdx++) {
             final HistoricalUidOps uidOps = histOps.getUidOpsAt(uidIdx);
             final int uid = uidOps.getUid();
@@ -3289,64 +3398,29 @@ public class StatsPullAtomService extends SystemService {
                                 packageOps.getAttributedOpsAt(attributionIdx);
                         for (int opIdx = 0; opIdx < attributedOps.getOpCount(); opIdx++) {
                             final AppOpsManager.HistoricalOp op = attributedOps.getOpAt(opIdx);
-                            counter += processHistoricalOp(op, atomTag, pulledData, uid,
+                            processHistoricalOp(op, opsList, uid, samplingRatio,
                                     packageOps.getPackageName(), attributedOps.getTag());
                         }
                     }
                 } else if (atomTag == FrameworkStatsLog.APP_OPS) {
                     for (int opIdx = 0; opIdx < packageOps.getOpCount(); opIdx++) {
                         final AppOpsManager.HistoricalOp op = packageOps.getOpAt(opIdx);
-                        counter += processHistoricalOp(op, atomTag, pulledData, uid,
+                        processHistoricalOp(op, opsList, uid, samplingRatio,
                                 packageOps.getPackageName(), null);
                     }
                 }
             }
         }
-        return counter;
+        return opsList;
     }
 
-    private int processHistoricalOp(AppOpsManager.HistoricalOp op, int atomTag,
-            @Nullable List<StatsEvent> pulledData, int uid, String packageName,
+    private void processHistoricalOp(AppOpsManager.HistoricalOp op,
+            List<AppOpEntry> opsList, int uid, int samplingRatio, String packageName,
             @Nullable String attributionTag) {
-        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
-            if (pulledData == null) { // this is size estimation call
-                if (op.getForegroundAccessCount(OP_FLAGS_PULLED) + op.getBackgroundAccessCount(
-                        OP_FLAGS_PULLED) == 0) {
-                    return 0;
-                } else {
-                    return 32 + packageName.length() + (attributionTag == null ? 1
-                            : attributionTag.length());
-                }
-            } else {
-                if (abs((op.getOpCode() + attributionTag + packageName).hashCode() + RANDOM_SEED)
-                        % 100 >= mAppOpsSamplingRate) {
-                    return 0;
-                }
-            }
+        AppOpEntry entry = new AppOpEntry(packageName, attributionTag, op, uid);
+        if (entry.mHash < samplingRatio) {
+            opsList.add(entry);
         }
-
-        StatsEvent.Builder e = StatsEvent.newBuilder();
-        e.setAtomId(atomTag);
-        e.writeInt(uid);
-        e.addBooleanAnnotation(ANNOTATION_ID_IS_UID, true);
-        e.writeString(packageName);
-        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
-            e.writeString(attributionTag);
-        }
-        e.writeInt(op.getOpCode());
-        e.writeLong(op.getForegroundAccessCount(OP_FLAGS_PULLED));
-        e.writeLong(op.getBackgroundAccessCount(OP_FLAGS_PULLED));
-        e.writeLong(op.getForegroundRejectCount(OP_FLAGS_PULLED));
-        e.writeLong(op.getBackgroundRejectCount(OP_FLAGS_PULLED));
-        e.writeLong(op.getForegroundAccessDuration(OP_FLAGS_PULLED));
-        e.writeLong(op.getBackgroundAccessDuration(OP_FLAGS_PULLED));
-        e.writeBoolean(mDangerousAppOpsList.contains(op.getOpCode()));
-
-        if (atomTag == FrameworkStatsLog.ATTRIBUTED_APP_OPS) {
-            e.writeInt(mAppOpsSamplingRate);
-        }
-        pulledData.add(e.build());
-        return 0;
     }
 
     int pullRuntimeAppOpAccessMessage(int atomTag, List<StatsEvent> pulledData) {

@@ -989,7 +989,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 .setUserId(10)
                 .build();
 
-        final int result = starter.recycleTask(task, null, null);
+        final int result = starter.recycleTask(task, null, null, null);
         assertThat(result == START_SUCCESS).isTrue();
         assertThat(starter.mAddingToTask).isTrue();
     }
@@ -1068,7 +1068,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 /* doResume */true,
                 /* options */null,
                 /* inTask */null,
-                /* restrictedBgActivity */false);
+                /* restrictedBgActivity */false,
+                /* intentGrants */null);
 
         // Then
         verify(stack).ensureActivitiesVisible(null, 0, !PRESERVE_WINDOWS);

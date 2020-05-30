@@ -114,7 +114,7 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
     private static final String TAG = "UriGrantsManagerService";
     // Maximum number of persisted Uri grants a package is allowed
     private static final int MAX_PERSISTED_URI_GRANTS = 128;
-    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = false;
+    private static final boolean ENABLE_DYNAMIC_PERMISSIONS = true;
 
     private final Object mLock = new Object();
     private final H mH;
@@ -633,17 +633,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         return needed;
-    }
-
-    void grantUriPermissionFromIntent(int callingUid,
-            String targetPkg, Intent intent, UriPermissionOwner owner, int targetUserId) {
-        NeededUriGrants needed = checkGrantUriPermissionFromIntent(callingUid, targetPkg,
-                intent, intent != null ? intent.getFlags() : 0, null, targetUserId);
-        if (needed == null) {
-            return;
-        }
-
-        grantUriPermissionUncheckedFromIntent(needed, owner);
     }
 
     void readGrantedUriPermissions() {
@@ -1326,15 +1315,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         @Override
-        public void grantUriPermission(int callingUid, String targetPkg, GrantUri grantUri,
-                int modeFlags, UriPermissionOwner owner, int targetUserId) {
-            synchronized (mLock) {
-                UriGrantsManagerService.this.grantUriPermission(
-                        callingUid, targetPkg, grantUri, modeFlags, owner, targetUserId);
-            }
-        }
-
-        @Override
         public void revokeUriPermission(String targetPackage, int callingUid, GrantUri grantUri,
                 int modeFlags) {
             synchronized (mLock) {
@@ -1351,15 +1331,6 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         @Override
-        public int checkGrantUriPermission(int callingUid, String targetPkg, GrantUri uri,
-                int modeFlags, int userId) {
-            synchronized (mLock) {
-                return UriGrantsManagerService.this.checkGrantUriPermission(
-                        callingUid, targetPkg, uri, modeFlags, userId);
-            }
-        }
-
-        @Override
         public int checkGrantUriPermission(int callingUid, String targetPkg, Uri uri, int modeFlags,
                 int userId) {
             enforceNotIsolatedCaller("checkGrantUriPermission");
@@ -1370,29 +1341,12 @@ public class UriGrantsManagerService extends IUriGrantsManager.Stub {
         }
 
         @Override
-        public NeededUriGrants checkGrantUriPermissionFromIntent(int callingUid, String targetPkg,
-                Intent intent, int mode, NeededUriGrants needed, int targetUserId) {
+        public NeededUriGrants checkGrantUriPermissionFromIntent(Intent intent, int callingUid,
+                String targetPkg, int targetUserId) {
             synchronized (mLock) {
+                final int mode = (intent != null) ? intent.getFlags() : 0;
                 return UriGrantsManagerService.this.checkGrantUriPermissionFromIntent(
-                        callingUid, targetPkg, intent, mode, needed, targetUserId);
-            }
-        }
-
-        @Override
-        public void grantUriPermissionFromIntent(int callingUid, String targetPkg, Intent intent,
-                int targetUserId) {
-            synchronized (mLock) {
-                UriGrantsManagerService.this.grantUriPermissionFromIntent(
-                        callingUid, targetPkg, intent, null, targetUserId);
-            }
-        }
-
-        @Override
-        public void grantUriPermissionFromIntent(int callingUid, String targetPkg, Intent intent,
-                UriPermissionOwner owner, int targetUserId) {
-            synchronized (mLock) {
-                UriGrantsManagerService.this.grantUriPermissionFromIntent(
-                        callingUid, targetPkg, intent, owner, targetUserId);
+                        callingUid, targetPkg, intent, mode, null, targetUserId);
             }
         }
 
