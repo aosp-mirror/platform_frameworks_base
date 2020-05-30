@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"ലൊക്കേഷൻ സജ്ജീകരിച്ചത് GPS ആണ്"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"ലൊക്കേഷൻ അഭ്യർത്ഥനകൾ സജീവമാണ്"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"സെൻസറുകൾ ഓഫ് സജീവമാണ്"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"മീഡിയ സജീവമാണ്"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"എല്ലാ വിവരങ്ങളും മായ്‌ക്കുക."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"പ്രവർത്തനരഹിതമാക്കുക"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ഔട്ട്‌പുട്ട് ഉപകരണം മാറുക"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"സ്‌ക്രീൻ പിൻ ചെയ്‌തു"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ആപ്പ് പിൻ ചെയ്തു"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ\', \'ചുരുക്കവിവരണം\' എന്നിവ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പിടിക്കുക."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'ചുരുക്കവിവരണം\' സ്‌പർശിച്ച് പിടിക്കുക."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"നിങ്ങൾ അൺപിൻ ചെയ്യുന്നതുവരെ ഇത് കാണുന്ന വിധത്തിൽ നിലനിർത്തും. അൺപിൻ ചെയ്യാൻ \'ഹോം\' ബട്ടൺ സ്‌പർശിച്ച് പിടിക്കുക."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, \'തിരികെ പോവുക\', \'അവലോകനം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ, \'തിരികെ പോവുക\', \'ഹോം\' ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"ഈ സ്‌ക്രീൻ അൺപിൻ ചെയ്യാൻ മുകളിലേക്ക് സ്വെെപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"വ്യക്തിപരമായ ഡാറ്റ ആക്‌സസ് ചെയ്യാനായേക്കും (ഇമെയിൽ ഉള്ളടക്കവും കോൺടാക്റ്റുകളും പോലുള്ളവ)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"പിൻ ചെയ്‌ത ആപ്പ് മറ്റ് ആപ്പുകൾ തുറന്നേക്കാം."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ഈ ആപ്പ് അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'അവലോകനം ചെയ്യുക\' എന്നീ ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ഈ ആപ്പ് അൺപിൻ ചെയ്യാൻ \'മടങ്ങുക\', \'ഹോം\' എന്നീ ബട്ടണുകൾ സ്‌പർശിച്ച് പിടിക്കുക"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ഈ ആപ്പ് അൺപിൻ ചെയ്യാൻ മുകളിലേക്ക് സ്വെെപ്പ് ചെയ്‌ത് പിടിക്കുക"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"മനസ്സിലായി"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"വേണ്ട, നന്ദി"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"സ്‌ക്രീൻ പിൻ ചെയ്തു"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"സ്‌ക്രീൻ അൺപിൻ ചെയ്തു"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ആപ്പ് പിൻ ചെയ്തു"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ആപ്പ് അൺപിൻ ചെയ്തു"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> എന്നത് മറയ്‌ക്കണോ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"അടുത്ത തവണ നിങ്ങൾ അത് ക്രമീകരണങ്ങളിൽ ഓണാക്കുമ്പോൾ അത് വീണ്ടും ദൃശ്യമാകും."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"മറയ്‌ക്കുക"</string>
@@ -714,7 +715,7 @@
     <string name="notification_alert_title" msgid="3656229781017543655">"ഡിഫോൾട്ട്"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"ബബ്ൾ"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ശബ്ദമോ വൈബ്രേഷനോ ഇല്ല"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ല, കൂടാതെ സംഭാഷണ വിഭാഗത്തിന് താഴെയായി ദൃശ്യമാകും"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ശബ്‌ദമോ വൈബ്രേഷനോ ഇല്ല, സംഭാഷണ വിഭാഗത്തിന് താഴെയായി ദൃശ്യമാകും"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്‌തേക്കാം അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്‌തേക്കാം"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ഫോൺ ക്രമീകരണം അടിസ്ഥാനമാക്കി റിംഗ് ചെയ്‌തേക്കാം അല്ലെങ്കിൽ വൈബ്രേറ്റ് ചെയ്‌തേക്കാം. <xliff:g id="APP_NAME">%1$s</xliff:g>-ൽ നിന്നുള്ള സംഭാഷണങ്ങൾ ഡിഫോൾട്ടായി ബബ്ൾ ആവുന്നു."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ഈ ഉള്ളടക്കത്തിലേക്ക് ഒരു ഫ്ലോട്ടിംഗ് കുറുക്കുവഴി ഉപയോഗിച്ച് നിങ്ങളുടെ ശ്രദ്ധ നിലനിർത്തുന്നു."</string>
