@@ -210,7 +210,7 @@ public class DataManager {
 
     /** Reports the sharing related {@link AppTargetEvent} from App Prediction Manager. */
     public void reportShareTargetEvent(@NonNull AppTargetEvent event,
-            @Nullable IntentFilter intentFilter) {
+            @NonNull IntentFilter intentFilter) {
         AppTarget appTarget = event.getTarget();
         if (appTarget == null || event.getAction() != AppTargetEvent.ACTION_LAUNCH) {
             return;
@@ -220,8 +220,7 @@ public class DataManager {
             return;
         }
         PackageData packageData = userData.getOrCreatePackageData(appTarget.getPackageName());
-        String mimeType = intentFilter != null ? intentFilter.getDataType(0) : null;
-        @Event.EventType int eventType = mimeTypeToShareEventType(mimeType);
+        @Event.EventType int eventType = mimeTypeToShareEventType(intentFilter.getDataType(0));
         EventHistoryImpl eventHistory;
         if (ChooserActivity.LAUNCH_LOCATION_DIRECT_SHARE.equals(event.getLaunchLocation())) {
             // Direct share event
