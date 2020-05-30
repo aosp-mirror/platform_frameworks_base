@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Координаты по GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Есть активные запросы на определение местоположения"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Датчики отключены"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"Идет воспроизведение мультимедиа"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Удалить все уведомления"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -602,19 +601,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"включить"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"отключить"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Сменить устройство аудиовыхода"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"Блокировка в приложении включена"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Приложение закреплено"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопки \"Назад\" и \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопки \"Назад\" и \"Главный экран\"."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Экран будет зафиксирован, пока вы не отмените блокировку (для этого нужно провести вверх и удерживать)."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Обзор\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Приложение останется активным, пока вы не отмените блокировку, нажав и удерживая кнопку \"Главный экран\"."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Чтобы открепить экран, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Чтобы открепить этот экран, проведите по нему вверх и задержите руку в крайнем положении."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Может быть получен доступ к персональным данным (например, контактам и содержимому электронных писем)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Закрепленное приложение может открывать другие приложения."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Чтобы открепить это приложение, нажмите и удерживайте кнопки \"Назад\" и \"Обзор\"."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Чтобы открепить это приложение, нажмите и удерживайте кнопки \"Назад\" и \"Главный экран\"."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Чтобы открепить это приложение, проведите по экрану вверх и задержите палец."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ОК"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Нет, спасибо"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Блокировка включена"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Блокировка выключена"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Приложение закреплено."</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Приложение откреплено."</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Скрыть параметр \"<xliff:g id="TILE_LABEL">%1$s</xliff:g>\"?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Этот параметр появится в следующий раз, когда вы включите его."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Скрыть"</string>
