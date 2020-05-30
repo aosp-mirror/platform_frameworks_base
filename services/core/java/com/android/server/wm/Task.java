@@ -1923,7 +1923,7 @@ class Task extends WindowContainer<WindowContainer> {
         super.onConfigurationChanged(newParentConfig);
         // Only need to update surface size here since the super method will handle updating
         // surface position.
-        updateSurfaceSize(getPendingTransaction());
+        updateSurfaceSize(getSyncTransaction());
 
         if (wasInPictureInPicture != inPinnedWindowingMode()) {
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(this, getStack());
@@ -3209,8 +3209,9 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    SurfaceControl.Builder makeSurface() {
-        return super.makeSurface().setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        b.setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
+        super.setInitialSurfaceControlProperties(b);
     }
 
     boolean isTaskAnimating() {
@@ -3475,20 +3476,6 @@ class Task extends WindowContainer<WindowContainer> {
         return mDimmer;
     }
 
-    void dim(float alpha) {
-        mDimmer.dimAbove(getPendingTransaction(), alpha);
-        scheduleAnimation();
-    }
-
-    void stopDimming() {
-        mDimmer.stopDim(getPendingTransaction());
-        scheduleAnimation();
-    }
-
-    boolean isTaskForUser(int userId) {
-        return mUserId == userId;
-    }
-
     @Override
     void prepareSurfaces() {
         mDimmer.resetDimStates();
@@ -3504,9 +3491,9 @@ class Task extends WindowContainer<WindowContainer> {
             mTmpDimBoundsRect.offsetTo(0, 0);
         }
 
-        updateShadowsRadius(isFocused(), getPendingTransaction());
+        updateShadowsRadius(isFocused(), getSyncTransaction());
 
-        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
+        if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
     }
@@ -4317,7 +4304,7 @@ class Task extends WindowContainer<WindowContainer> {
             // skip this for tasks created by the organizer because they can synchronously update
             // the leash before new children are added to the task.
             if (!mCreatedByOrganizer && mTaskOrganizer != null && !prevHasBeenVisible) {
-                getPendingTransaction().hide(getSurfaceControl());
+                getSyncTransaction().hide(getSurfaceControl());
                 commitPendingTransaction();
             }
 
@@ -4500,7 +4487,7 @@ class Task extends WindowContainer<WindowContainer> {
      * @param hasFocus
      */
     void onWindowFocusChanged(boolean hasFocus) {
-        updateShadowsRadius(hasFocus, getPendingTransaction());
+        updateShadowsRadius(hasFocus, getSyncTransaction());
     }
 
     void onPictureInPictureParamsChanged() {

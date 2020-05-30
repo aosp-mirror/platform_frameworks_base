@@ -2995,7 +2995,7 @@ static void android_media_MediaCodec_LinearBlock_native_recycle(
         JNIEnv *env, jobject thiz) {
     JMediaCodecLinearBlock *context =
         (JMediaCodecLinearBlock *)env->GetLongField(thiz, gLinearBlockInfo.contextId);
-    env->CallVoidMethod(thiz, gLinearBlockInfo.setInternalStateId, 0, false);
+    env->CallVoidMethod(thiz, gLinearBlockInfo.setInternalStateId, jlong(0), false);
     delete context;
 }
 

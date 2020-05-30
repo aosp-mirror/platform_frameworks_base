@@ -72,6 +72,7 @@ class ControlsControllerImpl @Inject constructor (
         private const val USER_CHANGE_RETRY_DELAY = 500L // ms
         private const val DEFAULT_ENABLED = 1
         private const val PERMISSION_SELF = "com.android.systemui.permission.SELF"
+        const val SUGGESTED_CONTROLS_PER_STRUCTURE = 6
 
         private fun isAvailable(userId: Int, cr: ContentResolver) = Settings.Secure.getIntForUser(
             cr, CONTROLS_AVAILABLE, DEFAULT_ENABLED, userId) != 0
@@ -361,29 +362,47 @@ class ControlsControllerImpl @Inject constructor (
         return true
     }
 
-    override fun seedFavoritesForComponent(
-        componentName: ComponentName,
-        callback: Consumer<Boolean>
+    override fun seedFavoritesForComponents(
+        componentNames: List<ComponentName>,
+        callback: Consumer<SeedResponse>
     ) {
-        if (seedingInProgress) return
+        if (seedingInProgress || componentNames.isEmpty()) return
 
-        Log.i(TAG, "Beginning request to seed favorites for: $componentName")
         if (!confirmAvailability()) {
             if (userChanging) {
                 // Try again later, userChanging should not last forever. If so, we have bigger
                 // problems. This will return a runnable that allows to cancel the delayed version,
                 // it will not be able to cancel the load if
                 executor.executeDelayed(
-                    { seedFavoritesForComponent(componentName, callback) },
+                    { seedFavoritesForComponents(componentNames, callback) },
                     USER_CHANGE_RETRY_DELAY,
                     TimeUnit.MILLISECONDS
                 )
             } else {
-                callback.accept(false)
+                componentNames.forEach {
+                    callback.accept(SeedResponse(it.packageName, false))
+                }
             }
             return
         }
         seedingInProgress = true
+        startSeeding(componentNames, callback, false)
+    }
+
+    private fun startSeeding(
+        remainingComponentNames: List<ComponentName>,
+        callback: Consumer<SeedResponse>,
+        didAnyFail: Boolean
+    ) {
+        if (remainingComponentNames.isEmpty()) {
+            endSeedingCall(!didAnyFail)
+            return
+        }
+
+        val componentName = remainingComponentNames[0]
+        Log.d(TAG, "Beginning request to seed favorites for: $componentName")
+
+        val remaining = remainingComponentNames.drop(1)
         bindingController.bindAndLoadSuggested(
             componentName,
             object : ControlsBindingController.LoadCallback {
@@ -396,9 +415,11 @@ class ControlsControllerImpl @Inject constructor (
                             val structure = it.structure ?: ""
                             val list = structureToControls.get(structure)
                                 ?: mutableListOf<ControlInfo>()
-                            list.add(
-                                ControlInfo(it.controlId, it.title, it.subtitle, it.deviceType))
-                            structureToControls.put(structure, list)
+                            if (list.size < SUGGESTED_CONTROLS_PER_STRUCTURE) {
+                                list.add(
+                                    ControlInfo(it.controlId, it.title, it.subtitle, it.deviceType))
+                                structureToControls.put(structure, list)
+                            }
                         }
 
                         structureToControls.forEach {
@@ -407,16 +428,16 @@ class ControlsControllerImpl @Inject constructor (
                         }
 
                         persistenceWrapper.storeFavorites(Favorites.getAllStructures())
-                        callback.accept(true)
-                        endSeedingCall(true)
+                        callback.accept(SeedResponse(componentName.packageName, true))
+                        startSeeding(remaining, callback, didAnyFail)
                     }
                 }
 
                 override fun error(message: String) {
                     Log.e(TAG, "Unable to seed favorites: $message")
                     executor.execute {
-                        callback.accept(false)
-                        endSeedingCall(false)
+                        callback.accept(SeedResponse(componentName.packageName, false))
+                        startSeeding(remaining, callback, true)
                     }
                 }
             }

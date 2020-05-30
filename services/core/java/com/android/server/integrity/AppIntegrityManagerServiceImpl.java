@@ -182,7 +182,7 @@ public class AppIntegrityManagerServiceImpl extends IAppIntegrityManager.Stub {
                 },
                 integrityVerificationFilter,
                 /* broadcastPermission= */ null,
-                mHandler);
+                /* scheduler= */ null);
     }
 
     @Override

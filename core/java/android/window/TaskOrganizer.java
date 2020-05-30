@@ -59,6 +59,11 @@ public class TaskOrganizer extends WindowOrganizer {
         }
     }
 
+    /**
+     * Called when a task with the registered windowing mode can be controlled by this task
+     * organizer. For non-root tasks, the leash may initially be hidden so it is up to the organizer
+     * to show this task.
+     */
     @BinderThread
     public void onTaskAppeared(@NonNull ActivityManager.RunningTaskInfo taskInfo,
             @NonNull SurfaceControl leash) {}
