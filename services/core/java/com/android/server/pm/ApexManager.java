@@ -327,6 +327,7 @@ public abstract class ApexManager {
 
     /**
      * Restores the snapshot of the CE apex data directory for the given {@code userId}.
+     * Note the snapshot will be deleted after restoration succeeded.
      *
      * @return boolean true if the restore was successful
      */
