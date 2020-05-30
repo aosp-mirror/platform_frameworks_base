@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
@@ -32,10 +33,12 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
 
 import static java.util.stream.Collectors.toList;
 
@@ -48,6 +51,7 @@ import androidx.test.filters.FlakyTest;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -61,6 +65,10 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Build/Install/Run:
+ *  atest WmTests:DisplayAreaPolicyBuilderTest
+ */
 @Presubmit
 public class DisplayAreaPolicyBuilderTest {
 
@@ -68,19 +76,28 @@ public class DisplayAreaPolicyBuilderTest {
     public final SystemServicesTestRule mSystemServices = new SystemServicesTestRule();
 
     private TestWindowManagerPolicy mPolicy = new TestWindowManagerPolicy(null, null);
+    private WindowManagerService mWms;
+    private DisplayArea.Root mRoot;
+    private DisplayArea<WindowContainer> mImeContainer;
+    private DisplayContent mDisplayContent;
+    private TaskDisplayArea mDefaultTaskDisplayArea;
+    private List<TaskDisplayArea> mTaskDisplayAreaList;
+
+    @Before
+    public void setup() {
+        mWms = mSystemServices.getWindowManagerService();
+        mRoot = new SurfacelessDisplayAreaRoot(mWms);
+        mImeContainer = new DisplayArea<>(mWms, ABOVE_TASKS, "Ime");
+        mDisplayContent = mock(DisplayContent.class);
+        mDefaultTaskDisplayArea = new TaskDisplayArea(mDisplayContent, mWms, "Tasks",
+                FEATURE_DEFAULT_TASK_CONTAINER);
+        mTaskDisplayAreaList = new ArrayList<>();
+        mTaskDisplayAreaList.add(mDefaultTaskDisplayArea);
+    }
 
     @Test
     @FlakyTest(bugId = 149760939)
     public void testBuilder() {
-        WindowManagerService wms = mSystemServices.getWindowManagerService();
-        DisplayArea.Root root = new SurfacelessDisplayAreaRoot(wms);
-        DisplayArea<WindowContainer> ime = new DisplayArea<>(wms, ABOVE_TASKS, "Ime");
-        DisplayContent displayContent = mock(DisplayContent.class);
-        TaskDisplayArea taskDisplayArea = new TaskDisplayArea(displayContent, wms, "Tasks",
-                FEATURE_DEFAULT_TASK_CONTAINER);
-        List<TaskDisplayArea> taskDisplayAreaList = new ArrayList<>();
-        taskDisplayAreaList.add(taskDisplayArea);
-
         final Feature foo;
         final Feature bar;
 
@@ -93,7 +110,7 @@ public class DisplayAreaPolicyBuilderTest {
                         .all()
                         .except(TYPE_STATUS_BAR)
                         .build())
-                .build(wms, displayContent, root, ime, taskDisplayAreaList);
+                .build(mWms, mDisplayContent, mRoot, mImeContainer, mTaskDisplayAreaList);
 
         policy.attachDisplayAreas();
 
@@ -105,19 +122,19 @@ public class DisplayAreaPolicyBuilderTest {
         assertThat(policy.findAreaForToken(tokenOfType(TYPE_STATUS_BAR)),
                 is(not(decendantOfOneOf(policy.getDisplayAreas(bar)))));
 
-        assertThat(taskDisplayArea,
+        assertThat(mDefaultTaskDisplayArea,
                 is(decendantOfOneOf(policy.getDisplayAreas(foo))));
-        assertThat(taskDisplayArea,
+        assertThat(mDefaultTaskDisplayArea,
                 is(decendantOfOneOf(policy.getDisplayAreas(bar))));
 
-        assertThat(ime,
+        assertThat(mImeContainer,
                 is(decendantOfOneOf(policy.getDisplayAreas(foo))));
-        assertThat(ime,
+        assertThat(mImeContainer,
                 is(decendantOfOneOf(policy.getDisplayAreas(bar))));
 
-        List<DisplayArea<?>> actualOrder = collectLeafAreas(root);
-        Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, root, ime,
-                taskDisplayArea);
+        List<DisplayArea<?>> actualOrder = collectLeafAreas(mRoot);
+        Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, mRoot, mImeContainer,
+                mDefaultTaskDisplayArea);
         actualOrder = actualOrder.stream().filter(zSets::containsKey).collect(toList());
 
         Map<DisplayArea<?>, Integer> expectedByMinLayer = mapValues(zSets,
@@ -131,20 +148,11 @@ public class DisplayAreaPolicyBuilderTest {
 
     @Test
     public void testBuilder_defaultPolicy_hasOneHandedFeature() {
-        WindowManagerService wms = mSystemServices.getWindowManagerService();
-        DisplayArea.Root root = new SurfacelessDisplayAreaRoot(wms);
-        DisplayArea<WindowContainer> ime = new DisplayArea<>(wms, ABOVE_TASKS, "Ime");
-        DisplayContent displayContent = mock(DisplayContent.class);
-        TaskDisplayArea taskDisplayArea = new TaskDisplayArea(displayContent, wms, "Tasks",
-                FEATURE_DEFAULT_TASK_CONTAINER);
-        List<TaskDisplayArea> taskDisplayAreaList = new ArrayList<>();
-        taskDisplayAreaList.add(taskDisplayArea);
-
         final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
                 resourcesWithProvider(""));
         final DisplayAreaPolicyBuilder.Result defaultPolicy =
-                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(wms, displayContent,
-                        root, ime);
+                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
+                        mRoot, mImeContainer);
         final List<Feature> features = defaultPolicy.getFeatures();
         boolean hasOneHandedFeature = false;
         for (int i = 0; i < features.size(); i++) {
@@ -152,6 +160,34 @@ public class DisplayAreaPolicyBuilderTest {
         }
 
         assertTrue(hasOneHandedFeature);
+    }
+
+    @Test
+    public void testBuilder_createCustomizedDisplayAreaForFeature() {
+        final Feature dimmable;
+        final Feature other;
+        DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .addFeature(dimmable = new Feature.Builder(mPolicy, "Dimmable", 0)
+                        .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                        .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                        .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
+                        .build())
+                .addFeature(other = new Feature.Builder(mPolicy, "Other", 1)
+                        .all()
+                        .build())
+                .build(mWms, mDisplayContent, mRoot, mImeContainer, mTaskDisplayAreaList);
+
+        policy.attachDisplayAreas();
+
+        List<DisplayArea<? extends WindowContainer>> dimmableDAs =
+                policy.getDisplayAreas(dimmable.getId());
+        List<DisplayArea<? extends WindowContainer>> otherDAs =
+                policy.getDisplayAreas(other.getId());
+        assertEquals(1, dimmableDAs.size());
+        assertTrue(dimmableDAs.get(0) instanceof DisplayArea.Dimmable);
+        for (DisplayArea otherDA : otherDAs) {
+            assertFalse(otherDA instanceof DisplayArea.Dimmable);
+        }
     }
 
     private static Resources resourcesWithProvider(String provider) {

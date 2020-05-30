@@ -266,11 +266,20 @@ public class DisplayArea<T extends WindowContainer> extends WindowContainer<T> {
      * Top-most DisplayArea under DisplayContent.
      */
     public static class Root extends DisplayArea<DisplayArea> {
+        Root(WindowManagerService wms) {
+            super(wms, Type.ANY, "DisplayArea.Root", FEATURE_ROOT);
+        }
+    }
+
+    /**
+     * DisplayArea that can be dimmed.
+     */
+    static class Dimmable extends DisplayArea<DisplayArea> {
         private final Dimmer mDimmer = new Dimmer(this);
         private final Rect mTmpDimBoundsRect = new Rect();
 
-        Root(WindowManagerService wms) {
-            super(wms, Type.ANY, "DisplayArea.Root", FEATURE_ROOT);
+        Dimmable(WindowManagerService wms, Type type, String name, int featureId) {
+            super(wms, type, name, featureId);
         }
 
         @Override
