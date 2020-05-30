@@ -773,22 +773,24 @@ void ValueMetricProducer::onMatchedLogEventInternalLocked(
     bool shouldSkipForPulledMetric = mIsPulled && !mUseDiff
             && mCondition != ConditionState::kTrue;
     if (shouldSkipForPushMetric || shouldSkipForPulledMetric) {
-        VLOG("ValueMetric skip event because condition is false");
+        VLOG("ValueMetric skip event because condition is false and we are not using diff (for "
+             "pulled metric)");
         return;
     }
 
     if (hitGuardRailLocked(eventKey)) {
         return;
     }
+
     vector<BaseInfo>& baseInfos = mCurrentBaseInfo[whatKey];
     if (baseInfos.size() < mFieldMatchers.size()) {
         VLOG("Resizing number of intervals to %d", (int)mFieldMatchers.size());
         baseInfos.resize(mFieldMatchers.size());
     }
 
-    for (auto baseInfo : baseInfos) {
+    for (BaseInfo& baseInfo : baseInfos) {
         if (!baseInfo.hasCurrentState) {
-            baseInfo.currentState = DEFAULT_DIMENSION_KEY;
+            baseInfo.currentState = getUnknownStateKey();
             baseInfo.hasCurrentState = true;
         }
     }
@@ -1056,7 +1058,7 @@ void ValueMetricProducer::initCurrentSlicedBucket(int64_t nextBucketStartTimeNs)
         } else {
             it++;
         }
-        // TODO: remove mCurrentBaseInfo entries when obsolete
+        // TODO(b/157655103): remove mCurrentBaseInfo entries when obsolete
     }
 
     mCurrentBucketIsSkipped = false;
