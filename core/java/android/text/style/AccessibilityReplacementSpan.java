@@ -22,30 +22,35 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.ParcelableSpan;
 import android.text.TextUtils;
+import android.view.accessibility.AccessibilityNodeInfo;
 
 /**
- * This class serves as a parcelable placeholder for the ReplacementSpans.
+ * This class serves as a parcelable placeholder for the {@link ReplacementSpan}.
  *
- * This span contains content description of original span to let Accessibility service to do the
- * substitution for it.
+ * It is used to replace ReplacementSpans in {@link AccessibilityNodeInfo#setText(CharSequence)}.
  *
  * @hide
  */
 public class AccessibilityReplacementSpan extends ReplacementSpan
         implements ParcelableSpan {
-    // The content description of the span this one replaces
-    private CharSequence mContentDescription;
 
     /**
+     * Sets the content description to the parent class.
+     *
      * @param contentDescription The content description of the span this one replaces
      */
     public AccessibilityReplacementSpan(CharSequence contentDescription) {
         this.setContentDescription(contentDescription);
-        mContentDescription = contentDescription;
     }
 
+    /**
+     * Sets the content description to the parent class.
+     *
+     * @param p The parcel to de-serialize from
+     */
     public AccessibilityReplacementSpan(Parcel p) {
-        mContentDescription = p.readCharSequence();
+        final CharSequence contentDescription = p.readCharSequence();
+        this.setContentDescription(contentDescription);
     }
 
     @Override
@@ -70,7 +75,7 @@ public class AccessibilityReplacementSpan extends ReplacementSpan
 
     @Override
     public void writeToParcelInternal(Parcel dest, int flags) {
-        dest.writeCharSequence(mContentDescription);
+        dest.writeCharSequence(this.getContentDescription());
     }
 
     @Override
