@@ -45,6 +45,9 @@ public class PageIndicator extends ViewGroup {
     }
 
     public void setNumPages(int numPages) {
+        if (numPages == getChildCount()) {
+            return;
+        }
         TypedArray array = getContext().obtainStyledAttributes(
                 new int[]{android.R.attr.colorControlActivated});
         int color = array.getColor(0, 0);
@@ -54,6 +57,9 @@ public class PageIndicator extends ViewGroup {
 
     /** Oveload of setNumPages that allows the indicator color to be specified.*/
     public void setNumPages(int numPages, int color) {
+        if (numPages == getChildCount()) {
+            return;
+        }
         setVisibility(numPages > 1 ? View.VISIBLE : View.GONE);
         if (mAnimating) {
             Log.w(TAG, "setNumPages during animation");
