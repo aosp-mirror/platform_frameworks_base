@@ -762,8 +762,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
         assertTrue(mStack.isTopStackInDisplayArea());
 
         mActivity.setState(RESUMED, "test");
-        mActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
-                false /* oomAdj */);
+        mActivity.finishIfPossible(0 /* resultCode */, null /* resultData */,
+                null /* resultGrants */, "test", false /* oomAdj */);
 
         assertTrue(stack1.isTopStackInDisplayArea());
     }
@@ -788,8 +788,8 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
         // Finish top activity and verify the next focusable rootable task has adjusted to top.
         topActivity.setState(RESUMED, "test");
-        topActivity.finishIfPossible(0 /* resultCode */, null /* resultData */, "test",
-                false /* oomAdj */);
+        topActivity.finishIfPossible(0 /* resultCode */, null /* resultData */,
+                null /* resultGrants */, "test", false /* oomAdj */);
         assertEquals(mTask, mStack.getTopMostTask());
     }
 
