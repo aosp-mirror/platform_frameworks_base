@@ -36,7 +36,7 @@ public:
           mIndex(index),
           mInitialized(false),
           mTrackerIndex(),
-          mNonSlicedConditionState(ConditionState::kUnknown),
+          mUnSlicedPartCondition(ConditionState::kUnknown),
           mSliced(false){};
 
     virtual ~ConditionTracker(){};
@@ -71,11 +71,6 @@ public:
                                    const std::vector<sp<ConditionTracker>>& mAllConditions,
                                    std::vector<ConditionState>& conditionCache,
                                    std::vector<bool>& conditionChanged) = 0;
-
-    // Return the current condition state.
-    virtual ConditionState isConditionMet() const {
-        return mNonSlicedConditionState;
-    };
 
     // Query the condition with parameters.
     // [conditionParameters]: a map from condition name to the HashableDimensionKey to query the
@@ -125,8 +120,9 @@ public:
         const std::vector<sp<ConditionTracker>>& allConditions,
         const vector<Matcher>& dimensions) const = 0;
 
+    // Return the current condition state of the unsliced part of the condition.
     inline ConditionState getUnSlicedPartConditionState() const  {
-        return mUnSlicedPart;
+        return mUnSlicedPartCondition;
     }
 
 protected:
@@ -141,10 +137,16 @@ protected:
     // the list of LogMatchingTracker index that this ConditionTracker uses.
     std::set<int> mTrackerIndex;
 
-    ConditionState mNonSlicedConditionState;
+    // This variable is only used for CombinationConditionTrackers.
+    // SimpleConditionTrackers technically don't have an unsliced part because
+    // they are either sliced or unsliced.
+    //
+    // CombinationConditionTrackers have multiple children ConditionTrackers
+    // that can be a mixture of sliced or unsliced. This tracks the
+    // condition of the unsliced part of the combination condition.
+    ConditionState mUnSlicedPartCondition;
 
     bool mSliced;
-    ConditionState mUnSlicedPart;
 };
 
 }  // namespace statsd
