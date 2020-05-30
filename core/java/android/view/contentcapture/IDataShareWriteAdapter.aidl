@@ -25,4 +25,5 @@ oneway interface IDataShareWriteAdapter {
     void write(in ParcelFileDescriptor destination);
     void error(int errorCode);
     void rejected();
+    void finish();
 }

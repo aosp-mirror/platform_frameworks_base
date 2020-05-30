@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Position définie par GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Demandes de localisation actives"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Option « Capteurs désactivés » active"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"L\'élément multimédia est actif"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Supprimer toutes les notifications"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,29 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"désactiver"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Changer d\'appareil de sortie"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"L\'écran est épinglé"</string>
+    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
+    <skip />
     <string name="screen_pinning_description" msgid="8699395373875667743">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Retour » et « Aperçu »."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur les touches Retour et Accueil."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'épinglage. Pour annuler l\'épinglage, balayez l\'écran vers le haut et gardez le doigt dessus."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Aperçu »."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur la touche Accueil."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Aperçu."</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Pour annuler l\'épinglage de cet écran, maintenez le doigt sur les touches Retour et Accueil."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Pour annuler l\'épinglage de cet écran, balayez-le vers le haut et gardez le doigt dessus"</string>
+    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
+    <skip />
+    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Non, merci"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Écran épinglé"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Épinglage d\'écran annulé"</string>
+    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Masquer <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Cet élément réapparaîtra la prochaine fois que vous l\'activerez dans les paramètres."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Masquer"</string>
