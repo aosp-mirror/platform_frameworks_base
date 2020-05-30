@@ -19,9 +19,17 @@
 
 #include "StateManager.h"
 
+#include <private/android_filesystem_config.h>
+
 namespace android {
 namespace os {
 namespace statsd {
+
+StateManager::StateManager()
+    : mAllowedPkg({
+              "com.android.systemui",
+      }) {
+}
 
 StateManager& StateManager::getInstance() {
     static StateManager sStateManager;
@@ -33,8 +41,14 @@ void StateManager::clear() {
 }
 
 void StateManager::onLogEvent(const LogEvent& event) {
-    if (mStateTrackers.find(event.GetTagId()) != mStateTrackers.end()) {
-        mStateTrackers[event.GetTagId()]->onLogEvent(event);
+    // Only process state events from uids in AID_* and packages that are whitelisted in
+    // mAllowedPkg.
+    // Whitelisted AIDs are AID_ROOT and all AIDs in [1000, 2000)
+    if (event.GetUid() == AID_ROOT || (event.GetUid() >= 1000 && event.GetUid() < 2000) ||
+        mAllowedLogSources.find(event.GetUid()) != mAllowedLogSources.end()) {
+        if (mStateTrackers.find(event.GetTagId()) != mStateTrackers.end()) {
+            mStateTrackers[event.GetTagId()]->onLogEvent(event);
+        }
     }
 }
 
@@ -77,6 +91,20 @@ bool StateManager::getStateValue(const int32_t atomId, const HashableDimensionKe
         return it->second->getStateValue(key, output);
     }
     return false;
+}
+
+void StateManager::updateLogSources(const sp<UidMap>& uidMap) {
+    mAllowedLogSources.clear();
+    for (const auto& pkg : mAllowedPkg) {
+        auto uids = uidMap->getAppUid(pkg);
+        mAllowedLogSources.insert(uids.begin(), uids.end());
+    }
+}
+
+void StateManager::notifyAppChanged(const string& apk, const sp<UidMap>& uidMap) {
+    if (mAllowedPkg.find(apk) != mAllowedPkg.end()) {
+        updateLogSources(uidMap);
+    }
 }
 
 }  // namespace statsd

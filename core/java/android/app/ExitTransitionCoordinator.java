@@ -434,7 +434,8 @@ class ExitTransitionCoordinator extends ActivityTransitionCoordinator {
                 mSharedElementNotified = true;
                 delayCancel();
 
-                if (!mActivity.isTopOfTask()) {
+                if (!mActivity.isTopOfTask() || (mIsReturning && !mActivity.isTaskRoot()
+                        && !mSharedElements.isEmpty())) {
                     mResultReceiver.send(MSG_ALLOW_RETURN_TRANSITION, null);
                 }
 

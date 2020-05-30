@@ -122,10 +122,8 @@ public class PackageManagerServiceTest {
             final PackageManagerService.ScanPartition scanPartition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(i);
             for (int j = 0; j < appdir.length; j++) {
-                String canonical = new File("/" + partitions[i]).getCanonicalPath();
-                String path = String.format("%s/%s/A.apk", canonical, appdir[j]);
-
-                Assert.assertEquals(j == 1 && i != 3, scanPartition.containsPrivPath(path));
+                File path = new File(String.format("%s/%s/A.apk", partitions[i], appdir[j]));
+                Assert.assertEquals(j == 1 && i != 3, scanPartition.containsPrivApp(path));
 
                 final int scanFlag = scanPartition.scanFlag;
                 Assert.assertEquals(i == 1, scanFlag == PackageManagerService.SCAN_AS_VENDOR);

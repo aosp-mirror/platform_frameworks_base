@@ -117,13 +117,14 @@ final class AutofillInlineSessionController {
     }
 
     /**
-     * Permanently delete the current inline fill UI. Notify the IME to hide the suggestions as
-     * well.
+     * Disables prefix/regex based filtering. Other filtering rules (see {@link
+     * android.service.autofill.Dataset}) still apply.
      */
     @GuardedBy("mLock")
-    boolean deleteInlineFillUiLocked(@NonNull AutofillId autofillId) {
-        mInlineFillUi = null;
-        return hideInlineSuggestionsUiLocked(autofillId);
+    void disableFilterMatching(@NonNull AutofillId autofillId) {
+        if (mInlineFillUi != null && mInlineFillUi.getAutofillId().equals(autofillId)) {
+            mInlineFillUi.disableFilterMatching();
+        }
     }
 
     /**

@@ -55,6 +55,7 @@ import com.google.android.exoplayer2.extractor.ts.TsExtractor;
 import com.google.android.exoplayer2.extractor.wav.WavExtractor;
 import com.google.android.exoplayer2.upstream.DataReader;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.google.android.exoplayer2.util.TimestampAdjuster;
 import com.google.android.exoplayer2.util.Util;
 import com.google.android.exoplayer2.video.ColorInfo;
 
@@ -759,7 +760,6 @@ public final class MediaParser {
      */
     public static final String PARAMETER_IN_BAND_CRYPTO_INFO =
             "android.media.mediaparser.inBandCryptoInfo";
-
     /**
      * Sets whether supplemental data should be included as part of the sample data. {@code boolean}
      * expected. Default value is {@code false}. See {@link #SAMPLE_FLAG_HAS_SUPPLEMENTAL_DATA} for
@@ -769,6 +769,31 @@ public final class MediaParser {
      */
     public static final String PARAMETER_INCLUDE_SUPPLEMENTAL_DATA =
             "android.media.mediaparser.includeSupplementalData";
+    /**
+     * Sets whether sample timestamps may start from non-zero offsets. {@code boolean} expected.
+     * Default value is {@code false}.
+     *
+     * <p>When set to true, sample timestamps will not be offset to start from zero, and the media
+     * provided timestamps will be used instead. For example, transport stream sample timestamps
+     * will not be converted to a zero-based timebase.
+     *
+     * @hide
+     */
+    public static final String PARAMETER_IGNORE_TIMESTAMP_OFFSET =
+            "android.media.mediaparser.ignoreTimestampOffset";
+    /**
+     * Sets whether each track type should be eagerly exposed. {@code boolean} expected. Default
+     * value is {@code false}.
+     *
+     * <p>When set to true, each track type will be eagerly exposed through a call to {@link
+     * OutputConsumer#onTrackDataFound} containing a single-value {@link MediaFormat}. The key for
+     * the track type is {@code "track-type-string"}, and the possible values are {@code "video"},
+     * {@code "audio"}, {@code "text"}, {@code "metadata"}, and {@code "unknown"}.
+     *
+     * @hide
+     */
+    public static final String PARAMETER_EAGERLY_EXPOSE_TRACKTYPE =
+            "android.media.mediaparser.eagerlyExposeTrackType";
 
     // Private constants.
 
@@ -930,6 +955,8 @@ public final class MediaParser {
     @Nullable private final Constructor<DrmInitData.SchemeInitData> mSchemeInitDataConstructor;
     private boolean mInBandCryptoInfo;
     private boolean mIncludeSupplementalData;
+    private boolean mIgnoreTimestampOffset;
+    private boolean mEagerlyExposeTrackType;
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
@@ -982,6 +1009,12 @@ public final class MediaParser {
         }
         if (PARAMETER_INCLUDE_SUPPLEMENTAL_DATA.equals(parameterName)) {
             mIncludeSupplementalData = (boolean) value;
+        }
+        if (PARAMETER_IGNORE_TIMESTAMP_OFFSET.equals(parameterName)) {
+            mIgnoreTimestampOffset = (boolean) value;
+        }
+        if (PARAMETER_EAGERLY_EXPOSE_TRACKTYPE.equals(parameterName)) {
+            mEagerlyExposeTrackType = (boolean) value;
         }
         mParserParameters.put(parameterName, value);
         return this;
@@ -1159,6 +1192,10 @@ public final class MediaParser {
 
     private Extractor createExtractor(String parserName) {
         int flags = 0;
+        TimestampAdjuster timestampAdjuster = null;
+        if (mIgnoreTimestampOffset) {
+            timestampAdjuster = new TimestampAdjuster(TimestampAdjuster.DO_NOT_OFFSET);
+        }
         switch (parserName) {
             case PARSER_NAME_MATROSKA:
                 flags =
@@ -1180,7 +1217,7 @@ public final class MediaParser {
                                 ? FragmentedMp4Extractor
                                         .FLAG_WORKAROUND_EVERY_VIDEO_FRAME_IS_SYNC_FRAME
                                 : 0;
-                return new FragmentedMp4Extractor(flags);
+                return new FragmentedMp4Extractor(flags, timestampAdjuster);
             case PARSER_NAME_MP4:
                 flags |=
                         getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
@@ -1238,7 +1275,12 @@ public final class MediaParser {
                                 : TS_MODE_HLS.equals(tsMode)
                                         ? TsExtractor.MODE_HLS
                                         : TsExtractor.MODE_MULTI_PMT;
-                return new TsExtractor(hlsMode, flags);
+                return new TsExtractor(
+                        hlsMode,
+                        timestampAdjuster != null
+                                ? timestampAdjuster
+                                : new TimestampAdjuster(/* firstSampleTimestampUs= */ 0),
+                        new DefaultTsPayloadReaderFactory(flags));
             case PARSER_NAME_FLV:
                 return new FlvExtractor();
             case PARSER_NAME_OGG:
@@ -1340,8 +1382,15 @@ public final class MediaParser {
         public TrackOutput track(int id, int type) {
             TrackOutput trackOutput = mTrackOutputAdapters.get(id);
             if (trackOutput == null) {
-                trackOutput = new TrackOutputAdapter(mTrackOutputAdapters.size());
+                int trackIndex = mTrackOutputAdapters.size();
+                trackOutput = new TrackOutputAdapter(trackIndex);
                 mTrackOutputAdapters.put(id, trackOutput);
+                if (mEagerlyExposeTrackType) {
+                    MediaFormat mediaFormat = new MediaFormat();
+                    mediaFormat.setString("track-type-string", toTypeString(type));
+                    mOutputConsumer.onTrackDataFound(
+                            trackIndex, new TrackData(mediaFormat, /* drmInitData= */ null));
+                }
             }
             return trackOutput;
         }
@@ -1662,6 +1711,21 @@ public final class MediaParser {
         return result;
     }
 
+    private static String toTypeString(int type) {
+        switch (type) {
+            case C.TRACK_TYPE_VIDEO:
+                return "video";
+            case C.TRACK_TYPE_AUDIO:
+                return "audio";
+            case C.TRACK_TYPE_TEXT:
+                return "text";
+            case C.TRACK_TYPE_METADATA:
+                return "metadata";
+            default:
+                return "unknown";
+        }
+    }
+
     private static void setPcmEncoding(Format format, MediaFormat result) {
         int exoPcmEncoding = format.pcmEncoding;
         setOptionalMediaFormatInt(result, "exo-pcm-encoding", format.pcmEncoding);
@@ -1800,6 +1864,8 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_TS_ENABLE_HDMV_DTS_AUDIO_STREAMS, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_IN_BAND_CRYPTO_INFO, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_INCLUDE_SUPPLEMENTAL_DATA, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_IGNORE_TIMESTAMP_OFFSET, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_EAGERLY_EXPOSE_TRACKTYPE, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }

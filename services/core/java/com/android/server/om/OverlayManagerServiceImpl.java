@@ -31,6 +31,7 @@ import android.annotation.Nullable;
 import android.content.om.OverlayInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
+import android.os.OverlayablePolicy;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -72,6 +73,9 @@ final class OverlayManagerServiceImpl {
     private final OverlayConfig mOverlayConfig;
     private final String[] mDefaultOverlays;
     private final OverlayChangeListener mListener;
+
+    private final String mOverlayableConfigurator;
+    private final String[] mOverlayableConfiguratorTargets;
 
     /**
      * Helper method to merge the overlay manager's (as read from overlays.xml)
@@ -115,13 +119,17 @@ final class OverlayManagerServiceImpl {
             @NonNull final OverlayManagerSettings settings,
             @NonNull final OverlayConfig overlayConfig,
             @NonNull final String[] defaultOverlays,
-            @NonNull final OverlayChangeListener listener) {
+            @NonNull final OverlayChangeListener listener,
+            @Nullable final String overlayableConfigurator,
+            @Nullable final String[] overlayableConfiguratorTargets) {
         mPackageManager = packageManager;
         mIdmapManager = idmapManager;
         mSettings = settings;
         mOverlayConfig = overlayConfig;
         mDefaultOverlays = defaultOverlays;
         mListener = listener;
+        mOverlayableConfigurator = overlayableConfigurator;
+        mOverlayableConfiguratorTargets = overlayableConfiguratorTargets;
     }
 
     /**
@@ -706,7 +714,25 @@ final class OverlayManagerServiceImpl {
         if (targetPackage != null && overlayPackage != null
                 && !("android".equals(targetPackageName)
                     && !isPackageConfiguredMutable(overlayPackageName))) {
-            modified |= mIdmapManager.createIdmap(targetPackage, overlayPackage, userId);
+
+            int additionalPolicies = 0;
+            if (TextUtils.nullIfEmpty(mOverlayableConfigurator) != null
+                    && ArrayUtils.contains(mOverlayableConfiguratorTargets, targetPackageName)
+                    && isPackageConfiguredMutable(overlayPackageName)
+                    && mPackageManager.signaturesMatching(mOverlayableConfigurator,
+                            overlayPackageName, userId)) {
+                // The overlay targets a package that has the overlayable configurator configured as
+                // its actor. The overlay and this actor are signed with the same signature, so
+                // the overlay fulfills the actor policy.
+                modified |= mSettings.setHasConfiguratorActorPolicy(overlayPackageName, userId,
+                        true);
+                additionalPolicies |= OverlayablePolicy.ACTOR_SIGNATURE;
+            } else if (mSettings.hasConfiguratorActorPolicy(overlayPackageName, userId)) {
+                additionalPolicies |= OverlayablePolicy.ACTOR_SIGNATURE;
+            }
+
+            modified |= mIdmapManager.createIdmap(targetPackage, overlayPackage, additionalPolicies,
+                    userId);
         }
 
         if (overlayPackage != null) {

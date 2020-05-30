@@ -386,7 +386,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             // surface animator such that hierarchy is preserved when animating, i.e.
             // mSurfaceControl stays attached to the leash and we just reparent the leash to the
             // new parent.
-            reparentSurfaceControl(getPendingTransaction(), mParent.mSurfaceControl);
+            reparentSurfaceControl(getSyncTransaction(), mParent.mSurfaceControl);
         }
 
         if (callback != null) {
@@ -399,13 +399,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void createSurfaceControl(boolean force) {
-        setInitialSurfaceControlProperties(makeSurface().build());
+        setInitialSurfaceControlProperties(makeSurface());
     }
 
-    private void setInitialSurfaceControlProperties(SurfaceControl surfaceControl) {
-        setSurfaceControl(surfaceControl);
-        getPendingTransaction().show(mSurfaceControl);
-        onSurfaceShown(getPendingTransaction());
+    void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
+        setSurfaceControl(b.build());
+        getSyncTransaction().show(mSurfaceControl);
+        onSurfaceShown(getSyncTransaction());
         updateSurfacePosition();
     }
 
@@ -431,7 +431,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
                 .setContainerLayer()
                 .setName(getName());
 
-        setInitialSurfaceControlProperties(b.build());
+        setInitialSurfaceControlProperties(b);
 
         // If parent is null, the layer should be placed offscreen so reparent to null. Otherwise,
         // set to the available parent.
@@ -575,7 +575,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void removeImmediately() {
         final DisplayContent dc = getDisplayContent();
         if (dc != null) {
-            mSurfaceFreezer.unfreeze(getPendingTransaction());
+            mSurfaceFreezer.unfreeze(getSyncTransaction());
             dc.mChangingContainers.remove(this);
         }
         while (!mChildren.isEmpty()) {
@@ -590,7 +590,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         if (mSurfaceControl != null) {
-            getPendingTransaction().remove(mSurfaceControl);
+            getSyncTransaction().remove(mSurfaceControl);
             setSurfaceControl(null);
             mLastSurfacePosition.set(0, 0);
             scheduleAnimation();
@@ -1002,7 +1002,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     void onChildVisibilityRequested(boolean visible) {
         // If we are changing visibility, then a snapshot isn't necessary and we are no-longer
         // part of a change transition.
-        mSurfaceFreezer.unfreeze(getPendingTransaction());
+        mSurfaceFreezer.unfreeze(getSyncTransaction());
         if (mDisplayContent != null) {
             mDisplayContent.mChangingContainers.remove(this);
         }
@@ -1901,7 +1901,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     void assignChildLayers() {
-        assignChildLayers(getPendingTransaction());
+        assignChildLayers(getSyncTransaction());
         scheduleAnimation();
     }
 
@@ -2050,12 +2050,23 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return mSurfaceControl;
     }
 
-    @Override
-    public Transaction getPendingTransaction() {
+    /**
+     * Use this method instead of {@link #getPendingTransaction()} if the Transaction should be
+     * synchronized with the client.
+     *
+     * @return {@link #mBLASTSyncTransaction} if available. Otherwise, returns
+     * {@link #getPendingTransaction()}
+     */
+    public Transaction getSyncTransaction() {
         if (mUsingBLASTSyncTransaction) {
             return mBLASTSyncTransaction;
         }
 
+        return getPendingTransaction();
+    }
+
+    @Override
+    public Transaction getPendingTransaction() {
         final DisplayContent displayContent = getDisplayContent();
         if (displayContent != null && displayContent != this) {
             return displayContent.getPendingTransaction();
@@ -2465,7 +2476,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     final void updateSurfacePosition() {
-        updateSurfacePosition(getPendingTransaction());
+        updateSurfacePosition(getSyncTransaction());
     }
 
     void updateSurfacePosition(Transaction t) {
