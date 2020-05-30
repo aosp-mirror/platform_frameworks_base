@@ -96,12 +96,26 @@ java_library {
 }
 
 // post-jarjar version of framework-wifi
-java_library {
+java_sdk_library {
     name: "framework-wifi",
-    sdk_version: "module_current",
+    defaults: ["framework-module-defaults"],
     static_libs: [
-        "framework-wifi-pre-jarjar",
+        "framework-wifi-util-lib",
+        "android.hardware.wifi-V1.0-java-constants",
     ],
+    libs: [
+        "unsupportedappusage", // for android.compat.annotation.UnsupportedAppUsage
+    ],
+    srcs: [
+        ":framework-wifi-updatable-sources",
+        ":framework-wifi-util-lib-aidls",
+    ],
+
+    // TODO(b/155480189) - Remove naming_scheme once references have been resolved.
+    // Temporary java_sdk_library component naming scheme to use to ease the transition from separate
+    // modules to java_sdk_library.
+    naming_scheme: "framework-modules",
+
     jarjar_rules: ":wifi-jarjar-rules",
 
     installable: true,
@@ -112,6 +126,7 @@ java_library {
     visibility: [
         "//frameworks/opt/net/wifi/service:__subpackages__",
     ] + test_access_hidden_api_whitelist,
+    stubs_library_visibility: ["//visibility:public"],
     apex_available: [
         "com.android.wifi",
         "test_com.android.wifi",
@@ -125,104 +140,6 @@ java_library {
     ],
 }
 
-stubs_defaults {
-    name: "framework-wifi-stubs-srcs-defaults",
-    srcs: [
-        ":framework-wifi-updatable-sources",
-        ":framework-wifi-util-lib-aidls",
-    ],
-    libs: [
-        "framework-annotations-lib",
-        "framework-wifi-util-lib",
-    ],
-    sdk_version: "module_current",
-    dist: { dest: "framework-wifi.txt" },
-}
-
-droidstubs {
-    name: "framework-wifi-stubs-srcs-publicapi",
-    defaults: [
-        "framework-module-stubs-defaults-publicapi",
-        "framework-wifi-stubs-srcs-defaults",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-wifi.api.public.latest",
-            removed_api_file: ":framework-wifi-removed.api.public.latest",
-        },
-        api_lint: {
-            new_since: ":framework-wifi.api.public.latest",
-            baseline_file: "api/lint-baseline.txt",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-wifi-stubs-srcs-systemapi",
-    defaults: [
-        "framework-module-stubs-defaults-systemapi",
-        "framework-wifi-stubs-srcs-defaults",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-wifi.api.system.latest",
-            removed_api_file: ":framework-wifi-removed.api.system.latest",
-        },
-        api_lint: {
-            new_since: ":framework-wifi.api.system.latest",
-            baseline_file: "api/system-lint-baseline.txt",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-wifi-api-module_libs_api",
-    defaults: [
-        "framework-module-api-defaults-module_libs_api",
-        "framework-wifi-stubs-srcs-defaults",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-wifi.api.module-lib.latest",
-            removed_api_file: ":framework-wifi-removed.api.module-lib.latest",
-        },
-        api_lint: {
-            new_since: ":framework-wifi.api.module-lib.latest",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-wifi-stubs-srcs-module_libs_api",
-    defaults: [
-        "framework-module-stubs-defaults-module_libs_api",
-        "framework-wifi-stubs-srcs-defaults",
-    ],
-}
-
-java_library {
-    name: "framework-wifi-stubs-publicapi",
-    srcs: [":framework-wifi-stubs-srcs-publicapi"],
-    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
-    dist: { dest: "framework-wifi.jar" },
-}
-
-java_library {
-    name: "framework-wifi-stubs-systemapi",
-    srcs: [":framework-wifi-stubs-srcs-systemapi"],
-    libs: ["framework-annotations-lib"],
-    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
-    dist: { dest: "framework-wifi.jar" },
-}
-
-java_library {
-    name: "framework-wifi-stubs-module_libs_api",
-    srcs: [":framework-wifi-stubs-srcs-module_libs_api"],
-    libs: ["framework-annotations-lib"],
-    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
-    dist: { dest: "framework-wifi.jar" },
-}
-
 // defaults for tests that need to build against framework-wifi's @hide APIs
 java_defaults {
     name: "framework-wifi-test-defaults",
@@ -230,7 +147,7 @@ java_defaults {
     libs: [
         // order matters: classes in framework-wifi are resolved before framework, meaning
         // @hide APIs in framework-wifi are resolved before @SystemApi stubs in framework
-        "framework-wifi",
+        "framework-wifi.impl",
         "framework",
 
         // if sdk_version="" this gets automatically included, but here we need to add manually.
