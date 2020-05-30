@@ -713,7 +713,7 @@ public class Path {
      */
     public void addPath(@NonNull Path src, @NonNull Matrix matrix) {
         if (!src.isSimplePath) isSimplePath = false;
-        nAddPath(mNativePath, src.mNativePath, matrix.native_instance);
+        nAddPath(mNativePath, src.mNativePath, matrix.ni());
     }
 
     /**
@@ -777,7 +777,7 @@ public class Path {
             dst.isSimplePath = false;
             dstNative = dst.mNativePath;
         }
-        nTransform(mNativePath, matrix.native_instance, dstNative);
+        nTransform(mNativePath, matrix.ni(), dstNative);
     }
 
     /**
@@ -787,7 +787,7 @@ public class Path {
      */
     public void transform(@NonNull Matrix matrix) {
         isSimplePath = false;
-        nTransform(mNativePath, matrix.native_instance);
+        nTransform(mNativePath, matrix.ni());
     }
 
     /** @hide */

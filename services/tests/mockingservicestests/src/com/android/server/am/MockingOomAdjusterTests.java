@@ -1387,6 +1387,15 @@ public class MockingOomAdjusterTests {
                 SCHED_GROUP_DEFAULT);
         assertProcStates(app3, PROCESS_STATE_FOREGROUND_SERVICE, PERCEPTIBLE_APP_ADJ,
                 SCHED_GROUP_DEFAULT);
+        assertEquals("service", app.adjType);
+        assertEquals("service", app2.adjType);
+        assertEquals("fg-service", app3.adjType);
+        assertEquals(false, app.isCached());
+        assertEquals(false, app2.isCached());
+        assertEquals(false, app3.isCached());
+        assertEquals(false, app.empty);
+        assertEquals(false, app2.empty);
+        assertEquals(false, app3.empty);
     }
 
     @SuppressWarnings("GuardedBy")

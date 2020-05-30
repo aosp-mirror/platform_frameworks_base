@@ -3239,7 +3239,7 @@ public final class Settings {
             PackageManagerService.ScanPartition partition =
                     PackageManagerService.SYSTEM_PARTITIONS.get(index);
 
-            File preferredDir = new File(partition.folder, "etc/preferred-apps");
+            File preferredDir = new File(partition.getFolder(), "etc/preferred-apps");
             if (!preferredDir.exists() || !preferredDir.isDirectory()) {
                 continue;
             }

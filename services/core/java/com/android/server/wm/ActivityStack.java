@@ -3213,7 +3213,7 @@ class ActivityStack extends Task {
     }
 
     private void updateSurfaceBounds() {
-        updateSurfaceSize(getPendingTransaction());
+        updateSurfaceSize(getSyncTransaction());
         updateSurfacePosition();
         scheduleAnimation();
     }

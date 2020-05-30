@@ -230,8 +230,12 @@ public class BubbleFlyoutView extends FrameLayout {
             mSenderText.setTranslationX(0);
         }
 
+        final int maxTextViewWidth =
+                (int) (parentWidth * FLYOUT_MAX_WIDTH_PERCENT) - mFlyoutPadding * 2;
+
         // Name visibility
         if (!TextUtils.isEmpty(flyoutMessage.senderName)) {
+            mSenderText.setMaxWidth(maxTextViewWidth);
             mSenderText.setText(flyoutMessage.senderName);
             mSenderText.setVisibility(VISIBLE);
         } else {
@@ -248,8 +252,7 @@ public class BubbleFlyoutView extends FrameLayout {
         // Set the flyout TextView's max width in terms of percent, and then subtract out the
         // padding so that the entire flyout view will be the desired width (rather than the
         // TextView being the desired width + extra padding).
-        mMessageText.setMaxWidth(
-                (int) (parentWidth * FLYOUT_MAX_WIDTH_PERCENT) - mFlyoutPadding * 2);
+        mMessageText.setMaxWidth(maxTextViewWidth);
         mMessageText.setText(flyoutMessage.message);
 
         // Wait for the TextView to lay out so we know its line count.

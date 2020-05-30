@@ -481,7 +481,7 @@ public final class RenderNode {
      * @param outMatrix The matrix to store the transform of the RenderNode
      */
     public void getMatrix(@NonNull Matrix outMatrix) {
-        nGetTransformMatrix(mNativeRenderNode, outMatrix.native_instance);
+        nGetTransformMatrix(mNativeRenderNode, outMatrix.ni());
     }
 
     /**
@@ -491,7 +491,7 @@ public final class RenderNode {
      * @param outMatrix The matrix to store the inverse transform of the RenderNode
      */
     public void getInverseMatrix(@NonNull Matrix outMatrix) {
-        nGetInverseTransformMatrix(mNativeRenderNode, outMatrix.native_instance);
+        nGetInverseTransformMatrix(mNativeRenderNode, outMatrix.ni());
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -797,7 +797,7 @@ public final class RenderNode {
      * @hide TODO Do we want this?
      */
     public boolean setStaticMatrix(Matrix matrix) {
-        return nSetStaticMatrix(mNativeRenderNode, matrix.native_instance);
+        return nSetStaticMatrix(mNativeRenderNode, matrix.ni());
     }
 
     /**
@@ -813,7 +813,7 @@ public final class RenderNode {
      */
     public boolean setAnimationMatrix(@Nullable Matrix matrix) {
         return nSetAnimationMatrix(mNativeRenderNode,
-                (matrix != null) ? matrix.native_instance : 0);
+                (matrix != null) ? matrix.ni() : 0);
     }
 
     /**
@@ -830,7 +830,7 @@ public final class RenderNode {
     @Nullable
     public Matrix getAnimationMatrix() {
         Matrix output = new Matrix();
-        if (nGetAnimationMatrix(mNativeRenderNode, output.native_instance)) {
+        if (nGetAnimationMatrix(mNativeRenderNode, output.ni())) {
             return output;
         } else {
             return null;
