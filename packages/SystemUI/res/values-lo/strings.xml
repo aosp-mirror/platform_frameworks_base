@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"ສະຖານທີ່ກຳນົດໂດຍ GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"ການຮ້ອງຂໍສະຖານທີ່ທີ່ເຮັດວຽກຢູ່"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"ປິດການເຮັດວຽກຂອງເຊັນເຊີແລ້ວ"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"ເປີດໃຊ້ມີເດຍຢູ່"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"ລຶບການແຈ້ງເຕືອນທັງໝົດ."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ເປີດນຳໃຊ້"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ປິດນຳໃຊ້"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ສະຫຼັບອຸປະກອນສົ່ງສຽງອອກ"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"ປັກ​ໝຸດໜ້າ​ຈໍ​ແລ້ວ"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ແອັບຖືກປັກໝຸດແລ້ວ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ນີ້ຈະເຮັດໃຫ້ມັນຢູ່ໃນມຸມມອງຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ປັດຂຶ້ນຄ້າງໄວ້ເພື່ອເຊົາປັກໝຸດ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"ເພື່ອຍົກເລີກການປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"ເພື່ອຍົກເລີກການປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"ເພື່ອເຊົາປັກໝຸດໜ້າຈໍນີ້, ໃຫ້ປັດຂຶ້ນຄ້າງໄວ້"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ອາດສາມາດເຂົ້າເຖິງຂໍ້ມູນສ່ວນຕົວໄດ້ (ເຊັ່ນ: ລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ເນື້ອຫາອີເມວ)"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ແອັບທີ່ປັກໝຸດໄວ້ອາດເປີດແອັບອື່ນ."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ເພື່ອຍົກເລີກການປັກໝຸດແອັບນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ເພື່ອຍົກເລີກການປັກໝຸດແອັບນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ເພື່ອເຊົາປັກໝຸດແອັບນີ້, ໃຫ້ປັດຂຶ້ນຄ້າງໄວ້"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ບໍ່, ຂອບໃຈ"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"ປັກໝຸດໜ້າຈໍແລ້ວ"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"ຍົກເລີກການປັກໝຸດໜ້າຈໍແລ້ວ"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ປັກໝຸດແອັບແລ້ວ"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ເຊົາປັກໝຸດແອັບແລ້ວ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"ເຊື່ອງ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ຫຼື​ບໍ່?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"​ມັນ​ຈະ​ສະ​ແດງ​ຄືນ​ໃໝ່​ເມື່ອ​ທ່ານ​ເປີດ​ນຳ​ໃຊ້​ມັນ​ໃນ​ການ​ຕັ້ງ​ຄ່າ​ຄັ້ງ​ຕໍ່​ໄປ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ເຊື່ອງ"</string>

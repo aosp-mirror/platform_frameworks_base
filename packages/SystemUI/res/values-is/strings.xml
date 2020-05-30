@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Staðsetning valin með GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Staðsetningarbeiðnir virkar"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Slökkt á skynjurum valið"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"Efni er virkt"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Hreinsa allar tilkynningar."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"virkja"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"slökkva"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Skipta um úttakstæki"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"Skjárinn er festur"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Forrit er fest"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Þetta heldur þessu opnu þangað til þú losar það. Haltu fingri á „Til baka“ og „Yfirlit“ til að losa."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Þetta heldur þessu opnu þangað til það er losað. Haltu inni bakkhnappinum og heimahnappinum til að losa."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Þetta heldur þessu opnu þangað til það er losað. Strjúktu upp og haltu inni til að losa."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Þetta heldur þessu opnu þangað til þú losar það. Haltu fingri á „Yfirlit“ til að losa."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Þetta heldur þessu opnu þangað til það er losað. Haltu heimahnappinum inni til að losa."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Til að losa þessa skjámynd skaltu halda inni bakkhnappinum og yfirlitshnappinum"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Til að losa þessa skjámynd skaltu halda inni bakkhnappinum og heimahnappinum"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Til að losa þennan skjá skaltu strjúka upp og halda"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persónuupplýsingar gætu verið aðgengilegar (til dæmis tengiliðir og innihald tölvupósts)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Fest forrit getur opnað önnur forrit."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Til að losa þetta forrit skaltu halda inni bakkhnappinum og yfirlitshnappinum"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Til að losa þetta forrit skaltu halda inni bakkhnappinum og heimahnappinum"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Til að losa þetta forrit skaltu strjúka upp og halda"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ég skil"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nei, takk"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Skjámynd fest"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Skjámynd losuð"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Forrit fest"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Forrit losað"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Fela <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Þetta birtist aftur næst þegar þú kveikir á því í stillingunum."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Fela"</string>
