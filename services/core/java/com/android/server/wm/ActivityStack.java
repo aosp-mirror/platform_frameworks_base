@@ -156,6 +156,7 @@ import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.am.AppTimeTracker;
+import com.android.server.uri.NeededUriGrants;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -2353,8 +2354,8 @@ class ActivityStack extends Task {
         return false;
     }
 
-    boolean navigateUpTo(ActivityRecord srec, Intent destIntent, int resultCode,
-            Intent resultData) {
+    boolean navigateUpTo(ActivityRecord srec, Intent destIntent, NeededUriGrants destGrants,
+            int resultCode, Intent resultData, NeededUriGrants resultGrants) {
         if (!srec.attachedToProcess()) {
             // Nothing to do if the caller is not attached, because this method should be called
             // from an alive activity.
@@ -2405,12 +2406,14 @@ class ActivityStack extends Task {
         resultCodeHolder[0] = resultCode;
         final Intent[] resultDataHolder = new Intent[1];
         resultDataHolder[0] = resultData;
+        final NeededUriGrants[] resultGrantsHolder = new NeededUriGrants[1];
+        resultGrantsHolder[0] = resultGrants;
         final ActivityRecord finalParent = parent;
         task.forAllActivities((ar) -> {
             if (ar == finalParent) return true;
 
-            ar.finishIfPossible(
-                    resultCodeHolder[0], resultDataHolder[0], "navigate-up", true /* oomAdj */);
+            ar.finishIfPossible(resultCodeHolder[0], resultDataHolder[0], resultGrantsHolder[0],
+                    "navigate-up", true /* oomAdj */);
             // Only return the supplied result for the first activity finished
             resultCodeHolder[0] = Activity.RESULT_CANCELED;
             resultDataHolder[0] = null;
@@ -2427,7 +2430,7 @@ class ActivityStack extends Task {
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TASK ||
                     parentLaunchMode == ActivityInfo.LAUNCH_SINGLE_TOP ||
                     (destIntentFlags & Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) {
-                parent.deliverNewIntentLocked(callingUid, destIntent, srec.packageName);
+                parent.deliverNewIntentLocked(callingUid, destIntent, destGrants, srec.packageName);
             } else {
                 try {
                     ActivityInfo aInfo = AppGlobals.getPackageManager().getActivityInfo(
@@ -2451,7 +2454,8 @@ class ActivityStack extends Task {
                 } catch (RemoteException e) {
                     foundParentInTask = false;
                 }
-                parent.finishIfPossible(resultCode, resultData, "navigate-top", true /* oomAdj */);
+                parent.finishIfPossible(resultCode, resultData, resultGrants,
+                        "navigate-top", true /* oomAdj */);
             }
         }
         Binder.restoreCallingIdentity(origId);

@@ -1281,11 +1281,13 @@ public class ActivityStackTests extends ActivityTestsBase {
         secondActivity.app.setThread(null);
         // This should do nothing from a non-attached caller.
         assertFalse(mStack.navigateUpTo(secondActivity /* source record */,
-                firstActivity.intent /* destIntent */, 0 /* resultCode */, null /* resultData */));
+                firstActivity.intent /* destIntent */, null /* destGrants */,
+                0 /* resultCode */, null /* resultData */, null /* resultGrants */));
 
         secondActivity.app.setThread(thread);
         assertTrue(mStack.navigateUpTo(secondActivity /* source record */,
-                firstActivity.intent /* destIntent */, 0 /* resultCode */, null /* resultData */));
+                firstActivity.intent /* destIntent */, null /* destGrants */,
+                0 /* resultCode */, null /* resultData */, null /* resultGrants */));
         // The firstActivity uses default launch mode, so the activities between it and itself will
         // be finished.
         assertTrue(secondActivity.finishing);
