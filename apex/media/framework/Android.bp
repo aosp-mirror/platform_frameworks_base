@@ -83,98 +83,31 @@ filegroup {
         "java/android/media/MediaParser.java"
     ],
     path: "java",
-}
+}	
 
-stubs_defaults {
-    name: "framework-media-stubs-srcs-defaults",
-    srcs: [ ":updatable-media-srcs" ],
-    libs: [ "framework_media_annotation" ],
-    aidl: {
-        // TODO(b/135922046) remove this
-        include_dirs: ["frameworks/base/core/java"],
-    },
-    dist: { dest: "framework-media.txt" },
-}
+java_sdk_library {
+    name: "framework-media",
+    defaults: ["framework-module-defaults"],
 
-droidstubs {
-    name: "framework-media-stubs-srcs-publicapi",
-    defaults: [
-        "framework-media-stubs-srcs-defaults",
-        "framework-module-stubs-defaults-publicapi",
+    // This is only used to define the APIs for updatable-media.
+    api_only: true,
+
+    srcs: [
+        ":updatable-media-srcs",
     ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-media.api.public.latest",
-            removed_api_file: ":framework-media-removed.api.public.latest",
-        },
-        api_lint: {
-            new_since: ":framework-media.api.public.latest",
-        },
-    },
-}
 
-droidstubs {
-    name: "framework-media-stubs-srcs-systemapi",
-    defaults: [
-        "framework-media-stubs-srcs-defaults",
-        "framework-module-stubs-defaults-systemapi",
+    // TODO(b/155480189) - Remove naming_scheme once references have been resolved.
+    // Temporary java_sdk_library component naming scheme to use to ease the transition from separate
+    // modules to java_sdk_library.
+    naming_scheme: "framework-modules",
+
+    libs: [
+        "framework_media_annotation",
     ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-media.api.system.latest",
-            removed_api_file: ":framework-media-removed.api.system.latest",
-        },
-        api_lint: {
-            new_since: ":framework-media.api.system.latest",
-        },
-    },
+
+    visibility: ["//frameworks/av/apex:__subpackages__"],
 }
 
-droidstubs {
-    name: "framework-media-api-module_libs_api",
-    defaults: [
-        "framework-media-stubs-srcs-defaults",
-        "framework-module-api-defaults-module_libs_api",
-    ],
-    check_api: {
-        last_released: {
-            api_file: ":framework-media.api.module-lib.latest",
-            removed_api_file: ":framework-media-removed.api.module-lib.latest",
-        },
-        api_lint: {
-            new_since: ":framework-media.api.module-lib.latest",
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-media-stubs-srcs-module_libs_api",
-    defaults: [
-        "framework-media-stubs-srcs-defaults",
-        "framework-module-stubs-defaults-module_libs_api",
-    ],
-}
-
-java_library {
-    name: "framework-media-stubs-publicapi",
-    srcs: [":framework-media-stubs-srcs-publicapi"],
-    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
-    dist: { dest: "framework-media.jar" },
-}
-
-java_library {
-    name: "framework-media-stubs-systemapi",
-    srcs: [":framework-media-stubs-srcs-systemapi"],
-    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
-    dist: { dest: "framework-media.jar" },
-}
-
-java_library {
-    name: "framework-media-stubs-module_libs_api",
-    srcs: [":framework-media-stubs-srcs-module_libs_api"],
-    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
-    dist: { dest: "framework-media.jar" },
-}
 
 java_library {
     name: "framework_media_annotation",
