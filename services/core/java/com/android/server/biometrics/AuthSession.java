@@ -51,8 +51,9 @@ import java.util.Random;
  * {@link android.hardware.biometrics.BiometricPrompt}, as well as all of the necessary
  * state information for such a session.
  */
-final class AuthSession implements IBinder.DeathRecipient {
+public final class AuthSession implements IBinder.DeathRecipient {
     private static final String TAG = "BiometricService/AuthSession";
+    private static final boolean DEBUG = false;
 
     /**
      * Authentication either just called and we have not transitioned to the CALLED state, or
@@ -554,8 +555,8 @@ final class AuthSession implements IBinder.DeathRecipient {
             // should have the first half (first acquired -> authenticated).
             final long latency = System.currentTimeMillis() - mAuthenticatedTimeMs;
 
-            if (LoggableMonitor.DEBUG) {
-                Slog.v(LoggableMonitor.TAG, "Confirmed! Modality: " + statsModality()
+            if (DEBUG) {
+                Slog.v(TAG, "Confirmed! Modality: " + statsModality()
                         + ", User: " + mUserId
                         + ", IsCrypto: " + isCrypto()
                         + ", Client: " + BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT
@@ -581,8 +582,8 @@ final class AuthSession implements IBinder.DeathRecipient {
                     : reason == BiometricPrompt.DISMISSED_REASON_USER_CANCEL
                             ? BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED
                             : 0;
-            if (LoggableMonitor.DEBUG) {
-                Slog.v(LoggableMonitor.TAG, "Dismissed! Modality: " + statsModality()
+            if (DEBUG) {
+                Slog.v(TAG, "Dismissed! Modality: " + statsModality()
                         + ", User: " + mUserId
                         + ", IsCrypto: " + isCrypto()
                         + ", Action: " + BiometricsProtoEnums.ACTION_AUTHENTICATE

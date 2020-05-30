@@ -49,9 +49,9 @@ import android.util.Slog;
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.SystemService;
-import com.android.server.biometrics.face.FaceAuthenticator;
-import com.android.server.biometrics.fingerprint.FingerprintAuthenticator;
-import com.android.server.biometrics.iris.IrisAuthenticator;
+import com.android.server.biometrics.sensors.face.FaceAuthenticator;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintAuthenticator;
+import com.android.server.biometrics.sensors.iris.IrisAuthenticator;
 
 /**
  * System service that provides an interface for authenticating with biometrics and

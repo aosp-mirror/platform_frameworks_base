@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics;
+package com.android.server.biometrics.sensors;
 
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
@@ -24,6 +24,7 @@ import android.hardware.fingerprint.FingerprintManager;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
+import com.android.server.biometrics.Utils;
 
 /**
  * Abstract class that adds logging functionality to the ClientMonitor classes.
