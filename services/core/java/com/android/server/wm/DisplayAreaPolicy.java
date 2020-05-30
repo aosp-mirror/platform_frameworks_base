@@ -124,6 +124,9 @@ public abstract class DisplayAreaPolicy {
                             "WindowedMagnification", FEATURE_WINDOWED_MAGNIFICATION)
                             .upTo(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
                             .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY)
+                            // Make the DA dimmable so that the magnify window also mirrors the dim
+                            // layer
+                            .setNewDisplayAreaSupplier(DisplayArea.Dimmable::new)
                             .build())
                     .addFeature(new DisplayAreaPolicyBuilder.Feature.Builder(wmService.mPolicy,
                             "OneHanded", FEATURE_ONE_HANDED)
