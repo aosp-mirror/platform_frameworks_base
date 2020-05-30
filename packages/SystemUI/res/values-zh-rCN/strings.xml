@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"已通过GPS确定位置"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"应用发出了有效位置信息请求"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"传感器已关闭"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"正在播放媒体内容"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"清除所有通知。"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,29 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"启用"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切换输出设备"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"已固定屏幕"</string>
+    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
+    <skip />
     <string name="screen_pinning_description" msgid="8699395373875667743">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“主屏幕”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"这会使此屏幕固定显示，直到您取消固定为止。向上滑动并按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“主屏幕”即可取消固定屏幕。"</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"要取消固定此屏幕，请触摸并按住“返回”和“概览”按钮"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"要取消固定此屏幕，请触摸并按住“返回”和“主屏幕”按钮"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"要取消固定此屏幕，请向上滑动并按住"</string>
+    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
+    <skip />
+    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3285785989665266984">"知道了"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"不用了"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"已固定屏幕"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"已取消固定屏幕"</string>
+    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"要隐藏“<xliff:g id="TILE_LABEL">%1$s</xliff:g>”吗？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"下次在设置中将其开启后，此快捷设置条目将会重新显示。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"隐藏"</string>

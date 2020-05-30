@@ -738,7 +738,7 @@ public class TextUtils {
     /** @hide */
     public static final int ACCESSIBILITY_REPLACEMENT_SPAN = 29;
     /** @hide */
-    public static final int LAST_SPAN = LINE_HEIGHT_SPAN;
+    public static final int LAST_SPAN = ACCESSIBILITY_REPLACEMENT_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes

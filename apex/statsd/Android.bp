@@ -62,8 +62,8 @@ prebuilt_etc {
 cc_library_shared {
     name: "libstats_jni",
     srcs: ["jni/**/*.cpp"],
+    header_libs: ["libnativehelper_header_only"],
     shared_libs: [
-        "libnativehelper", // Has stable abi - should not be copied into apex.
         "liblog",  // Has a stable abi - should not be copied into apex.
         "libstatssocket",
     ],
