@@ -34,6 +34,7 @@ import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.Source;
 import android.graphics.Matrix;
 import android.graphics.Rect;
+import android.media.MediaMetadataRetriever.BitmapParams;
 import android.net.Uri;
 import android.os.Build;
 import android.os.CancellationSignal;
@@ -365,6 +366,9 @@ public class ThumbnailUtils {
                 return ImageDecoder.decodeBitmap(ImageDecoder.createSource(raw), resizer);
             }
 
+            final BitmapParams params = new BitmapParams();
+            params.setPreferredConfig(Bitmap.Config.ARGB_8888);
+
             final int width = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_WIDTH));
             final int height = Integer.parseInt(mmr.extractMetadata(METADATA_KEY_VIDEO_HEIGHT));
             // Fall back to middle of video
@@ -376,11 +380,11 @@ public class ThumbnailUtils {
             // return a frame without up-scaling it
             if (size.getWidth() > width && size.getHeight() > height) {
                 return Objects.requireNonNull(
-                        mmr.getFrameAtTime(thumbnailTimeUs, OPTION_CLOSEST_SYNC));
+                        mmr.getFrameAtTime(thumbnailTimeUs, OPTION_CLOSEST_SYNC, params));
             } else {
                 return Objects.requireNonNull(
                         mmr.getScaledFrameAtTime(thumbnailTimeUs, OPTION_CLOSEST_SYNC,
-                        size.getWidth(), size.getHeight()));
+                        size.getWidth(), size.getHeight(), params));
             }
         } catch (RuntimeException e) {
             throw new IOException("Failed to create thumbnail", e);
