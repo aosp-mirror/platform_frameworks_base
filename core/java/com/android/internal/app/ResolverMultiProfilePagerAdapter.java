@@ -18,6 +18,7 @@ package com.android.internal.app;
 
 import android.annotation.Nullable;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.UserHandle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -63,6 +64,24 @@ public class ResolverMultiProfilePagerAdapter extends AbstractMultiProfilePagerA
                 createProfileDescriptor(workAdapter)
         };
         mShouldShowNoCrossProfileIntentsEmptyState = shouldShowNoCrossProfileIntentsEmptyState;
+    }
+
+    @Override
+    void updateAfterConfigChange() {
+        super.updateAfterConfigChange();
+        for (ResolverProfileDescriptor descriptor : mItems) {
+            View emptyStateCont =
+                    descriptor.rootView.findViewById(R.id.resolver_empty_state_container);
+            Resources resources = getContext().getResources();
+            emptyStateCont.setPadding(
+                    emptyStateCont.getPaddingLeft(),
+                    resources.getDimensionPixelSize(
+                            R.dimen.resolver_empty_state_container_padding_top),
+                    emptyStateCont.getPaddingRight(),
+                    resources.getDimensionPixelSize(
+                            R.dimen.resolver_empty_state_container_padding_bottom));
+
+        }
     }
 
     private ResolverProfileDescriptor createProfileDescriptor(

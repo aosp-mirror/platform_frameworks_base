@@ -44,7 +44,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
-import com.android.systemui.pip.PipSurfaceTransactionHelper;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
@@ -52,7 +51,6 @@ import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.PinnedStackListenerForwarder.PinnedStackListener;
 import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.util.DeviceConfigProxy;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.wm.DisplayChangeController;
@@ -86,6 +84,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private PipTouchHandler mTouchHandler;
     private PipAppOpsListener mAppOpsListener;
     private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
+    private boolean mIsInFixedRotation;
 
     protected PipTaskOrganizer mPipTaskOrganizer;
 
@@ -104,14 +103,32 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                     mPipTaskOrganizer.getLastReportedBounds(), mTmpInsetBounds);
 
             // The bounds are being applied to a specific snap fraction, so reset any known offsets
-            // for the previous orientation before updating the movement bounds
-            mPipBoundsHandler.setShelfHeight(false , 0);
-            mPipBoundsHandler.onImeVisibilityChanged(false, 0);
-            mTouchHandler.onShelfVisibilityChanged(false, 0);
-            mTouchHandler.onImeVisibilityChanged(false, 0);
+            // for the previous orientation before updating the movement bounds.
+            // We perform the resets if and only if this callback is due to screen rotation but
+            // not during the fixed rotation. In fixed rotation case, app is about to enter PiP
+            // and we need the offsets preserved to calculate the destination bounds.
+            if (!mIsInFixedRotation) {
+                mPipBoundsHandler.setShelfHeight(false , 0);
+                mPipBoundsHandler.onImeVisibilityChanged(false, 0);
+                mTouchHandler.onShelfVisibilityChanged(false, 0);
+                mTouchHandler.onImeVisibilityChanged(false, 0);
+            }
 
             updateMovementBounds(mTmpNormalBounds, true /* fromRotation */,
                     false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
+        }
+    };
+
+    private DisplayController.OnDisplaysChangedListener mFixedRotationListener =
+            new DisplayController.OnDisplaysChangedListener() {
+        @Override
+        public void onFixedRotationStarted(int displayId, int newRotation) {
+            mIsInFixedRotation = true;
+        }
+
+        @Override
+        public void onFixedRotationFinished(int displayId) {
+            mIsInFixedRotation = false;
         }
     };
 
@@ -212,9 +229,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             DeviceConfigProxy deviceConfig,
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
-            PipTaskOrganizer pipTaskOrganizer,
-            PipSurfaceTransactionHelper surfaceTransactionHelper,
-            Divider divider) {
+            PipTaskOrganizer pipTaskOrganizer) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -239,6 +254,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);
+        displayController.addDisplayWindowListener(mFixedRotationListener);
 
         // Ensure that we have the display info in case we get calls to update the bounds before the
         // listener calls back

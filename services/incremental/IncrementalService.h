@@ -35,6 +35,7 @@
 #include <limits>
 #include <map>
 #include <mutex>
+#include <set>
 #include <span>
 #include <string>
 #include <string_view>
@@ -186,17 +187,12 @@ private:
 
         void onDump(int fd);
 
-        MountId id() const { return mId; }
+        MountId id() const { return mId.load(std::memory_order_relaxed); }
         const content::pm::DataLoaderParamsParcel& params() const { return mParams; }
 
     private:
         binder::Status onStatusChanged(MountId mount, int newStatus) final;
 
-        void registerForPendingReads();
-        void unregisterFromPendingReads();
-        int onPendingReads();
-
-        bool isValid() const { return mId != kInvalidStorageId; }
         sp<content::pm::IDataLoader> getDataLoader();
 
         bool bind();
@@ -208,21 +204,27 @@ private:
         void setTargetStatusLocked(int status);
 
         bool fsmStep();
+        bool fsmStep(int currentStatus, int targetStatus);
 
-        // Watching for pending reads.
-        void healthStatusOk();
-        // Pending reads detected, waiting for Xsecs to confirm blocked state.
-        void healthStatusReadsPending();
-        // There are reads pending for X+secs, waiting for additional Ysecs to confirm unhealthy
-        // state.
-        void healthStatusBlocked();
-        // There are reads pending for X+Ysecs, marking storage as unhealthy.
-        void healthStatusUnhealthy();
+        void onHealthStatus(StorageHealthListener healthListener, int healthStatus);
+        void updateHealthStatus(bool baseline = false);
+
+        bool isValid() const { return id() != kInvalidStorageId; }
+
+        bool isHealthParamsValid() const;
+
+        const incfs::UniqueControl& initializeHealthControl();
+        void resetHealthControl();
+
+        BootClockTsUs getOldestPendingReadTs();
+
+        void registerForPendingReads();
+        void unregisterFromPendingReads();
 
         IncrementalService& mService;
 
         std::mutex mMutex;
-        MountId mId = kInvalidStorageId;
+        std::atomic<MountId> mId = kInvalidStorageId;
         content::pm::DataLoaderParamsParcel mParams;
         content::pm::FileSystemControlParcel mControl;
         DataLoaderStatusListener mStatusListener;
@@ -235,6 +237,11 @@ private:
 
         std::string mHealthPath;
         incfs::UniqueControl mHealthControl;
+        struct {
+            TimePoint userTs;
+            BootClockTsUs kernelTsUs;
+        } mHealthBase = {TimePoint::max(), kMaxBootClockTsUs};
+        StorageHealthCheckParams mHealthCheckParams;
     };
     using DataLoaderStubPtr = sp<DataLoaderStub>;
 
@@ -331,12 +338,18 @@ private:
     bool unregisterAppOpsCallback(const std::string& packageName);
     void onAppOpChanged(const std::string& packageName);
 
+    using Job = std::function<void()>;
+
     void runJobProcessing();
     void extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle zipFile, ZipEntry& entry,
                         const incfs::FileId& libFileId, std::string_view targetLibPath,
                         Clock::time_point scheduledTs);
 
     void runCmdLooper();
+
+    void addTimedJob(MountId id, TimePoint when, Job what);
+    void removeTimedJobs(MountId id);
+    void runTimers();
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
@@ -360,7 +373,6 @@ private:
 
     std::atomic_bool mRunning{true};
 
-    using Job = std::function<void()>;
     std::unordered_map<MountId, std::vector<Job>> mJobQueue;
     MountId mPendingJobsMount = kInvalidStorageId;
     std::condition_variable mJobCondition;
@@ -368,6 +380,19 @@ private:
     std::thread mJobProcessor;
 
     std::thread mCmdLooperThread;
+
+    struct TimedJob {
+        MountId id;
+        TimePoint when;
+        Job what;
+        friend bool operator<(const TimedJob& lhs, const TimedJob& rhs) {
+            return lhs.when < rhs.when;
+        }
+    };
+    std::set<TimedJob> mTimedJobs;
+    std::condition_variable mTimerCondition;
+    std::mutex mTimerMutex;
+    std::thread mTimerThread;
 };
 
 } // namespace android::incremental

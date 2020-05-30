@@ -27,8 +27,8 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Xml;
 
-import com.android.internal.util.XmlUtils;
 import com.android.internal.content.om.OverlayScanner.ParsedOverlayInfo;
+import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 
@@ -154,7 +154,7 @@ final class OverlayConfigParser {
                     return POLICY_PRODUCT;
                 default:
                     throw new IllegalStateException("Unable to determine policy for "
-                            + partition.folder);
+                            + partition.getFolder());
             }
         }
     }

@@ -141,6 +141,36 @@ public final class WindowContainerTransaction implements Parcelable {
     }
 
     /**
+     * Like {@link #setBoundsChangeTransaction} but instead queues up a setPosition/WindowCrop
+     * on a container's surface control. This is useful when a boundsChangeTransaction needs to be
+     * queued up on a Task that won't be organized until the end of this window-container
+     * transaction.
+     *
+     * This requires that, at the end of this transaction, `task` will be organized; otherwise
+     * the server will throw an IllegalArgumentException.
+     *
+     * WARNING: Use this carefully. Whatever is set here should match the expected bounds after
+     *          the transaction completes since it will likely be replaced by it. This call is
+     *          intended to pre-emptively set bounds on a surface in sync with a buffer when
+     *          otherwise the new bounds and the new buffer would update on different frames.
+     *
+     * TODO(b/134365562): remove once TaskOrg drives full-screen or BLAST is enabled.
+     *
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction setBoundsChangeTransaction(
+            @NonNull WindowContainerToken task, @NonNull Rect surfaceBounds) {
+        Change chg = getOrCreateChange(task.asBinder());
+        if (chg.mBoundsChangeSurfaceBounds == null) {
+            chg.mBoundsChangeSurfaceBounds = new Rect();
+        }
+        chg.mBoundsChangeSurfaceBounds.set(surfaceBounds);
+        chg.mChangeMask |= Change.CHANGE_BOUNDS_TRANSACTION_RECT;
+        return this;
+    }
+
+    /**
      * Set the windowing mode of children of a given root task, without changing
      * the windowing mode of the Task itself. This can be used during transitions
      * for example to make the activity render it's fullscreen configuration
@@ -287,6 +317,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int CHANGE_BOUNDS_TRANSACTION = 1 << 1;
         public static final int CHANGE_PIP_CALLBACK = 1 << 2;
         public static final int CHANGE_HIDDEN = 1 << 3;
+        public static final int CHANGE_BOUNDS_TRANSACTION_RECT = 1 << 4;
 
         private final Configuration mConfiguration = new Configuration();
         private boolean mFocusable = true;
@@ -297,6 +328,7 @@ public final class WindowContainerTransaction implements Parcelable {
 
         private Rect mPinnedBounds = null;
         private SurfaceControl.Transaction mBoundsChangeTransaction = null;
+        private Rect mBoundsChangeSurfaceBounds = null;
 
         private int mActivityWindowingMode = -1;
         private int mWindowingMode = -1;
@@ -317,6 +349,10 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & Change.CHANGE_BOUNDS_TRANSACTION) != 0) {
                 mBoundsChangeTransaction =
                     SurfaceControl.Transaction.CREATOR.createFromParcel(in);
+            }
+            if ((mChangeMask & Change.CHANGE_BOUNDS_TRANSACTION_RECT) != 0) {
+                mBoundsChangeSurfaceBounds = new Rect();
+                mBoundsChangeSurfaceBounds.readFromParcel(in);
             }
 
             mWindowingMode = in.readInt();
@@ -377,6 +413,10 @@ public final class WindowContainerTransaction implements Parcelable {
             return mBoundsChangeTransaction;
         }
 
+        public Rect getBoundsChangeSurfaceBounds() {
+            return mBoundsChangeSurfaceBounds;
+        }
+
         @Override
         public String toString() {
             final boolean changesBounds =
@@ -408,6 +448,9 @@ public final class WindowContainerTransaction implements Parcelable {
             if ((mChangeMask & CHANGE_FOCUSABLE) != 0) {
                 sb.append("focusable:" + mFocusable + ",");
             }
+            if (mBoundsChangeTransaction != null) {
+                sb.append("hasBoundsTransaction,");
+            }
             sb.append("}");
             return sb.toString();
         }
@@ -426,6 +469,9 @@ public final class WindowContainerTransaction implements Parcelable {
             }
             if (mBoundsChangeTransaction != null) {
                 mBoundsChangeTransaction.writeToParcel(dest, flags);
+            }
+            if (mBoundsChangeSurfaceBounds != null) {
+                mBoundsChangeSurfaceBounds.writeToParcel(dest, flags);
             }
 
             dest.writeInt(mWindowingMode);

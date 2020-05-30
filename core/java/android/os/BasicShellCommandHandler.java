@@ -104,7 +104,7 @@ public abstract class BasicShellCommandHandler {
             // go.
             PrintWriter eout = getErrPrintWriter();
             eout.println();
-            eout.println("Exception occurred while executing: " + e.getMessage());
+            eout.println("Exception occurred while executing '" + mCmd + "':");
             e.printStackTrace(eout);
         } finally {
             if (DEBUG) Log.d(TAG, "Flushing output streams on " + mTarget);

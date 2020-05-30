@@ -564,10 +564,10 @@
     <!-- Respect drawable/rounded.xml intrinsic size for multiple radius corner path customization -->
     <bool name="config_roundedCornerMultipleRadius">false</bool>
 
-    <!-- Controls can query a preferred application for limited number of suggested controls.
-         This config value should contain the package name of that preferred application.
+    <!-- Controls can query 2 preferred applications for limited number of suggested controls.
+         This config value should contain a list of package names of thoses preferred applications.
     -->
-    <string translatable="false" name="config_controlsPreferredPackage"></string>
+    <string-array translatable="false" name="config_controlsPreferredPackages" />
 
     <!-- Max number of columns for quick controls area -->
     <integer name="controls_max_columns">2</integer>

@@ -3961,6 +3961,7 @@
   <java-symbol type="id" name="resolver_button_bar_divider" />
   <java-symbol type="id" name="resolver_empty_state_container" />
   <java-symbol type="id" name="button_bar_container" />
+  <java-symbol type="id" name="title_container" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps" />
   <java-symbol type="string" name="resolver_cant_share_with_work_apps_explanation" />
   <java-symbol type="string" name="resolver_cant_share_with_personal_apps" />
@@ -3984,6 +3985,9 @@
   <java-symbol type="dimen" name="resolver_max_collapsed_height_with_default_with_tabs" />
   <java-symbol type="bool" name="resolver_landscape_phone" />
   <java-symbol type="dimen" name="resolver_tab_text_size" />
+  <java-symbol type="dimen" name="resolver_title_padding_bottom" />
+  <java-symbol type="dimen" name="resolver_empty_state_container_padding_top" />
+  <java-symbol type="dimen" name="resolver_empty_state_container_padding_bottom" />
 
   <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
   <java-symbol type="string" name="allow_while_in_use_permission_in_fgs" />

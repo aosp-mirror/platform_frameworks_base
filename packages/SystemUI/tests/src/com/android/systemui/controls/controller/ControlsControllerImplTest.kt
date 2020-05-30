@@ -89,6 +89,9 @@ class ControlsControllerImplTest : SysuiTestCase() {
     @Captor
     private lateinit var controlLoadCallbackCaptor:
             ArgumentCaptor<ControlsBindingController.LoadCallback>
+    @Captor
+    private lateinit var controlLoadCallbackCaptor2:
+            ArgumentCaptor<ControlsBindingController.LoadCallback>
 
     @Captor
     private lateinit var broadcastReceiverCaptor: ArgumentCaptor<BroadcastReceiver>
@@ -797,33 +800,63 @@ class ControlsControllerImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testSeedFavoritesForComponent() {
-        var succeeded = false
-        val control = statelessBuilderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure)
-            .build()
+    fun testSeedFavoritesForComponentsWithLimit() {
+        var responses = mutableListOf<SeedResponse>()
 
-        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
-            succeeded = accepted
+        val controls1 = mutableListOf<Control>()
+        for (i in 1..10) {
+            controls1.add(statelessBuilderFromInfo(ControlInfo("id1:$i", TEST_CONTROL_TITLE,
+                TEST_CONTROL_SUBTITLE, TEST_DEVICE_TYPE), "testStructure").build())
+        }
+        val controls2 = mutableListOf<Control>()
+        for (i in 1..3) {
+            controls2.add(statelessBuilderFromInfo(ControlInfo("id2:$i", TEST_CONTROL_TITLE,
+                TEST_CONTROL_SUBTITLE, TEST_DEVICE_TYPE), "testStructure2").build())
+        }
+        controller.seedFavoritesForComponents(listOf(TEST_COMPONENT, TEST_COMPONENT_2), Consumer {
+            resp -> responses.add(resp)
         })
 
         verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
                 capture(controlLoadCallbackCaptor))
-
-        controlLoadCallbackCaptor.value.accept(listOf(control))
-
+        controlLoadCallbackCaptor.value.accept(controls1)
         delayableExecutor.runAllReady()
 
-        assertEquals(listOf(TEST_STRUCTURE_INFO),
-            controller.getFavoritesForComponent(TEST_COMPONENT))
-        assertTrue(succeeded)
+        verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT_2),
+                capture(controlLoadCallbackCaptor2))
+        controlLoadCallbackCaptor2.value.accept(controls2)
+        delayableExecutor.runAllReady()
+
+        // COMPONENT 1
+        val structureInfo = controller.getFavoritesForComponent(TEST_COMPONENT)[0]
+        assertEquals(structureInfo.controls.size,
+            ControlsControllerImpl.SUGGESTED_CONTROLS_PER_STRUCTURE)
+
+        var i = 1
+        structureInfo.controls.forEach {
+            assertEquals(it.controlId, "id1:$i")
+            i++
+        }
+        assertEquals(SeedResponse(TEST_COMPONENT.packageName, true), responses[0])
+
+        // COMPONENT 2
+        val structureInfo2 = controller.getFavoritesForComponent(TEST_COMPONENT_2)[0]
+        assertEquals(structureInfo2.controls.size, 3)
+
+        i = 1
+        structureInfo2.controls.forEach {
+            assertEquals(it.controlId, "id2:$i")
+            i++
+        }
+        assertEquals(SeedResponse(TEST_COMPONENT.packageName, true), responses[1])
     }
 
     @Test
-    fun testSeedFavoritesForComponent_error() {
-        var succeeded = false
+    fun testSeedFavoritesForComponents_error() {
+        var response: SeedResponse? = null
 
-        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
-            succeeded = accepted
+        controller.seedFavoritesForComponents(listOf(TEST_COMPONENT), Consumer { resp ->
+            response = resp
         })
 
         verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
@@ -834,18 +867,18 @@ class ControlsControllerImplTest : SysuiTestCase() {
         delayableExecutor.runAllReady()
 
         assertEquals(listOf<StructureInfo>(), controller.getFavoritesForComponent(TEST_COMPONENT))
-        assertFalse(succeeded)
+        assertEquals(SeedResponse(TEST_COMPONENT.packageName, false), response)
     }
 
     @Test
-    fun testSeedFavoritesForComponent_inProgressCallback() {
-        var succeeded = false
+    fun testSeedFavoritesForComponents_inProgressCallback() {
+        var response: SeedResponse? = null
         var seeded = false
         val control = statelessBuilderFromInfo(TEST_CONTROL_INFO, TEST_STRUCTURE_INFO.structure)
             .build()
 
-        controller.seedFavoritesForComponent(TEST_COMPONENT, Consumer { accepted ->
-            succeeded = accepted
+        controller.seedFavoritesForComponents(listOf(TEST_COMPONENT), Consumer { resp ->
+            response = resp
         })
 
         verify(bindingController).bindAndLoadSuggested(eq(TEST_COMPONENT),
@@ -860,7 +893,7 @@ class ControlsControllerImplTest : SysuiTestCase() {
 
         assertEquals(listOf(TEST_STRUCTURE_INFO),
             controller.getFavoritesForComponent(TEST_COMPONENT))
-        assertTrue(succeeded)
+        assertEquals(SeedResponse(TEST_COMPONENT.packageName, true), response)
         assertTrue(seeded)
     }
 
