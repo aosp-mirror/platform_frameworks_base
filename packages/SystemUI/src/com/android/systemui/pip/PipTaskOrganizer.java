@@ -313,6 +313,11 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         }
         getUpdateHandler().post(() -> {
             try {
+                // Reset the task bounds first to ensure the activity configuration is reset as well
+                final WindowContainerTransaction wct = new WindowContainerTransaction();
+                wct.setBounds(mToken, null);
+                WindowOrganizer.applyTransaction(wct);
+
                 ActivityTaskManager.getService().removeStacksInWindowingModes(
                         new int[]{ WINDOWING_MODE_PINNED });
             } catch (RemoteException e) {
