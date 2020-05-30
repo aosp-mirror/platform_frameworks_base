@@ -118,6 +118,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.pm.InstantAppResolver;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.wm.ActivityMetricsLogger.LaunchingState;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
@@ -310,6 +311,7 @@ class ActivityStarter {
 
         IApplicationThread caller;
         Intent intent;
+        NeededUriGrants intentGrants;
         // A copy of the original requested intent, in case for ephemeral app launch.
         Intent ephemeralIntent;
         String resolvedType;
@@ -361,6 +363,7 @@ class ActivityStarter {
         void reset() {
             caller = null;
             intent = null;
+            intentGrants = null;
             ephemeralIntent = null;
             resolvedType = null;
             activityInfo = null;
@@ -400,6 +403,7 @@ class ActivityStarter {
         void set(Request request) {
             caller = request.caller;
             intent = request.intent;
+            intentGrants = request.intentGrants;
             ephemeralIntent = request.ephemeralIntent;
             resolvedType = request.resolvedType;
             activityInfo = request.activityInfo;
@@ -454,6 +458,20 @@ class ActivityStarter {
                 callingPid = callingUid = -1;
             }
 
+            // To determine the set of needed Uri permission grants, we need the
+            // "resolved" calling UID, where we try our best to identify the
+            // actual caller that is starting this activity
+            int resolvedCallingUid = callingUid;
+            if (caller != null) {
+                synchronized (supervisor.mService.mGlobalLock) {
+                    final WindowProcessController callerApp = supervisor.mService
+                            .getProcessController(caller);
+                    if (callerApp != null) {
+                        resolvedCallingUid = callerApp.mInfo.uid;
+                    }
+                }
+            }
+
             // Save a copy in case ephemeral needs it
             ephemeralIntent = new Intent(intent);
             // Don't modify the client's object!
@@ -503,6 +521,13 @@ class ActivityStarter {
             // Collect information about the target of the Intent.
             activityInfo = supervisor.resolveActivity(intent, resolveInfo, startFlags,
                     profilerInfo);
+
+            // Carefully collect grants without holding lock
+            if (activityInfo != null) {
+                intentGrants = supervisor.mService.mUgmInternal.checkGrantUriPermissionFromIntent(
+                        intent, resolvedCallingUid, activityInfo.applicationInfo.packageName,
+                        UserHandle.getUserId(activityInfo.applicationInfo.uid));
+            }
         }
     }
 
@@ -577,7 +602,8 @@ class ActivityStarter {
      */
     void startResolvedActivity(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
-            int startFlags, boolean doResume, ActivityOptions options, Task inTask) {
+            int startFlags, boolean doResume, ActivityOptions options, Task inTask,
+            NeededUriGrants intentGrants) {
         try {
             final LaunchingState launchingState = mSupervisor.getActivityMetricsLogger()
                     .notifyActivityLaunching(r.intent, r.resultTo);
@@ -586,7 +612,7 @@ class ActivityStarter {
             mLastStartActivityRecord = r;
             mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                     voiceInteractor, startFlags, doResume, options, inTask,
-                    false /* restrictedBgActivity */);
+                    false /* restrictedBgActivity */, intentGrants);
             mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(launchingState,
                     mLastStartActivityResult, mLastStartActivityRecord);
         } finally {
@@ -813,6 +839,7 @@ class ActivityStarter {
 
         final IApplicationThread caller = request.caller;
         Intent intent = request.intent;
+        NeededUriGrants intentGrants = request.intentGrants;
         String resolvedType = request.resolvedType;
         ActivityInfo aInfo = request.activityInfo;
         ResolveInfo rInfo = request.resolveInfo;
@@ -960,7 +987,7 @@ class ActivityStarter {
         if (err != START_SUCCESS) {
             if (resultRecord != null) {
                 resultRecord.sendResult(INVALID_UID, resultWho, requestCode, RESULT_CANCELED,
-                        null /* data */);
+                        null /* data */, null /* dataGrants */);
             }
             SafeActivityOptions.abort(options);
             return err;
@@ -1022,12 +1049,16 @@ class ActivityStarter {
             callingPid = mInterceptor.mCallingPid;
             callingUid = mInterceptor.mCallingUid;
             checkedOptions = mInterceptor.mActivityOptions;
+
+            // The interception target shouldn't get any permission grants
+            // intended for the original destination
+            intentGrants = null;
         }
 
         if (abort) {
             if (resultRecord != null) {
                 resultRecord.sendResult(INVALID_UID, resultWho, requestCode, RESULT_CANCELED,
-                        null /* data */);
+                        null /* data */, null /* dataGrants */);
             }
             // We pretend to the caller that it was really started, but they will just get a
             // cancel result.
@@ -1073,6 +1104,10 @@ class ActivityStarter {
                 }
                 intent = newIntent;
 
+                // The permissions review target shouldn't get any permission
+                // grants intended for the original destination
+                intentGrants = null;
+
                 resolvedType = null;
                 callingUid = realCallingUid;
                 callingPid = realCallingPid;
@@ -1105,6 +1140,10 @@ class ActivityStarter {
             callingUid = realCallingUid;
             callingPid = realCallingPid;
 
+            // The ephemeral installer shouldn't get any permission grants
+            // intended for the original destination
+            intentGrants = null;
+
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
 
@@ -1131,7 +1170,7 @@ class ActivityStarter {
                     realCallingPid, realCallingUid, "Activity start")) {
                 if (!(restrictedBgActivity && handleBackgroundActivityAbort(r))) {
                     mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
-                            sourceRecord, startFlags, stack, callerApp));
+                            sourceRecord, startFlags, stack, callerApp, intentGrants));
                 }
                 ActivityOptions.abort(checkedOptions);
                 return ActivityManager.START_SWITCHES_CANCELED;
@@ -1143,7 +1182,7 @@ class ActivityStarter {
 
         mLastStartActivityResult = startActivityUnchecked(r, sourceRecord, voiceSession,
                 request.voiceInteractor, startFlags, true /* doResume */, checkedOptions, inTask,
-                restrictedBgActivity);
+                restrictedBgActivity, intentGrants);
 
         if (request.outActivity != null) {
             request.outActivity[0] = mLastStartActivityRecord;
@@ -1168,7 +1207,7 @@ class ActivityStarter {
         int requestCode = r.requestCode;
         if (resultRecord != null) {
             resultRecord.sendResult(INVALID_UID, resultWho, requestCode, RESULT_CANCELED,
-                    null /* data */);
+                    null /* data */, null /* dataGrants */);
         }
         // We pretend to the caller that it was really started to make it backward compatible, but
         // they will just get a cancel result.
@@ -1470,14 +1509,14 @@ class ActivityStarter {
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
                 IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
                 int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-                boolean restrictedBgActivity) {
+                boolean restrictedBgActivity, NeededUriGrants intentGrants) {
         int result = START_CANCELED;
         final ActivityStack startedActivityStack;
         try {
             mService.deferWindowLayout();
             Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "startActivityInner");
             result = startActivityInner(r, sourceRecord, voiceSession, voiceInteractor,
-                    startFlags, doResume, options, inTask, restrictedBgActivity);
+                    startFlags, doResume, options, inTask, restrictedBgActivity, intentGrants);
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
             startedActivityStack = handleStartResult(r, result);
@@ -1545,7 +1584,7 @@ class ActivityStarter {
     int startActivityInner(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
             int startFlags, boolean doResume, ActivityOptions options, Task inTask,
-            boolean restrictedBgActivity) {
+            boolean restrictedBgActivity, NeededUriGrants intentGrants) {
         setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
                 voiceInteractor, restrictedBgActivity);
 
@@ -1582,7 +1621,7 @@ class ActivityStarter {
                 ? null : targetTask.getTopNonFinishingActivity();
         if (targetTaskTop != null) {
             // Recycle the target task for this launch.
-            startResult = recycleTask(targetTask, targetTaskTop, reusedTask);
+            startResult = recycleTask(targetTask, targetTaskTop, reusedTask, intentGrants);
             if (startResult != START_SUCCESS) {
                 return startResult;
             }
@@ -1594,7 +1633,7 @@ class ActivityStarter {
         // we need to check if it should only be launched once.
         final ActivityStack topStack = mRootWindowContainer.getTopDisplayFocusedStack();
         if (topStack != null) {
-            startResult = deliverToCurrentTopIfNeeded(topStack);
+            startResult = deliverToCurrentTopIfNeeded(topStack, intentGrants);
             if (startResult != START_SUCCESS) {
                 return startResult;
             }
@@ -1625,8 +1664,8 @@ class ActivityStarter {
             }
         }
 
-        mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
-                mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.mUserId);
+        mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
+                mStartActivity.getUriPermissionsLocked());
         if (mStartActivity.resultTo != null && mStartActivity.resultTo.info != null) {
             // we need to resolve resultTo to a uid as grantImplicitAccess deals explicitly in UIDs
             final PackageManagerInternal pmInternal =
@@ -1752,7 +1791,8 @@ class ActivityStarter {
         if (mStartActivity.packageName == null) {
             if (mStartActivity.resultTo != null) {
                 mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
-                        mStartActivity.requestCode, RESULT_CANCELED, null /* data */);
+                        mStartActivity.requestCode, RESULT_CANCELED,
+                        null /* data */, null /* dataGrants */);
             }
             ActivityOptions.abort(mOptions);
             return START_CLASS_NOT_FOUND;
@@ -1797,7 +1837,8 @@ class ActivityStarter {
      * - Determine whether need to add a new activity on top or just brought the task to front.
      */
     @VisibleForTesting
-    int recycleTask(Task targetTask, ActivityRecord targetTaskTop, Task reusedTask) {
+    int recycleTask(Task targetTask, ActivityRecord targetTaskTop, Task reusedTask,
+            NeededUriGrants intentGrants) {
         // Should not recycle task which is from a different user, just adding the starting
         // activity to the task.
         if (targetTask.mUserId != mStartActivity.mUserId) {
@@ -1857,7 +1898,7 @@ class ActivityStarter {
         }
 
         complyActivityFlags(targetTask,
-                reusedTask != null ? reusedTask.getTopNonFinishingActivity() : null);
+                reusedTask != null ? reusedTask.getTopNonFinishingActivity() : null, intentGrants);
 
         if (clearTaskForReuse) {
             // Clear task for re-use so later code to methods
@@ -1893,7 +1934,7 @@ class ActivityStarter {
      * Check if the activity being launched is the same as the one currently at the top and it
      * should only be launched once.
      */
-    private int deliverToCurrentTopIfNeeded(ActivityStack topStack) {
+    private int deliverToCurrentTopIfNeeded(ActivityStack topStack, NeededUriGrants intentGrants) {
         final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
         final boolean dontStart = top != null && mStartActivity.resultTo == null
                 && top.mActivityComponent.equals(mStartActivity.mActivityComponent)
@@ -1921,7 +1962,7 @@ class ActivityStarter {
             return START_RETURN_INTENT_TO_CALLER;
         }
 
-        deliverNewIntent(top);
+        deliverNewIntent(top, intentGrants);
 
         // Don't use mStartActivity.task to show the toast. We're not starting a new activity but
         // reusing 'top'. Fields in mStartActivity may not be fully initialized.
@@ -1935,7 +1976,8 @@ class ActivityStarter {
      * Applying the launching flags to the task, which might clear few or all the activities in the
      * task.
      */
-    private void complyActivityFlags(Task targetTask, ActivityRecord reusedActivity) {
+    private void complyActivityFlags(Task targetTask, ActivityRecord reusedActivity,
+            NeededUriGrants intentGrants) {
         ActivityRecord targetTaskTop = targetTask.getTopNonFinishingActivity();
         final boolean resetTask =
                 reusedActivity != null && (mLaunchFlags & FLAG_ACTIVITY_RESET_TASK_IF_NEEDED) != 0;
@@ -1979,7 +2021,7 @@ class ActivityStarter {
                     // so make sure the task now has the identity of the new intent.
                     top.getTask().setIntent(mStartActivity);
                 }
-                deliverNewIntent(top);
+                deliverNewIntent(top, intentGrants);
             } else {
                 // A special case: we need to start the activity because it is not currently
                 // running, and the caller has asked to clear the current task to have this
@@ -2005,7 +2047,7 @@ class ActivityStarter {
                 final Task task = act.getTask();
                 task.moveActivityToFrontLocked(act);
                 act.updateOptionsLocked(mOptions);
-                deliverNewIntent(act);
+                deliverNewIntent(act, intentGrants);
                 mTargetStack.mLastPausedActivity = null;
             } else {
                 mAddingToTask = true;
@@ -2025,7 +2067,7 @@ class ActivityStarter {
                 if (targetTaskTop.isRootOfTask()) {
                     targetTaskTop.getTask().setIntent(mStartActivity);
                 }
-                deliverNewIntent(targetTaskTop);
+                deliverNewIntent(targetTaskTop, intentGrants);
             } else if (!targetTask.isSameIntentFilter(mStartActivity)) {
                 // In this case we are launching the root activity of the task, but with a
                 // different intent. We should start a new instance on top.
@@ -2233,7 +2275,8 @@ class ActivityStarter {
             // as normal without a dependency on its originator.
             Slog.w(TAG, "Activity is launching as a new task, so cancelling activity result.");
             mStartActivity.resultTo.sendResult(INVALID_UID, mStartActivity.resultWho,
-                    mStartActivity.requestCode, RESULT_CANCELED, null /* data */);
+                    mStartActivity.requestCode, RESULT_CANCELED,
+                    null /* data */, null /* dataGrants */);
             mStartActivity.resultTo = null;
         }
     }
@@ -2512,13 +2555,13 @@ class ActivityStarter {
         }
     }
 
-    private void deliverNewIntent(ActivityRecord activity) {
+    private void deliverNewIntent(ActivityRecord activity, NeededUriGrants intentGrants) {
         if (mIntentDelivered) {
             return;
         }
 
         activity.logStartActivity(EventLogTags.WM_NEW_INTENT, activity.getTask());
-        activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent,
+        activity.deliverNewIntentLocked(mCallingUid, mStartActivity.intent, intentGrants,
                 mStartActivity.launchedFromPackage);
         mIntentDelivered = true;
     }

@@ -1518,8 +1518,8 @@ class Task extends WindowContainer<WindowContainer> {
             forAllActivities((r) -> {
                 if (r.finishing) return;
                 // TODO: figure-out how to avoid object creation due to capture of reason variable.
-                r.finishIfPossible(Activity.RESULT_CANCELED, null /* resultData */, reason,
-                        false /* oomAdj */);
+                r.finishIfPossible(Activity.RESULT_CANCELED,
+                        null /* resultData */, null /* resultGrants */, reason, false /* oomAdj */);
             });
         }
     }
