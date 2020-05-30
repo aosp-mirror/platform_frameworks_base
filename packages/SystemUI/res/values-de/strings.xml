@@ -77,12 +77,9 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom auf Bildschirmgröße"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Auf Bildschirmgröße anpassen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <!-- no translation found for global_action_lock_message (4466026255205186456) -->
-    <skip />
-    <!-- no translation found for global_action_lock_message (7621167597240332986) -->
-    <skip />
-    <!-- no translation found for global_action_lock_message (538790401275363781) -->
-    <skip />
+    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Entsperre dein Smartphone für weitere Optionen"</string>
+    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Entsperre dein Tablet für weitere Optionen"</string>
+    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Entsperre dein Gerät für weitere Optionen"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"Bild gesendet"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Screenshot wird gespeichert..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Screenshot wird gespeichert..."</string>
@@ -329,8 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Standort durch GPS festgelegt"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Standortanfragen aktiv"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"\"Sensoren aus\" ist aktiv"</string>
-    <!-- no translation found for accessibility_media_active (4942087422908239969) -->
-    <skip />
     <string name="accessibility_clear_all" msgid="970525598287244592">"Alle Benachrichtigungen löschen"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -519,10 +514,8 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Verwalten"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Verlauf"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"Neue Benachrichtigungen"</string>
-    <!-- no translation found for notification_section_header_gentle (6804099527336337197) -->
-    <skip />
-    <!-- no translation found for notification_section_header_alerting (5581175033680477651) -->
-    <skip />
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Lautlos"</string>
+    <string name="notification_section_header_alerting" msgid="5581175033680477651">"Benachrichtigungen"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Unterhaltungen"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Alle lautlosen Benachrichtigungen löschen"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
@@ -602,19 +595,29 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktivieren"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivieren"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Ausgabegerät wechseln"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"Der Bildschirm ist angpinnt"</string>
+    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
+    <skip />
     <string name="screen_pinning_description" msgid="8699395373875667743">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Dazu wischst du nach oben und hältst den Bildschirm gedrückt"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Um die Fixierung für diesen Bildschirm aufzuheben, berühre und halte \"Zurück\" und \"Übersicht\""</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Um die Fixierung für diesen Bildschirm aufzuheben, berühre und halte \"Zurück\" und \"Startbildschirm\""</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Zum Loslösen des Bildschirms nach oben wischen und halten"</string>
+    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
+    <skip />
+    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Der Bildschirm ist angepinnt"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Fixierung für Bildschirm aufgehoben"</string>
+    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ausblenden"</string>
@@ -717,20 +720,14 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Benachrichtigungen deaktivieren"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Benachrichtigungen dieser App weiterhin anzeigen?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Lautlos"</string>
-    <!-- no translation found for notification_alert_title (3656229781017543655) -->
-    <skip />
+    <string name="notification_alert_title" msgid="3656229781017543655">"Standard"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bubble"</string>
-    <!-- no translation found for notification_channel_summary_low (4860617986908931158) -->
-    <skip />
-    <!-- no translation found for notification_conversation_summary_low (1734433426085468009) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default (3282930979307248890) -->
-    <skip />
-    <!-- no translation found for notification_channel_summary_default_with_bubbles (1782419896613644568) -->
-    <skip />
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"Kein Ton und keine Vibration"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Kein Ton und keine Vibration, erscheint weiter unten im Bereich \"Unterhaltungen\""</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kann klingeln oder vibrieren, abhängig von den Telefoneinstellungen"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kann klingeln oder vibrieren, je nach Telefoneinstellungen. Unterhaltungen von <xliff:g id="APP_NAME">%1$s</xliff:g> werden standardmäßig als Bubble angezeigt."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Du wirst mit einer unverankerten Verknüpfung darauf aufmerksam gemacht."</string>
-    <!-- no translation found for notification_channel_summary_priority (7952654515769021553) -->
-    <skip />
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich \"Unterhaltungen\" als unverankerte Bubble mit einem Profilbild auf dem Sperrbildschirm angezeigt"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Einstellungen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
     <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine unterhaltungsspezifischen Einstellungen"</string>

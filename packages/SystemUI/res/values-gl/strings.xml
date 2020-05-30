@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Localización establecida polo GPS"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Solicitudes de localización activas"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"A opción Desactivar sensores está activada"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"A reprodución multimedia está activa"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Eliminar todas as notificacións."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"<xliff:g id="NUMBER">%s</xliff:g> máis"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activa"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desactiva"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Cambia ao dispositivo de saída"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"A pantalla está fixada"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"A aplicación está fixada"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Atrás e Visión xeral."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Atrás e Inicio."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"A pantalla manterase visible ata que deixes de fixala. Para facelo, pasa o dedo cara arriba e manteno premido."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Visión xeral."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"A pantalla manterase visible ata que deixes de fixala. Para facelo, mantén premido Inicio."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Para deixar de fixar a pantalla, mantén premidos os botóns Volver e Visión xeral"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Para deixar de fixar a pantalla, mantén premidos os botóns Atrás e Inicio"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Para deixar de fixar esta pantalla, pasa o dedo cara arriba e mantena premida"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Pódese acceder aos datos persoais (por exemplo, os contactos e o contido dos correos electrónicos)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"As aplicacións fixadas poden abrir outras aplicacións."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Para soltar esta aplicación, mantén premidos os botóns Atrás e Visión xeral"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para soltar esta aplicación, mantén premidos os botóns Atrás e Inicio"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para soltar esta aplicación, pasa o dedo cara arriba e mantena premida"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"De acordo"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Non, grazas"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Fixouse a pantalla"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Deixouse de fixar a pantalla"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Fixouse a aplicación"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Soltouse a aplicación"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Queres ocultar <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Volverá aparecer a próxima vez que se active na configuración."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ocultar"</string>
