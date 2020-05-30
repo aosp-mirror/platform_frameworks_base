@@ -21,9 +21,12 @@ import static com.android.tests.rollback.host.WatchdogEventLogger.watchdogEventO
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
 import com.android.compatibility.common.tradefed.build.CompatibilityBuildHelper;
+import com.android.tradefed.device.DeviceNotAvailableException;
+import com.android.tradefed.device.IFileEntry;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.CommandResult;
@@ -35,8 +38,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Runs the staged rollback tests.
@@ -304,6 +309,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackApexDataDirectories_DeSys() throws Exception {
+        List<String> before = getSnapshotDirectories("/data/misc/apexrollback");
         pushTestApex();
 
         // Push files to apex data directory
@@ -335,6 +341,12 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
         assertNull(getDevice().pullFile(newFilePath3));
         assertNull(getDevice().pullFile(newFilePath4));
+
+        // Verify snapshots are deleted after restoration
+        List<String> after = getSnapshotDirectories("/data/misc/apexrollback");
+        // Only check directories newly created during the test
+        after.removeAll(before);
+        after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
     /**
@@ -342,6 +354,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackApexDataDirectories_DeUser() throws Exception {
+        List<String> before = getSnapshotDirectories("/data/misc_de/0/apexrollback");
         pushTestApex();
 
         // Push files to apex data directory
@@ -375,6 +388,12 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
         assertNull(getDevice().pullFile(newFilePath3));
         assertNull(getDevice().pullFile(newFilePath4));
+
+        // Verify snapshots are deleted after restoration
+        List<String> after = getSnapshotDirectories("/data/misc_de/0/apexrollback");
+        // Only check directories newly created during the test
+        after.removeAll(before);
+        after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
     /**
@@ -382,6 +401,7 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
      */
     @Test
     public void testRollbackApexDataDirectories_Ce() throws Exception {
+        List<String> before = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
         pushTestApex();
 
         // Push files to apex data directory
@@ -413,6 +433,12 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
         assertEquals(TEST_STRING_2, getDevice().pullFileContents(oldFilePath2));
         assertNull(getDevice().pullFile(newFilePath3));
         assertNull(getDevice().pullFile(newFilePath4));
+
+        // Verify snapshots are deleted after restoration
+        List<String> after = getSnapshotDirectories("/data/misc_ce/0/apexrollback");
+        // Only check directories newly created during the test
+        after.removeAll(before);
+        after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
     private void pushTestApex() throws Exception {
@@ -437,6 +463,28 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     private static String apexDataDirCe(String apexName, int userId) {
         return String.format("/data/misc_ce/%d/apexdata/%s", userId, apexName);
+    }
+
+    private List<String> getSnapshotDirectories(String baseDir) {
+        try {
+            return getDevice().getFileEntry(baseDir).getChildren(false)
+                    .stream().filter(entry -> entry.getName().matches("\\d+(-prerestore)?"))
+                    .map(entry -> entry.getFullPath())
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            // Return an empty list if any error
+            return Collections.EMPTY_LIST;
+        }
+    }
+
+    private void assertDirectoryIsEmpty(String path) {
+        try {
+            IFileEntry file = getDevice().getFileEntry(path);
+            assertTrue("Not a directory: " + path, file.isDirectory());
+            assertTrue("Directory not empty: " + path, file.getChildren(false).isEmpty());
+        } catch (DeviceNotAvailableException e) {
+            fail("Can't access directory: " + path);
+        }
     }
 
     private void crashProcess(String processName, int numberOfCrashes) throws Exception {
