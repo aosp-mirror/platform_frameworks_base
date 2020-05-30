@@ -1908,31 +1908,11 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller) {
-        final IAudioPolicyCallback extVolCtlr;
-        synchronized (mExtVolumeControllerLock) {
-            extVolCtlr = mExtVolumeController;
-        }
-        new MediaMetrics.Item(mMetricsId + "adjustSuggestedStreamVolume")
-                .setUid(Binder.getCallingUid())
-                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackage)
-                .set(MediaMetrics.Property.CLIENT_NAME, caller)
-                .set(MediaMetrics.Property.DIRECTION, direction > 0
-                        ? MediaMetrics.Value.UP : MediaMetrics.Value.DOWN)
-                .set(MediaMetrics.Property.EXTERNAL, extVolCtlr != null
-                        ? MediaMetrics.Value.YES : MediaMetrics.Value.NO)
-                .set(MediaMetrics.Property.FLAGS, flags)
-                .record();
-        if (extVolCtlr != null) {
-            sendMsg(mAudioHandler, MSG_NOTIFY_VOL_EVENT, SENDMSG_QUEUE,
-                    direction, 0 /*ignored*/,
-                    extVolCtlr, 0 /*delay*/);
-        } else {
-            final boolean hasModifyAudioSettings =
-                    mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
-                            == PackageManager.PERMISSION_GRANTED;
-            adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
-                    caller, Binder.getCallingUid(), hasModifyAudioSettings, VOL_ADJUST_NORMAL);
-        }
+        boolean hasModifyAudioSettings =
+                mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED;
+        adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
+                caller, Binder.getCallingUid(), hasModifyAudioSettings, VOL_ADJUST_NORMAL);
     }
 
     private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
@@ -1947,6 +1927,24 @@ public class AudioService extends IAudioService.Stub
                     direction/*val1*/, flags/*val2*/, new StringBuilder(callingPackage)
                     .append("/").append(caller).append(" uid:").append(uid).toString()));
         }
+
+        boolean hasExternalVolumeController = notifyExternalVolumeController(direction);
+
+        new MediaMetrics.Item(mMetricsId + "adjustSuggestedStreamVolume")
+                .setUid(Binder.getCallingUid())
+                .set(MediaMetrics.Property.CALLING_PACKAGE, callingPackage)
+                .set(MediaMetrics.Property.CLIENT_NAME, caller)
+                .set(MediaMetrics.Property.DIRECTION, direction > 0
+                        ? MediaMetrics.Value.UP : MediaMetrics.Value.DOWN)
+                .set(MediaMetrics.Property.EXTERNAL, hasExternalVolumeController
+                        ? MediaMetrics.Value.YES : MediaMetrics.Value.NO)
+                .set(MediaMetrics.Property.FLAGS, flags)
+                .record();
+
+        if (hasExternalVolumeController) {
+            return;
+        }
+
         final int streamType;
         synchronized (mForceControlStreamLock) {
             // Request lock in case mVolumeControlStream is changed by other thread.
@@ -1993,6 +1991,21 @@ public class AudioService extends IAudioService.Stub
 
         adjustStreamVolume(streamType, direction, flags, callingPackage, caller, uid,
                 hasModifyAudioSettings, keyEventMode);
+    }
+
+    private boolean notifyExternalVolumeController(int direction) {
+        final IAudioPolicyCallback externalVolumeController;
+        synchronized (mExtVolumeControllerLock) {
+            externalVolumeController = mExtVolumeController;
+        }
+        if (externalVolumeController == null) {
+            return false;
+        }
+
+        sendMsg(mAudioHandler, MSG_NOTIFY_VOL_EVENT, SENDMSG_QUEUE,
+                direction, 0 /*ignored*/,
+                externalVolumeController, 0 /*delay*/);
+        return true;
     }
 
     /** @see AudioManager#adjustStreamVolume(int, int, int)
@@ -7378,6 +7391,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mIsSingleVolume="); pw.println(mIsSingleVolume);
         pw.print("  mUseFixedVolume="); pw.println(mUseFixedVolume);
         pw.print("  mFixedVolumeDevices="); pw.println(dumpDeviceTypes(mFixedVolumeDevices));
+        pw.print("  mExtVolumeController="); pw.println(mExtVolumeController);
         pw.print("  mHdmiCecSink="); pw.println(mHdmiCecSink);
         pw.print("  mHdmiAudioSystemClient="); pw.println(mHdmiAudioSystemClient);
         pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
