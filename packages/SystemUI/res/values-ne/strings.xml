@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS द्वारा स्थान सेट गरिएको"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"स्थान अनुरोधहरू सक्रिय"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"सेन्सर निष्क्रिय नामक सुविधा सक्रिय छ"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"मिडिया प्ले भइरहेको छ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"सबै सूचनाहरू हटाउनुहोस्।"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,29 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"सक्षम पार्नुहोस्"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"असक्षम पार्नुहोस्"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"आउटपुट यन्त्र बदल्नुहोस्"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"पर्दा राखेका छ"</string>
+    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
+    <skip />
     <string name="screen_pinning_description" msgid="8699395373875667743">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र गृह नामक बटनहरूलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"तपाईंले अनपिन नगरेसम्म यस कार्यले यसलाई दृश्यमा राख्छ। अनपिन गर्न माथितिर स्वाइप गरी होल्ड गर्नुहोस्।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न गृह नामक बटनलाई छोइराख्नुहोस्।"</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"यस स्क्रिनलाई अनपनि गर्न पछाडि र परिदृश्य नामक बटनहरूलाई छोइराख्नुहोस्"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"यस स्क्रिनलाई अनपिन गर्न पछाडि र गृह नामक बटनहरूलाई छोइराख्नुहोस्"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"यो स्क्रिन अनपिन गर्न माथितिर स्वाइप गरी थिचिराख्नुहोस्"</string>
+    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
+    <skip />
+    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3285785989665266984">"बुझेँ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"धन्यवाद पर्दैन"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"स्क्रिन पिन गरियो"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"स्क्रिन अनपिन गरियो"</string>
+    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"लुकाउनुहुन्छ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"यो तपाईं सेटिङ् मा यो बारी अर्को समय देखापर्नेछ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"लुकाउनुहोस्"</string>
