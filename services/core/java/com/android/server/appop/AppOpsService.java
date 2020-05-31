@@ -16,6 +16,11 @@
 
 package com.android.server.appop;
 
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
@@ -66,11 +71,6 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import static java.lang.Long.max;
@@ -1776,8 +1776,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                List<String> packageNames = getPackageNamesForSampling();
-                resamplePackageAndAppOpLocked(packageNames);
+                List<String> packageNames = getPackageListAndResample();
                 initializeRarelyUsedPackagesList(new ArraySet<>(packageNames));
             }
         }, RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS);
@@ -5967,11 +5966,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
         RuntimeAppOpAccessMessage result;
-        List<String> packageNames = getPackageNamesForSampling();
         synchronized (this) {
             result = mCollectedRuntimePermissionMessage;
-            resamplePackageAndAppOpLocked(packageNames);
+            mCollectedRuntimePermissionMessage = null;
         }
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+                AppOpsService::getPackageListAndResample,
+                this));
         return result;
     }
 
@@ -5995,6 +5996,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /** Obtains package list and resamples package and appop to watch. */
+    private List<String> getPackageListAndResample() {
+        List<String> packageNames = getPackageNamesForSampling();
+        synchronized (this) {
+            resamplePackageAndAppOpLocked(packageNames);
+        }
+        return packageNames;
+    }
+
     /** Resamples package and appop to watch from the list provided. */
     private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
         if (!packageNames.isEmpty()) {
@@ -6010,7 +6020,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         mSampledAppOpCode = ThreadLocalRandom.current().nextInt(_NUM_OP);
         mAcceptableLeftDistance = _NUM_OP;
         mSampledPackage = packageName;
-        mCollectedRuntimePermissionMessage = null;
     }
 
     /**
