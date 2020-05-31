@@ -4860,6 +4860,14 @@ message SnapshotMergeReported {
     // Number of reboots that occurred after issuing and before completing the
     // merge of all the snapshot devices.
     optional int32 intermediate_reboots = 3;
+
+    // The device has been upgraded to Virtual A/B.
+    optional bool is_vab_retrofit = 4;
+
+    // Space that has been temporarily allocated in the /data partition
+    // containing the dm-snapshot's copy-on-write data generated during a
+    // Virtual A/B update.
+    optional int64 cow_file_size_bytes = 5;
 }
 
 //////////////////////////////////////////////////////////////////////
