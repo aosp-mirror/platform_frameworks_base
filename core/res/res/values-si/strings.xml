@@ -202,8 +202,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> විසින් මුද්‍රණය කිරීම අබල කර ඇත."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ඔබේ කාර්යාල පැතිකඩ ඔන් කරන්න"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ඔබ ඔබගේ කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන තෙක් ඔබගේ පෞද්ගලික යෙදුම් අවහිර කර ඇත"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"පෞද්ගලික යෙදුම් <xliff:g id="DATE">%1$s</xliff:g> දින <xliff:g id="TIME">%2$s</xliff:g>ට අවහිර වනු ඇත. ඔබේ කාර්යාල පැතිකඩ දින <xliff:g id="NUMBER">%3$d</xliff:g>කට වඩා ඉවත් කර තැබිය නොහැකිය."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"කාර්යාල පැතිකඩ ක්‍රියාත්මක කරන්න"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"මම"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ටැබ්ලට විකල්ප"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV විකල්ප"</string>
@@ -889,9 +891,7 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> කොටුව එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"රටාව සම්පූර්ණයි"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"රටා ප්‍රදේශය."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for keyguard_accessibility_widget_changed (7298011259508200234) -->
-    <skip />
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. %3$d න් %2$d විජටය."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"විජටය එක් කරන්න."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"හිස්"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"අගුළු අරින ප්‍රදේශය විදහා ඇත."</string>
@@ -1550,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"බ්‍රවුසරය දියත් කරන්නද?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"ඇමතුම පිළිගන්නවාද?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"සැම විටම"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"සැම විට විවෘත ලෙස සකසන්න"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"එක් වාරයයි"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"සැකසීම්"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s කාර්යාල පැතිකඩ සඳහා සහාය ලබනොදේ."</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ටැබ්ලට්ය"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"රූපවාහිනී"</string>
