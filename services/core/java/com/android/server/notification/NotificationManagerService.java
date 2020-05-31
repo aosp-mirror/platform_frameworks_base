@@ -3172,6 +3172,12 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public boolean hasSentValidMsg(String pkg, int uid) {
+            checkCallerIsSystem();
+            return mPreferencesHelper.hasSentValidMsg(pkg, uid);
+        }
+
+        @Override
         public boolean isInInvalidMsgState(String pkg, int uid) {
             checkCallerIsSystem();
             return mPreferencesHelper.isInInvalidMsgState(pkg, uid);
