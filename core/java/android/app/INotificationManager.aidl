@@ -58,6 +58,7 @@ interface INotificationManager
 
     void setShowBadge(String pkg, int uid, boolean showBadge);
     boolean canShowBadge(String pkg, int uid);
+    boolean hasSentValidMsg(String pkg, int uid);
     boolean isInInvalidMsgState(String pkg, int uid);
     boolean hasUserDemotedInvalidMsgApp(String pkg, int uid);
     void setInvalidMsgAppDemoted(String pkg, int uid, boolean isDemoted);
