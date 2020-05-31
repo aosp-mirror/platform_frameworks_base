@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS මඟින් ස්ථානය සකසා ඇත"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"පිහිටීම් ඉල්ලීම් සක්‍රියයි"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"සංවේදක ක්‍රියාවිරහිතය සක්‍රියයි"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"මාධ්‍ය සක්‍රියයි"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"සියලු දැනුම්දීම් හිස් කරන්න."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"සබල කරන්න"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"අබල කරන්න"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ප්‍රතිදාන උපාංගය මාරු කරන්න"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"තීරය අමුණන ලදි"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"යෙදුම අමුණා ඇත"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර ආපසු අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට ඉහළට ස්වයිප් කර අල්ලා සිටින්න."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට දළ විශ්ලේෂණය ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"මෙය ඔබ ගලවන තෙක් එය දසුන තුළ තබයි. ගැලවීමට මුල් පිටුව ස්පර්ශ කර අල්ලාගෙන සිටින්න."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"මෙම තිර ඇමුණුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"මෙම තිරය ඇමුණුම ගැලවීමට, මුල් පිටුව බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"මෙම තිරය ගැලවීමට, ඉහළට ස්වයිප් කර අල්ලාගෙන සිටින්න"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"පෞද්ගලික දත්ත ප්‍රවේශ විය හැකිය (සම්බන්ධතා සහ ඉ-තැපැල් අන්තර්ගත යනාදි)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ඇමිණූ යෙදුම වෙනත් යෙදුම් විවෘත කළ හැකිය."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"මෙම යෙදුම ගැලවීමට, දළ විශ්ලේෂණය බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"මෙම යෙදුම ගැලවීමට, මුල් පිටුව බොත්තම් ස්පර්ශ කර අල්ලා ගෙන සිටින්න"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"මෙම යෙදුම ගැලවීමට, ඉහළට ස්වයිප් කර අල්ලාගෙන සිටින්න"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"හරි, තේරුණා"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"එපා ස්තූතියි"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"තිරය අමුණා ඇත"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"තිරයේ ගලවා ඇත"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"යෙදුම අමුණන ලදී"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"යෙදුම ගලවන ලදී"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> සඟවන්නද?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"ඊළඟ අවස්ථාවේ සැකසීම් තුළ ඔබ එය සක්‍රිය කළ විට එය නැවත දිසිවේ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"සඟවන්න"</string>

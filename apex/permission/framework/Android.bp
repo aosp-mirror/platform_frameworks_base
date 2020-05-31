@@ -24,6 +24,16 @@ filegroup {
 java_sdk_library {
     name: "framework-permission",
     defaults: ["framework-module-defaults"],
+
+    // Allow access to the stubs from anywhere.
+    visibility: ["//visibility:public"],
+
+    // Restrict access to implementation library.
+    impl_library_visibility: [
+        "//visibility:override", // Ignore the visibility property.
+        "//frameworks/base/apex/permission:__subpackages__",
+    ],
+
     srcs: [
         ":framework-permission-sources",
     ],
@@ -43,8 +53,4 @@ java_sdk_library {
     ],
     hostdex: true,
     installable: true,
-    visibility: [
-        "//frameworks/base/apex/permission:__subpackages__",
-    ],
-    stubs_library_visibility: ["//visibility:public"],
 }

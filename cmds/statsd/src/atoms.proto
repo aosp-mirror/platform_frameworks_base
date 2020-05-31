@@ -4873,6 +4873,14 @@ message SnapshotMergeReported {
     // Number of reboots that occurred after issuing and before completing the
     // merge of all the snapshot devices.
     optional int32 intermediate_reboots = 3;
+
+    // The device has been upgraded to Virtual A/B.
+    optional bool is_vab_retrofit = 4;
+
+    // Space that has been temporarily allocated in the /data partition
+    // containing the dm-snapshot's copy-on-write data generated during a
+    // Virtual A/B update.
+    optional int64 cow_file_size_bytes = 5;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -8650,6 +8658,15 @@ message UpdateEngineUpdateAttemptReported {
     // system property when the device takes the update. e.g.
     // Android/aosp_sailfish/sailfish:10/QP1A.190425.004/5507117:userdebug/test-keys
     optional string source_fingerprint = 8;
+
+    // Size of super partition.
+    optional int64 super_partition_size_bytes = 9;
+
+    // Size of current slot within the super partition.
+    optional int64 slot_size_bytes = 10;
+
+    // Free space available in the super partition.
+    optional int64 super_free_space_bytes = 11;
 }
 
 /**

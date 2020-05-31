@@ -117,7 +117,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * The default scrim under the shade and dialogs.
      * This should not be lower than 0.54, otherwise we won't pass GAR.
      */
-    public static final float BUSY_SCRIM_ALPHA = 0.75f;
+    public static final float BUSY_SCRIM_ALPHA = 0.85f;
 
     /**
      * Same as above, but when blur is supported.

@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"GPS ਵੱਲੋਂ ਸੈੱਟ ਕੀਤਾ ਗਿਆ ਟਿਕਾਣਾ"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"ਨਿਰਧਾਰਿਤ ਸਥਾਨ ਸੇਵਾ ਬੇਨਤੀਆਂ ਸਕਿਰਿਆ"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"\'ਸੈਂਸਰ ਬੰਦ ਕਰੋ\' ਨੂੰ ਕਿਰਿਆਸ਼ੀਲ ਕਰੋ"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"ਮੀਡੀਆ ਕਿਰਿਆਸ਼ੀਲ ਹੈ"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"ਸਾਰੀਆਂ ਸੂਚਨਾਵਾਂ ਹਟਾਓ।"</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ਚਾਲੂ ਕਰੋ"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ਬੰਦ ਕਰੋ"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ਆਊਟਪੁੱਟ ਡੀਵਾਈਸ ਵਰਤੋ"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ ਹੈ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰੋ ਅਤੇ ਫੜ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ਇਹ ਇਸ ਨੂੰ ਤਦ ਤੱਕ ਦ੍ਰਿਸ਼ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਦ ਤੱਕ ਤੁਸੀਂ ਅਨਪਿੰਨ ਨਹੀਂ ਕਰਦੇ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਰੂਪ-ਰੇਖਾ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ਤੁਹਾਡੇ ਵੱਲੋਂ ਅਨਪਿੰਨ ਨਾ ਕੀਤੇ ਜਾਣ ਤੱਕ ਇਸਨੂੰ ਦਿਖਾਇਆ ਜਾਂਦਾ ਹੈ। ਅਨਪਿੰਨ ਕਰਨ ਲਈ \'ਹੋਮ\' ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ।"</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਬਟਨਾਂ ਨੂੰ ਸਪੱਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਬਟਨਾਂ ਨੂੰ ਸਪੱਰਸ਼ ਕਰੋ ਅਤੇ ਦਬਾਈ ਰੱਖੋ"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"ਇਸ ਸਕ੍ਰੀਨ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ਨਿੱਜੀ ਡਾਟੇ ਤੱਕ ਪਹੁੰਚ ਕੀਤੀ ਜਾ ਸਕਦੀ ਹੈ (ਜਿਵੇਂ ਕਿ ਸੰਪਰਕ ਅਤੇ ਈਮੇਲ ਸਮੱਗਰੀ)।"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ਪਿੰਨ ਕੀਤੀ ਐਪ ਹੋਰ ਐਪਾਂ ਨੂੰ ਖੋਲ੍ਹ ਸਕਦੀ ਹੈ।"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ਇਸ ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਰੂਪ-ਰੇਖਾ\' ਬਟਨਾਂ ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ਇਸ ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, \'ਪਿੱਛੇ\' ਅਤੇ \'ਹੋਮ\' ਬਟਨਾਂ ਨੂੰ ਸਪਰਸ਼ ਕਰਕੇ ਦਬਾਈ ਰੱਖੋ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ਇਸ ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕਰਨ ਲਈ, ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰਕੇ ਰੱਖੋ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ਸਮਝ ਲਿਆ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ਨਹੀਂ ਧੰਨਵਾਦ"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"ਸਕ੍ਰੀਨ ਪਿੰਨ ਕੀਤੀ ਗਈ"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"ਸਕ੍ਰੀਨ ਅਨਪਿੰਨ ਕੀਤੀ ਗਈ"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ਐਪ ਨੂੰ ਪਿੰਨ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ਐਪ ਨੂੰ ਅਨਪਿੰਨ ਕੀਤਾ ਗਿਆ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"ਕੀ <xliff:g id="TILE_LABEL">%1$s</xliff:g> ਨੂੰ ਲੁਕਾਉਣਾ ਹੈ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"ਇਹ ਅਗਲੀ ਵਾਰ ਮੁੜ ਪ੍ਰਗਟ ਹੋਵੇਗਾ ਜਦੋਂ ਤੁਸੀਂ ਇਸਨੂੰ ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਚਾਲੂ ਕਰਦੇ ਹੋ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ਲੁਕਾਓ"</string>

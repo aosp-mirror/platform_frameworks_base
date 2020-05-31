@@ -193,8 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు. వివరాల కోసం నొక్కండి."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"యాప్‌లు మీ లొకేషన్‌ను యాక్సెస్ చేయగలవు"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"మరింత తెలుసుకోవడానికి మీ IT అడ్మిన్‌ను కాంటాక్ట్ చేయండి"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"భౌగోళిక సరిహద్దుల సర్వీస్"</string>
     <string name="country_detector" msgid="7023275114706088854">"దేశం డిటెక్టర్"</string>
     <string name="location_service" msgid="2439187616018455546">"లొకేషన్ సర్వీస్"</string>
     <string name="gnss_service" msgid="8907781262179951385">"GNSS సర్వీస్"</string>
