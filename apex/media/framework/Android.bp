@@ -105,7 +105,14 @@ java_sdk_library {
         "framework_media_annotation",
     ],
 
-    visibility: ["//frameworks/av/apex:__subpackages__"],
+    // Allow access to the stubs from anywhere.
+    visibility: ["//visibility:public"],
+
+    // Restrict access to implementation library.
+    impl_library_visibility: [
+       "//visibility:override", // Ignore the visibility property.
+       "//frameworks/av/apex:__subpackages__",
+    ],
 }
 
 
