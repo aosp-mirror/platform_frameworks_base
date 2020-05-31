@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"స్థానం GPS ద్వారా సెట్ చేయబడింది"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"స్థాన అభ్యర్థనలు సక్రియంగా ఉన్నాయి"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"సెన్సార్‌లు ఆఫ్ యాక్టివ్‌లో ఉంది"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"మీడియా యాక్టివ్‌గా ఉంది"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"అన్ని నోటిఫికేషన్‌లను క్లియర్ చేయండి."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,29 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ప్రారంభించు"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"నిలిపివేయండి"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"పరికరం అవుట్‌పుట్‌ని మార్చండి"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"స్క్రీన్ పిన్ చేయబడింది"</string>
+    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
+    <skip />
     <string name="screen_pinning_description" msgid="8699395373875667743">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు స్థూలదృష్టి తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు హోమ్‌ని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి, పైకి స్వైప్ చేసి &amp; పట్టుకోండి."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి స్థూలదృష్టిని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి హోమ్‌ని తాకి &amp; అలాగే పట్టుకోండి."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు అవలోకనం బటన్‌లను తాకి &amp; అలాగే పట్టుకోండి"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు మరియు హోమ్ బటన్‌లను తాకి &amp; అలాగే పట్టుకోండి"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"ఈ స్క్రీన్‌ను అన్‌పిన్ చేయడానికి, పైకి స్వైప్ చేసి &amp; అలాగే పట్టుకోండి"</string>
+    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
+    <skip />
+    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
+    <skip />
+    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
+    <skip />
     <string name="screen_pinning_positive" msgid="3285785989665266984">"అర్థమైంది"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"వద్దు, ధన్యవాదాలు"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"స్క్రీన్ పిన్ చేయబడింది"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"స్క్రీన్ అన్‌పిన్ చేయబడింది"</string>
+    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
+    <skip />
+    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
+    <skip />
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ని దాచాలా?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"మీరు సెట్టింగ్‌ల్లో దీన్ని ఆన్ చేసిన తదుపరిసారి ఇది కనిపిస్తుంది."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"దాచు"</string>

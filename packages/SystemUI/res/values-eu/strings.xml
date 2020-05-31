@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Kokapena GPS bidez ezarri da"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Aplikazioen kokapen-eskaerak aktibo daude"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"Aktibo dago sentsore guztiak desaktibatzen dituen aukera"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"Multimedia-edukia aktibo dago"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Garbitu jakinarazpen guztiak."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"gaitu"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"desgaitu"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Aldatu irteerako gailua"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"Pantaila ainguratuta dago"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikazioa ainguratuta dago"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Atzera\" eta \"Ikuspegi orokorra\" botoiak."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Hasiera botoia."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta \"Ikuspegi orokorra\" botoia."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Horrela, ikusgai egongo da aingura kendu arte. Aingura kentzeko, eduki sakatuta Hasiera botoia."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Pantailari aingura kentzeko, eduki sakatuta Atzera eta Ikuspegi orokorra botoiak"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Pantailari aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Pantailari aingura kentzeko, pasatu hatza gora eta eduki sakatuta"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Baliteke datu pertsonalak atzitu ahal izatea (adibidez, kontaktuak eta posta elektronikoko edukia)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Baliteke ainguratutako aplikazioak beste aplikazio batzuk irekitzeko gai izatea."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Aplikazioari aingura kentzeko, eduki sakatuta Atzera eta Ikuspegi orokorra botoiak"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Aplikazioari aingura kentzeko, eduki sakatuta Atzera eta Hasiera botoiak"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Aplikazioari aingura kentzeko, arrastatu aplikazioa gora eta eduki ezazu sakatuta"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ados"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ez, eskerrik asko"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Ainguratu da pantaila"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Kendu zaio aingura pantailari"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Ainguratu da aplikazioa"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Kendu da aplikazioaren aingura"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ezkutatu nahi duzu?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Ezarpenetan aktibatzen duzun hurrengoan agertuko da berriro."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ezkutatu"</string>
