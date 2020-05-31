@@ -335,8 +335,8 @@
     <string name="permdesc_statusBar" msgid="5809162768651019642">"Թույլ է տալիս հավելվածին անջատել կարգավիճակի գոտին կամ ավելացնել ու հեռացնել համակարգի պատկերակները:"</string>
     <string name="permlab_statusBarService" msgid="2523421018081437981">"լինել կարգավիճակի գոտի"</string>
     <string name="permdesc_statusBarService" msgid="6652917399085712557">"Թույլ է տալիս հավելվածին կարգավիճակի գոտին լինել:"</string>
-    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ընդլայնել կամ ետ ծալել կարգավիճակի գոտին"</string>
-    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Թույլ է տալիս ծրագրին ընդլայնել կամ ետ ծալել կարգավիճակի գոտին:"</string>
+    <string name="permlab_expandStatusBar" msgid="1184232794782141698">"ընդլայնել կամ հետ ծալել կարգավիճակի գոտին"</string>
+    <string name="permdesc_expandStatusBar" msgid="7180756900448498536">"Թույլ է տալիս ծրագրին ընդլայնել կամ հետ ծալել կարգավիճակի գոտին:"</string>
     <string name="permlab_install_shortcut" msgid="7451554307502256221">"տեղադրել դյուրանցումներ"</string>
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Հավելվածին թույլ է տալիս ավելացնել գլխավոր էկրանի դյուրանցումներ՝ առանց օգտագործողի միջամտության:"</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"ապատեղադրել դյուրանցումները"</string>
@@ -896,7 +896,7 @@
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"Ավելացնել վիջեթ:"</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"Դատարկ"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"Ապակողպման տարածքն ընդլայնված է:"</string>
-    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"Ապակողպման տարածքը ետ է ծալված:"</string>
+    <string name="keyguard_accessibility_unlock_area_collapsed" msgid="4729922043778400434">"Ապակողպման տարածքը հետ է ծալված:"</string>
     <string name="keyguard_accessibility_widget" msgid="6776892679715699875">"<xliff:g id="WIDGET_INDEX">%1$s</xliff:g> վիջեթ:"</string>
     <string name="keyguard_accessibility_user_selector" msgid="1466067610235696600">"Օգտատիրոջ ընտրիչ"</string>
     <string name="keyguard_accessibility_status" msgid="6792745049712397237">"Կարգավիճակ"</string>

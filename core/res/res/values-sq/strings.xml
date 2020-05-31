@@ -193,8 +193,7 @@
     <string name="network_logging_notification_text" msgid="1327373071132562512">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit. Trokit për detaje."</string>
     <string name="location_changed_notification_title" msgid="3620158742816699316">"Aplikacionet mund të kenë qasje te vendndodhja jote"</string>
     <string name="location_changed_notification_text" msgid="7158423339982706912">"Kontakto me administratorin e TI-së për të mësuar më shumë"</string>
-    <!-- no translation found for geofencing_service (3826902410740315456) -->
-    <skip />
+    <string name="geofencing_service" msgid="3826902410740315456">"Shërbimi i kufizimit gjeografik"</string>
     <string name="country_detector" msgid="7023275114706088854">"Zbuluesi i shtetit"</string>
     <string name="location_service" msgid="2439187616018455546">"Vendndodhja e shërbimit"</string>
     <string name="gnss_service" msgid="8907781262179951385">"Shërbimi GNSS"</string>
@@ -1188,7 +1187,7 @@
     <string name="unsupported_compile_sdk_message" msgid="7326293500707890537">"<xliff:g id="APP_NAME">%1$s</xliff:g> është ndërtuar për një version të papërputhshëm të sistemit operativ Android dhe mund të shfaqë sjellje të papritura. Mund të ofrohet një version i përditësuar i aplikacionit."</string>
     <string name="unsupported_compile_sdk_show" msgid="1601210057960312248">"Shfaq gjithnjë"</string>
     <string name="unsupported_compile_sdk_check_update" msgid="1103639989147664456">"Kontrollo për përditësim"</string>
-    <string name="smv_application" msgid="3775183542777792638">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i ashpër\" (StrictMode)."</string>
+    <string name="smv_application" msgid="3775183542777792638">"Aplikacioni <xliff:g id="APPLICATION">%1$s</xliff:g> (procesi <xliff:g id="PROCESS">%2$s</xliff:g>) ka shkelur politikën e tij të vetëimponuar të \"Modalitetit të ashpër\"(StrictMode) ."</string>
     <string name="smv_process" msgid="1398801497130695446">"Procesi <xliff:g id="PROCESS">%1$s</xliff:g> ka shkelur politikën e tij të vetë-imponuar \"Modaliteti i rreptë\" (StrictMode)"</string>
     <string name="android_upgrading_title" product="default" msgid="7279077384220829683">"Telefoni po përditësohet…"</string>
     <string name="android_upgrading_title" product="tablet" msgid="4268417249079938805">"Tableti po përditësohet…"</string>
