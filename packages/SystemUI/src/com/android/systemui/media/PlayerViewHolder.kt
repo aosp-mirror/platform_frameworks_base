@@ -41,7 +41,7 @@ class PlayerViewHolder private constructor(itemView: View) {
     val artistText = itemView.requireViewById<TextView>(R.id.header_artist)
 
     // Output switcher
-    val seamless = itemView.findViewById<ViewGroup>(R.id.media_seamless)
+    val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
     val seamlessIcon = itemView.requireViewById<ImageView>(R.id.media_seamless_image)
     val seamlessText = itemView.requireViewById<TextView>(R.id.media_seamless_text)
 
@@ -59,12 +59,12 @@ class PlayerViewHolder private constructor(itemView: View) {
 
     init {
         (player.background as IlluminationDrawable).let {
-            it.setupTouch(seamless, player)
-            it.setupTouch(action0, player)
-            it.setupTouch(action1, player)
-            it.setupTouch(action2, player)
-            it.setupTouch(action3, player)
-            it.setupTouch(action4, player)
+            it.registerLightSource(seamless)
+            it.registerLightSource(action0)
+            it.registerLightSource(action1)
+            it.registerLightSource(action2)
+            it.registerLightSource(action3)
+            it.registerLightSource(action4)
         }
     }
 

@@ -146,4 +146,14 @@ interface ISystemUiProxy {
      * @param rotation indicates which Surface.Rotation the gesture was started in
      */
     void onQuickSwitchToNewTask(int rotation) = 25;
+
+    /**
+    * Start the one-handed mode.
+    */
+    void startOneHandedMode() = 26;
+
+    /**
+    * Stop the one-handed mode.
+    */
+    void stopOneHandedMode() = 27;
 }

@@ -141,17 +141,14 @@ void CombinationConditionTracker::evaluateCondition(
     ConditionState newCondition =
             evaluateCombinationCondition(mChildren, mLogicalOperation, nonSlicedConditionCache);
     if (!mSliced) {
+        bool nonSlicedChanged = (mUnSlicedPartCondition != newCondition);
+        mUnSlicedPartCondition = newCondition;
 
-        bool nonSlicedChanged = (mNonSlicedConditionState != newCondition);
-        mNonSlicedConditionState = newCondition;
-
-        nonSlicedConditionCache[mIndex] = mNonSlicedConditionState;
-
+        nonSlicedConditionCache[mIndex] = mUnSlicedPartCondition;
         conditionChangedCache[mIndex] = nonSlicedChanged;
-        mUnSlicedPart = newCondition;
     } else {
-        mUnSlicedPart = evaluateCombinationCondition(
-            mUnSlicedChildren, mLogicalOperation, nonSlicedConditionCache);
+        mUnSlicedPartCondition = evaluateCombinationCondition(mUnSlicedChildren, mLogicalOperation,
+                                                              nonSlicedConditionCache);
 
         for (const int childIndex : mChildren) {
             // If any of the sliced condition in children condition changes, the combination

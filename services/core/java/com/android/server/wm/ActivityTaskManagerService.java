@@ -270,6 +270,7 @@ import com.android.server.firewall.IntentFirewall;
 import com.android.server.inputmethod.InputMethodSystemProperty;
 import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PermissionPolicyInternal;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 
@@ -1672,11 +1673,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
 
+        final ActivityRecord r;
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+            r = ActivityRecord.isInStackLocked(token);
             if (r == null) {
                 return true;
             }
+        }
+
+        // Carefully collect grants without holding lock
+        final NeededUriGrants resultGrants = collectGrants(resultData, r.resultTo);
+
+        synchronized (mGlobalLock) {
             // Keep track of the root activity of the task before we finish it
             final Task tr = r.getTask();
             final ActivityRecord rootR = tr.getRootActivity();
@@ -1737,7 +1745,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     // Explicitly dismissing the activity so reset its relaunch flag.
                     r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
-                    r.finishIfPossible(resultCode, resultData, "app-request", true /* oomAdj */);
+                    r.finishIfPossible(resultCode, resultData, resultGrants,
+                            "app-request", true /* oomAdj */);
                     res = r.finishing;
                     if (!res) {
                         Slog.i(TAG, "Failed to finish by app-request");
@@ -2258,14 +2267,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public boolean navigateUpTo(IBinder token, Intent destIntent, int resultCode,
             Intent resultData) {
+        final ActivityRecord r;
+        synchronized (mGlobalLock) {
+            r = ActivityRecord.isInStackLocked(token);
+            if (r == null) {
+                return false;
+            }
+        }
+
+        // Carefully collect grants without holding lock
+        final NeededUriGrants destGrants = collectGrants(destIntent, r);
+        final NeededUriGrants resultGrants = collectGrants(resultData, r.resultTo);
 
         synchronized (mGlobalLock) {
-            final ActivityRecord r = ActivityRecord.forTokenLocked(token);
-            if (r != null) {
-                return r.getRootTask().navigateUpTo(
-                        r, destIntent, resultCode, resultData);
-            }
-            return false;
+            return r.getRootTask().navigateUpTo(
+                    r, destIntent, destGrants, resultCode, resultData, resultGrants);
         }
     }
 
@@ -2415,6 +2431,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return null;
         }
         return r.resultTo;
+    }
+
+    private NeededUriGrants collectGrants(Intent intent, ActivityRecord target) {
+        if (target != null) {
+            return mUgmInternal.checkGrantUriPermissionFromIntent(intent,
+                    Binder.getCallingUid(), target.packageName, target.mUserId);
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -3209,23 +3234,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         final long ident = Binder.clearCallingIdentity();
         try {
-            if (TextUtils.equals(pae.intent.getAction(),
-                    android.service.voice.VoiceInteractionService.SERVICE_INTERFACE)) {
-                // Start voice interaction through VoiceInteractionManagerService.
-                mAssistUtils.showSessionForActiveService(pae.extras, SHOW_SOURCE_APPLICATION,
-                        null, null);
-            } else {
-                pae.intent.replaceExtras(pae.extras);
-                pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
-                        | Intent.FLAG_ACTIVITY_SINGLE_TOP
-                        | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                mInternal.closeSystemDialogs("assist");
+            pae.intent.replaceExtras(pae.extras);
+            pae.intent.setFlags(FLAG_ACTIVITY_NEW_TASK
+                    | Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            mInternal.closeSystemDialogs("assist");
 
-                try {
-                    mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
-                } catch (ActivityNotFoundException e) {
-                    Slog.w(TAG, "No activity to handle assist action.", e);
-                }
+            try {
+                mContext.startActivityAsUser(pae.intent, new UserHandle(pae.userHandle));
+            } catch (ActivityNotFoundException e) {
+                Slog.w(TAG, "No activity to handle assist action.", e);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -3543,14 +3561,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return enqueueAssistContext(ActivityManager.ASSIST_CONTEXT_AUTOFILL, null, null,
                 receiver, receiverExtras, activityToken, true, true, UserHandle.getCallingUserId(),
                 null, PENDING_AUTOFILL_ASSIST_STRUCTURE_TIMEOUT, flags) != null;
-    }
-
-    @Override
-    public boolean launchAssistIntent(Intent intent, int requestType, String hint, int userHandle,
-            Bundle args) {
-        return enqueueAssistContext(requestType, intent, hint, null, null, null,
-                true /* focused */, true /* newSessionId */, userHandle, args,
-                PENDING_ASSIST_EXTRAS_TIMEOUT, 0) != null;
     }
 
     @Override
@@ -6573,11 +6583,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void sendActivityResult(int callingUid, IBinder activityToken, String resultWho,
                 int requestCode, int resultCode, Intent data) {
+            final ActivityRecord r;
             synchronized (mGlobalLock) {
-                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
-                if (r != null && r.getRootTask() != null) {
-                    r.sendResult(callingUid, resultWho, requestCode, resultCode, data);
+                r = ActivityRecord.isInStackLocked(activityToken);
+                if (r == null || r.getRootTask() == null) {
+                    return;
                 }
+            }
+
+            // Carefully collect grants without holding lock
+            final NeededUriGrants dataGrants = collectGrants(data, r);
+
+            synchronized (mGlobalLock) {
+                r.sendResult(callingUid, resultWho, requestCode, resultCode, data, dataGrants);
             }
         }
 

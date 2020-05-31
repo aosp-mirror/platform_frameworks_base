@@ -23,11 +23,6 @@
 #include <utils/String8.h>
 #include <gui/Surface.h>
 
-#include <android/graphics/bitmap.h>
-#include <android/graphics/canvas.h>
-#include <android/graphics/paint.h>
-#include <android/native_window.h>
-
 namespace android {
 
 // --- SpriteController ---
@@ -130,8 +125,8 @@ void SpriteController::doUpdateSprites() {
         SpriteUpdate& update = updates.editItemAt(i);
 
         if (update.state.surfaceControl == NULL && update.state.wantSurfaceVisible()) {
-            update.state.surfaceWidth = update.state.icon.bitmap.getInfo().width;
-            update.state.surfaceHeight = update.state.icon.bitmap.getInfo().height;
+            update.state.surfaceWidth = update.state.icon.width();
+            update.state.surfaceHeight = update.state.icon.height();
             update.state.surfaceDrawn = false;
             update.state.surfaceVisible = false;
             update.state.surfaceControl = obtainSurface(
@@ -152,8 +147,8 @@ void SpriteController::doUpdateSprites() {
         }
 
         if (update.state.wantSurfaceVisible()) {
-            int32_t desiredWidth = update.state.icon.bitmap.getInfo().width;
-            int32_t desiredHeight = update.state.icon.bitmap.getInfo().height;
+            int32_t desiredWidth = update.state.icon.width();
+            int32_t desiredHeight = update.state.icon.height();
             if (update.state.surfaceWidth < desiredWidth
                     || update.state.surfaceHeight < desiredHeight) {
                 needApplyTransaction = true;
@@ -194,36 +189,9 @@ void SpriteController::doUpdateSprites() {
         if (update.state.surfaceControl != NULL && !update.state.surfaceDrawn
                 && update.state.wantSurfaceVisible()) {
             sp<Surface> surface = update.state.surfaceControl->getSurface();
-            ANativeWindow_Buffer outBuffer;
-            status_t status = surface->lock(&outBuffer, NULL);
-            if (status) {
-                ALOGE("Error %d locking sprite surface before drawing.", status);
-            } else {
-                graphics::Paint paint;
-                paint.setBlendMode(ABLEND_MODE_SRC);
-
-                graphics::Canvas canvas(outBuffer, (int32_t) surface->getBuffersDataSpace());
-                canvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
-
-                const int iconWidth = update.state.icon.bitmap.getInfo().width;
-                const int iconHeight = update.state.icon.bitmap.getInfo().height;
-
-                if (outBuffer.width > iconWidth) {
-                    paint.setBlendMode(ABLEND_MODE_CLEAR); // clear to transparent
-                    canvas.drawRect({iconWidth, 0, outBuffer.width, iconHeight}, paint);
-                }
-                if (outBuffer.height > iconHeight) {
-                    paint.setBlendMode(ABLEND_MODE_CLEAR); // clear to transparent
-                    canvas.drawRect({0, iconHeight, outBuffer.width, outBuffer.height}, paint);
-                }
-
-                status = surface->unlockAndPost();
-                if (status) {
-                    ALOGE("Error %d unlocking and posting sprite surface after drawing.", status);
-                } else {
-                    update.state.surfaceDrawn = true;
-                    update.surfaceChanged = surfaceChanged = true;
-                }
+            if (update.state.icon.draw(surface)) {
+                update.state.surfaceDrawn = true;
+                update.surfaceChanged = surfaceChanged = true;
             }
         }
     }

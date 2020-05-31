@@ -759,7 +759,7 @@ public class Canvas extends BaseCanvas {
      * @param matrix The matrix to preconcatenate with the current matrix
      */
     public void concat(@Nullable Matrix matrix) {
-        if (matrix != null) nConcat(mNativeCanvasWrapper, matrix.native_instance);
+        if (matrix != null) nConcat(mNativeCanvasWrapper, matrix.ni());
     }
 
     /**
@@ -777,7 +777,7 @@ public class Canvas extends BaseCanvas {
      */
     public void setMatrix(@Nullable Matrix matrix) {
         nSetMatrix(mNativeCanvasWrapper,
-                         matrix == null ? 0 : matrix.native_instance);
+                         matrix == null ? 0 : matrix.ni());
     }
 
     /**
@@ -792,7 +792,7 @@ public class Canvas extends BaseCanvas {
      */
     @Deprecated
     public void getMatrix(@NonNull Matrix ctm) {
-        nGetMatrix(mNativeCanvasWrapper, ctm.native_instance);
+        nGetMatrix(mNativeCanvasWrapper, ctm.ni());
     }
 
     /**

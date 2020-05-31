@@ -275,8 +275,6 @@ interface IActivityTaskManager {
      */
     void setLockScreenShown(boolean showingKeyguard, boolean showingAod);
     Bundle getAssistContextExtras(int requestType);
-    boolean launchAssistIntent(in Intent intent, int requestType, in String hint, int userHandle,
-            in Bundle args);
     boolean requestAssistContextExtras(int requestType, in IAssistDataReceiver receiver,
             in Bundle receiverExtras, in IBinder activityToken,
             boolean focused, boolean newSessionId);

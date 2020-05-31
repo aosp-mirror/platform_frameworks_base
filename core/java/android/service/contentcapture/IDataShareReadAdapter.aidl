@@ -22,4 +22,5 @@ import android.os.ICancellationSignal;
 oneway interface IDataShareReadAdapter {
     void start(in ParcelFileDescriptor fd);
     void error(int errorCode);
+    void finish();
 }

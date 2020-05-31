@@ -66,7 +66,9 @@ class ShareTargetPredictor extends AppTargetPredictor {
         if (DEBUG) {
             Slog.d(TAG, "reportAppTargetEvent");
         }
-        getDataManager().reportShareTargetEvent(event, mIntentFilter);
+        if (mIntentFilter != null) {
+            getDataManager().reportShareTargetEvent(event, mIntentFilter);
+        }
     }
 
     /** Provides prediction on direct share targets */
@@ -75,6 +77,10 @@ class ShareTargetPredictor extends AppTargetPredictor {
     void predictTargets() {
         if (DEBUG) {
             Slog.d(TAG, "predictTargets");
+        }
+        if (mIntentFilter == null) {
+            updatePredictions(List.of());
+            return;
         }
         List<ShareTarget> shareTargets = getDirectShareTargets();
         SharesheetModelScorer.computeScore(shareTargets, getShareEventType(mIntentFilter),
@@ -94,6 +100,10 @@ class ShareTargetPredictor extends AppTargetPredictor {
     void sortTargets(List<AppTarget> targets, Consumer<List<AppTarget>> callback) {
         if (DEBUG) {
             Slog.d(TAG, "sortTargets");
+        }
+        if (mIntentFilter == null) {
+            callback.accept(targets);
+            return;
         }
         List<ShareTarget> shareTargets = getAppShareTargets(targets);
         SharesheetModelScorer.computeScoreForAppShare(shareTargets,

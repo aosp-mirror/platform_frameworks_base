@@ -549,7 +549,7 @@ public class AudioDeviceInventory {
         synchronized (mDevicesLock) {
             if ((wdcs.mState == AudioService.CONNECTION_STATE_DISCONNECTED)
                     && DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(wdcs.mType)) {
-                mDeviceBroker.setBluetoothA2dpOnInt(true,
+                mDeviceBroker.setBluetoothA2dpOnInt(true, false /*fromA2dp*/,
                         "onSetWiredDeviceConnectionState state DISCONNECTED");
             }
 
@@ -562,7 +562,7 @@ public class AudioDeviceInventory {
             }
             if (wdcs.mState != AudioService.CONNECTION_STATE_DISCONNECTED) {
                 if (DEVICE_OVERRIDE_A2DP_ROUTE_ON_PLUG_SET.contains(wdcs.mType)) {
-                    mDeviceBroker.setBluetoothA2dpOnInt(false,
+                    mDeviceBroker.setBluetoothA2dpOnInt(false, false /*fromA2dp*/,
                             "onSetWiredDeviceConnectionState state not DISCONNECTED");
                 }
                 mDeviceBroker.checkMusicActive(wdcs.mType, wdcs.mCaller);
@@ -879,7 +879,7 @@ public class AudioDeviceInventory {
             int a2dpCodec) {
         // enable A2DP before notifying A2DP connection to avoid unnecessary processing in
         // audio policy manager
-        mDeviceBroker.setBluetoothA2dpOnInt(true, eventSource);
+        mDeviceBroker.setBluetoothA2dpOnInt(true, true /*fromA2dp*/, eventSource);
         // at this point there could be another A2DP device already connected in APM, but it
         // doesn't matter as this new one will overwrite the previous one
         final int res = mAudioSystem.setDeviceConnectionState(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP,
@@ -910,7 +910,7 @@ public class AudioDeviceInventory {
         mApmConnectedDevices.put(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, diKey);
 
         mDeviceBroker.postAccessoryPlugMediaUnmute(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
-        setCurrentAudioRouteNameIfPossible(name);
+        setCurrentAudioRouteNameIfPossible(name, true /*fromA2dp*/);
     }
 
     @GuardedBy("mDevicesLock")
@@ -955,7 +955,7 @@ public class AudioDeviceInventory {
         }
         mApmConnectedDevices.remove(AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP);
         // Remove A2DP routes as well
-        setCurrentAudioRouteNameIfPossible(null);
+        setCurrentAudioRouteNameIfPossible(null, true /*fromA2dp*/);
         mmi.record();
     }
 
@@ -1014,7 +1014,7 @@ public class AudioDeviceInventory {
         mDeviceBroker.postAccessoryPlugMediaUnmute(AudioSystem.DEVICE_OUT_HEARING_AID);
         mDeviceBroker.postApplyVolumeOnDevice(streamType,
                 AudioSystem.DEVICE_OUT_HEARING_AID, "makeHearingAidDeviceAvailable");
-        setCurrentAudioRouteNameIfPossible(name);
+        setCurrentAudioRouteNameIfPossible(name, false /*fromA2dp*/);
         new MediaMetrics.Item(mMetricsId + "makeHearingAidDeviceAvailable")
                 .set(MediaMetrics.Property.ADDRESS, address != null ? address : "")
                 .set(MediaMetrics.Property.DEVICE,
@@ -1033,7 +1033,7 @@ public class AudioDeviceInventory {
         mConnectedDevices.remove(
                 DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_HEARING_AID, address));
         // Remove Hearing Aid routes as well
-        setCurrentAudioRouteNameIfPossible(null);
+        setCurrentAudioRouteNameIfPossible(null, false /*fromA2dp*/);
         new MediaMetrics.Item(mMetricsId + "makeHearingAidDeviceUnavailable")
                 .set(MediaMetrics.Property.ADDRESS, address != null ? address : "")
                 .set(MediaMetrics.Property.DEVICE,
@@ -1042,14 +1042,14 @@ public class AudioDeviceInventory {
     }
 
     @GuardedBy("mDevicesLock")
-    private void setCurrentAudioRouteNameIfPossible(String name) {
+    private void setCurrentAudioRouteNameIfPossible(String name, boolean fromA2dp) {
         synchronized (mCurAudioRoutes) {
             if (TextUtils.equals(mCurAudioRoutes.bluetoothName, name)) {
                 return;
             }
             if (name != null || !isCurrentDeviceConnected()) {
                 mCurAudioRoutes.bluetoothName = name;
-                mDeviceBroker.postReportNewRoutes();
+                mDeviceBroker.postReportNewRoutes(fromA2dp);
             }
         }
     }
@@ -1236,7 +1236,7 @@ public class AudioDeviceInventory {
             }
             if (newConn != mCurAudioRoutes.mainType) {
                 mCurAudioRoutes.mainType = newConn;
-                mDeviceBroker.postReportNewRoutes();
+                mDeviceBroker.postReportNewRoutes(false /*fromA2dp*/);
             }
         }
     }

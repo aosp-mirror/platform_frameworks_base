@@ -68,6 +68,12 @@ class DisplayAreaPolicyBuilder {
 
     private final ArrayList<Feature> mFeatures = new ArrayList<>();
 
+    /** Supplier interface to provide a new created {@link DisplayArea}. */
+    interface NewDisplayAreaSupplier {
+        DisplayArea create(WindowManagerService wms, DisplayArea.Type type, String name,
+                int featureId);
+    }
+
     /**
      * A feature that requires {@link DisplayArea DisplayArea(s)}.
      */
@@ -75,11 +81,14 @@ class DisplayAreaPolicyBuilder {
         private final String mName;
         private final int mId;
         private final boolean[] mWindowLayers;
+        private final NewDisplayAreaSupplier mNewDisplayAreaSupplier;
 
-        private Feature(String name, int id, boolean[] windowLayers) {
+        private Feature(String name, int id, boolean[] windowLayers,
+                NewDisplayAreaSupplier newDisplayAreaSupplier) {
             mName = name;
             mId = id;
             mWindowLayers = windowLayers;
+            mNewDisplayAreaSupplier = newDisplayAreaSupplier;
         }
 
         /**
@@ -104,6 +113,7 @@ class DisplayAreaPolicyBuilder {
             private final String mName;
             private final int mId;
             private final boolean[] mLayers;
+            private NewDisplayAreaSupplier mNewDisplayAreaSupplier = DisplayArea::new;
 
             /**
              * Build a new feature that applies to a set of window types as specified by the builder
@@ -168,8 +178,17 @@ class DisplayAreaPolicyBuilder {
                 return this;
             }
 
+            /**
+             * Sets the function to create new {@link DisplayArea} for this feature. By default, it
+             * uses {@link DisplayArea}'s constructor.
+             */
+            Builder setNewDisplayAreaSupplier(NewDisplayAreaSupplier newDisplayAreaSupplier) {
+                mNewDisplayAreaSupplier = newDisplayAreaSupplier;
+                return this;
+            }
+
             Feature build() {
-                return new Feature(mName, mId, mLayers.clone());
+                return new Feature(mName, mId, mLayers.clone(), mNewDisplayAreaSupplier);
             }
 
             private void set(int type, boolean value) {
@@ -416,8 +435,8 @@ class DisplayAreaPolicyBuilder {
                 }
                 return leaf;
             } else {
-                return new DisplayArea(parent.mWmService, type, mFeature.mName + ":"
-                        + mMinLayer + ":" + mMaxLayer, mFeature.mId);
+                return mFeature.mNewDisplayAreaSupplier.create(parent.mWmService, type,
+                        mFeature.mName + ":" + mMinLayer + ":" + mMaxLayer, mFeature.mId);
             }
         }
     }

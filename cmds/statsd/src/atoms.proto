@@ -444,7 +444,6 @@ message Atom {
         TvTunerStateChanged tv_tuner_state_changed = 276 [(module) = "framework"];
         MediaOutputOpSwitchReported mediaoutput_op_switch_reported =
             277 [(module) = "settings"];
-        SdkExtensionStatus sdk_extension_status = 354;
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -9178,30 +9177,6 @@ message CellBroadcastMessageError {
 
     // Exception message (or log message) associated with the error (max 1000 chars)
     optional string exception_message = 2;
-}
-
-/**
- * Logs when the SDK Extensions test app has polled the current version.
- * This is atom ID 354.
- *
- * Logged from:
- *   vendor/google_testing/integration/packages/apps/SdkExtensionsTestApp/
- */
-message SdkExtensionStatus {
-    enum ApiCallStatus {
-        CALL_NOT_ATTEMPTED = 0;
-        CALL_SUCCESSFUL = 1;
-        CALL_FAILED = 2;
-    }
-
-    optional ApiCallStatus result = 1;
-
-    // The R extension version, i.e. android.os.ext.SdkExtension.getExtensionVersion(R).
-    optional int32 r_extension_version = 2;
-
-    // A number identifying which particular symbol's call failed, if any. 0 means no missing symbol.
-    // "Failed" here can mean a symbol that wasn't meant to be visible was, or the other way around.
-    optional int32 failed_call_symbol = 3;
 }
 
 /**

@@ -371,7 +371,7 @@ class MockJniWrapper : public JniWrapper {
 public:
     MOCK_CONST_METHOD0(initializeForCurrentThread, void());
 
-    MockJniWrapper() { EXPECT_CALL(*this, initializeForCurrentThread()).Times(2); }
+    MockJniWrapper() { EXPECT_CALL(*this, initializeForCurrentThread()).Times(3); }
 };
 
 class MockLooperWrapper : public LooperWrapper {

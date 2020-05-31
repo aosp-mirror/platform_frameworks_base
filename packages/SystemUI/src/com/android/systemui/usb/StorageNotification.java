@@ -294,6 +294,16 @@ public class StorageNotification extends SystemUI {
     private void onPublicVolumeStateChangedInternal(VolumeInfo vol) {
         Log.d(TAG, "Notifying about public volume: " + vol.toString());
 
+        // Volume state change event may come from removed user, in this case, mountedUserId will
+        // equals to UserHandle.USER_NULL (-10000) which will do nothing when call cancelAsUser(),
+        // but cause crash when call notifyAsUser(). Here we return directly for USER_NULL, and
+        // leave all notifications belong to removed user to NotificationManagerService, the latter
+        // will remove all notifications of the removed user when handles user stopped broadcast.
+        if (isAutomotive() && vol.getMountUserId() == UserHandle.USER_NULL) {
+            Log.d(TAG, "Ignore public volume state change event of removed user");
+            return;
+        }
+
         final Notification notif;
         switch (vol.getState()) {
             case VolumeInfo.STATE_UNMOUNTED:

@@ -1260,9 +1260,11 @@ public final class OomAdjuster {
             // value that the caller wants us to.
             adj = cachedAdj;
             procState = PROCESS_STATE_CACHED_EMPTY;
-            app.setCached(true);
-            app.empty = true;
-            app.adjType = "cch-empty";
+            if (!app.containsCycle) {
+                app.setCached(true);
+                app.empty = true;
+                app.adjType = "cch-empty";
+            }
             if (DEBUG_OOM_ADJ_REASON || logUid == appUid) {
                 reportOomAdjMessageLocked(TAG_OOM_ADJ, "Making empty: " + app);
             }

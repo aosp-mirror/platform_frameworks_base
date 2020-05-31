@@ -101,6 +101,7 @@ StatsLogProcessor::StatsLogProcessor(const sp<UidMap>& uidMap,
       mLargestTimestampSeen(0),
       mLastTimestampSeen(0) {
     mPullerManager->ForceClearPullerCache();
+    StateManager::getInstance().updateLogSources(uidMap);
 }
 
 StatsLogProcessor::~StatsLogProcessor() {
@@ -419,6 +420,9 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     // The field numbers need to be currently updated by hand with atoms.proto
     if (atomId == android::os::statsd::util::ISOLATED_UID_CHANGED) {
         onIsolatedUidChangedEventLocked(*event);
+    } else {
+        // Map the isolated uid to host uid if necessary.
+        mapIsolatedUidToHostUidIfNecessaryLocked(event);
     }
 
     StateManager::getInstance().onLogEvent(*event);
@@ -431,12 +435,6 @@ void StatsLogProcessor::OnLogEvent(LogEvent* event, int64_t elapsedRealtimeNs) {
     if (curTimeSec - mLastPullerCacheClearTimeSec > StatsdStats::kPullerCacheClearIntervalSec) {
         mPullerManager->ClearPullerCacheIfNecessary(curTimeSec * NS_PER_SEC);
         mLastPullerCacheClearTimeSec = curTimeSec;
-    }
-
-
-    if (atomId != android::os::statsd::util::ISOLATED_UID_CHANGED) {
-        // Map the isolated uid to host uid if necessary.
-        mapIsolatedUidToHostUidIfNecessaryLocked(event);
     }
 
     std::unordered_set<int> uidsWithActiveConfigsChanged;
@@ -1054,6 +1052,7 @@ void StatsLogProcessor::notifyAppUpgrade(const int64_t& eventTimeNs, const strin
                                          const int uid, const int64_t version) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     VLOG("Received app upgrade");
+    StateManager::getInstance().notifyAppChanged(apk, mUidMap);
     for (const auto& it : mMetricsManagers) {
         it.second->notifyAppUpgrade(eventTimeNs, apk, uid, version);
     }
@@ -1063,6 +1062,7 @@ void StatsLogProcessor::notifyAppRemoved(const int64_t& eventTimeNs, const strin
                                          const int uid) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     VLOG("Received app removed");
+    StateManager::getInstance().notifyAppChanged(apk, mUidMap);
     for (const auto& it : mMetricsManagers) {
         it.second->notifyAppRemoved(eventTimeNs, apk, uid);
     }
@@ -1071,6 +1071,7 @@ void StatsLogProcessor::notifyAppRemoved(const int64_t& eventTimeNs, const strin
 void StatsLogProcessor::onUidMapReceived(const int64_t& eventTimeNs) {
     std::lock_guard<std::mutex> lock(mMetricsMutex);
     VLOG("Received uid map");
+    StateManager::getInstance().updateLogSources(mUidMap);
     for (const auto& it : mMetricsManagers) {
         it.second->onUidMapReceived(eventTimeNs);
     }
