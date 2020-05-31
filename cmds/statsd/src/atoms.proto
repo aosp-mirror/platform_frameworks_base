@@ -8645,6 +8645,15 @@ message UpdateEngineUpdateAttemptReported {
     // system property when the device takes the update. e.g.
     // Android/aosp_sailfish/sailfish:10/QP1A.190425.004/5507117:userdebug/test-keys
     optional string source_fingerprint = 8;
+
+    // Size of super partition.
+    optional int64 super_partition_size_bytes = 9;
+
+    // Size of current slot within the super partition.
+    optional int64 slot_size_bytes = 10;
+
+    // Free space available in the super partition.
+    optional int64 super_free_space_bytes = 11;
 }
 
 /**
