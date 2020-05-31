@@ -27,7 +27,9 @@ import static java.util.Objects.requireNonNull;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.app.ActivityThread;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -57,6 +59,7 @@ import java.util.UUID;
  *
  * @hide
  */
+@TestApi
 @SystemApi
 public class SoundTrigger {
     private static final String TAG = "SoundTrigger";
@@ -136,7 +139,9 @@ public class SoundTrigger {
         @AudioCapabilities
         private final int mAudioCapabilities;
 
-        ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
+        /** @hide */
+        @TestApi
+        public ModuleProperties(int id, @NonNull String implementor, @NonNull String description,
                 @NonNull String uuid, int version, @NonNull String supportedModelArch,
                 int maxSoundModels, int maxKeyphrases, int maxUsers,
                 @RecognitionModes int recognitionModes, boolean supportsCaptureTransition,
@@ -289,7 +294,7 @@ public class SoundTrigger {
         }
 
         @Override
-        public void writeToParcel(Parcel dest, int flags) {
+        public void writeToParcel(@SuppressLint("MissingNullability") Parcel dest, int flags) {
             dest.writeInt(getId());
             dest.writeString(getImplementor());
             dest.writeString(getDescription());
@@ -931,7 +936,9 @@ public class SoundTrigger {
          */
         private final int mEnd;
 
-        ModelParamRange(int start, int end) {
+        /** @hide */
+        @TestApi
+        public ModelParamRange(int start, int end) {
             this.mStart = start;
             this.mEnd = end;
         }
@@ -1159,6 +1166,7 @@ public class SoundTrigger {
         public final byte[] data;
 
         /** @hide */
+        @TestApi
         @UnsupportedAppUsage
         public RecognitionEvent(int status, int soundModelHandle, boolean captureAvailable,
                 int captureSession, int captureDelayMs, int capturePreambleMs,
@@ -1209,6 +1217,7 @@ public class SoundTrigger {
          *
          * @return The data of the event
          */
+        @SuppressLint("MissingNullability")
         public byte[] getData() {
             return data;
         }

@@ -250,10 +250,19 @@ public class PipBoundsHandler {
     }
 
     /**
-     * @return {@link Rect} of the destination PiP window bounds.
+     * See {@link #getDestinationBounds(ComponentName, float, Rect, Size, boolean)}
      */
     Rect getDestinationBounds(ComponentName componentName, float aspectRatio, Rect bounds,
             Size minimalSize) {
+        return getDestinationBounds(componentName, aspectRatio, bounds, minimalSize,
+                false /* useCurrentMinEdgeSize */);
+    }
+
+    /**
+     * @return {@link Rect} of the destination PiP window bounds.
+     */
+    Rect getDestinationBounds(ComponentName componentName, float aspectRatio, Rect bounds,
+            Size minimalSize, boolean useCurrentMinEdgeSize) {
         if (!componentName.equals(mLastPipComponentName)) {
             onResetReentryBoundsUnchecked();
             mLastPipComponentName = componentName;
@@ -269,8 +278,7 @@ public class PipBoundsHandler {
             destinationBounds = new Rect(bounds);
         }
         if (isValidPictureInPictureAspectRatio(aspectRatio)) {
-            transformBoundsToAspectRatio(destinationBounds, aspectRatio,
-                    false /* useCurrentMinEdgeSize */);
+            transformBoundsToAspectRatio(destinationBounds, aspectRatio, useCurrentMinEdgeSize);
         }
         mAspectRatio = aspectRatio;
         return destinationBounds;

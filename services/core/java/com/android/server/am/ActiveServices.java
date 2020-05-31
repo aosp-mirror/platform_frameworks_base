@@ -590,7 +590,7 @@ public final class ActiveServices {
         }
 
         NeededUriGrants neededGrants = mAm.mUgmInternal.checkGrantUriPermissionFromIntent(
-                callingUid, r.packageName, service, service.getFlags(), null, r.userId);
+                service, callingUid, r.packageName, r.userId);
 
         // If permissions need a review before any of the app components can run,
         // we do not start the service and launch a review activity if the calling app
@@ -2460,6 +2460,16 @@ public final class ActiveServices {
                             && mAm.isValidSingletonCall(callingUid, sInfo.applicationInfo.uid)) {
                         userId = 0;
                         smap = getServiceMapLocked(0);
+                        ResolveInfo rInfoForUserId0 =
+                                mAm.getPackageManagerInternalLocked().resolveService(service,
+                                        resolvedType, flags, userId, callingUid);
+                        if (rInfoForUserId0 == null) {
+                            Slog.w(TAG_SERVICE,
+                                    "Unable to resolve service " + service + " U=" + userId
+                                            + ": not found");
+                            return null;
+                        }
+                        sInfo = rInfoForUserId0.serviceInfo;
                     }
                     sInfo = new ServiceInfo(sInfo);
                     sInfo.applicationInfo = mAm.getAppInfoForUser(sInfo.applicationInfo, userId);

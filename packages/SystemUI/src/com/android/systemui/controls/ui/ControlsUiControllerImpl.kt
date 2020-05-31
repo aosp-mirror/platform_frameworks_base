@@ -328,7 +328,7 @@ class ControlsUiControllerImpl @Inject constructor (
                     val userContext = context.createContextAsUser(userHandle, 0)
                     val prefs = userContext.getSharedPreferences(
                         "controls_prefs", Context.MODE_PRIVATE)
-                    prefs.edit().putBoolean("ControlsSeedingCompleted", false).apply()
+                    prefs.edit().remove("SeedingCompleted").apply()
                     controlsController.get().resetFavorites()
                     dialog.dismiss()
                     context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))

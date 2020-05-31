@@ -207,6 +207,7 @@ public class Tethering {
             new SparseArray<>();
 
     // used to synchronize public access to members
+    // TODO(b/153621704): remove mPublicSync to make Tethering lock free
     private final Object mPublicSync;
     private final Context mContext;
     private final ArrayMap<String, TetherState> mTetherStates;
@@ -231,6 +232,7 @@ public class Tethering {
     private final TetheringThreadExecutor mExecutor;
     private final TetheringNotificationUpdater mNotificationUpdater;
     private final UserManager mUserManager;
+    private final PrivateAddressCoordinator mPrivateAddressCoordinator;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
     // All the usage of mTetheringEventCallback should run in the same thread.
     private ITetheringEventCallback mTetheringEventCallback = null;
@@ -314,6 +316,7 @@ public class Tethering {
         mExecutor = new TetheringThreadExecutor(mHandler);
         mActiveDataSubIdListener = new ActiveDataSubIdListener(mExecutor);
         mNetdCallback = new NetdCallback();
+        mPrivateAddressCoordinator = new PrivateAddressCoordinator(mContext);
 
         // Load tethering configuration.
         updateConfiguration();
@@ -1616,6 +1619,14 @@ public class Tethering {
             }
         }
 
+        private void addUpstreamPrefixes(final UpstreamNetworkState ns) {
+            mPrivateAddressCoordinator.updateUpstreamPrefix(ns.network, ns.linkProperties);
+        }
+
+        private void removeUpstreamPrefixes(final UpstreamNetworkState ns) {
+            mPrivateAddressCoordinator.removeUpstreamPrefix(ns.network);
+        }
+
         @VisibleForTesting
         void handleUpstreamNetworkMonitorCallback(int arg1, Object o) {
             if (arg1 == UpstreamNetworkMonitor.NOTIFY_LOCAL_PREFIXES) {
@@ -1624,6 +1635,14 @@ public class Tethering {
             }
 
             final UpstreamNetworkState ns = (UpstreamNetworkState) o;
+            switch (arg1) {
+                case UpstreamNetworkMonitor.EVENT_ON_LINKPROPERTIES:
+                    addUpstreamPrefixes(ns);
+                    break;
+                case UpstreamNetworkMonitor.EVENT_ON_LOST:
+                    removeUpstreamPrefixes(ns);
+                    break;
+            }
 
             if (ns == null || !pertainsToCurrentUpstream(ns)) {
                 // TODO: In future, this is where upstream evaluation and selection
@@ -2190,6 +2209,11 @@ public class Tethering {
         mOffloadController.dump(pw);
         pw.decreaseIndent();
 
+        pw.println("Private address coordinator:");
+        pw.increaseIndent();
+        mPrivateAddressCoordinator.dump(pw);
+        pw.decreaseIndent();
+
         pw.println("Log:");
         pw.increaseIndent();
         if (argsContain(args, "--short")) {
@@ -2230,6 +2254,11 @@ public class Tethering {
             @Override
             public void dhcpLeasesChanged() {
                 updateConnectedClients(null /* wifiClients */);
+            }
+
+            @Override
+            public void requestEnableTethering(int tetheringType, boolean enabled) {
+                enableTetheringInternal(tetheringType, enabled, null);
             }
         };
     }
@@ -2314,7 +2343,8 @@ public class Tethering {
         final TetherState tetherState = new TetherState(
                 new IpServer(iface, mLooper, interfaceType, mLog, mNetd,
                              makeControlCallback(), mConfig.enableLegacyDhcpServer,
-                             mConfig.enableBpfOffload, mDeps.getIpServerDependencies()));
+                             mConfig.enableBpfOffload, mPrivateAddressCoordinator,
+                             mDeps.getIpServerDependencies()));
         mTetherStates.put(iface, tetherState);
         tetherState.ipServer.start();
     }

@@ -326,7 +326,6 @@
     <string name="gps_notification_found_text" msgid="3145873880174658526">"Locatie bepaald met gps"</string>
     <string name="accessibility_location_active" msgid="2845747916764660369">"Locatieverzoeken actief"</string>
     <string name="accessibility_sensors_off_active" msgid="2619725434618911551">"\'Sensoren uit\' actief"</string>
-    <string name="accessibility_media_active" msgid="4942087422908239969">"Media is actief"</string>
     <string name="accessibility_clear_all" msgid="970525598287244592">"Alle meldingen wissen."</string>
     <string name="notification_group_overflow_indicator" msgid="7605120293801012648">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="91483442850649192">
@@ -596,19 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"inschakelen"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"uitschakelen"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Naar een ander uitvoerapparaat schakelen"</string>
-    <string name="screen_pinning_title" msgid="7357611095909618178">"Scherm is vastgezet"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"App is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Veeg omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
-    <string name="screen_pinning_toast" msgid="2083944237147005811">"Tik op Terug en Overzicht en houd deze knoppen vast om dit scherm los te maken"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6343770487795352573">"Tik op Terug en Home en houd deze knoppen vast om dit scherm los te maken"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="2884536903398445645">"Veeg omhoog en houd vast om dit scherm los te maken"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlijke informatie kan toegankelijk zijn (zoals contacten en e-mailcontent)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"De vastgezette app kan andere apps openen."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Tik op Terug en Overzicht en houd de knoppen vast om deze app los te maken"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Tik op Terug en Home en houd de knoppen vast om deze app los te maken"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Swipe omhoog en houd vast om deze app los te maken"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ik snap het"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nee, bedankt"</string>
-    <string name="screen_pinning_start" msgid="5695091877402422575">"Scherm vastgezet"</string>
-    <string name="screen_pinning_exit" msgid="5114993350662745840">"Scherm losgemaakt"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"App vastgezet"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"App losgemaakt"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> verbergen?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Deze wordt opnieuw weergegeven zodra u de instelling weer inschakelt."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Verbergen"</string>

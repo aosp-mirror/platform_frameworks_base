@@ -646,7 +646,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                 mSplitScreenDividerAnchor = makeChildSurface(null)
                         .setName("splitScreenDividerAnchor")
                         .build();
-                getPendingTransaction()
+                getSyncTransaction()
                         .show(mAppAnimationLayer)
                         .show(mBoostedAppAnimationLayer)
                         .show(mHomeAppAnimationLayer)

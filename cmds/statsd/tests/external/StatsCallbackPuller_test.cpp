@@ -201,9 +201,9 @@ TEST_F(StatsCallbackPullerTest, RegisterAndTimeout) {
     int64_t actualPullDurationNs = endTimeNs - startTimeNs;
 
     // Pull should take at least the timeout amount of time, but should stop early because the delay
-    // is bigger.
+    // is bigger. Make sure that the time is closer to the timeout, than to the intended delay.
     EXPECT_LT(pullTimeoutNs, actualPullDurationNs);
-    EXPECT_GT(pullDelayNs, actualPullDurationNs);
+    EXPECT_GT(pullDelayNs / 5, actualPullDurationNs);
     ASSERT_EQ(0, dataHolder.size());
 
     // Let the pull return and make sure that the dataHolder is not modified.

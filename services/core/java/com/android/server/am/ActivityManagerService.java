@@ -365,6 +365,7 @@ import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 import com.android.server.uri.GrantUri;
+import com.android.server.uri.NeededUriGrants;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
 import com.android.server.utils.TimingsTraceAndSlog;
@@ -6511,17 +6512,19 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (targetPkg == null) {
                 throw new IllegalArgumentException("null target");
             }
-            if (grantUri == null) {
-                throw new IllegalArgumentException("null uri");
-            }
 
             Preconditions.checkFlagsArgument(modeFlags, Intent.FLAG_GRANT_READ_URI_PERMISSION
                     | Intent.FLAG_GRANT_WRITE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
                     | Intent.FLAG_GRANT_PREFIX_URI_PERMISSION);
 
-            mUgmInternal.grantUriPermission(r.uid, targetPkg, grantUri, modeFlags, null,
-                    UserHandle.getUserId(r.uid));
+            final Intent intent = new Intent();
+            intent.setData(uri);
+            intent.setFlags(modeFlags);
+
+            final NeededUriGrants needed = mUgmInternal.checkGrantUriPermissionFromIntent(intent,
+                    r.uid, targetPkg, UserHandle.getUserId(r.uid));
+            mUgmInternal.grantUriPermissionUncheckedFromIntent(needed, null);
         }
     }
 
@@ -10153,8 +10156,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    private volatile long mWtfClusterStart;
-    private volatile int mWtfClusterCount;
+    private final ArrayMap<String, long[]> mErrorClusterRecords = new ArrayMap<>();
 
     /**
      * Write a description of an error (crash, WTF, ANR) to the drop box.
@@ -10185,13 +10187,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (dbox == null || !dbox.isTagEnabled(dropboxTag)) return;
 
         // Rate-limit how often we're willing to do the heavy lifting below to
-        // collect and record logs; currently 5 logs per 10 second period.
+        // collect and record logs; currently 5 logs per 10 second period per eventType.
         final long now = SystemClock.elapsedRealtime();
-        if (now - mWtfClusterStart > 10 * DateUtils.SECOND_IN_MILLIS) {
-            mWtfClusterStart = now;
-            mWtfClusterCount = 1;
-        } else {
-            if (mWtfClusterCount++ >= 5) return;
+        synchronized (mErrorClusterRecords) {
+            long[] errRecord = mErrorClusterRecords.get(eventType);
+            if (errRecord == null) {
+                errRecord = new long[2]; // [0]: startTime, [1]: count
+                mErrorClusterRecords.put(eventType, errRecord);
+            }
+            if (now - errRecord[0] > 10 * DateUtils.SECOND_IN_MILLIS) {
+                errRecord[0] = now;
+                errRecord[1] = 1L;
+            } else {
+                if (errRecord[1]++ >= 5) return;
+            }
         }
 
         final StringBuilder sb = new StringBuilder(1024);
@@ -20224,8 +20233,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
-                    return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
-                            "com.android.shell", null, uid, packageName, featureId,
+                    return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
                             shouldCollectAsyncNotedOp, message);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
