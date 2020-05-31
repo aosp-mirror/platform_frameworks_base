@@ -24,6 +24,7 @@ import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.LogLevel.WTF
 import com.android.systemui.log.dagger.NotificationLog
+import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import javax.inject.Inject
 
 class NotifCollectionLogger @Inject constructor(
@@ -63,11 +64,43 @@ class NotifCollectionLogger @Inject constructor(
         })
     }
 
+    fun logNotifReleased(key: String) {
+        buffer.log(TAG, INFO, {
+            str1 = key
+        }, {
+            "RELEASED $str1"
+        })
+    }
+
     fun logNotifDismissed(key: String) {
         buffer.log(TAG, INFO, {
             str1 = key
         }, {
             "DISMISSED $str1"
+        })
+    }
+
+    fun logChildDismissed(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.key
+        }, {
+            "CHILD DISMISSED (inferred): $str1"
+        })
+    }
+
+    fun logDismissAll(userId: Int) {
+        buffer.log(TAG, INFO, {
+            int1 = userId
+        }, {
+            "DISMISS ALL notifications for user $int1"
+        })
+    }
+
+    fun logDismissOnAlreadyCanceledEntry(entry: NotificationEntry) {
+        buffer.log(TAG, DEBUG, {
+            str1 = entry.key
+        }, {
+            "Dismiss on $str1, which was already canceled. Trying to remove..."
         })
     }
 
