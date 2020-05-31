@@ -96,11 +96,6 @@ java_sdk_library {
         ":updatable-media-srcs",
     ],
 
-    // TODO(b/155480189) - Remove naming_scheme once references have been resolved.
-    // Temporary java_sdk_library component naming scheme to use to ease the transition from separate
-    // modules to java_sdk_library.
-    naming_scheme: "framework-modules",
-
     libs: [
         "framework_media_annotation",
     ],
