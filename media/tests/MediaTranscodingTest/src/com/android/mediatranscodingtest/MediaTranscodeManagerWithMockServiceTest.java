@@ -135,7 +135,9 @@ public class MediaTranscodeManagerWithMockServiceTest
                     try {
                         outjob.request = inRequest;
                         outjob.jobId = mJobId.getAndIncrement();
-                        Log.d(TAG, "Generate new job " + outjob.jobId);
+                        Log.i(TAG, "Generate new job " + outjob.jobId);
+                        Log.i(TAG, "Source Uri " + inRequest.sourceFilePath);
+                        Log.i(TAG, "Destination Uri " + inRequest.destinationFilePath);
 
                         // Schedules the job to run after inRequest.processingDelayMs.
                         ScheduledFuture<?> transcodingFuture = mJobScheduler.schedule(
