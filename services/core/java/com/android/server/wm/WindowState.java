@@ -21,6 +21,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.isSplitScreenWindowingMode;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.os.PowerManager.DRAW_WAKE_LOCK;
@@ -3755,6 +3756,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
         if (!inSplitScreenWindowingMode() && !inFreeformWindowingMode()) {
+            return false;
+        }
+        // TODO(157912944): formalize drag-resizing so that exceptions aren't hardcoded like this
+        if (task.getActivityType() == ACTIVITY_TYPE_HOME) {
+            // The current sys-ui implementations never live-resize home, so to prevent WSA from
+            // creating/destroying surfaces (which messes up sync-transactions), skip HOME tasks.
             return false;
         }
         if (mAttrs.width != MATCH_PARENT || mAttrs.height != MATCH_PARENT) {
