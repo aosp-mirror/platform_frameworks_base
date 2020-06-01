@@ -99,7 +99,7 @@ java_library_static {
         "android.hardware.vibrator-java",
         "android.net.ipsec.ike.stubs.module_lib",
         "app-compat-annotations",
-        "framework-tethering-stubs-module_libs_api",
+        "framework-tethering.stubs.module_lib",
         "service-permission-stubs",
     ],
 
