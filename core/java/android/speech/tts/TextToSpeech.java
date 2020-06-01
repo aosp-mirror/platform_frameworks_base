@@ -60,6 +60,19 @@ import java.util.Set;
  * notified of the completion of the initialization.<br>
  * When you are done using the TextToSpeech instance, call the {@link #shutdown()} method
  * to release the native resources used by the TextToSpeech engine.
+ *
+ * Apps targeting Android 11 that use text-to-speech should declare {@link
+ * TextToSpeech.Engine#INTENT_ACTION_TTS_SERVICE} in the <code><queries></code> elements of their
+ * manifest:
+ *
+ * <code>
+ * <queries>
+ *   ...
+ *  <intent>
+ *      <action android:name="android.intent.action.TTS_SERVICE" />
+ *  </intent>
+ * </queries>
+ * </code>
  */
 public class TextToSpeech {
 
@@ -239,6 +252,20 @@ public class TextToSpeech {
      *         through {@link TextToSpeech#getFeatures(java.util.Locale)}.
      *     </li>
      * </ul>
+     *
+     * Apps targeting Android 11 that use text-to-speech should declare {@link
+     * #INTENT_ACTION_TTS_SERVICE} in the <code><queries></code> elements of their
+     * manifest:
+     *
+     * <code>
+     * <queries>
+     *   ...
+     *  <intent>
+     *      <action android:name="android.intent.action.TTS_SERVICE" />
+     *  </intent>
+     * </queries>
+     * </code>
+
      */
     public class Engine {
 
