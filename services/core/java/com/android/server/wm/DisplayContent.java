@@ -28,7 +28,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -94,7 +93,6 @@ import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
 import static com.android.server.wm.DisplayContentProto.ROTATION;
 import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SINGLE_TASK_INSTANCE;
-import static com.android.server.wm.DisplayContentProto.WINDOW_CONTAINER;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_BOOT;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_FOCUS;
@@ -219,7 +217,6 @@ import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -232,8 +229,7 @@ import java.util.function.Predicate;
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
  * particular Display.
  */
-class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer>
-        implements WindowManagerPolicy.DisplayContentInfo {
+class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
 
@@ -255,16 +251,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     final int mDisplayId;
 
     /**
-     * Most surfaces will be a child of this window. There are some special layers and windows
-     * which are always on top of others and omitted from Screen-Magnification, for example the
-     * strict mode flash or the magnification overlay itself. Those layers will be children of
-     * {@link #mOverlayLayer} where mWindowContainers contains everything else.
-     */
-     // TODO(b/156425461) we don't need this extra layer between DisplayContent and DisplayArea.Root
-    private final WindowContainers mWindowContainers =
-            new WindowContainers("mWindowContainers", mWmService);
-
-    /**
      * We organize all top-level Surfaces into the following layer.
      * It contains a few Surfaces which are always on top of others, and omitted from
      * Screen-Magnification, for example the strict mode flash or the fullscreen magnification
@@ -278,8 +264,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     // WindowContainer which is omitted from screen magnification, as the IME is never magnified.
     // TODO(display-area): is "no magnification" in the comment still true?
     private final ImeContainer mImeWindowsContainers = new ImeContainer(mWmService);
-
-    private final DisplayArea.Root mRootDisplayArea = new DisplayArea.Root(mWmService);
 
     @VisibleForTesting
     final DisplayAreaPolicy mDisplayAreaPolicy;
@@ -994,12 +978,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 .show(mOverlayLayer);
         getPendingTransaction().apply();
 
-        // These are the only direct children we should ever have and they are permanent.
-        super.addChild(mWindowContainers, null);
-
+        // Setup the policy and build the display area hierarchy.
         mDisplayAreaPolicy = mWmService.mDisplayAreaPolicyProvider.instantiate(
-                mWmService, this, mRootDisplayArea, mImeWindowsContainers);
-        mWindowContainers.addChildren();
+                mWmService, this /* content */, this /* root */, mImeWindowsContainers);
+        mDisplayAreaPolicy.attachDisplayAreas();
 
         // Sets the display content for the children.
         onDisplayChanged(this);
@@ -2327,9 +2309,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 return getLastOrientation();
             }
         }
-        final int rootOrientation = mRootDisplayArea.getOrientation();
-        mLastOrientationSource = mRootDisplayArea.getLastOrientationSource();
-        return rootOrientation;
+        return super.getOrientation();
     }
 
     void updateDisplayInfo() {
@@ -2520,37 +2500,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mDisplayAreaPolicy.getTaskDisplayAreaAt(0);
     }
 
-    @Override
-    protected void addChild(DisplayChildWindowContainer child,
-            Comparator<DisplayChildWindowContainer> comparator) {
-        throw new UnsupportedOperationException("See DisplayChildWindowContainer");
-    }
-
-    @Override
-    protected void addChild(DisplayChildWindowContainer child, int index) {
-        throw new UnsupportedOperationException("See DisplayChildWindowContainer");
-    }
-
-    @Override
-    protected void removeChild(DisplayChildWindowContainer child) {
-        // Only allow removal of direct children from this display if the display is in the process
-        // of been removed.
-        if (mRemovingDisplay) {
-            super.removeChild(child);
-            return;
-        }
-        throw new UnsupportedOperationException("See DisplayChildWindowContainer");
-    }
-
     void positionDisplayAt(int position, boolean includingParents) {
         getParent().positionChildAt(position, this, includingParents);
-    }
-
-    @Override
-    void positionChildAt(int position, DisplayChildWindowContainer child, boolean includingParents) {
-        // Children of the display are statically ordered, so the real intention here is to perform
-        // the operation on the display and not the static direct children.
-        positionDisplayAt(position, includingParents);
     }
 
     /**
@@ -2749,7 +2700,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         boolean stillDeferringRemoval = false;
 
         for (int i = getChildCount() - 1; i >= 0; --i) {
-            final DisplayChildWindowContainer child = getChildAt(i);
+            final DisplayArea child = getChildAt(i);
             stillDeferringRemoval |= child.checkCompleteDeferredRemoval();
             if (getChildCount() == 0) {
                 // If this display is pending to be removed because it contains an activity with
@@ -2849,6 +2800,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
     }
 
+    @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTraceLogLevel int logLevel) {
         // Critical log level logs only visible elements to mitigate performance overheard
@@ -2857,10 +2809,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         final long token = proto.start(fieldId);
-        super.dumpDebug(proto, WINDOW_CONTAINER, logLevel);
+        super.dumpDebug(proto, ROOT_DISPLAY_AREA, logLevel);
 
         proto.write(ID, mDisplayId);
-        mRootDisplayArea.dumpDebug(proto, ROOT_DISPLAY_AREA, logLevel);
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
         proto.write(ROTATION, getRotation());
@@ -4271,99 +4222,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Base class for any direct child window container of {@link #DisplayContent} need to inherit
-     * from. This is mainly a pass through class that allows {@link #DisplayContent} to have
-     * homogeneous children type which is currently required by sub-classes of
-     * {@link WindowContainer} class.
-     */
-    static class DisplayChildWindowContainer<E extends WindowContainer> extends WindowContainer<E> {
-
-        DisplayChildWindowContainer(WindowManagerService service) {
-            super(service);
-            // TODO(display-area): move to ConfigurationContainer?
-            mOrientation = SCREEN_ORIENTATION_UNSET;
-        }
-
-        @Override
-        boolean fillsParent() {
-            return true;
-        }
-
-        @Override
-        boolean isVisible() {
-            return true;
-        }
-    }
-
-    private class WindowContainers extends DisplayChildWindowContainer<WindowContainer> {
-        private final String mName;
-
-        WindowContainers(String name, WindowManagerService service) {
-            super(service);
-            mName = name;
-        }
-
-        @Override
-        void assignChildLayers(SurfaceControl.Transaction t) {
-            mImeWindowsContainers.setNeedsLayer();
-
-            mRootDisplayArea.assignLayer(t, 0);
-
-            final WindowState imeTarget = mInputMethodTarget;
-            // In the case where we have an IME target that is not in split-screen mode IME
-            // assignment is easy. We just need the IME to go directly above the target. This way
-            // children of the target will naturally go above the IME and everyone is happy.
-            //
-            // In the case of split-screen windowing mode, we need to elevate the IME above the
-            // docked divider while keeping the app itself below the docked divider, so instead
-            // we use relative layering of the IME targets child windows, and place the IME in
-            // the non-app layer (see {@link AboveAppWindowContainers#assignChildLayers}).
-            //
-            // In the case the IME target is animating, the animation Z order may be different
-            // than the WindowContainer Z order, so it's difficult to be sure we have the correct
-            // IME target. In this case we just layer the IME over all transitions by placing it
-            // in the above applications layer.
-            //
-            // In the case where we have no IME target we assign it where its base layer would
-            // place it in the AboveAppWindowContainers.
-            //
-            // Keep IME window in mAboveAppWindowsContainers as long as app's starting window
-            // exists so it get's layered above the starting window.
-            if (imeTarget != null && !(imeTarget.mActivityRecord != null
-                    && imeTarget.mActivityRecord.hasStartingWindow()) && (
-                    !(imeTarget.inMultiWindowMode()
-                            || imeTarget.mToken.isAppTransitioning()) && (
-                            imeTarget.getSurfaceControl() != null))) {
-                mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
-                        // TODO: We need to use an extra level on the app surface to ensure
-                        // this is always above SurfaceView but always below attached window.
-                        1);
-            }
-
-            // Above we have assigned layers to our children, now we ask them to assign
-            // layers to their children.
-            mRootDisplayArea.assignChildLayers(t);
-        }
-
-        @Override
-        String getName() {
-            return mName;
-        }
-
-        void addChildren() {
-            addChild(mRootDisplayArea, 0);
-            mDisplayAreaPolicy.attachDisplayAreas();
-        }
-
-        @Override
-        void positionChildAt(int position, WindowContainer child, boolean includingParents) {
-            // Children of the WindowContainers are statically ordered, so the real intention here
-            // is to perform the operation on the display and not the static direct children.
-            getParent().positionChildAt(position, this, includingParents);
-        }
-    }
-
-    /**
      * Container for IME windows.
      *
      * This has some special behaviors:
@@ -4517,8 +4375,38 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     @Override
     void assignChildLayers(SurfaceControl.Transaction t) {
-        mWindowContainers.assignLayer(t, 0);
-        mWindowContainers.assignChildLayers(t);
+        mImeWindowsContainers.setNeedsLayer();
+        final WindowState imeTarget = mInputMethodTarget;
+        // In the case where we have an IME target that is not in split-screen mode IME
+        // assignment is easy. We just need the IME to go directly above the target. This way
+        // children of the target will naturally go above the IME and everyone is happy.
+        //
+        // In the case of split-screen windowing mode, we need to elevate the IME above the
+        // docked divider while keeping the app itself below the docked divider, so instead
+        // we use relative layering of the IME targets child windows, and place the IME in
+        // the non-app layer (see {@link AboveAppWindowContainers#assignChildLayers}).
+        //
+        // In the case the IME target is animating, the animation Z order may be different
+        // than the WindowContainer Z order, so it's difficult to be sure we have the correct
+        // IME target. In this case we just layer the IME over all transitions by placing it
+        // in the above applications layer.
+        //
+        // In the case where we have no IME target we assign it where its base layer would
+        // place it in the AboveAppWindowContainers.
+        //
+        // Keep IME window in mAboveAppWindowsContainers as long as app's starting window
+        // exists so it get's layered above the starting window.
+        if (imeTarget != null && !(imeTarget.mActivityRecord != null
+                && imeTarget.mActivityRecord.hasStartingWindow()) && (
+                !(imeTarget.inMultiWindowMode()
+                        || imeTarget.mToken.isAppTransitioning()) && (
+                        imeTarget.getSurfaceControl() != null))) {
+            mImeWindowsContainers.assignRelativeLayer(t, imeTarget.getSurfaceControl(),
+                    // TODO: We need to use an extra level on the app surface to ensure
+                    // this is always above SurfaceView but always below attached window.
+                    1);
+        }
+        super.assignChildLayers(t);
     }
 
     /**
@@ -4765,12 +4653,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         forAllWindows(w -> {
             w.updateLocationInParentDisplayIfNeeded();
         }, false /* traverseTopToBottom */);
-    }
-
-    // TODO(b/156425461) Make DisplayContent the DisplayArea.Root
-    @Override
-    public SurfaceControl getSurfaceControl() {
-        return mRootDisplayArea.getSurfaceControl();
     }
 
     private DisplayArea getWindowContainers() {
