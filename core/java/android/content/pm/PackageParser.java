@@ -207,6 +207,7 @@ public class PackageParser {
     public static final String TAG_USES_SPLIT = "uses-split";
 
     public static final String METADATA_MAX_ASPECT_RATIO = "android.max_aspect";
+    public static final String METADATA_SUPPORTS_SIZE_CHANGES = "android.supports_size_changes";
     public static final String METADATA_ACTIVITY_WINDOW_LAYOUT_AFFINITY =
             "android.activity_window_layout_affinity";
 
@@ -3897,6 +3898,7 @@ public class PackageParser {
         // every activity info has had a chance to set it from its attributes.
         setMaxAspectRatio(owner);
         setMinAspectRatio(owner);
+        setSupportsSizeChanges(owner);
 
         if (hasDomainURLs(owner)) {
             owner.applicationInfo.privateFlags |= ApplicationInfo.PRIVATE_FLAG_HAS_DOMAIN_URLS;
@@ -4694,6 +4696,18 @@ public class PackageParser {
         }
     }
 
+    private void setSupportsSizeChanges(Package owner) {
+        final boolean supportsSizeChanges = owner.mAppMetaData != null
+                && owner.mAppMetaData.getBoolean(METADATA_SUPPORTS_SIZE_CHANGES, false);
+
+        for (Activity activity : owner.activities) {
+            if (supportsSizeChanges || (activity.metaData != null
+                    && activity.metaData.getBoolean(METADATA_SUPPORTS_SIZE_CHANGES, false))) {
+                activity.info.supportsSizeChanges = true;
+            }
+        }
+    }
+
     /**
      * @param configChanges The bit mask of configChanges fetched from AndroidManifest.xml.
      * @param recreateOnConfigChanges The bit mask recreateOnConfigChanges fetched from
@@ -4863,6 +4877,7 @@ public class PackageParser {
         info.resizeMode = target.info.resizeMode;
         info.maxAspectRatio = target.info.maxAspectRatio;
         info.minAspectRatio = target.info.minAspectRatio;
+        info.supportsSizeChanges = target.info.supportsSizeChanges;
         info.requestedVrComponent = target.info.requestedVrComponent;
 
         info.directBootAware = target.info.directBootAware;

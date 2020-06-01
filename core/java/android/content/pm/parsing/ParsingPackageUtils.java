@@ -1912,6 +1912,7 @@ public class ParsingPackageUtils {
         // every activity info has had a chance to set it from its attributes.
         setMaxAspectRatio(pkg);
         setMinAspectRatio(pkg);
+        setSupportsSizeChanges(pkg);
 
         pkg.setHasDomainUrls(hasDomainURLs(pkg));
 
@@ -2362,6 +2363,23 @@ public class ParsingPackageUtils {
             ParsedActivity activity = activities.get(index);
             if (activity.getMinAspectRatio() == null) {
                 activity.setMinAspectRatio(activity.getResizeMode(), minAspectRatio);
+            }
+        }
+    }
+
+    private void setSupportsSizeChanges(ParsingPackage pkg) {
+        final Bundle appMetaData = pkg.getMetaData();
+        final boolean supportsSizeChanges = appMetaData != null
+                && appMetaData.getBoolean(PackageParser.METADATA_SUPPORTS_SIZE_CHANGES, false);
+
+        List<ParsedActivity> activities = pkg.getActivities();
+        int activitiesSize = activities.size();
+        for (int index = 0; index < activitiesSize; index++) {
+            ParsedActivity activity = activities.get(index);
+            if (supportsSizeChanges || (activity.getMetaData() != null
+                    && activity.getMetaData().getBoolean(
+                            PackageParser.METADATA_SUPPORTS_SIZE_CHANGES, false))) {
+                activity.setSupportsSizeChanges(true);
             }
         }
     }
