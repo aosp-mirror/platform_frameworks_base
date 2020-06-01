@@ -1451,7 +1451,7 @@ public final class StrictMode {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Apps must always use {@code content://} Uris when sharing data")
     public static void enableDeathOnFileUriExposure() {
         sVmPolicy =
                 new VmPolicy(
@@ -1469,7 +1469,7 @@ public final class StrictMode {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.Q, publicAlternatives = "Apps must always use {@code content://} Uris when sharing data")
     public static void disableDeathOnFileUriExposure() {
         sVmPolicy =
                 new VmPolicy(
