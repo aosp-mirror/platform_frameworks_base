@@ -70,7 +70,7 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public long getAuthenticatorId() throws RemoteException {
+    public long getAuthenticatorId(int callingUserId) throws RemoteException {
         return 0;
     }
 }

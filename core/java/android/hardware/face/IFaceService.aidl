@@ -84,7 +84,7 @@ interface IFaceService {
     boolean hasEnrolledFaces(int userId, String opPackageName);
 
     // Gets the authenticator ID for face
-    long getAuthenticatorId();
+    long getAuthenticatorId(int callingUserId);
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
     void resetLockout(in byte [] token);
