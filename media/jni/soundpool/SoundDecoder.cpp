@@ -107,7 +107,8 @@ void SoundDecoder::loadSound(int32_t soundID)
     }
     // Launch threads as needed.  The "as needed" is weakly consistent as we release mLock.
     if (pendingSounds > mThreadPool->getActiveThreadCount()) {
-        const int32_t id __unused = mThreadPool->launch([this](int32_t id) { run(id); });
+        const int32_t id = mThreadPool->launch([this](int32_t id) { run(id); });
+        (void)id; // avoid clang warning -Wunused-variable -Wused-but-marked-unused
         ALOGV_IF(id != 0, "%s: launched thread %d", __func__, id);
     }
 }
