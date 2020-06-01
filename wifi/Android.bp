@@ -140,7 +140,6 @@ java_sdk_library {
     permitted_packages: [
         "android.hardware.wifi",
         "android.net.wifi",
-        "android.x.net.wifi",
         // Created by jarjar rules.
         "com.android.wifi.x",
     ],
