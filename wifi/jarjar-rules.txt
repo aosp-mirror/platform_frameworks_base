@@ -31,6 +31,7 @@ rule android.net.ip.IIpClient* com.android.wifi.x.@0
 rule android.net.ip.IIpClientCallbacks* com.android.wifi.x.@0
 rule android.net.ipmemorystore.Blob* com.android.wifi.x.@0
 rule android.net.ipmemorystore.IOnBlobRetrievedListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.IOnStatusAndCountListener* com.android.wifi.x.@0
 rule android.net.ipmemorystore.IOnStatusListener* com.android.wifi.x.@0
 rule android.net.ipmemorystore.NetworkAttributesParcelable* com.android.wifi.x.@0
 rule android.net.ipmemorystore.SameL3NetworkResponseParcelable* com.android.wifi.x.@0
@@ -46,7 +47,9 @@ rule android.net.NetworkFactory* com.android.wifi.x.@0
 rule android.net.ip.IpClientCallbacks* com.android.wifi.x.@0
 rule android.net.ip.IpClientManager* com.android.wifi.x.@0
 rule android.net.ip.IpClientUtil* com.android.wifi.x.@0
+rule android.net.ipmemorystore.NetworkAttributes* com.android.wifi.x.@0
 rule android.net.ipmemorystore.OnBlobRetrievedListener* com.android.wifi.x.@0
+rule android.net.ipmemorystore.OnDeleteStatusListener* com.android.wifi.x.@0
 rule android.net.ipmemorystore.OnStatusListener* com.android.wifi.x.@0
 rule android.net.ipmemorystore.Status* com.android.wifi.x.@0
 rule android.net.networkstack.ModuleNetworkStackClient* com.android.wifi.x.@0
