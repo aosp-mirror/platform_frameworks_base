@@ -1246,8 +1246,8 @@ public class ResolverActivity extends Activity implements
         }
 
         if (target != null) {
-            if (intent != null) {
-                intent.fixUris(UserHandle.myUserId());
+            if (intent != null && isLaunchingTargetInOtherProfile()) {
+                prepareIntentForCrossProfileLaunch(intent);
             }
             safelyStartActivity(target);
 
@@ -1259,6 +1259,13 @@ public class ResolverActivity extends Activity implements
         }
 
         return true;
+    }
+
+    void prepareIntentForCrossProfileLaunch(Intent intent) {}
+
+    private boolean isLaunchingTargetInOtherProfile() {
+        return mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
+                != UserHandle.myUserId();
     }
 
     @VisibleForTesting
