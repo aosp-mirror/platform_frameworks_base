@@ -487,6 +487,7 @@ public class UserManagerService extends IUserManager.Stub {
         final SparseIntArray states;
         public WatchedUserStates() {
             states = new SparseIntArray();
+            invalidateIsUserUnlockedCache();
         }
         public int get(int userId) {
             return states.get(userId);
