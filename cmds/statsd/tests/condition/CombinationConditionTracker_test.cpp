@@ -24,6 +24,7 @@ using namespace android::os::statsd;
 using std::vector;
 
 #ifdef __ANDROID__
+
 TEST(ConditionTrackerTest, TestUnknownCondition) {
     LogicalOperation operation = LogicalOperation::AND;
 
