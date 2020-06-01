@@ -58,6 +58,7 @@ class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     GaugeMetricProducer(
             const ConfigKey& key, const GaugeMetric& gaugeMetric, const int conditionIndex,
+            const vector<ConditionState>& initialConditionCache,
             const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
             const sp<EventMatcherWizard>& matcherWizard, const int pullTagId,
             const int triggerAtomId, const int atomId, const int64_t timeBaseNs,
