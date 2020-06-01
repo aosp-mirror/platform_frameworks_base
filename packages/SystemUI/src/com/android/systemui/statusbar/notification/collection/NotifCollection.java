@@ -281,6 +281,8 @@ public class NotifCollection implements Dumpable {
         Assert.isMainThread();
         checkForReentrantCall();
 
+        mLogger.logDismissAll(userId);
+
         try {
             mStatusBarService.onClearAllNotifications(userId);
         } catch (RemoteException e) {
@@ -327,6 +329,7 @@ public class NotifCollection implements Dumpable {
                     for (NotificationEntry otherEntry : mNotificationSet.values()) {
                         if (shouldAutoDismissChildren(otherEntry, entry.getSbn().getGroupKey())) {
                             otherEntry.setDismissState(PARENT_DISMISSED);
+                            mLogger.logChildDismissed(otherEntry);
                             if (isCanceled(otherEntry)) {
                                 canceledEntries.add(otherEntry);
                             }
@@ -339,6 +342,7 @@ public class NotifCollection implements Dumpable {
         // Immediately remove any dismissed notifs that have already been canceled by system server
         // (probably due to being lifetime-extended up until this point).
         for (NotificationEntry canceledEntry : canceledEntries) {
+            mLogger.logDismissOnAlreadyCanceledEntry(canceledEntry);
             tryRemoveNotification(canceledEntry);
         }
     }
@@ -453,6 +457,7 @@ public class NotifCollection implements Dumpable {
         }
 
         if (!isLifetimeExtended(entry)) {
+            mLogger.logNotifReleased(entry.getKey());
             mNotificationSet.remove(entry.getKey());
             cancelDismissInterception(entry);
             mEventQueue.add(new EntryRemovedEvent(entry, entry.mCancellationReason));
