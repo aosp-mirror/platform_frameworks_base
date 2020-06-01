@@ -3203,14 +3203,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    void onSurfaceShown(SurfaceControl.Transaction t) {
-        super.onSurfaceShown(t);
-        t.unsetColor(mSurfaceControl);
-    }
-
-    @Override
     void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
-        b.setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
+        b.setEffectLayer().setMetadata(METADATA_TASK_ID, mTaskId);
         super.setInitialSurfaceControlProperties(b);
     }
 
