@@ -16,6 +16,7 @@
 
 package com.android.server.accessibility;
 
+import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_BUTTON;
 import static android.view.accessibility.AccessibilityManager.ACCESSIBILITY_SHORTCUT_KEY;
 import static android.view.accessibility.AccessibilityManager.ShortcutType;
@@ -542,10 +543,54 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                     intent.getStringExtra(Intent.EXTRA_SETTING_PREVIOUS_VALUE),
                                     intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE));
                         }
+                    } else if (ACCESSIBILITY_DISPLAY_MAGNIFICATION_NAVBAR_ENABLED.equals(which)) {
+                        synchronized (mLock) {
+                            restoreLegacyDisplayMagnificationNavBarIfNeededLocked(
+                                    intent.getStringExtra(Intent.EXTRA_SETTING_NEW_VALUE),
+                                    intent.getIntExtra(Intent.EXTRA_SETTING_RESTORED_FROM_SDK_INT,
+                                            0));
+                        }
                     }
                 }
             }
         }, UserHandle.ALL, intentFilter, null, null);
+    }
+
+    // Called only during settings restore; currently supports only the owner user
+    // TODO: b/22388012
+    private void restoreLegacyDisplayMagnificationNavBarIfNeededLocked(String newSetting,
+            int restoreFromSdkInt) {
+        if (restoreFromSdkInt >= Build.VERSION_CODES.R) {
+            return;
+        }
+
+        boolean displayMagnificationNavBarEnabled;
+        try {
+            displayMagnificationNavBarEnabled = Integer.parseInt(newSetting) == 1;
+        } catch (NumberFormatException e) {
+            Slog.w(LOG_TAG, "number format is incorrect" + e);
+            return;
+        }
+
+        final AccessibilityUserState userState = getUserStateLocked(UserHandle.USER_SYSTEM);
+        final Set<String> targetsFromSetting = new ArraySet<>();
+        readColonDelimitedSettingToSet(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                userState.mUserId, targetsFromSetting, str -> str);
+        final boolean targetsContainMagnification = targetsFromSetting.contains(
+                MAGNIFICATION_CONTROLLER_NAME);
+        if (targetsContainMagnification == displayMagnificationNavBarEnabled) {
+            return;
+        }
+
+        if (displayMagnificationNavBarEnabled) {
+            targetsFromSetting.add(MAGNIFICATION_CONTROLLER_NAME);
+        } else {
+            targetsFromSetting.remove(MAGNIFICATION_CONTROLLER_NAME);
+        }
+        persistColonDelimitedSetToSettingLocked(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS,
+                userState.mUserId, targetsFromSetting, str -> str);
+        readAccessibilityButtonTargetsLocked(userState);
+        onUserStateChangedLocked(userState);
     }
 
     @Override
