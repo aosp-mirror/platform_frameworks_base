@@ -24,7 +24,6 @@ import com.android.mediaframeworktest.functional.CameraTest;
 import com.android.mediaframeworktest.functional.MediaMetadataTest;
 import com.android.mediaframeworktest.functional.MediaMimeTest;
 import com.android.mediaframeworktest.functional.MediaPlayerInvokeTest;
-import com.android.mediaframeworktest.functional.MediaTranscodeManagerTest;
 import com.android.mediaframeworktest.functional.audio.MediaAudioEffectTest;
 import com.android.mediaframeworktest.functional.audio.MediaAudioManagerTest;
 import com.android.mediaframeworktest.functional.audio.MediaAudioTrackTest;
@@ -71,7 +70,6 @@ public class MediaFrameworkTestRunner extends InstrumentationTestRunner {
         suite.addTestSuite(MediaEnvReverbTest.class);
         suite.addTestSuite(MediaEqualizerTest.class);
         suite.addTestSuite(MediaPresetReverbTest.class);
-        suite.addTestSuite(MediaTranscodeManagerTest.class);
         suite.addTestSuite(MediaVirtualizerTest.class);
         suite.addTestSuite(MediaVisualizerTest.class);
         return suite;
