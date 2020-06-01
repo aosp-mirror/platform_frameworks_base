@@ -1134,6 +1134,8 @@ class StorageManagerService extends IStorageManager.Stub
             Slog.wtf(TAG, e);
         }
 
+        onKeyguardStateChanged(false);
+
         mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId).sendToTarget();
     }
 
