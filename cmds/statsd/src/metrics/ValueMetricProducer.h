@@ -52,6 +52,7 @@ class ValueMetricProducer : public virtual MetricProducer, public virtual PullDa
 public:
     ValueMetricProducer(
             const ConfigKey& key, const ValueMetric& valueMetric, const int conditionIndex,
+            const vector<ConditionState>& initialConditionCache,
             const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
             const sp<EventMatcherWizard>& matcherWizard, const int pullTagId,
             const int64_t timeBaseNs, const int64_t startTimeNs,
