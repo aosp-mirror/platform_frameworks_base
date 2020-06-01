@@ -26,8 +26,10 @@ import static android.net.NetworkStats.UID_TETHERING;
 
 import android.app.usage.NetworkStatsManager;
 import android.net.INetd;
+import android.net.MacAddress;
 import android.net.NetworkStats;
 import android.net.NetworkStats.Entry;
+import android.net.TetherOffloadRuleParcel;
 import android.net.TetherStatsParcel;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.net.util.SharedLog;
@@ -42,6 +44,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+
+import java.net.Inet6Address;
 
 /**
  *  This coordinator is responsible for providing BPF offload relevant functionality.
@@ -166,6 +170,45 @@ public class BpfCoordinator {
             Log.wtf(TAG, "The upstream interface name " + upstreamIface
                     + " is different from the existing interface name "
                     + iface + " for index " + upstreamIfindex);
+        }
+    }
+
+    /** IPv6 forwarding rule class. */
+    public static class Ipv6ForwardingRule {
+        public final int upstreamIfindex;
+        public final int downstreamIfindex;
+        public final Inet6Address address;
+        public final MacAddress srcMac;
+        public final MacAddress dstMac;
+
+        public Ipv6ForwardingRule(int upstreamIfindex, int downstreamIfIndex, Inet6Address address,
+                MacAddress srcMac, MacAddress dstMac) {
+            this.upstreamIfindex = upstreamIfindex;
+            this.downstreamIfindex = downstreamIfIndex;
+            this.address = address;
+            this.srcMac = srcMac;
+            this.dstMac = dstMac;
+        }
+
+        /** Return a new rule object which updates with new upstream index. */
+        public Ipv6ForwardingRule onNewUpstream(int newUpstreamIfindex) {
+            return new Ipv6ForwardingRule(newUpstreamIfindex, downstreamIfindex, address, srcMac,
+                    dstMac);
+        }
+
+        /**
+         * Don't manipulate TetherOffloadRuleParcel directly because implementing onNewUpstream()
+         * would be error-prone due to generated stable AIDL classes not having a copy constructor.
+         */
+        public TetherOffloadRuleParcel toTetherOffloadRuleParcel() {
+            final TetherOffloadRuleParcel parcel = new TetherOffloadRuleParcel();
+            parcel.inputInterfaceIndex = upstreamIfindex;
+            parcel.outputInterfaceIndex = downstreamIfindex;
+            parcel.destination = address.getAddress();
+            parcel.prefixLength = 128;
+            parcel.srcL2Address = srcMac.toByteArray();
+            parcel.dstL2Address = dstMac.toByteArray();
+            return parcel;
         }
     }
 
