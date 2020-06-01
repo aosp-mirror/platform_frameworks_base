@@ -38,15 +38,15 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
+import com.android.server.FgThread;
 import com.android.server.SystemConfig;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -102,25 +102,26 @@ public class SettingsHelper {
     private final StringSetCachedGlobalSetting mBackgroundThrottlePackageWhitelist;
     private final StringSetCachedGlobalSetting mIgnoreSettingsPackageWhitelist;
 
-    // TODO: get rid of handler
-    public SettingsHelper(Context context, Handler handler) {
+    public SettingsHelper(Context context) {
         mContext = context;
 
-        mLocationMode = new IntegerSecureSetting(context, LOCATION_MODE, handler);
+        mLocationMode = new IntegerSecureSetting(context, LOCATION_MODE, FgThread.getHandler());
         mBackgroundThrottleIntervalMs = new LongGlobalSetting(context,
-                LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS, handler);
+                LOCATION_BACKGROUND_THROTTLE_INTERVAL_MS, FgThread.getHandler());
         mGnssMeasurementFullTracking = new BooleanGlobalSetting(context,
-                ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, handler);
+                ENABLE_GNSS_RAW_MEAS_FULL_TRACKING, FgThread.getHandler());
         mLocationPackageBlacklist = new StringListCachedSecureSetting(context,
-                LOCATION_PACKAGE_BLACKLIST, handler);
+                LOCATION_PACKAGE_BLACKLIST, FgThread.getHandler());
         mLocationPackageWhitelist = new StringListCachedSecureSetting(context,
-                LOCATION_PACKAGE_WHITELIST, handler);
+                LOCATION_PACKAGE_WHITELIST, FgThread.getHandler());
         mBackgroundThrottlePackageWhitelist = new StringSetCachedGlobalSetting(context,
                 LOCATION_BACKGROUND_THROTTLE_PACKAGE_WHITELIST,
-                () -> SystemConfig.getInstance().getAllowUnthrottledLocation(), handler);
+                () -> SystemConfig.getInstance().getAllowUnthrottledLocation(),
+                FgThread.getHandler());
         mIgnoreSettingsPackageWhitelist = new StringSetCachedGlobalSetting(context,
                 LOCATION_IGNORE_SETTINGS_PACKAGE_WHITELIST,
-                () -> SystemConfig.getInstance().getAllowIgnoreLocationSettings(), handler);
+                () -> SystemConfig.getInstance().getAllowIgnoreLocationSettings(),
+                FgThread.getHandler());
     }
 
     /** Called when system is ready. */
@@ -346,8 +347,7 @@ public class SettingsHelper {
     /**
      * Dump info for debugging.
      */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+    public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
         int userId = ActivityManager.getCurrentUser();
 
         ipw.print("Location Enabled: ");
