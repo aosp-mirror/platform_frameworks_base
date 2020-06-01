@@ -64,15 +64,16 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
 DurationMetricProducer::DurationMetricProducer(
         const ConfigKey& key, const DurationMetric& metric, const int conditionIndex,
-        const size_t startIndex, const size_t stopIndex, const size_t stopAllIndex,
-        const bool nesting, const sp<ConditionWizard>& wizard,
-        const FieldMatcher& internalDimensions, const int64_t timeBaseNs, const int64_t startTimeNs,
+        const vector<ConditionState>& initialConditionCache, const size_t startIndex,
+        const size_t stopIndex, const size_t stopAllIndex, const bool nesting,
+        const sp<ConditionWizard>& wizard, const FieldMatcher& internalDimensions,
+        const int64_t timeBaseNs, const int64_t startTimeNs,
         const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
         const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
         const vector<int>& slicedStateAtoms,
         const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
-    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard, eventActivationMap,
-                     eventDeactivationMap, slicedStateAtoms, stateGroupMap),
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, initialConditionCache, wizard,
+                     eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap),
       mAggregationType(metric.aggregation_type()),
       mStartIndex(startIndex),
       mStopIndex(stopIndex),

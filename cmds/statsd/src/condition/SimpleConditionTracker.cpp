@@ -95,9 +95,11 @@ SimpleConditionTracker::~SimpleConditionTracker() {
 bool SimpleConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                   const vector<sp<ConditionTracker>>& allConditionTrackers,
                                   const unordered_map<int64_t, int>& conditionIdIndexMap,
-                                  vector<bool>& stack) {
+                                  vector<bool>& stack,
+                                  vector<ConditionState>& initialConditionCache) {
     // SimpleConditionTracker does not have dependency on other conditions, thus we just return
     // if the initialization was successful.
+    initialConditionCache[mIndex] = mInitialValue;
     return mInitialized;
 }
 
