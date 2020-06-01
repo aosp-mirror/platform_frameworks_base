@@ -69,7 +69,7 @@ public abstract class ListenerTransportManager<TTransport extends ListenerTransp
      * replace the old transport with the new transport server side. If no transport exists with
      * that key, it will be added server side via {@link #registerWithServer(ListenerTransport)}.
      */
-    public void registerListener(@NonNull Object key, @NonNull TTransport transport) {
+    protected void registerListener(@NonNull Object key, @NonNull TTransport transport) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(transport);
 
@@ -104,7 +104,7 @@ public abstract class ListenerTransportManager<TTransport extends ListenerTransp
      * Removes the transport with the given key, and makes a call to remove the transport server
      * side via {@link #unregisterWithServer(ListenerTransport)}.
      */
-    public void unregisterListener(@NonNull Object key) {
+    protected void unregisterListener(@NonNull Object key) {
         Objects.requireNonNull(key);
 
         synchronized (mTransports) {
@@ -128,7 +128,7 @@ public abstract class ListenerTransportManager<TTransport extends ListenerTransp
      * intended use is for when the transport is already removed server side and only client side
      * cleanup is necessary.
      */
-    public void removeTransport(@NonNull Object key, @NonNull ListenerTransport<?> transport) {
+    protected void removeTransport(@NonNull Object key, @NonNull ListenerTransport<?> transport) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(transport);
 
