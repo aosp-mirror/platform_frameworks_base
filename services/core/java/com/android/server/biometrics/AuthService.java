@@ -173,7 +173,7 @@ public class AuthService extends SystemService {
             checkPermission();
 
             if (token == null || opPackageName == null) {
-                Slog.e(TAG, "Unable to authenticate, one or more null arguments");
+                Slog.e(TAG, "Unable to cancel authentication, one or more null arguments");
                 return;
             }
 
