@@ -99,16 +99,19 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     private Handler mHandler;
     private KeyguardStateController mKeyguardStateController;
 
+    private WindowManagerProxy mWindowManagerProxy;
+
     private final ArrayList<WeakReference<Consumer<Boolean>>> mDockedStackExistsListeners =
             new ArrayList<>();
 
     private SplitScreenTaskOrganizer mSplits = new SplitScreenTaskOrganizer(this);
 
     private DisplayChangeController.OnDisplayChangingListener mRotationController =
-            (display, fromRotation, toRotation, t) -> {
-                if (!mSplits.isSplitScreenSupported()) {
+            (display, fromRotation, toRotation, wct) -> {
+                if (!mSplits.isSplitScreenSupported() || mWindowManagerProxy == null) {
                     return;
                 }
+                WindowContainerTransaction t = new WindowContainerTransaction();
                 DisplayLayout displayLayout =
                         new DisplayLayout(mDisplayController.getDisplayLayout(display));
                 SplitDisplayLayout sdl = new SplitDisplayLayout(mContext, displayLayout, mSplits);
@@ -126,6 +129,17 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
                 if (isSplitActive()) {
                     WindowManagerProxy.applyHomeTasksMinimized(sdl, mSplits.mSecondary.token, t);
+                }
+                if (mWindowManagerProxy.queueSyncTransactionIfWaiting(t)) {
+                    // Because sync transactions are serialized, its possible for an "older"
+                    // bounds-change to get applied after a screen rotation. In that case, we
+                    // want to actually defer on that rather than apply immediately. Of course,
+                    // this means that the bounds may not change until after the rotation so
+                    // the user might see some artifacts. This should be rare.
+                    Slog.w(TAG, "Screen rotated while other operations were pending, this may"
+                            + " result in some graphical artifacts.");
+                } else {
+                    wct.merge(t, true /* transfer */);
                 }
             };
 
@@ -159,6 +173,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         mRecentsOptionalLazy = recentsOptionalLazy;
         mForcedResizableController = new ForcedResizableInfoActivityController(context, this);
         mTransactionPool = transactionPool;
+        mWindowManagerProxy = new WindowManagerProxy(mTransactionPool, mHandler);
         mImePositionProcessor = new DividerImeController(mSplits, mTransactionPool, mHandler);
     }
 
@@ -278,9 +293,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 LayoutInflater.from(dctx).inflate(R.layout.docked_stack_divider, null);
         DisplayLayout displayLayout = mDisplayController.getDisplayLayout(mContext.getDisplayId());
         mView.injectDependencies(mWindowManager, mDividerState, this, mSplits, mSplitLayout,
-                mImePositionProcessor);
+                mImePositionProcessor, mWindowManagerProxy);
         mView.setVisibility(mVisible ? View.VISIBLE : View.INVISIBLE);
-        mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
+        mView.setMinimizedDockStack(mMinimized, mHomeStackResizable, null /* transaction */);
         final int size = dctx.getResources().getDimensionPixelSize(
                 com.android.internal.R.dimen.docked_stack_divider_thickness);
         final boolean landscape = configuration.orientation == ORIENTATION_LANDSCAPE;
@@ -303,7 +318,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         addDivider(configuration);
 
         if (mMinimized) {
-            mView.setMinimizedDockStack(true, mHomeStackResizable);
+            mView.setMinimizedDockStack(true, mHomeStackResizable, null /* transaction */);
             updateTouchable();
         }
         mView.setHidden(isDividerHidden);
@@ -327,11 +342,13 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             if (visible) {
                 mView.enterSplitMode(mHomeStackResizable);
                 // Update state because animations won't finish.
-                mView.setMinimizedDockStack(mMinimized, mHomeStackResizable);
+                mWindowManagerProxy.runInSync(
+                        t -> mView.setMinimizedDockStack(mMinimized, mHomeStackResizable, t));
+
             } else {
                 mView.exitSplitMode();
-                // un-minimize so that next entry triggers minimize anim.
-                mView.setMinimizedDockStack(false /* minimized */, mHomeStackResizable);
+                mWindowManagerProxy.runInSync(
+                        t -> mView.setMinimizedDockStack(false, mHomeStackResizable, t));
             }
             // Notify existence listeners
             synchronized (mDockedStackExistsListeners) {
@@ -342,12 +359,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                 });
             }
         }
-    }
-
-    void onSplitDismissed() {
-        updateVisibility(false /* visible */);
-        mMinimized = false;
-        removeDivider();
     }
 
     /** Switch to minimized state if appropriate */
@@ -405,7 +416,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             }
         }
         updateTouchable();
-        WindowOrganizer.applyTransaction(wct);
+        mWindowManagerProxy.applySyncTransaction(wct);
     }
 
     void setAdjustedForIme(boolean adjustedForIme) {
@@ -501,7 +512,14 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         update(mDisplayController.getDisplayContext(
                 mContext.getDisplayId()).getResources().getConfiguration());
         // Set resizable directly here because applyEnterSplit already resizes home stack.
-        mHomeStackResizable = WindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
+        mHomeStackResizable = mWindowManagerProxy.applyEnterSplit(mSplits, mSplitLayout);
+    }
+
+    void startDismissSplit() {
+        mWindowManagerProxy.applyDismissSplit(mSplits, mSplitLayout, true /* dismissOrMaximize */);
+        updateVisibility(false /* visible */);
+        mMinimized = false;
+        removeDivider();
     }
 
     void ensureMinimizedSplit() {
@@ -528,6 +546,10 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     SplitDisplayLayout getSplitLayout() {
         return mSplitLayout;
+    }
+
+    WindowManagerProxy getWmProxy() {
+        return mWindowManagerProxy;
     }
 
     /** @return the container token for the secondary split root task. */
