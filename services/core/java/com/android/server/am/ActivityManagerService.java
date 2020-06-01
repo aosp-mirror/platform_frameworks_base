@@ -18900,30 +18900,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkContentProviderUriPermission(Uri uri, int userId,
                 int callingUid, int modeFlags) {
-            // We can find ourselves needing to check Uri permissions while
-            // already holding the WM lock, which means reaching back here for
-            // the AM lock would cause an inversion. The WM team has requested
-            // that we use the strategy below instead of shifting where Uri
-            // grants are calculated.
-
-            // Since we could also arrive here while holding the AM lock, we
-            // can't always delegate the call through the handler, and we need
-            // to delicately dance between the deadlocks.
-            if (Thread.currentThread().holdsLock(ActivityManagerService.this)) {
-                return ActivityManagerService.this.checkContentProviderUriPermission(uri,
-                        userId, callingUid, modeFlags);
-            } else {
-                final CompletableFuture<Integer> res = new CompletableFuture<>();
-                mHandler.post(() -> {
-                    res.complete(ActivityManagerService.this.checkContentProviderUriPermission(uri,
-                            userId, callingUid, modeFlags));
-                });
-                try {
-                    return res.get();
-                } catch (InterruptedException | ExecutionException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+            return ActivityManagerService.this.checkContentProviderUriPermission(uri,
+                    userId, callingUid, modeFlags);
         }
 
         @Override
