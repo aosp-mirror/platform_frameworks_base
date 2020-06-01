@@ -233,7 +233,6 @@ public abstract class MediaRoute2ProviderService extends Service {
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
-                // TODO: Notify failure to the requester, and throw exception if needed.
                 Log.w(TAG, "Ignoring duplicate session id.");
                 return;
             }
@@ -244,7 +243,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             return;
         }
         try {
-            // TODO: Calling binder calls in multiple thread may cause timing issue.
+            // TODO(b/157873487): Calling binder calls in multiple thread may cause timing issue.
             //       Consider to change implementations to avoid the problems.
             //       For example, post binder calls, always send all sessions at once, etc.
             mRemoteCallback.notifySessionCreated(requestId, sessionInfo);
@@ -519,7 +518,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                     requestCreateSession));
         }
 
-        //TODO: Ignore requests with unknown session ID.
+        //TODO(b/157873546): Ignore requests with unknown session ID. -> For all similar commands.
         @Override
         public void selectRoute(long requestId, String sessionId, String routeId) {
             if (!checkCallerisSystem()) {
