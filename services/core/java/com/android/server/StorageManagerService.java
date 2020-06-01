@@ -376,6 +376,7 @@ class StorageManagerService extends IStorageManager.Stub
     private class WatchedLockedUsers {
         private int[] users = EmptyArray.INT;
         public WatchedLockedUsers() {
+            invalidateIsUserUnlockedCache();
         }
         public void append(int userId) {
             users = ArrayUtils.appendInt(users, userId);
