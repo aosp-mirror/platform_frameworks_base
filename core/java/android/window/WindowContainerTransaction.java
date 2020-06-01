@@ -264,6 +264,29 @@ public final class WindowContainerTransaction implements Parcelable {
         return this;
     }
 
+    /**
+     * Merges another WCT into this one.
+     * @param transfer When true, this will transfer everything from other potentially leaving
+     *                 other in an unusable state. When false, other is left alone, but
+     *                 SurfaceFlinger Transactions will not be merged.
+     * @hide
+     */
+    public void merge(WindowContainerTransaction other, boolean transfer) {
+        for (int i = 0, n = other.mChanges.size(); i < n; ++i) {
+            final IBinder key = other.mChanges.keyAt(i);
+            Change existing = mChanges.get(key);
+            if (existing == null) {
+                existing = new Change();
+                mChanges.put(key, existing);
+            }
+            existing.merge(other.mChanges.valueAt(i), transfer);
+        }
+        for (int i = 0, n = other.mHierarchyOps.size(); i < n; ++i) {
+            mHierarchyOps.add(transfer ? other.mHierarchyOps.get(i)
+                    : new HierarchyOp(other.mHierarchyOps.get(i)));
+        }
+    }
+
     /** @hide */
     public Map<IBinder, Change> getChanges() {
         return mChanges;
@@ -357,6 +380,41 @@ public final class WindowContainerTransaction implements Parcelable {
 
             mWindowingMode = in.readInt();
             mActivityWindowingMode = in.readInt();
+        }
+
+        /**
+         * @param transfer When true, this will transfer other into this leaving other in an
+         *                 undefined state. Use this if you don't intend to use other. When false,
+         *                 SurfaceFlinger Transactions will not merge.
+         */
+        public void merge(Change other, boolean transfer) {
+            mConfiguration.setTo(other.mConfiguration, other.mConfigSetMask, other.mWindowSetMask);
+            mConfigSetMask |= other.mConfigSetMask;
+            mWindowSetMask |= other.mWindowSetMask;
+            if ((other.mChangeMask & CHANGE_FOCUSABLE) != 0) {
+                mFocusable = other.mFocusable;
+            }
+            if (transfer && (other.mChangeMask & CHANGE_BOUNDS_TRANSACTION) != 0) {
+                mBoundsChangeTransaction = other.mBoundsChangeTransaction;
+                other.mBoundsChangeTransaction = null;
+            }
+            if ((other.mChangeMask & CHANGE_PIP_CALLBACK) != 0) {
+                mPinnedBounds = transfer ? other.mPinnedBounds : new Rect(other.mPinnedBounds);
+            }
+            if ((other.mChangeMask & CHANGE_HIDDEN) != 0) {
+                mHidden = other.mHidden;
+            }
+            mChangeMask |= other.mChangeMask;
+            if (other.mActivityWindowingMode >= 0) {
+                mActivityWindowingMode = other.mActivityWindowingMode;
+            }
+            if (other.mWindowingMode >= 0) {
+                mWindowingMode = other.mWindowingMode;
+            }
+            if (other.mBoundsChangeSurfaceBounds != null) {
+                mBoundsChangeSurfaceBounds = transfer ? other.mBoundsChangeSurfaceBounds
+                        : new Rect(other.mBoundsChangeSurfaceBounds);
+            }
         }
 
         public int getWindowingMode() {
@@ -520,6 +578,12 @@ public final class WindowContainerTransaction implements Parcelable {
             mContainer = container;
             mReparent = container;
             mToTop = toTop;
+        }
+
+        public HierarchyOp(@NonNull HierarchyOp copy) {
+            mContainer = copy.mContainer;
+            mReparent = copy.mReparent;
+            mToTop = copy.mToTop;
         }
 
         protected HierarchyOp(Parcel in) {
