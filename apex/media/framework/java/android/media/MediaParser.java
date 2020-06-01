@@ -402,9 +402,9 @@ public final class MediaParser {
          *     onSampleDataFound(int, MediaParser.InputReader)} for the specified track, since the
          *     last byte belonging to the sample whose metadata is being passed.
          * @param cryptoInfo Encryption data required to decrypt the sample. May be null for
-         *     unencrypted samples. MediaParser may reuse {@link CryptoInfo} instances to avoid
-         *     allocations, so implementations of this method must not write to or keep reference to
-         *     the fields of this parameter.
+         *     unencrypted samples. Implementors should treat any output {@link CryptoInfo}
+         *     instances as immutable. MediaParser will not modify any output {@code cryptoInfos}
+         *     and implementors should not modify them either.
          */
         void onSampleCompleted(
                 int trackIndex,
@@ -1409,23 +1409,28 @@ public final class MediaParser {
     private class TrackOutputAdapter implements TrackOutput {
 
         private final int mTrackIndex;
-        private final CryptoInfo mCryptoInfo;
+
+        private CryptoInfo mLastOutputCryptoInfo;
+        private CryptoInfo.Pattern mLastOutputEncryptionPattern;
+        private CryptoData mLastReceivedCryptoData;
 
         @EncryptionDataReadState private int mEncryptionDataReadState;
         private int mEncryptionDataSizeToSubtractFromSampleDataSize;
         private int mEncryptionVectorSize;
+        private byte[] mScratchIvSpace;
+        private int mSubsampleEncryptionDataSize;
+        private int[] mScratchSubsampleEncryptedBytesCount;
+        private int[] mScratchSubsampleClearBytesCount;
         private boolean mHasSubsampleEncryptionData;
-        private CryptoInfo.Pattern mEncryptionPattern;
         private int mSkippedSupplementalDataBytes;
 
         private TrackOutputAdapter(int trackIndex) {
             mTrackIndex = trackIndex;
-            mCryptoInfo = new CryptoInfo();
-            mCryptoInfo.iv = new byte[16]; // Size documented in CryptoInfo.
-            mCryptoInfo.numBytesOfClearData = new int[0];
-            mCryptoInfo.numBytesOfEncryptedData = new int[0];
+            mScratchIvSpace = new byte[16]; // Size documented in CryptoInfo.
+            mScratchSubsampleEncryptedBytesCount = new int[32];
+            mScratchSubsampleClearBytesCount = new int[32];
             mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
-            mEncryptionPattern =
+            mLastOutputEncryptionPattern =
                     new CryptoInfo.Pattern(/* blocksToEncrypt= */ 0, /* blocksToSkip= */ 0);
         }
 
@@ -1466,35 +1471,39 @@ public final class MediaParser {
                             mEncryptionDataReadState = STATE_READING_INIT_VECTOR;
                             break;
                         case STATE_READING_INIT_VECTOR:
-                            Arrays.fill(mCryptoInfo.iv, (byte) 0); // Ensure 0-padding.
-                            data.readBytes(mCryptoInfo.iv, /* offset= */ 0, mEncryptionVectorSize);
+                            Arrays.fill(mScratchIvSpace, (byte) 0); // Ensure 0-padding.
+                            data.readBytes(mScratchIvSpace, /* offset= */ 0, mEncryptionVectorSize);
                             length -= mEncryptionVectorSize;
                             if (mHasSubsampleEncryptionData) {
                                 mEncryptionDataReadState = STATE_READING_SUBSAMPLE_ENCRYPTION_SIZE;
                             } else {
-                                mCryptoInfo.numSubSamples = 0;
+                                mSubsampleEncryptionDataSize = 0;
                                 mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
                             }
                             break;
                         case STATE_READING_SUBSAMPLE_ENCRYPTION_SIZE:
-                            int numSubSamples = data.readUnsignedShort();
-                            mCryptoInfo.numSubSamples = numSubSamples;
-                            if (mCryptoInfo.numBytesOfClearData.length < numSubSamples) {
-                                mCryptoInfo.numBytesOfClearData = new int[numSubSamples];
-                                mCryptoInfo.numBytesOfEncryptedData = new int[numSubSamples];
+                            mSubsampleEncryptionDataSize = data.readUnsignedShort();
+                            if (mScratchSubsampleClearBytesCount.length
+                                    < mSubsampleEncryptionDataSize) {
+                                mScratchSubsampleClearBytesCount =
+                                        new int[mSubsampleEncryptionDataSize];
+                                mScratchSubsampleEncryptedBytesCount =
+                                        new int[mSubsampleEncryptionDataSize];
                             }
                             length -= 2;
                             mEncryptionDataSizeToSubtractFromSampleDataSize +=
-                                    2 + numSubSamples * BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY;
+                                    2
+                                            + mSubsampleEncryptionDataSize
+                                                    * BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY;
                             mEncryptionDataReadState = STATE_READING_SUBSAMPLE_ENCRYPTION_DATA;
                             break;
                         case STATE_READING_SUBSAMPLE_ENCRYPTION_DATA:
-                            for (int i = 0; i < mCryptoInfo.numSubSamples; i++) {
-                                mCryptoInfo.numBytesOfClearData[i] = data.readUnsignedShort();
-                                mCryptoInfo.numBytesOfEncryptedData[i] = data.readInt();
+                            for (int i = 0; i < mSubsampleEncryptionDataSize; i++) {
+                                mScratchSubsampleClearBytesCount[i] = data.readUnsignedShort();
+                                mScratchSubsampleEncryptedBytesCount[i] = data.readInt();
                             }
                             length -=
-                                    mCryptoInfo.numSubSamples
+                                    mSubsampleEncryptionDataSize
                                             * BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY;
                             mEncryptionDataReadState = STATE_READING_SIGNAL_BYTE;
                             if (length != 0) {
@@ -1536,24 +1545,71 @@ public final class MediaParser {
             if (cryptoData == null) {
                 // The sample is not encrypted.
                 return null;
+            } else if (mInBandCryptoInfo) {
+                if (cryptoData != mLastReceivedCryptoData) {
+                    mLastOutputCryptoInfo =
+                            createNewCryptoInfoAndPopulateWithCryptoData(cryptoData);
+                }
+            } else /* We must populate the full CryptoInfo. */ {
+                // CryptoInfo.pattern is not accessible to the user, so the user needs to feed
+                // this CryptoInfo directly to MediaCodec. We need to create a new CryptoInfo per
+                // sample because of per-sample initialization vector changes.
+                CryptoInfo newCryptoInfo = createNewCryptoInfoAndPopulateWithCryptoData(cryptoData);
+                newCryptoInfo.iv = Arrays.copyOf(mScratchIvSpace, mScratchIvSpace.length);
+                boolean canReuseSubsampleInfo =
+                        mLastOutputCryptoInfo != null
+                                && mLastOutputCryptoInfo.numSubSamples
+                                        == mSubsampleEncryptionDataSize;
+                for (int i = 0; i < mSubsampleEncryptionDataSize && canReuseSubsampleInfo; i++) {
+                    canReuseSubsampleInfo =
+                            mLastOutputCryptoInfo.numBytesOfClearData[i]
+                                            == mScratchSubsampleClearBytesCount[i]
+                                    && mLastOutputCryptoInfo.numBytesOfEncryptedData[i]
+                                            == mScratchSubsampleEncryptedBytesCount[i];
+                }
+                newCryptoInfo.numSubSamples = mSubsampleEncryptionDataSize;
+                if (canReuseSubsampleInfo) {
+                    newCryptoInfo.numBytesOfClearData = mLastOutputCryptoInfo.numBytesOfClearData;
+                    newCryptoInfo.numBytesOfEncryptedData =
+                            mLastOutputCryptoInfo.numBytesOfEncryptedData;
+                } else {
+                    newCryptoInfo.numBytesOfClearData =
+                            Arrays.copyOf(
+                                    mScratchSubsampleClearBytesCount, mSubsampleEncryptionDataSize);
+                    newCryptoInfo.numBytesOfEncryptedData =
+                            Arrays.copyOf(
+                                    mScratchSubsampleEncryptedBytesCount,
+                                    mSubsampleEncryptionDataSize);
+                }
+                mLastOutputCryptoInfo = newCryptoInfo;
             }
-            mCryptoInfo.key = cryptoData.encryptionKey;
-            // ExoPlayer modes match MediaCodec modes.
-            mCryptoInfo.mode = cryptoData.cryptoMode;
-            if (cryptoData.clearBlocks != 0) {
-                // Content is pattern-encrypted.
-                mCryptoInfo.setPattern(mEncryptionPattern);
-                mEncryptionPattern.set(cryptoData.encryptedBlocks, cryptoData.clearBlocks);
-            } else {
-                mCryptoInfo.setPattern(null);
+            mLastReceivedCryptoData = cryptoData;
+            return mLastOutputCryptoInfo;
+        }
+
+        private CryptoInfo createNewCryptoInfoAndPopulateWithCryptoData(CryptoData cryptoData) {
+            CryptoInfo cryptoInfo = new CryptoInfo();
+            cryptoInfo.key = cryptoData.encryptionKey;
+            cryptoInfo.mode = cryptoData.cryptoMode;
+            if (cryptoData.clearBlocks != mLastOutputEncryptionPattern.getSkipBlocks()
+                    || cryptoData.encryptedBlocks
+                            != mLastOutputEncryptionPattern.getEncryptBlocks()) {
+                mLastOutputEncryptionPattern =
+                        new CryptoInfo.Pattern(cryptoData.encryptedBlocks, cryptoData.clearBlocks);
             }
-            return mCryptoInfo;
+            cryptoInfo.setPattern(mLastOutputEncryptionPattern);
+            return cryptoInfo;
         }
 
         private void outputSampleData(ParsableByteArray data, int length) {
             mScratchParsableByteArrayAdapter.resetWithByteArray(data, length);
             try {
-                mOutputConsumer.onSampleDataFound(mTrackIndex, mScratchParsableByteArrayAdapter);
+                // Read all bytes from data. ExoPlayer extractors expect all sample data to be
+                // consumed by TrackOutput implementations when passing a ParsableByteArray.
+                while (mScratchParsableByteArrayAdapter.getLength() > 0) {
+                    mOutputConsumer.onSampleDataFound(
+                            mTrackIndex, mScratchParsableByteArrayAdapter);
+                }
             } catch (IOException e) {
                 // Unexpected.
                 throw new RuntimeException(e);
