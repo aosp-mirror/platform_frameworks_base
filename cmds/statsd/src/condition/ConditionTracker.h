@@ -51,10 +51,12 @@ public:
     //                       need to call init() on children conditions)
     // conditionIdIndexMap: the mapping from condition id to its index.
     // stack: a bit map to keep track which nodes have been visited on the stack in the recursion.
+    // initialConditionCache: tracks initial conditions of all ConditionTrackers.
     virtual bool init(const std::vector<Predicate>& allConditionConfig,
                       const std::vector<sp<ConditionTracker>>& allConditionTrackers,
                       const std::unordered_map<int64_t, int>& conditionIdIndexMap,
-                      std::vector<bool>& stack) = 0;
+                      std::vector<bool>& stack,
+                      std::vector<ConditionState>& initialConditionCache) = 0;
 
     // evaluate current condition given the new event.
     // event: the new log event
