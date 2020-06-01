@@ -1037,6 +1037,11 @@ public class PhysicsAnimationLayout extends FrameLayout {
             if (view != null) {
                 final SpringAnimation animation =
                         (SpringAnimation) view.getTag(getTagIdForProperty(property));
+
+                if (animation == null) {
+                    return;
+                }
+
                 final SpringForce animationSpring = animation.getSpring();
 
                 if (animationSpring == null) {
