@@ -89,7 +89,7 @@ public class PartialConversationInfo extends LinearLayout implements
 
     private OnClickListener mOnDone = v -> {
         mPressedApply = true;
-        closeControls(v, true);
+        mGutsContainer.closeControls(v, true);
     };
 
     public PartialConversationInfo(Context context, AttributeSet attrs) {
@@ -132,6 +132,7 @@ public class PartialConversationInfo extends LinearLayout implements
 
         View done = findViewById(R.id.done);
         done.setOnClickListener(mOnDone);
+        done.setAccessibilityDelegate(mGutsContainer.getAccessibilityDelegate());
     }
 
     private void bindActions() {
@@ -172,7 +173,7 @@ public class PartialConversationInfo extends LinearLayout implements
                         mUniqueChannelsInRow, mPkgIcon, mOnSettingsClickListener);
                 mChannelEditorDialogController.setOnFinishListener(() -> {
                     mPresentingChannelEditorDialog = false;
-                    closeControls(this, false);
+                    mGutsContainer.closeControls(this, false);
                 });
                 mChannelEditorDialogController.show();
             }
@@ -318,25 +319,6 @@ public class PartialConversationInfo extends LinearLayout implements
                         R.string.notification_channel_controls_closed_accessibility, mAppName));
             }
         }
-    }
-
-    /**
-     * Closes the controls and commits the updated importance values (indirectly).
-     *
-     * <p><b>Note,</b> this will only get called once the view is dismissing. This means that the
-     * user does not have the ability to undo the action anymore.
-     */
-    @VisibleForTesting
-    void closeControls(View v, boolean save) {
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, save, false /* force */);
     }
 
     @Override

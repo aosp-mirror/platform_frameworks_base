@@ -173,7 +173,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         doAnswer((Answer<Object>) invocation -> {
             mNotificationInfo.handleCloseControls(true, false);
             return null;
-        }).when(mNotificationGuts).closeControls(anyInt(), anyInt(), eq(true), eq(false));
+        }).when(mNotificationGuts).closeControls(any(View.class), eq(true));
         // Our view is never attached to a window so the View#post methods in NotificationInfo never
         // get called. Setting this will skip the post and do the action immediately.
         mNotificationInfo.mSkipPost = true;
