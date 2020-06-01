@@ -232,6 +232,7 @@ public class Tethering {
     private final TetheringThreadExecutor mExecutor;
     private final TetheringNotificationUpdater mNotificationUpdater;
     private final UserManager mUserManager;
+    private final BpfCoordinator mBpfCoordinator;
     private final PrivateAddressCoordinator mPrivateAddressCoordinator;
     private int mActiveDataSubId = INVALID_SUBSCRIPTION_ID;
     // All the usage of mTetheringEventCallback should run in the same thread.
@@ -284,6 +285,8 @@ public class Tethering {
         mUpstreamNetworkMonitor = mDeps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
                 TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new LinkedHashSet<>();
+        mBpfCoordinator = mDeps.getBpfCoordinator(
+                mHandler, mNetd, mLog, new BpfCoordinator.Dependencies());
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
@@ -1704,6 +1707,9 @@ public class Tethering {
                     chooseUpstreamType(true);
                     mTryCell = false;
                 }
+
+                // TODO: Check the upstream interface if it is managed by BPF offload.
+                mBpfCoordinator.start();
             }
 
             @Override
@@ -1716,6 +1722,7 @@ public class Tethering {
                     mTetherUpstream = null;
                     reportUpstreamChanged(null);
                 }
+                mBpfCoordinator.stop();
             }
 
             private boolean updateUpstreamWanted() {
@@ -2341,7 +2348,7 @@ public class Tethering {
 
         mLog.log("adding TetheringInterfaceStateMachine for: " + iface);
         final TetherState tetherState = new TetherState(
-                new IpServer(iface, mLooper, interfaceType, mLog, mNetd,
+                new IpServer(iface, mLooper, interfaceType, mLog, mNetd, mBpfCoordinator,
                              makeControlCallback(), mConfig.enableLegacyDhcpServer,
                              mConfig.enableBpfOffload, mPrivateAddressCoordinator,
                              mDeps.getIpServerDependencies()));
