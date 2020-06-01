@@ -245,6 +245,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
     public float minAspectRatio;
 
     /**
+     * Indicates that the activity works well with size changes like display changing size.
+     *
+     * @hide
+     */
+    public boolean supportsSizeChanges;
+
+    /**
      * Name of the VrListenerService component to run for this activity.
      * @see android.R.attr#enableVrMode
      * @hide
@@ -1013,6 +1020,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         colorMode = orig.colorMode;
         maxAspectRatio = orig.maxAspectRatio;
         minAspectRatio = orig.minAspectRatio;
+        supportsSizeChanges = orig.supportsSizeChanges;
     }
 
     /**
@@ -1188,6 +1196,9 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         if (minAspectRatio != 0) {
             pw.println(prefix + "minAspectRatio=" + minAspectRatio);
         }
+        if (supportsSizeChanges) {
+            pw.println(prefix + "supportsSizeChanges=true");
+        }
         super.dumpBack(pw, prefix, dumpFlags);
     }
 
@@ -1232,6 +1243,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         dest.writeInt(colorMode);
         dest.writeFloat(maxAspectRatio);
         dest.writeFloat(minAspectRatio);
+        dest.writeBoolean(supportsSizeChanges);
     }
 
     /**
@@ -1350,6 +1362,7 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
         colorMode = source.readInt();
         maxAspectRatio = source.readFloat();
         minAspectRatio = source.readFloat();
+        supportsSizeChanges = source.readBoolean();
     }
 
     /**
