@@ -1001,6 +1001,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             if (info.minAspectRatio != 0) {
                 pw.println(prefix + "minAspectRatio=" + info.minAspectRatio);
             }
+            if (info.supportsSizeChanges) {
+                pw.println(prefix + "supportsSizeChanges=true");
+            }
         }
     }
 
@@ -6383,6 +6386,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldUseSizeCompatMode() {
+        if (info.supportsSizeChanges) {
+            return false;
+        }
         if (inMultiWindowMode() || getWindowConfiguration().hasWindowDecorCaption()) {
             final ActivityRecord root = task != null ? task.getRootActivity() : null;
             if (root != null && root != this && !root.shouldUseSizeCompatMode()) {
