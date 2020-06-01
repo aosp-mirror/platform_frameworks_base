@@ -24,7 +24,6 @@ import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.function.Consumer;
 
 /**
@@ -58,36 +57,24 @@ public class ListenerTransport<TListener> {
     }
 
     /**
-     * Executes the given operation for the listener. {@link #onOperationFinished(Consumer)} will
-     * always be invoked at some time after this method, regardless of if the listener invocation
-     * happens or if the operation fails in some way.
+     * Executes the given operation for the listener.
      */
     public final void execute(@NonNull Consumer<TListener> operation) {
         Objects.requireNonNull(operation);
-        try {
-            mExecutor.execute(() -> {
-                try {
-                    TListener listener = mListener;
-                    if (listener == null) {
-                        return;
-                    }
 
-                    operation.accept(listener);
-                } finally {
-                    onOperationFinished(operation);
-                }
-            });
-        } catch (RejectedExecutionException e) {
-            onOperationFinished(operation);
+        if (mListener == null) {
+            return;
         }
-    }
 
-    /**
-     * Invoked when an operation is finished. This method will always be called once for every call
-     * to {@link #execute(Consumer)}, regardless of whether the operation encountered any
-     * error or failed to execute in any way. May run on any thread.
-     */
-    protected void onOperationFinished(@NonNull Consumer<TListener> operation) {}
+        mExecutor.execute(() -> {
+            TListener listener = mListener;
+            if (listener == null) {
+                return;
+            }
+
+            operation.accept(listener);
+        });
+    }
 
     @Override
     public final boolean equals(Object obj) {

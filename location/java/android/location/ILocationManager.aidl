@@ -50,9 +50,11 @@ interface ILocationManager
             in ICancellationSignal cancellationSignal, in ILocationListener listener,
             String packageName, String attributionTag, String listenerId);
 
-    void requestLocationUpdates(in LocationRequest request, in ILocationListener listener,
-            in PendingIntent intent, String packageName, String attributionTag, String listenerId);
-    void removeUpdates(in ILocationListener listener, in PendingIntent intent);
+    void registerLocationListener(in LocationRequest request, in ILocationListener listener, String packageName, String attributionTag, String listenerId);
+    void unregisterLocationListener(in ILocationListener listener);
+
+    void registerLocationPendingIntent(in LocationRequest request, in PendingIntent intent, String packageName, String attributionTag);
+    void unregisterLocationPendingIntent(in PendingIntent intent);
 
     void requestGeofence(in Geofence geofence, in PendingIntent intent, String packageName, String attributionTag);
     void removeGeofence(in PendingIntent intent);

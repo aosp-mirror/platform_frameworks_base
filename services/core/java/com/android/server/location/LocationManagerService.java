@@ -1838,15 +1838,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void requestLocationUpdates(LocationRequest request, ILocationListener listener,
-            PendingIntent intent, String packageName, String attributionTag, String listenerId) {
-        if (request == null) {
-            request = DEFAULT_LOCATION_REQUEST;
-        }
-        if (listenerId == null && intent != null) {
-            listenerId = AppOpsManager.toReceiverId(intent);
-        }
-
+    public void registerLocationListener(LocationRequest request, ILocationListener listener,
+            String packageName, String attributionTag, String listenerId) {
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 listenerId);
         identity.enforceLocationPermission(PERMISSION_COARSE);
@@ -1872,27 +1865,60 @@ public class LocationManagerService extends ILocationManager.Stub {
                 identity,
                 callerHasLocationHardwarePermission);
 
-        if (intent == null && listener == null) {
-            throw new IllegalArgumentException("need either listener or intent");
-        } else if (intent != null && listener != null) {
-            throw new IllegalArgumentException(
-                    "cannot register both listener and intent");
-        }
-
         mLocationUsageLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_STARTED,
                 LocationStatsEnums.API_REQUEST_LOCATION_UPDATES,
-                packageName, request, listener != null, intent != null,
+                packageName, request, true, false,
                 /* geofence= */ null,
                 mAppForegroundHelper.isAppForeground(identity.uid));
 
         synchronized (mLock) {
-            Receiver receiver;
-            if (intent != null) {
-                receiver = getReceiverLocked(intent, identity, workSource, hideFromAppOps);
-            } else {
-                receiver = getReceiverLocked(listener, identity, workSource, hideFromAppOps);
+            Receiver receiver = getReceiverLocked(Objects.requireNonNull(listener), identity,
+                    workSource, hideFromAppOps);
+            if (receiver != null) {
+                requestLocationUpdatesLocked(sanitizedRequest, receiver);
             }
+        }
+    }
+
+    @Override
+    public void registerLocationPendingIntent(LocationRequest request, PendingIntent pendingIntent,
+            String packageName, String attributionTag) {
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
+                AppOpsManager.toReceiverId(pendingIntent));
+        identity.enforceLocationPermission(PERMISSION_COARSE);
+
+        WorkSource workSource = request.getWorkSource();
+        if (workSource != null && !workSource.isEmpty()) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.UPDATE_DEVICE_STATS, null);
+        }
+        boolean hideFromAppOps = request.getHideFromAppOps();
+        if (hideFromAppOps) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.UPDATE_APP_OPS_STATS, null);
+        }
+        if (request.isLocationSettingsIgnored()) {
+            mContext.enforceCallingOrSelfPermission(
+                    Manifest.permission.WRITE_SECURE_SETTINGS, null);
+        }
+        boolean callerHasLocationHardwarePermission =
+                mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
+                        == PERMISSION_GRANTED;
+        LocationRequest sanitizedRequest = createSanitizedRequest(request,
+                identity,
+                callerHasLocationHardwarePermission);
+
+        mLocationUsageLogger.logLocationApiUsage(
+                LocationStatsEnums.USAGE_STARTED,
+                LocationStatsEnums.API_REQUEST_LOCATION_UPDATES,
+                packageName, request, true, false,
+                /* geofence= */ null,
+                mAppForegroundHelper.isAppForeground(identity.uid));
+
+        synchronized (mLock) {
+            Receiver receiver = getReceiverLocked(Objects.requireNonNull(pendingIntent), identity,
+                    workSource, hideFromAppOps);
             if (receiver != null) {
                 requestLocationUpdatesLocked(sanitizedRequest, receiver);
             }
@@ -1901,22 +1927,16 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @GuardedBy("mLock")
     private void requestLocationUpdatesLocked(LocationRequest request, Receiver receiver) {
-        // Figure out the provider. Either its explicitly request (legacy use cases), or
-        // use the fused provider
-        if (request == null) request = DEFAULT_LOCATION_REQUEST;
-        String name = request.getProvider();
-        if (name == null) {
-            throw new IllegalArgumentException("provider name must not be null");
-        }
+        String provider = request.getProvider();
 
-        LocationProviderManager manager = getLocationProviderManager(name);
+        LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
-            throw new IllegalArgumentException("provider doesn't exist: " + name);
+            throw new IllegalArgumentException("provider doesn't exist: " + provider);
         }
 
-        UpdateRecord record = new UpdateRecord(name, request, receiver);
+        UpdateRecord record = new UpdateRecord(provider, request, receiver);
 
-        UpdateRecord oldRecord = receiver.mUpdateRecords.put(name, record);
+        UpdateRecord oldRecord = receiver.mUpdateRecords.put(provider, record);
         if (oldRecord != null) {
             oldRecord.disposeLocked(false);
         }
@@ -1927,10 +1947,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (!manager.isEnabled(userId) && !isSettingsExempt(record)) {
                 // Notify the listener that updates are currently disabled - but only if the request
                 // does not ignore location settings
-                receiver.callProviderEnabledLocked(name, false);
+                receiver.callProviderEnabledLocked(provider, false);
             }
 
-            applyRequirementsLocked(name);
+            applyRequirementsLocked(provider);
 
             // Update the monitoring here just in case multiple location requests were added to the
             // same receiver (this request may be high power and the initial might not have been).
@@ -1941,21 +1961,21 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void removeUpdates(ILocationListener listener, PendingIntent intent) {
-        if (intent == null && listener == null) {
-            throw new IllegalArgumentException("need either listener or intent");
-        } else if (intent != null && listener != null) {
-            throw new IllegalArgumentException("cannot register both listener and intent");
-        }
-
+    public void unregisterLocationListener(ILocationListener listener) {
         synchronized (mLock) {
-            Receiver receiver;
-            if (intent != null) {
-                receiver = getReceiverLocked(intent, null, null, false);
-            } else {
-                receiver = getReceiverLocked(listener, null, null, false);
+            Receiver receiver = getReceiverLocked(Objects.requireNonNull(listener), null, null,
+                    false);
+            if (receiver != null) {
+                removeUpdatesLocked(receiver);
             }
+        }
+    }
 
+    @Override
+    public void unregisterLocationPendingIntent(PendingIntent pendingIntent) {
+        synchronized (mLock) {
+            Receiver receiver = getReceiverLocked(Objects.requireNonNull(pendingIntent), null, null,
+                    false);
             if (receiver != null) {
                 removeUpdatesLocked(receiver);
             }
@@ -2061,13 +2081,13 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
         }
 
-        requestLocationUpdates(locationRequest, listener, null, packageName, attributionTag,
+        registerLocationListener(locationRequest, listener, packageName, attributionTag,
                 listenerId);
         CancellationSignal cancellationSignal = CancellationSignal.fromTransport(
                 remoteCancellationSignal);
         if (cancellationSignal != null) {
             cancellationSignal.setOnCancelListener(
-                    () -> removeUpdates(listener, null));
+                    () -> unregisterLocationListener(listener));
         }
         return true;
     }
