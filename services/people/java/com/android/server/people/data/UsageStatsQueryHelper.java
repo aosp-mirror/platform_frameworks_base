@@ -148,6 +148,9 @@ class UsageStatsQueryHelper {
                 UsageStatsManager.INTERVAL_BEST, startTime, endTime,
                 /* obfuscateInstantApps= */ false);
         Map<String, AppUsageStatsData> aggregatedStats = new ArrayMap<>();
+        if (stats == null) {
+            return aggregatedStats;
+        }
         for (UsageStats stat : stats) {
             String packageName = stat.getPackageName();
             if (packageNameFilter.contains(packageName)) {
