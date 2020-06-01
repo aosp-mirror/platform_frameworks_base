@@ -13451,7 +13451,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             for (String packageName : packagesToChange) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (ps.getSuspended(userId)) {
+                if (ps != null && ps.getSuspended(userId)) {
                     ps.removeSuspension(suspendingPackagePredicate, userId);
                     if (!ps.getSuspended(userId)) {
                         unsuspendedPackages.add(ps.name);
@@ -13492,7 +13492,7 @@ public class PackageManagerService extends IPackageManager.Stub
         synchronized (mLock) {
             for (String packageName : packagesToChange) {
                 final PackageSetting ps = mSettings.mPackages.get(packageName);
-                if (ps.getDistractionFlags(userId) != 0) {
+                if (ps != null && ps.getDistractionFlags(userId) != 0) {
                     ps.setDistractionFlags(0, userId);
                     changedPackages.add(ps.name);
                     changedUids.add(UserHandle.getUid(userId, ps.getAppId()));
@@ -18881,6 +18881,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.DELETE_PACKAGES, null);
+        // TODO (b/157774108): This should fail on non-existent packages.
         synchronized (mLock) {
             // Cannot block uninstall of static shared libs as they are
             // considered a part of the using app (emulating static linking).
