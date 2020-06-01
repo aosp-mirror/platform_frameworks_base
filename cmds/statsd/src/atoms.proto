@@ -447,6 +447,8 @@ message Atom {
         CellBroadcastMessageFiltered cb_message_filtered =
             278 [(module) = "cellbroadcast"];
         TvTunerDvrStatus tv_tuner_dvr_status = 279 [(module) = "framework"];
+        TvCasSessionOpenStatus tv_cas_session_open_status =
+            280 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -9273,6 +9275,28 @@ message TvTunerDvrStatus {
     // indicate how many overflow or underflow happened between started to stopped
     optional int32 overflow_underflow_count = 5;
 }
+
+/**
+ * Logs when a cas session opened through MediaCas.
+ * This is atom ID 280.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/MediaCas.java
+ */
+message TvCasSessionOpenStatus {
+    enum State {
+        UNKNOWN = 0;
+        SUCCEEDED = 1; // indicate that the session is opened successfully.
+        FAILED = 2; // indicate that the session isn’t opened successfully.
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    //  Cas system Id
+    optional int32 cas_system_id = 2;
+    // State of the session
+    optional State state = 3;
+}
+
 /**
  * Logs when an app is frozen or unfrozen.
  *
