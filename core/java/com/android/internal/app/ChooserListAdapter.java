@@ -80,6 +80,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
     private static final int MAX_SUGGESTED_APP_TARGETS = 4;
     private static final int MAX_CHOOSER_TARGETS_PER_APP = 2;
     private static final int MAX_SERVICE_TARGET_APP = 8;
+    private static final int DEFAULT_DIRECT_SHARE_RANKING_SCORE = 1000;
 
     static final int MAX_SERVICE_TARGETS = 8;
 
@@ -564,11 +565,13 @@ public class ChooserListAdapter extends ResolverListAdapter {
         }
         Map<String, Integer> scores = mChooserTargetScores.get(componentName);
         Collections.sort(mParkingDirectShareTargets.get(componentName).first, (o1, o2) -> {
-            // The score has been normalized between 0 and 2, the default is 1.
+            // The score has been normalized between 0 and 2000, the default is 1000.
             int score1 = scores.getOrDefault(
-                    ChooserUtil.md5(o1.getChooserTarget().getTitle().toString()), 1);
+                    ChooserUtil.md5(o1.getChooserTarget().getTitle().toString()),
+                    DEFAULT_DIRECT_SHARE_RANKING_SCORE);
             int score2 = scores.getOrDefault(
-                    ChooserUtil.md5(o2.getChooserTarget().getTitle().toString()), 1);
+                    ChooserUtil.md5(o2.getChooserTarget().getTitle().toString()),
+                    DEFAULT_DIRECT_SHARE_RANKING_SCORE);
             return score2 - score1;
         });
     }
