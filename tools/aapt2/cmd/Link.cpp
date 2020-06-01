@@ -78,6 +78,8 @@ using ::android::base::StringPrintf;
 
 namespace aapt {
 
+constexpr uint8_t kAndroidPackageId = 0x01;
+
 class LinkContext : public IAaptContext {
  public:
   explicit LinkContext(IDiagnostics* diagnostics)
@@ -1804,7 +1806,7 @@ class Linker {
 
     // Override the package ID when it is "android".
     if (context_->GetCompilationPackage() == "android") {
-      context_->SetPackageId(0x01);
+      context_->SetPackageId(kAndroidPackageId);
 
       // Verify we're building a regular app.
       if (context_->GetPackageType() != PackageType::kApp) {
@@ -1861,7 +1863,8 @@ class Linker {
 
     if (context_->GetPackageType() != PackageType::kStaticLib) {
       PrivateAttributeMover mover;
-      if (!mover.Consume(context_, &final_table_)) {
+      if (context_->GetPackageId() == kAndroidPackageId &&
+          !mover.Consume(context_, &final_table_)) {
         context_->GetDiagnostics()->Error(DiagMessage() << "failed moving private attributes");
         return 1;
       }
