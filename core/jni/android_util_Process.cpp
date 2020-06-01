@@ -352,9 +352,9 @@ void android_os_Process_enableFreezer(
     bool success = true;
 
     if (enable) {
-        success = SetTaskProfiles(0, {"FreezerFrozen"}, true);
+        success = SetTaskProfiles(0, {"FreezerEnabled"}, true);
     } else {
-        success = SetTaskProfiles(0, {"FreezerThawed"}, true);
+        success = SetTaskProfiles(0, {"FreezerDisabled"}, true);
     }
 
     if (!success) {
