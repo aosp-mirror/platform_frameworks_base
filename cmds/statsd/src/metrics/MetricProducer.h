@@ -129,7 +129,8 @@ struct SkippedBucket {
 class MetricProducer : public virtual android::RefBase, public virtual StateListener {
 public:
     MetricProducer(const int64_t& metricId, const ConfigKey& key, const int64_t timeBaseNs,
-                   const int conditionIndex, const sp<ConditionWizard>& wizard,
+                   const int conditionIndex, const vector<ConditionState>& initialConditionCache,
+                   const sp<ConditionWizard>& wizard,
                    const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap,
                    const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                            eventDeactivationMap,
@@ -138,8 +139,9 @@ public:
 
     virtual ~MetricProducer(){};
 
-    ConditionState initialCondition(const int conditionIndex) const {
-        return conditionIndex >= 0 ? ConditionState::kUnknown : ConditionState::kTrue;
+    ConditionState initialCondition(const int conditionIndex,
+                                    const vector<ConditionState>& initialConditionCache) const {
+        return conditionIndex >= 0 ? initialConditionCache[conditionIndex] : ConditionState::kTrue;
     }
 
     /**
@@ -496,6 +498,8 @@ protected:
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithDimensions);
     FRIEND_TEST(ValueMetricE2eTest, TestInitWithSlicedState_WithIncorrectDimensions);
     FRIEND_TEST(ValueMetricE2eTest, TestInitialConditionChanges);
+
+    FRIEND_TEST(MetricsManagerTest, TestInitialConditions);
 };
 
 }  // namespace statsd
