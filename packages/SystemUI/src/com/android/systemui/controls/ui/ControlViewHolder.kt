@@ -29,6 +29,7 @@ import android.graphics.drawable.ClipDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
+import android.graphics.drawable.StateListDrawable
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 import android.service.controls.actions.ControlAction
@@ -75,7 +76,8 @@ class ControlViewHolder(
             DeviceTypes.TYPE_THERMOSTAT,
             DeviceTypes.TYPE_CAMERA
         )
-
+        private val ATTR_ENABLED = intArrayOf(android.R.attr.state_enabled)
+        private val ATTR_DISABLED = intArrayOf(-android.R.attr.state_enabled)
         const val MIN_LEVEL = 0
         const val MAX_LEVEL = 10000
 
@@ -243,7 +245,7 @@ class ControlViewHolder(
     }
 
     internal fun applyRenderInfo(enabled: Boolean, offset: Int, animated: Boolean = true) {
-        val ri = RenderInfo.lookup(context, cws.componentName, deviceType, enabled, offset)
+        val ri = RenderInfo.lookup(context, cws.componentName, deviceType, offset)
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
         val newText = nextStatusText
         nextStatusText = ""
@@ -394,7 +396,17 @@ class ControlViewHolder(
             icon.imageTintList = null
             icon.setImageIcon(it)
         } ?: run {
-            icon.setImageDrawable(drawable)
+            if (drawable is StateListDrawable) {
+                // Only reset the drawable if it is a different resource, as it will interfere
+                // with the image state and animation.
+                if (icon.drawable == null || !(icon.drawable is StateListDrawable)) {
+                    icon.setImageDrawable(drawable)
+                }
+                val state = if (enabled) ATTR_ENABLED else ATTR_DISABLED
+                icon.setImageState(state, true)
+            } else {
+                icon.setImageDrawable(drawable)
+            }
 
             // do not color app icons
             if (deviceType != DeviceTypes.TYPE_ROUTINE) {
