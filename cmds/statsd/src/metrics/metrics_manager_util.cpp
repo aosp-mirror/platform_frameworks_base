@@ -285,11 +285,14 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
                     const unordered_map<int64_t, int>& logTrackerMap,
                     unordered_map<int64_t, int>& conditionTrackerMap,
                     vector<sp<ConditionTracker>>& allConditionTrackers,
-                    unordered_map<int, std::vector<int>>& trackerToConditionMap) {
+                    unordered_map<int, std::vector<int>>& trackerToConditionMap,
+                    vector<ConditionState>& initialConditionCache) {
     vector<Predicate> conditionConfigs;
     const int conditionTrackerCount = config.predicate_size();
     conditionConfigs.reserve(conditionTrackerCount);
     allConditionTrackers.reserve(conditionTrackerCount);
+    initialConditionCache.reserve(conditionTrackerCount);
+    std::fill(initialConditionCache.begin(), initialConditionCache.end(), ConditionState::kUnknown);
 
     for (int i = 0; i < conditionTrackerCount; i++) {
         const Predicate& condition = config.predicate(i);
@@ -321,7 +324,7 @@ bool initConditions(const ConfigKey& key, const StatsdConfig& config,
     for (size_t i = 0; i < allConditionTrackers.size(); i++) {
         auto& conditionTracker = allConditionTrackers[i];
         if (!conditionTracker->init(conditionConfigs, allConditionTrackers, conditionTrackerMap,
-                                    stackTracker)) {
+                                    stackTracker, initialConditionCache)) {
             return false;
         }
         for (const int trackerIndex : conditionTracker->getLogTrackerIndex()) {
@@ -351,14 +354,14 @@ bool initStates(const StatsdConfig& config, unordered_map<int64_t, int>& stateAt
 }
 
 bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t timeBaseTimeNs,
-                 const int64_t currentTimeNs,
-                 const sp<StatsPullerManager>& pullerManager,
+                 const int64_t currentTimeNs, const sp<StatsPullerManager>& pullerManager,
                  const unordered_map<int64_t, int>& logTrackerMap,
                  const unordered_map<int64_t, int>& conditionTrackerMap,
                  const vector<sp<LogMatchingTracker>>& allAtomMatchers,
                  const unordered_map<int64_t, int>& stateAtomIdMap,
                  const unordered_map<int64_t, unordered_map<int, int64_t>>& allStateGroupMaps,
                  vector<sp<ConditionTracker>>& allConditionTrackers,
+                 const vector<ConditionState>& initialConditionCache,
                  vector<sp<MetricProducer>>& allMetricProducers,
                  unordered_map<int, vector<int>>& conditionToMetricMap,
                  unordered_map<int, vector<int>>& trackerToMetricMap,
@@ -441,9 +444,10 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                 eventDeactivationMap);
         if (!success) return false;
 
-        sp<MetricProducer> countProducer = new CountMetricProducer(
-                key, metric, conditionIndex, wizard, timeBaseTimeNs, currentTimeNs,
-                eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap);
+        sp<MetricProducer> countProducer =
+                new CountMetricProducer(key, metric, conditionIndex, initialConditionCache, wizard,
+                                        timeBaseTimeNs, currentTimeNs, eventActivationMap,
+                                        eventDeactivationMap, slicedStateAtoms, stateGroupMap);
         allMetricProducers.push_back(countProducer);
     }
 
@@ -547,10 +551,10 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         if (!success) return false;
 
         sp<MetricProducer> durationMetric = new DurationMetricProducer(
-                key, metric, conditionIndex, trackerIndices[0], trackerIndices[1],
-                trackerIndices[2], nesting, wizard, internalDimensions, timeBaseTimeNs,
-                currentTimeNs, eventActivationMap, eventDeactivationMap, slicedStateAtoms,
-                stateGroupMap);
+                key, metric, conditionIndex, initialConditionCache, trackerIndices[0],
+                trackerIndices[1], trackerIndices[2], nesting, wizard, internalDimensions,
+                timeBaseTimeNs, currentTimeNs, eventActivationMap, eventDeactivationMap,
+                slicedStateAtoms, stateGroupMap);
 
         allMetricProducers.push_back(durationMetric);
     }
@@ -593,9 +597,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                 eventDeactivationMap);
         if (!success) return false;
 
-        sp<MetricProducer> eventMetric = new EventMetricProducer(
-                key, metric, conditionIndex, wizard, timeBaseTimeNs, eventActivationMap,
-                eventDeactivationMap);
+        sp<MetricProducer> eventMetric =
+                new EventMetricProducer(key, metric, conditionIndex, initialConditionCache, wizard,
+                                        timeBaseTimeNs, eventActivationMap, eventDeactivationMap);
 
         allMetricProducers.push_back(eventMetric);
     }
@@ -683,9 +687,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         if (!success) return false;
 
         sp<MetricProducer> valueProducer = new ValueMetricProducer(
-                key, metric, conditionIndex, wizard, trackerIndex, matcherWizard, pullTagId,
-                timeBaseTimeNs, currentTimeNs, pullerManager, eventActivationMap,
-                eventDeactivationMap, slicedStateAtoms, stateGroupMap);
+                key, metric, conditionIndex, initialConditionCache, wizard, trackerIndex,
+                matcherWizard, pullTagId, timeBaseTimeNs, currentTimeNs, pullerManager,
+                eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap);
         allMetricProducers.push_back(valueProducer);
     }
 
@@ -778,9 +782,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         if (!success) return false;
 
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, wizard, trackerIndex, matcherWizard, pullTagId,
-                triggerAtomId, atomTagId, timeBaseTimeNs, currentTimeNs, pullerManager,
-                eventActivationMap, eventDeactivationMap);
+                key, metric, conditionIndex, initialConditionCache, wizard, trackerIndex,
+                matcherWizard, pullTagId, triggerAtomId, atomTagId, timeBaseTimeNs, currentTimeNs,
+                pullerManager, eventActivationMap, eventDeactivationMap);
         allMetricProducers.push_back(gaugeProducer);
     }
     for (int i = 0; i < config.no_report_metric_size(); ++i) {
@@ -930,6 +934,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       std::set<int64_t>& noReportMetricIds) {
     unordered_map<int64_t, int> logTrackerMap;
     unordered_map<int64_t, int> conditionTrackerMap;
+    vector<ConditionState> initialConditionCache;
     unordered_map<int64_t, int> metricProducerMap;
     unordered_map<int64_t, int> stateAtomIdMap;
     unordered_map<int64_t, unordered_map<int, int64_t>> allStateGroupMaps;
@@ -941,7 +946,7 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
     VLOG("initLogMatchingTrackers succeed...");
 
     if (!initConditions(key, config, logTrackerMap, conditionTrackerMap, allConditionTrackers,
-                        trackerToConditionMap)) {
+                        trackerToConditionMap, initialConditionCache)) {
         ALOGE("initConditionTrackers failed");
         return false;
     }
@@ -952,10 +957,10 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
     }
     if (!initMetrics(key, config, timeBaseNs, currentTimeNs, pullerManager, logTrackerMap,
                      conditionTrackerMap, allAtomMatchers, stateAtomIdMap, allStateGroupMaps,
-                     allConditionTrackers, allMetricProducers,
-                     conditionToMetricMap, trackerToMetricMap, metricProducerMap,
-                     noReportMetricIds, activationAtomTrackerToMetricMap,
-                     deactivationAtomTrackerToMetricMap, metricsWithActivation)) {
+                     allConditionTrackers, initialConditionCache, allMetricProducers,
+                     conditionToMetricMap, trackerToMetricMap, metricProducerMap, noReportMetricIds,
+                     activationAtomTrackerToMetricMap, deactivationAtomTrackerToMetricMap,
+                     metricsWithActivation)) {
         ALOGE("initMetricProducers failed");
         return false;
     }
