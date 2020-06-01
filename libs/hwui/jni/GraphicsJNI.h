@@ -4,8 +4,8 @@
 #include <cutils/compiler.h>
 
 #include "Bitmap.h"
+#include "BRDAllocator.h"
 #include "SkBitmap.h"
-#include "SkBRDAllocator.h"
 #include "SkCodec.h"
 #include "SkPixelRef.h"
 #include "SkMallocPixelRef.h"
@@ -17,10 +17,12 @@
 
 #include "graphics_jni_helpers.h"
 
-class SkBitmapRegionDecoder;
 class SkCanvas;
 
 namespace android {
+namespace skia {
+    class BitmapRegionDecoder;
+}
 class Paint;
 struct Typeface;
 }
@@ -103,7 +105,8 @@ public:
 
     static jobject createRegion(JNIEnv* env, SkRegion* region);
 
-    static jobject createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap);
+    static jobject createBitmapRegionDecoder(JNIEnv* env,
+                                             android::skia::BitmapRegionDecoder* bitmap);
 
     /**
      * Given a bitmap we natively allocate a memory block to store the contents
@@ -154,7 +157,7 @@ private:
     static JavaVM* mJavaVM;
 };
 
-class HeapAllocator : public SkBRDAllocator {
+class HeapAllocator : public android::skia::BRDAllocator {
 public:
    HeapAllocator() { };
     ~HeapAllocator() { };
@@ -181,7 +184,7 @@ private:
  *  the decoded output to fit in the recycled bitmap if necessary.
  *  This allocator implements that behavior.
  *
- *  Skia's SkBitmapRegionDecoder expects the memory that
+ *  Skia's BitmapRegionDecoder expects the memory that
  *  is allocated to be large enough to decode the entire region
  *  that is requested.  It will decode directly into the memory
  *  that is provided.
@@ -200,7 +203,7 @@ private:
  *  reuse it again, given that it still may be in use from our
  *  first allocation.
  */
-class RecyclingClippingPixelAllocator : public SkBRDAllocator {
+class RecyclingClippingPixelAllocator : public android::skia::BRDAllocator {
 public:
 
     RecyclingClippingPixelAllocator(android::Bitmap* recycledBitmap,
