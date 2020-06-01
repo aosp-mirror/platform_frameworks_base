@@ -17,6 +17,7 @@
 cc_library_shared {
     name: "libshim_jni",
     srcs: ["Shim.c"],
+    header_libs: ["jni_headers"],
     sdk_version: "24",
     apex_available: [
         "//apex_available:platform",
