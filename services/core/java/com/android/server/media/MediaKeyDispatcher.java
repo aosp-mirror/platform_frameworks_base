@@ -71,6 +71,9 @@ public abstract class MediaKeyDispatcher {
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_STOP, 0);
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_NEXT, 0);
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_PREVIOUS, 0);
+        mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_DOWN, 0);
+        mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_UP, 0);
+        mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_MUTE, 0);
     }
 
     // TODO: Move this method into SessionPolicyProvider.java for better readability.
@@ -120,6 +123,9 @@ public abstract class MediaKeyDispatcher {
      * <li> {@link KeyEvent#KEYCODE_MEDIA_STOP}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_NEXT}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_UP}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_DOWN}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_MUTE}
      * </ul>
      * @see {@link KeyEvent#isMediaSessionKey(int)}
      */
@@ -158,6 +164,9 @@ public abstract class MediaKeyDispatcher {
      * <li> {@link KeyEvent#KEYCODE_MEDIA_STOP}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_NEXT}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_DOWN}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_UP}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_MUTE}
      * </ul>
      * @see {@link KeyEvent#isMediaSessionKey(int)}
      * @param keyCode
