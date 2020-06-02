@@ -35,7 +35,8 @@ class EventMetricProducer : public MetricProducer {
 public:
     EventMetricProducer(
             const ConfigKey& key, const EventMetric& eventMetric, const int conditionIndex,
-            const sp<ConditionWizard>& wizard, const int64_t startTimeNs,
+            const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
+            const int64_t startTimeNs,
             const std::unordered_map<int, std::shared_ptr<Activation>>& eventActivationMap = {},
             const std::unordered_map<int, std::vector<std::shared_ptr<Activation>>>&
                     eventDeactivationMap = {},

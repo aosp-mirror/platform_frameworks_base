@@ -56,6 +56,7 @@ import android.content.pm.IPackageMoveObserver;
 import android.content.pm.PackageManager;
 import android.content.res.ObbInfo;
 import android.content.res.ObbScanner;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -1201,7 +1202,19 @@ public class StorageManager {
      * {@link MediaStore} item.
      */
     public @NonNull StorageVolume getStorageVolume(@NonNull Uri uri) {
-        final String volumeName = MediaStore.getVolumeName(uri);
+        String volumeName = MediaStore.getVolumeName(uri);
+
+        // When Uri is pointing at a synthetic volume, we're willing to query to
+        // resolve the actual volume name
+        if (Objects.equals(volumeName, MediaStore.VOLUME_EXTERNAL)) {
+            try (Cursor c = mContext.getContentResolver().query(uri,
+                    new String[] { MediaStore.MediaColumns.VOLUME_NAME }, null, null)) {
+                if (c.moveToFirst()) {
+                    volumeName = c.getString(0);
+                }
+            }
+        }
+
         switch (volumeName) {
             case MediaStore.VOLUME_EXTERNAL_PRIMARY:
                 return getPrimaryStorageVolume();

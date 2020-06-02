@@ -1952,7 +1952,8 @@ public class NotificationManagerService extends SystemService {
                 mRankingHandler,
                 mZenModeHelper,
                 new NotificationChannelLoggerImpl(),
-                mAppOps);
+                mAppOps,
+                new SysUiStatsEvent.BuilderFactory());
         mRankingHelper = new RankingHelper(getContext(),
                 mRankingHandler,
                 mPreferencesHelper,
@@ -6802,9 +6803,13 @@ public class NotificationManagerService extends SystemService {
         boolean hasValidVibrate = false;
         boolean hasValidSound = false;
         boolean sentAccessibilityEvent = false;
-        // If the notification will appear in the status bar, it should send an accessibility
-        // event
-        if (!record.isUpdate && record.getImportance() > IMPORTANCE_MIN) {
+
+        // If the notification will appear in the status bar, it should send an accessibility event
+        final boolean suppressedByDnd = record.isIntercepted()
+                && (record.getSuppressedVisualEffects() & SUPPRESSED_EFFECT_STATUS_BAR) != 0;
+        if (!record.isUpdate
+                && record.getImportance() > IMPORTANCE_MIN
+                && !suppressedByDnd) {
             sendAccessibilityEvent(notification, record.getSbn().getPackageName());
             sentAccessibilityEvent = true;
         }

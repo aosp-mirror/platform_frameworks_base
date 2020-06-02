@@ -18,6 +18,8 @@ package com.android.server.people.data;
 
 import static com.android.server.people.data.TestUtils.timestamp;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -233,6 +235,19 @@ public final class UsageStatsQueryHelperTest {
         assertEquals(1, appLaunchChooserCountCounts.size());
         assertEquals(8, (long) appLaunchChooserCountCounts.get(PKG_NAME_1).getChosenCount());
         assertEquals(5, (long) appLaunchChooserCountCounts.get(PKG_NAME_1).getLaunchCount());
+    }
+
+    @Test
+    public void testQueryAppUsageStats_nullUsageStats() {
+        when(mUsageStatsManagerInternal.queryUsageStatsForUser(anyInt(), anyInt(), anyLong(),
+                anyLong(), anyBoolean())).thenReturn(null);
+
+        Map<String, AppUsageStatsData> appLaunchChooserCountCounts =
+                mHelper.queryAppUsageStats(USER_ID_PRIMARY, 90_000L,
+                        200_000L,
+                        Set.of(PKG_NAME_1));
+
+        assertThat(appLaunchChooserCountCounts).isEmpty();
     }
 
     private void addUsageEvents(UsageEvents.Event... events) {

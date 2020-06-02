@@ -21,6 +21,7 @@ android_test {
         "mockito-target-inline-minus-junit4",
         "platform-test-annotations",
         "platformprotosnano",
+        "statsdprotolite",
         "hamcrest-library",
         "testables",
         "truth-prebuilt",
