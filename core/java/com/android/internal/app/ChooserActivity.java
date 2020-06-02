@@ -2182,6 +2182,9 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     void updateModelAndChooserCounts(TargetInfo info) {
+        if (info != null && info instanceof MultiDisplayResolveInfo) {
+            info = ((MultiDisplayResolveInfo) info).getSelectedTarget();
+        }
         if (info != null) {
             sendClickToAppPredictor(info);
             final ResolveInfo ri = info.getResolveInfo();
