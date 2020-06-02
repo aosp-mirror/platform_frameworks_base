@@ -28,16 +28,6 @@ import android.util.SparseArray
 
 import com.android.systemui.R
 
-data class IconState(val disabledResourceId: Int, val enabledResourceId: Int) {
-    operator fun get(state: Boolean): Int {
-        return if (state) {
-            enabledResourceId
-        } else {
-            disabledResourceId
-        }
-    }
-}
-
 data class RenderInfo(
     val icon: Drawable,
     val foreground: Int,
@@ -53,7 +43,6 @@ data class RenderInfo(
             context: Context,
             componentName: ComponentName,
             deviceType: Int,
-            enabled: Boolean,
             offset: Int = 0
         ): RenderInfo {
             val key = if (offset > 0) {
@@ -61,8 +50,7 @@ data class RenderInfo(
             } else deviceType
 
             val (fg, bg) = deviceColorMap.getValue(key)
-            val iconState = deviceIconMap.getValue(key)
-            val resourceId = iconState[enabled]
+            val resourceId = deviceIconMap.getValue(key)
             var icon: Drawable?
             if (resourceId == APP_ICON_ID) {
                 icon = appIconMap.get(componentName)
@@ -75,11 +63,10 @@ data class RenderInfo(
                 icon = iconMap.get(resourceId)
                 if (icon == null) {
                     icon = context.resources.getDrawable(resourceId, null)
-                    icon.mutate()
                     iconMap.put(resourceId, icon)
                 }
             }
-            return RenderInfo(icon!!, fg, bg)
+            return RenderInfo(icon!!.constantState.newDrawable(context.resources), fg, bg)
         }
 
         fun registerComponentIcon(componentName: ComponentName, icon: Drawable) {
@@ -109,230 +96,67 @@ private val deviceColorMap = mapOf<Int, Pair<Int, Int>>(
         Pair(R.color.control_foreground, R.color.control_enabled_default_background)
 }
 
-private val deviceIconMap = mapOf<Int, IconState>(
-    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_OFF) to IconState(
+private val deviceIconMap = mapOf<Int, Int>(
+    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_OFF) to
         R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_off
-    ),
-    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT) to IconState(
+    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT) to
+        R.drawable.ic_device_thermostat,
+    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_COOL) to
+        R.drawable.ic_device_thermostat,
+    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT_COOL) to
+        R.drawable.ic_device_thermostat,
+    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_ECO) to
         R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_COOL) to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_HEAT_COOL) to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    (THERMOSTAT_RANGE + TemperatureControlTemplate.MODE_ECO) to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_off
-    ),
-    DeviceTypes.TYPE_THERMOSTAT to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    DeviceTypes.TYPE_LIGHT to IconState(
-        R.drawable.ic_device_light_off,
-        R.drawable.ic_device_light_on
-    ),
-    DeviceTypes.TYPE_CAMERA to IconState(
-        R.drawable.ic_device_camera_off,
-        R.drawable.ic_device_camera_on
-    ),
-    DeviceTypes.TYPE_LOCK to IconState(
-        R.drawable.ic_device_lock_off,
-        R.drawable.ic_device_lock_on
-    ),
-    DeviceTypes.TYPE_SWITCH to IconState(
-        R.drawable.ic_device_switch_off,
-        R.drawable.ic_device_switch_on
-    ),
-    DeviceTypes.TYPE_OUTLET to IconState(
-        R.drawable.ic_device_outlet_off,
-        R.drawable.ic_device_outlet_on
-    ),
-    DeviceTypes.TYPE_VACUUM to IconState(
-        R.drawable.ic_device_vacuum_off,
-        R.drawable.ic_device_vacuum_on
-    ),
-    DeviceTypes.TYPE_MOP to IconState(
-        R.drawable.ic_device_mop_off,
-        R.drawable.ic_device_mop_on
-    ),
-    DeviceTypes.TYPE_AIR_FRESHENER to IconState(
-        R.drawable.ic_device_air_freshener_off,
-        R.drawable.ic_device_air_freshener_on
-    ),
-    DeviceTypes.TYPE_AIR_PURIFIER to IconState(
-        R.drawable.ic_device_air_purifier_off,
-        R.drawable.ic_device_air_purifier_on
-    ),
-    DeviceTypes.TYPE_FAN to IconState(
-        R.drawable.ic_device_fan_off,
-        R.drawable.ic_device_fan_on
-    ),
-    DeviceTypes.TYPE_HOOD to IconState(
-        R.drawable.ic_device_hood_off,
-        R.drawable.ic_device_hood_on
-    ),
-    DeviceTypes.TYPE_KETTLE to IconState(
-        R.drawable.ic_device_kettle_off,
-        R.drawable.ic_device_kettle_on
-    ),
-    DeviceTypes.TYPE_MICROWAVE to IconState(
-        R.drawable.ic_device_microwave_off,
-        R.drawable.ic_device_microwave_on
-    ),
-    DeviceTypes.TYPE_REMOTE_CONTROL to IconState(
-        R.drawable.ic_device_remote_control_off,
-        R.drawable.ic_device_remote_control_on
-    ),
-    DeviceTypes.TYPE_SET_TOP to IconState(
-        R.drawable.ic_device_set_top_off,
-        R.drawable.ic_device_set_top_on
-    ),
-    DeviceTypes.TYPE_STYLER to IconState(
-        R.drawable.ic_device_styler_off,
-        R.drawable.ic_device_styler_on
-    ),
-    DeviceTypes.TYPE_TV to IconState(
-        R.drawable.ic_device_tv_off,
-        R.drawable.ic_device_tv_on
-    ),
-    DeviceTypes.TYPE_WATER_HEATER to IconState(
-        R.drawable.ic_device_water_heater_off,
-        R.drawable.ic_device_water_heater_on
-    ),
-    DeviceTypes.TYPE_DISHWASHER to IconState(
-        R.drawable.ic_device_dishwasher_off,
-        R.drawable.ic_device_dishwasher_on
-    ),
-    DeviceTypes.TYPE_MULTICOOKER to IconState(
-        R.drawable.ic_device_multicooker_off,
-        R.drawable.ic_device_multicooker_on
-    ),
-    DeviceTypes.TYPE_SPRINKLER to IconState(
-        R.drawable.ic_device_sprinkler_off,
-        R.drawable.ic_device_sprinkler_on
-    ),
-    DeviceTypes.TYPE_WASHER to IconState(
-        R.drawable.ic_device_washer_off,
-        R.drawable.ic_device_washer_on
-    ),
-    DeviceTypes.TYPE_BLINDS to IconState(
-        R.drawable.ic_device_blinds_off,
-        R.drawable.ic_device_blinds_on
-    ),
-    DeviceTypes.TYPE_DRAWER to IconState(
-        R.drawable.ic_device_drawer_off,
-        R.drawable.ic_device_drawer_on
-    ),
-    DeviceTypes.TYPE_GARAGE to IconState(
-        R.drawable.ic_device_garage_off,
-        R.drawable.ic_device_garage_on
-    ),
-    DeviceTypes.TYPE_GATE to IconState(
-        R.drawable.ic_device_gate_off,
-        R.drawable.ic_device_gate_on
-    ),
-    DeviceTypes.TYPE_PERGOLA to IconState(
-        R.drawable.ic_device_pergola_off,
-        R.drawable.ic_device_pergola_on
-    ),
-    DeviceTypes.TYPE_WINDOW to IconState(
-        R.drawable.ic_device_window_off,
-        R.drawable.ic_device_window_on
-    ),
-    DeviceTypes.TYPE_VALVE to IconState(
-        R.drawable.ic_device_valve_off,
-        R.drawable.ic_device_valve_on
-    ),
-    DeviceTypes.TYPE_SECURITY_SYSTEM to IconState(
-        R.drawable.ic_device_security_system_off,
-        R.drawable.ic_device_security_system_on
-    ),
-    DeviceTypes.TYPE_REFRIGERATOR to IconState(
-        R.drawable.ic_device_refrigerator_off,
-        R.drawable.ic_device_refrigerator_on
-    ),
-    DeviceTypes.TYPE_DOORBELL to IconState(
-        R.drawable.ic_device_doorbell_off,
-        R.drawable.ic_device_doorbell_on
-    ),
-    DeviceTypes.TYPE_ROUTINE to IconState(
-        RenderInfo.APP_ICON_ID,
-        RenderInfo.APP_ICON_ID
-    ),
-    DeviceTypes.TYPE_AC_HEATER to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    DeviceTypes.TYPE_AC_UNIT to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    DeviceTypes.TYPE_COFFEE_MAKER to IconState(
-        R.drawable.ic_device_kettle_off,
-        R.drawable.ic_device_kettle_on
-    ),
-    DeviceTypes.TYPE_DEHUMIDIFIER to IconState(
-        R.drawable.ic_device_air_freshener_off,
-        R.drawable.ic_device_air_freshener_on
-    ),
-    DeviceTypes.TYPE_RADIATOR to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    ),
-    DeviceTypes.TYPE_STANDMIXER to IconState(
-        R.drawable.ic_device_cooking_off,
-        R.drawable.ic_device_cooking_on
-    ),
-    DeviceTypes.TYPE_DISPLAY to IconState(
-        R.drawable.ic_device_display_off,
-        R.drawable.ic_device_display_on
-    ),
-    DeviceTypes.TYPE_DRYER to IconState(
-        R.drawable.ic_device_washer_off,
-        R.drawable.ic_device_washer_on
-    ),
-    DeviceTypes.TYPE_MOWER to IconState(
-        R.drawable.ic_device_outdoor_garden_off,
-        R.drawable.ic_device_outdoor_garden_on
-    ),
-    DeviceTypes.TYPE_SHOWER to IconState(
-        R.drawable.ic_device_water_off,
-        R.drawable.ic_device_water_on
-    ),
-    DeviceTypes.TYPE_AWNING to IconState(
-        R.drawable.ic_device_pergola_off,
-        R.drawable.ic_device_pergola_on
-    ),
-    DeviceTypes.TYPE_CLOSET to IconState(
-        R.drawable.ic_device_drawer_off,
-        R.drawable.ic_device_drawer_on
-    ),
-    DeviceTypes.TYPE_CURTAIN to IconState(
-        R.drawable.ic_device_blinds_off,
-        R.drawable.ic_device_blinds_on
-    ),
-    DeviceTypes.TYPE_DOOR to IconState(
-        R.drawable.ic_device_door_off,
-        R.drawable.ic_device_door_on
-    ),
-    DeviceTypes.TYPE_SHUTTER to IconState(
-        R.drawable.ic_device_window_off,
-        R.drawable.ic_device_window_on
-    ),
-    DeviceTypes.TYPE_HEATER to IconState(
-        R.drawable.ic_device_thermostat_off,
-        R.drawable.ic_device_thermostat_on
-    )
+    DeviceTypes.TYPE_THERMOSTAT to R.drawable.ic_device_thermostat,
+    DeviceTypes.TYPE_LIGHT to R.drawable.ic_device_light,
+    DeviceTypes.TYPE_CAMERA to R.drawable.ic_device_camera,
+    DeviceTypes.TYPE_LOCK to R.drawable.ic_device_lock,
+    DeviceTypes.TYPE_SWITCH to R.drawable.ic_device_switch,
+    DeviceTypes.TYPE_OUTLET to R.drawable.ic_device_outlet,
+    DeviceTypes.TYPE_VACUUM to R.drawable.ic_device_vacuum,
+    DeviceTypes.TYPE_MOP to R.drawable.ic_device_mop,
+    DeviceTypes.TYPE_AIR_FRESHENER to R.drawable.ic_device_air_freshener,
+    DeviceTypes.TYPE_AIR_PURIFIER to R.drawable.ic_device_air_purifier,
+    DeviceTypes.TYPE_FAN to R.drawable.ic_device_fan,
+    DeviceTypes.TYPE_HOOD to R.drawable.ic_device_hood,
+    DeviceTypes.TYPE_KETTLE to R.drawable.ic_device_kettle,
+    DeviceTypes.TYPE_MICROWAVE to R.drawable.ic_device_microwave,
+    DeviceTypes.TYPE_REMOTE_CONTROL to R.drawable.ic_device_remote_control,
+    DeviceTypes.TYPE_SET_TOP to R.drawable.ic_device_set_top,
+    DeviceTypes.TYPE_STYLER to R.drawable.ic_device_styler,
+    DeviceTypes.TYPE_TV to R.drawable.ic_device_tv,
+    DeviceTypes.TYPE_WATER_HEATER to R.drawable.ic_device_water_heater,
+    DeviceTypes.TYPE_DISHWASHER to R.drawable.ic_device_dishwasher,
+    DeviceTypes.TYPE_MULTICOOKER to R.drawable.ic_device_multicooker,
+    DeviceTypes.TYPE_SPRINKLER to R.drawable.ic_device_sprinkler,
+    DeviceTypes.TYPE_WASHER to R.drawable.ic_device_washer,
+    DeviceTypes.TYPE_BLINDS to R.drawable.ic_device_blinds,
+    DeviceTypes.TYPE_DRAWER to R.drawable.ic_device_drawer,
+    DeviceTypes.TYPE_GARAGE to R.drawable.ic_device_garage,
+    DeviceTypes.TYPE_GATE to R.drawable.ic_device_gate,
+    DeviceTypes.TYPE_PERGOLA to R.drawable.ic_device_pergola,
+    DeviceTypes.TYPE_WINDOW to R.drawable.ic_device_window,
+    DeviceTypes.TYPE_VALVE to R.drawable.ic_device_valve,
+    DeviceTypes.TYPE_SECURITY_SYSTEM to R.drawable.ic_device_security_system,
+    DeviceTypes.TYPE_REFRIGERATOR to R.drawable.ic_device_refrigerator,
+    DeviceTypes.TYPE_DOORBELL to R.drawable.ic_device_doorbell,
+    DeviceTypes.TYPE_ROUTINE to RenderInfo.APP_ICON_ID,
+    DeviceTypes.TYPE_AC_HEATER to R.drawable.ic_device_thermostat,
+    DeviceTypes.TYPE_AC_UNIT to R.drawable.ic_device_thermostat,
+    DeviceTypes.TYPE_COFFEE_MAKER to R.drawable.ic_device_kettle,
+    DeviceTypes.TYPE_DEHUMIDIFIER to R.drawable.ic_device_air_freshener,
+    DeviceTypes.TYPE_RADIATOR to R.drawable.ic_device_thermostat,
+    DeviceTypes.TYPE_STANDMIXER to R.drawable.ic_device_cooking,
+    DeviceTypes.TYPE_DISPLAY to R.drawable.ic_device_display,
+    DeviceTypes.TYPE_DRYER to R.drawable.ic_device_washer,
+    DeviceTypes.TYPE_MOWER to R.drawable.ic_device_outdoor_garden,
+    DeviceTypes.TYPE_SHOWER to R.drawable.ic_device_water,
+    DeviceTypes.TYPE_AWNING to R.drawable.ic_device_pergola,
+    DeviceTypes.TYPE_CLOSET to R.drawable.ic_device_drawer,
+    DeviceTypes.TYPE_CURTAIN to R.drawable.ic_device_blinds,
+    DeviceTypes.TYPE_DOOR to R.drawable.ic_device_door,
+    DeviceTypes.TYPE_SHUTTER to R.drawable.ic_device_window,
+    DeviceTypes.TYPE_HEATER to R.drawable.ic_device_thermostat
 ).withDefault {
-    IconState(
-        R.drawable.ic_device_unknown_off,
-        R.drawable.ic_device_unknown_on
-    )
+    R.drawable.ic_device_unknown
 }

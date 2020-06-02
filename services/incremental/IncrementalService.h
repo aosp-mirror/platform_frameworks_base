@@ -56,8 +56,6 @@ using StorageId = int;
 using FileId = incfs::FileId;
 using BlockIndex = incfs::BlockIndex;
 using RawMetadata = incfs::RawMetadata;
-using Clock = std::chrono::steady_clock;
-using TimePoint = std::chrono::time_point<Clock>;
 using Seconds = std::chrono::seconds;
 using BootClockTsUs = uint64_t;
 
@@ -338,8 +336,6 @@ private:
     bool unregisterAppOpsCallback(const std::string& packageName);
     void onAppOpChanged(const std::string& packageName);
 
-    using Job = std::function<void()>;
-
     void runJobProcessing();
     void extractZipFile(const IfsMountPtr& ifs, ZipArchiveHandle zipFile, ZipEntry& entry,
                         const incfs::FileId& libFileId, std::string_view targetLibPath,
@@ -347,9 +343,8 @@ private:
 
     void runCmdLooper();
 
-    void addTimedJob(MountId id, TimePoint when, Job what);
+    void addTimedJob(MountId id, Milliseconds after, Job what);
     void removeTimedJobs(MountId id);
-    void runTimers();
 
 private:
     const std::unique_ptr<VoldServiceWrapper> mVold;
@@ -358,6 +353,7 @@ private:
     const std::unique_ptr<AppOpsManagerWrapper> mAppOpsManager;
     const std::unique_ptr<JniWrapper> mJni;
     const std::unique_ptr<LooperWrapper> mLooper;
+    const std::unique_ptr<TimedQueueWrapper> mTimedQueue;
     const std::string mIncrementalDir;
 
     mutable std::mutex mLock;
@@ -380,19 +376,6 @@ private:
     std::thread mJobProcessor;
 
     std::thread mCmdLooperThread;
-
-    struct TimedJob {
-        MountId id;
-        TimePoint when;
-        Job what;
-        friend bool operator<(const TimedJob& lhs, const TimedJob& rhs) {
-            return lhs.when < rhs.when;
-        }
-    };
-    std::set<TimedJob> mTimedJobs;
-    std::condition_variable mTimerCondition;
-    std::mutex mTimerMutex;
-    std::thread mTimerThread;
 };
 
 } // namespace android::incremental

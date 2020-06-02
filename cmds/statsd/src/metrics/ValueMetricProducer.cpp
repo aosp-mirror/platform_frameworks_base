@@ -78,6 +78,7 @@ const Value ZERO_DOUBLE((int64_t)0);
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
 ValueMetricProducer::ValueMetricProducer(
         const ConfigKey& key, const ValueMetric& metric, const int conditionIndex,
+        const vector<ConditionState>& initialConditionCache,
         const sp<ConditionWizard>& conditionWizard, const int whatMatcherIndex,
         const sp<EventMatcherWizard>& matcherWizard, const int pullTagId, const int64_t timeBaseNs,
         const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
@@ -85,8 +86,9 @@ ValueMetricProducer::ValueMetricProducer(
         const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap,
         const vector<int>& slicedStateAtoms,
         const unordered_map<int, unordered_map<int, int64_t>>& stateGroupMap)
-    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, conditionWizard,
-                     eventActivationMap, eventDeactivationMap, slicedStateAtoms, stateGroupMap),
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, initialConditionCache,
+                     conditionWizard, eventActivationMap, eventDeactivationMap, slicedStateAtoms,
+                     stateGroupMap),
       mWhatMatcherIndex(whatMatcherIndex),
       mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),
