@@ -323,6 +323,14 @@ public final class SurfaceControl implements Parcelable {
     public static final int CURSOR_WINDOW = 0x00002000;
 
     /**
+     * Surface creation flag: Indicates the effect layer will not have a color fill on
+     * creation.
+     *
+     * @hide
+     */
+    public static final int NO_COLOR_FILL = 0x00004000;
+
+    /**
      * Surface creation flag: Creates a normal surface.
      * This is the default.
      *
@@ -577,7 +585,7 @@ public final class SurfaceControl implements Parcelable {
                 throw new IllegalStateException(
                         "width and height must be positive or unset");
             }
-            if ((mWidth > 0 || mHeight > 0) && (isColorLayerSet() || isContainerLayerSet())) {
+            if ((mWidth > 0 || mHeight > 0) && (isEffectLayer() || isContainerLayer())) {
                 throw new IllegalStateException(
                         "Only buffer layers can set a valid buffer size.");
             }
@@ -749,10 +757,27 @@ public final class SurfaceControl implements Parcelable {
         }
 
         /**
-         * Indicate whether a 'ColorLayer' is to be constructed.
+         * Indicate whether an 'EffectLayer' is to be constructed.
          *
-         * Color layers will not have an associated BufferQueue and will instead always render a
-         * solid color (that is, solid before plane alpha). Currently that color is black.
+         * An effect layer behaves like a container layer by default but it can support
+         * color fill, shadows and/or blur. These layers will not have an associated buffer.
+         * When created, this layer has no effects set and will be transparent but the caller
+         * can render an effect by calling:
+         *  - {@link Transaction#setColor(SurfaceControl, float[])}
+         *  - {@link Transaction#setBackgroundBlurRadius(SurfaceControl, int)}
+         *  - {@link Transaction#setShadowRadius(SurfaceControl, float)}
+         *
+         * @hide
+         */
+        public Builder setEffectLayer() {
+            mFlags |= NO_COLOR_FILL;
+            unsetBufferSize();
+            return setFlags(FX_SURFACE_EFFECT, FX_SURFACE_MASK);
+        }
+
+        /**
+         * A convenience function to create an effect layer with a default color fill
+         * applied to it. Currently that color is black.
          *
          * @hide
          */
@@ -761,7 +786,7 @@ public final class SurfaceControl implements Parcelable {
             return setFlags(FX_SURFACE_EFFECT, FX_SURFACE_MASK);
         }
 
-        private boolean isColorLayerSet() {
+        private boolean isEffectLayer() {
             return  (mFlags & FX_SURFACE_EFFECT) == FX_SURFACE_EFFECT;
         }
 
@@ -786,7 +811,7 @@ public final class SurfaceControl implements Parcelable {
             return setFlags(FX_SURFACE_CONTAINER, FX_SURFACE_MASK);
         }
 
-        private boolean isContainerLayerSet() {
+        private boolean isContainerLayer() {
             return  (mFlags & FX_SURFACE_CONTAINER) == FX_SURFACE_CONTAINER;
         }
 
