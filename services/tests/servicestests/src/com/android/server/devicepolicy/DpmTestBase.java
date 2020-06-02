@@ -83,6 +83,23 @@ public abstract class DpmTestBase extends AndroidTestCase {
         return mServices;
     }
 
+    protected void sendBroadcastWithUser(DevicePolicyManagerServiceTestable dpms, String action,
+            int userHandle) throws Exception {
+        final Intent intent = new Intent(action);
+        intent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
+        getServices().injectBroadcast(getContext(), intent, userHandle);
+        flushTasks(dpms);
+    }
+
+    protected void flushTasks(DevicePolicyManagerServiceTestable dpms) throws Exception {
+        dpms.mHandler.runWithScissors(() -> { }, 0 /*now*/);
+        dpms.mBackgroundHandler.runWithScissors(() -> { }, 0 /*now*/);
+
+        // We can't let exceptions happen on the background thread. Throw them here if they happen
+        // so they still cause the test to fail despite being suppressed.
+        getServices().rethrowBackgroundBroadcastExceptions();
+    }
+
     protected interface DpmRunnable {
         void run(DevicePolicyManager dpm) throws Exception;
     }
@@ -180,7 +197,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
      * @param copyFromAdmin package information for {@code admin} will be built based on this
      *    component's information.
      */
-    private void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
+    protected void setUpPackageManagerForFakeAdmin(ComponentName admin, int packageUid,
             Integer enabledSetting, Integer appTargetSdk, ComponentName copyFromAdmin)
             throws Exception {
 

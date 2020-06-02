@@ -2742,7 +2742,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         Slog.i(LOG_TAG, "Giving the PO additional power...");
         markProfileOwnerOnOrganizationOwnedDeviceUncheckedLocked(poAdminComponent, poUserId);
         Slog.i(LOG_TAG, "Migrating DO policies to PO...");
-        moveDoPoliciesToProfileParentAdmin(doAdmin, poAdmin.getParentActiveAdmin());
+        moveDoPoliciesToProfileParentAdminLocked(doAdmin, poAdmin.getParentActiveAdmin());
+        migratePersonalAppSuspensionLocked(doUserId, poUserId, poAdmin);
         saveSettingsLocked(poUserId);
         Slog.i(LOG_TAG, "Clearing the DO...");
         final ComponentName doAdminReceiver = doAdmin.info.getComponent();
@@ -2760,6 +2761,25 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 .createEvent(DevicePolicyEnums.COMP_TO_ORG_OWNED_PO_MIGRATED)
                 .setAdmin(poAdminComponent)
                 .write();
+    }
+
+    @GuardedBy("getLockObject()")
+    private void migratePersonalAppSuspensionLocked(
+            int doUserId, int poUserId, ActiveAdmin poAdmin) {
+        final PackageManagerInternal pmi = mInjector.getPackageManagerInternal();
+        if (!pmi.isSuspendingAnyPackages(PLATFORM_PACKAGE_NAME, doUserId)) {
+            Slog.i(LOG_TAG, "DO is not suspending any apps.");
+            return;
+        }
+
+        if (getTargetSdk(poAdmin.info.getPackageName(), poUserId) >= Build.VERSION_CODES.R) {
+            Slog.i(LOG_TAG, "PO is targeting R+, keeping personal apps suspended.");
+            getUserData(doUserId).mAppsSuspended = true;
+            poAdmin.mSuspendPersonalApps = true;
+        } else {
+            Slog.i(LOG_TAG, "PO isn't targeting R+, unsuspending personal apps.");
+            pmi.unsuspendForSuspendingPackage(PLATFORM_PACKAGE_NAME, doUserId);
+        }
     }
 
     private void uninstallOrDisablePackage(String packageName, int userHandle) {
@@ -2803,7 +2823,9 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         pi.uninstall(packageName, 0 /* flags */, new IntentSender((IIntentSender) mLocalSender));
     }
 
-    private void moveDoPoliciesToProfileParentAdmin(ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
+    @GuardedBy("getLockObject()")
+    private void moveDoPoliciesToProfileParentAdminLocked(
+            ActiveAdmin doAdmin, ActiveAdmin parentAdmin) {
         // The following policies can be already controlled via parent instance, skip if so.
         if (parentAdmin.mPasswordPolicy.quality == PASSWORD_QUALITY_UNSPECIFIED) {
             parentAdmin.mPasswordPolicy = doAdmin.mPasswordPolicy;
@@ -16132,25 +16154,34 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         }
         Slog.i(LOG_TAG, String.format("%s personal apps for user %d",
                 suspended ? "Suspending" : "Unsuspending", userId));
+
+        if (suspended) {
+            suspendPersonalAppsInPackageManager(userId);
+        } else {
+            mInjector.getPackageManagerInternal().unsuspendForSuspendingPackage(
+                    PLATFORM_PACKAGE_NAME, userId);
+        }
+
+        synchronized (getLockObject()) {
+            getUserData(userId).mAppsSuspended = suspended;
+            saveSettingsLocked(userId);
+        }
+    }
+
+    private void suspendPersonalAppsInPackageManager(int userId) {
         mInjector.binderWithCleanCallingIdentity(() -> {
             try {
                 final String[] appsToSuspend = mInjector.getPersonalAppsForSuspension(userId);
-                final String[] failedPackages = mIPackageManager.setPackagesSuspendedAsUser(
-                        appsToSuspend, suspended, null, null, null, PLATFORM_PACKAGE_NAME, userId);
-                if (!ArrayUtils.isEmpty(failedPackages)) {
-                    Slog.wtf(LOG_TAG, String.format("Failed to %s packages: %s",
-                            suspended ? "suspend" : "unsuspend", String.join(",", failedPackages)));
+                final String[] failedApps = mIPackageManager.setPackagesSuspendedAsUser(
+                        appsToSuspend, true, null, null, null, PLATFORM_PACKAGE_NAME, userId);
+                if (!ArrayUtils.isEmpty(failedApps)) {
+                    Slog.wtf(LOG_TAG, "Failed to suspend apps: " + String.join(",", failedApps));
                 }
             } catch (RemoteException re) {
                 // Shouldn't happen.
                 Slog.e(LOG_TAG, "Failed talking to the package manager", re);
             }
         });
-
-        synchronized (getLockObject()) {
-            getUserData(userId).mAppsSuspended = suspended;
-            saveSettingsLocked(userId);
-        }
     }
 
     @GuardedBy("getLockObject()")
