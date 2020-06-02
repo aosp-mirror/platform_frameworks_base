@@ -206,8 +206,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Drukāšanu atspējoja <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Darba profila ieslēgšana"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Jūsu personīgās lietotnes būs bloķētas, līdz ieslēgsiet savu darba profilu."</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Personīgās lietotnes tiks bloķētas šādā datumā: <xliff:g id="DATE">%1$s</xliff:g>, plkst. <xliff:g id="TIME">%2$s</xliff:g>. Darba profilu nevar atspējot ilgāk par <xliff:g id="NUMBER">%3$d</xliff:g> dienām."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ieslēgt darba profilu"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Man"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planšetdatora opcijas"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV opcijas"</string>
@@ -1569,9 +1571,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Vai palaist pārlūkprogrammu?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Vai atbildēt uz zvanu?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Vienmēr"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Iestatīt uz “Vienmēr atvērt”"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Tikai vienreiz"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Iestatījumi"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"Programma %1$s neatbalsta darba profilus"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Planšetdators"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>

@@ -204,8 +204,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> દ્વારા પ્રિન્ટ કરવાનું બંધ કરાયું છે."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"જ્યાં સુધી તમે કાર્યાલયની પ્રોફાઇલ ચાલુ ન કરો ત્યાં સુધી તમારી વ્યક્તિગત ઍપ બ્લૉક કરેલી રહે છે"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"વ્યક્તિગત ઍપને <xliff:g id="DATE">%1$s</xliff:g>ના રોજ <xliff:g id="TIME">%2$s</xliff:g> વાગ્યે બ્લૉક કરવામાં આવશે. તમારી ઑફિસની પ્રોફાઇલ <xliff:g id="NUMBER">%3$d</xliff:g>ને દિવસ કરતાં વધુ સમય માટે બંધ રાખી શકાતી નથી."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"કાર્યાલયની પ્રોફાઇલ ચાલુ કરો"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"હું"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ટેબ્લેટ વિકલ્પો"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TVના વિકલ્પો"</string>
@@ -1548,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"બ્રાઉઝર લોન્ચ કરીએ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"કૉલ સ્વીકારીએ?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"હંમેશા"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"હંમેશાં ખુલ્લી તરીકે સેટ કરો"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ફક્ત એક વાર"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"સેટિંગ"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s કાર્ય પ્રોફાઇલનું સમર્થન કરતું નથી"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ટેબ્લેટ"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>

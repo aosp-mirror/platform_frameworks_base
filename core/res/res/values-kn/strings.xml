@@ -204,8 +204,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ಮೂಲಕ ಪ್ರಿಂಟಿಂಗ್ ಅನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್ ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"ನಿಮ್ಮ ಉದ್ಯೋಗದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಸಕ್ರಿಯಗೊಳಿಸುವವರೆಗೆ ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತದೆ"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"ವೈಯಕ್ತಿಕ ಆ್ಯಪ್‌ಗಳನ್ನು <xliff:g id="DATE">%1$s</xliff:g> ರಂದು <xliff:g id="TIME">%2$s</xliff:g> ಸಮಯಕ್ಕೆ ನಿರ್ಬಂಧಿಸಲಾಗುತ್ತದೆ. ನಿಮ್ಮ ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್ ಅನ್ನು <xliff:g id="NUMBER">%3$d</xliff:g> ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ಕಾಲ ಮುಚ್ಚಲಾಗುವುದಿಲ್ಲ."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"ಉದ್ಯೋಗ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಆನ್ ಮಾಡಿ"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"ನಾನು"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"ಟ್ಯಾಬ್ಲೆಟ್ ಆಯ್ಕೆಗಳು"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ಆಯ್ಕೆಗಳು"</string>
@@ -1309,7 +1311,7 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"ಸಂಪರ್ಕಗೊಂಡಿರುವ ಸಾಧನವನ್ನು ಚಾರ್ಜ್ ಮಾಡಲಾಗುತ್ತಿದೆ. ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"ಅನ್‌ಲಾಗ್ ಆಡಿಯೋ ಪರಿಕರ ಪತ್ತೆಯಾಗಿದೆ"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"ಲಗತ್ತಿಸಲಾದ ಸಾಧನವು ಈ ಫೋನಿನೊಂದಿಗೆ ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗಿಂಗ್‌‌ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆ ಸಂಪರ್ಕಗೊಂಡಿದೆ"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಆಫ್‌ ಮಾಡಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲು ಆಯ್ಕೆ ಮಾಡಿ."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"ವೈರ್‌ಲೆಸ್ ಡೀಬಗ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಕನೆಕ್ಟ್ ಮಾಡಲಾಗಿದೆ"</string>
@@ -1548,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"ಬ್ರೌಸರ್ ಪ್ರಾರಂಭಿಸುವುದೇ?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"ಕರೆ ಸ್ವೀಕರಿಸುವುದೇ?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"ಯಾವಾಗಲೂ"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"ಯಾವಾಗಲೂ ತೆರೆಯುವುದಕ್ಕೆ ಹೊಂದಿಸಿ"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"ಒಮ್ಮೆ ಮಾತ್ರ"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ಕೆಲಸದ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"ಟ್ಯಾಬ್ಲೆಟ್‌‌"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"ಟಿವಿ"</string>
@@ -2032,7 +2032,7 @@
       <item quantity="one"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ಫೈಲ್‌ಗಳು</item>
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ಫೈಲ್‌ಗಳು</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ಹಂಚಿಕೊಳ್ಳಲು, ಯಾವುದೇ ಶಿಫಾರಸು ಮಾಡಲಾದ ಜನರಿಲ್ಲ"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ಹಂಚಿಕೊಳ್ಳಲು ಶಿಫಾರಸು ಮಾಡಲಾದವರು ಯಾರೂ ಇಲ್ಲ"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"ಆ್ಯಪ್‌ಗಳ ಪಟ್ಟಿ"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ಈ ಆ್ಯಪ್‌ಗೆ ರೆಕಾರ್ಡ್ ಅನುಮತಿಯನ್ನು ನೀಡಲಾಗಿಲ್ಲ, ಆದರೆ ಈ USB ಸಾಧನದ ಮೂಲಕ ಆಡಿಯೊವನ್ನು ಸೆರೆಹಿಡಿಯಬಲ್ಲದು."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"ಹೋಮ್"</string>

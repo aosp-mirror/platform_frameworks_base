@@ -204,8 +204,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Печатењето е оневозможено од <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Вклучете го работниот профил"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Вашите лични апликации се блокирани додека да го вклучите работниот профил"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Личните апликации ќе се блокираат на <xliff:g id="DATE">%1$s</xliff:g> во <xliff:g id="TIME">%2$s</xliff:g>. Вашиот работен профил не може да остане исклучен подолго од <xliff:g id="NUMBER">%3$d</xliff:g> дена."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Вклучи го работниот профил"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Јас"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Опции на таблет"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Опции на Android TV"</string>
@@ -1505,9 +1507,7 @@
     <string name="action_bar_home_description" msgid="1501655419158631974">"Движи се кон дома"</string>
     <string name="action_bar_up_description" msgid="6611579697195026932">"Движи се нагоре"</string>
     <string name="action_menu_overflow_description" msgid="4579536843510088170">"Повеќе опции"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for action_bar_home_description_format (5087107531331621803) -->
-    <skip />
+    <string name="action_bar_home_description_format" msgid="5087107531331621803">"%1$s, %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="4346835454749569826">"%1$s, %2$s, %3$s"</string>
     <string name="storage_internal" msgid="8490227947584914460">"Внатрешно заедничко место за складирање"</string>
     <string name="storage_sd_card" msgid="3404740277075331881">"СД картичка"</string>
@@ -1550,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Стартувај прелистувач?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Прифати повик?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Секогаш"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Поставете на секогаш отворај"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Само еднаш"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Поставки"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s не поддржува работен профил"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Таблет"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"Телевизор"</string>
