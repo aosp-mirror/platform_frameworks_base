@@ -184,6 +184,18 @@ public class ResolverActivity extends Activity implements
     static final String EXTRA_SELECTED_PROFILE =
             "com.android.internal.app.ResolverActivity.EXTRA_SELECTED_PROFILE";
 
+    /**
+     * {@link UserHandle} extra to indicate the user of the user that the starting intent
+     * originated from.
+     * <p>This is not necessarily the same as {@link #getUserId()} or {@link UserHandle#myUserId()},
+     * as there are edge cases when the intent resolver is launched in the other profile.
+     * For example, when we have 0 resolved apps in current profile and multiple resolved
+     * apps in the other profile, opening a link from the current profile launches the intent
+     * resolver in the other one. b/148536209 for more info.
+     */
+    static final String EXTRA_CALLING_USER =
+            "com.android.internal.app.ResolverActivity.EXTRA_CALLING_USER";
+
     static final int PROFILE_PERSONAL = AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
     static final int PROFILE_WORK = AbstractMultiProfilePagerAdapter.PROFILE_WORK;
 
@@ -470,17 +482,20 @@ public class ResolverActivity extends Activity implements
         // the intent resolver is started in the other profile. Since this is the only case when
         // this happens, we check for it here and set the current profile's tab.
         int selectedProfile = getCurrentProfile();
-        UserHandle intentUser = UserHandle.of(getLaunchingUserId());
+        UserHandle intentUser = getIntent().hasExtra(EXTRA_CALLING_USER)
+                ? getIntent().getParcelableExtra(EXTRA_CALLING_USER)
+                : getUser();
         if (!getUser().equals(intentUser)) {
             if (getPersonalProfileUserHandle().equals(intentUser)) {
                 selectedProfile = PROFILE_PERSONAL;
             } else if (getWorkProfileUserHandle().equals(intentUser)) {
                 selectedProfile = PROFILE_WORK;
             }
-        }
-        int selectedProfileExtra = getSelectedProfileExtra();
-        if (selectedProfileExtra != -1) {
-            selectedProfile = selectedProfileExtra;
+        } else {
+            int selectedProfileExtra = getSelectedProfileExtra();
+            if (selectedProfileExtra != -1) {
+                selectedProfile = selectedProfileExtra;
+            }
         }
         // We only show the default app for the profile of the current user. The filterLastUsed
         // flag determines whether to show a default app and that app is not shown in the
@@ -533,22 +548,6 @@ public class ResolverActivity extends Activity implements
             }
         }
         return selectedProfile;
-    }
-
-    /**
-     * Returns the user id of the user that the starting intent originated from.
-     * <p>This is not necessarily equal to {@link #getUserId()} or {@link UserHandle#myUserId()},
-     * as there are edge cases when the intent resolver is launched in the other profile.
-     * For example, when we have 0 resolved apps in current profile and multiple resolved apps
-     * in the other profile, opening a link from the current profile launches the intent resolver
-     * in the other one. b/148536209 for more info.
-     */
-    private int getLaunchingUserId() {
-        int contentUserHint = getIntent().getContentUserHint();
-        if (contentUserHint == UserHandle.USER_CURRENT) {
-            return UserHandle.myUserId();
-        }
-        return contentUserHint;
     }
 
     protected @Profile int getCurrentProfile() {
