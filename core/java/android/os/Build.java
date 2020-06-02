@@ -109,7 +109,7 @@ public class Build {
      * The hardware variant (SKU), if available.
      */
     @NonNull
-    public static final String SKU = getString("ro.boot.product.hardware.sku");
+    public static final String SKU = getString("ro.boot.hardware.sku");
 
     /**
      * Whether this build was for an emulator device.
