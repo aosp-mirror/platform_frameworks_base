@@ -28,7 +28,7 @@ import android.os.IStatsd;
 import android.os.Process;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.util.StatsdStatsLog;
+import com.android.internal.statsd.StatsdStatsLog;
 
 /**
  * StatsLog provides an API for developers to send events to statsd. The events can be used to
