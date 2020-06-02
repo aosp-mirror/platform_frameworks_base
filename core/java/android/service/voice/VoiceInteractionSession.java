@@ -1311,7 +1311,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             throw new IllegalStateException("Can't call before onCreate()");
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(mContext);
             intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startVoiceActivity(mToken, intent,
                     intent.resolveType(mContext.getContentResolver()),
@@ -1340,7 +1340,7 @@ public class VoiceInteractionSession implements KeyEvent.Callback, ComponentCall
             throw new IllegalStateException("Can't call before onCreate()");
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(mContext);
             intent.prepareToLeaveProcess(mContext);
             int res = mSystemService.startAssistantActivity(mToken, intent,
                     intent.resolveType(mContext.getContentResolver()),
