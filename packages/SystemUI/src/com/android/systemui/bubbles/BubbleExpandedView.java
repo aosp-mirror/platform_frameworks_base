@@ -316,6 +316,10 @@ public class BubbleExpandedView extends LinearLayout {
 
             return false;
         });
+
+        // BubbleStackView is forced LTR, but we want to respect the locale for expanded view layout
+        // so the Manage button appears on the right.
+        setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
     }
 
     private String getBubbleKey() {
