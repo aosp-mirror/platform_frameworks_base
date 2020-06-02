@@ -3504,7 +3504,7 @@ class Task extends WindowContainer<WindowContainer> {
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                         "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
                         control, asTask(), AppTransition.appTransitionToString(transit));
-                control.addTaskToTargets(getRootTask(), finishedCallback);
+                control.addTaskToTargets(this, finishedCallback);
             }
         } else {
             super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, finishedCallback);
