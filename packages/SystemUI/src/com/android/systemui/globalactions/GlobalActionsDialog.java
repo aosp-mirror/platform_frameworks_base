@@ -183,8 +183,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
     static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
 
-    private static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
-    private static final String PREFS_CONTROLS_FILE = "controls_prefs";
+    public static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
+    public static final String PREFS_CONTROLS_FILE = "controls_prefs";
     private static final int SEEDING_MAX = 2;
 
     private final Context mContext;
