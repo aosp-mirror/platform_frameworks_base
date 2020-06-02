@@ -65,7 +65,8 @@ class MediaDataCombineLatest @Inject constructor(
         val (entry, device) = entries[key] ?: null to null
         if (entry != null && device != null) {
             val data = entry.copy(device = device)
-            listeners.forEach {
+            val listenersCopy = listeners.toSet()
+            listenersCopy.forEach {
                 it.onMediaDataLoaded(key, data)
             }
         }
@@ -73,7 +74,8 @@ class MediaDataCombineLatest @Inject constructor(
 
     private fun remove(key: String) {
         entries.remove(key)?.let {
-            listeners.forEach {
+            val listenersCopy = listeners.toSet()
+            listenersCopy.forEach {
                 it.onMediaDataRemoved(key)
             }
         }
