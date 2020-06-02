@@ -62,8 +62,6 @@ public class QuickQSPanel extends QSPanel {
     private boolean mDisabledByPolicy;
     private int mMaxTiles;
     protected QSPanel mFullPanel;
-    /** Whether or not the QS media player feature is enabled. */
-    private boolean mUsingMediaPlayer;
     /** Whether or not the QuickQSPanel currently contains a media player. */
     private boolean mShowHorizontalTileLayout;
     private LinearLayout mHorizontalLinearLayout;
@@ -97,8 +95,6 @@ public class QuickQSPanel extends QSPanel {
         }
         mMediaBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_media_extra_bottom_margin);
-
-        mUsingMediaPlayer = Utils.useQsMediaPlayer(context);
         if (mUsingMediaPlayer) {
             mHorizontalLinearLayout = new LinearLayout(mContext);
             mHorizontalLinearLayout.setOrientation(LinearLayout.HORIZONTAL);
@@ -132,7 +128,6 @@ public class QuickQSPanel extends QSPanel {
             mHorizontalLinearLayout.setVisibility(useHorizontal ? View.VISIBLE : View.GONE);
             addView((View) mRegularTileLayout, 0);
             super.setPadding(0, 0, 0, 0);
-            applySideMargins(mHorizontalLinearLayout);
             applyBottomMargin((View) mRegularTileLayout);
         } else {
             sDefaultMaxTiles = getResources().getInteger(R.integer.quick_qs_panel_max_columns);
@@ -148,14 +143,6 @@ public class QuickQSPanel extends QSPanel {
         int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_bottom);
         MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
         layoutParams.bottomMargin = margin;
-        view.setLayoutParams(layoutParams);
-    }
-
-    private void applySideMargins(View view) {
-        int margin = getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_horizontal);
-        MarginLayoutParams layoutParams = (MarginLayoutParams) view.getLayoutParams();
-        layoutParams.setMarginStart(margin);
-        layoutParams.setMarginEnd(margin);
         view.setLayoutParams(layoutParams);
     }
 
@@ -177,10 +164,6 @@ public class QuickQSPanel extends QSPanel {
             layoutParams.width = horizontal ? 0 : ViewGroup.LayoutParams.MATCH_PARENT;
             layoutParams.weight = horizontal ? 1.5f : 0;
             layoutParams.bottomMargin = mMediaBottomMargin;
-            int marginStart = horizontal
-                    ? getResources().getDimensionPixelSize(R.dimen.qs_header_tile_margin_horizontal)
-                    : 0;
-            layoutParams.setMarginStart(marginStart);
         }
     }
 
@@ -194,11 +177,22 @@ public class QuickQSPanel extends QSPanel {
         mMediaHost.setShowsOnlyActiveMedia(true);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QQS);
         reAttachMediaHost();
+        updateMediaHostContentMargins();
     }
 
     @Override
-    public void setPadding(int left, int top, int right, int bottom) {
-        // Always have no padding.
+    protected void updateTileLayoutMargins(int visualMarginStart, int visualMarginEnd) {
+        if (mUsingMediaPlayer) {
+            updateMargins((View) mRegularTileLayout, visualMarginStart, visualMarginEnd);
+            updateMargins((View) mHorizontalTileLayout, visualMarginStart, 0);
+        } else {
+            updateMargins((View) mTileLayout, visualMarginStart, visualMarginEnd);
+        }
+    }
+
+    @Override
+    protected void updatePadding() {
+        // QS Panel is setting a top padding by default, which we don't need.
     }
 
     @Override
