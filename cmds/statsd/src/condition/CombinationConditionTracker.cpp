@@ -37,7 +37,8 @@ CombinationConditionTracker::~CombinationConditionTracker() {
 bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConfig,
                                        const vector<sp<ConditionTracker>>& allConditionTrackers,
                                        const unordered_map<int64_t, int>& conditionIdIndexMap,
-                                       vector<bool>& stack) {
+                                       vector<bool>& stack,
+                                       vector<ConditionState>& initialConditionCache) {
     VLOG("Combination predicate init() %lld", (long long)mConditionId);
     if (mInitialized) {
         return true;
@@ -73,9 +74,9 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
             return false;
         }
 
-
-        bool initChildSucceeded = childTracker->init(allConditionConfig, allConditionTrackers,
-                                                     conditionIdIndexMap, stack);
+        bool initChildSucceeded =
+                childTracker->init(allConditionConfig, allConditionTrackers, conditionIdIndexMap,
+                                   stack, initialConditionCache);
 
         if (!initChildSucceeded) {
             ALOGW("Child initialization failed %lld ", (long long)child);
@@ -94,6 +95,11 @@ bool CombinationConditionTracker::init(const vector<Predicate>& allConditionConf
         mTrackerIndex.insert(childTracker->getLogTrackerIndex().begin(),
                              childTracker->getLogTrackerIndex().end());
     }
+
+    mUnSlicedPartCondition = evaluateCombinationCondition(mUnSlicedChildren, mLogicalOperation,
+                                                          initialConditionCache);
+    initialConditionCache[mIndex] =
+            evaluateCombinationCondition(mChildren, mLogicalOperation, initialConditionCache);
 
     // unmark this node in the recursion stack.
     stack[mIndex] = false;

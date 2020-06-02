@@ -203,7 +203,7 @@ void Stream::stop()
 void Stream::stop_l()
 {
     if (mState != IDLE) {
-        ALOGV("%s: track streamID: %d", __func__, (int)mStreamID);
+        ALOGV("%s: track(%p) streamID: %d", __func__, mAudioTrack.get(), (int)mStreamID);
         if (mAudioTrack != nullptr) {
             mAudioTrack->stop();
         }
@@ -232,7 +232,7 @@ Stream* Stream::playPairStream() {
     LOG_ALWAYS_FATAL_IF(pairStream == nullptr, "No pair stream!");
     sp<AudioTrack> releaseTracks[2];
     {
-        ALOGV("%s: track streamID: %d", __func__, (int)mStreamID);
+        ALOGV("%s: track streamID: %d", __func__, (int)getStreamID());
         // TODO: Do we really want to force a simultaneous synchronization between
         // the stream and its pair?
 
@@ -390,10 +390,10 @@ void Stream::staticCallback(int event, void* user, void* info)
 
 void Stream::callback(int event, void* info, int toggle, int tries)
 {
-    ALOGV("%s streamID %d", __func__, (int)mStreamID);
     int32_t activeStreamIDToRestart = 0;
     {
         std::unique_lock lock(mLock);
+        ALOGV("%s track(%p) streamID %d", __func__, mAudioTrack.get(), (int)mStreamID);
 
         if (mAudioTrack == nullptr) {
             // The AudioTrack is either with this stream or its pair.
@@ -403,6 +403,7 @@ void Stream::callback(int event, void* info, int toggle, int tries)
             // logic here.
             if (tries < 3) {
                 lock.unlock();
+                ALOGV("%s streamID %d going to pair stream", __func__, (int)mStreamID);
                 getPairStream()->callback(event, info, toggle, tries + 1);
             } else {
                 ALOGW("%s streamID %d cannot find track", __func__, (int)mStreamID);
@@ -449,8 +450,9 @@ void Stream::callback(int event, void* info, int toggle, int tries)
 
 void Stream::dump() const
 {
+    // TODO: consider std::try_lock() - ok for now for ALOGV.
     ALOGV("mPairStream=%p, mState=%d, mStreamID=%d, mSoundID=%d, mPriority=%d, mLoop=%d",
-            getPairStream(), mState, (int)mStreamID, mSoundID, mPriority, mLoop);
+            getPairStream(), mState, (int)getStreamID(), getSoundID(), mPriority, mLoop);
 }
 
 } // namespace android::soundpool

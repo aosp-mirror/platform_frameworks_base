@@ -136,7 +136,7 @@ class ControlsRequestDialog @Inject constructor(
     }
 
     fun createDialog(label: CharSequence): Dialog {
-        val renderInfo = RenderInfo.lookup(this, component, control.deviceType, true)
+        val renderInfo = RenderInfo.lookup(this, component, control.deviceType)
         val frame = LayoutInflater.from(this).inflate(R.layout.controls_dialog, null).apply {
             requireViewById<ImageView>(R.id.icon).apply {
                 setImageDrawable(renderInfo.icon)

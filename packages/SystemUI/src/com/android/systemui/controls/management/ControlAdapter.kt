@@ -251,7 +251,7 @@ internal class ControlHolder(
         component: ComponentName,
         @DeviceTypes.DeviceType deviceType: Int
     ): RenderInfo {
-        return RenderInfo.lookup(itemView.context, component, deviceType, true)
+        return RenderInfo.lookup(itemView.context, component, deviceType)
     }
 
     private fun applyRenderInfo(ri: RenderInfo) {

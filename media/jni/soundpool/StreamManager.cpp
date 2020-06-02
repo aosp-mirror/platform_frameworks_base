@@ -249,7 +249,8 @@ int32_t StreamManager::queueForPlay(const std::shared_ptr<Sound> &sound,
     } // lock
 
     if (launchThread) {
-        const int32_t id __unused = mThreadPool->launch([this](int32_t id) { run(id); });
+        const int32_t id = mThreadPool->launch([this](int32_t id) { run(id); });
+        (void)id; // avoid clang warning -Wunused-variable -Wused-but-marked-unused
         ALOGV_IF(id != 0, "%s: launched thread %d", __func__, id);
     }
     ALOGV("%s: returning %d", __func__, streamID);
@@ -277,7 +278,8 @@ void StreamManager::moveToRestartQueue(
         sanityCheckQueue_l();
     }
     if (restart) {
-        const int32_t id __unused = mThreadPool->launch([this](int32_t id) { run(id); });
+        const int32_t id = mThreadPool->launch([this](int32_t id) { run(id); });
+        (void)id; // avoid clang warning -Wunused-variable -Wused-but-marked-unused
         ALOGV_IF(id != 0, "%s: launched thread %d", __func__, id);
     }
 }
