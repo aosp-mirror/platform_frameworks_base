@@ -17,8 +17,10 @@
 package com.android.networkstack.tethering;
 
 import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.NETWORK_STACK;
 import static android.Manifest.permission.TETHER_PRIVILEGED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION;
 import static android.net.TetheringManager.TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
@@ -253,15 +255,26 @@ public class TetheringService extends Service {
             return false;
         }
 
+        private boolean hasNetworkStackPermission() {
+            return checkCallingOrSelfPermission(NETWORK_STACK)
+                    || checkCallingOrSelfPermission(PERMISSION_MAINLINE_NETWORK_STACK);
+        }
+
         private boolean hasTetherPrivilegedPermission() {
-            return mService.checkCallingOrSelfPermission(TETHER_PRIVILEGED) == PERMISSION_GRANTED;
+            return checkCallingOrSelfPermission(TETHER_PRIVILEGED);
+        }
+
+        private boolean checkCallingOrSelfPermission(final String permission) {
+            return mService.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
         }
 
         private boolean hasTetherChangePermission(final String callerPkg,
                 final String callingAttributionTag, final boolean onlyAllowPrivileged) {
+            if (onlyAllowPrivileged && !hasNetworkStackPermission()) return false;
+
             if (hasTetherPrivilegedPermission()) return true;
 
-            if (onlyAllowPrivileged || mTethering.isTetherProvisioningRequired()) return false;
+            if (mTethering.isTetherProvisioningRequired()) return false;
 
             int uid = Binder.getCallingUid();
 
