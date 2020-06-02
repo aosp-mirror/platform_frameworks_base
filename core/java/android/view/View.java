@@ -14274,6 +14274,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public boolean dispatchTouchEvent(MotionEvent event) {
         // If the event should be handled by accessibility focus first.
+        if (event.isTargetAccessibilityFocus()) {
+            // We don't have focus or no virtual descendant has it, do not handle the event.
+            if (!isAccessibilityFocusedViewOrHost()) {
+                return false;
+            }
+            // We have focus and got the event, then use normal event dispatch.
+            event.setTargetAccessibilityFocus(false);
+        }
         boolean result = false;
 
         if (mInputEventConsistencyVerifier != null) {
