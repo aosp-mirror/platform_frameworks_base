@@ -259,8 +259,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 false);
         final TextView nameView = mInfo.findViewById(R.id.delegate_name);
         assertEquals(GONE, nameView.getVisibility());
-        final TextView dividerView = mInfo.findViewById(R.id.group_divider);
-        assertEquals(GONE, dividerView.getVisibility());
     }
 
     @Test
@@ -305,8 +303,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
                 false);
         final TextView groupNameView = mInfo.findViewById(R.id.group_name);
         assertEquals(GONE, groupNameView.getVisibility());
-        final TextView dividerView = mInfo.findViewById(R.id.group_divider);
-        assertEquals(GONE, dividerView.getVisibility());
     }
 
     @Test
@@ -331,8 +327,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
         final TextView groupNameView = mInfo.findViewById(R.id.group_name);
         assertEquals(View.VISIBLE, groupNameView.getVisibility());
         assertEquals("Test Group Name", groupNameView.getText());
-        final TextView dividerView = mInfo.findViewById(R.id.group_divider);
-        assertEquals(View.VISIBLE, dividerView.getVisibility());
     }
 
     @Test
