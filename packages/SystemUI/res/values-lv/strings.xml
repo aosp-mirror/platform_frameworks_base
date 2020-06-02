@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Tālumm., lai aizp. ekr."</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Stiepiet, lai aizp. ekr."</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Ekrānuzņēmums"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Atbloķējiet tālruni, lai skatītu citas opcijas."</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Atbloķējiet planšetdatoru, lai skatītu citas opcijas."</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Atbloķējiet ierīci, lai skatītu citas opcijas."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"nosūtīts attēls"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Saglabā ekrānuzņēmumu…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Notiek ekrānuzņēmuma saglabāšana..."</string>
@@ -725,7 +722,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Parādās sarunu sadaļas augšdaļā un kā peldošs burbulis, kā arī bloķēšanas ekrānā tiek rādīts profila attēls"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Iestatījumi"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstīti atsevišķu sarunu iestatījumi."</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nav nesen aizvērtu burbuļu"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Šeit būs redzami nesen rādītie burbuļi un aizvērtie burbuļi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šos paziņojumus nevar modificēt."</string>

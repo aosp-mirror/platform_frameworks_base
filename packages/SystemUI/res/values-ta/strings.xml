@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"திரையை நிரப்ப அளவை மாற்று"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"திரையை நிரப்ப இழு"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ஸ்கிரீன்ஷாட்"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"மேலும் விருப்பங்களுக்கு மொபைலை அன்லாக் செய்யவும்"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"மேலும் விருப்பங்களுக்கு டேப்லெட்டை அன்லாக் செய்யவும்"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"மேலும் விருப்பங்களுக்குச் சாதனத்தை அன்லாக் செய்யவும்"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"படம் அனுப்பப்பட்டது"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ஸ்க்ரீன் ஷாட்டைச் சேமிக்கிறது…"</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"இயக்கும்"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"முடக்கும்"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"வெளியீட்டுச் சாதனத்தை மாற்றுதல்"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ஆப்ஸ் பின் செய்யப்பட்டது"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, முந்தையது மற்றும் மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முந்தையது மற்றும் முகப்புப் பொத்தான்களைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"பின் செய்திருப்பதை அகற்றும் வரை இதைச் செயல்பாட்டில் வைத்திருக்கும். அதை அகற்றுவதற்கு மேல்நோக்கி ஸ்வைப் செய்து பிடித்திருக்கவும்."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முகப்புப் பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"(தொடர்புகள், மின்னஞ்சலின் உள்ளடக்கம் போன்ற) தனிப்பட்ட தரவு அணுகப்படக்கூடும்."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"பின் செய்யப்பட்டிருக்கும் ஆப்ஸ் பிற ஆப்ஸைத் திறக்கக்கூடும்."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"இந்த ஆப்ஸை அகற்ற, பின்செல் மற்றும் மேலோட்டப் பார்வை பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"இந்த ஆப்ஸை அகற்ற, பின்செல் மற்றும் முகப்பு பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"இந்த ஆப்ஸை அகற்ற, மேல்நோக்கி ஸ்வைப் செய்தவாறு பிடித்திருக்கவும்"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"புரிந்தது"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"வேண்டாம்"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ஆப்ஸ் பின் செய்யப்பட்டது"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ஆப்ஸ் அகற்றப்பட்டது"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ஐ மறைக்கவா?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"அடுத்த முறை அமைப்புகளில் மீண்டும் இயக்கும்போது, இது மீண்டும் தோன்றும்."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"மறை"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"உரையாடல் பிரிவின் மேற்பகுதியில் மிதக்கும் குமிழாகத் தோன்றும். பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"உரையாடல் சார்ந்த குறிப்பிட்ட அமைப்புகளை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காது"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"சமீபத்திய குமிழ்கள் இல்லை"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"சமீபத்திய குமிழ்களும் நிராகரிக்கப்பட்ட குமிழ்களும் இங்கே தோன்றும்"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>

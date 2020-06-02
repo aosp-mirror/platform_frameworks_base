@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ampliar ata ocupar todo"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estirar ata ocupar todo"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Facer captura"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Desbloquea o teléfono para ver máis opcións"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Desbloquea a tableta para ver máis opcións"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Desbloquea o dispositivo para ver máis opcións"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"enviou unha imaxe"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Gardando captura de pantalla…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Gardando captura de pantalla…"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Móstrase na parte superior da sección de conversas en forma de burbulla flotante e aparece a imaxe do perfil na pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> non admite opcións de configuración específicas para conversas"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Non hai burbullas recentes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"As burbullas recentes e ignoradas aparecerán aquí."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificacións non se poden modificar."</string>
