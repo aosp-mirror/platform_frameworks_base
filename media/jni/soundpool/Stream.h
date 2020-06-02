@@ -88,7 +88,7 @@ public:
     void resume(int32_t streamID);
     void autoResume();
     void mute(bool muting);
-    void dump() const;
+    void dump() const NO_THREAD_SAFETY_ANALYSIS; // disable for ALOGV (see func for details).
 
     // returns the pair stream if successful, nullptr otherwise
     Stream* playPairStream();

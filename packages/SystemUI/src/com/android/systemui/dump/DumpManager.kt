@@ -140,6 +140,20 @@ class DumpManager @Inject constructor() {
         }
     }
 
+    @Synchronized
+    fun freezeBuffers() {
+        for (buffer in buffers.values) {
+            buffer.dumpable.freeze()
+        }
+    }
+
+    @Synchronized
+    fun unfreezeBuffers() {
+        for (buffer in buffers.values) {
+            buffer.dumpable.unfreeze()
+        }
+    }
+
     private fun dumpDumpable(
         dumpable: RegisteredDumpable<Dumpable>,
         fd: FileDescriptor,
@@ -174,3 +188,5 @@ private data class RegisteredDumpable<T>(
     val name: String,
     val dumpable: T
 )
+
+private const val TAG = "DumpManager"

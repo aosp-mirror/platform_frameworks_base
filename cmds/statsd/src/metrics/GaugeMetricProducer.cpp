@@ -70,14 +70,15 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 8;
 
 GaugeMetricProducer::GaugeMetricProducer(
         const ConfigKey& key, const GaugeMetric& metric, const int conditionIndex,
-        const sp<ConditionWizard>& wizard, const int whatMatcherIndex,
-        const sp<EventMatcherWizard>& matcherWizard, const int pullTagId, const int triggerAtomId,
-        const int atomId, const int64_t timeBaseNs, const int64_t startTimeNs,
-        const sp<StatsPullerManager>& pullerManager,
+        const vector<ConditionState>& initialConditionCache, const sp<ConditionWizard>& wizard,
+        const int whatMatcherIndex, const sp<EventMatcherWizard>& matcherWizard,
+        const int pullTagId, const int triggerAtomId, const int atomId, const int64_t timeBaseNs,
+        const int64_t startTimeNs, const sp<StatsPullerManager>& pullerManager,
         const unordered_map<int, shared_ptr<Activation>>& eventActivationMap,
         const unordered_map<int, vector<shared_ptr<Activation>>>& eventDeactivationMap)
-    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard, eventActivationMap,
-                     eventDeactivationMap, /*slicedStateAtoms=*/{}, /*stateGroupMap=*/{}),
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, initialConditionCache, wizard,
+                     eventActivationMap, eventDeactivationMap, /*slicedStateAtoms=*/{},
+                     /*stateGroupMap=*/{}),
       mWhatMatcherIndex(whatMatcherIndex),
       mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),

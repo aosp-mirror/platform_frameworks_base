@@ -276,10 +276,156 @@ StatsdConfig buildCirclePredicates() {
     return config;
 }
 
+StatsdConfig buildConfigWithDifferentPredicates() {
+    StatsdConfig config;
+    config.set_id(12345);
+
+    auto pulledAtomMatcher =
+            CreateSimpleAtomMatcher("SUBSYSTEM_SLEEP", util::SUBSYSTEM_SLEEP_STATE);
+    *config.add_atom_matcher() = pulledAtomMatcher;
+    auto screenOnAtomMatcher = CreateScreenTurnedOnAtomMatcher();
+    *config.add_atom_matcher() = screenOnAtomMatcher;
+    auto screenOffAtomMatcher = CreateScreenTurnedOffAtomMatcher();
+    *config.add_atom_matcher() = screenOffAtomMatcher;
+    auto batteryNoneAtomMatcher = CreateBatteryStateNoneMatcher();
+    *config.add_atom_matcher() = batteryNoneAtomMatcher;
+    auto batteryUsbAtomMatcher = CreateBatteryStateUsbMatcher();
+    *config.add_atom_matcher() = batteryUsbAtomMatcher;
+
+    // Simple condition with InitialValue set to default (unknown).
+    auto screenOnUnknownPredicate = CreateScreenIsOnPredicate();
+    *config.add_predicate() = screenOnUnknownPredicate;
+
+    // Simple condition with InitialValue set to false.
+    auto screenOnFalsePredicate = config.add_predicate();
+    screenOnFalsePredicate->set_id(StringToId("ScreenIsOnInitialFalse"));
+    SimplePredicate* simpleScreenOnFalsePredicate =
+            screenOnFalsePredicate->mutable_simple_predicate();
+    simpleScreenOnFalsePredicate->set_start(screenOnAtomMatcher.id());
+    simpleScreenOnFalsePredicate->set_stop(screenOffAtomMatcher.id());
+    simpleScreenOnFalsePredicate->set_initial_value(SimplePredicate_InitialValue_FALSE);
+
+    // Simple condition with InitialValue set to false.
+    auto onBatteryFalsePredicate = config.add_predicate();
+    onBatteryFalsePredicate->set_id(StringToId("OnBatteryInitialFalse"));
+    SimplePredicate* simpleOnBatteryFalsePredicate =
+            onBatteryFalsePredicate->mutable_simple_predicate();
+    simpleOnBatteryFalsePredicate->set_start(batteryNoneAtomMatcher.id());
+    simpleOnBatteryFalsePredicate->set_stop(batteryUsbAtomMatcher.id());
+    simpleOnBatteryFalsePredicate->set_initial_value(SimplePredicate_InitialValue_FALSE);
+
+    // Combination condition with both simple condition InitialValues set to false.
+    auto screenOnFalseOnBatteryFalsePredicate = config.add_predicate();
+    screenOnFalseOnBatteryFalsePredicate->set_id(StringToId("ScreenOnFalseOnBatteryFalse"));
+    screenOnFalseOnBatteryFalsePredicate->mutable_combination()->set_operation(
+            LogicalOperation::AND);
+    addPredicateToPredicateCombination(*screenOnFalsePredicate,
+                                       screenOnFalseOnBatteryFalsePredicate);
+    addPredicateToPredicateCombination(*onBatteryFalsePredicate,
+                                       screenOnFalseOnBatteryFalsePredicate);
+
+    // Combination condition with one simple condition InitialValue set to unknown and one set to
+    // false.
+    auto screenOnUnknownOnBatteryFalsePredicate = config.add_predicate();
+    screenOnUnknownOnBatteryFalsePredicate->set_id(StringToId("ScreenOnUnknowneOnBatteryFalse"));
+    screenOnUnknownOnBatteryFalsePredicate->mutable_combination()->set_operation(
+            LogicalOperation::AND);
+    addPredicateToPredicateCombination(screenOnUnknownPredicate,
+                                       screenOnUnknownOnBatteryFalsePredicate);
+    addPredicateToPredicateCombination(*onBatteryFalsePredicate,
+                                       screenOnUnknownOnBatteryFalsePredicate);
+
+    // Simple condition metric with initial value false.
+    ValueMetric* metric1 = config.add_value_metric();
+    metric1->set_id(StringToId("ValueSubsystemSleepWhileScreenOnInitialFalse"));
+    metric1->set_what(pulledAtomMatcher.id());
+    *metric1->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    metric1->set_bucket(FIVE_MINUTES);
+    metric1->set_condition(screenOnFalsePredicate->id());
+
+    // Simple condition metric with initial value unknown.
+    ValueMetric* metric2 = config.add_value_metric();
+    metric2->set_id(StringToId("ValueSubsystemSleepWhileScreenOnInitialUnknown"));
+    metric2->set_what(pulledAtomMatcher.id());
+    *metric2->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    metric2->set_bucket(FIVE_MINUTES);
+    metric2->set_condition(screenOnUnknownPredicate.id());
+
+    // Combination condition metric with initial values false and false.
+    ValueMetric* metric3 = config.add_value_metric();
+    metric3->set_id(StringToId("ValueSubsystemSleepWhileScreenOnFalseDeviceUnpluggedFalse"));
+    metric3->set_what(pulledAtomMatcher.id());
+    *metric3->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    metric3->set_bucket(FIVE_MINUTES);
+    metric3->set_condition(screenOnFalseOnBatteryFalsePredicate->id());
+
+    // Combination condition metric with initial values unknown and false.
+    ValueMetric* metric4 = config.add_value_metric();
+    metric4->set_id(StringToId("ValueSubsystemSleepWhileScreenOnUnknownDeviceUnpluggedFalse"));
+    metric4->set_what(pulledAtomMatcher.id());
+    *metric4->mutable_value_field() =
+            CreateDimensions(util::SUBSYSTEM_SLEEP_STATE, {4 /* time sleeping field */});
+    metric4->set_bucket(FIVE_MINUTES);
+    metric4->set_condition(screenOnUnknownOnBatteryFalsePredicate->id());
+
+    return config;
+}
+
 bool isSubset(const set<int32_t>& set1, const set<int32_t>& set2) {
     return std::includes(set2.begin(), set2.end(), set1.begin(), set1.end());
 }
 }  // anonymous namespace
+
+TEST(MetricsManagerTest, TestInitialConditions) {
+    UidMap uidMap;
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> periodicAlarmMonitor;
+    StatsdConfig config = buildConfigWithDifferentPredicates();
+    set<int> allTagIds;
+    vector<sp<LogMatchingTracker>> allAtomMatchers;
+    vector<sp<ConditionTracker>> allConditionTrackers;
+    vector<sp<MetricProducer>> allMetricProducers;
+    std::vector<sp<AnomalyTracker>> allAnomalyTrackers;
+    std::vector<sp<AlarmTracker>> allAlarmTrackers;
+    unordered_map<int, std::vector<int>> conditionToMetricMap;
+    unordered_map<int, std::vector<int>> trackerToMetricMap;
+    unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> activationAtomTrackerToMetricMap;
+    unordered_map<int, std::vector<int>> deactivationAtomTrackerToMetricMap;
+    unordered_map<int64_t, int> alertTrackerMap;
+    vector<int> metricsWithActivation;
+    std::set<int64_t> noReportMetricIds;
+
+    EXPECT_TRUE(initStatsdConfig(
+            kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
+            timeBaseSec, timeBaseSec, allTagIds, allAtomMatchers, allConditionTrackers,
+            allMetricProducers, allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
+            trackerToMetricMap, trackerToConditionMap, activationAtomTrackerToMetricMap,
+            deactivationAtomTrackerToMetricMap, alertTrackerMap, metricsWithActivation,
+            noReportMetricIds));
+    ASSERT_EQ(4u, allMetricProducers.size());
+    ASSERT_EQ(5u, allConditionTrackers.size());
+
+    ConditionKey queryKey;
+    vector<ConditionState> conditionCache(5, ConditionState::kNotEvaluated);
+
+    allConditionTrackers[3]->isConditionMet(queryKey, allConditionTrackers, false, conditionCache);
+    allConditionTrackers[4]->isConditionMet(queryKey, allConditionTrackers, false, conditionCache);
+    EXPECT_EQ(ConditionState::kUnknown, conditionCache[0]);
+    EXPECT_EQ(ConditionState::kFalse, conditionCache[1]);
+    EXPECT_EQ(ConditionState::kFalse, conditionCache[2]);
+    EXPECT_EQ(ConditionState::kFalse, conditionCache[3]);
+    EXPECT_EQ(ConditionState::kUnknown, conditionCache[4]);
+
+    EXPECT_EQ(ConditionState::kFalse, allMetricProducers[0]->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, allMetricProducers[1]->mCondition);
+    EXPECT_EQ(ConditionState::kFalse, allMetricProducers[2]->mCondition);
+    EXPECT_EQ(ConditionState::kUnknown, allMetricProducers[3]->mCondition);
+}
 
 TEST(MetricsManagerTest, TestGoodConfig) {
     UidMap uidMap;

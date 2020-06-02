@@ -29,7 +29,6 @@ import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
-import android.window.WindowOrganizer;
 
 import androidx.annotation.Nullable;
 
@@ -213,7 +212,7 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
                     SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
         }
 
-        WindowOrganizer.applyTransaction(wct);
+        mSplits.mDivider.getWmProxy().applySyncTransaction(wct);
 
         // Update all the adjusted-for-ime states
         if (!mPaused) {
