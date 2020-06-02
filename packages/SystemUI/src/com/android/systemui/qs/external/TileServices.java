@@ -69,10 +69,14 @@ public class TileServices extends IQSService.Stub {
         mHost = host;
         mContext = mHost.getContext();
         mBroadcastDispatcher = broadcastDispatcher;
-        mBroadcastDispatcher.registerReceiver(mRequestListeningReceiver,
-                new IntentFilter(TileService.ACTION_REQUEST_LISTENING));
         mHandler = new Handler(looper);
         mMainHandler = new Handler(Looper.getMainLooper());
+        mBroadcastDispatcher.registerReceiver(
+                mRequestListeningReceiver,
+                new IntentFilter(TileService.ACTION_REQUEST_LISTENING),
+                null, // Use the default Executor
+                UserHandle.ALL
+        );
     }
 
     public Context getContext() {
