@@ -723,6 +723,12 @@ public class BubbleStackView extends FrameLayout
 
         setUpUserEducation();
 
+        // Force LTR by default since most of the Bubbles UI is positioned manually by the user, or
+        // is centered. It greatly simplifies translation positioning/animations. Views that will
+        // actually lay out differently in RTL, such as the flyout and expanded view, will set their
+        // layout direction to LOCALE.
+        setLayoutDirection(LAYOUT_DIRECTION_LTR);
+
         mBubbleContainer = new PhysicsAnimationLayout(context);
         mBubbleContainer.setActiveController(mStackAnimationController);
         mBubbleContainer.setElevation(elevation);
@@ -961,6 +967,9 @@ public class BubbleStackView extends FrameLayout
 
         mManageSettingsIcon = mManageMenu.findViewById(R.id.bubble_manage_menu_settings_icon);
         mManageSettingsText = mManageMenu.findViewById(R.id.bubble_manage_menu_settings_name);
+
+        // The menu itself should respect locale direction so the icons are on the correct side.
+        mManageMenu.setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
         addView(mManageMenu);
     }
 
@@ -1082,6 +1091,16 @@ public class BubbleStackView extends FrameLayout
 
         mManageMenu.setVisibility(View.INVISIBLE);
         mShowingManage = false;
+    }
+
+    /** Tells the views with locale-dependent layout direction to resolve the new direction. */
+    public void onLayoutDirectionChanged() {
+        mManageMenu.resolveLayoutDirection();
+        mFlyout.resolveLayoutDirection();
+
+        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+            mExpandedBubble.getExpandedView().resolveLayoutDirection();
+        }
     }
 
     /** Respond to the display size change by recalculating view size and location. */
@@ -2095,16 +2114,21 @@ public class BubbleStackView extends FrameLayout
 
         mExpandedBubble.getExpandedView().getManageButtonBoundsOnScreen(mTempRect);
 
-        // When the menu is open, it should be at these coordinates. This will make the menu's
-        // bottom left corner match up with the button's bottom left corner.
-        final float targetX = mTempRect.left;
+        final boolean isLtr =
+                getResources().getConfiguration().getLayoutDirection() == LAYOUT_DIRECTION_LTR;
+
+        // When the menu is open, it should be at these coordinates. The menu pops out to the right
+        // in LTR and to the left in RTL.
+        final float targetX = isLtr ? mTempRect.left : mTempRect.right - mManageMenu.getWidth();
         final float targetY = mTempRect.bottom - mManageMenu.getHeight();
+
+        final float xOffsetForAnimation = (isLtr ? 1 : -1) * mManageMenu.getWidth() / 4f;
 
         if (show) {
             mManageMenu.setScaleX(0.5f);
             mManageMenu.setScaleY(0.5f);
-            mManageMenu.setTranslationX(targetX - mManageMenu.getWidth() / 4);
-            mManageMenu.setTranslationY(targetY + mManageMenu.getHeight() / 4);
+            mManageMenu.setTranslationX(targetX - xOffsetForAnimation);
+            mManageMenu.setTranslationY(targetY + mManageMenu.getHeight() / 4f);
             mManageMenu.setAlpha(0f);
 
             PhysicsAnimator.getInstance(mManageMenu)
@@ -2121,8 +2145,8 @@ public class BubbleStackView extends FrameLayout
                     .spring(DynamicAnimation.ALPHA, 0f)
                     .spring(DynamicAnimation.SCALE_X, 0.5f)
                     .spring(DynamicAnimation.SCALE_Y, 0.5f)
-                    .spring(DynamicAnimation.TRANSLATION_X, targetX - mManageMenu.getWidth() / 4)
-                    .spring(DynamicAnimation.TRANSLATION_Y, targetY + mManageMenu.getHeight() / 4)
+                    .spring(DynamicAnimation.TRANSLATION_X, targetX - xOffsetForAnimation)
+                    .spring(DynamicAnimation.TRANSLATION_Y, targetY + mManageMenu.getHeight() / 4f)
                     .withEndActions(() -> mManageMenu.setVisibility(View.INVISIBLE))
                     .start();
         }
