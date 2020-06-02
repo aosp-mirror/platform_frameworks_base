@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"بزرگ‌نمایی برای پر کردن صفحه"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"گسترده کردن برای پر کردن صفحه"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"نماگرفت"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"برای گزینه‌های بیشتر، قفل تلفن را باز کنید"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"برای گزینه‌های بیشتر، قفل رایانه لوحی را باز کنید"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"برای گزینه‌های بیشتر، قفل دستگاه را باز کنید"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"تصویری ارسال کرد"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"در حال ذخیره نماگرفت..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"درحال ذخیره نماگرفت…"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"در بالای بخش مکالمه به‌صورت حبابک شناور نشان داده می‌شود و تصویر نمایه را در صفحه قفل نمایش می‌دهد"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> از تنظیمات خاص مکالمه پشتیبانی نمی‌کند"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"هیچ ابزارک اعلان جدیدی وجود ندارد"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ابزارک اعلان اخیر و ابزارک اعلان ردشده اینجا ظاهر خواهند شد"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>

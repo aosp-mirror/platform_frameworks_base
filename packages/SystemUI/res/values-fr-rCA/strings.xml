@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoomer pour remplir l\'écran"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Étirer pour remplir l\'écran"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Capture d\'écran"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Déverrouillez votre téléphone pour afficher davantage d\'options"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Déverrouillez votre tablette pour afficher davantage d\'options"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Déverrouillez votre appareil pour afficher davantage d\'options"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a envoyé une image"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Enregistrement capture écran…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Enregistrement capture écran…"</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activer"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"désactiver"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Changer d\'appareil de sortie"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"L\'application est épinglée"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Retour » et « Aperçu »."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur les touches Retour et Accueil."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'épinglage. Pour annuler l\'épinglage, balayez l\'écran vers le haut et gardez le doigt dessus."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur « Aperçu »."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Cet écran est épinglé jusqu\'à ce que vous annuliez l\'opération. Pour annuler l\'épinglage, maintenez le doigt sur la touche Accueil."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Certaines données personnelles pourraient être accessibles (comme les contacts et le contenu des courriels)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"L\'application épinglée peut ouvrir d\'autres applications."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pour annuler l\'épinglage de cette application, maintenez un doigt sur les touches Retour et Aperçu"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Pour annuler l\'épinglage de cette application, maintenez un doigt sur les touches Retour et Accueil"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pour annuler l\'épinglage de cette application, balayez-la vers le haut et gardez le doigt dessus"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Non, merci"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Application épinglée"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"L\'épinglage de l\'application a été annulé"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Masquer <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Cet élément réapparaîtra la prochaine fois que vous l\'activerez dans les paramètres."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Masquer"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations sous forme de bulle flottante et affiche la photo du profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les paramètres propres aux conversations"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ces notifications ne peuvent pas être modifiées"</string>

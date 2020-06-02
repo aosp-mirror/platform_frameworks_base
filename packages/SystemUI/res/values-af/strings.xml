@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoem om skerm te vul"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Strek om skerm te vul"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skermkiekie"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Ontsluit jou foon vir meer opsies"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Ontsluit jou tablet vir meer opsies"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Ontsluit jou toestel vir meer opsies"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"het \'n prent gestuur"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Stoor tans skermkiekie..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Stoor tans skermkiekie..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wys boaan die gespreksafdeling, verskyn as \'n swewende borrel, wys profielfoto op sluitskerm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellings"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie gesprekspesifieke-instellings nie"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen onlangse borrels nie"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Onlangse borrels en borrels wat toegemaak is, sal hier verskyn"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hierdie kennisgewings kan nie gewysig word nie."</string>

@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"放大為全螢幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"放大為全螢幕"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"螢幕截圖"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"解鎖手機以存取更多選項"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"解鎖平板電腦以存取更多選項"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"解鎖裝置以存取更多選項"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"已傳送圖片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在儲存螢幕擷取畫面..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在儲存螢幕擷取畫面..."</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"啟用"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切換輸出裝置"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"已固定應用程式"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"畫面將會繼續顯示，直至您取消固定。按住 [返回] 和 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"畫面將會繼續顯示，直至您取消固定為止。按住 [返回] 按鈕和主按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"畫面將會繼續顯示，直至您取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"畫面將會繼續顯示，直至您取消固定。按住 [概覽] 即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"畫面將會繼續顯示，直至您取消固定為止。按住主按鈕即可取消固定。"</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"該應用程式可存取個人資料 (例如聯絡人和電郵內容)。"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定的應用程式可開啟其他應用程式。"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"如要取消固定此應用程式，請按住「返回」按鈕和「概覽」按鈕"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"如要取消固定此應用程式，請按住「返回」按鈕和主按鈕"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"如要取消固定此應用程式，請向上滑動並按住"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"知道了"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"不用了，謝謝"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"已固定應用程式"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"已取消固定應用程式"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"隱藏 <xliff:g id="TILE_LABEL">%1$s</xliff:g>？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"下一次您在設定開啟它時，它將再次出現。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"隱藏"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"在對話部分的頂部以浮動對話氣泡顯示，並在上鎖畫面顯示個人檔案相片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"重要"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」不支援對話專用設定"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"沒有最近曾使用的小視窗"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近使用和關閉的小視窗會在這裡顯示"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"無法修改這些通知。"</string>

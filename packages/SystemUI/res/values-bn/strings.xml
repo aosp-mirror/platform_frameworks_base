@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্রীণ পূরণ করতে জুম করুন"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ফুল স্ক্রিন করুন"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্রিনশট"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"আরও বিকল্প দেখতে আপনার ফোন আনলক করুন"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"আরও বিকল্প দেখতে আপনার ট্যাবলেট আনলক করুন"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"আরও বিকল্প দেখতে আপনার ডিভাইস আনলক করুন"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"একটি ছবি পাঠানো হয়েছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্রিনশট সেভ করা হচ্ছে..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"কথোপকথন বিভাগের উপরে ভাসমান বাবলের মতো দেখা যাবে, লক স্ক্রিনে প্রোফাইল ছবি দেখাবে"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"সেটিংস"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্রাধিকার"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> অ্যাপে কথোপকথনের ক্ষেত্রে প্রযোজ্য সেটিংস কাজ করে না"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"কোনও সাম্প্রতিক বাবল নেই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"সাম্প্রতিক ও বাতিল করা বাবল এখানে দেখা যাবে"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই বিজ্ঞপ্তিগুলি পরিবর্তন করা যাবে না।"</string>
