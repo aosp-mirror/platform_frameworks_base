@@ -631,7 +631,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     /**
      * Whether or not device admin feature is supported. If it isn't return defaults for all
-     * public methods.
+     * public methods, unless the caller has the appropriate permission for a particular method.
      */
     final boolean mHasFeature;
 
@@ -5995,7 +5995,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
 
     @Override
     public void lockNow(int flags, boolean parent) {
-        if (!mHasFeature) {
+        if (!mHasFeature && mContext.checkCallingPermission(android.Manifest.permission.LOCK_DEVICE)
+                != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
