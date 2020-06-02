@@ -354,6 +354,7 @@
 
         <receiver
             android:name=".BugreportRequestedReceiver"
+            android:exported="true"
             android:permission="android.permission.TRIGGER_SHELL_BUGREPORT">
             <intent-filter>
                 <action android:name="com.android.internal.intent.action.BUGREPORT_REQUESTED" />
@@ -362,6 +363,7 @@
 
         <receiver
             android:name=".HeapDumpReceiver"
+            android:exported="true"
             android:permission="android.permission.DUMP">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
