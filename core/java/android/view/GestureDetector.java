@@ -289,6 +289,11 @@ public class GestureDetector {
     private VelocityTracker mVelocityTracker;
 
     /**
+     * True if the detector can throw exception when touch steam is unexpected .
+     */
+    private boolean mExceptionForTouchStream;
+
+    /**
      * Consistency verifier for debugging purposes.
      */
     private final InputEventConsistencyVerifier mInputEventConsistencyVerifier =
@@ -467,6 +472,8 @@ public class GestureDetector {
         mTouchSlopSquare = touchSlop * touchSlop;
         mDoubleTapTouchSlopSquare = doubleTapTouchSlop * doubleTapTouchSlop;
         mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;
+        mExceptionForTouchStream = context != null
+                && context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R;
     }
 
     /**
@@ -639,6 +646,13 @@ public class GestureDetector {
                 break;
 
             case MotionEvent.ACTION_MOVE:
+                if (mExceptionForTouchStream && !mStillDown) {
+                    throw new IllegalStateException("Incomplete event stream received: "
+                            + "Received ACTION_MOVE before ACTION_DOWN. ACTION_DOWN must precede "
+                            + "ACTION_MOVE following ACTION_UP or ACTION_CANCEL, or when this "
+                            + "GestureDetector has not yet received any events.");
+                }
+
                 if (mInLongPress || mInContextClick) {
                     break;
                 }
