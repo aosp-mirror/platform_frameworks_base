@@ -144,7 +144,7 @@ public class AppOpsInfoTest extends SysuiTestCase {
         final View okButton = mAppOpsInfo.findViewById(R.id.ok);
         okButton.performClick();
         assertEquals(1, latch.getCount());
-        verify(mGutsParent, times(1)).closeControls(anyInt(), anyInt(), anyBoolean(), anyBoolean());
+        verify(mGutsParent, times(1)).closeControls(eq(okButton), anyBoolean());
     }
 
     @Test
