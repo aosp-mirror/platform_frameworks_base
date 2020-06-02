@@ -90,6 +90,17 @@ public final class MediaProjectionManager {
      * projection is stopped. This allows for user controls to be displayed on top of the screen
      * being captured.
      *
+     * <p>
+     * Apps targeting SDK version {@link android.os.Build.VERSION_CODES#Q} or later should specify
+     * the foreground service type using the attribute {@link android.R.attr#foregroundServiceType}
+     * in the service element of the app's manifest file.
+     * The {@link android.content.pm.ServiceInfo#FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION} attribute
+     * should be specified.
+     * </p>
+     *
+     * @see <a href="https://developer.android.com/preview/privacy/foreground-service-types">
+     * Foregroud Service Types</a>
+     *
      * @param resultCode The result code from {@link android.app.Activity#onActivityResult(int,
      * int, android.content.Intent)}
      * @param resultData The resulting data from {@link android.app.Activity#onActivityResult(int,
