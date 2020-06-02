@@ -202,8 +202,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"「<xliff:g id="OWNER_APP">%s</xliff:g>」暫停了列印。"</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"開啟工作設定檔"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"系統會封鎖您的個人應用程式，直至您開啟工作設定檔為止"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"個人應用程式將於 <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> 封鎖。您的工作設定檔不能保持關閉狀態超過 <xliff:g id="NUMBER">%3$d</xliff:g> 天。"</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"啟用工作設定檔"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"我本人"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"平板電腦選項"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV 選項"</string>
@@ -1548,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"要啟動「瀏覽器」嗎？"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"接聽電話嗎？"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"一律採用"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"設為一律開啟"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"只此一次"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"設定"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s 不支援公司檔案"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"平板電腦"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"電視"</string>
