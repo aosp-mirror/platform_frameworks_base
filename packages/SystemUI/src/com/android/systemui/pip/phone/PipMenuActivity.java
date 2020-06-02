@@ -295,6 +295,14 @@ public class PipMenuActivity extends Activity {
     }
 
     @Override
+    public void onTopResumedActivityChanged(boolean isTopResumedActivity) {
+        super.onTopResumedActivityChanged(isTopResumedActivity);
+        if (!isTopResumedActivity && mMenuState != MENU_STATE_NONE) {
+            hideMenu();
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
 
