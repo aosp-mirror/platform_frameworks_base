@@ -322,7 +322,7 @@ public class StatsPullAtomService extends SystemService {
 
     // Listener for monitoring subscriptions changed event.
     private StatsSubscriptionsListener mStatsSubscriptionsListener;
-    // List that store SubInfo of subscriptions that ever appeared since boot.
+    // List that stores SubInfo of subscriptions that ever appeared since boot.
     private final CopyOnWriteArrayList<SubInfo> mHistoricalSubs = new CopyOnWriteArrayList<>();
 
     public StatsPullAtomService(Context context) {
@@ -678,7 +678,7 @@ public class StatsPullAtomService extends SystemService {
                 collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
 
         // Listen to subscription changes to record historical subscriptions that activated before
-        // pulling, this is used by {@link #pullMobileBytesTransfer}.
+        // pulling, this is used by {@code DATA_USAGE_BYTES_TRANSFER}.
         mSubscriptionManager.addOnSubscriptionsChangedListener(
                 BackgroundThread.getExecutor(), mStatsSubscriptionsListener);
 
