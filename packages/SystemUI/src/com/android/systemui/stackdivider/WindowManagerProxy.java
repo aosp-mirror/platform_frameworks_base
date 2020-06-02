@@ -25,9 +25,11 @@ import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.graphics.Rect;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
+import android.view.SurfaceControl;
 import android.view.WindowManagerGlobal;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
@@ -35,6 +37,7 @@ import android.window.WindowContainerTransaction;
 import android.window.WindowOrganizer;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.TransactionPool;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +52,6 @@ public class WindowManagerProxy {
     private static final String TAG = "WindowManagerProxy";
     private static final int[] HOME_AND_RECENTS = {ACTIVITY_TYPE_HOME, ACTIVITY_TYPE_RECENTS};
 
-    private static final WindowManagerProxy sInstance = new WindowManagerProxy();
-
     @GuardedBy("mDockedRect")
     private final Rect mDockedRect = new Rect();
 
@@ -60,6 +61,8 @@ public class WindowManagerProxy {
     private final Rect mTouchableRegion = new Rect();
 
     private final ExecutorService mExecutor = Executors.newSingleThreadExecutor();
+
+    private final SyncTransactionQueue mSyncTransactionQueue;
 
     private final Runnable mSetTouchableRegionRunnable = new Runnable() {
         @Override
@@ -76,16 +79,13 @@ public class WindowManagerProxy {
         }
     };
 
-    private WindowManagerProxy() {
+    WindowManagerProxy(TransactionPool transactionPool, Handler handler) {
+        mSyncTransactionQueue = new SyncTransactionQueue(transactionPool, handler);
     }
 
-    public static WindowManagerProxy getInstance() {
-        return sInstance;
-    }
-
-    void dismissOrMaximizeDocked(
-            final SplitScreenTaskOrganizer tiles, final boolean dismissOrMaximize) {
-        mExecutor.execute(() -> applyDismissSplit(tiles, dismissOrMaximize));
+    void dismissOrMaximizeDocked(final SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout,
+            final boolean dismissOrMaximize) {
+        mExecutor.execute(() -> applyDismissSplit(tiles, layout, dismissOrMaximize));
     }
 
     public void setResizing(final boolean resizing) {
@@ -163,7 +163,7 @@ public class WindowManagerProxy {
      *
      * @return whether the home stack is resizable
      */
-    static boolean applyEnterSplit(SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout) {
+    boolean applyEnterSplit(SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout) {
         // Set launchtile first so that any stack created after
         // getAllStackInfos and before reparent (even if unlikely) are placed
         // correctly.
@@ -174,6 +174,8 @@ public class WindowManagerProxy {
         if (rootTasks.isEmpty()) {
             return false;
         }
+        ActivityManager.RunningTaskInfo topHomeTask = null;
+        boolean homeIsTop = false;
         for (int i = rootTasks.size() - 1; i >= 0; --i) {
             final ActivityManager.RunningTaskInfo rootTask = rootTasks.get(i);
             // Only move resizeable task to split secondary. WM will just ignore this anyways...
@@ -183,16 +185,25 @@ public class WindowManagerProxy {
                     != WINDOWING_MODE_FULLSCREEN) {
                 continue;
             }
+            // Since this iterates from bottom to top, update topHomeTask for every fullscreen task
+            // so it will be left with the status of the top one.
+            topHomeTask = isHomeOrRecentTask(rootTask) ? rootTask : null;
             wct.reparent(rootTask.token, tiles.mSecondary.token, true /* onTop */);
         }
         // Move the secondary split-forward.
         wct.reorder(tiles.mSecondary.token, true /* onTop */);
         boolean isHomeResizable = applyHomeTasksMinimized(layout, null /* parent */, wct);
-        WindowOrganizer.applyTransaction(wct);
+        if (isHomeResizable && topHomeTask != null) {
+            // Translate/update-crop of secondary out-of-band with sync transaction -- Until BALST
+            // is enabled, this temporarily syncs the home surface position with offset until
+            // sync transaction finishes.
+            wct.setBoundsChangeTransaction(topHomeTask.token, tiles.mHomeBounds);
+        }
+        applySyncTransaction(wct);
         return isHomeResizable;
     }
 
-    private static boolean isHomeOrRecentTask(ActivityManager.RunningTaskInfo ti) {
+    static boolean isHomeOrRecentTask(ActivityManager.RunningTaskInfo ti) {
         final int atype = ti.configuration.windowConfiguration.getActivityType();
         return atype == ACTIVITY_TYPE_HOME || atype == ACTIVITY_TYPE_RECENTS;
     }
@@ -203,7 +214,8 @@ public class WindowManagerProxy {
      *                          split (thus resulting in the top of the secondary split becoming
      *                          fullscreen. {@code false} resolves the other way.
      */
-    static void applyDismissSplit(SplitScreenTaskOrganizer tiles, boolean dismissOrMaximize) {
+    void applyDismissSplit(SplitScreenTaskOrganizer tiles, SplitDisplayLayout layout,
+            boolean dismissOrMaximize) {
         // Set launch root first so that any task created after getChildContainers and
         // before reparent (pretty unlikely) are put into fullscreen.
         TaskOrganizer.setLaunchRoot(Display.DEFAULT_DISPLAY, null);
@@ -229,6 +241,7 @@ public class WindowManagerProxy {
                 wct.reparent(primaryChildren.get(i).token, null /* parent */,
                         true /* onTop */);
             }
+            boolean homeOnTop = false;
             // Don't need to worry about home tasks because they are already in the "proper"
             // order within the secondary split.
             for (int i = secondaryChildren.size() - 1; i >= 0; --i) {
@@ -236,7 +249,30 @@ public class WindowManagerProxy {
                 wct.reparent(ti.token, null /* parent */, true /* onTop */);
                 if (isHomeOrRecentTask(ti)) {
                     wct.setBounds(ti.token, null);
+                    if (i == 0) {
+                        homeOnTop = true;
+                    }
                 }
+            }
+            if (homeOnTop) {
+                // Translate/update-crop of secondary out-of-band with sync transaction -- instead
+                // play this in sync with new home-app frame because until BALST is enabled this
+                // shows up on screen before the syncTransaction returns.
+                // We only have access to the secondary root surface, though, so in order to
+                // position things properly, we have to take into account the existing negative
+                // offset/crop of the minimized-home task.
+                final boolean landscape = layout.mDisplayLayout.isLandscape();
+                final int posX = landscape ? layout.mSecondary.left - tiles.mHomeBounds.left
+                        : layout.mSecondary.left;
+                final int posY = landscape ? layout.mSecondary.top
+                        : layout.mSecondary.top - tiles.mHomeBounds.top;
+                final SurfaceControl.Transaction sft = new SurfaceControl.Transaction();
+                sft.setPosition(tiles.mSecondarySurface, posX, posY);
+                final Rect crop = new Rect(0, 0, layout.mDisplayLayout.width(),
+                        layout.mDisplayLayout.height());
+                crop.offset(-posX, -posY);
+                sft.setWindowCrop(tiles.mSecondarySurface, crop);
+                wct.setBoundsChangeTransaction(tiles.mSecondary.token, sft);
             }
         } else {
             // Maximize, so move non-home secondary split first
@@ -267,6 +303,29 @@ public class WindowManagerProxy {
         }
         // Reset focusable to true
         wct.setFocusable(tiles.mPrimary.token, true /* focusable */);
-        WindowOrganizer.applyTransaction(wct);
+        applySyncTransaction(wct);
+    }
+
+    /**
+     * Utility to apply a sync transaction serially with other sync transactions.
+     *
+     * @see SyncTransactionQueue#queue
+     */
+    void applySyncTransaction(WindowContainerTransaction wct) {
+        mSyncTransactionQueue.queue(wct);
+    }
+
+    /**
+     * @see SyncTransactionQueue#queueIfWaiting
+     */
+    boolean queueSyncTransactionIfWaiting(WindowContainerTransaction wct) {
+        return mSyncTransactionQueue.queueIfWaiting(wct);
+    }
+
+    /**
+     * @see SyncTransactionQueue#runInSync
+     */
+    void runInSync(SyncTransactionQueue.TransactionRunnable runnable) {
+        mSyncTransactionQueue.runInSync(runnable);
     }
 }
