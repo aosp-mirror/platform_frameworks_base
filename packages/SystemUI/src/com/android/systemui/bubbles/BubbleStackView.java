@@ -342,6 +342,12 @@ public class BubbleStackView extends FrameLayout
     private final NotificationShadeWindowController mNotificationShadeWindowController;
 
     /**
+     * Callback to run when the IME visibility changes - BubbleController uses this to update the
+     * Bubbles window focusability flags with the WindowManager.
+     */
+    public final Consumer<Boolean> mOnImeVisibilityChanged;
+
+    /**
      * The currently magnetized object, which is being dragged and will be attracted to the magnetic
      * dismiss target.
      *
@@ -667,7 +673,8 @@ public class BubbleStackView extends FrameLayout
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
             NotificationShadeWindowController notificationShadeWindowController,
-            Runnable allBubblesAnimatedOutAction) {
+            Runnable allBubblesAnimatedOutAction,
+            Consumer<Boolean> onImeVisibilityChanged) {
         super(context);
 
         mBubbleData = data;
@@ -724,8 +731,6 @@ public class BubbleStackView extends FrameLayout
 
         mExpandedViewContainer = new FrameLayout(context);
         mExpandedViewContainer.setElevation(elevation);
-        mExpandedViewContainer.setPadding(mExpandedViewPadding, mExpandedViewPadding,
-                mExpandedViewPadding, mExpandedViewPadding);
         mExpandedViewContainer.setClipChildren(false);
         addView(mExpandedViewContainer);
 
@@ -793,7 +798,11 @@ public class BubbleStackView extends FrameLayout
 
         setUpOverflow();
 
+        mOnImeVisibilityChanged = onImeVisibilityChanged;
+
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
+            onImeVisibilityChanged.accept(insets.getInsets(WindowInsets.Type.ime()).bottom > 0);
+
             if (!mIsExpanded || mIsExpansionAnimating) {
                 return view.onApplyWindowInsets(insets);
             }
@@ -2126,6 +2135,13 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedBubble()");
         }
+
+        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+            // Hide the currently expanded bubble's IME if it's visible before switching to a new
+            // bubble.
+            mExpandedBubble.getExpandedView().hideImeIfVisible();
+        }
+
         mExpandedViewContainer.removeAllViews();
         if (mIsExpanded && mExpandedBubble != null
                 && mExpandedBubble.getExpandedView() != null) {
