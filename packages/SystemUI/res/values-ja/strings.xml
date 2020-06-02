@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"画面サイズに合わせて拡大"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"画面サイズに合わせて拡大"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"スクリーンショット"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"スマートフォンのロックを解除してその他のオプションを表示する"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"タブレットのロックを解除してその他のオプションを表示する"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"デバイスのロックを解除してその他のオプションを表示する"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"画像を送信しました"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"スクリーンショットを保存中..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"スクリーンショットを保存しています..."</string>
@@ -730,7 +727,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"会話セクションの一番上にふきだしとして表示され、プロフィール写真がロック画面に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先度"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話専用の設定をサポートしていません"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたバブルはありません"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近表示されたバブルや閉じたバブルが、ここに表示されます"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
@@ -759,7 +757,7 @@
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"重要でない会話"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"マナーモード"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"アラートを受け取る"</string>
-    <string name="notification_conversation_bubble" msgid="2242180995373949022">"バブルを表示"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"バブルで表示"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"バブルを削除"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ホーム画面に追加"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
@@ -1014,7 +1012,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"左下に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"右下に移動"</string>
     <string name="bubble_dismiss_text" msgid="7071770411580452911">"閉じる"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をバブルにしない"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をバブルで表示しない"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでのバブルの使用"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"いつでもバブルを管理"</string>
@@ -1024,7 +1022,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"会話セクションの一番上にバブル表示"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"会話セクションの一番上にバブルで表示"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ロック画面にプロフィール写真を表示"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"他のアプリに重ねてフローティング バブルとして表示"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"サイレント モードに割り込み"</string>

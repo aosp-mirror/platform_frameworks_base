@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom til fuld skærm"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Stræk til fuld skærm"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Lås din telefon op for at se flere valgmuligheder"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Lås din tablet op for at se flere valgmuligheder"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Lås din enhed op for at se flere valgmuligheder"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"sendte et billede"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Gemmer screenshot..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Gemmer screenshot..."</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktivér"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiver"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Skift enhed til lydudgang"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Appen er fastgjort"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage og Overblik, og hold fingeren nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Dette fastholder skærmen i visningen, indtil du frigør den. Hold Tilbage og Startskærm nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Dette fastholder skærmen i visningen, indtil du frigør den. Stryg opad, og hold fingeren nede for at frigøre den."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Dette fastholder skærmen i visningen, indtil du frigør den. Tryk på Tilbage, og hold fingeren nede for at frigøre skærmen."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Dette fastholder skærmen i visningen, indtil du frigør den. Hold Startskærm nede for at frigøre skærmen."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Personoplysninger er muligvis tilgængelige (f.eks. kontakter og mailindhold)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"En fastgjort app kan åbne andre apps."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Du kan frigøre denne app ved at holde knapperne Tilbage og Oversigt nede"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Du kan frigøre denne app ved at holde knapperne Tilbage og Hjem nede"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Du kan frigøre denne app ved at stryge opad og holde fingeren nede"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nej tak"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Appen er fastgjort"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Appen er frigjort"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Vil du skjule <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Den vises igen, næste gang du aktiverer den i indstillingerne."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Skjul"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Vises øverst i samtalesektionen, som en svævende boble og med profilbillede på låseskærmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Indstillinger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> understøtter ikke samtalespecifikke indstillinger"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ingen seneste bobler"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nye bobler og afviste bobler vises her"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse notifikationer kan ikke redigeres."</string>

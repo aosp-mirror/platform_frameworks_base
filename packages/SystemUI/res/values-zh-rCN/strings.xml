@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"缩放以填满屏幕"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"拉伸以填满屏幕"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"屏幕截图"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"解锁手机即可查看更多选项"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"解锁平板电脑即可查看更多选项"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"解锁设备即可查看更多选项"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"发送了一张图片"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"正在保存屏幕截图..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"正在保存屏幕截图..."</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"启用"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"停用"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"切换输出设备"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"应用已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“返回”和“主屏幕”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"这会使此屏幕固定显示，直到您取消固定为止。向上滑动并按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“概览”即可取消固定屏幕。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"这将会固定显示此屏幕，直到您取消固定为止。触摸并按住“主屏幕”即可取消固定屏幕。"</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"可访问个人数据（例如通讯录和电子邮件内容）。"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定的应用可打开其他应用。"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"如需取消固定此应用，请轻触并按住“返回”按钮和“概览”按钮"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"如需取消固定此应用，请轻触并按住“返回”按钮和主屏幕按钮"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"如需取消固定此应用，请向上滑动并按住"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"知道了"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"不用了"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"已固定应用"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"已取消固定应用"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"要隐藏“<xliff:g id="TILE_LABEL">%1$s</xliff:g>”吗？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"下次在设置中将其开启后，此快捷设置条目将会重新显示。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"隐藏"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以悬浮对话泡形式显示在对话部分顶部，如果设备处于锁定状态，在锁定屏幕上显示个人资料照片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"设置"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g>不支持对话专用设置"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近没有对话泡"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"此处会显示最近的对话泡和已关闭的对话泡"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"无法修改这些通知。"</string>
