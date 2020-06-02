@@ -34,7 +34,7 @@ java_defaults {
     ],
     libs: [
         "framework-tethering.impl",
-        "framework-wifi-stubs-systemapi",
+        "framework-wifi",
         "unsupportedappusage",
     ],
     plugins: ["java_api_finder"],
