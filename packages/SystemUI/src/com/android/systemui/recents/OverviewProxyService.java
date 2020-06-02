@@ -73,6 +73,7 @@ import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.InputMonitorCompat;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
@@ -327,10 +328,11 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             long token = Binder.clearCallingIdentity();
             try {
-                InputMonitor monitor =
+                final InputMonitor monitor =
                         InputManager.getInstance().monitorGestureInput(name, displayId);
-                Bundle result = new Bundle();
-                result.putParcelable(KEY_EXTRA_INPUT_MONITOR, monitor);
+                final Bundle result = new Bundle();
+                result.putParcelable(KEY_EXTRA_INPUT_MONITOR,
+                        InputMonitorCompat.obtainReturnValue(monitor));
                 return result;
             } finally {
                 Binder.restoreCallingIdentity(token);
