@@ -60,7 +60,7 @@
     <string name="ClirMmi" msgid="4702929460236547156">"ଆଉଟଗୋଇଙ୍ଗ୍ କଲର୍ ଆଇଡି"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ସଂଯୁକ୍ତ ଲାଇନ୍ ID"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"ସଂଯୁକ୍ତ ଲାଇନ୍ ID କଟକଣା"</string>
-    <string name="CfMmi" msgid="8390012691099787178">"କଲ୍‌ ଫରୱାର୍ଡିଙ୍ଗ"</string>
+    <string name="CfMmi" msgid="8390012691099787178">"କଲ୍‌ ଫରୱାର୍ଡିଂ"</string>
     <string name="CwMmi" msgid="3164609577675404761">"କଲ୍‌ ଅପେକ୍ଷାରତ"</string>
     <string name="BaMmi" msgid="7205614070543372167">"କଲ୍‌ ବ୍ୟାରିଙ୍ଗ୍"</string>
     <string name="PwdMmi" msgid="3360991257288638281">"ପାସ୍‌ୱର୍ଡ ପରିବର୍ତ୍ତନ"</string>
@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ଜରୁରୀକାଳୀନ କଲ୍ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="EmergencyCallWarningSummary" msgid="1194185880092805497">"ୱାଇ-ଫାଇ ସାହାଯ୍ୟରେ ଜରୁରୀକାଳୀନ କଲ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ଆଲର୍ଟ"</string>
-    <string name="notification_channel_call_forward" msgid="8230490317314272406">"କଲ୍‌ ଫରୱାର୍ଡିଙ୍ଗ"</string>
+    <string name="notification_channel_call_forward" msgid="8230490317314272406">"କଲ୍‌ ଫରୱାର୍ଡିଂ"</string>
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"ଜରୁରୀକାଳୀନ କଲବ୍ୟାକ୍‍ ମୋଡ୍‍"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"ମୋବାଇଲ୍‍ ଡାଟା ଷ୍ଟାଟସ୍‌"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"SMS ମେସେଜ୍‌"</string>

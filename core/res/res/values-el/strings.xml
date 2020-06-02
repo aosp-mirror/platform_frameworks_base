@@ -1309,7 +1309,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Εντοπίστηκε αναλογικό αξεσουάρ ήχου"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Η συνδεδεμένη συσκευή δεν είναι συμβατή με αυτό το τηλέφωνο. Πατήστε για να μάθετε περισσότερα."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"Συνδέθηκε ο εντοπισμός σφαλμάτων USB"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Απενεργοποιήστε τον εντοπισμό/διόρθ. σφαλμάτων USB"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Πατήστε για απενεργοποίηση εντοπισμού/διόρθ. σφαλμάτων USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Επιλογή για απενεργοποίηση του εντοπισμού σφαλμάτων USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Συνδέθηκε ο ασύρματος εντοπισμός σφαλμάτων"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Πατήστε, για να απενεργοποιήσετε τον ασύρματο εντοπισμό σφαλμάτων"</string>
