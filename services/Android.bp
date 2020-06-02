@@ -87,7 +87,7 @@ java_library {
 
     libs: [
         "android.hidl.manager-V1.0-java",
-        "framework-tethering-stubs-module_libs_api",
+        "framework-tethering.stubs.module_lib",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
