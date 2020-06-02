@@ -24,6 +24,7 @@ import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -234,8 +235,10 @@ public class GlobalScreenshotLegacy {
     }
 
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
-            Insets visibleInsets, int taskId, Consumer<Uri> finisher) {
-        // TODO use taskId and visibleInsets
+            Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
+            Consumer<Uri> finisher) {
+        // TODO: use task Id, userId, topComponent for smart handler
+        // TODO: use visibleInsets for animation
         takeScreenshot(screenshot, finisher, false, false, screenshotScreenBounds);
     }
 
