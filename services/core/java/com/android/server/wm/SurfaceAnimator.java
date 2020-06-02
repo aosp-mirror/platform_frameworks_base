@@ -388,18 +388,15 @@ class SurfaceAnimator {
         final SurfaceControl.Builder builder = animatable.makeAnimationLeash()
                 .setParent(animatable.getAnimationLeashParent())
                 .setName(surface + " - animation-leash")
-                .setColorLayer();
+                // TODO(b/151665759) Defer reparent calls
+                // We want the leash to be visible immediately because the transaction which shows
+                // the leash may be deferred but the reparent will not. This will cause the leashed
+                // surface to be invisible until the deferred transaction is applied. If this
+                // doesn't work, you will can see the 2/3 button nav bar flicker during seamless
+                // rotation.
+                .setHidden(hidden)
+                .setEffectLayer();
         final SurfaceControl leash = builder.build();
-        if (!hidden) {
-            // TODO(b/151665759) Defer reparent calls
-            // We want the leash to be visible immediately but we want to set the effects on
-            // the layer. Since the transaction used in this function may be deferred, we apply
-            // another transaction immediately with the correct visibility and effects.
-            // If this doesn't work, you will can see the 2/3 button nav bar flicker during
-            // seamless rotation.
-            transactionFactory.get().unsetColor(leash).show(leash).apply();
-        }
-        t.unsetColor(leash);
         t.setWindowCrop(leash, width, height);
         t.setPosition(leash, x, y);
         t.show(leash);
