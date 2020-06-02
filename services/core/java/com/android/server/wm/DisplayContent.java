@@ -1481,6 +1481,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // has it own policy for bounds, the activity bounds based on parent is unknown.
             return false;
         }
+        if (mPinnedStackControllerLocked.isPipActiveOrWindowingModeChanging()) {
+            // Use normal rotation animation because seamless PiP rotation is not supported yet.
+            return false;
+        }
 
         setFixedRotationLaunchingApp(r, rotation);
         return true;
