@@ -88,6 +88,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private final H mHandler = new H();
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
     private final QSTileRevealController mQsTileRevealController;
+    /** Whether or not the QS media player feature is enabled. */
+    protected boolean mUsingMediaPlayer;
 
     protected boolean mExpanded;
     protected boolean mListening;
@@ -102,6 +104,9 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected QSSecurityFooter mFooter;
     private PageIndicator mFooterPageIndicator;
     private boolean mGridContentVisible = true;
+    private int mContentMarginStart;
+    private int mContentMarginEnd;
+    private int mVisualTilePadding;
 
     protected QSTileLayout mTileLayout;
 
@@ -122,6 +127,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             UiEventLogger uiEventLogger
     ) {
         super(context, attrs);
+        mUsingMediaPlayer = useQsMediaPlayer(context);
         mMediaHost = mediaHost;
         mContext = context;
         mQSLogger = qsLogger;
@@ -170,8 +176,6 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         ViewGroup hostView = mMediaHost.getHostView();
         addView(hostView);
-        int sidePaddings = getResources().getDimensionPixelSize(
-                R.dimen.quick_settings_side_margins);
         int bottomPadding = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_expanded_bottom_margin);
         MarginLayoutParams layoutParams = (MarginLayoutParams) hostView.getLayoutParams();
@@ -179,8 +183,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
         layoutParams.bottomMargin = bottomPadding;
         hostView.setLayoutParams(layoutParams);
-        hostView.setPadding(sidePaddings, hostView.getPaddingTop(), sidePaddings,
-                hostView.getPaddingBottom());
+        updateMediaHostContentMargins();
     }
 
     protected void addDivider() {
@@ -359,8 +362,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public void updateResources() {
-        final Resources res = mContext.getResources();
-        setPadding(0, res.getDimensionPixelSize(R.dimen.qs_panel_padding_top), 0, res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
+        int tileSize = getResources().getDimensionPixelSize(R.dimen.qs_quick_tile_size);
+        int tileBg = getResources().getDimensionPixelSize(R.dimen.qs_tile_background_size);
+        mVisualTilePadding = (int) ((tileSize - tileBg) / 2.0f);
+        updatePadding();
 
         updatePageIndicator();
 
@@ -370,6 +375,14 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         if (mTileLayout != null) {
             mTileLayout.updateResources();
         }
+    }
+
+    protected void updatePadding() {
+        final Resources res = mContext.getResources();
+        setPaddingRelative(getPaddingStart(),
+                res.getDimensionPixelSize(R.dimen.qs_panel_padding_top),
+                getPaddingEnd(),
+                res.getDimensionPixelSize(R.dimen.qs_panel_padding_bottom));
     }
 
     @Override
@@ -723,15 +736,49 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mFooter.showDeviceMonitoringDialog();
     }
 
-    public void setMargins(int sideMargins) {
-        for (int i = 0; i < getChildCount(); i++) {
-            View view = getChildAt(i);
-            if (view != mTileLayout) {
-                LayoutParams lp = (LayoutParams) view.getLayoutParams();
-                lp.leftMargin = sideMargins;
-                lp.rightMargin = sideMargins;
-            }
+    public void setContentMargins(int startMargin, int endMargin) {
+        // Only some views actually want this content padding, others want to go all the way
+        // to the edge like the brightness slider
+        mContentMarginStart = startMargin;
+        mContentMarginEnd = endMargin;
+        updateTileLayoutMargins(mContentMarginStart - mVisualTilePadding,
+                mContentMarginEnd - mVisualTilePadding);
+        updateMediaHostContentMargins();
+    }
+
+    /**
+     * Update the margins of all tile Layouts.
+     *
+     * @param visualMarginStart the visual start margin of the tile, adjusted for local insets
+     *                          to the tile. This can be set on a tileLayout
+     * @param visualMarginEnd the visual end margin of the tile, adjusted for local insets
+     *                        to the tile. This can be set on a tileLayout
+     */
+    protected void updateTileLayoutMargins(int visualMarginStart, int visualMarginEnd) {
+        updateMargins((View) mTileLayout, visualMarginStart, visualMarginEnd);
+    }
+
+    /**
+     * Update the margins of the media hosts
+     */
+    protected void updateMediaHostContentMargins() {
+        if (mUsingMediaPlayer && mMediaHost != null) {
+            updateMargins(mMediaHost.getHostView(), mContentMarginStart, mContentMarginEnd);
         }
+    }
+
+    /**
+     * Update the margins of a view.
+     *
+     * @param view the view to adjust
+     * @param start the start margin to set
+     * @param end the end margin to set
+     */
+    protected void updateMargins(View view, int start, int end) {
+        LayoutParams lp = (LayoutParams) view.getLayoutParams();
+        lp.setMarginStart(start);
+        lp.setMarginEnd(end);
+        view.setLayoutParams(lp);
     }
 
     public MediaHost getMediaHost() {

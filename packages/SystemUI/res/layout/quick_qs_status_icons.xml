@@ -21,8 +21,6 @@
     android:layout_height="wrap_content"
     android:paddingTop="@dimen/qs_header_top_padding"
     android:paddingBottom="@dimen/qs_header_bottom_padding"
-    android:paddingStart="@dimen/status_bar_padding_start"
-    android:paddingEnd="@dimen/status_bar_padding_end"
     android:layout_below="@id/quick_status_bar_system_icons"
     android:clipChildren="false"
     android:clipToPadding="false"
