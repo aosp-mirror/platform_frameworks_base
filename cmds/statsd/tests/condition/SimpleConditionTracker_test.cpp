@@ -112,6 +112,114 @@ std::map<int64_t, HashableDimensionKey> getWakeLockQueryKey(
     return outputKeyMap;
 }
 
+TEST(SimpleConditionTrackerTest, TestNonSlicedInitialValueFalse) {
+    SimplePredicate simplePredicate;
+    simplePredicate.set_start(StringToId("SCREEN_TURNED_ON"));
+    simplePredicate.set_stop(StringToId("SCREEN_TURNED_OFF"));
+    simplePredicate.set_count_nesting(false);
+    simplePredicate.set_initial_value(SimplePredicate_InitialValue_FALSE);
+
+    unordered_map<int64_t, int> trackerNameIndexMap;
+    trackerNameIndexMap[StringToId("SCREEN_TURNED_ON")] = 0;
+    trackerNameIndexMap[StringToId("SCREEN_TURNED_OFF")] = 1;
+
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"),
+                                            0 /*tracker index*/, simplePredicate,
+                                            trackerNameIndexMap);
+
+    ConditionKey queryKey;
+    vector<sp<ConditionTracker>> allPredicates;
+    vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
+
+    // Check that initial condition is false.
+    conditionTracker.isConditionMet(queryKey, allPredicates, false, conditionCache);
+    EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
+
+    vector<MatchingState> matcherState;
+    vector<bool> changedCache(1, false);
+
+    // Matched stop event.
+    // Check that condition is still false.
+    unique_ptr<LogEvent> screenOffEvent =
+            CreateScreenStateChangedEvent(/*timestamp=*/50, android::view::DISPLAY_STATE_OFF);
+    matcherState.clear();
+    matcherState.push_back(MatchingState::kNotMatched);  // On matcher not matched
+    matcherState.push_back(MatchingState::kMatched);     // Off matcher matched
+    conditionCache[0] = ConditionState::kNotEvaluated;
+    conditionTracker.evaluateCondition(*screenOffEvent, matcherState, allPredicates, conditionCache,
+                                       changedCache);
+    EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
+    EXPECT_FALSE(changedCache[0]);
+
+    // Matched start event.
+    // Check that condition has changed to true.
+    unique_ptr<LogEvent> screenOnEvent =
+            CreateScreenStateChangedEvent(/*timestamp=*/100, android::view::DISPLAY_STATE_ON);
+    matcherState.clear();
+    matcherState.push_back(MatchingState::kMatched);     // On matcher matched
+    matcherState.push_back(MatchingState::kNotMatched);  // Off matcher not matched
+    conditionCache[0] = ConditionState::kNotEvaluated;
+    changedCache[0] = false;
+    conditionTracker.evaluateCondition(*screenOnEvent, matcherState, allPredicates, conditionCache,
+                                       changedCache);
+    EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
+    EXPECT_TRUE(changedCache[0]);
+}
+
+TEST(SimpleConditionTrackerTest, TestNonSlicedInitialValueUnknown) {
+    SimplePredicate simplePredicate;
+    simplePredicate.set_start(StringToId("SCREEN_TURNED_ON"));
+    simplePredicate.set_stop(StringToId("SCREEN_TURNED_OFF"));
+    simplePredicate.set_count_nesting(false);
+    simplePredicate.set_initial_value(SimplePredicate_InitialValue_UNKNOWN);
+
+    unordered_map<int64_t, int> trackerNameIndexMap;
+    trackerNameIndexMap[StringToId("SCREEN_TURNED_ON")] = 0;
+    trackerNameIndexMap[StringToId("SCREEN_TURNED_OFF")] = 1;
+
+    SimpleConditionTracker conditionTracker(kConfigKey, StringToId("SCREEN_IS_ON"),
+                                            0 /*tracker index*/, simplePredicate,
+                                            trackerNameIndexMap);
+
+    ConditionKey queryKey;
+    vector<sp<ConditionTracker>> allPredicates;
+    vector<ConditionState> conditionCache(1, ConditionState::kNotEvaluated);
+
+    // Check that initial condition is unknown.
+    conditionTracker.isConditionMet(queryKey, allPredicates, false, conditionCache);
+    EXPECT_EQ(ConditionState::kUnknown, conditionCache[0]);
+
+    vector<MatchingState> matcherState;
+    vector<bool> changedCache(1, false);
+
+    // Matched stop event.
+    // Check that condition is changed to false.
+    unique_ptr<LogEvent> screenOffEvent =
+            CreateScreenStateChangedEvent(/*timestamp=*/50, android::view::DISPLAY_STATE_OFF);
+    matcherState.clear();
+    matcherState.push_back(MatchingState::kNotMatched);  // On matcher not matched
+    matcherState.push_back(MatchingState::kMatched);     // Off matcher matched
+    conditionCache[0] = ConditionState::kNotEvaluated;
+    conditionTracker.evaluateCondition(*screenOffEvent, matcherState, allPredicates, conditionCache,
+                                       changedCache);
+    EXPECT_EQ(ConditionState::kFalse, conditionCache[0]);
+    EXPECT_TRUE(changedCache[0]);
+
+    // Matched start event.
+    // Check that condition has changed to true.
+    unique_ptr<LogEvent> screenOnEvent =
+            CreateScreenStateChangedEvent(/*timestamp=*/100, android::view::DISPLAY_STATE_ON);
+    matcherState.clear();
+    matcherState.push_back(MatchingState::kMatched);     // On matcher matched
+    matcherState.push_back(MatchingState::kNotMatched);  // Off matcher not matched
+    conditionCache[0] = ConditionState::kNotEvaluated;
+    changedCache[0] = false;
+    conditionTracker.evaluateCondition(*screenOnEvent, matcherState, allPredicates, conditionCache,
+                                       changedCache);
+    EXPECT_EQ(ConditionState::kTrue, conditionCache[0]);
+    EXPECT_TRUE(changedCache[0]);
+}
+
 TEST(SimpleConditionTrackerTest, TestNonSlicedCondition) {
     SimplePredicate simplePredicate;
     simplePredicate.set_start(StringToId("SCREEN_TURNED_ON"));

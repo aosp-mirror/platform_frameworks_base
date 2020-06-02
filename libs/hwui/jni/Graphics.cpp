@@ -470,7 +470,7 @@ SkRegion* GraphicsJNI::getNativeRegion(JNIEnv* env, jobject region)
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, SkBitmapRegionDecoder* bitmap)
+jobject GraphicsJNI::createBitmapRegionDecoder(JNIEnv* env, skia::BitmapRegionDecoder* bitmap)
 {
     ALOG_ASSERT(bitmap != NULL);
 

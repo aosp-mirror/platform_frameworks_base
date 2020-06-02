@@ -606,9 +606,9 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public long getAuthenticatorId() {
+        public long getAuthenticatorId(int callingUserId) {
             checkPermission(USE_BIOMETRIC_INTERNAL);
-            return FaceService.this.getAuthenticatorId();
+            return FaceService.this.getAuthenticatorId(callingUserId);
         }
 
         @Override // Binder call

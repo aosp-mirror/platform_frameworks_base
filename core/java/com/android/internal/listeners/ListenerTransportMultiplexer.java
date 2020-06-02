@@ -72,8 +72,8 @@ public abstract class ListenerTransportMultiplexer<TRequest, TListener> {
 
     /**
      * Invoked when the server already has a request registered, and it is being replaced with a new
-     * request. The default implementation unregisters first, then registers the new request, but
-     * this may be overridden by subclasses in order to reregister more efficiently.
+     * request. The default implementation simply registers the new request, trusting the server to
+     * overwrite the old request.
      */
     protected void reregisterWithServer(TRequest oldMergedRequest, TRequest mergedRequest)
             throws RemoteException {

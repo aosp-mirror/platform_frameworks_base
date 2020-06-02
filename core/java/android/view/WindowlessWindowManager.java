@@ -210,7 +210,11 @@ public class WindowlessWindowManager implements IWindowSession {
 
     /** @hide */
     protected SurfaceControl getSurfaceControl(View rootView) {
-        final State s = mStateForWindow.get(rootView.getViewRootImpl().mWindow.asBinder());
+        final ViewRootImpl root = rootView.getViewRootImpl();
+        if (root == null) {
+            return null;
+        }
+        final State s = mStateForWindow.get(root.mWindow.asBinder());
         if (s == null) {
             return null;
         }

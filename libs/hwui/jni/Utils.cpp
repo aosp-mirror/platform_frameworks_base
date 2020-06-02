@@ -114,7 +114,7 @@ size_t AssetStreamAdaptor::read(void* buffer, size_t size) {
     return amount;
 }
 
-SkMemoryStream* android::CopyAssetToStream(Asset* asset) {
+sk_sp<SkData> android::CopyAssetToData(Asset* asset) {
     if (NULL == asset) {
         return NULL;
     }
@@ -138,7 +138,7 @@ SkMemoryStream* android::CopyAssetToStream(Asset* asset) {
         return NULL;
     }
 
-    return new SkMemoryStream(std::move(data));
+    return data;
 }
 
 jobject android::nullObjectReturn(const char msg[]) {

@@ -32,8 +32,8 @@ public:
 
     bool init(const std::vector<Predicate>& allConditionConfig,
               const std::vector<sp<ConditionTracker>>& allConditionTrackers,
-              const std::unordered_map<int64_t, int>& conditionIdIndexMap,
-              std::vector<bool>& stack) override;
+              const std::unordered_map<int64_t, int>& conditionIdIndexMap, std::vector<bool>& stack,
+              std::vector<ConditionState>& initialConditionCache) override;
 
     void evaluateCondition(const LogEvent& event,
                            const std::vector<MatchingState>& eventMatcherValues,

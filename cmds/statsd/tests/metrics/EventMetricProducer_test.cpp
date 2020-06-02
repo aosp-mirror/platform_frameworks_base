@@ -65,8 +65,8 @@ TEST(EventMetricProducerTest, TestNoCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    EventMetricProducer eventProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      bucketStartTimeNs);
+    EventMetricProducer eventProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, {},
+                                      wizard, bucketStartTimeNs);
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);
@@ -101,7 +101,8 @@ TEST(EventMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
-    EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
+    EventMetricProducer eventProducer(kConfigKey, metric, 0 /*condition index*/,
+                                      {ConditionState::kUnknown}, wizard, bucketStartTimeNs);
 
     eventProducer.onConditionChanged(true /*condition*/, bucketStartTimeNs);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
@@ -155,7 +156,8 @@ TEST(EventMetricProducerTest, TestEventsWithSlicedCondition) {
     // Condition is true for second event.
     EXPECT_CALL(*wizard, query(_, key2, _)).WillOnce(Return(ConditionState::kTrue));
 
-    EventMetricProducer eventProducer(kConfigKey, metric, 1, wizard, bucketStartTimeNs);
+    EventMetricProducer eventProducer(kConfigKey, metric, 0 /*condition index*/,
+                                      {ConditionState::kUnknown}, wizard, bucketStartTimeNs);
 
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event1);
     eventProducer.onMatchedLogEvent(1 /*matcher index*/, event2);

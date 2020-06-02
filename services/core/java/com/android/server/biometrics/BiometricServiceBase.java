@@ -1253,9 +1253,8 @@ public abstract class BiometricServiceBase extends SystemService
     /***
      * @return authenticator id for the calling user
      */
-    protected long getAuthenticatorId() {
-        final int userId = getUserOrWorkProfileId(null /* clientPackage */,
-                UserHandle.getCallingUserId());
+    protected long getAuthenticatorId(int callingUserId) {
+        final int userId = getUserOrWorkProfileId(null /* clientPackage */, callingUserId);
         return mAuthenticatorIds.getOrDefault(userId, 0L);
     }
 
