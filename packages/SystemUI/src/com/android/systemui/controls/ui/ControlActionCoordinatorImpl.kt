@@ -58,16 +58,14 @@ class ControlActionCoordinatorImpl @Inject constructor(
 
     override fun toggle(cvh: ControlViewHolder, templateId: String, isChecked: Boolean) {
         bouncerOrRun {
-            val effect = if (!isChecked) Vibrations.toggleOnEffect else Vibrations.toggleOffEffect
-            vibrate(effect)
+            cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             cvh.action(BooleanAction(templateId, !isChecked))
         }
     }
 
     override fun touch(cvh: ControlViewHolder, templateId: String, control: Control) {
-        vibrate(Vibrations.toggleOnEffect)
-
         bouncerOrRun {
+            cvh.layout.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
             if (cvh.usePanel()) {
                 showDialog(cvh, control.getAppIntent().getIntent())
             } else {
