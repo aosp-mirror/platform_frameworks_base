@@ -79,6 +79,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.ViewClippingUtil;
+import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
@@ -88,6 +89,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -238,6 +240,9 @@ public class BubbleStackView extends FrameLayout
 
     /** Whether a touch gesture, such as a stack/bubble drag or flyout drag, is in progress. */
     private boolean mIsGestureInProgress = false;
+
+    /** Whether or not the stack is temporarily invisible off the side of the screen. */
+    private boolean mTemporarilyInvisible = false;
 
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -902,6 +907,38 @@ public class BubbleStackView extends FrameLayout
 
             return true;
         });
+
+        animate()
+                .setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED)
+                .setDuration(CollapsedStatusBarFragment.FADE_IN_DURATION);
+    }
+
+    /**
+     * Sets whether or not the stack should become temporarily invisible by moving off the side of
+     * the screen.
+     *
+     * If a flyout comes in while it's invisible, it will animate back in while the flyout is
+     * showing but disappear again when the flyout is gone.
+     */
+    public void setTemporarilyInvisible(boolean invisible) {
+        mTemporarilyInvisible = invisible;
+        animateTemporarilyInvisible();
+    }
+
+    /**
+     * Animates onto or off the screen depending on whether we're temporarily invisible, and whether
+     * a flyout is visible.
+     */
+    private void animateTemporarilyInvisible() {
+        if (mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE) {
+            if (mStackAnimationController.isStackOnLeftSide()) {
+                animate().translationX(-mBubbleSize).start();
+            } else {
+                animate().translationX(mBubbleSize).start();
+            }
+        } else {
+            animate().translationX(0).start();
+        }
     }
 
     private void setUpManageMenu() {
@@ -1953,6 +1990,9 @@ public class BubbleStackView extends FrameLayout
             // Stop suppressing the dot now that the flyout has morphed into the dot.
             bubbleView.removeDotSuppressionFlag(
                     BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
+
+            mFlyout.setVisibility(INVISIBLE);
+            animateTemporarilyInvisible();
         };
         mFlyout.setVisibility(INVISIBLE);
 
@@ -1970,6 +2010,7 @@ public class BubbleStackView extends FrameLayout
             final Runnable expandFlyoutAfterDelay = () -> {
                 mAnimateInFlyout = () -> {
                     mFlyout.setVisibility(VISIBLE);
+                    animateTemporarilyInvisible();
                     mFlyoutDragDeltaX =
                             mStackAnimationController.isStackOnLeftSide()
                                     ? -mFlyout.getWidth()
