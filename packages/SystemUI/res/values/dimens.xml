@@ -1075,8 +1075,7 @@
     <dimen name="edge_margin">8dp</dimen>
 
     <!-- The absolute side margins of quick settings -->
-    <dimen name="quick_settings_expanded_bottom_margin">16dp</dimen>
-    <dimen name="quick_settings_media_extra_bottom_margin">6dp</dimen>
+    <dimen name="quick_settings_bottom_margin_media">16dp</dimen>
     <dimen name="rounded_corner_content_padding">0dp</dimen>
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
@@ -1268,8 +1267,8 @@
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_album_size">52dp</dimen>
     <dimen name="qs_seamless_icon_size">20dp</dimen>
-    <dimen name="qqs_media_spacing">8dp</dimen>
-    <dimen name="qqs_horizonal_tile_padding_bottom">8dp</dimen>
+    <dimen name="qqs_media_spacing">16dp</dimen>
+    <dimen name="qs_footer_horizontal_margin">22dp</dimen>
 
     <dimen name="magnification_border_size">5dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>

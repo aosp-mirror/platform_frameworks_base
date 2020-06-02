@@ -16,8 +16,6 @@
 */
 -->
 <resources>
-    <!-- Standard notification width + gravity -->
-    <dimen name="notification_panel_width">416dp</dimen>
 
     <!-- Diameter of outer shape drawable shown in navbar search-->
     <dimen name="navbar_search_outerring_diameter">430dip</dimen>

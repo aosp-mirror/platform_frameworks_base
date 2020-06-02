@@ -104,7 +104,6 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
@@ -3069,7 +3068,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mBlockTouches || mQsFullyExpanded && mQs.onInterceptTouchEvent(event)) {
+                if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
                     return false;
                 }
                 initDownStates(event);
@@ -3096,7 +3095,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (mBlockTouches || (mQs != null && mQs.isCustomizing())) {
+                if (mBlockTouches || (mQsFullyExpanded && mQs != null
+                        && mQs.disallowPanelTouches())) {
                     return false;
                 }
 
