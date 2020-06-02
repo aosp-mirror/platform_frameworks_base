@@ -882,6 +882,9 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 Slog.d(LOG_TAG, "Binding to " + serviceIntent.getComponent());
                 willBind = mContext.bindServiceAsUser(
                         serviceIntent, mConnection, mBindServiceFlags, UserHandle.of(mUserId));
+                if (!willBind) {
+                    Slog.e(LOG_TAG, "Could not bind to " + componentName);
+                }
                 mBinding = willBind;
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -954,16 +957,19 @@ public final class TextClassificationManagerService extends ITextClassifierServi
 
             @Override
             public void onServiceDisconnected(ComponentName name) {
+                Slog.i(LOG_TAG, "onServiceDisconnected called with " + name);
                 cleanupService();
             }
 
             @Override
             public void onBindingDied(ComponentName name) {
+                Slog.i(LOG_TAG, "onBindingDied called with " + name);
                 cleanupService();
             }
 
             @Override
             public void onNullBinding(ComponentName name) {
+                Slog.i(LOG_TAG, "onNullBinding called with " + name);
                 cleanupService();
             }
 
