@@ -261,7 +261,7 @@ public class BubbleStackView extends FrameLayout
     private boolean mShowingDismiss = false;
 
     /** The view to desaturate/darken when magneted to the dismiss target. */
-    private View mDesaturateAndDarkenTargetView;
+    @Nullable private View mDesaturateAndDarkenTargetView;
 
     private LayoutInflater mInflater;
 
@@ -886,7 +886,10 @@ public class BubbleStackView extends FrameLayout
 
             // Update the paint and apply it to the bubble container.
             mDesaturateAndDarkenPaint.setColorFilter(new ColorMatrixColorFilter(animatedMatrix));
-            mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
+
+            if (mDesaturateAndDarkenTargetView != null) {
+                mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
+            }
         });
 
         // If the stack itself is touched, it means none of its touchable views (bubbles, flyouts,
@@ -1827,6 +1830,10 @@ public class BubbleStackView extends FrameLayout
     private void animateDesaturateAndDarken(View targetView, boolean desaturateAndDarken) {
         mDesaturateAndDarkenTargetView = targetView;
 
+        if (mDesaturateAndDarkenTargetView == null) {
+            return;
+        }
+
         if (desaturateAndDarken) {
             // Use the animated paint for the bubbles.
             mDesaturateAndDarkenTargetView.setLayerType(
@@ -1848,9 +1855,14 @@ public class BubbleStackView extends FrameLayout
     }
 
     private void resetDesaturationAndDarken() {
+
         mDesaturateAndDarkenAnimator.removeAllListeners();
         mDesaturateAndDarkenAnimator.cancel();
-        mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
+
+        if (mDesaturateAndDarkenTargetView != null) {
+            mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
+            mDesaturateAndDarkenTargetView = null;
+        }
     }
 
     /** Animates in the dismiss target. */
