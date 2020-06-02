@@ -202,8 +202,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> چاپ کردن را غیرفعال کرده است."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"نمایه کاری‌تان را روشن کنید"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تا زمانی‌که نمایه کاری‌تان را روشن نکنید، برنامه‌های شخصی‌تان مسدودند"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"برنامه‌های شخصی در تاریخ <xliff:g id="DATE">%1$s</xliff:g> ساعت <xliff:g id="TIME">%2$s</xliff:g> مسدود خواهند شد. نمایه کاری‌تان نباید بیشتر از <xliff:g id="NUMBER">%3$d</xliff:g> روز خاموش بماند."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"روشن کردن نمایه کاری"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"من"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"گزینه‌های رایانهٔ لوحی"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏گزینه‌های Android TV"</string>
@@ -1548,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"مرورگر راه‌اندازی شود؟"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"تماس را می‌پذیرید؟"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"همیشه"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"تنظیم روی همیشه باز شدن"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"فقط این بار"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"تنظیمات"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"‏%1$s از نمایه کاری پشتیبانی نمی‌کند"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"رایانهٔ لوحی"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"تلویزیون"</string>
