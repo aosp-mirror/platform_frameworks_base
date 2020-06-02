@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ຊູມໃຫ້ເຕັມໜ້າຈໍ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ປັບໃຫ້ເຕັມໜ້າຈໍ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ພາບໜ້າຈໍ"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"ປົດລັອກໂທລະສັບຂອງທ່ານເພື່ອໃຊ້ຕົວເລືອກເພີ່ມເຕີມ"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"ປົດລັອກແທັບເລັດຂອງທ່ານເພື່ອໃຊ້ຕົວເລືອກເພີ່ມເຕີມ"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"ປົດລັອກອຸປະກອນຂອງທ່ານເພື່ອໃຊ້ຕົວເລືອກເພີ່ມເຕີມ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ສົ່ງຮູບແລ້ວ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ກຳລັງບັນທຶກຮູບໜ້າຈໍ"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ກຳລັງບັນທຶກພາບໜ້າຈໍ..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ສະແດງຢູ່ເທິງສຸດຂອງພາກສ່ວນການສົນທະນາ, ປາກົດເປັນ bubble ແບບລອຍ, ສະແດງຮູບໂປຣໄຟລ໌ຢູ່ໜ້າຈໍລັອກ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ຕັ້ງຄ່າ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ສຳຄັນ"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ຮອງຮັບການຕັ້ງຄ່າສະເພາະຂອງການສົນທະນາ"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ບໍ່ມີຟອງຫຼ້າສຸດ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ຟອງຫຼ້າສຸດ ແລະ ຟອງທີ່ປິດໄປຈະປາກົດຢູ່ບ່ອນນີ້"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ບໍ່ສາມາດແກ້ໄຂການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄດ້."</string>

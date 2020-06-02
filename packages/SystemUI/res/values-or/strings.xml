@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ସ୍କ୍ରୀନ ଭରିବା ପାଇଁ ଜୁମ୍ କରନ୍ତୁ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ସ୍କ୍ରୀନ୍‌କୁ ଭରିବା ପାଇଁ ଟାଣନ୍ତୁ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ସ୍କ୍ରିନ୍‌ସଟ୍ ନିଅନ୍ତୁ"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଫୋନ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଟାବଲେଟ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"ଅଧିକ ବିକଳ୍ପ ପାଇଁ ଆପଣଙ୍କ ଡିଭାଇସ୍ ଅନଲକ୍ କରନ୍ତୁ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ଏକ ଛବି ପଠାଯାଇଛି"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ କରାଯାଉଛି…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ କରାଯାଉଛି…"</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ଅକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ଆଉଟପୁଟ୍ ଡିଭାଇସ୍‌କୁ ଯାଆନ୍ତୁ"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ଆପକୁ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ଆକ୍ସେସ୍ କରାଯାଇପାରେ (ଯେପରିକି ଯୋଗାଯୋଗଗୁଡ଼ିକ ଏବଂ ଇମେଲ୍ ବିଷୟବସ୍ତୁ)।"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ପିନ୍ କରାଯାଇଥିବା ଆପଟି ଅନ୍ୟ ଆପଗୁଡ଼ିକୁ ଖୋଲିପାରେ।"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବା ପାଇଁ, \"ବ୍ୟାକ୍\" ଏବଂ \"ଓଭରଭିଉ\" ବଟନକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବାକୁ, \"ବ୍ୟାକ୍\" ଏବଂ \"ହୋମ୍\" ବଟନକୁ ସ୍ପର୍ଶ କରି ଧରି ରଖନ୍ତୁ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ଏହି ଆପକୁ ଅନପିନ୍ କରିବାକୁ, ଉପରକୁ ସ୍ୱାଇପ୍ କରି ଧରି ରଖନ୍ତୁ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ବୁଝିଗଲି"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ନାହିଁ, ଥାଉ"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ଆପ୍ ପିନ୍ କରାଯାଇଛି"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ଆପ୍ ଅନପିନ୍ କରାଯାଇଛି"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ଲୁଚାନ୍ତୁ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"ଆଗକୁ ଆପଣ ଯେତେବେଳେ ଏହି ସେଟିଙ୍ଗକୁ ଚାଲୁ କରିବେ, ଏହା ପୁଣି ଦେଖାଦେବ।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ଲୁଚାନ୍ତୁ"</string>
@@ -715,7 +704,7 @@
     <string name="inline_minimize_button" msgid="1474436209299333445">"ଛୋଟ କରନ୍ତୁ"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"ନୀରବ"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"ନୀରବ ରହନ୍ତୁ"</string>
-    <string name="inline_silent_button_alert" msgid="5705343216858250354">"ଆଲର୍ଟ କରିବା"</string>
+    <string name="inline_silent_button_alert" msgid="5705343216858250354">"ଆଲର୍ଟିଂ"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"ଆଲର୍ଟ କରିବା ଜାରି ରଖନ୍ତୁ"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"ବିଜ୍ଞପ୍ତି ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"ଏହି ଆପ୍‌ରୁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାଏ, ଭାସମାନ ବବଲ୍ ଭାବେ ଦେଖାଯାଏ, ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଡିସପ୍ଲେ କରେ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ସେଟିଂସ୍"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ପ୍ରାଥମିକତା"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ବାର୍ତ୍ତାଳାପ ସମ୍ବନ୍ଧିତ ନିର୍ଦ୍ଦିଷ୍ଟ ସେଟିଂସକୁ ସମର୍ଥନ କରେ ନାହିଁ"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ବର୍ତ୍ତମାନ କୌଣସି ବବଲ୍ ନାହିଁ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ବର୍ତ୍ତମାନର ଏବଂ ଖାରଜ କରାଯାଇଥିବା ବବଲଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ପରିବର୍ତ୍ତନ କରିହେବ ନାହିଁ।"</string>
@@ -758,7 +748,7 @@
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ବାର୍ତ୍ତାଳାପ"</string>
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"କୌଣସି ଗୁରୁତ୍ୱପୂର୍ଣ୍ଣ ବାର୍ତ୍ତାଳାପ ନାହିଁ"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"ନିରବ କରାଯାଇଛି"</string>
-    <string name="notification_conversation_unmute" msgid="2692255619510896710">"ଆଲର୍ଟ କରୁଛି"</string>
+    <string name="notification_conversation_unmute" msgid="2692255619510896710">"ଆଲର୍ଟିଂ"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"ବବଲ୍ ଦେଖାନ୍ତୁ"</string>
     <string name="notification_conversation_unbubble" msgid="6908427185031099868">"ବବଲଗୁଡ଼ିକ କାଢ଼ି ଦିଅନ୍ତୁ"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"ମୂଳ ସ୍କ୍ରିନରେ ଯୋଗ କରନ୍ତୁ"</string>

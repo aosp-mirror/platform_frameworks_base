@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"স্ক্ৰীণ পূর্ণ কৰিবলৈ জুম কৰক"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"স্ক্ৰীণ পূর্ণ কৰিবলৈ প্ৰসাৰিত কৰক"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"স্ক্ৰীনশ্বট"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"অধিক বিকল্পৰ বাবে আপোনাৰ ফ’নটো আনলক কৰক"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"অধিক বিকল্পৰ বাবে আপোনাৰ টেবলেটটো আনলক কৰক"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"অধিক বিকল্পৰ বাবে আপোনাৰ ডিভাইচটো আনলক কৰক"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"এখন প্ৰতিচ্ছবি পঠিয়াইছে"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"স্ক্ৰীণশ্বট ছেভ কৰি থকা হৈছে…"</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"সক্ষম কৰক"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"অক্ষম কৰক"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"আউটপুট ডিভাইচ সলনি কৰক"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"এপ্‌টো পিন কৰা আছে"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'পিছলৈ যাওক\' আৰু \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ ওপৰলৈ ছোৱাইপ কৰি ধৰি ৰাখক।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ \'অৱলোকন\'-ত স্পৰ্শ কৰি থাকক।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"এই কাৰ্যই আপুনি আনপিন নকৰালৈকে ইয়াক দেখা পোৱা অৱস্থাত ৰাখে। আনপিন কৰিবলৈ পিছলৈ যাওক আৰু হ\'মত স্পৰ্শ কৰি সেঁচি ধৰক।"</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ব্যক্তিগত ডেটা এক্সেছ কৰিব পৰা যাব পাৰে (যেনে সম্পর্কসমূহ আৰু ইমেইলৰ সমল)।"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"পিন কৰি ৰখা এপ্‌টোৱে হয়তো অন্য এপ্‌সমূহ খুলিব পাৰে।"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"এই এপ্‌টো আনপিন কৰিবলৈ, উভতি যাওক আৰু ৰূপৰেখাৰ বুটামসমূহ স্পৰ্শ কৰি ধৰি ৰাখক"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"এই এপ্‌টো আনপিন কৰিবলৈ, উভতি যাওক আৰু গৃহপৃষ্ঠাৰ বুটামসমূহ স্পৰ্শ কৰি ধৰি ৰাখক"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"এই এপ্‌টো আনপিন কৰিবলৈ, ওপৰলৈ ছোৱাইপ কৰক আৰু ধৰি ৰাখক"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"বুজি পালোঁ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"নালাগে, ধন্যবাদ"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"এপ্‌টো পিন কৰা হ’ল"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"এপ্‌টো আনপিন কৰা হ’ল"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> লুকুৱাবনে?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"আপুনি ইয়াক পৰৱৰ্তী সময়ত ছেটিংসমূহত অন কৰিলে ই পুনৰ প্ৰকট হ\'ব।"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"লুকুৱাওক"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"বাৰ্তালাপ শাখাটোৰ শীৰ্ষত দেখুৱায়, ওপঙা বাবল হিচাপে দেখা পোৱা যায়, লক স্ক্ৰীনত প্ৰ’ফাইলৰ চিত্ৰ প্ৰদৰ্শন কৰে"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ছেটিংসমূহ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্ৰাধিকাৰ"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বাৰ্তালাপ নিৰ্দিষ্ট ছেটিংসমূহ সমৰ্থন নকৰে"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"কোনো শেহতীয়া bubbles নাই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"শেহতীয়া bubbles আৰু অগ্ৰাহ্য কৰা bubbles ইয়াত প্ৰদর্শিত হ\'ব"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
