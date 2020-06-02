@@ -35,7 +35,8 @@ data class MediaData(
     val packageName: String?,
     val token: MediaSession.Token?,
     val clickIntent: PendingIntent?,
-    val device: MediaDeviceData?
+    val device: MediaDeviceData?,
+    val notificationKey: String = "INVALID"
 )
 
 /** State of a media action. */

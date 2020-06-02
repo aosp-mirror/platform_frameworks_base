@@ -57,5 +57,5 @@ interface IBiometricAuthenticator {
     void setActiveUser(int uid);
 
     // Gets the authenticator ID representing the current set of enrolled templates
-    long getAuthenticatorId();
+    long getAuthenticatorId(int callingUserId);
 }

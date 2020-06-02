@@ -25,7 +25,7 @@ java_defaults {
     ],
     static_libs: [
         "androidx.annotation_annotation",
-        "netd_aidl_interface-V3-java",
+        "netd_aidl_interface-unstable-java",
         "netlink-client",
         "networkstack-aidl-interfaces-java",
         "android.hardware.tetheroffload.config-V1.0-java",
@@ -35,7 +35,7 @@ java_defaults {
     libs: [
         "framework-tethering.impl",
         "framework-telephony-stubs",
-        "framework-wifi-stubs-systemapi",
+        "framework-wifi",
         "unsupportedappusage",
     ],
     plugins: ["java_api_finder"],

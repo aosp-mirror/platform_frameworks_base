@@ -127,11 +127,8 @@ public class AppDataRollbackHelper {
         if (packageRollbackInfo.isApex()) {
             // For APEX, only snapshot CE here
             if ((flags & Installer.FLAG_STORAGE_CE) != 0) {
-                long ceSnapshotInode = mApexManager.snapshotCeData(
+                return mApexManager.snapshotCeData(
                         userId, rollbackId, packageRollbackInfo.getPackageName());
-                if (ceSnapshotInode <= 0) {
-                    return false;
-                }
             }
         } else {
             // APK

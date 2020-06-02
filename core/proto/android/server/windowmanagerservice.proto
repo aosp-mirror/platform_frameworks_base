@@ -164,7 +164,8 @@ message AppTransitionProto {
 message DisplayContentProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional WindowContainerProto window_container = 1;
+    // Use root_display_area instead
+    optional WindowContainerProto window_container = 1 [deprecated=true];
     optional int32 id = 2;
     reserved 3; // stacks
     optional DockedStackDividerControllerProto docked_stack_divider_controller = 4 [deprecated=true];
@@ -187,7 +188,6 @@ message DisplayContentProto {
     repeated IdentifierProto changing_apps = 19;
     repeated WindowTokenProto overlay_windows = 20 [deprecated=true];
     optional DisplayAreaProto root_display_area = 21;
-
 
     optional bool single_task_instance = 22;
     optional int32 focused_root_task_id = 23;
