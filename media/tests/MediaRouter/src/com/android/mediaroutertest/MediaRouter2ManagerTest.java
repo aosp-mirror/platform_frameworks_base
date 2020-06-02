@@ -17,6 +17,7 @@
 package com.android.mediaroutertest;
 
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
+import static android.media.MediaRoute2Info.FEATURE_REMOTE_PLAYBACK;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_FIXED;
 import static android.media.MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE;
 import static android.media.MediaRoute2ProviderService.REASON_REJECTED;
@@ -79,6 +80,8 @@ public class MediaRouter2ManagerTest {
     private static final int TIMEOUT_MS = 5000;
     private static final String TEST_KEY = "test_key";
     private static final String TEST_VALUE = "test_value";
+    private static final String TEST_ID_UNKNOWN = "id_unknown";
+    private static final String TEST_NAME_UNKNOWN = "unknown";
 
     private Context mContext;
     private MediaRouter2Manager mManager;
@@ -307,6 +310,36 @@ public class MediaRouter2ManagerTest {
                 ROUTE_ID1,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
         assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
+    }
+
+    @Test
+    public void testTransfer_unknownRoute_fail() throws Exception {
+        addRouterCallback(new RouteCallback() {});
+
+        CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
+        CountDownLatch onTransferFailedLatch = new CountDownLatch(1);
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                assertNotNull(newSessionInfo);
+                onSessionCreatedLatch.countDown();
+            }
+            @Override
+            public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
+                onTransferFailedLatch.countDown();
+            }
+        });
+
+        MediaRoute2Info unknownRoute =
+                new MediaRoute2Info.Builder(TEST_ID_UNKNOWN, TEST_NAME_UNKNOWN)
+                .addFeature(FEATURE_REMOTE_PLAYBACK)
+                .build();
+
+        mManager.transfer(mManager.getSystemRoutingSession(), unknownRoute);
+        assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertTrue(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
     /**
@@ -639,8 +672,10 @@ public class MediaRouter2ManagerTest {
         mRouter2.registerRouteCallback(mExecutor, routeCallback,
                 new RouteDiscoveryPreference.Builder(routeFeatures, true).build());
         try {
-            addedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
-            featuresLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+            if (mManager.getAllRoutes().isEmpty()) {
+                addedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
+            }
+            featuresLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS);
             return createRouteMap(mManager.getAvailableRoutes(mPackageName));
         } finally {
             mRouter2.unregisterRouteCallback(routeCallback);

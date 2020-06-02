@@ -337,7 +337,14 @@ public final class MediaRouter2Manager {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
-        //TODO(b/157875504): Ignore unknown route.
+        synchronized (mRoutesLock) {
+            if (!mRoutes.containsKey(route.getId())) {
+                Log.w(TAG, "transfer: Ignoring an unknown route id=" + route.getId());
+                notifyTransferFailed(sessionInfo, route);
+                return;
+            }
+        }
+
         if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
             transferToRoute(sessionInfo, route);
             return;
@@ -595,7 +602,7 @@ public final class MediaRouter2Manager {
     public List<MediaRoute2Info> getSelectedRoutes(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
-        synchronized (sLock) {
+        synchronized (mRoutesLock) {
             return sessionInfo.getSelectedRoutes().stream().map(mRoutes::get)
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
@@ -611,7 +618,7 @@ public final class MediaRouter2Manager {
 
         List<String> selectedRouteIds = sessionInfo.getSelectedRoutes();
 
-        synchronized (sLock) {
+        synchronized (mRoutesLock) {
             return sessionInfo.getSelectableRoutes().stream()
                     .filter(routeId -> !selectedRouteIds.contains(routeId))
                     .map(mRoutes::get)
@@ -629,7 +636,7 @@ public final class MediaRouter2Manager {
 
         List<String> selectedRouteIds = sessionInfo.getSelectedRoutes();
 
-        synchronized (sLock) {
+        synchronized (mRoutesLock) {
             return sessionInfo.getDeselectableRoutes().stream()
                     .filter(routeId -> selectedRouteIds.contains(routeId))
                     .map(mRoutes::get)
