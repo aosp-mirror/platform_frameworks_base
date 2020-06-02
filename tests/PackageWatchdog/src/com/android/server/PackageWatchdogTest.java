@@ -1113,6 +1113,7 @@ public class PackageWatchdogTest {
         mTestLooper.dispatchAll();
 
         List<Set> expectedSyncRequests = List.of(
+                Set.of(),
                 Set.of(APP_A),
                 Set.of(APP_A, APP_B),
                 Set.of(APP_A, APP_B, APP_C),
