@@ -391,7 +391,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         if (controlsComponent.getControlsListingController().isPresent()) {
             controlsComponent.getControlsListingController().get()
-                    .addCallback(list -> mControlsServiceInfos = list);
+                    .addCallback(list -> {
+                        mControlsServiceInfos = list;
+                        // This callback may occur after the dialog has been shown.
+                        // If so, add controls into the already visible space
+                        if (mDialog != null && !mDialog.isShowingControls()
+                                && shouldShowControls()) {
+                            mDialog.showControls(mControlsUiControllerOptional.get());
+                        }
+                    });
         }
 
         // Need to be user-specific with the context to make sure we read the correct prefs
