@@ -20,8 +20,8 @@ genrule {
     name: "statslog-statsd-java-gen",
     tools: ["stats-log-api-gen"],
     cmd: "$(location stats-log-api-gen) --java $(out) --module statsd" +
-         " --javaPackage com.android.internal.util --javaClass StatsdStatsLog",
-    out: ["com/android/internal/util/StatsdStatsLog.java"],
+         " --javaPackage com.android.internal.statsd --javaClass StatsdStatsLog",
+    out: ["com/android/internal/statsd/StatsdStatsLog.java"],
 }
 
 java_library_static {
@@ -65,7 +65,7 @@ java_sdk_library {
         "android.os",
         "android.util",
         // From :statslog-statsd-java-gen
-        "com.android.internal.util",
+        "com.android.internal.statsd",
     ],
 
     api_packages: [
