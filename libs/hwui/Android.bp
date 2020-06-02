@@ -156,8 +156,12 @@ cc_defaults {
 // framework-graphics jar
 // ------------------------
 
-java_library {
+java_sdk_library {
     name: "framework-graphics",
+    defaults: ["framework-module-defaults"],
+    visibility: [
+        "//frameworks/base", // Framework
+    ],
 
     srcs: [
         ":framework-graphics-srcs",
@@ -167,15 +171,16 @@ java_library {
         "android.graphics",
     ],
 
-    sdk_version: "module_current",
-
     // TODO: once framework-graphics is officially part of the
     // UI-rendering module this line would no longer be
     // needed.
     installable: true,
 
-    // Enable detection of apis used by this module
-    plugins: ["java_api_finder",],
+    // Disable api_lint that the defaults enable
+    // TODO: enable this
+    api_lint: {
+        enabled: false,
+    },
 }
 
 filegroup {
@@ -184,94 +189,6 @@ filegroup {
         "apex/java/**/*.java",
     ],
     path: "apex/java"
-}
-
-stubs_defaults {
-    name: "framework-graphics-stubs-srcs-defaults",
-    srcs: [ ":framework-graphics-srcs"],
-}
-
-droidstubs {
-    name: "framework-graphics-api-module_libs_api",
-    defaults: [
-        "framework-graphics-stubs-srcs-defaults",
-        "framework-module-api-defaults-module_libs_api",
-    ],
-    check_api: {
-        // Disable api_lint that the defaults enable
-        // TODO: enable this
-        api_lint: {
-            enabled: false,
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-graphics-stubs-srcs-module_libs_api",
-    defaults: [
-        "framework-graphics-stubs-srcs-defaults",
-        "framework-module-stubs-defaults-module_libs_api",
-    ],
-}
-
-droidstubs {
-    name: "framework-graphics-stubs-srcs-publicapi",
-    defaults: [
-        "framework-graphics-stubs-srcs-defaults",
-        "framework-module-stubs-defaults-publicapi",
-    ],
-    check_api: {
-        // Disable api_lint that the defaults enable
-        // TODO: enable this
-        api_lint: {
-            enabled: false,
-        },
-    },
-}
-
-droidstubs {
-    name: "framework-graphics-stubs-srcs-systemapi",
-    defaults: [
-        "framework-graphics-stubs-srcs-defaults",
-        "framework-module-stubs-defaults-systemapi",
-    ],
-    check_api: {
-        // Disable api_lint that the defaults enable
-        // TODO: enable this
-        api_lint: {
-            enabled: false,
-        },
-    },
-}
-
-java_library {
-    name: "framework-graphics-stubs-module_libs_api",
-    srcs: [":framework-graphics-stubs-srcs-module_libs_api"],
-    defaults: ["framework-module-stubs-lib-defaults-module_libs_api"],
-    visibility: [
-        "//frameworks/base", // Framework
-        "//frameworks/base/libs/hwui", // UI-rendering module
-    ],
-}
-
-java_library {
-    name: "framework-graphics-stubs-publicapi",
-    srcs: [":framework-graphics-stubs-srcs-publicapi"],
-    defaults: ["framework-module-stubs-lib-defaults-publicapi"],
-    visibility: [
-        "//frameworks/base", // Framework
-        "//frameworks/base/libs/hwui", // UI-rendering module
-    ],
-}
-
-java_library {
-    name: "framework-graphics-stubs-systemapi",
-    srcs: [":framework-graphics-stubs-srcs-systemapi"],
-    defaults: ["framework-module-stubs-lib-defaults-systemapi"],
-    visibility: [
-        "//frameworks/base", // Framework
-        "//frameworks/base/libs/hwui", // UI-rendering module
-    ],
 }
 
 // ------------------------
