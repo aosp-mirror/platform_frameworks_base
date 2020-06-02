@@ -375,14 +375,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             }
         }
         TextView groupNameView = findViewById(R.id.group_name);
-        View divider = findViewById(R.id.group_divider);
         if (groupName != null) {
             groupNameView.setText(groupName);
             groupNameView.setVisibility(VISIBLE);
-            divider.setVisibility(VISIBLE);
         } else {
             groupNameView.setVisibility(GONE);
-            divider.setVisibility(GONE);
         }
     }
 
