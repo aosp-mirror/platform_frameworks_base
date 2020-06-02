@@ -186,6 +186,9 @@ public class BubbleFlyoutView extends FrameLayout {
             }
         });
 
+        // Use locale direction so the text is aligned correctly.
+        setLayoutDirection(LAYOUT_DIRECTION_LOCALE);
+
         mBgPaint.setColor(mFloatingBackgroundColor);
 
         mLeftTriangleShape =
