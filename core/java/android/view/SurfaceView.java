@@ -134,6 +134,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     // we need to preserve the old one until the new one has drawn.
     SurfaceControl mDeferredDestroySurfaceControl;
     SurfaceControl mBackgroundControl;
+    private boolean mDisableBackgroundLayer = false;
 
     /**
      * We use this lock in SOME cases when reading or writing SurfaceControl,
@@ -245,10 +246,17 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+        this(context, attrs, defStyleAttr, defStyleRes, false);
+    }
+
+    /** @hide */
+    public SurfaceView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr,
+            int defStyleRes, boolean disableBackgroundLayer) {
         super(context, attrs, defStyleAttr, defStyleRes);
         mRenderNode.addPositionUpdateListener(mPositionListener);
 
         setWillNotDraw(true);
+        mDisableBackgroundLayer = disableBackgroundLayer;
     }
 
     /**
@@ -839,7 +847,8 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (mBackgroundControl == null) {
             return;
         }
-        if ((mSubLayer < 0) && ((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)) {
+        if ((mSubLayer < 0) && ((mSurfaceFlags & SurfaceControl.OPAQUE) != 0)
+                && !mDisableBackgroundLayer) {
             t.show(mBackgroundControl);
         } else {
             t.hide(mBackgroundControl);
