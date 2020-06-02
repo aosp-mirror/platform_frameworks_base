@@ -161,6 +161,7 @@ public class PipTouchHandler {
     private float mSavedSnapFraction = -1f;
     private boolean mSendingHoverAccessibilityEvents;
     private boolean mMovementWithinDismiss;
+    private boolean mHideMenuAfterShown = false;
     private PipAccessibilityInteractionConnection mConnection;
 
     // Touch state
@@ -677,6 +678,7 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
+                mHideMenuAfterShown = true;
                 // If Touch Exploration is enabled, some a11y services (e.g. Talkback) is probably
                 // on and changing MotionEvents into HoverEvents.
                 // Let's not enable menu show/hide for a11y services.
@@ -767,6 +769,9 @@ public class PipTouchHandler {
                 mSavedSnapFraction = mMotionHelper.animateToExpandedState(expandedBounds,
                         mMovementBounds, mExpandedMovementBounds, callback);
             }
+            if (mHideMenuAfterShown) {
+                mMenuController.hideMenu();
+            }
         } else if (menuState == MENU_STATE_NONE && mMenuState == MENU_STATE_FULL) {
             // Try and restore the PiP to the closest edge, using the saved snap fraction
             // if possible
@@ -804,6 +809,7 @@ public class PipTouchHandler {
             }
         }
         mMenuState = menuState;
+        mHideMenuAfterShown = false;
         updateMovementBounds();
         // If pip menu has dismissed, we should register the A11y ActionReplacingConnection for pip
         // as well, or it can't handle a11y focus and pip menu can't perform any action.
