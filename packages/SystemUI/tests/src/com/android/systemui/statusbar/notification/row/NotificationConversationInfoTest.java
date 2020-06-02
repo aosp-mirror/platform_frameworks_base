@@ -336,7 +336,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         assertTrue(textView.getText().toString().contains(group.getName()));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
         assertEquals(VISIBLE, textView.getVisibility());
-        assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.group_divider).getVisibility());
     }
 
     @Test
@@ -361,7 +360,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
         assertEquals(GONE, textView.getVisibility());
-        assertEquals(GONE, mNotificationInfo.findViewById(R.id.group_divider).getVisibility());
     }
 
     @Test
