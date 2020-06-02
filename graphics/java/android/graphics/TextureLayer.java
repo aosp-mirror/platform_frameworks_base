@@ -14,14 +14,11 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.graphics;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.graphics.Bitmap;
-import android.graphics.HardwareRenderer;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.SurfaceTexture;
+import android.view.View;
 
 import com.android.internal.util.VirtualRefBasePtr;
 
@@ -30,13 +27,13 @@ import com.android.internal.util.VirtualRefBasePtr;
  * frame when drawn in a HW accelerated Canvas. This is backed by a DeferredLayerUpdater on
  * the native side.
  *
- * @hide
+ * @hide TODO: Make this a SystemApi for b/155905258
  */
-public final class TextureLayer {
+public final class TextureLayer implements AutoCloseable {
     private HardwareRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
 
-    private TextureLayer(HardwareRenderer renderer, long deferredUpdater) {
+    private TextureLayer(@NonNull HardwareRenderer renderer, long deferredUpdater) {
         if (renderer == null || deferredUpdater == 0) {
             throw new IllegalArgumentException("Either hardware renderer: " + renderer
                     + " or deferredUpdater: " + deferredUpdater + " is invalid");
@@ -61,14 +58,15 @@ public final class TextureLayer {
      *
      * @return True if the layer can be rendered into, false otherwise
      */
-    public boolean isValid() {
+    private boolean isValid() {
         return mFinalizer != null && mFinalizer.get() != 0;
     }
 
     /**
      * Destroys resources without waiting for a GC.
      */
-    public void destroy() {
+    @Override
+    public void close() {
         if (!isValid()) {
             // Already destroyed
             return;
@@ -79,7 +77,7 @@ public final class TextureLayer {
         mFinalizer = null;
     }
 
-    public long getDeferredLayerUpdater() {
+    /*package*/ long getDeferredLayerUpdater() {
         return mFinalizer.get();
     }
 
@@ -90,7 +88,7 @@ public final class TextureLayer {
      *
      * @return True if the copy was successful, false otherwise
      */
-    public boolean copyInto(Bitmap bitmap) {
+    public boolean copyInto(@NonNull Bitmap bitmap) {
         return mRenderer.copyLayerInto(this, bitmap);
     }
 
@@ -114,7 +112,7 @@ public final class TextureLayer {
      *
      * @param matrix The transform to apply to the layer.
      */
-    public void setTransform(Matrix matrix) {
+    public void setTransform(@NonNull Matrix matrix) {
         nSetTransform(mFinalizer.get(), matrix.ni());
         mRenderer.pushLayerUpdate(this);
     }
@@ -126,11 +124,11 @@ public final class TextureLayer {
         mRenderer.detachSurfaceTexture(mFinalizer.get());
     }
 
-    public long getLayerHandle() {
+    /*package*/ long getLayerHandle() {
         return mFinalizer.get();
     }
 
-    public void setSurfaceTexture(SurfaceTexture surface) {
+    public void setSurfaceTexture(@NonNull SurfaceTexture surface) {
         nSetSurfaceTexture(mFinalizer.get(), surface);
         mRenderer.pushLayerUpdate(this);
     }
@@ -140,8 +138,8 @@ public final class TextureLayer {
         mRenderer.pushLayerUpdate(this);
     }
 
-    /** @hide */
-    public static TextureLayer adoptTextureLayer(HardwareRenderer renderer, long layer) {
+    /*package*/ static TextureLayer adoptTextureLayer(@NonNull HardwareRenderer renderer,
+            long layer) {
         return new TextureLayer(renderer, layer);
     }
 
@@ -149,6 +147,7 @@ public final class TextureLayer {
             boolean isOpaque);
     private static native void nSetLayerPaint(long layerUpdater, long paint);
     private static native void nSetTransform(long layerUpdater, long matrix);
-    private static native void nSetSurfaceTexture(long layerUpdater, SurfaceTexture surface);
+    private static native void nSetSurfaceTexture(long layerUpdater,
+            @NonNull SurfaceTexture surface);
     private static native void nUpdateSurfaceTexture(long layerUpdater);
 }
