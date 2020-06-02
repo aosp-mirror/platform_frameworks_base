@@ -16,6 +16,16 @@
 java_sdk_library {
     name: "framework-tethering",
     defaults: ["framework-module-defaults"],
+
+    // Allow access to the stubs from anywhere.
+    visibility: ["//visibility:public"],
+
+    // Restrict access to implementation library.
+    impl_library_visibility: [
+        "//visibility:override", // Ignore the visibility property.
+        "//frameworks/base/packages/Tethering:__subpackages__",
+    ],
+
     srcs: [
         ":framework-tethering-srcs",
     ],
@@ -29,8 +39,6 @@ java_sdk_library {
     installable: true,
 
     hostdex: true, // for hiddenapi check
-    visibility: ["//frameworks/base/packages/Tethering:__subpackages__"],
-    stubs_library_visibility: ["//visibility:public"],
     apex_available: ["com.android.tethering"],
     permitted_packages: ["android.net"],
 }
