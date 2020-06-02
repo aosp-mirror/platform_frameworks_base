@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom per omplir pantalla"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estira per omplir pant."</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Desbloqueja el teu telèfon per veure més opcions"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Desbloqueja la teva tauleta per veure més opcions"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Desbloqueja el teu dispositiu per veure més opcions"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ha enviat una imatge"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"S\'està desant captura de pantalla..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"S\'està desant la captura de pantalla..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Es mostra com a bombolla flotant a la part superior de la secció de converses i mostra la foto de perfil a la pantalla de bloqueig"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuració"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritat"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admet opcions de configuració específiques de converses"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hi ha bombolles recents"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bombolles recents i les ignorades es mostraran aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aquestes notificacions no es poden modificar."</string>

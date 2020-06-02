@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zmadho për të mbushur ekranin"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Shtrije për të mbushur ekranin"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Pamja e ekranit"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Shkyçe telefonin për më shumë opsione"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Shkyçe tabletin për më shumë opsione"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Shkyçe pajisjen për më shumë opsione"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"dërgoi një imazh"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Po ruan pamjen e ekranit..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Po ruan pamjen e ekranit…"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Shfaqet në krye të seksionit të bisedës dhe shfaqet si flluskë pluskuese, shfaq fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Përparësia"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk i mbështet cilësimet specifike të bisedës"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nuk ka flluska të fundit"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Flluskat e fundit dhe flluskat e hequra do të shfaqen këtu"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Këto njoftime nuk mund të modifikohen."</string>

@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"전체화면 모드로 확대"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"전체화면 모드로 확대"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"스크린샷"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"더 많은 옵션을 확인하려면 휴대전화를 잠금 해제하세요."</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"더 많은 옵션을 확인하려면 태블릿을 잠금 해제하세요."</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"더 많은 옵션을 확인하려면 기기를 잠금 해제하세요."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"이미지 보냄"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"캡쳐화면 저장 중..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"캡쳐화면 저장 중..."</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"사용"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"사용 중지"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"출력 기기 전환"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"앱 고정됨"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 뒤로 및 홈을 길게 터치하세요."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 위로 스와이프한 다음 탭한 상태를 유지하세요."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 최근 사용을 길게 터치하세요."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"고정 해제할 때까지 계속 표시됩니다. 고정 해제하려면 홈을 길게 터치하세요."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"개인 정보가 표시될 수 있습니다(연락처, 이메일 내용 등)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"고정된 앱을 통해 다른 앱이 열릴 수 있습니다."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"이 앱을 고정 해제하려면 뒤로 및 최근 사용 버튼을 길게 터치하세요."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"이 앱을 고정 해제하려면 뒤로 및 홈 버튼을 길게 터치하세요."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"이 앱을 고정 해제하려면 위로 스와이프하고 유지하세요."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"확인"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"거부"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"앱 고정됨"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"앱 고정 해제됨"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>을(를) 숨기시겠습니까?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"다음번에 설정에서 사용 설정하면 다시 표시됩니다."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"숨기기"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"대화 섹션 상단의 플로팅 대화창 또는 잠금 화면의 프로필 사진으로 표시됩니다."</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"설정"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"우선순위"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g>에서는 대화 관련 설정을 지원하지 않습니다."</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"최근에 닫은 대화창 없음"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"최근 대화창과 내가 닫은 대화창이 여기에 표시됩니다."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"이 알림은 수정할 수 없습니다."</string>

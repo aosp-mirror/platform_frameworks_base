@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom to fill screen"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Stretch to fill screen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Screenshot"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Unlock your phone for more options"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Unlock your tablet for more options"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Unlock your device for more options"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"sent an image"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Saving screenshot…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Saving screenshot…"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Shows at top of conversation section, appears as floating bubble, displays profile picture on lock screen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Settings"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priority"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> does not support conversation-specific settings"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No recent bubbles"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recent bubbles and dismissed bubbles will appear here"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"These notifications can\'t be modified."</string>
