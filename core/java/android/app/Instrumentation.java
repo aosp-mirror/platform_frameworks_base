@@ -1721,7 +1721,7 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivity(whoThread,
                     who.getBasePackageName(), who.getAttributionTag(), intent,
@@ -1791,7 +1791,7 @@ public class Instrumentation {
         try {
             String[] resolvedTypes = new String[intents.length];
             for (int i=0; i<intents.length; i++) {
-                intents[i].migrateExtraStreamToClipData();
+                intents[i].migrateExtraStreamToClipData(who);
                 intents[i].prepareToLeaveProcess(who);
                 resolvedTypes[i] = intents[i].resolveTypeIfNeeded(who.getContentResolver());
             }
@@ -1860,7 +1860,7 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivity(whoThread,
                     who.getBasePackageName(), who.getAttributionTag(), intent,
@@ -1927,7 +1927,7 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService().startActivityAsUser(whoThread,
                     who.getBasePackageName(), who.getAttributionTag(), intent,
@@ -1973,7 +1973,7 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = ActivityTaskManager.getService()
                 .startActivityAsCaller(whoThread, who.getBasePackageName(), intent,
@@ -2020,7 +2020,7 @@ public class Instrumentation {
             }
         }
         try {
-            intent.migrateExtraStreamToClipData();
+            intent.migrateExtraStreamToClipData(who);
             intent.prepareToLeaveProcess(who);
             int result = appTask.startActivity(whoThread.asBinder(), who.getBasePackageName(),
                     who.getAttributionTag(), intent,
