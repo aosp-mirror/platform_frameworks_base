@@ -234,7 +234,8 @@ public class MbmsDownloadServiceBase extends IMbmsDownloadService.Stub {
     @Override
     public @MbmsErrors.MbmsError int addServiceAnnouncement(
             int subscriptionId, @NonNull byte[] contents) {
-        return 0;
+        throw new UnsupportedOperationException("addServiceAnnouncement not supported by"
+                + " this middleware.");
     }
 
     /**
