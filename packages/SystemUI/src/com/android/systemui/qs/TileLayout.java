@@ -96,7 +96,6 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         mCellMarginHorizontal = res.getDimensionPixelSize(R.dimen.qs_tile_margin_horizontal);
         mCellMarginVertical= res.getDimensionPixelSize(R.dimen.qs_tile_margin_vertical);
         mCellMarginTop = res.getDimensionPixelSize(R.dimen.qs_tile_margin_top);
-        mSidePadding = res.getDimensionPixelOffset(R.dimen.qs_tile_layout_margin_side);
         mMaxAllowedRows = Math.max(1, getResources().getInteger(R.integer.quick_settings_max_rows));
         if (mLessRows) mMaxAllowedRows = Math.max(1, mMaxAllowedRows - 1);
         if (mColumns != columns) {
@@ -120,7 +119,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
             mRows = (numTiles + mColumns - 1) / mColumns;
         }
         mCellWidth =
-                (availableWidth - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
+                (availableWidth - (mCellMarginHorizontal * mColumns)) / mColumns;
 
         // Measure each QS tile.
         View previousView = this;
@@ -204,7 +203,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
     }
 
     protected int getColumnStart(int column) {
-        return getPaddingStart() + mSidePadding + mCellMarginHorizontal / 2 +
+        return getPaddingStart() + mCellMarginHorizontal / 2 +
                 column *  (mCellWidth + mCellMarginHorizontal);
     }
 
