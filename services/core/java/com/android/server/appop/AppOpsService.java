@@ -16,6 +16,11 @@
 
 package com.android.server.appop;
 
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
@@ -66,11 +71,6 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import static java.lang.Long.max;
@@ -249,7 +249,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             OP_CAMERA,
     };
 
-    private static final int MAX_UNFORWARED_OPS = 10;
+    private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
@@ -3372,7 +3372,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     unforwardedOps.add(asyncNotedOp);
-                    if (unforwardedOps.size() > MAX_UNFORWARED_OPS) {
+                    if (unforwardedOps.size() > MAX_UNFORWARDED_OPS) {
                         unforwardedOps.remove(0);
                     }
                 }
