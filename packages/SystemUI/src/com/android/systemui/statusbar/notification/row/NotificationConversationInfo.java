@@ -368,14 +368,11 @@ public class NotificationConversationInfo extends LinearLayout implements
             }
         }
         TextView groupNameView = findViewById(R.id.group_name);
-        View groupDivider = findViewById(R.id.group_divider);
         if (groupName != null) {
             groupNameView.setText(groupName);
             groupNameView.setVisibility(VISIBLE);
-            groupDivider.setVisibility(VISIBLE);
         } else {
             groupNameView.setVisibility(GONE);
-            groupDivider.setVisibility(GONE);
         }
     }
 
