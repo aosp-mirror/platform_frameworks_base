@@ -57,6 +57,8 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Mock
     OneHandedTouchHandler mMockTouchHandler;
     @Mock
+    OneHandedGestureHandler mMockGestureHandler;
+    @Mock
     SysUiState mMockSysUiState;
 
     @Before
@@ -66,6 +68,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
                 mMockTouchHandler,
+                mMockGestureHandler,
                 mMockSysUiState);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
