@@ -58,6 +58,7 @@ import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationCallback;
 import android.hardware.fingerprint.FingerprintManager.AuthenticationResult;
+import android.os.Build;
 import android.os.CancellationSignal;
 import android.os.Handler;
 import android.os.IRemoteCallback;
@@ -108,9 +109,13 @@ import com.google.android.collect.Lists;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
+import java.text.SimpleDateFormat;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TimeZone;
@@ -131,7 +136,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private static final String TAG = "KeyguardUpdateMonitor";
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
     private static final boolean DEBUG_SIM_STATES = KeyguardConstants.DEBUG_SIM_STATES;
-    private static final boolean DEBUG_FACE = true;
+    private static final boolean DEBUG_FACE = Build.IS_DEBUGGABLE;
     private static final boolean DEBUG_SPEW = false;
     private static final int LOW_BATTERY_THRESHOLD = 20;
 
@@ -361,6 +366,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     SparseArray<BiometricAuthenticated> mUserFingerprintAuthenticated = new SparseArray<>();
     @VisibleForTesting
     SparseArray<BiometricAuthenticated> mUserFaceAuthenticated = new SparseArray<>();
+
+    // Keep track of recent calls to shouldListenForFace() for debugging.
+    private static final int FACE_LISTEN_CALLS_QUEUE_SIZE = 20;
+    private ArrayDeque<KeyguardFaceListenModel> mFaceListenModels;
 
     private static int sCurrentUser;
     private Runnable mUpdateBiometricListeningState = this::updateBiometricListeningState;
@@ -1945,25 +1954,48 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && strongAuthAllowsScanning && mIsPrimaryUser
                 && !mSecureCameraLaunched;
 
+        // Aggregate relevant fields for debug logging.
+        if (DEBUG_FACE || DEBUG_SPEW) {
+            final KeyguardFaceListenModel model = new KeyguardFaceListenModel(
+                    System.currentTimeMillis(),
+                    user,
+                    shouldListen,
+                    mBouncer,
+                    mAuthInterruptActive,
+                    awakeKeyguard,
+                    shouldListenForFaceAssistant(),
+                    mSwitchingUser,
+                    isFaceDisabled(user),
+                    becauseCannotSkipBouncer,
+                    mKeyguardGoingAway,
+                    mFaceSettingEnabledForUser.get(user),
+                    mLockIconPressed,
+                    strongAuthAllowsScanning,
+                    mIsPrimaryUser,
+                    mSecureCameraLaunched);
+            maybeLogFaceListenerModelData(model);
+        }
+
+        return shouldListen;
+    }
+
+    private void maybeLogFaceListenerModelData(KeyguardFaceListenModel model) {
         // Too chatty, but very useful when debugging issues.
         if (DEBUG_SPEW) {
-            Log.v(TAG, "shouldListenForFace(" + user + ")=" + shouldListen + "... "
-                    + ", mBouncer: " + mBouncer
-                    + ", mAuthInterruptActive: " + mAuthInterruptActive
-                    + ", awakeKeyguard: " + awakeKeyguard
-                    + ", shouldListenForFaceAssistant: " + shouldListenForFaceAssistant()
-                    + ", mSwitchingUser: " + mSwitchingUser
-                    + ", isFaceDisabled(" + user + "): " + isFaceDisabled(user)
-                    + ", becauseCannotSkipBouncer: " + becauseCannotSkipBouncer
-                    + ", mKeyguardGoingAway: " + mKeyguardGoingAway
-                    + ", mFaceSettingEnabledForUser(" + user + "): "
-                            + mFaceSettingEnabledForUser.get(user)
-                    + ", mLockIconPressed: " + mLockIconPressed
-                    + ", strongAuthAllowsScanning: " + strongAuthAllowsScanning
-                    + ", isPrimaryUser: " + mIsPrimaryUser
-                    + ", mSecureCameraLaunched: " + mSecureCameraLaunched);
+            Log.v(TAG, model.toString());
         }
-        return shouldListen;
+
+        // Add model data to the historical buffer.
+        if (DEBUG_FACE && mFaceRunningState != BIOMETRIC_STATE_RUNNING
+                && model.isListeningForFace()) {
+            if (mFaceListenModels == null) {
+                mFaceListenModels = new ArrayDeque<>(FACE_LISTEN_CALLS_QUEUE_SIZE);
+            }
+            if (mFaceListenModels.size() >= FACE_LISTEN_CALLS_QUEUE_SIZE) {
+                mFaceListenModels.remove();
+            }
+            mFaceListenModels.add(model);
+        }
     }
 
     /**
@@ -2918,6 +2950,15 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             pw.println("    trustManaged=" + getUserTrustIsManaged(userId));
             pw.println("    enabledByUser=" + mFaceSettingEnabledForUser.get(userId));
             pw.println("    mSecureCameraLaunched=" + mSecureCameraLaunched);
+        }
+        if (mFaceListenModels != null && !mFaceListenModels.isEmpty()) {
+            final SimpleDateFormat dateFormat =
+                    new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.US);
+            pw.println("  Face listen results (last " + FACE_LISTEN_CALLS_QUEUE_SIZE + " calls):");
+            for (final KeyguardFaceListenModel model : mFaceListenModels) {
+                final String time = dateFormat.format(new Date(model.getTimeMillis()));
+                pw.println("    " + time + " " + model.toString());
+            }
         }
     }
 }
