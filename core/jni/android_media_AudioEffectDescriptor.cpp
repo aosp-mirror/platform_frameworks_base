@@ -102,9 +102,9 @@ void convertAudioEffectDescriptorVectorFromNative(JNIEnv *env, jobjectArray *jDe
 
     *jDescriptors = env->NewObjectArray(actualSize, audioEffectDescriptorClass(), NULL);
     for (size_t i = 0; i < actualSize; i++) {
-        env->SetObjectArrayElement(*jDescriptors,
-                                   i,
-                                   env->GetObjectArrayElement(temp, i));
+        jobject jdesc = env->GetObjectArrayElement(temp, i);
+        env->SetObjectArrayElement(*jDescriptors, i, jdesc);
+        env->DeleteLocalRef(jdesc);
     }
     env->DeleteLocalRef(temp);
 }
