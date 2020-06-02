@@ -23,13 +23,6 @@
 #include <utils/String8.h>
 #include <gui/Surface.h>
 
-#include <SkBitmap.h>
-#include <SkCanvas.h>
-#include <SkColor.h>
-#include <SkPaint.h>
-
-#include <android/native_window.h>
-
 namespace android {
 
 // --- SpriteController ---
@@ -132,8 +125,8 @@ void SpriteController::doUpdateSprites() {
         SpriteUpdate& update = updates.editItemAt(i);
 
         if (update.state.surfaceControl == NULL && update.state.wantSurfaceVisible()) {
-            update.state.surfaceWidth = update.state.icon.bitmap.width();
-            update.state.surfaceHeight = update.state.icon.bitmap.height();
+            update.state.surfaceWidth = update.state.icon.width();
+            update.state.surfaceHeight = update.state.icon.height();
             update.state.surfaceDrawn = false;
             update.state.surfaceVisible = false;
             update.state.surfaceControl = obtainSurface(
@@ -154,8 +147,8 @@ void SpriteController::doUpdateSprites() {
         }
 
         if (update.state.wantSurfaceVisible()) {
-            int32_t desiredWidth = update.state.icon.bitmap.width();
-            int32_t desiredHeight = update.state.icon.bitmap.height();
+            int32_t desiredWidth = update.state.icon.width();
+            int32_t desiredHeight = update.state.icon.height();
             if (update.state.surfaceWidth < desiredWidth
                     || update.state.surfaceHeight < desiredHeight) {
                 needApplyTransaction = true;
@@ -196,40 +189,9 @@ void SpriteController::doUpdateSprites() {
         if (update.state.surfaceControl != NULL && !update.state.surfaceDrawn
                 && update.state.wantSurfaceVisible()) {
             sp<Surface> surface = update.state.surfaceControl->getSurface();
-            ANativeWindow_Buffer outBuffer;
-            status_t status = surface->lock(&outBuffer, NULL);
-            if (status) {
-                ALOGE("Error %d locking sprite surface before drawing.", status);
-            } else {
-                SkBitmap surfaceBitmap;
-                ssize_t bpr = outBuffer.stride * bytesPerPixel(outBuffer.format);
-                surfaceBitmap.installPixels(SkImageInfo::MakeN32Premul(outBuffer.width, outBuffer.height),
-                                            outBuffer.bits, bpr);
-
-                SkCanvas surfaceCanvas(surfaceBitmap);
-
-                SkPaint paint;
-                paint.setBlendMode(SkBlendMode::kSrc);
-                surfaceCanvas.drawBitmap(update.state.icon.bitmap, 0, 0, &paint);
-
-                if (outBuffer.width > update.state.icon.bitmap.width()) {
-                    paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRect(SkRect::MakeLTRB(update.state.icon.bitmap.width(), 0,
-                            outBuffer.width, update.state.icon.bitmap.height()), paint);
-                }
-                if (outBuffer.height > update.state.icon.bitmap.height()) {
-                    paint.setColor(0); // transparent fill color
-                    surfaceCanvas.drawRect(SkRect::MakeLTRB(0, update.state.icon.bitmap.height(),
-                            outBuffer.width, outBuffer.height), paint);
-                }
-
-                status = surface->unlockAndPost();
-                if (status) {
-                    ALOGE("Error %d unlocking and posting sprite surface after drawing.", status);
-                } else {
-                    update.state.surfaceDrawn = true;
-                    update.surfaceChanged = surfaceChanged = true;
-                }
+            if (update.state.icon.draw(surface)) {
+                update.state.surfaceDrawn = true;
+                update.surfaceChanged = surfaceChanged = true;
             }
         }
     }
