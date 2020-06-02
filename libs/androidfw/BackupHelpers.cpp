@@ -479,7 +479,7 @@ void send_tarfile_chunk(BackupDataWriter* writer, const char* buffer, size_t siz
 }
 
 int write_tarfile(const String8& packageName, const String8& domain,
-        const String8& rootpath, const String8& filepath, off_t* outSize,
+        const String8& rootpath, const String8& filepath, off64_t* outSize,
         BackupDataWriter* writer)
 {
     // In the output stream everything is stored relative to the root

@@ -155,6 +155,7 @@ cc_test {
         android: {
             srcs: [
                 "tests/BackupData_test.cpp",
+		"tests/BackupHelpers_test.cpp",
                 "tests/ObbFile_test.cpp",
                 "tests/PosixUtils_test.cpp",
             ],
