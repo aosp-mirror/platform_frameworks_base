@@ -819,6 +819,22 @@ class ActivityStack extends Task {
 
         mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
+
+        final boolean pinnedToFullscreen = currentMode == WINDOWING_MODE_PINNED
+                && windowingMode == WINDOWING_MODE_FULLSCREEN;
+        if (pinnedToFullscreen && topActivity != null && !isForceHidden()) {
+            mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
+            try {
+                // Report orientation as soon as possible so that the display can freeze earlier if
+                // the display orientation will be changed. Because the surface bounds of activity
+                // may have been set to fullscreen but the activity hasn't redrawn its content yet,
+                // the rotation animation needs to capture snapshot earlier to avoid animating from
+                // an intermediate state.
+                topActivity.reportDescendantOrientationChangeIfNeeded();
+            } finally {
+                mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(false);
+            }
+        }
     }
 
     @Override
