@@ -1374,10 +1374,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (nri == null || net == null || !LOGD_BLOCKED_NETWORKINFO) {
             return;
         }
-        String action = blocked ? "BLOCKED" : "UNBLOCKED";
-        log(String.format("Blocked status changed to %s for %d(%d) on netId %d", blocked,
-                nri.mUid, nri.request.requestId, net.netId));
-        mNetworkInfoBlockingLogs.log(action + " " + nri.mUid);
+        final String action = blocked ? "BLOCKED" : "UNBLOCKED";
+        mNetworkInfoBlockingLogs.log(String.format(
+                "%s %d(%d) on netId %d", action, nri.mUid, nri.request.requestId, net.netId));
     }
 
     /**
