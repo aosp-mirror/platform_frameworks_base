@@ -1026,7 +1026,8 @@ class MediaRouter2ServiceImpl {
             mHandler = new UserHandler(MediaRouter2ServiceImpl.this, this);
         }
 
-        // TODO: This assumes that only one router exists in a package. Is it true?
+        // TODO: This assumes that only one router exists in a package.
+        //       Do this in Android S or later.
         RouterRecord findRouterRecordLocked(String packageName) {
             for (RouterRecord routerRecord : mRouterRecords) {
                 if (TextUtils.equals(routerRecord.mPackageName, packageName)) {
@@ -1121,7 +1122,6 @@ class MediaRouter2ServiceImpl {
         private final UserRecord mUserRecord;
         private final MediaRoute2ProviderWatcher mWatcher;
 
-        //TODO: Make this thread-safe.
         private final SystemMediaRoute2Provider mSystemProvider;
         private final ArrayList<MediaRoute2Provider> mRouteProviders =
                 new ArrayList<>();
@@ -1153,7 +1153,6 @@ class MediaRouter2ServiceImpl {
         private void stop() {
             if (mRunning) {
                 mRunning = false;
-                //TODO: may unselect routes
                 mWatcher.stop(); // also stops all providers
             }
         }
@@ -1386,7 +1385,6 @@ class MediaRouter2ServiceImpl {
 
             final String providerId = route.getProviderId();
             final MediaRoute2Provider provider = findProvider(providerId);
-            // TODO: Remove this null check when the mMediaProviders are referenced only in handler.
             if (provider == null) {
                 return;
             }
@@ -1405,7 +1403,6 @@ class MediaRouter2ServiceImpl {
 
             final String providerId = route.getProviderId();
             final MediaRoute2Provider provider = findProvider(providerId);
-            // TODO: Remove this null check when the mMediaProviders are referenced only in handler.
             if (provider == null) {
                 return;
             }
@@ -1425,7 +1422,6 @@ class MediaRouter2ServiceImpl {
 
             final String providerId = route.getProviderId();
             final MediaRoute2Provider provider = findProvider(providerId);
-            // TODO: Remove this null check when the mMediaProviders are referenced only in handler.
             if (provider == null) {
                 return;
             }
@@ -1641,8 +1637,8 @@ class MediaRouter2ServiceImpl {
             // TODO: Notify router too when the related callback is introduced.
         }
 
-        // TODO: Find a way to prevent providers from notifying error on random uniqueRequestId.
-        //       Solutions can be:
+        // TODO(b/157873556): Find a way to prevent providers from notifying error on random reqID.
+        //       Possible solutions can be:
         //       1) Record the other type of requests too (not only session creation request)
         //       2) Throw exception on providers when they try to notify error on
         //          random uniqueRequestId.
