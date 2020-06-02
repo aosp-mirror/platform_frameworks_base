@@ -3023,6 +3023,10 @@ public class ChooserActivity extends ResolverActivity implements
         currentRootAdapter.updateDirectShareExpansion();
     }
 
+    void prepareIntentForCrossProfileLaunch(Intent intent) {
+        intent.fixUris(UserHandle.myUserId());
+    }
+
     /**
      * Adapter for all types of items and targets in ShareSheet.
      * Note that ranked sections like Direct Share - while appearing grid-like - are handled on the
