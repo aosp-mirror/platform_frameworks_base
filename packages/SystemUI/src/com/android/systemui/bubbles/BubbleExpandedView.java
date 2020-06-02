@@ -34,6 +34,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.Nullable;
+import android.annotation.SuppressLint;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityView;
@@ -239,6 +240,7 @@ public class BubbleExpandedView extends LinearLayout {
         mPointerMargin = res.getDimensionPixelSize(R.dimen.bubble_pointer_margin);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -290,6 +292,30 @@ public class BubbleExpandedView extends LinearLayout {
             }
             return view.onApplyWindowInsets(insets);
         });
+
+        final int expandedViewPadding =
+                res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+
+        setPadding(
+                expandedViewPadding, expandedViewPadding, expandedViewPadding, expandedViewPadding);
+        setOnTouchListener((view, motionEvent) -> {
+            if (!usingActivityView()) {
+                return false;
+            }
+
+            final Rect avBounds = new Rect();
+            mActivityView.getBoundsOnScreen(avBounds);
+
+            // Consume and ignore events on the expanded view padding that are within the
+            // ActivityView's vertical bounds. These events are part of a back gesture, and so they
+            // should not collapse the stack (which all other touches on areas around the AV would
+            // do).
+            if (motionEvent.getRawY() >= avBounds.top && motionEvent.getRawY() <= avBounds.bottom) {
+                return true;
+            }
+
+            return false;
+        });
     }
 
     private String getBubbleKey() {
@@ -323,9 +349,19 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
+    /**
+     * Hides the IME if it's showing. This is currently done by dispatching a back press to the AV.
+     */
+    void hideImeIfVisible() {
+        if (mKeyboardVisible) {
+            performBackPressIfNeeded();
+        }
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
+        hideImeIfVisible();
         mKeyboardVisible = false;
         mNeedsNewHeight = false;
         if (mActivityView != null) {
