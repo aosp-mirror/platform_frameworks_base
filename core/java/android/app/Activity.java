@@ -5568,7 +5568,7 @@ public class Activity extends ContextThemeWrapper
             options = transferSpringboardActivityOptions(options);
             String resolvedType = null;
             if (fillInIntent != null) {
-                fillInIntent.migrateExtraStreamToClipData();
+                fillInIntent.migrateExtraStreamToClipData(this);
                 fillInIntent.prepareToLeaveProcess(this);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }
@@ -5823,7 +5823,7 @@ public class Activity extends ContextThemeWrapper
                 if (referrer != null) {
                     intent.putExtra(Intent.EXTRA_REFERRER, referrer);
                 }
-                intent.migrateExtraStreamToClipData();
+                intent.migrateExtraStreamToClipData(this);
                 intent.prepareToLeaveProcess(this);
                 result = ActivityTaskManager.getService()
                     .startActivity(mMainThread.getApplicationThread(), getBasePackageName(),
@@ -5894,7 +5894,7 @@ public class Activity extends ContextThemeWrapper
             @Nullable Bundle options) {
         if (mParent == null) {
             try {
-                intent.migrateExtraStreamToClipData();
+                intent.migrateExtraStreamToClipData(this);
                 intent.prepareToLeaveProcess(this);
                 return ActivityTaskManager.getService()
                     .startNextMatchingActivity(mToken, intent, options);
