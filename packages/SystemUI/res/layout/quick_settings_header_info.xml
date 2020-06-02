@@ -19,8 +19,6 @@
     android:layout_width="match_parent"
     android:layout_height="@dimen/qs_header_tooltip_height"
     android:layout_below="@id/quick_status_bar_system_icons"
-    android:paddingStart="@dimen/status_bar_padding_start"
-    android:paddingEnd="@dimen/status_bar_padding_end"
     android:visibility="invisible"
     android:theme="@style/QSHeaderTheme">
 
