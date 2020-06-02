@@ -25,6 +25,7 @@ import static com.android.server.wm.flicker.helpers.AutomationUtils.expandPipWin
 import static com.android.server.wm.flicker.helpers.AutomationUtils.launchSplitScreen;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.stopPackage;
 
+import android.app.Instrumentation;
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
@@ -222,8 +223,9 @@ class CommonTransitions {
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder resizeSplitScreen(IAppHelper testAppTop, ImeAppHelper testAppBottom,
-            UiDevice device, int beginRotation, Rational startRatio, Rational stopRatio) {
+    static TransitionBuilder resizeSplitScreen(Instrumentation instr, IAppHelper testAppTop,
+            ImeAppHelper testAppBottom, UiDevice device, int beginRotation, Rational startRatio,
+            Rational stopRatio) {
         String testTag = "resizeSplitScreen_" + testAppTop.getLauncherName() + "_"
                 + testAppBottom.getLauncherName() + "_"
                 + startRatio.toString().replace("/", ":") + "_to_"
@@ -234,7 +236,7 @@ class CommonTransitions {
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBeforeAll(() -> setRotation(device, beginRotation))
-                .runBeforeAll(() -> clearRecents(device))
+                .runBeforeAll(() -> clearRecents(instr))
                 .runBefore(testAppBottom::open)
                 .runBefore(device::pressHome)
                 .runBefore(testAppTop::open)
