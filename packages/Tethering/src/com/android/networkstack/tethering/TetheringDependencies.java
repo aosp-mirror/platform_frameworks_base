@@ -41,6 +41,17 @@ import java.util.ArrayList;
  */
 public abstract class TetheringDependencies {
     /**
+     * Get a reference to the BpfCoordinator to be used by tethering.
+     */
+    public @NonNull BpfCoordinator getBpfCoordinator(
+            @NonNull Handler handler, @NonNull INetd netd, @NonNull SharedLog log,
+            @NonNull BpfCoordinator.Dependencies deps) {
+        final NetworkStatsManager statsManager =
+                (NetworkStatsManager) getContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+        return new BpfCoordinator(handler, netd, statsManager, log, deps);
+    }
+
+    /**
      * Get a reference to the offload hardware interface to be used by tethering.
      */
     public OffloadHardwareInterface getOffloadHardwareInterface(Handler h, SharedLog log) {
