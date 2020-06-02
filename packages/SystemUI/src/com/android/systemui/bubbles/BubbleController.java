@@ -799,6 +799,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }
+
+            mStackView.onLayoutDirectionChanged();
         }
     }
 
