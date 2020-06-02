@@ -140,6 +140,10 @@ public class ApplicationPackageManager extends PackageManager {
     public static final String APP_PERMISSION_BUTTON_ALLOW_ALWAYS =
             "app_permission_button_allow_always";
 
+    // Name of the package which the permission controller's resources are in.
+    public static final String PERMISSION_CONTROLLER_RESOURCE_PACKAGE =
+            "com.android.permissioncontroller";
+
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
@@ -894,8 +898,7 @@ public class ApplicationPackageManager extends PackageManager {
                     mContext.createPackageContext(permissionController, 0);
 
             int textId = context.getResources().getIdentifier(APP_PERMISSION_BUTTON_ALLOW_ALWAYS,
-                    "string", "com.android.permissioncontroller");
-//                    permissionController); STOPSHIP b/147434671
+                    "string", PERMISSION_CONTROLLER_RESOURCE_PACKAGE);
             if (textId != 0) {
                 return context.getText(textId);
             }
