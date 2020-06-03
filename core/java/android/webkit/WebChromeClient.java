@@ -205,6 +205,8 @@ public class WebChromeClient {
      * <p>Note that if the {@link WebChromeClient} is set to be {@code null},
      * or if {@link WebChromeClient} is not set at all, the default dialog will
      * be suppressed and Javascript execution will continue immediately.
+     * <p>Note that the default dialog does not inherit the {@link
+     * android.view.Display#FLAG_SECURE} flag from the parent window.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
@@ -240,6 +242,8 @@ public class WebChromeClient {
      * or if {@link WebChromeClient} is not set at all, the default dialog will
      * be suppressed and the default value of {@code false} will be returned to
      * the JavaScript code immediately.
+     * <p>Note that the default dialog does not inherit the {@link
+     * android.view.Display#FLAG_SECURE} flag from the parent window.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
@@ -274,6 +278,8 @@ public class WebChromeClient {
      * or if {@link WebChromeClient} is not set at all, the default dialog will
      * be suppressed and {@code null} will be returned to the JavaScript code
      * immediately.
+     * <p>Note that the default dialog does not inherit the {@link
+     * android.view.Display#FLAG_SECURE} flag from the parent window.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
@@ -308,6 +314,8 @@ public class WebChromeClient {
      * <p>Note that if the {@link WebChromeClient} is set to be {@code null},
      * or if {@link WebChromeClient} is not set at all, the default dialog will
      * be suppressed and the navigation will be resumed immediately.
+     * <p>Note that the default dialog does not inherit the {@link
+     * android.view.Display#FLAG_SECURE} flag from the parent window.
      *
      * @param view The WebView that initiated the callback.
      * @param url The url of the page requesting the dialog.
