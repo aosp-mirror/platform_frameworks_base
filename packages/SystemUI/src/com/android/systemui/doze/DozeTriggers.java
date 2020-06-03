@@ -41,10 +41,10 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.Dependency;
-import com.android.systemui.R;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.Assert;
+import com.android.systemui.util.ProximitySensor;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -431,15 +431,18 @@ public class DozeTriggers implements DozeMachine.Part {
         private boolean mFinished;
         private float mMaxRange;
         private boolean mUsingBrightnessSensor;
+        private float mSensorThreshold;
 
         protected abstract void onProximityResult(int result);
 
         public void check() {
             Preconditions.checkState(!mFinished && !mRegistered);
-            Sensor sensor = DozeSensors.findSensorWithType(mSensorManager,
-                    mContext.getString(R.string.doze_brightness_sensor_type));
+            Sensor sensor = ProximitySensor.findCustomProxSensor(mContext, mSensorManager);
             mUsingBrightnessSensor = sensor != null;
-            if (sensor == null) {
+            if (mUsingBrightnessSensor) {
+                mSensorThreshold = ProximitySensor.getBrightnessSensorThreshold(
+                        mContext.getResources());
+            } else {
                 sensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
             }
             if (sensor == null) {
@@ -473,7 +476,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (mUsingBrightnessSensor) {
                     // The custom brightness sensor is gated by the proximity sensor and will
                     // return 0 whenever prox is covered.
-                    isNear = event.values[0] == 0;
+                    isNear = event.values[0] <= mSensorThreshold;
                 } else {
                     isNear = event.values[0] < mMaxRange;
                 }

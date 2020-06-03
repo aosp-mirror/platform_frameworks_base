@@ -16,7 +16,6 @@ package com.android.systemui;
 
 import android.annotation.Nullable;
 import android.app.INotificationManager;
-import android.content.res.Configuration;
 import android.hardware.SensorPrivacyManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
@@ -519,15 +518,6 @@ public class Dependency {
                 .filter(obj -> obj instanceof Dumpable && (controller == null
                         || obj.getClass().getName().toLowerCase().endsWith(controller)))
                 .forEach(o -> ((Dumpable) o).dump(fd, pw, args));
-    }
-
-    protected static void staticOnConfigurationChanged(Configuration newConfig) {
-        sDependency.onConfigurationChanged(newConfig);
-    }
-
-    protected synchronized void onConfigurationChanged(Configuration newConfig) {
-        mDependencies.values().stream().filter(obj -> obj instanceof ConfigurationChangedReceiver)
-                .forEach(o -> ((ConfigurationChangedReceiver) o).onConfigurationChanged(newConfig));
     }
 
     protected final <T> T getDependency(Class<T> cls) {

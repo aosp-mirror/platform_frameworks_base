@@ -34,7 +34,7 @@
     <string name="print_preview" msgid="8010217796057763343">"प्रिंट की झलक"</string>
     <string name="install_for_print_preview" msgid="6366303997385509332">"झलक देखने के लिए PDF व्यूअर इंस्टॉल करें"</string>
     <string name="printing_app_crashed" msgid="854477616686566398">"प्रिंटिंग ऐप बंद हो गया"</string>
-    <string name="generating_print_job" msgid="3119608742651698916">"प्रिंट जॉ जनरेट हो रहा है"</string>
+    <string name="generating_print_job" msgid="3119608742651698916">"प्रिंट कार्य जनरेट हो रहा है"</string>
     <string name="save_as_pdf" msgid="5718454119847596853">"पीडीएफ़ के तौर पर सेव करें"</string>
     <string name="all_printers" msgid="5018829726861876202">"सभी प्रिंटर..."</string>
     <string name="print_dialog" msgid="32628687461331979">"प्रिंट डॉयलॉग"</string>
@@ -61,8 +61,8 @@
     </plurals>
     <string name="printer_extended_description_template" msgid="1366699227703381874">"<xliff:g id="PRINT_SERVICE_LABEL">%1$s</xliff:g> - <xliff:g id="PRINTER_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="printer_info_desc" msgid="7181988788991581654">"इस प्रिंटर के बारे में ज़्यादा जानकारी"</string>
-    <string name="notification_channel_progress" msgid="872788690775721436">"चल रहे प्रिंट जॉ"</string>
-    <string name="notification_channel_failure" msgid="9042250774797916414">"असफल रहे प्रिंट जॉ"</string>
+    <string name="notification_channel_progress" msgid="872788690775721436">"चल रहे प्रिंट कार्य"</string>
+    <string name="notification_channel_failure" msgid="9042250774797916414">"असफल रहे प्रिंट कार्य"</string>
     <string name="could_not_create_file" msgid="3425025039427448443">"फ़ाइल नहीं बनाई जा सकी"</string>
     <string name="print_services_disabled_toast" msgid="9089060734685174685">"कुछ प्रिंट सेवाएं अक्षम हैं"</string>
     <string name="print_searching_for_printers" msgid="6550424555079932867">"प्रिंटर सर्च कर रहा है"</string>
@@ -84,11 +84,11 @@
     <string name="failed_notification_title_template" msgid="2256217208186530973">"प्रिंटर गड़बड़ी <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="blocked_notification_title_template" msgid="1175435827331588646">"प्रिंटर अवरोधित <xliff:g id="PRINT_JOB_NAME">%1$s</xliff:g>"</string>
     <string name="cancel" msgid="4373674107267141885">"रद्द करें"</string>
-    <string name="restart" msgid="2472034227037808749">"फिर से आरंभ करें"</string>
+    <string name="restart" msgid="2472034227037808749">"पुन: आरंभ करें"</string>
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटर के लिए कोई कनेक्शन नहीं"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> का उपयोग करें?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"प्रिंटर पर जाते समय आपका दस्तावेज़ एक या ज़्यादा सर्वर से गुज़र सकता है."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"प्रिंटर पर जाते समय आपका दस्तावेज़ एक या अधिक सर्वर से गुज़र सकता है."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"श्याम और श्वेत"</item>
     <item msgid="2762241247228983754">"रंग"</item>
@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"लैंडस्केप"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"फ़ाइल पर नहीं लिखा जा सका"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. फिर से प्रयास करें."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"क्षमा करें, उससे बात नहीं बनी. पुन: प्रयास करें."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"फिर से प्रयास करें"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"यह प्रिंटर इस समय उपलब्ध नहीं है."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"झलक नहीं दिखाई जा सकती"</string>

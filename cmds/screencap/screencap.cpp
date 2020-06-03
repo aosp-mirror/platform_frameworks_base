@@ -24,6 +24,7 @@
 #include <linux/fb.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <sys/wait.h>
 
 #include <binder/ProcessState.h>
 
@@ -99,11 +100,38 @@ static uint32_t dataSpaceToInt(ui::Dataspace d)
 }
 
 static status_t notifyMediaScanner(const char* fileName) {
-    String8 cmd("am broadcast -a android.intent.action.MEDIA_SCANNER_SCAN_FILE -d file://");
-    cmd.append(fileName);
-    cmd.append(" > /dev/null");
-    int result = system(cmd.string());
-    if (result < 0) {
+    std::string filePath("file://");
+    filePath.append(fileName);
+    char *cmd[] = {
+        (char*) "am",
+        (char*) "broadcast",
+        (char*) "am",
+        (char*) "android.intent.action.MEDIA_SCANNER_SCAN_FILE",
+        (char*) "-d",
+        &filePath[0],
+        nullptr
+    };
+
+    int status;
+    int pid = fork();
+    if (pid < 0){
+       fprintf(stderr, "Unable to fork in order to send intent for media scanner.\n");
+       return UNKNOWN_ERROR;
+    }
+    if (pid == 0){
+        int fd = open("/dev/null", O_WRONLY);
+        if (fd < 0){
+            fprintf(stderr, "Unable to open /dev/null for media scanner stdout redirection.\n");
+            exit(1);
+        }
+        dup2(fd, 1);
+        int result = execvp(cmd[0], cmd);
+        close(fd);
+        exit(result);
+    }
+    wait(&status);
+
+    if (status < 0) {
         fprintf(stderr, "Unable to broadcast intent for media scanner.\n");
         return UNKNOWN_ERROR;
     }
