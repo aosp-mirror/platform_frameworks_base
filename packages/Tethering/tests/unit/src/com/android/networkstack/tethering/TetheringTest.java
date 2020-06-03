@@ -16,6 +16,7 @@
 
 package com.android.networkstack.tethering;
 
+import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
 import static android.hardware.usb.UsbManager.USB_FUNCTION_NCM;
@@ -81,6 +82,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
@@ -204,6 +206,7 @@ public class TetheringTest {
     @Mock private EthernetManager mEm;
     @Mock private TetheringNotificationUpdater mNotificationUpdater;
     @Mock private BpfCoordinator mBpfCoordinator;
+    @Mock private PackageManager mPackageManager;
 
     private final MockIpServerDependencies mIpServerDependencies =
             spy(new MockIpServerDependencies());
@@ -261,6 +264,11 @@ public class TetheringTest {
             if (Context.CONNECTIVITY_SERVICE.equals(name)) return mCm;
             if (Context.ETHERNET_SERVICE.equals(name)) return mEm;
             return super.getSystemService(name);
+        }
+
+        @Override
+        public PackageManager getPackageManager() {
+            return mPackageManager;
         }
 
         @Override
@@ -424,6 +432,11 @@ public class TetheringTest {
         @Override
         public TetheringNotificationUpdater getNotificationUpdater(Context ctx, Looper looper) {
             return mNotificationUpdater;
+        }
+
+        @Override
+        public boolean isTetheringDenied() {
+            return false;
         }
     }
 
@@ -1949,6 +1962,23 @@ public class TetheringTest {
         assertContains(Arrays.asList(mTethering.getTetherableIfaces()), TEST_ETH_IFNAME);
         assertEquals(TETHER_ERROR_IFACE_CFG_ERROR, mTethering.getLastTetherError(TEST_USB_IFNAME));
         assertEquals(TETHER_ERROR_IFACE_CFG_ERROR, mTethering.getLastTetherError(TEST_ETH_IFNAME));
+    }
+
+    @Test
+    public void testProvisioningNeededButUnavailable() throws Exception {
+        assertTrue(mTethering.isTetheringSupported());
+        verify(mPackageManager, never()).getPackageInfo(PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
+
+        setupForRequiredProvisioning();
+        assertTrue(mTethering.isTetheringSupported());
+        verify(mPackageManager).getPackageInfo(PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
+        reset(mPackageManager);
+
+        doThrow(PackageManager.NameNotFoundException.class).when(mPackageManager).getPackageInfo(
+                PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
+        setupForRequiredProvisioning();
+        assertFalse(mTethering.isTetheringSupported());
+        verify(mPackageManager).getPackageInfo(PROVISIONING_APP_NAME[0], GET_ACTIVITIES);
     }
 
     // TODO: Test that a request for hotspot mode doesn't interfere with an

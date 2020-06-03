@@ -18,6 +18,7 @@ package com.android.networkstack.tethering;
 
 import static android.Manifest.permission.NETWORK_SETTINGS;
 import static android.Manifest.permission.NETWORK_STACK;
+import static android.content.pm.PackageManager.GET_ACTIVITIES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.hardware.usb.UsbManager.USB_CONFIGURED;
 import static android.hardware.usb.UsbManager.USB_CONNECTED;
@@ -71,6 +72,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.hardware.usb.UsbManager;
 import android.net.ConnectivityManager;
 import android.net.EthernetManager;
@@ -110,7 +112,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ServiceSpecificException;
-import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -811,9 +812,28 @@ public class Tethering {
         }
     }
 
+    private boolean isProvisioningNeededButUnavailable() {
+        return isTetherProvisioningRequired() && !doesEntitlementPackageExist();
+    }
+
     boolean isTetherProvisioningRequired() {
         final TetheringConfiguration cfg = mConfig;
         return mEntitlementMgr.isTetherProvisioningRequired(cfg);
+    }
+
+    private boolean doesEntitlementPackageExist() {
+        // provisioningApp must contain package and class name.
+        if (mConfig.provisioningApp.length != 2) {
+            return false;
+        }
+
+        final PackageManager pm = mContext.getPackageManager();
+        try {
+            pm.getPackageInfo(mConfig.provisioningApp[0], GET_ACTIVITIES);
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
+        return true;
     }
 
     // TODO: Figure out how to update for local hotspot mode interfaces.
@@ -2175,14 +2195,14 @@ public class Tethering {
     // gservices could set the secure setting to 1 though to enable it on a build where it
     // had previously been turned off.
     boolean isTetheringSupported() {
-        final int defaultVal =
-                SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1;
+        final int defaultVal = mDeps.isTetheringDenied() ? 0 : 1;
         final boolean tetherSupported = Settings.Global.getInt(mContext.getContentResolver(),
                 Settings.Global.TETHER_SUPPORTED, defaultVal) != 0;
         final boolean tetherEnabledInSettings = tetherSupported
                 && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
 
-        return tetherEnabledInSettings && hasTetherableConfiguration();
+        return tetherEnabledInSettings && hasTetherableConfiguration()
+                && !isProvisioningNeededButUnavailable();
     }
 
     void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter writer, @Nullable String[] args) {
