@@ -140,8 +140,8 @@
     <string name="accessibility_wifi_security_type_none" msgid="162352241518066966">"Адкрытая сетка"</string>
     <string name="accessibility_wifi_security_type_secured" msgid="2399774097343238942">"Бяспечная сетка"</string>
     <string name="process_kernel_label" msgid="950292573930336765">"АС Android"</string>
-    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Выдаленыя прыкладанні"</string>
-    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Выдаленыя прыкладанні і карыстальнiкi"</string>
+    <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"Выдаленыя праграмы"</string>
+    <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"Выдаленыя праграмы і карыстальнiкi"</string>
     <string name="data_usage_ota" msgid="7984667793701597001">"Абнаўленні сістэмы"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB-мадэм"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"Партатыўны хот-спот"</string>
