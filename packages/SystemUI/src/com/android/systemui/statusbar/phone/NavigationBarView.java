@@ -1198,6 +1198,9 @@ public class NavigationBarView extends FrameLayout implements
 
         pw.println("    }");
 
+        if (mNavigationInflaterView != null) {
+            mNavigationInflaterView.dump(pw);
+        }
         mContextualButtonGroup.dump(pw);
         mRecentsOnboarding.dump(pw);
         mRegionSamplingHelper.dump(pw);

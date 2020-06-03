@@ -40,6 +40,7 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
+import java.io.PrintWriter;
 import java.util.Objects;
 
 public class NavigationBarInflaterView extends FrameLayout
@@ -468,5 +469,11 @@ public class NavigationBarInflaterView extends FrameLayout
 
     private static float convertDpToPx(Context context, float dp) {
         return dp * context.getResources().getDisplayMetrics().density;
+    }
+
+    public void dump(PrintWriter pw) {
+        pw.println("NavigationBarInflaterView {");
+        pw.println("      mCurrentLayout: " + mCurrentLayout);
+        pw.println("    }");
     }
 }
