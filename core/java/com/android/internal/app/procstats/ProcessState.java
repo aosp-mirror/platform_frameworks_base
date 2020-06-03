@@ -49,12 +49,14 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.service.procstats.ProcessStatsProto;
 import android.service.procstats.ProcessStatsStateProto;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
 import android.util.Log;
 import android.util.LongSparseArray;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.SparseLongArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
@@ -1420,10 +1422,38 @@ public final class ProcessState {
         proto.end(token);
     }
 
+    /**
+     * Assume the atom already includes a UID field, write the process name only if
+     * it's different from the package name; and only write the suffix if possible.
+     */
+    static void writeCompressedProcessName(final ProtoOutputStream proto, final long fieldId,
+            final String procName, final String packageName, final boolean sharedUid) {
+        if (sharedUid) {
+            // This UID has multiple packages running, write the full process name here
+            proto.write(fieldId, procName);
+            return;
+        }
+        if (TextUtils.equals(procName, packageName)) {
+            // Same name, don't bother to write the process name here.
+            return;
+        }
+        if (procName.startsWith(packageName)) {
+            final int pkgLength = packageName.length();
+            if (procName.charAt(pkgLength) == ':') {
+                // Only write the suffix starting with ':'
+                proto.write(fieldId, procName.substring(pkgLength));
+                return;
+            }
+        }
+        // Write the full process name
+        proto.write(fieldId, procName);
+    }
+
     /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
     public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto, long fieldId,
             String procName, int uid, long now,
-            final ProcessMap<ArraySet<PackageState>> procToPkgMap) {
+            final ProcessMap<ArraySet<PackageState>> procToPkgMap,
+            final SparseArray<ArraySet<String>> uidToPkgMap) {
         // Group proc stats by aggregated type (only screen state + process state)
         SparseLongArray durationByState = new SparseLongArray();
         boolean didCurState = false;
@@ -1503,7 +1533,8 @@ public final class ProcessState {
 
         // build the output
         final long token = proto.start(fieldId);
-        proto.write(ProcessStatsProto.PROCESS, procName);
+        writeCompressedProcessName(proto, ProcessStatsProto.PROCESS, procName, mPackage,
+                mMultiPackage || (uidToPkgMap.get(mUid).size() > 1));
         proto.write(ProcessStatsProto.UID, uid);
 
         for (int i = 0; i < durationByState.size(); i++) {
@@ -1528,7 +1559,7 @@ public final class ProcessState {
         }
 
         mStats.dumpFilteredAssociationStatesProtoForProc(proto, ProcessStatsProto.ASSOCS,
-                now, this, procToPkgMap);
+                now, this, procToPkgMap, uidToPkgMap);
         proto.end(token);
     }
 }
