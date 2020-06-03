@@ -732,6 +732,10 @@ public class AppOpsManager {
     public static final int SAMPLING_STRATEGY_BOOT_TIME_SAMPLING =
             FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__BOOT_TIME_SAMPLING;
 
+    /** @hide */
+    public static final int SAMPLING_STRATEGY_UNIFORM_OPS =
+            FrameworkStatsLog.RUNTIME_APP_OP_ACCESS__SAMPLING_STRATEGY__UNIFORM_OPS;
+
     /**
      * Strategies used for message sampling
      * @hide
@@ -741,7 +745,8 @@ public class AppOpsManager {
             SAMPLING_STRATEGY_DEFAULT,
             SAMPLING_STRATEGY_UNIFORM,
             SAMPLING_STRATEGY_RARELY_USED,
-            SAMPLING_STRATEGY_BOOT_TIME_SAMPLING
+            SAMPLING_STRATEGY_BOOT_TIME_SAMPLING,
+            SAMPLING_STRATEGY_UNIFORM_OPS
     })
     public @interface SamplingStrategy {}
 
@@ -8349,7 +8354,7 @@ public class AppOpsManager {
      * @hide
      */
     private static boolean isCollectingStackTraces() {
-        if (sConfig.getSampledOpCode() == OP_NONE &&
+        if (sConfig.getSampledOpCode() == OP_NONE && sConfig.getAcceptableLeftDistance() == 0 &&
                 sConfig.getExpirationTimeSinceBootMillis() >= SystemClock.elapsedRealtime()) {
             return false;
         }

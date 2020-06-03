@@ -44,6 +44,7 @@ import static android.app.AppOpsManager.RestrictionBypass;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
+import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM_OPS;
 import static android.app.AppOpsManager.SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
@@ -5936,11 +5937,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         int newLeftDistance = AppOpsManager.leftCircularDistance(opCode,
                 mSampledAppOpCode, _NUM_OP);
 
-        if (mAcceptableLeftDistance < newLeftDistance) {
+        if (mAcceptableLeftDistance < newLeftDistance
+                && mSamplingStrategy != SAMPLING_STRATEGY_UNIFORM_OPS) {
             return;
         }
 
-        if (mAcceptableLeftDistance > newLeftDistance) {
+        if (mAcceptableLeftDistance > newLeftDistance
+                && mSamplingStrategy != SAMPLING_STRATEGY_UNIFORM_OPS) {
             mAcceptableLeftDistance = newLeftDistance;
             mMessagesCollectedCount = 0.0f;
         }
@@ -5978,13 +5981,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (mSampledPackage == null) {
             if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
                 mSamplingStrategy = SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
-                resampleAppOpForPackageLocked(packageName);
+                resampleAppOpForPackageLocked(packageName, true);
             }
         } else if (mRarelyUsedPackages.contains(packageName)) {
             mRarelyUsedPackages.remove(packageName);
             if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
                 mSamplingStrategy = SAMPLING_STRATEGY_RARELY_USED;
-                resampleAppOpForPackageLocked(packageName);
+                resampleAppOpForPackageLocked(packageName, true);
             }
         }
     }
@@ -6001,16 +6004,22 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Resamples package and appop to watch from the list provided. */
     private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
         if (!packageNames.isEmpty()) {
-            mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM;
-            resampleAppOpForPackageLocked(packageNames.get(
-                    ThreadLocalRandom.current().nextInt(packageNames.size())));
+            if (ThreadLocalRandom.current().nextFloat() < 0.5f) {
+                mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM;
+                resampleAppOpForPackageLocked(packageNames.get(
+                        ThreadLocalRandom.current().nextInt(packageNames.size())), true);
+            } else {
+                mSamplingStrategy = SAMPLING_STRATEGY_UNIFORM_OPS;
+                resampleAppOpForPackageLocked(packageNames.get(
+                        ThreadLocalRandom.current().nextInt(packageNames.size())), false);
+            }
         }
     }
 
     /** Resamples appop for the chosen package and initializes sampling state */
-    private void resampleAppOpForPackageLocked(@NonNull String packageName) {
+    private void resampleAppOpForPackageLocked(@NonNull String packageName, boolean pickOp) {
         mMessagesCollectedCount = 0.0f;
-        mSampledAppOpCode = ThreadLocalRandom.current().nextInt(_NUM_OP);
+        mSampledAppOpCode = pickOp ? ThreadLocalRandom.current().nextInt(_NUM_OP) : OP_NONE;
         mAcceptableLeftDistance = _NUM_OP;
         mSampledPackage = packageName;
     }
