@@ -44,6 +44,6 @@
     <style name="NavigationBarButton">
         <item name="android:layout_height">96dp</item>
         <item name="android:layout_width">96dp</item>
-        <item name="android:background">@drawable/nav_button_background</item>
+        <item name="android:background">@*android:drawable/item_background_material</item>
     </style>
 </resources>
