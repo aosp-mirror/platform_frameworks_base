@@ -302,7 +302,14 @@ public class ParsedActivityUtils {
         }
 
         String permission = array.getNonConfigurationString(permissionAttr, 0);
-        activity.setPermission(permission != null ? permission : pkg.getPermission());
+        if (isAlias) {
+            // An alias will override permissions to allow referencing an Activity through its alias
+            // without needing the original permission. If an alias needs the same permission,
+            // it must be re-declared.
+            activity.setPermission(permission);
+        } else {
+            activity.setPermission(permission != null ? permission : pkg.getPermission());
+        }
 
         final boolean setExported = array.hasValue(exportedAttr);
         if (setExported) {
