@@ -1159,7 +1159,7 @@ public class PackageManagerService extends IPackageManager.Stub
     final SparseArray<PackageVerificationState> mPendingVerification = new SparseArray<>();
 
     /** List of packages waiting for rollback to be enabled. */
-    final SparseArray<InstallParams> mPendingEnableRollback = new SparseArray<>();
+    final SparseArray<VerificationParams> mPendingEnableRollback = new SparseArray<>();
 
     final PackageInstallerService mInstallerService;
 
@@ -1833,7 +1833,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
                     if ((state != null) && !state.isVerificationComplete()
                             && !state.timeoutExtended()) {
-                        final InstallParams params = state.getInstallParams();
+                        final VerificationParams params = state.getVerificationParams();
                         final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         Slog.i(TAG, "Verification timed out for " + originUri);
@@ -1874,7 +1874,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     final PackageVerificationState state = mPendingVerification.get(verificationId);
 
                     if (state != null && !state.isIntegrityVerificationComplete()) {
-                        final InstallParams params = state.getInstallParams();
+                        final VerificationParams params = state.getVerificationParams();
                         final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         Slog.i(TAG, "Integrity verification timed out for " + originUri);
@@ -1919,7 +1919,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     state.setVerifierResponse(response.callerUid, response.code);
 
                     if (state.isVerificationComplete()) {
-                        final InstallParams params = state.getInstallParams();
+                        final VerificationParams params = state.getVerificationParams();
                         final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                         if (state.isInstallAllowed()) {
@@ -1953,7 +1953,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
 
                     final int response = (Integer) msg.obj;
-                    final InstallParams params = state.getInstallParams();
+                    final VerificationParams params = state.getVerificationParams();
                     final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
                     state.setIntegrityVerificationResult(response);
@@ -2037,7 +2037,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 case ENABLE_ROLLBACK_STATUS: {
                     final int enableRollbackToken = msg.arg1;
                     final int enableRollbackCode = msg.arg2;
-                    InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
+                    final VerificationParams params =
+                            mPendingEnableRollback.get(enableRollbackToken);
                     if (params == null) {
                         Slog.w(TAG, "Invalid rollback enabled token "
                                 + enableRollbackToken + " received");
@@ -2061,7 +2062,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 case ENABLE_ROLLBACK_TIMEOUT: {
                     final int enableRollbackToken = msg.arg1;
                     final int sessionId = msg.arg2;
-                    final InstallParams params = mPendingEnableRollback.get(enableRollbackToken);
+                    final VerificationParams params =
+                            mPendingEnableRollback.get(enableRollbackToken);
                     if (params != null) {
                         final Uri originUri = Uri.fromFile(params.origin.resolvedFile);
 
@@ -12867,6 +12869,22 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
+    void verifyStage(ActiveInstallSession activeInstallSession) {
+        final VerificationParams params = new VerificationParams(activeInstallSession);
+        mHandler.post(()-> {
+            params.startCopy();
+        });
+    }
+
+    void verifyStage(ActiveInstallSession parent, List<ActiveInstallSession> children)
+            throws PackageManagerException {
+        final MultiPackageVerificationParams params =
+                new MultiPackageVerificationParams(UserHandle.ALL, parent, children);
+        mHandler.post(()-> {
+            params.startCopy();
+        });
+    }
+
     private void sendPackageAddedForUser(String packageName, PackageSetting pkgSetting,
             int userId, int dataLoaderType) {
         final boolean isSystem = isSystemApp(pkgSetting) || isUpdatedSystemApp(pkgSetting);
@@ -14727,13 +14745,8 @@ public class PackageManagerService extends IPackageManager.Stub
      * committed together.
      */
     class MultiPackageInstallParams extends HandlerParams {
-        private final IPackageInstallObserver2 mVerificationObserver;
-        @NonNull
         private final ArrayList<InstallParams> mChildParams;
-        // TODO(samiul): mCurrentState will relocated to a install-specific class in future
-        @NonNull
         private final Map<InstallArgs, Integer> mCurrentState;
-        private final Map<InstallParams, Integer> mVerificationState;
 
         MultiPackageInstallParams(
                 @NonNull UserHandle user,
@@ -14751,8 +14764,6 @@ public class PackageManagerService extends IPackageManager.Stub
                 this.mChildParams.add(childParams);
             }
             this.mCurrentState = new ArrayMap<>(mChildParams.size());
-            this.mVerificationState = new ArrayMap<>(mChildParams.size());
-            mVerificationObserver = parent.getVerificationObserver();
         }
 
         @Override
@@ -14769,7 +14780,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        // TODO(samiul): this method will relocated to a install-specific class in future
         void tryProcessInstallRequest(InstallArgs args, int currentStatus) {
             mCurrentState.put(args, currentStatus);
             if (mCurrentState.size() != mChildParams.size()) {
@@ -14793,43 +14803,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     completeStatus == PackageManager.INSTALL_SUCCEEDED,
                     installRequests);
         }
-
-        void trySendVerificationCompleteNotification(InstallParams child, int currentStatus) {
-            mVerificationState.put(child, currentStatus);
-            if (mVerificationState.size() != mChildParams.size()) {
-                return;
-            }
-            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
-            for (Integer status : mVerificationState.values()) {
-                if (status == PackageManager.INSTALL_UNKNOWN) {
-                    return;
-                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
-                    completeStatus = status;
-                    break;
-                }
-            }
-            try {
-                mVerificationObserver.onPackageInstalled(null, completeStatus,
-                        "Package Verification Result", new Bundle());
-            } catch (RemoteException e) {
-                Slog.i(TAG, "Observer no longer exists.");
-            }
-        }
     }
 
     class InstallParams extends HandlerParams {
         // TODO: see if we can collapse this into ActiveInstallSession
-
         final OriginInfo origin;
         final MoveInfo move;
-        final IPackageInstallObserver2 mInstallObserver;
-        private final IPackageInstallObserver2 mVerificationObserver;
+        final IPackageInstallObserver2 observer;
         int installFlags;
         @NonNull final InstallSource installSource;
         final String volumeUuid;
-        private boolean mWaitForVerificationToComplete;
-        private boolean mWaitForIntegrityVerificationToComplete;
-        private boolean mWaitForEnableRollbackToComplete;
         int mRet;
         final String packageAbiOverride;
         final String[] grantedRuntimePermissions;
@@ -14845,7 +14828,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int mDataLoaderType;
         final int mSessionId;
 
-        InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 installObserver,
+        InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
                 VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
@@ -14855,8 +14838,7 @@ public class PackageManagerService extends IPackageManager.Stub
             super(user);
             this.origin = origin;
             this.move = move;
-            this.mInstallObserver = installObserver;
-            this.mVerificationObserver = null;
+            this.observer = observer;
             this.installFlags = installFlags;
             this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
@@ -14894,8 +14876,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     activeInstallSession.getInstallSource().installerPackageName,
                     activeInstallSession.getInstallerUid(),
                     sessionParams.installReason);
-            mInstallObserver = activeInstallSession.getInstallObserver();
-            mVerificationObserver = activeInstallSession.getVerificationObserver();
+            observer = activeInstallSession.getObserver();
             installFlags = sessionParams.installFlags;
             installSource = activeInstallSession.getInstallSource();
             volumeUuid = sessionParams.volumeUuid;
@@ -15055,12 +15036,170 @@ public class PackageManagerService extends IPackageManager.Stub
         public void handleStartCopy() {
             PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
                     origin.resolvedPath, installFlags, packageAbiOverride);
+            mRet = overrideInstallLocation(pkgLite);
+        }
+
+        @Override
+        void handleReturnCode() {
+            processPendingInstall();
+        }
+
+        private void processPendingInstall() {
+            InstallArgs args = createInstallArgs(this);
+            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
+                mRet = args.copyApk();
+            }
+            if (mParentInstallParams != null) {
+                mParentInstallParams.tryProcessInstallRequest(args, mRet);
+            } else {
+                PackageInstalledInfo res = createPackageInstalledInfo(mRet);
+                processInstallRequestsAsync(
+                        res.returnCode == PackageManager.INSTALL_SUCCEEDED,
+                        Collections.singletonList(new InstallRequest(args, res)));
+
+            }
+        }
+    }
+
+    /**
+     * Container for a multi-package install which refers to all install sessions and args being
+     * committed together.
+     */
+    class MultiPackageVerificationParams extends HandlerParams {
+        private final IPackageInstallObserver2 mObserver;
+        private final ArrayList<VerificationParams> mChildParams;
+        private final Map<VerificationParams, Integer> mVerificationState;
+
+        MultiPackageVerificationParams(
+                @NonNull UserHandle user,
+                @NonNull ActiveInstallSession parent,
+                @NonNull List<ActiveInstallSession> activeInstallSessions)
+                throws PackageManagerException {
+            super(user);
+            if (activeInstallSessions.size() == 0) {
+                throw new PackageManagerException("No child sessions found!");
+            }
+            mChildParams = new ArrayList<>(activeInstallSessions.size());
+            for (int i = 0; i < activeInstallSessions.size(); i++) {
+                final VerificationParams childParams =
+                        new VerificationParams(activeInstallSessions.get(i));
+                childParams.mParentVerificationParams = this;
+                this.mChildParams.add(childParams);
+            }
+            this.mVerificationState = new ArrayMap<>(mChildParams.size());
+            mObserver = parent.getObserver();
+        }
+
+        @Override
+        void handleStartCopy() {
+            for (VerificationParams params : mChildParams) {
+                params.handleStartCopy();
+            }
+        }
+
+        @Override
+        void handleReturnCode() {
+            for (VerificationParams params : mChildParams) {
+                params.handleReturnCode();
+            }
+        }
+
+        void trySendVerificationCompleteNotification(VerificationParams child, int currentStatus) {
+            mVerificationState.put(child, currentStatus);
+            if (mVerificationState.size() != mChildParams.size()) {
+                return;
+            }
+            int completeStatus = PackageManager.INSTALL_SUCCEEDED;
+            for (Integer status : mVerificationState.values()) {
+                if (status == PackageManager.INSTALL_UNKNOWN) {
+                    return;
+                } else if (status != PackageManager.INSTALL_SUCCEEDED) {
+                    completeStatus = status;
+                    break;
+                }
+            }
+            try {
+                mObserver.onPackageInstalled(null, completeStatus,
+                        "Package Verification Result", new Bundle());
+            } catch (RemoteException e) {
+                Slog.i(TAG, "Observer no longer exists.");
+            }
+        }
+    }
+
+    class VerificationParams extends HandlerParams {
+        final OriginInfo origin;
+        final MoveInfo move;
+        final IPackageInstallObserver2 observer;
+        int installFlags;
+        @NonNull final InstallSource installSource;
+        final String volumeUuid;
+        private boolean mWaitForVerificationToComplete;
+        private boolean mWaitForIntegrityVerificationToComplete;
+        private boolean mWaitForEnableRollbackToComplete;
+        int mRet;
+        final String packageAbiOverride;
+        final String[] grantedRuntimePermissions;
+        final List<String> whitelistedRestrictedPermissions;
+        final int autoRevokePermissionsMode;
+        final VerificationInfo verificationInfo;
+        final PackageParser.SigningDetails signingDetails;
+        final int installReason;
+        @Nullable
+        MultiPackageVerificationParams mParentVerificationParams;
+        final long requiredInstalledVersionCode;
+        final boolean forceQueryableOverride;
+        final int mDataLoaderType;
+        final int mSessionId;
+
+        VerificationParams(ActiveInstallSession activeInstallSession) {
+            super(activeInstallSession.getUser());
+            final PackageInstaller.SessionParams sessionParams =
+                    activeInstallSession.getSessionParams();
+            if (DEBUG_INSTANT) {
+                if ((sessionParams.installFlags
+                        & PackageManager.INSTALL_INSTANT_APP) != 0) {
+                    Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
+                }
+            }
+            verificationInfo = new VerificationInfo(
+                    sessionParams.originatingUri,
+                    sessionParams.referrerUri,
+                    sessionParams.originatingUid,
+                    activeInstallSession.getInstallerUid());
+            origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
+            move = null;
+            installReason = fixUpInstallReason(
+                    activeInstallSession.getInstallSource().installerPackageName,
+                    activeInstallSession.getInstallerUid(),
+                    sessionParams.installReason);
+            observer = activeInstallSession.getObserver();
+            installFlags = sessionParams.installFlags;
+            installSource = activeInstallSession.getInstallSource();
+            volumeUuid = sessionParams.volumeUuid;
+            packageAbiOverride = sessionParams.abiOverride;
+            grantedRuntimePermissions = sessionParams.grantedRuntimePermissions;
+            whitelistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
+            autoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
+            signingDetails = activeInstallSession.getSigningDetails();
+            requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
+            forceQueryableOverride = sessionParams.forceQueryableOverride;
+            mDataLoaderType = (sessionParams.dataLoaderParams != null)
+                    ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
+            mSessionId = activeInstallSession.getSessionId();
+        }
+
+        @Override
+        public String toString() {
+            return "InstallParams{" + Integer.toHexString(System.identityHashCode(this))
+                    + " file=" + origin.file + "}";
+        }
+
+        public void handleStartCopy() {
+            PackageInfoLite pkgLite = PackageManagerServiceUtils.getMinimalPackageInfo(mContext,
+                    origin.resolvedPath, installFlags, packageAbiOverride);
 
             mRet = verifyReplacingVersionCode(pkgLite);
-
-            if (mRet == INSTALL_SUCCEEDED) {
-                mRet = overrideInstallLocation(pkgLite);
-            }
 
             // Perform package verification and enable rollback (unless we are simply moving the
             // package).
@@ -15223,7 +15362,7 @@ public class PackageManagerService extends IPackageManager.Stub
             final long idleDuration = getVerificationTimeout();
 
             idleController.addPowerSaveTempWhitelistAppDirect(Process.myUid(),
-                     idleDuration,
+                    idleDuration,
                     false, "integrity component");
             final BroadcastOptions options = BroadcastOptions.makeBasic();
             options.setTemporaryAppWhitelistDuration(idleDuration);
@@ -15457,44 +15596,16 @@ public class PackageManagerService extends IPackageManager.Stub
                     || mWaitForEnableRollbackToComplete) {
                 return;
             }
-
-            if ((installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
-                try {
-                    mInstallObserver.onPackageInstalled(null, mRet, "Dry run", new Bundle());
-                } catch (RemoteException e) {
-                    Slog.i(TAG, "Observer no longer exists.");
-                }
-                return;
-            }
             sendVerificationCompleteNotification();
-
-            // TODO(samiul): In future return once verification is complete
-            processPendingInstall();
-        }
-
-        private void processPendingInstall() {
-            InstallArgs args = createInstallArgs(this);
-            if (mRet == PackageManager.INSTALL_SUCCEEDED) {
-                mRet = args.copyApk();
-            }
-            if (mParentInstallParams != null) {
-                mParentInstallParams.tryProcessInstallRequest(args, mRet);
-            } else {
-                PackageInstalledInfo res = createPackageInstalledInfo(mRet);
-                processInstallRequestsAsync(
-                        res.returnCode == PackageManager.INSTALL_SUCCEEDED,
-                        Collections.singletonList(new InstallRequest(args, res)));
-
-            }
         }
 
         private void sendVerificationCompleteNotification() {
-            if (mParentInstallParams != null) {
-                mParentInstallParams.trySendVerificationCompleteNotification(this, mRet);
+            if (mParentVerificationParams != null) {
+                mParentVerificationParams.trySendVerificationCompleteNotification(this, mRet);
             } else {
                 try {
-                    mVerificationObserver.onPackageInstalled(null, mRet,
-                            "Package Verification Result", new Bundle());
+                    observer.onPackageInstalled(null, mRet, "Package Verification Result",
+                            new Bundle());
                 } catch (RemoteException e) {
                     Slog.i(TAG, "Observer no longer exists.");
                 }
@@ -15578,7 +15689,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         /** New install */
         InstallArgs(InstallParams params) {
-            this(params.origin, params.move, params.mInstallObserver, params.installFlags,
+            this(params.origin, params.move, params.observer, params.installFlags,
                     params.installSource, params.volumeUuid,
                     params.getUser(), null /*instructionSets*/, params.packageAbiOverride,
                     params.grantedRuntimePermissions, params.whitelistedRestrictedPermissions,
@@ -25610,13 +25721,12 @@ public class PackageManagerService extends IPackageManager.Stub
         return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
     }
 
+    // TODO(samiul): Get rid of this class. The callers can create InstallParams and
+    //  VerificationParams directly.
     static class ActiveInstallSession {
         private final String mPackageName;
         private final File mStagedDir;
-        private final IPackageInstallObserver2 mInstallObserver;
-        // TODO(samiul): We are temporarily assigning two observer to ActiveInstallSession. One for
-        // installation and one for verification. This will be fixed within next few CLs.
-        private final IPackageInstallObserver2 mVerificationObserver;
+        private final IPackageInstallObserver2 mObserver;
         private final int mSessionId;
         private final PackageInstaller.SessionParams mSessionParams;
         private final int mInstallerUid;
@@ -25624,15 +25734,12 @@ public class PackageManagerService extends IPackageManager.Stub
         private final UserHandle mUser;
         private final SigningDetails mSigningDetails;
 
-        ActiveInstallSession(String packageName, File stagedDir,
-                IPackageInstallObserver2 installObserver,
-                IPackageInstallObserver2 verificationObserver,
+        ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
                 int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
                 InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
             mPackageName = packageName;
             mStagedDir = stagedDir;
-            mInstallObserver = installObserver;
-            mVerificationObserver = verificationObserver;
+            mObserver = observer;
             mSessionId = sessionId;
             mSessionParams = sessionParams;
             mInstallerUid = installerUid;
@@ -25649,12 +25756,8 @@ public class PackageManagerService extends IPackageManager.Stub
             return mStagedDir;
         }
 
-        public IPackageInstallObserver2 getInstallObserver() {
-            return mInstallObserver;
-        }
-
-        public IPackageInstallObserver2 getVerificationObserver() {
-            return mVerificationObserver;
+        public IPackageInstallObserver2 getObserver() {
+            return mObserver;
         }
 
         public int getSessionId() {

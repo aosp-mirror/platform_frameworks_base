@@ -1736,7 +1736,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
 
         try {
-            installNonStaged(childSessions);
+            verifyNonStaged(childSessions);
         } catch (PackageManagerException e) {
             final String completeMsg = ExceptionUtils.getCompleteMessage(e);
             Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
@@ -1745,10 +1745,51 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
     }
 
+    private void verifyNonStaged(List<PackageInstallerSession> childSessions)
+            throws PackageManagerException {
+        final PackageManagerService.ActiveInstallSession verifyingSession =
+                makeSessionActiveForVerification();
+        if (verifyingSession == null) {
+            return;
+        }
+        if (isMultiPackage()) {
+            List<PackageManagerService.ActiveInstallSession> verifyingChildSessions =
+                    new ArrayList<>(childSessions.size());
+            boolean success = true;
+            PackageManagerException failure = null;
+            for (int i = 0; i < childSessions.size(); ++i) {
+                final PackageInstallerSession session = childSessions.get(i);
+                try {
+                    final PackageManagerService.ActiveInstallSession verifyingChildSession =
+                            session.makeSessionActiveForVerification();
+                    if (verifyingChildSession != null) {
+                        verifyingChildSessions.add(verifyingChildSession);
+                    }
+                } catch (PackageManagerException e) {
+                    failure = e;
+                    success = false;
+                }
+            }
+            if (!success) {
+                final IntentSender statusReceiver;
+                synchronized (mLock) {
+                    statusReceiver = mRemoteStatusReceiver;
+                }
+                sendOnPackageInstalled(mContext, statusReceiver, sessionId,
+                        isInstallerDeviceOwnerOrAffiliatedProfileOwner(), userId, null,
+                        failure.error, failure.getLocalizedMessage(), null);
+                return;
+            }
+            mPm.verifyStage(verifyingSession, verifyingChildSessions);
+        } else {
+            mPm.verifyStage(verifyingSession);
+        }
+    }
+
     private void installNonStaged(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
         final PackageManagerService.ActiveInstallSession installingSession =
-                makeSessionActive();
+                makeSessionActiveForInstall();
         if (installingSession == null) {
             return;
         }
@@ -1761,7 +1802,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
                     final PackageManagerService.ActiveInstallSession installingChildSession =
-                            session.makeSessionActive();
+                            session.makeSessionActiveForInstall();
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
                     }
@@ -1787,11 +1828,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
     }
 
     /**
-     * Stages this session for install and returns a
+     * Stages this session for verification and returns a
      * {@link PackageManagerService.ActiveInstallSession} representing this new staged state or null
-     * in case permissions need to be requested before install can proceed.
+     * in case permissions need to be requested before verification can proceed.
      */
-    private PackageManagerService.ActiveInstallSession makeSessionActive()
+    private PackageManagerService.ActiveInstallSession makeSessionActiveForVerification()
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
@@ -1810,6 +1851,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         }
 
+        // TODO(b/159331446): Move this to makeSessionActiveForInstall and update javadoc
         if (!params.isMultiPackage && needToAskForPermissions()) {
             // User needs to confirm installation;
             // give installer an intent they can use to involve
@@ -1831,12 +1873,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return makeSessionActiveLocked();
+            return makeSessionActiveForVerificationLocked();
         }
     }
 
     @GuardedBy("mLock")
-    private PackageManagerService.ActiveInstallSession makeSessionActiveLocked()
+    private PackageManagerService.ActiveInstallSession makeSessionActiveForVerificationLocked()
             throws PackageManagerException {
         if (!params.isMultiPackage) {
             Objects.requireNonNull(mPackageName);
@@ -1900,6 +1942,80 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             extractNativeLibraries(stageDir, params.abiOverride, mayInheritNativeLibs());
         }
 
+        final IPackageInstallObserver2 localObserver;
+        if (!hasParentSessionId()) {
+            // Avoid attaching this observer to child session since they won't use it.
+            localObserver = new IPackageInstallObserver2.Stub() {
+                @Override
+                public void onUserActionRequired(Intent intent) {
+                    throw new IllegalStateException();
+                }
+
+                @Override
+                public void onPackageInstalled(String basePackageName, int returnCode, String msg,
+                        Bundle extras) {
+                    if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
+                        onVerificationComplete();
+                    } else {
+                        destroyInternal();
+                        dispatchSessionFinished(returnCode, msg, extras);
+                    }
+                }
+            };
+        } else {
+            localObserver = null;
+        }
+
+        final UserHandle user;
+        if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
+            user = UserHandle.ALL;
+        } else {
+            user = new UserHandle(userId);
+        }
+
+        mRelinquished = true;
+        // TODO(159331446): create VerificationParams directly by passing information that is
+        //  required for verification only
+        return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
+                localObserver, sessionId, params, mInstallerUid, mInstallSource, user,
+                mSigningDetails);
+    }
+
+    private void onVerificationComplete() {
+        if ((params.installFlags & PackageManager.INSTALL_DRY_RUN) != 0) {
+            destroyInternal();
+            dispatchSessionFinished(PackageManager.INSTALL_SUCCEEDED, "Dry run", new Bundle());
+            return;
+        }
+
+        List<PackageInstallerSession> childSessions = getChildSessionsNotLocked();
+        try {
+            installNonStaged(childSessions);
+        } catch (PackageManagerException e) {
+            final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+            Slog.e(TAG, "Commit of session " + sessionId + " failed: " + completeMsg);
+            destroyInternal();
+            dispatchSessionFinished(e.error, completeMsg, null);
+        }
+    }
+
+    /**
+     * Stages this session for install and returns a
+     * {@link PackageManagerService.ActiveInstallSession} representing this new staged state.
+     */
+    private PackageManagerService.ActiveInstallSession makeSessionActiveForInstall()
+            throws PackageManagerException {
+        synchronized (mLock) {
+            if (mDestroyed) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_INTERNAL_ERROR, "Session destroyed");
+            }
+            if (!mSealed) {
+                throw new PackageManagerException(
+                        INSTALL_FAILED_INTERNAL_ERROR, "Session not sealed");
+            }
+        }
+
         // We've reached point of no return; call into PMS to install the stage.
         // Regardless of success or failure we always destroy session.
         final IPackageInstallObserver2 localObserver = new IPackageInstallObserver2.Stub() {
@@ -1916,34 +2032,6 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             }
         };
 
-        // An observer through which PMS returns the result of verification
-        // TODO(samiul): We are temporarily assigning two observer to ActiveInstallSession. One for
-        // installation and one for verification. This will be fixed within next few CLs.
-        final IPackageInstallObserver2 sessionVerificationObserver;
-        if (!hasParentSessionId()) {
-            // Avoid attaching this observer to child session since they won't use it.
-            sessionVerificationObserver = new IPackageInstallObserver2.Stub() {
-                @Override
-                public void onUserActionRequired(Intent intent) {
-                    throw new IllegalStateException();
-                }
-
-                @Override
-                public void onPackageInstalled(String basePackageName, int returnCode, String msg,
-                        Bundle extras) {
-                    if (returnCode == PackageManager.INSTALL_SUCCEEDED) {
-                        // TODO(samiul): In future, packages will not be installed immediately after
-                        // verification. Package verification will return control back to here,
-                        // and we will have call into PMS again to install package.
-                        //
-                        // For now, this is a no op.
-                    }
-                }
-            };
-        } else {
-            sessionVerificationObserver = null;
-        }
-
         final UserHandle user;
         if ((params.installFlags & PackageManager.INSTALL_ALL_USERS) != 0) {
             user = UserHandle.ALL;
@@ -1951,10 +2039,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
             user = new UserHandle(userId);
         }
 
-        mRelinquished = true;
-        return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir, localObserver,
-                sessionVerificationObserver, sessionId, params, mInstallerUid, mInstallSource, user,
-                mSigningDetails);
+        synchronized (mLock) {
+            return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
+                    localObserver, sessionId, params, mInstallerUid, mInstallSource, user,
+                    mSigningDetails);
+        }
     }
 
     private static void maybeRenameFile(File from, File to) throws PackageManagerException {
