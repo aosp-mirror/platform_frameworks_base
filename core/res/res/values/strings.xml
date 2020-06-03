@@ -1613,7 +1613,7 @@
     <string name="face_error_no_space">Can\u2019t store new face data. Delete an old one first.</string>
     <!-- Generic error message shown when the face operation (e.g. enrollment or authentication) is canceled. Generally not shown to the user. [CHAR LIMIT=50] -->
     <string name="face_error_canceled">Face operation canceled.</string>
-    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=54] -->
+    <!-- Generic error message shown when the face unlock operation is canceled due to user input. Generally not shown to the user [CHAR LIMIT=68] -->
     <string name="face_error_user_canceled">Face unlock canceled by user.</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
