@@ -172,11 +172,12 @@ public class AutoTileManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testSettingTileAddedComponent_onChanged() {
+    public void testSettingTileAddedComponentAtEnd_onChanged() {
         changeValue(TEST_SETTING_COMPONENT, 1);
         waitForIdleSync();
         verify(mAutoAddTracker).setTileAdded(TEST_CUSTOM_SPEC);
-        verify(mQsTileHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT));
+        verify(mQsTileHost).addTile(ComponentName.unflattenFromString(TEST_COMPONENT)
+            , /* end */ true);
     }
 
     @Test
