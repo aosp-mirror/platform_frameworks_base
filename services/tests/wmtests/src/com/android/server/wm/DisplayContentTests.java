@@ -16,7 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
@@ -73,6 +76,8 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 
 import android.annotation.SuppressLint;
@@ -1165,6 +1170,57 @@ public class DisplayContentTests extends WindowTestsBase {
         // Use normal rotation because animating recents is an intermediate state.
         assertFalse(displayRotation.shouldRotateSeamlessly(ROTATION_0 /* oldRotation */,
                 ROTATION_90 /* newRotation */, false /* forceUpdate */));
+    }
+
+    @Test
+    public void testNoFixedRotationWithPip() {
+        mWm.mIsFixedRotationTransformEnabled = true;
+        // Make resume-top really update the activity state.
+        doReturn(false).when(mWm.mAtmService).isBooting();
+        doReturn(true).when(mWm.mAtmService).isBooted();
+        // Speed up the test by a few seconds.
+        mWm.mAtmService.deferWindowLayout();
+        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+
+        final DisplayContent displayContent = mWm.mRoot.getDefaultDisplay();
+        final Configuration displayConfig = displayContent.getConfiguration();
+        final ActivityRecord pinnedActivity = createActivityRecord(displayContent,
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD);
+        final Task pinnedTask = pinnedActivity.getRootTask();
+        final ActivityRecord homeActivity = WindowTestUtils.createTestActivityRecord(
+                displayContent.getDefaultTaskDisplayArea().getOrCreateRootHomeTask());
+        if (displayConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            homeActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+            pinnedActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            homeActivity.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+            pinnedActivity.setOrientation(SCREEN_ORIENTATION_PORTRAIT);
+        }
+        final int homeConfigOrientation = homeActivity.getRequestedConfigurationOrientation();
+        final int pinnedConfigOrientation = pinnedActivity.getRequestedConfigurationOrientation();
+
+        assertEquals(homeConfigOrientation, displayConfig.orientation);
+
+        clearInvocations(mWm);
+        // Leave PiP to fullscreen. The orientation can be updated from
+        // ActivityRecord#reportDescendantOrientationChangeIfNeeded.
+        pinnedTask.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        homeActivity.setState(ActivityStack.ActivityState.STOPPED, "test");
+
+        assertFalse(displayContent.hasTopFixedRotationLaunchingApp());
+        verify(mWm, atLeastOnce()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+        assertEquals(pinnedConfigOrientation, displayConfig.orientation);
+        assertFalse(displayContent.getPinnedStackController().isPipActiveOrWindowingModeChanging());
+
+        clearInvocations(mWm);
+        // Enter PiP from fullscreen. The orientation can be updated from
+        // ensure-visibility/resume-focused-stack -> ActivityRecord#makeActiveIfNeeded -> resume.
+        pinnedTask.setWindowingMode(WINDOWING_MODE_PINNED);
+
+        assertFalse(displayContent.hasTopFixedRotationLaunchingApp());
+        verify(mWm, atLeastOnce()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
+        assertEquals(homeConfigOrientation, displayConfig.orientation);
+        assertTrue(displayContent.getPinnedStackController().isPipActiveOrWindowingModeChanging());
     }
 
     @Test

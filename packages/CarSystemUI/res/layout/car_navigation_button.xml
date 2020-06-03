@@ -27,7 +27,7 @@
         android:animateLayoutChanges="true"
         android:orientation="vertical">
 
-        <com.android.keyguard.AlphaOptimizedImageButton
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/car_nav_button_icon_image"
             android:layout_height="@dimen/car_navigation_button_icon_height"
             android:layout_width="match_parent"
@@ -40,7 +40,7 @@
             android:clickable="false"
         />
 
-        <com.android.keyguard.AlphaOptimizedImageButton
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/car_nav_button_more_icon"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"

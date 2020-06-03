@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ സൂം ചെയ്യുക"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"സ്‌ക്രീനിൽ ഉൾക്കൊള്ളിക്കാൻ വലിച്ചുനീട്ടുക"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"സ്ക്രീൻഷോട്ട്"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് നിങ്ങളുടെ ഫോൺ അൺലോക്ക് ചെയ്യുക"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് നിങ്ങളുടെ ടാബ്‌ലെറ്റ് അൺലോക്ക് ചെയ്യുക"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"കൂടുതൽ ഓപ്ഷനുകൾക്ക് നിങ്ങളുടെ ഉപകരണം അൺലോക്ക് ചെയ്യുക"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ചിത്രം അയച്ചു"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"സ്‌ക്രീൻഷോട്ട് സംരക്ഷിക്കുന്നു..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"സംഭാഷണ വിഭാഗത്തിന് മുകളിലായി കാണിക്കുന്നു, ഫ്ലോട്ടിംഗ് ബബിളായി ദൃശ്യമാകുന്നു, ലോക്ക് സ്ക്രീനിൽ പ്രൊഫൈൽ ചിത്രം പ്രദർശിപ്പിക്കുന്നു"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ക്രമീകരണം"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"മുൻഗണന"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"സംഭാഷണ നിർദ്ദിഷ്ട ക്രമീകരണം <xliff:g id="APP_NAME">%1$s</xliff:g> പിന്തുണയ്ക്കുന്നില്ല"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"അടുത്തിടെയുള്ള ബബിളുകൾ ഒന്നുമില്ല"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"അടുത്തിടെയുള്ള ബബിളുകൾ, ഡിസ്മിസ് ചെയ്ത ബബിളുകൾ എന്നിവ ഇവിടെ ദൃശ്യമാവും"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ഈ അറിയിപ്പുകൾ പരിഷ്ക്കരിക്കാനാവില്ല."</string>

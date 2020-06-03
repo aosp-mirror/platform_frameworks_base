@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्‍क्रीन भरने के लिए ज़ूम करें"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्‍क्रीन भरने के लिए खींचें"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रीनशॉट"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"ज़्यादा विकल्प देखने के लिए, अपना फ़ोन अनलॉक करें"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"ज़्यादा विकल्प देखने के लिए, अपना टैबलेट अनलॉक करें"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"ज़्यादा विकल्प देखने के लिए, अपना डिवाइस अनलॉक करें"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"एक इमेज भेजी गई"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रीनशॉट सहेजा जा रहा है..."</string>
@@ -597,29 +594,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"चालू करें"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"बंद करें"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"आउटपुट डिवाइस बदलें"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ऐप्लिकेशन पिन किया गया है"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम और वापस जाएं वाले बटन को दबाकर रखें."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"इससे ऐप्लिकेशन की स्क्रीन तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं करते. अनपिन करने के लिए ऊपर स्वाइप करें और स्क्रीन दबाकर रखें."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"इससे वह तब तक दिखता रहता है जब तक कि आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, \'खास जानकारी\' को दबाकर रखें."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"इससे वह तब तक दिखाई देती है जब तक आप उसे अनपिन नहीं कर देते. अनपिन करने के लिए, होम बटन को दबाकर रखें."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"निजी डेटा ऐक्सेस किया जा सकता है. जैसे कि संपर्क और ईमेल का कॉन्टेंट."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"पिन किए गए ऐप्लिकेशन से दूसरे ऐप्लिकेशन भी खोले जा सकते हैं."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"इस ऐप्लिकेशन को अनपिन करने के लिए, \'वापस जाएं\' और \'खास जानकारी\' बटन को साथ-साथ दबाकर रखें"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"इस ऐप्लिकेशन को अनपिन करने के लिए, \'होम\' और \'वापस जाएं\' बटन को साथ-साथ दबाकर रखें"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"इस ऐप्लिकेशन को अनपिन करने के लिए, ऊपर की ओर स्वाइप करें और स्क्रीन को दबाकर रखें"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ठीक है"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"नहीं, रहने दें"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ऐप्लिकेशन पिन किया गया"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ऐप्लिकेशन अनपिन किया गया"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> को छिपाएं?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"जब आप उसे अगली बार सेटिंग में चालू करेंगे तो वह फिर से दिखाई देगी."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"छिपाएं"</string>
@@ -732,7 +721,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"इससे बातचीत की सुविधा, सेक्शन में सबसे ऊपर और फ़्लोटिंग बबल के तौर पर दिखती है. साथ ही, लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखती है"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिंग"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> में हर बातचीत के लिए अलग सेटिंग तय नहीं की जा सकती"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हाल ही के बबल्स मौजूद नहीं हैं"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ये सूचनाएं नहीं बदली जा सकती हैं."</string>

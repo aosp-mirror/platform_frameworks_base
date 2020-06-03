@@ -380,16 +380,8 @@ public class NotificationSnooze extends LinearLayout
 
     private void undoSnooze(View v) {
         mSelectedOption = null;
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
         showSnoozeOptions(false);
-        mGutsContainer.closeControls(x, y, false /* save */, false /* force */);
+        mGutsContainer.closeControls(v, false);
     }
 
     @Override

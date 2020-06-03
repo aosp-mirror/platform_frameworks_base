@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"స్క్రీన్‌కు నింపేలా జూమ్ చేయండి"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"స్క్రీన్‌కు నింపేలా విస్తరించండి"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"స్క్రీన్‌షాట్"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"మరిన్ని ఆప్షన్‌ల కోసం మీ ఫోన్‌ను అన్‌లాక్ చేయండి"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"మరిన్ని ఆప్షన్‌ల కోసం మీ టాబ్లెట్‌ను అన్‌లాక్ చేయండి"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"మరిన్ని ఆప్షన్‌ల కోసం మీ పరికరాన్ని అన్‌లాక్ చేయండి"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ఇమేజ్‌ను పంపారు"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"స్క్రీన్‌షాట్‌ను సేవ్ చేస్తోంది…"</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ప్రారంభించు"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"నిలిపివేయండి"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"పరికరం అవుట్‌పుట్‌ని మార్చండి"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"యాప్ పిన్ చేయబడి ఉంది"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు స్థూలదృష్టి తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి వెనుకకు మరియు హోమ్‌ని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి, పైకి స్వైప్ చేసి &amp; పట్టుకోండి."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి స్థూలదృష్టిని తాకి &amp; అలాగే పట్టుకోండి."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"దీని వలన మీరు అన్‌పిన్ చేసే వరకు ఇది వీక్షణలో ఉంచబడుతుంది. అన్‌పిన్ చేయడానికి హోమ్‌ని తాకి &amp; అలాగే పట్టుకోండి."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"వ్యక్తిగత డేటా (కాంటాక్ట్‌లు, ఇంకా ఇమెయిల్ కంటెంట్ లాంటివి) యాక్సెస్ చేయబడవచ్చు."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"పిన్ చేయబడిన యాప్ ఇతర యాప్‌లను తెరవవచ్చు."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ఈ యాప్‌ను అన్‌పిన్ చేయడానికి, \'వెనుకకు\', \'ఓవర్‌వ్యూ\' బటన్‌లను తాకి &amp; అలాగే పట్టుకోండి"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ఈ యాప్‌ను అన్‌పిన్ చేయడానికి, వెనుకకు, హోమ్ బటన్‌లను తాకి &amp; అలాగే పట్టుకోండి"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ఈ యాప్‌ను అన్‌పిన్ చేయడానికి, పైకి స్వైప్ చేసి &amp; అలాగే పట్టుకోండి"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"అర్థమైంది"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"వద్దు, ధన్యవాదాలు"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"యాప్ పిన్ చేయబడింది"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"యాప్ అన్‌పిన్ చేయబడింది"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ని దాచాలా?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"మీరు సెట్టింగ్‌ల్లో దీన్ని ఆన్ చేసిన తదుపరిసారి ఇది కనిపిస్తుంది."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"దాచు"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"సంభాషణ విభాగం ఎగువన ఉంటుంది, తేలుతున్న బబుల్‌లాగా కనిపిస్తుంది, లాక్ స్క్రీన్‌పై ప్రొఫైల్ ఫోటోను ప్రదర్శిస్తుంది"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"సెట్టింగ్‌లు"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"\'సంభాషణ నిర్దిష్ట సెట్టింగ్\'‌లకు <xliff:g id="APP_NAME">%1$s</xliff:g> సపోర్ట్ చేయదు"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ఇటీవలి బబుల్స్, తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>

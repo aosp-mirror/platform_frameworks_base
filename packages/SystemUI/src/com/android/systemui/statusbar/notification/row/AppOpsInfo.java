@@ -52,7 +52,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     private NotificationGuts mGutsContainer;
 
     private OnClickListener mOnOk = v -> {
-        closeControls(v);
+        mGutsContainer.closeControls(v, false);
     };
 
     public AppOpsInfo(Context context, AttributeSet attrs) {
@@ -117,6 +117,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         });
         TextView ok = findViewById(R.id.ok);
         ok.setOnClickListener(mOnOk);
+        ok.setAccessibilityDelegate(mGutsContainer.getAccessibilityDelegate());
     }
 
     private String getPrompt() {
@@ -160,19 +161,6 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         }
     }
 
-    private void closeControls(View v) {
-        mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
-        int[] parentLoc = new int[2];
-        int[] targetLoc = new int[2];
-        mGutsContainer.getLocationOnScreen(parentLoc);
-        v.getLocationOnScreen(targetLoc);
-        final int centerX = v.getWidth() / 2;
-        final int centerY = v.getHeight() / 2;
-        final int x = targetLoc[0] - parentLoc[0] + centerX;
-        final int y = targetLoc[1] - parentLoc[1] + centerY;
-        mGutsContainer.closeControls(x, y, false, false);
-    }
-
     @Override
     public void setGutsParent(NotificationGuts guts) {
         mGutsContainer = guts;
@@ -200,6 +188,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
+        mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
         return false;
     }
 

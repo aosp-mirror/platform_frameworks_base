@@ -60,14 +60,12 @@ import java.util.Set;
 
 public class UriGrantsManagerServiceTest {
     private UriGrantsMockContext mContext;
-    private UriGrantsManagerService mService;
-    private UriGrantsManagerInternal mLocalService;
+    private UriGrantsManagerInternal mService;
 
     @Before
     public void setUp() throws Exception {
         mContext = new UriGrantsMockContext(InstrumentationRegistry.getContext());
-        mService = UriGrantsManagerService.createForTest(mContext.getFilesDir());
-        mLocalService = mService.getLocalService();
+        mService = UriGrantsManagerService.createForTest(mContext.getFilesDir()).getLocalService();
     }
 
     /**
@@ -80,8 +78,7 @@ public class UriGrantsManagerServiceTest {
         final GrantUri expectedGrant = new GrantUri(USER_PRIMARY, URI_PHOTO_1, FLAG_READ);
 
         final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null,
-                USER_PRIMARY);
+                intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY);
         assertEquals(PKG_SOCIAL, needed.targetPkg);
         assertEquals(UID_PRIMARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
@@ -98,8 +95,7 @@ public class UriGrantsManagerServiceTest {
         final GrantUri expectedGrant = new GrantUri(USER_PRIMARY, URI_PHOTO_1, FLAG_READ);
 
         final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null,
-                USER_SECONDARY);
+                intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_SECONDARY);
         assertEquals(PKG_SOCIAL, needed.targetPkg);
         assertEquals(UID_SECONDARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
@@ -113,8 +109,7 @@ public class UriGrantsManagerServiceTest {
     public void testNeeded_public() {
         final Intent intent = new Intent(Intent.ACTION_VIEW, URI_PUBLIC).addFlags(FLAG_READ);
         final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_PUBLIC, PKG_SOCIAL, intent, intent.getFlags(), null,
-                USER_PRIMARY);
+                intent, UID_PRIMARY_PUBLIC, PKG_SOCIAL, USER_PRIMARY);
         assertNull(needed);
     }
 
@@ -128,7 +123,7 @@ public class UriGrantsManagerServiceTest {
         final GrantUri expectedGrant = new GrantUri(USER_PRIMARY, URI_PUBLIC, FLAG_READ);
 
         final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_PUBLIC, PKG_SOCIAL, intent, intent.getFlags(), null, USER_SECONDARY);
+                intent, UID_PRIMARY_PUBLIC, PKG_SOCIAL, USER_SECONDARY);
         assertEquals(PKG_SOCIAL, needed.targetPkg);
         assertEquals(UID_SECONDARY_SOCIAL, needed.targetUid);
         assertEquals(FLAG_READ, needed.flags);
@@ -143,7 +138,7 @@ public class UriGrantsManagerServiceTest {
         final Intent intent = new Intent(Intent.ACTION_VIEW, URI_PRIVATE).addFlags(FLAG_READ);
         try {
             mService.checkGrantUriPermissionFromIntent(
-                    UID_PRIMARY_PRIVATE, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY);
+                    intent, UID_PRIMARY_PRIVATE, PKG_SOCIAL, USER_PRIMARY);
             fail();
         } catch (SecurityException expected) {
         }
@@ -158,7 +153,7 @@ public class UriGrantsManagerServiceTest {
         final Intent intent = new Intent(Intent.ACTION_VIEW, URI_FORCE)
                 .addFlags(FLAG_READ);
         final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_FORCE, PKG_FORCE, intent, intent.getFlags(), null, USER_PRIMARY);
+                intent, UID_PRIMARY_FORCE, PKG_FORCE, USER_PRIMARY);
         assertEquals(asSet(new GrantUri(USER_PRIMARY, URI_FORCE, 0)), needed.uris);
     }
 
@@ -172,15 +167,15 @@ public class UriGrantsManagerServiceTest {
         {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            assertNull(mService.checkGrantUriPermissionFromIntent(UID_PRIMARY_COMPLEX, PKG_SOCIAL,
-                    intent, intent.getFlags(), null, USER_PRIMARY));
+            assertNull(mService.checkGrantUriPermissionFromIntent(
+                    intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_PRIMARY));
         }
         {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ | FLAG_PREFIX);
             try {
-                mService.checkGrantUriPermissionFromIntent(UID_PRIMARY_COMPLEX, PKG_SOCIAL,
-                        intent, intent.getFlags(), null, USER_PRIMARY);
+                mService.checkGrantUriPermissionFromIntent(
+                        intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_PRIMARY);
                 fail();
             } catch (SecurityException expected) {
             }
@@ -189,8 +184,8 @@ public class UriGrantsManagerServiceTest {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ | FLAG_PERSISTABLE);
             try {
-                mService.checkGrantUriPermissionFromIntent(UID_PRIMARY_COMPLEX, PKG_SOCIAL,
-                        intent, intent.getFlags(), null, USER_PRIMARY);
+                mService.checkGrantUriPermissionFromIntent(
+                        intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_PRIMARY);
                 fail();
             } catch (SecurityException expected) {
             }
@@ -209,8 +204,7 @@ public class UriGrantsManagerServiceTest {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ);
             final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                    UID_PRIMARY_COMPLEX, PKG_SOCIAL, intent, intent.getFlags(), null,
-                    USER_SECONDARY);
+                    intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_SECONDARY);
             assertEquals(FLAG_READ, needed.flags);
         }
         {
@@ -218,8 +212,7 @@ public class UriGrantsManagerServiceTest {
                     .addFlags(FLAG_READ | FLAG_PREFIX);
             try {
                 mService.checkGrantUriPermissionFromIntent(
-                        UID_PRIMARY_COMPLEX, PKG_SOCIAL, intent, intent.getFlags(), null,
-                        USER_SECONDARY);
+                        intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_SECONDARY);
                 fail();
             } catch (SecurityException expected) {
             }
@@ -229,8 +222,7 @@ public class UriGrantsManagerServiceTest {
                     .addFlags(FLAG_READ | FLAG_PERSISTABLE);
             try {
                 mService.checkGrantUriPermissionFromIntent(
-                        UID_PRIMARY_COMPLEX, PKG_SOCIAL, intent, intent.getFlags(), null,
-                        USER_SECONDARY);
+                        intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_SECONDARY);
                 fail();
             } catch (SecurityException expected) {
             }
@@ -248,21 +240,21 @@ public class UriGrantsManagerServiceTest {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ);
             final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                    UID_PRIMARY_COMPLEX, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY);
+                    intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_PRIMARY);
             assertEquals(asSet(new GrantUri(USER_PRIMARY, uri, 0)), needed.uris);
         }
         {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ | FLAG_PREFIX);
             final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                    UID_PRIMARY_COMPLEX, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY);
+                    intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_PRIMARY);
             assertEquals(asSet(new GrantUri(USER_PRIMARY, uri, FLAG_PREFIX)), needed.uris);
         }
         {
             final Intent intent = new Intent(Intent.ACTION_VIEW, uri)
                     .addFlags(FLAG_READ | FLAG_PERSISTABLE);
             final NeededUriGrants needed = mService.checkGrantUriPermissionFromIntent(
-                    UID_PRIMARY_COMPLEX, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY);
+                    intent, UID_PRIMARY_COMPLEX, PKG_SOCIAL, USER_PRIMARY);
             assertEquals(asSet(new GrantUri(USER_PRIMARY, uri, 0)), needed.uris);
         }
     }
@@ -284,8 +276,8 @@ public class UriGrantsManagerServiceTest {
             // When granting towards primary, persistable can't be honored so
             // the entire grant fails
             try {
-                mService.checkGrantUriPermissionFromIntent(UID_PRIMARY_CAMERA, PKG_SOCIAL, intent,
-                        intent.getFlags(), null, USER_PRIMARY);
+                mService.checkGrantUriPermissionFromIntent(
+                        intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY);
                 fail();
             } catch (SecurityException expected) {
             }
@@ -294,8 +286,8 @@ public class UriGrantsManagerServiceTest {
             // When granting towards secondary, persistable can't be honored so
             // the entire grant fails
             try {
-                mService.checkGrantUriPermissionFromIntent(UID_PRIMARY_CAMERA, PKG_SOCIAL, intent,
-                        intent.getFlags(), null, USER_SECONDARY);
+                mService.checkGrantUriPermissionFromIntent(
+                        intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_SECONDARY);
                 fail();
             } catch (SecurityException expected) {
             }
@@ -310,18 +302,16 @@ public class UriGrantsManagerServiceTest {
     public void testGrant_overlap() {
         final Intent intent = new Intent(Intent.ACTION_VIEW, URI_PHOTO_1).addFlags(FLAG_READ);
 
-        final UriPermissionOwner activity = new UriPermissionOwner(mLocalService, "activity");
-        final UriPermissionOwner service = new UriPermissionOwner(mLocalService, "service");
+        final UriPermissionOwner activity = new UriPermissionOwner(mService, "activity");
+        final UriPermissionOwner service = new UriPermissionOwner(mService, "service");
 
         final GrantUri expectedGrant = new GrantUri(USER_PRIMARY, URI_PHOTO_1, FLAG_READ);
 
         // Grant read via activity and write via service
         mService.grantUriPermissionUncheckedFromIntent(mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY),
-                activity);
+                intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY), activity);
         mService.grantUriPermissionUncheckedFromIntent(mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY),
-                service);
+                intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY), service);
 
         // Verify that everything is good with the world
         assertTrue(mService.checkUriPermission(expectedGrant, UID_PRIMARY_SOCIAL, FLAG_READ));
@@ -338,7 +328,7 @@ public class UriGrantsManagerServiceTest {
     @Test
     public void testCheckAuthorityGrants() {
         final Intent intent = new Intent(Intent.ACTION_VIEW, URI_PHOTO_1).addFlags(FLAG_READ);
-        final UriPermissionOwner owner = new UriPermissionOwner(mLocalService, "primary");
+        final UriPermissionOwner owner = new UriPermissionOwner(mService, "primary");
 
         final ProviderInfo cameraInfo = mContext.mPmInternal.resolveContentProvider(
                 PKG_CAMERA, 0, USER_PRIMARY);
@@ -355,8 +345,7 @@ public class UriGrantsManagerServiceTest {
 
         // Granting primary camera to primary social
         mService.grantUriPermissionUncheckedFromIntent(mService.checkGrantUriPermissionFromIntent(
-                UID_PRIMARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY),
-                owner);
+                intent, UID_PRIMARY_CAMERA, PKG_SOCIAL, USER_PRIMARY), owner);
         assertTrue(mService.checkAuthorityGrants(UID_PRIMARY_SOCIAL,
                 cameraInfo, USER_PRIMARY, true));
         assertFalse(mService.checkAuthorityGrants(UID_PRIMARY_SOCIAL,
@@ -368,8 +357,7 @@ public class UriGrantsManagerServiceTest {
 
         // Granting secondary camera to primary social
         mService.grantUriPermissionUncheckedFromIntent(mService.checkGrantUriPermissionFromIntent(
-                UID_SECONDARY_CAMERA, PKG_SOCIAL, intent, intent.getFlags(), null, USER_PRIMARY),
-                owner);
+                intent, UID_SECONDARY_CAMERA, PKG_SOCIAL, USER_PRIMARY), owner);
         assertTrue(mService.checkAuthorityGrants(UID_PRIMARY_SOCIAL,
                 cameraInfo, USER_PRIMARY, true));
         assertTrue(mService.checkAuthorityGrants(UID_PRIMARY_SOCIAL,

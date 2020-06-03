@@ -82,7 +82,7 @@
         android:gravity="bottom"
         android:orientation="vertical">
 
-        <com.android.keyguard.AlphaOptimizedImageButton
+        <com.android.systemui.statusbar.AlphaOptimizedImageView
             android:id="@+id/note"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"

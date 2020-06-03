@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"स्क्रिन भर्न जुम गर्नुहोस्"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"स्क्रिन भर्न तन्काउनुहोस्"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"स्क्रिनसट"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"थप विकल्पहरू हेर्न आफ्नो फोन अनलक गर्नुहोस्"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"थप विकल्पहरू हेर्न आफ्नो ट्याब्लेट अनलक गर्नुहोस्"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"थप विकल्पहरू हेर्न आफ्नो यन्त्र अनलक गर्नुहोस्"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"कुनै छवि पठाइयो"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"स्क्रिनसट बचत गर्दै…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"स्क्रिनसट बचत गर्दै…"</string>
@@ -730,7 +727,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"वार्तालाप खण्डको सिरानमा देखा पर्छ, तैरने बबलका रूपमा देखा पर्छ, लक स्क्रिनमा प्रोफाइल तस्बिर देखाइन्छ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"सेटिङ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"प्राथमिकता"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> मा वार्तालापविशेषका लागि सेटिङ उपलब्ध छैन"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"हालैका बबलहरू छैनन्"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"हालैका बबल र खारेज गरिएका बबलहरू यहाँ देखिने छन्"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"यी सूचनाहरू परिमार्जन गर्न मिल्दैन।"</string>

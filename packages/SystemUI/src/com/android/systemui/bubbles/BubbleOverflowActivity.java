@@ -22,6 +22,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -204,6 +205,8 @@ public class BubbleOverflowActivity extends Activity {
 }
 
 class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.ViewHolder> {
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowAdapter" : TAG_BUBBLES;
+
     private Context mContext;
     private Consumer<Bubble> mPromoteBubbleFromOverflow;
     private List<Bubble> mBubbles;
@@ -282,11 +285,19 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
                     }
                 });
 
-        Bubble.FlyoutMessage message = b.getFlyoutMessage();
-        if (message != null && message.senderName != null) {
-            vh.textView.setText(message.senderName.toString());
+        // If the bubble was persisted, the entry is null but it should have shortcut info
+        ShortcutInfo info = b.getEntry() == null
+                ? b.getShortcutInfo()
+                : b.getEntry().getRanking().getShortcutInfo();
+        if (info == null) {
+            Log.d(TAG, "ShortcutInfo required to bubble but none found for " + b);
         } else {
-            vh.textView.setText(b.getAppName());
+            CharSequence label = info.getLabel();
+            if (label == null) {
+                vh.textView.setText(b.getAppName());
+            } else {
+                vh.textView.setText(label.toString());
+            }
         }
     }
 

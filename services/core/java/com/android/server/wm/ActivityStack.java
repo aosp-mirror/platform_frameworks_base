@@ -23,7 +23,6 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
@@ -268,9 +267,6 @@ class ActivityStack extends Task {
 
     private final AnimatingActivityRegistry mAnimatingActivityRegistry =
             new AnimatingActivityRegistry();
-
-    /** Stores the override windowing-mode from before a transient mode change (eg. split) */
-    private int mRestoreOverrideWindowingMode = WINDOWING_MODE_UNDEFINED;
 
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
@@ -662,19 +658,6 @@ class ActivityStack extends Task {
     }
 
     /**
-     * A transient windowing mode is one which activities enter into temporarily. Examples of this
-     * are Split window modes and pip. Non-transient modes are modes that displays can adopt.
-     *
-     * @param windowingMode the windowingMode to test for transient-ness.
-     * @return {@code true} if the windowing mode is transient, {@code false} otherwise.
-     */
-    private static boolean isTransientWindowingMode(int windowingMode) {
-        return windowingMode == WINDOWING_MODE_PINNED
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-    }
-
-    /**
      * Specialization of {@link #setWindowingMode(int)} for this subclass.
      *
      * @param preferredWindowingMode the preferred windowing mode. This may not be honored depending
@@ -698,11 +681,6 @@ class ActivityStack extends Task {
         final int currentOverrideMode = getRequestedOverrideWindowingMode();
         final Task topTask = getTopMostTask();
         int windowingMode = preferredWindowingMode;
-        if (preferredWindowingMode == WINDOWING_MODE_UNDEFINED
-                && isTransientWindowingMode(currentMode)) {
-            // Leaving a transient mode. Interpret UNDEFINED as "restore"
-            windowingMode = mRestoreOverrideWindowingMode;
-        }
 
         // Need to make sure windowing mode is supported. If we in the process of creating the stack
         // no need to resolve the windowing mode again as it is already resolved to the right mode.
@@ -712,29 +690,16 @@ class ActivityStack extends Task {
                 windowingMode = WINDOWING_MODE_UNDEFINED;
             }
         }
-        if (taskDisplayArea.getRootSplitScreenPrimaryTask() == this
-                && windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
-            // Resolution to split-screen secondary for the primary split-screen stack means
-            // we want to leave split-screen mode.
-            windowingMode = mRestoreOverrideWindowingMode;
-        }
 
         final boolean alreadyInSplitScreenMode = taskDisplayArea.isSplitScreenModeActivated();
 
-        // Take any required action due to us not supporting the preferred windowing mode.
-        if (alreadyInSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
+        if (creating && alreadyInSplitScreenMode && windowingMode == WINDOWING_MODE_FULLSCREEN
                 && isActivityTypeStandardOrUndefined()) {
-            final boolean preferredSplitScreen =
-                    preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    || preferredWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
-            if (preferredSplitScreen || creating) {
-                // Looks like we can't launch in split screen mode or the stack we are launching
-                // doesn't support split-screen mode, go ahead an dismiss split-screen and display a
-                // warning toast about it.
-                mAtmService.getTaskChangeNotificationController()
-                        .notifyActivityDismissingDockedStack();
-                taskDisplayArea.onSplitScreenModeDismissed(this);
-            }
+            // If the stack is being created explicitly in fullscreen mode, dismiss split-screen
+            // and display a warning toast about it.
+            mAtmService.getTaskChangeNotificationController()
+                    .notifyActivityDismissingDockedStack();
+            taskDisplayArea.onSplitScreenModeDismissed(this);
         }
 
         if (currentMode == windowingMode) {
@@ -797,9 +762,6 @@ class ActivityStack extends Task {
                         + " while there is already one isn't currently supported");
                 //return;
             }
-            if (isTransientWindowingMode(windowingMode) && !isTransientWindowingMode(currentMode)) {
-                mRestoreOverrideWindowingMode = currentOverrideMode;
-            }
 
             mTmpRect2.setEmpty();
             if (windowingMode != WINDOWING_MODE_FULLSCREEN) {
@@ -819,6 +781,22 @@ class ActivityStack extends Task {
 
         mRootWindowContainer.ensureActivitiesVisible(null, 0, PRESERVE_WINDOWS);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
+
+        final boolean pinnedToFullscreen = currentMode == WINDOWING_MODE_PINNED
+                && windowingMode == WINDOWING_MODE_FULLSCREEN;
+        if (pinnedToFullscreen && topActivity != null && !isForceHidden()) {
+            mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
+            try {
+                // Report orientation as soon as possible so that the display can freeze earlier if
+                // the display orientation will be changed. Because the surface bounds of activity
+                // may have been set to fullscreen but the activity hasn't redrawn its content yet,
+                // the rotation animation needs to capture snapshot earlier to avoid animating from
+                // an intermediate state.
+                topActivity.reportDescendantOrientationChangeIfNeeded();
+            } finally {
+                mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(false);
+            }
+        }
     }
 
     @Override

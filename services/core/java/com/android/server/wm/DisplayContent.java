@@ -1481,6 +1481,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // has it own policy for bounds, the activity bounds based on parent is unknown.
             return false;
         }
+        if (mPinnedStackControllerLocked.isPipActiveOrWindowingModeChanging()) {
+            // Use normal rotation animation because seamless PiP rotation is not supported yet.
+            return false;
+        }
 
         setFixedRotationLaunchingApp(r, rotation);
         return true;
@@ -4772,6 +4776,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @param sc The new SurfaceControl, where the DisplayContent's surfaces will be re-parented to.
      */
     void reparentDisplayContent(WindowState win, SurfaceControl sc) {
+        if (mParentWindow != null) {
+            mParentWindow.removeEmbeddedDisplayContent(this);
+        }
         mParentWindow = win;
         mParentWindow.addEmbeddedDisplayContent(this);
         mParentSurfaceControl = sc;

@@ -109,7 +109,7 @@ public class MediaRouter2ManagerTest {
         mContext = InstrumentationRegistry.getTargetContext();
         mManager = MediaRouter2Manager.getInstance(mContext);
         mRouter2 = MediaRouter2.getInstance(mContext);
-        //TODO: If we need to support thread pool executors, change this to thread pool executor.
+        // If we need to support thread pool executors, change this to thread pool executor.
         mExecutor = Executors.newSingleThreadExecutor();
         mPackageName = mContext.getPackageName();
     }
@@ -253,7 +253,6 @@ public class MediaRouter2ManagerTest {
         CountDownLatch latch = new CountDownLatch(1);
 
         addManagerCallback(new MediaRouter2Manager.Callback());
-        //TODO: remove this when it's not necessary.
         addRouterCallback(new MediaRouter2.RouteCallback() {});
         addTransferCallback(new MediaRouter2.TransferCallback() {
             @Override

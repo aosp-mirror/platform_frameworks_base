@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"තිරය පිරවීමට විශාලනය කරන්න"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"තිරය පිරවීමට අදින්න"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"තිර රුව"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"තව විකල්ප සඳහා ඔබේ දුරකථනය අගුලු හරින්න"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"තව විකල්ප සඳහා ඔබේ ටැබ්ලට් පරිගණකය අගුලු හරින්න"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"තව විකල්ප සඳහා ඔබේ උපාංගය අගුලු හරින්න"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"රූපයක් එවන ලදී"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"තිර රුව සුරකිමින්…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"තිර රුව සුරැකෙමින් පවතී…"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"සංවාද කොටසේ ඉහළම පෙන්වයි, බුබුළක් ලෙස දිස් වේ, අගුලු තිරයේ පැතිකඩ පින්තූරය සංදර්ශනය වේ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"සැකසීම්"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ප්‍රමුඛතාව"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> සංවාදය නිශ්චිත සැකසීම්වලට සහාය නොදක්වයි"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"මෑත බුබුලු නැත"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"මෑත බුබුලු සහ ඉවත ලූ බුබුලු මෙහි දිස් වනු ඇත"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"මෙම දැනුම්දීම් වෙනස් කළ නොහැක."</string>

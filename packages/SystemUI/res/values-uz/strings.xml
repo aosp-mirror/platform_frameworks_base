@@ -592,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"faollashtirish"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"faolsizlantirish"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Audiochiqish qurilmasini almashtirish"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Ilova mahkamlandi"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmalarni birga bosib turing."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Yechilmaguncha chiqib turadi. Yechish uchun tepaga suring va qoʻlingizni kerakli holatda tutib turing."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmlarni birga bosib turing."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Shaxsiy maʼlumotlarga kira oladi (masalan, kontaktlar va email ichidagilarga)"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Mahkamlangan ilova boshqa ilovalarni ochishi mumkin."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu ilovadan chiqish uchun Orqaga va Menyu tugmalarini bosib turing"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu ilovani olib tashlash uchun Orqaga va Bosh ekran tugmalarini bosib turing"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu ilovani olib tashlash uchun tepaga surib, bosib turing"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Yo‘q, kerakmas"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Ilova mahkamlandi"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Ilova olib tashlandi"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Berkitish"</string>
@@ -727,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Suhbatlar ruknining tepasida qalqib chiquvchi bulutcha shaklida chiqadi, ekran qulfida profil rasmi chiqadi"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat sozlamalari ishlamaydi"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bu yerda oxirgi va yopilgan bulutcha shaklidagi bildirishnomalar chiqadi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>

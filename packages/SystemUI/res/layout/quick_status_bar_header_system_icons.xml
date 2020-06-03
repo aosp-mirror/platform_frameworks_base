@@ -25,8 +25,6 @@
     android:gravity="center"
     android:orientation="horizontal"
     android:clickable="true"
-    android:paddingStart="@dimen/status_bar_padding_start"
-    android:paddingEnd="@dimen/status_bar_padding_end"
     android:paddingTop="@dimen/status_bar_padding_top" >
 
     <com.android.systemui.statusbar.policy.Clock
