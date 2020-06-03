@@ -1621,7 +1621,7 @@
     <string name="face_error_lockout_permanent">Too many attempts. Face unlock disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
-    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=52] -->
+    <!-- Generic error message shown when the user has no enrolled face. [CHAR LIMIT=59] -->
     <string name="face_error_not_enrolled">You haven\u2019t set up face unlock.</string>
     <!-- Generic error message shown when the app requests face unlock on a device without a sensor. [CHAR LIMIT=61] -->
     <string name="face_error_hw_not_present">Face unlock is not supported on this device.</string>
