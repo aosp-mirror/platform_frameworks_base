@@ -1653,10 +1653,18 @@ public class ResolverActivity extends Activity implements
         viewPager.setVisibility(View.VISIBLE);
         tabHost.setCurrentTab(mMultiProfilePagerAdapter.getCurrentPage());
         mMultiProfilePagerAdapter.setOnProfileSelectedListener(
-                index -> {
-                    tabHost.setCurrentTab(index);
-                    resetButtonBar();
-                    resetCheckedItem();
+                new AbstractMultiProfilePagerAdapter.OnProfileSelectedListener() {
+                    @Override
+                    public void onProfileSelected(int index) {
+                        tabHost.setCurrentTab(index);
+                        resetButtonBar();
+                        resetCheckedItem();
+                    }
+
+                    @Override
+                    public void onProfilePageStateChanged(int state) {
+                        onHorizontalSwipeStateChanged(state);
+                    }
                 });
         mMultiProfilePagerAdapter.setOnSwitchOnWorkSelectedListener(
                 () -> {
@@ -1667,6 +1675,8 @@ public class ResolverActivity extends Activity implements
                 });
         findViewById(R.id.resolver_tab_divider).setVisibility(View.VISIBLE);
     }
+
+    void onHorizontalSwipeStateChanged(int state) {}
 
     private void maybeHideDivider() {
         if (!isIntentPicker()) {
