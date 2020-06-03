@@ -48,4 +48,31 @@ public class UiEventLoggerImpl implements UiEventLogger {
             log(event, uid, packageName);
         }
     }
+
+    @Override
+    public void logWithPosition(UiEventEnum event, int uid, String packageName, int position) {
+        final int eventID = event.getId();
+        if (eventID > 0) {
+            FrameworkStatsLog.write(FrameworkStatsLog.RANKING_SELECTED,
+                    /* event_id = 1 */ eventID,
+                    /* package_name = 2 */ packageName,
+                    /* instance_id = 3 */ 0,
+                    /* position_picked = 4 */ position);
+        }
+    }
+
+    @Override
+    public void logWithInstanceIdAndPosition(UiEventEnum event, int uid, String packageName,
+            InstanceId instance, int position) {
+        final int eventID = event.getId();
+        if ((eventID > 0)  && (instance != null)) {
+            FrameworkStatsLog.write(FrameworkStatsLog.RANKING_SELECTED,
+                    /* event_id = 1 */ eventID,
+                    /* package_name = 2 */ packageName,
+                    /* instance_id = 3 */ instance.getId(),
+                    /* position_picked = 4 */ position);
+        } else {
+            logWithPosition(event, uid, packageName, position);
+        }
+    }
 }
