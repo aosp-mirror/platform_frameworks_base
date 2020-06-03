@@ -26,6 +26,7 @@ import static android.content.pm.ApplicationInfo.AUTO_REVOKE_DISCOURAGED;
 import static android.content.pm.PackageManager.FLAGS_PERMISSION_RESTRICTION_ANY_EXEMPT;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_APPLY_RESTRICTION;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_GRANTED_BY_ROLE;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_ONE_TIME;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_POLICY_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED;
@@ -1804,8 +1805,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 continue;
             }
 
-            // If this permission was granted by default, make sure it is.
-            if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0) {
+            // If this permission was granted by default or role, make sure it is.
+            if ((oldFlags & FLAG_PERMISSION_GRANTED_BY_DEFAULT) != 0
+                    || (oldFlags & FLAG_PERMISSION_GRANTED_BY_ROLE) != 0) {
                 // PermissionPolicyService will handle the app op for runtime permissions later.
                 grantRuntimePermissionInternal(permName, packageName, false,
                         Process.SYSTEM_UID, userId, delayingPermCallback);
