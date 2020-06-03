@@ -1778,6 +1778,15 @@ public final class Settings {
             = "android.settings.NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show conversation settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONVERSATION_SETTINGS
+            = "android.settings.CONVERSATION_SETTINGS";
+
+    /**
      * Activity Action: Show notification history screen.
      *
      * @hide
