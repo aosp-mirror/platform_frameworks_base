@@ -45,9 +45,9 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.IDeviceIdleController;
 import android.os.IInterface;
 import android.os.Parcel;
+import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
@@ -120,7 +120,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
     private final CompanionDeviceManagerImpl mImpl;
     private final ConcurrentMap<Integer, AtomicFile> mUidToStorage = new ConcurrentHashMap<>();
-    private IDeviceIdleController mIdleController;
+    private PowerWhitelistManager mPowerWhitelistManager;
     private PerUser<ServiceConnector<ICompanionDeviceDiscoveryService>> mServiceConnectors;
     private IAppOpsService mAppOpsManager;
 
@@ -134,8 +134,7 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     public CompanionDeviceManagerService(Context context) {
         super(context);
         mImpl = new CompanionDeviceManagerImpl();
-        mIdleController = IDeviceIdleController.Stub.asInterface(
-                ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
+        mPowerWhitelistManager = context.getSystemService(PowerWhitelistManager.class);
         mAppOpsManager = IAppOpsService.Stub.asInterface(
                 ServiceManager.getService(Context.APP_OPS_SERVICE));
 
@@ -445,16 +444,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
     }
 
     private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo) {
-        try {
-            if (containsEither(packageInfo.requestedPermissions,
-                    android.Manifest.permission.RUN_IN_BACKGROUND,
-                    android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
-                mIdleController.addPowerSaveWhitelistApp(packageInfo.packageName);
-            } else {
-                mIdleController.removePowerSaveWhitelistApp(packageInfo.packageName);
-            }
-        } catch (RemoteException e) {
-            /* ignore - local call */
+        if (containsEither(packageInfo.requestedPermissions,
+                android.Manifest.permission.RUN_IN_BACKGROUND,
+                android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
+            mPowerWhitelistManager.addToWhitelist(packageInfo.packageName);
+        } else {
+            mPowerWhitelistManager.removeFromWhitelist(packageInfo.packageName);
         }
 
         NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());
