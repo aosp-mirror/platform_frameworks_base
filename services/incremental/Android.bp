@@ -39,6 +39,7 @@ cc_defaults {
 cc_defaults {
     name: "service.incremental-defaults",
     defaults: ["service.incremental-proto-defaults"],
+    header_libs: ["jni_headers"],
     local_include_dirs: ["include/"],
     cflags: [
         "-Wall",
