@@ -1250,7 +1250,9 @@ public class ResolverActivity extends Activity implements
         return true;
     }
 
-    void prepareIntentForCrossProfileLaunch(Intent intent) {}
+    private void prepareIntentForCrossProfileLaunch(Intent intent) {
+        intent.fixUris(UserHandle.myUserId());
+    }
 
     private boolean isLaunchingTargetInOtherProfile() {
         return mMultiProfilePagerAdapter.getCurrentUserHandle().getIdentifier()
