@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Na celou obrazovku"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snímek obrazovky"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Chcete-li zobrazit další možnosti, odemkněte telefon"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Chcete-li zobrazit další možnosti, odemkněte tablet"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Chcete-li zobrazit další možnosti, odemkněte zařízení"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"odesílá obrázek"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Ukládání snímku obrazovky..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Ukládání snímku obrazovky..."</string>
@@ -728,7 +725,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzace a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje nastavení specifická pro konverzaci"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žádné nedávné bubliny"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Zde se budou zobrazovat nedávné bubliny a zavřené bubliny"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>

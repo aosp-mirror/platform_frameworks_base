@@ -2182,6 +2182,9 @@ public class ChooserActivity extends ResolverActivity implements
     }
 
     void updateModelAndChooserCounts(TargetInfo info) {
+        if (info != null && info instanceof MultiDisplayResolveInfo) {
+            info = ((MultiDisplayResolveInfo) info).getSelectedTarget();
+        }
         if (info != null) {
             sendClickToAppPredictor(info);
             final ResolveInfo ri = info.getResolveInfo();
@@ -2784,6 +2787,13 @@ public class ChooserActivity extends ResolverActivity implements
             return;
         }
 
+        // no need to query direct share for work profile when its turned off
+        UserManager userManager = getSystemService(UserManager.class);
+        if (userManager.isQuietModeEnabled(chooserListAdapter.getUserHandle())) {
+            getChooserActivityLogger().logSharesheetAppLoadComplete();
+            return;
+        }
+
         if (ChooserFlags.USE_SHORTCUT_MANAGER_FOR_DIRECT_TARGETS
                 || ChooserFlags.USE_PREDICTION_MANAGER_FOR_DIRECT_TARGETS) {
             if (DEBUG) {
@@ -3014,6 +3024,10 @@ public class ChooserActivity extends ResolverActivity implements
         ChooserGridAdapter currentRootAdapter =
                 mChooserMultiProfilePagerAdapter.getCurrentRootAdapter();
         currentRootAdapter.updateDirectShareExpansion();
+    }
+
+    void prepareIntentForCrossProfileLaunch(Intent intent) {
+        intent.fixUris(UserHandle.myUserId());
     }
 
     /**

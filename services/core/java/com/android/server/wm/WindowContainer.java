@@ -1165,15 +1165,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         }
 
         mOrientation = orientation;
-        final int configOrientation = getRequestedConfigurationOrientation();
-        if (getRequestedOverrideConfiguration().orientation != configOrientation) {
-            mTmpConfig.setTo(getRequestedOverrideConfiguration());
-            mTmpConfig.orientation = configOrientation;
-            onRequestedOverrideConfigurationChanged(mTmpConfig);
-        }
-
         final WindowContainer parent = getParent();
         if (parent != null) {
+            if (getConfiguration().orientation != getRequestedConfigurationOrientation()) {
+                // Resolve the requested orientation.
+                onConfigurationChanged(parent.getConfiguration());
+            }
             onDescendantOrientationChanged(freezeDisplayToken, requestingContainer);
         }
     }

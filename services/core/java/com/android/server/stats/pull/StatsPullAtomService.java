@@ -19,6 +19,8 @@ package com.android.server.stats.pull;
 import static android.app.AppOpsManager.OP_FLAG_SELF;
 import static android.app.AppOpsManager.OP_FLAG_TRUSTED_PROXIED;
 import static android.app.usage.NetworkStatsManager.FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN;
+import static android.app.usage.NetworkStatsManager.FLAG_POLL_FORCE;
+import static android.app.usage.NetworkStatsManager.FLAG_POLL_ON_OPEN;
 import static android.content.pm.PackageInfo.REQUESTED_PERMISSION_GRANTED;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
@@ -243,11 +245,6 @@ public class StatsPullAtomService extends SystemService {
     private static final String DANGEROUS_PERMISSION_STATE_SAMPLE_RATE =
             "dangerous_permission_state_sample_rate";
 
-    private final Object mNetworkStatsLock = new Object();
-    @GuardedBy("mNetworkStatsLock")
-    @Nullable
-    private INetworkStatsSession mNetworkStatsSession;
-
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
     private IThermalService mThermalService;
@@ -325,7 +322,7 @@ public class StatsPullAtomService extends SystemService {
 
     // Listener for monitoring subscriptions changed event.
     private StatsSubscriptionsListener mStatsSubscriptionsListener;
-    // List that store SubInfo of subscriptions that ever appeared since boot.
+    // List that stores SubInfo of subscriptions that ever appeared since boot.
     private final CopyOnWriteArrayList<SubInfo> mHistoricalSubs = new CopyOnWriteArrayList<>();
 
     public StatsPullAtomService(Context context) {
@@ -681,7 +678,7 @@ public class StatsPullAtomService extends SystemService {
                 collectNetworkStatsSnapshotForAtom(FrameworkStatsLog.DATA_USAGE_BYTES_TRANSFER));
 
         // Listen to subscription changes to record historical subscriptions that activated before
-        // pulling, this is used by {@link #pullMobileBytesTransfer}.
+        // pulling, this is used by {@code DATA_USAGE_BYTES_TRANSFER}.
         mSubscriptionManager.addOnSubscriptionsChangedListener(
                 BackgroundThread.getExecutor(), mStatsSubscriptionsListener);
 
@@ -696,32 +693,26 @@ public class StatsPullAtomService extends SystemService {
     /**
      * Return the {@code INetworkStatsSession} object that holds the necessary properties needed
      * for the subsequent queries to {@link com.android.server.net.NetworkStatsService}. Or
-     * null if the service or binder cannot be obtained.
+     * null if the service or binder cannot be obtained. Calling this method will trigger poll
+     * in NetworkStatsService with once per 15 seconds rate-limit, unless {@code bypassRateLimit}
+     * is set to true. This is needed in {@link #getUidNetworkStatsSnapshotForTemplate}, where
+     * bypassing the limit is necessary for perfd to supply realtime stats to developers looking at
+     * the network usage of their app.
      */
     @Nullable
-    private INetworkStatsSession getNetworkStatsSession() {
-        synchronized (mNetworkStatsLock) {
-            if (mNetworkStatsSession != null) return mNetworkStatsSession;
+    private INetworkStatsSession getNetworkStatsSession(boolean bypassRateLimit) {
+        final INetworkStatsService networkStatsService =
+                INetworkStatsService.Stub.asInterface(
+                        ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        if (networkStatsService == null) return null;
 
-            final INetworkStatsService networkStatsService =
-                    INetworkStatsService.Stub.asInterface(
-                            ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
-            if (networkStatsService == null) return null;
-
-            try {
-                networkStatsService.asBinder().linkToDeath(() -> {
-                    synchronized (mNetworkStatsLock) {
-                        mNetworkStatsSession = null;
-                    }
-                }, /* flags */ 0);
-                mNetworkStatsSession = networkStatsService.openSessionForUsageStats(
-                        FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN, mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Cannot get NetworkStats session", e);
-                mNetworkStatsSession = null;
-            }
-
-            return mNetworkStatsSession;
+        try {
+            return networkStatsService.openSessionForUsageStats(
+                    FLAG_AUGMENT_WITH_SUBSCRIPTION_PLAN | (bypassRateLimit ? FLAG_POLL_FORCE
+                            : FLAG_POLL_ON_OPEN), mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Cannot get NetworkStats session", e);
+            return null;
         }
     }
 
@@ -1032,7 +1023,13 @@ public class StatsPullAtomService extends SystemService {
         final long bucketDuration = Settings.Global.getLong(mContext.getContentResolver(),
                 NETSTATS_UID_BUCKET_DURATION, NETSTATS_UID_DEFAULT_BUCKET_DURATION_MS);
         try {
-            final NetworkStats stats = getNetworkStatsSession().getSummaryForAllUid(template,
+            // TODO (b/156313635): This is short-term hack to allow perfd gets updated networkStats
+            //  history when query in every second in order to show realtime statistics. However,
+            //  this is not a good long-term solution since NetworkStatsService will make frequent
+            //  I/O and also block main thread when polling.
+            //  Consider making perfd queries NetworkStatsService directly.
+            final NetworkStats stats = getNetworkStatsSession(template.getMatchRule()
+                    == NetworkTemplate.MATCH_WIFI_WILDCARD).getSummaryForAllUid(template,
                     currentTimeInMillis - elapsedMillisSinceBoot - bucketDuration,
                     currentTimeInMillis, includeTags);
             return stats;

@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoomer pour remplir l\'écran"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Étirer pour remplir l\'écran"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Capture d\'écran"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Déverrouillez votre téléphone pour obtenir plus d\'options"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Déverrouillez votre tablette pour obtenir plus d\'options"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Déverrouillez votre appareil pour obtenir plus d\'options"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a envoyé une image"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Enregistrement capture écran…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Enregistrement de la capture d\'écran…"</string>
@@ -730,7 +727,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations, apparaît sous forme de bulle flottante, affiche la photo de profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritaire"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> n\'est pas compatible avec les paramètres de conversation"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et ignorées s\'afficheront ici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossible de modifier ces notifications."</string>

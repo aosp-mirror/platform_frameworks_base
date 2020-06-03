@@ -1230,7 +1230,7 @@
     <string name="volume_unknown" msgid="4041914008166576293">"កម្រិត​សំឡេង"</string>
     <string name="volume_icon_description_bluetooth" msgid="7540388479345558400">"កម្រិត​សំឡេង​ប៊្លូធូស"</string>
     <string name="volume_icon_description_ringer" msgid="2187800636867423459">"កម្រិត​សំឡេង​រោទ៍"</string>
-    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅ"</string>
+    <string name="volume_icon_description_incall" msgid="4491255105381227919">"កម្រិត​សំឡេង​ហៅទូរសព្ទ"</string>
     <string name="volume_icon_description_media" msgid="4997633254078171233">"កម្រិត​សំឡេង​មេឌៀ"</string>
     <string name="volume_icon_description_notification" msgid="579091344110747279">"កម្រិត​សំឡេង​ការ​ជូន​ដំណឹង"</string>
     <string name="ringtone_default" msgid="9118299121288174597">"សំឡេង​រោទ៍​លំនាំដើម"</string>

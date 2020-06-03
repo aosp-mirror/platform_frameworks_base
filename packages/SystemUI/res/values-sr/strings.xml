@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Зумирај на целом екрану"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Развуци на цео екран"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Снимак екрана"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Откључајте телефон за још опција"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Откључајте таблет за још опција"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Откључајте уређај за још опција"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"је послао/ла слику"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Чување снимка екрана..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Чување снимка екрана..."</string>
@@ -725,7 +722,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Приказује се у врху одељка за конверзације као плутајући облачић, приказује слику профила на закључаном екрану"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Подешавања"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> не подржава подешавања за конверзације"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема недавних облачића"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Овде се приказују недавни и одбачени облачићи"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ова обавештења не могу да се мењају."</string>

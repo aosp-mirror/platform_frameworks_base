@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zumiraj na celom ekranu"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Razvuci na ceo ekran"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snimak ekrana"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Otključajte telefon za još opcija"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Otključajte tablet za još opcija"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Otključajte uređaj za još opcija"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"je poslao/la sliku"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Čuvanje snimka ekrana..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Čuvanje snimka ekrana..."</string>
@@ -725,7 +722,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Prikazuje se u vrhu odeljka za konverzacije kao plutajući oblačić, prikazuje sliku profila na zaključanom ekranu"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Podešavanja"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne podržava podešavanja za konverzacije"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nema nedavnih oblačića"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Ovde se prikazuju nedavni i odbačeni oblačići"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ova obaveštenja ne mogu da se menjaju."</string>

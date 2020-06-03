@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ಪರದೆ ತುಂಬಿಸಲು ಝೂಮ್ ಮಾಡು"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ಪರದೆ ತುಂಬಿಸಲು ವಿಸ್ತಾರಗೊಳಿಸು"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಫೋನ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಅನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"ಹೆಚ್ಚಿನ ಆಯ್ಕೆಗಳಿಗಾಗಿ ನಿಮ್ಮ ಸಾಧನವನ್ನು ಅನ್‌ಲಾಕ್ ಮಾಡಿ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ಚಿತ್ರವನ್ನು ಕಳುಹಿಸಲಾಗಿದೆ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲಾಗುತ್ತಿದೆ…"</string>
@@ -252,7 +249,7 @@
     <string name="accessibility_gps_enabled" msgid="4061313248217660858">"GPS ಸಕ್ರಿಯವಾಗಿದೆ."</string>
     <string name="accessibility_gps_acquiring" msgid="896207402196024040">"GPS ಸ್ವಾಧೀನ."</string>
     <string name="accessibility_tty_enabled" msgid="1123180388823381118">"ಟೆಲಿಟೈಪ್‌ರೈಟರ್ ಸಕ್ರಿಯವಾಗಿದೆ."</string>
-    <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"ರಿಂಗರ್ ಕಂಪನ."</string>
+    <string name="accessibility_ringer_vibrate" msgid="6261841170896561364">"ರಿಂಗರ್ ವೈಬ್ರೇಟ್‌."</string>
     <string name="accessibility_ringer_silent" msgid="8994620163934249882">"ರಿಂಗರ್ ಶಾಂತ."</string>
     <!-- no translation found for accessibility_casting (8708751252897282313) -->
     <skip />
@@ -730,7 +727,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ಸಂಭಾಷಣೆ ವಿಭಾಗದ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೇಲುವ ಬಬಲ್‌ ಆಗಿ ಗೋಚರಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ಲಾಕ್‌ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ‌ ಗೋಚರಿಸುತ್ತದೆ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್ ಸಂಭಾಷಣೆ ನಿರ್ದಿಷ್ಟ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ಯಾವುದೇ ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಇಲ್ಲ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಮತ್ತು ವಜಾಗೊಳಿಸಿದ ಬಬಲ್ಸ್ ಇಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
