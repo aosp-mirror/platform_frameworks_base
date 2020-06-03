@@ -1617,7 +1617,7 @@
     <string name="face_error_user_canceled">Face unlock canceled by user.</string>
     <!-- Generic error message shown when the face operation fails because too many attempts have been made. [CHAR LIMIT=50] -->
     <string name="face_error_lockout">Too many attempts. Try again later.</string>
-    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=71] -->
+    <!-- Generic error message shown when the face operation fails because strong authentication is required. [CHAR LIMIT=77] -->
     <string name="face_error_lockout_permanent">Too many attempts. Face unlock disabled.</string>
     <!-- Generic error message shown when the face hardware can't recognize the face. [CHAR LIMIT=50] -->
     <string name="face_error_unable_to_process">Can\u2019t verify face. Try again.</string>
