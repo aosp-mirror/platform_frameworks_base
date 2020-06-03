@@ -1087,7 +1087,7 @@ class ContextImpl extends Context {
         try {
             String resolvedType = null;
             if (fillInIntent != null) {
-                fillInIntent.migrateExtraStreamToClipData();
+                fillInIntent.migrateExtraStreamToClipData(this);
                 fillInIntent.prepareToLeaveProcess(this);
                 resolvedType = fillInIntent.resolveTypeIfNeeded(getContentResolver());
             }

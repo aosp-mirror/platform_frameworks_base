@@ -204,8 +204,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impressão desativada por <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Ative o perfil de trabalho"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"As suas apps pessoais estão bloqueadas até ativar o seu perfil de trabalho."</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"As apps pessoais serão bloqueadas a <xliff:g id="DATE">%1$s</xliff:g> à(s) <xliff:g id="TIME">%2$s</xliff:g>. O seu perfil de trabalho não pode ficar desativado durante mais de <xliff:g id="NUMBER">%3$d</xliff:g> dias."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Ativar perfil de trabalho"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opções do tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opções do Android TV"</string>
@@ -1548,9 +1550,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Iniciar Navegador?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Aceitar chamada?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Sempre"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Definir como abrir sempre"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Apenas uma vez"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Definições"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s não suporta o perfil de trabalho"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>

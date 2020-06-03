@@ -15,18 +15,93 @@
  */
 package android.net.util;
 
+import android.net.TetherStatsParcel;
 import android.net.TetheringRequestParcel;
+
+import androidx.annotation.NonNull;
 
 import java.io.FileDescriptor;
 import java.net.SocketException;
 import java.util.Objects;
 
 /**
- * Native methods for tethering utilization.
+ * The classes and the methods for tethering utilization.
  *
  * {@hide}
  */
 public class TetheringUtils {
+    /**
+     *  The object which records offload Tx/Rx forwarded bytes/packets.
+     *  TODO: Replace the inner class ForwardedStats of class OffloadHardwareInterface with
+     *  this class as well.
+     */
+    public static class ForwardedStats {
+        public final long rxBytes;
+        public final long rxPackets;
+        public final long txBytes;
+        public final long txPackets;
+
+        public ForwardedStats() {
+            rxBytes = 0;
+            rxPackets = 0;
+            txBytes = 0;
+            txPackets = 0;
+        }
+
+        public ForwardedStats(long rxBytes, long txBytes) {
+            this.rxBytes = rxBytes;
+            this.rxPackets = 0;
+            this.txBytes = txBytes;
+            this.txPackets = 0;
+        }
+
+        public ForwardedStats(long rxBytes, long rxPackets, long txBytes, long txPackets) {
+            this.rxBytes = rxBytes;
+            this.rxPackets = rxPackets;
+            this.txBytes = txBytes;
+            this.txPackets = txPackets;
+        }
+
+        public ForwardedStats(@NonNull TetherStatsParcel tetherStats) {
+            rxBytes = tetherStats.rxBytes;
+            rxPackets = tetherStats.rxPackets;
+            txBytes = tetherStats.txBytes;
+            txPackets = tetherStats.txPackets;
+        }
+
+        public ForwardedStats(@NonNull ForwardedStats other) {
+            rxBytes = other.rxBytes;
+            rxPackets = other.rxPackets;
+            txBytes = other.txBytes;
+            txPackets = other.txPackets;
+        }
+
+        /** Add Tx/Rx bytes/packets and return the result as a new object. */
+        @NonNull
+        public ForwardedStats add(@NonNull ForwardedStats other) {
+            return new ForwardedStats(rxBytes + other.rxBytes, rxPackets + other.rxPackets,
+                    txBytes + other.txBytes, txPackets + other.txPackets);
+        }
+
+        /** Subtract Tx/Rx bytes/packets and return the result as a new object. */
+        @NonNull
+        public ForwardedStats subtract(@NonNull ForwardedStats other) {
+            // TODO: Perhaps throw an exception if any negative difference value just in case.
+            final long rxBytesDiff = Math.max(rxBytes - other.rxBytes, 0);
+            final long rxPacketsDiff = Math.max(rxPackets - other.rxPackets, 0);
+            final long txBytesDiff = Math.max(txBytes - other.txBytes, 0);
+            final long txPacketsDiff = Math.max(txPackets - other.txPackets, 0);
+            return new ForwardedStats(rxBytesDiff, rxPacketsDiff, txBytesDiff, txPacketsDiff);
+        }
+
+        /** Returns the string representation of this object. */
+        @NonNull
+        public String toString() {
+            return String.format("ForwardedStats(rxb: %d, rxp: %d, txb: %d, txp: %d)", rxBytes,
+                    rxPackets, txBytes, txPackets);
+        }
+    }
+
     /**
      * Configures a socket for receiving ICMPv6 router solicitations and sending advertisements.
      * @param fd the socket's {@link FileDescriptor}.

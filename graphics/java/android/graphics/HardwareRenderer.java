@@ -39,7 +39,6 @@ import android.view.NativeVectorDrawableAnimator;
 import android.view.PixelCopy;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.view.TextureLayer;
 import android.view.animation.AnimationUtils;
 
 import java.io.File;

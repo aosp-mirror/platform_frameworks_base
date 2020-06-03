@@ -151,8 +151,6 @@ public final class MediaRouter2Manager {
         return null;
     }
 
-    //TODO: Use cache not to create array. For now, it's unclear when to purge the cache.
-    //Do this when we finalize how to set control categories.
     /**
      * Gets available routes for an application.
      *
@@ -339,7 +337,7 @@ public final class MediaRouter2Manager {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
-        //TODO: Ignore unknown route.
+        //TODO(b/157875504): Ignore unknown route.
         if (sessionInfo.getTransferableRoutes().contains(route.getId())) {
             transferToRoute(sessionInfo, route);
             return;
@@ -355,7 +353,7 @@ public final class MediaRouter2Manager {
         if (client != null) {
             try {
                 int requestId = mNextRequestId.getAndIncrement();
-                //TODO: Ensure that every request is eventually removed.
+                //TODO(b/157875723): Ensure that every request is eventually removed. (Memory leak)
                 mTransferRequests.add(new TransferRequest(requestId, sessionInfo, route));
 
                 mMediaRouterService.requestCreateSessionWithManager(

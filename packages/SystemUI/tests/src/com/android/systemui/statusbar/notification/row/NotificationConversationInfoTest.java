@@ -173,7 +173,7 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         doAnswer((Answer<Object>) invocation -> {
             mNotificationInfo.handleCloseControls(true, false);
             return null;
-        }).when(mNotificationGuts).closeControls(anyInt(), anyInt(), eq(true), eq(false));
+        }).when(mNotificationGuts).closeControls(any(View.class), eq(true));
         // Our view is never attached to a window so the View#post methods in NotificationInfo never
         // get called. Setting this will skip the post and do the action immediately.
         mNotificationInfo.mSkipPost = true;
@@ -336,7 +336,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         assertTrue(textView.getText().toString().contains(group.getName()));
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
         assertEquals(VISIBLE, textView.getVisibility());
-        assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.group_divider).getVisibility());
     }
 
     @Test
@@ -361,7 +360,6 @@ public class NotificationConversationInfoTest extends SysuiTestCase {
         final TextView textView = mNotificationInfo.findViewById(R.id.group_name);
         assertEquals(VISIBLE, mNotificationInfo.findViewById(R.id.header).getVisibility());
         assertEquals(GONE, textView.getVisibility());
-        assertEquals(GONE, mNotificationInfo.findViewById(R.id.group_divider).getVisibility());
     }
 
     @Test

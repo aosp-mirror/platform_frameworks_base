@@ -40,7 +40,6 @@ import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -209,18 +208,9 @@ final class AutofillInlineSuggestionsRequestSession {
         if (mDestroyed || mResponseCallback == null) {
             return;
         }
-        if (!mImeInputStarted && mPreviousResponseIsNotEmpty) {
-            // 1. if previous response is not empty, and IME is just disconnected from the view,
-            // then send empty response to make sure existing responses don't stick around.
-            // Although the inline suggestions should disappear when IME hides which removes them
-            // from the view hierarchy, but we still send an empty response to indicate that the
-            // previous suggestions are invalid now.
-            if (sVerbose) Slog.v(TAG, "Send empty inline response");
-            updateResponseToImeUncheckLocked(new InlineSuggestionsResponse(Collections.EMPTY_LIST));
-            mPreviousResponseIsNotEmpty = false;
-        } else if (mImeInputViewStarted && mInlineFillUi != null && match(mAutofillId,
+        if (mImeInputViewStarted && mInlineFillUi != null && match(mAutofillId,
                 mImeCurrentFieldId)) {
-            // 2. if IME is visible, and response is not null, send the response
+            // if IME is visible, and response is not null, send the response
             InlineSuggestionsResponse response = mInlineFillUi.getInlineSuggestionsResponse();
             boolean isEmptyResponse = response.getInlineSuggestions().isEmpty();
             if (isEmptyResponse && !mPreviousResponseIsNotEmpty) {

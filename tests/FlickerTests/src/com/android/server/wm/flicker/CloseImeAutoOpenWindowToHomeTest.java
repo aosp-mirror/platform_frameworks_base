@@ -65,4 +65,11 @@ public class CloseImeAutoOpenWindowToHomeTest extends CloseImeWindowToHomeTest {
     public void checkVisibility_imeLayerBecomesInvisible() {
         super.checkVisibility_imeLayerBecomesInvisible();
     }
+
+    @FlakyTest(bugId = 157449248)
+    @Ignore("Waiting bug feedback")
+    @Test
+    public void checkVisibility_imeAppWindowBecomesInvisible() {
+        super.checkVisibility_imeAppWindowBecomesInvisible();
+    }
 }

@@ -337,7 +337,7 @@ java_library_static {
     srcs: [ ":api-stubs-docs-non-updatable" ],
     static_libs: [
         "conscrypt.module.public.api.stubs",
-        "framework-graphics-stubs-publicapi",
+        "framework-graphics.stubs",
         "framework-media.stubs",
         "framework-mediaprovider.stubs",
         "framework-permission.stubs",
@@ -369,7 +369,7 @@ java_library_static {
     static_libs: [
         "conscrypt.module.public.api.stubs",
         "framework-appsearch-stubs", // TODO: standardize appsearch stubs
-        "framework-graphics-stubs-systemapi",
+        "framework-graphics.stubs.system",
         "framework-media.stubs.system",
         "framework-mediaprovider.stubs.system",
         "framework-permission.stubs.system",

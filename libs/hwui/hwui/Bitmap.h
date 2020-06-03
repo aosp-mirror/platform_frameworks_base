@@ -32,7 +32,7 @@ class SkWStream;
 namespace android {
 
 enum class PixelStorageType {
-    External,
+    WrappedPixelRef,
     Heap,
     Ashmem,
     Hardware,
@@ -163,8 +163,7 @@ private:
     static sk_sp<Bitmap> allocateAshmemBitmap(size_t size, const SkImageInfo& i, size_t rowBytes);
 
     Bitmap(void* address, size_t allocSize, const SkImageInfo& info, size_t rowBytes);
-    Bitmap(void* address, void* context, FreeFunc freeFunc, const SkImageInfo& info,
-           size_t rowBytes);
+    Bitmap(SkPixelRef& pixelRef, const SkImageInfo& info);
     Bitmap(void* address, int fd, size_t mappedSize, const SkImageInfo& info, size_t rowBytes);
 #ifdef __ANDROID__ // Layoutlib does not support hardware acceleration
     Bitmap(AHardwareBuffer* buffer, const SkImageInfo& info, size_t rowBytes,
@@ -178,7 +177,6 @@ private:
 #endif
 
     virtual ~Bitmap();
-    void* getStorage() const;
 
     SkImageInfo mInfo;
 
@@ -191,10 +189,8 @@ private:
 
     union {
         struct {
-            void* address;
-            void* context;
-            FreeFunc freeFunc;
-        } external;
+            SkPixelRef* pixelRef;
+        } wrapped;
         struct {
             void* address;
             int fd;

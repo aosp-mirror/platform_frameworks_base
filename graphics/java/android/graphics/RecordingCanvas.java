@@ -19,7 +19,6 @@ package android.graphics;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.util.Pools.SynchronizedPool;
-import android.view.TextureLayer;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -214,9 +213,9 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
      * Draws the specified layer onto this canvas.
      *
      * @param layer The layer to composite on this canvas
-     * @hide
+     * @hide TODO: Make this a SystemApi for b/155905258
      */
-    public void drawTextureLayer(TextureLayer layer) {
+    public void drawTextureLayer(@NonNull TextureLayer layer) {
         nDrawTextureLayer(mNativeCanvasWrapper, layer.getLayerHandle());
     }
 

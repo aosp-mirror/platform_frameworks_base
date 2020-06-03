@@ -198,12 +198,12 @@ public class SystemServiceManager {
 
         Slog.i(TAG, "Starting phase " + mCurrentPhase);
         try {
-            t.traceBegin("OnBootPhase " + phase);
+            t.traceBegin("OnBootPhase_" + phase);
             final int serviceLen = mServices.size();
             for (int i = 0; i < serviceLen; i++) {
                 final SystemService service = mServices.get(i);
                 long time = SystemClock.elapsedRealtime();
-                t.traceBegin("OnBootPhase " + service.getClass().getName());
+                t.traceBegin("OnBootPhase_" + phase + "_" + service.getClass().getName());
                 try {
                     service.onBootPhase(mCurrentPhase);
                 } catch (Exception ex) {
@@ -332,7 +332,7 @@ public class SystemServiceManager {
                 }
                 continue;
             }
-            t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + " " + serviceName);
+            t.traceBegin("ssm.on" + onWhat + "User-" + curUserId + "_" + serviceName);
             long time = SystemClock.elapsedRealtime();
             try {
                 switch (onWhat) {
