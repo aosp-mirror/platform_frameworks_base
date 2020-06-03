@@ -2419,6 +2419,9 @@ public class ShortcutService extends IShortcutService.Stub {
     @Override
     public ParceledListSlice<ShortcutManager.ShareShortcutInfo> getShareTargets(String packageName,
             IntentFilter filter, @UserIdInt int userId) {
+        Preconditions.checkStringNotEmpty(packageName, "packageName");
+        Objects.requireNonNull(filter, "intentFilter");
+
         verifyCaller(packageName, userId);
         enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APP_PREDICTIONS,
                 "getShareTargets");
