@@ -8109,6 +8109,140 @@ public class TelephonyManager {
         return false;
     }
 
+    /** @hide */
+    @IntDef({
+            ALLOWED_NETWORK_TYPES_REASON_POWER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface AllowedNetworkTypesReason{}
+
+    /**
+     * To indicate allowed network type change is requested by power manager.
+     * Power Manger configuration won't affect the settings configured through
+     * {@link setAllowedNetworkTypes} and will result in allowing network types that are in both
+     * configurations (i.e intersection of both sets).
+     * @hide
+     */
+    public static final int ALLOWED_NETWORK_TYPES_REASON_POWER = 0;
+
+    /**
+     * Set the allowed network types of the device and
+     * provide the reason triggering the allowed network change.
+     * This can be called for following reasons
+     * <ol>
+     * <li>Allowed network types control by power manager
+     * {@link #ALLOWED_NETWORK_TYPES_REASON_POWER}
+     * </ol>
+     * This API will result in allowing an intersection of allowed network types for all reasons,
+     * including the configuration done through {@link setAllowedNetworkTypes}.
+     * While this API and {@link setAllowedNetworkTypes} is controlling allowed network types
+     * on device, user preference will still be set through {@link #setPreferredNetworkTypeBitmask}.
+     * Thus resultant network type configured on modem will be an intersection of the network types
+     * from setAllowedNetworkTypesForReason, {@link setAllowedNetworkTypes}
+     * and {@link #setPreferredNetworkTypeBitmask}.
+     *
+     * @param reason the reason the allowed network type change is taking place
+     * @param allowedNetworkTypes The bitmask of allowed network types.
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setAllowedNetworkTypesForReason(@AllowedNetworkTypesReason int reason,
+            @NetworkTypeBitMask long allowedNetworkTypes) {
+        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+            throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                telephony.setAllowedNetworkTypesForReason(getSubId(), reason,
+                        allowedNetworkTypes);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "setAllowedNetworkTypesForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Get the allowed network types for certain reason.
+     *
+     * {@link #getAllowedNetworkTypesForReason} returns allowed network type for a
+     * specific reason. For effective allowed network types configured on device,
+     * query {@link getEffectiveAllowedNetworkTypes}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *s
+     * @param reason the reason the allowed network type change is taking place
+     * @return the allowed network type bitmask
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @throws IllegalArgumentException if invalid AllowedNetworkTypesReason is passed.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NetworkTypeBitMask long getAllowedNetworkTypesForReason(
+            @AllowedNetworkTypesReason int reason) {
+        if (reason != ALLOWED_NETWORK_TYPES_REASON_POWER) {
+            throw new IllegalArgumentException("invalid AllowedNetworkTypesReason.");
+        }
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getAllowedNetworkTypesForReason(getSubId(), reason);
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getAllowedNetworkTypesForReason RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return -1;
+    }
+
+    /**
+     * Get bit mask of all network types.
+     *
+     * @return bit mask of all network types
+     * @hide
+     */
+    public static @NetworkTypeBitMask long getAllNetworkTypesBitmask() {
+        return NETWORK_STANDARDS_FAMILY_BITMASK_3GPP | NETWORK_STANDARDS_FAMILY_BITMASK_3GPP2;
+    }
+
+    /**
+     * Get the allowed network types configured on the device.
+     * This API will return an intersection of allowed network types for all reasons,
+     * including the configuration done through setAllowedNetworkTypes
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE READ_PRIVILEGED_PHONE_STATE}
+     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return the allowed network type bitmask
+     * @throws IllegalStateException if the Telephony process is not currently available.
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @NetworkTypeBitMask long getEffectiveAllowedNetworkTypes() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getEffectiveAllowedNetworkTypes(getSubId());
+            } else {
+                throw new IllegalStateException("telephony service is null.");
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "getEffectiveAllowedNetworkTypes RemoteException", ex);
+            ex.rethrowFromSystemServer();
+        }
+        return -1;
+    }
+
     /**
      * Set the preferred network type to global mode which includes LTE, CDMA, EvDo and GSM/WCDMA.
      *
