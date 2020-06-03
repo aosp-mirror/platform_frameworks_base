@@ -24,6 +24,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.LayoutRes;
 
+import com.android.car.ui.FocusParkingView;
 import com.android.systemui.R;
 
 import javax.inject.Inject;
@@ -146,6 +147,12 @@ public class NavigationBarViewFactory {
 
         CarNavigationBarView view = (CarNavigationBarView) View.inflate(mContext, barLayout,
                 /* root= */ null);
+
+        // Include a FocusParkingView at the end. The rotary controller "parks" the focus here when
+        // the user navigates to another window. This is also used to prevent wrap-around which is
+        // why it must be first or last in Tab order.
+        view.addView(new FocusParkingView(mContext));
+
         mCachedViewMap.put(type, view);
         return mCachedViewMap.get(type);
     }
