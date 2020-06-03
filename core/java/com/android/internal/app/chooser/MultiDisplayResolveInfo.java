@@ -70,6 +70,13 @@ public class MultiDisplayResolveInfo extends DisplayResolveInfo {
     }
 
     /**
+     * Return selected target.
+     */
+    public DisplayResolveInfo getSelectedTarget() {
+        return hasSelected() ? mTargetInfos.get(mSelected) : null;
+    }
+
+    /**
      * Whether or not the user has selected a specific target for this MultiInfo.
      */
     public boolean hasSelected() {

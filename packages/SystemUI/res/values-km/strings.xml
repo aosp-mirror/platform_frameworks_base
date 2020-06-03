@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ពង្រីក​​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ទាញ​ដើម្បី​ឲ្យ​ពេញ​អេក្រង់"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"រូបថតអេក្រង់"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"ដោះសោ​ទូរសព្ទរបស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"ដោះសោ​ថេប្លេតរបស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"ដោះសោ​ឧបករណ៍របស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"បាន​ផ្ញើរូបភាព"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"កំពុង​រក្សាទុក​រូបថត​អេក្រង់..."</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"បើក"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"បិទ"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ប្ដូរ​ឧបករណ៍​បញ្ចេញ​សំឡេង"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"កម្មវិធី​ត្រូវបានខ្ទាស់"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​សង្កត់​ប៊ូតុង​ថយ​ក្រោយ និង​ប៊ូតុង​ទិដ្ឋភាពរួម​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុចប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"វា​នឹង​នៅតែ​បង្ហាញ រហូតទាល់​តែអ្នក​ដកការដៅ។ អូសឡើងលើ​ឱ្យជាប់ ដើម្បី​ដក​ការដៅ។"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការ​ដៅ។ សូម​សង្កត់​ប៊ូតុង​ទិដ្ឋភាពរួម​​ឲ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"វា​នឹង​នៅតែ​បង្ហាញ រហូត​ទាល់​តែ​អ្នក​ដក​ការដៅ។ សូម​ចុច​ប៊ូតុង​ទំព័រដើម​ឱ្យ​ជាប់ ដើម្បី​ដក​ការ​ដៅ។"</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"អាចចូលប្រើ​ទិន្នន័យផ្ទាល់ខ្លួន​បាន (ដូចជា ទំនាក់ទំនង និងខ្លឹមសារ​អ៊ីមែលជាដើម)។"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"កម្មវិធីដែលបានខ្ទាស់​អាចបើកកម្មវិធី​ផ្សេងទៀតបាន។"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ដើម្បីដកខ្ទាស់​កម្មវិធីនេះ សូមចុច​ប៊ូតុង​ថយក្រោយ និងប៊ូតុង​ទិដ្ឋភាពរួម​ឱ្យជាប់"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ដើម្បី​ដកខ្ទាស់​កម្មវិធីនេះ សូម​ចុចប៊ូតុង​ថយក្រោយ និង​ប៊ូតុងទំព័រដើម​ឱ្យជាប់"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ដើម្បីដកខ្ទាស់កម្មវិធី​នេះ សូមអូសឡើងលើ​ឱ្យជាប់"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"យល់​ហើយ"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ទេ អរគុណ"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"បានខ្ទាស់​កម្មវិធី"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"បានដកខ្ទាស់​កម្មវិធី"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"លាក់ <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"វា​នឹង​បង្ហាញ​ពេល​ក្រោយ​ ពេល​ដែល​អ្នក​បើក​ក្នុង​ការ​កំណត់។"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"លាក់"</string>
@@ -730,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"បង្ហាញនៅខាងលើ​ផ្នែកសន្ទនា បង្ហាញជា​ពពុះអណ្ដែត បង្ហាញ​រូបភាព​កម្រងព័ត៌មាន​នៅលើ​អេក្រង់ចាក់សោ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ការកំណត់"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"អាទិភាព"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> មិនអាចប្រើ​ការកំណត់​ជាក់លាក់ចំពោះការសន្ទនា​បានទេ"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"មិនមាន​ពពុះ​ថ្មីៗ​ទេ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ពពុះថ្មីៗ​ និង​ពពុះដែលបានបិទ​​នឹង​បង្ហាញ​នៅទីនេះ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"មិនអាច​កែប្រែ​ការជូនដំណឹង​ទាំងនេះ​បានទេ។"</string>

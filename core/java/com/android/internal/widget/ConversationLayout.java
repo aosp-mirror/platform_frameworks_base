@@ -480,23 +480,25 @@ public class ConversationLayout extends FrameLayout
                         // (This usually happens for most 1:1 conversations)
                         conversationText = messagingGroup.getSenderName();
                     }
-                    Icon avatarIcon = messagingGroup.getAvatarIcon();
-                    if (avatarIcon == null) {
-                        avatarIcon = createAvatarSymbol(conversationText, "", mLayoutColor);
+                    if (mConversationIcon == null) {
+                        Icon avatarIcon = messagingGroup.getAvatarIcon();
+                        if (avatarIcon == null) {
+                            avatarIcon = createAvatarSymbol(conversationText, "", mLayoutColor);
+                        }
+                        mConversationIcon = avatarIcon;
                     }
-                    mConversationIcon = avatarIcon;
-                    mConversationIconView.setImageIcon(mConversationIcon);
                     break;
                 }
             }
         } else {
-            if (mLargeIcon != null) {
+            if (mConversationIcon == null && mLargeIcon != null) {
                 mConversationIcon = mLargeIcon;
+            }
+            if (mConversationIcon != null) {
                 mConversationIconView.setVisibility(VISIBLE);
                 mConversationFacePile.setVisibility(GONE);
-                mConversationIconView.setImageIcon(mLargeIcon);
+                mConversationIconView.setImageIcon(mConversationIcon);
             } else {
-                mConversationIcon = null;
                 mConversationIconView.setVisibility(GONE);
                 // This will also inflate it!
                 mConversationFacePile.setVisibility(VISIBLE);
@@ -707,6 +709,11 @@ public class ConversationLayout extends FrameLayout
     @RemotableViewMethod
     public void setLargeIcon(Icon largeIcon) {
         mLargeIcon = largeIcon;
+    }
+
+    @RemotableViewMethod
+    public void setConversationIcon(Icon conversationIcon) {
+        mConversationIcon = conversationIcon;
     }
 
     /**

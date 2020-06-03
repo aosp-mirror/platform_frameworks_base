@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom para ocupar la pantalla"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estirar p/ ocupar la pantalla"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Desbloquea el teléfono para ver más opciones"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Desbloquea la tablet para ver más opciones"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Desbloquea el dispositivo para ver más opciones"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"envió una imagen"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Guardando captura de pantalla"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Guardando la captura de pantalla..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece en la parte superior de la sección de conversaciones, en forma de burbuja flotante, y muestra la foto de perfil en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite opciones de configuración específicas de conversaciones"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las que se descartaron aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>

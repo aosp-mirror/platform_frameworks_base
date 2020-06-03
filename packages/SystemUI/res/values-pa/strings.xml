@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਜ਼ੂਮ ਕਰੋ"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ਸਕ੍ਰੀਨ ਭਰਨ ਲਈ ਸਟ੍ਰੈਚ ਕਰੋ"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ਸਕ੍ਰੀਨਸ਼ਾਟ"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਆਪਣਾ ਫ਼ੋਨ ਅਣਲਾਕ ਕਰੋ"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਆਪਣਾ ਟੈਬਲੈੱਟ ਅਣਲਾਕ ਕਰੋ"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"ਹੋਰ ਵਿਕਲਪਾਂ ਲਈ ਆਪਣਾ ਡੀਵਾਈਸ ਅਣਲਾਕ ਕਰੋ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ਚਿੱਤਰ ਭੇਜਿਆ ਗਿਆ"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਸੁਰੱਖਿਅਤ ਕਰ ਰਿਹਾ ਹੈ…"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ, ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਗੱਲਬਾਤ ਸੰਬੰਧੀ ਵਿਸ਼ੇਸ਼ ਸੈਟਿੰਗਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ਕੋਈ ਹਾਲੀਆ ਬਬਲ ਨਹੀਂ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ਹਾਲੀਆ ਬਬਲ ਅਤੇ ਖਾਰਜ ਕੀਤੇ ਬਬਲ ਇੱਥੇ ਦਿਸਣਗੇ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>

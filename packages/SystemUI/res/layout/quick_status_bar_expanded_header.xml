@@ -33,6 +33,7 @@
     android:paddingStart="0dp"
     android:elevation="4dp" >
 
+    <!-- The clock -->
     <include layout="@layout/quick_status_bar_header_system_icons" />
 
     <!-- Status icons within the panel itself (and not in the top-most status bar) -->

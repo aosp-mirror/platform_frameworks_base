@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zooma för att fylla skärm"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Dra för att fylla skärmen"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skärmdump"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Lås upp telefonen för fler alternativ"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Lås upp surfplattan för fler alternativ"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Lås upp enheten för fler alternativ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"har skickat en bild"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skärmdumpen sparas ..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skärmdumpen sparas ..."</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla, visar profilbilden på låsskärmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsspecifika inställningar"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga nya bubblor"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"De senaste bubblorna och ignorerade bubblor visas här"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>

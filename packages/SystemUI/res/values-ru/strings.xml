@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Подогнать по размерам экрана"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Растянуть на весь экран"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Скриншот"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Чтобы посмотреть дополнительные параметры, разблокируйте телефон."</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Чтобы посмотреть дополнительные параметры, разблокируйте планшет."</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Чтобы посмотреть дополнительные параметры, разблокируйте устройство."</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"отправлено изображение"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Сохранение..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Сохранение..."</string>
@@ -728,7 +725,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Появляется в верхней части списка разговоров и как всплывающий чат, а также показывает фото профиля на заблокированном экране"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" не поддерживает настройки разговора."</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нет недавних всплывающих чатов"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Здесь будут появляться недавние и закрытые всплывающие чаты."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Эти уведомления нельзя изменить."</string>

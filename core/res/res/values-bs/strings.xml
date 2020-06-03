@@ -204,8 +204,10 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Štampanje je onemogućila aplikacija <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Uključite radni profil"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Vaše lične aplikacije će biti blokirane dok ne uključite radni profil"</string>
-    <string name="personal_apps_suspension_soon_text" msgid="8705436617422002146">"Lične aplikacije će biti blokirane <xliff:g id="DATE">%1$s</xliff:g> u <xliff:g id="TIME">%2$s</xliff:g>. Vaš radni profil ne može ostati isključen duže od <xliff:g id="NUMBER">%3$d</xliff:g> dana."</string>
-    <string name="personal_apps_suspended_turn_profile_on" msgid="4278188538997940785">"Uključi radni profil"</string>
+    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
+    <skip />
+    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
+    <skip />
     <string name="me" msgid="6207584824693813140">"Ja"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcije tableta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcije Android TV uređaja"</string>
@@ -410,7 +412,7 @@
     <string name="permdesc_readCallLog" msgid="8964770895425873433">"Ova aplikacija može čitati historiju vaših poziva."</string>
     <string name="permlab_writeCallLog" msgid="670292975137658895">"pisanje zapisnika poziva"</string>
     <string name="permdesc_writeCallLog" product="tablet" msgid="2657525794731690397">"Omogućava aplikaciji da izmijeni zapisnik poziva sa vašeg tableta, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije mogu to iskoristiti za brisanje ili izmjenu vašeg zapisnika poziva."</string>
-    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Omogućava aplikaciji izmjenu popisa poziva Android TV uređaja, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu iskoristiti za brisanje ili izmjenu popisa poziva."</string>
+    <string name="permdesc_writeCallLog" product="tv" msgid="3934939195095317432">"Omogućava aplikaciji izmjenu zapisnika poziva Android TV uređaja, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije to mogu iskoristiti za brisanje ili izmjenu zapisnika poziva."</string>
     <string name="permdesc_writeCallLog" product="default" msgid="5903033505665134802">"Omogućava aplikaciji da izmijeni zapisnik poziva sa vašeg telefona, uključujući podatke o dolaznim i odlaznim pozivima. Zlonamjerne aplikacije mogu to iskoristiti za brisanje ili izmjenu vašeg zapisnika poziva."</string>
     <string name="permlab_bodySensors" msgid="3411035315357380862">"pristup tjelesnim senzorima (poput monitora za puls)"</string>
     <string name="permdesc_bodySensors" product="default" msgid="2365357960407973997">"Dozvoljava aplikaciji pristup podacima sa senzora koji prate fizičke pokazatelje kao što je vaš puls."</string>
@@ -1166,9 +1168,7 @@
     <string name="whichHomeApplicationNamed" msgid="5855990024847433794">"Koristi %1$s kao glavnu aplikaciju"</string>
     <string name="whichHomeApplicationLabel" msgid="8907334282202933959">"Snimanje slike"</string>
     <string name="whichImageCaptureApplication" msgid="2737413019463215284">"Snimanje slike koristeći"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichImageCaptureApplicationNamed (8820702441847612202) -->
-    <skip />
+    <string name="whichImageCaptureApplicationNamed" msgid="8820702441847612202">"Snimanje slike koristeći %1$s"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6505433734824988277">"Snimanje slike"</string>
     <string name="alwaysUse" msgid="3153558199076112903">"Koristiti kao zadanu rezoluciju za ovu akciju."</string>
     <string name="use_a_different_app" msgid="4987790276170972776">"Koristi drugu aplikaciju"</string>
@@ -1571,9 +1571,7 @@
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Pokretanje preglednika?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Prihvatiti poziv?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Uvijek"</string>
-    <string name="activity_resolver_set_always" msgid="4142825808921411476">"Postavi da se uvijek otvara"</string>
     <string name="activity_resolver_use_once" msgid="948462794469672658">"Samo ovaj put"</string>
-    <string name="activity_resolver_app_settings" msgid="6758823206817748026">"Postavke"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s ne podržava poslovni profil"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"Tablet"</string>
     <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
