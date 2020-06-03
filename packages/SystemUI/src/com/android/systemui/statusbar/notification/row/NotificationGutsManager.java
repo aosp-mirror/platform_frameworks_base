@@ -216,6 +216,11 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         }
     }
 
+    private void startConversationSettingsActivity(int uid, ExpandableNotificationRow row) {
+        final Intent intent = new Intent(Settings.ACTION_CONVERSATION_SETTINGS);
+        mNotificationActivityStarter.startNotificationGutsIntent(intent, uid, row);
+    }
+
     private boolean bindGuts(final ExpandableNotificationRow row) {
         row.ensureGutsInflated();
         return bindGuts(row, mGutsMenuItem);
@@ -438,6 +443,12 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                     mListContainer.getSwipeActionHelper().snooze(sbn, hours);
                 };
 
+        final NotificationConversationInfo.OnConversationSettingsClickListener
+                onConversationSettingsListener =
+                () -> {
+                    startConversationSettingsActivity(sbn.getUid(), row);
+                };
+
         if (!userHandle.equals(UserHandle.ALL)
                 || mLockscreenUserManager.getCurrentUserId() == UserHandle.USER_SYSTEM) {
             onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
@@ -468,7 +479,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mBuilderProvider,
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mMainHandler,
-                mBgHandler);
+                mBgHandler,
+                onConversationSettingsListener);
     }
 
     /**
