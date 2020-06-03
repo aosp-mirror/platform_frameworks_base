@@ -632,7 +632,6 @@ public class WifiInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     public boolean is24GHz() {
         return ScanResult.is24GHz(mFrequency);
@@ -640,11 +639,17 @@ public class WifiInfo implements Parcelable {
 
     /**
      * @hide
-     * TODO: makes real freq boundaries
      */
     @UnsupportedAppUsage
     public boolean is5GHz() {
         return ScanResult.is5GHz(mFrequency);
+    }
+
+    /**
+     * @hide
+     */
+    public boolean is6GHz() {
+        return ScanResult.is6GHz(mFrequency);
     }
 
     /**
