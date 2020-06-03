@@ -51,7 +51,7 @@ class ThresholdSensorImpl implements ThresholdSensor {
         @Override
         public void onSensorChanged(SensorEvent event) {
             boolean below = event.values[0] < mThreshold;
-            boolean above = event.values[0] > mThresholdLatch;
+            boolean above = event.values[0] >= mThresholdLatch;
             logDebug("Sensor value: " + event.values[0]);
             onSensorEvent(below, above, event.timestamp);
         }

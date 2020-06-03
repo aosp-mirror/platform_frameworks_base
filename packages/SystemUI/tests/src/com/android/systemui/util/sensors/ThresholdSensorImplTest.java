@@ -259,7 +259,7 @@ public class ThresholdSensorImplTest extends SysuiTestCase {
         assertTrue(listener.mBelow);
         assertEquals(1, listener.mCallCount);
 
-        sensor.sendSensorEvent(highValue + 1);
+        sensor.sendSensorEvent(highValue);
 
         assertFalse(listener.mBelow);
         assertEquals(2, listener.mCallCount);
