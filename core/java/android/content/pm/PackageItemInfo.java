@@ -49,8 +49,16 @@ import java.util.Objects;
  * in the implementation of Parcelable in subclasses.
  */
 public class PackageItemInfo {
-    /** The maximum length of a safe label, in characters */
-    private static final int MAX_SAFE_LABEL_LENGTH = 50000;
+
+    /**
+     * The maximum length of a safe label, in characters
+     *
+     * TODO(b/157997155): It may make sense to expose this publicly so that apps can check for the
+     *  value and truncate the strings/use a different label, without having to hardcode and make
+     *  assumptions about the value.
+     * @hide
+     */
+    public static final int MAX_SAFE_LABEL_LENGTH = 1000;
 
     /** @hide */
     public static final float DEFAULT_MAX_LABEL_SIZE_PX = 500f;
