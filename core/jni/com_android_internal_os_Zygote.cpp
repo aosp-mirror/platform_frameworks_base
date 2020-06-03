@@ -1351,7 +1351,13 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
   }
   closedir(dir);
 
-  bool legacySymlinkCreated = false;
+  // Prepare default dirs for user 0 as user 0 always exists.
+  int result = symlink("/data/data", "/data/user/0");
+  if (result != 0) {
+    fail_fn(CREATE_ERROR("Failed to create symlink /data/user/0 %s", strerror(errno)));
+  }
+  PrepareDirIfNotPresent("/data/user_de/0", DEFAULT_DATA_DIR_PERMISSION,
+      AID_ROOT, AID_ROOT, fail_fn);
 
   for (int i = 0; i < size; i += 3) {
     std::string const & packageName = merged_data_info_list[i];
@@ -1392,17 +1398,8 @@ static void isolateAppData(JNIEnv* env, const std::vector<std::string>& merged_d
       char internalDeUserPath[PATH_MAX];
       snprintf(internalCeUserPath, PATH_MAX, "/data/user/%d", userId);
       snprintf(internalDeUserPath, PATH_MAX, "/data/user_de/%d", userId);
-      // If it's user 0, create a symlink /data/user/0 -> /data/data,
-      // otherwise create /data/user/$USER
+      // If it's not user 0, create /data/user/$USER.
       if (userId == 0) {
-        if (!legacySymlinkCreated) {
-          legacySymlinkCreated = true;
-          int result = symlink(internalLegacyCePath, internalCeUserPath);
-          if (result != 0) {
-             fail_fn(CREATE_ERROR("Failed to create symlink %s %s", internalCeUserPath,
-              strerror(errno)));
-          }
-        }
         actualCePath = internalLegacyCePath;
       } else {
         PrepareDirIfNotPresent(internalCeUserPath, DEFAULT_DATA_DIR_PERMISSION,
@@ -1578,10 +1575,6 @@ static void BindMountStorageDirs(JNIEnv* env, jobjectArray pkg_data_info_list,
 
   // Fuse is ready, so we can start using fuse path.
   int size = (pkg_data_info_list != nullptr) ? env->GetArrayLength(pkg_data_info_list) : 0;
-
-  if (size == 0) {
-    fail_fn(CREATE_ERROR("Data package list cannot be empty"));
-  }
 
   // Create tmpfs on Android/obb and Android/data so these 2 dirs won't enter fuse anymore.
   std::string androidObbDir = StringPrintf("/storage/emulated/%d/Android/obb", user_id);
