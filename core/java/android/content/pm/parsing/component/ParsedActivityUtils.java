@@ -27,6 +27,7 @@ import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -390,7 +391,18 @@ public class ParsedActivityUtils {
         activity.windowLayout = layoutResult.getResult();
 
         if (!setExported) {
-            activity.exported = activity.getIntents().size() > 0;
+            boolean hasIntentFilters = activity.getIntents().size() > 0;
+            if (hasIntentFilters) {
+                final ParseResult exportedCheckResult = input.deferError(
+                        activity.getName() + ": Targeting S+ (version " + Build.VERSION_CODES.S
+                        + " and above) requires that an explicit value for android:exported be"
+                        + " defined when intent filters are present",
+                        DeferredError.MISSING_EXPORTED_FLAG);
+                if (exportedCheckResult.isError()) {
+                    return input.error(exportedCheckResult);
+                }
+            }
+            activity.exported = hasIntentFilters;
         }
 
         return input.success(activity);
