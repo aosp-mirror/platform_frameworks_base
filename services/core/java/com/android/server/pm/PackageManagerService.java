@@ -5259,15 +5259,17 @@ public class PackageManagerService extends IPackageManager.Stub
      * </ul>
      */
     int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps,
-            boolean matchSystemOnly) {
+            boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         return updateFlagsForResolve(flags, userId, callingUid,
-                wantInstantApps, matchSystemOnly, false /*onlyExposedExplicitly*/);
+                wantInstantApps, false /*onlyExposedExplicitly*/,
+                isImplicitImageCaptureIntentAndNotSetByDpc);
     }
 
     int updateFlagsForResolve(int flags, int userId, int callingUid,
-            boolean wantInstantApps, boolean onlyExposedExplicitly, boolean matchSystemOnly) {
+            boolean wantInstantApps, boolean onlyExposedExplicitly,
+            boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         // Safe mode means we shouldn't match any third-party components
-        if (mSafeMode || matchSystemOnly) {
+        if (mSafeMode || isImplicitImageCaptureIntentAndNotSetByDpc) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
         }
         if (getInstantAppPackageName(callingUid) != null) {
@@ -6400,7 +6402,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
             flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                    intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                    isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                            flags));
             mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
@@ -6438,7 +6441,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
         final int flags = updateFlagsForResolve(
                 0, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType, 0));
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mLock) {
@@ -6684,6 +6687,40 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    /**
+     * From Android R, camera intents have to match system apps. The only exception to this is if
+     * the DPC has set the camera persistent preferred activity. This case was introduced
+     * because it is important that the DPC has the ability to set both system and non-system
+     * camera persistent preferred activities.
+     *
+     * @return {@code true} if the intent is a camera intent and the persistent preferred
+     * activity was not set by the DPC.
+     */
+    @GuardedBy("mLock")
+    private boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
+            String resolvedType, int flags) {
+        return intent.isImplicitImageCaptureIntent() && !isPersistentPreferredActivitySetByDpm(
+                intent, userId, resolvedType, flags);
+    }
+
+    private boolean isPersistentPreferredActivitySetByDpm(Intent intent, int userId,
+            String resolvedType, int flags) {
+        PersistentPreferredIntentResolver ppir = mSettings.mPersistentPreferredActivities
+                .get(userId);
+        //TODO(b/158003772): Remove double query
+        List<PersistentPreferredActivity> pprefs = ppir != null
+                ? ppir.queryIntent(intent, resolvedType,
+                (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                userId)
+                : new ArrayList<>();
+        for (PersistentPreferredActivity ppa : pprefs) {
+            if (ppa.mIsSetByDpm) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @GuardedBy("mLock")
     private ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, boolean debug, int userId) {
@@ -6767,7 +6804,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
         flags = updateFlagsForResolve(
                 flags, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mLock) {
@@ -6980,7 +7018,8 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 int flags = updateFlagsForResolve(0, parent.id, callingUid,
                         false /*includeInstantApps*/,
-                        intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                        isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, parent.id,
+                                resolvedType, 0));
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
@@ -7067,7 +7106,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
                 comp != null || pkgName != null /*onlyExposedExplicitly*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<>(1);
             final ActivityInfo ai = getActivityInfo(comp, flags, userId);
@@ -7856,7 +7896,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent activity options");
@@ -8043,7 +8084,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -8134,7 +8176,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId, int callingUid) {
         if (!mUserManager.exists(userId)) return null;
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                false /* matchSystemOnly */);
+                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         List<ResolveInfo> query = queryIntentServicesInternal(
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
         if (query != null) {
@@ -8166,7 +8208,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps,
-                false /* matchSystemOnly */);
+                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -8304,7 +8346,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                false /* matchSystemOnly */);
+                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -19837,7 +19879,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized (mLock) {
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
-                    new PersistentPreferredActivity(filter, activity));
+                    new PersistentPreferredActivity(filter, activity, true));
             scheduleWritePackageRestrictionsLocked(userId);
         }
         updateDefaultHomeNotLocked(userId);
