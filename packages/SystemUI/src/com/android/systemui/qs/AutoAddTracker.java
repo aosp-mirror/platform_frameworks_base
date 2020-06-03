@@ -23,6 +23,7 @@ import static com.android.systemui.statusbar.phone.AutoTileManager.WORK;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -30,6 +31,7 @@ import android.util.ArraySet;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Prefs;
 import com.android.systemui.Prefs.Key;
+import com.android.systemui.util.UserAwareController;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +39,7 @@ import java.util.Collections;
 
 import javax.inject.Inject;
 
-public class AutoAddTracker {
+public class AutoAddTracker implements UserAwareController {
 
     private static final String[][] CONVERT_PREFS = {
             {Key.QS_HOTSPOT_ADDED, HOTSPOT},
@@ -49,20 +51,45 @@ public class AutoAddTracker {
 
     private final ArraySet<String> mAutoAdded;
     private final Context mContext;
+    private int mUserId;
 
-    @Inject
-    public AutoAddTracker(Context context) {
+    public AutoAddTracker(Context context, int userId) {
         mContext = context;
+        mUserId = userId;
         mAutoAdded = new ArraySet<>(getAdded());
+    }
+
+    /**
+     * Init method must be called after construction to start listening
+     */
+    public void initialize() {
         // TODO: remove migration code and shared preferences keys after P release
-        for (String[] convertPref : CONVERT_PREFS) {
-            if (Prefs.getBoolean(context, convertPref[0], false)) {
-                setTileAdded(convertPref[1]);
-                Prefs.remove(context, convertPref[0]);
+        if (mUserId == UserHandle.USER_SYSTEM) {
+            for (String[] convertPref : CONVERT_PREFS) {
+                if (Prefs.getBoolean(mContext, convertPref[0], false)) {
+                    setTileAdded(convertPref[1]);
+                    Prefs.remove(mContext, convertPref[0]);
+                }
             }
         }
         mContext.getContentResolver().registerContentObserver(
-                Secure.getUriFor(Secure.QS_AUTO_ADDED_TILES), false, mObserver);
+                Secure.getUriFor(Secure.QS_AUTO_ADDED_TILES), false, mObserver,
+                UserHandle.USER_ALL);
+    }
+
+    @Override
+    public void changeUser(UserHandle newUser) {
+        if (newUser.getIdentifier() == mUserId) {
+            return;
+        }
+        mUserId = newUser.getIdentifier();
+        mAutoAdded.clear();
+        mAutoAdded.addAll(getAdded());
+    }
+
+    @Override
+    public int getCurrentUserId() {
+        return mUserId;
     }
 
     public boolean isAdded(String tile) {
@@ -86,12 +113,13 @@ public class AutoAddTracker {
     }
 
     private void saveTiles() {
-        Secure.putString(mContext.getContentResolver(), Secure.QS_AUTO_ADDED_TILES,
-                TextUtils.join(",", mAutoAdded));
+        Secure.putStringForUser(mContext.getContentResolver(), Secure.QS_AUTO_ADDED_TILES,
+                TextUtils.join(",", mAutoAdded), mUserId);
     }
 
     private Collection<String> getAdded() {
-        String current = Secure.getString(mContext.getContentResolver(), Secure.QS_AUTO_ADDED_TILES);
+        String current = Secure.getStringForUser(mContext.getContentResolver(),
+                Secure.QS_AUTO_ADDED_TILES, mUserId);
         if (current == null) {
             return Collections.emptyList();
         }
@@ -102,7 +130,27 @@ public class AutoAddTracker {
     protected final ContentObserver mObserver = new ContentObserver(new Handler()) {
         @Override
         public void onChange(boolean selfChange) {
+            mAutoAdded.clear();
             mAutoAdded.addAll(getAdded());
         }
     };
+
+    public static class Builder {
+        private final Context mContext;
+        private int mUserId;
+
+        @Inject
+        public Builder(Context context) {
+            mContext = context;
+        }
+
+        public Builder setUserId(int userId) {
+            mUserId = userId;
+            return this;
+        }
+
+        public AutoAddTracker build() {
+            return new AutoAddTracker(mContext, mUserId);
+        }
+    }
 }
