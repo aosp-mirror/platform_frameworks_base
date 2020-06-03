@@ -156,4 +156,16 @@ public final class AccessibilityUtils {
 
         return false;
     }
+
+    /**
+     * Indicates whether the current user has completed setup via the setup wizard.
+     * {@link android.provider.Settings.Secure#USER_SETUP_COMPLETE}
+     *
+     * @return {@code true} if the setup is completed.
+     */
+    public static boolean isUserSetupCompleted(Context context) {
+        return Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.USER_SETUP_COMPLETE, /* def= */ 0, UserHandle.USER_CURRENT)
+                != /* false */ 0;
+    }
 }
