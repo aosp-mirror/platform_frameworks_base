@@ -5790,10 +5790,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // be invoked and we need to invoke it ourself.
         if (mLocalSyncId >= 0) {
             mBLASTSyncEngine.setReady(mLocalSyncId);
-        } else {
-            mWaitingListener.onTransactionReady(mWaitingSyncId, mBLASTSyncTransaction);
+            return mWinAnimator.finishDrawingLocked(null);
         }
 
+        mWaitingListener.onTransactionReady(mWaitingSyncId, mBLASTSyncTransaction);
         mUsingBLASTSyncTransaction = false;
 
         mWaitingSyncId = 0;
