@@ -4325,6 +4325,15 @@ public final class Telephony {
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
+         * ETWS (Earthquake and Tsunami Warning System) primary message or not (ETWS alerts only).
+         * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
+         * <P>Type: BOOLEAN</P>
+         *
+         * @hide        // TODO: Unhide this for S.
+         */
+        public static final String ETWS_IS_PRIMARY = "etws_is_primary";
+
+        /**
          * CMAS (Commercial Mobile Alert System) message class (CMAS alerts only).
          * <p>See {@link android.telephony.SmsCbCmasInfo}</p>
          * <P>Type: INTEGER</P>
@@ -4463,37 +4472,6 @@ public final class Telephony {
                 CMAS_SEVERITY,
                 CMAS_URGENCY,
                 CMAS_CERTAINTY
-        };
-
-        /**
-         * Query columns for instantiating {@link android.telephony.SmsCbMessage} objects.
-         * @hide
-         */
-        public static final String[] QUERY_COLUMNS_FWK = {
-                _ID,
-                SLOT_INDEX,
-                SUBSCRIPTION_ID,
-                GEOGRAPHICAL_SCOPE,
-                PLMN,
-                LAC,
-                CID,
-                SERIAL_NUMBER,
-                SERVICE_CATEGORY,
-                LANGUAGE_CODE,
-                MESSAGE_BODY,
-                MESSAGE_FORMAT,
-                MESSAGE_PRIORITY,
-                ETWS_WARNING_TYPE,
-                CMAS_MESSAGE_CLASS,
-                CMAS_CATEGORY,
-                CMAS_RESPONSE_TYPE,
-                CMAS_SEVERITY,
-                CMAS_URGENCY,
-                CMAS_CERTAINTY,
-                RECEIVED_TIME,
-                MESSAGE_BROADCASTED,
-                GEOMETRIES,
-                MAXIMUM_WAIT_TIME
         };
     }
 
