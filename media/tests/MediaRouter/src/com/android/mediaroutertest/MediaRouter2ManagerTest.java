@@ -28,6 +28,7 @@ import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_I
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID2;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID4_TO_SELECT_AND_DESELECT;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID5_TO_TRANSFER_TO;
+import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID6_TO_BE_IGNORED;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_FIXED_VOLUME;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_SPECIAL_FEATURE;
 import static com.android.mediaroutertest.StubMediaRoute2ProviderService.ROUTE_ID_VARIABLE_VOLUME;
@@ -51,6 +52,7 @@ import android.media.RouteDiscoveryPreference;
 import android.media.RoutingSessionInfo;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.text.TextUtils;
@@ -349,6 +351,35 @@ public class MediaRouter2ManagerTest {
                 route -> TextUtils.equals(route.getClientPackageName(), null));
     }
 
+    @Test
+    @LargeTest
+    public void testTransfer_ignored_fails() throws Exception {
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        addRouterCallback(new RouteCallback() {});
+
+        CountDownLatch onSessionCreatedLatch = new CountDownLatch(1);
+        CountDownLatch onFailedLatch = new CountDownLatch(1);
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                onSessionCreatedLatch.countDown();
+            }
+            @Override
+            public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
+                onFailedLatch.countDown();
+            }
+        });
+
+        List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
+        RoutingSessionInfo targetSession = sessions.get(sessions.size() - 1);
+        mManager.transfer(targetSession, routes.get(ROUTE_ID6_TO_BE_IGNORED));
+
+        assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertTrue(onFailedLatch.await(MediaRouter2Manager.TRANSFER_TIMEOUT_MS,
+                TimeUnit.MILLISECONDS));
+    }
     @Test
     public void testSetSystemRouteVolume() throws Exception {
         // ensure client
