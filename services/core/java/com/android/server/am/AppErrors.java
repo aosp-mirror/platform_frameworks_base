@@ -383,7 +383,11 @@ class AppErrors {
             // and then the delayed summary kill will be a no-op.
             final ProcessRecord p = proc;
             mService.mHandler.postDelayed(
-                    () -> killAppImmediateLocked(p, "forced", "killed for invalid state"),
+                    () -> {
+                        synchronized (mService) {
+                            killAppImmediateLocked(p, "forced", "killed for invalid state");
+                        }
+                    },
                     5000L);
         }
     }
