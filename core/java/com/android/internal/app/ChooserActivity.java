@@ -102,6 +102,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -2680,7 +2681,7 @@ public class ChooserActivity extends ResolverActivity implements
                         offset = Math.min(offset, minHeight);
                     }
                 } else {
-                    ViewGroup currentEmptyStateView = getCurrentEmptyStateView();
+                    ViewGroup currentEmptyStateView = getActiveEmptyStateView();
                     if (currentEmptyStateView.getVisibility() == View.VISIBLE) {
                         offset += currentEmptyStateView.getHeight();
                     }
@@ -2705,7 +2706,7 @@ public class ChooserActivity extends ResolverActivity implements
         return -1;
     }
 
-    private ViewGroup getCurrentEmptyStateView() {
+    private ViewGroup getActiveEmptyStateView() {
         int currentPage = mChooserMultiProfilePagerAdapter.getCurrentPage();
         return mChooserMultiProfilePagerAdapter.getItem(currentPage).getEmptyStateView();
     }
@@ -3028,6 +3029,17 @@ public class ChooserActivity extends ResolverActivity implements
 
     void prepareIntentForCrossProfileLaunch(Intent intent) {
         intent.fixUris(UserHandle.myUserId());
+    }
+
+    @Override
+    protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+        if (shouldShowTabs()) {
+            mChooserMultiProfilePagerAdapter
+                    .setEmptyStateBottomOffset(insets.getSystemWindowInsetBottom());
+            mChooserMultiProfilePagerAdapter.setupContainerPadding(
+                    getActiveEmptyStateView().findViewById(R.id.resolver_empty_state_container));
+        }
+        return super.onApplyWindowInsets(v, insets);
     }
 
     /**
