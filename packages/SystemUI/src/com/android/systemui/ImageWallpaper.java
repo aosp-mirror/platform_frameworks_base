@@ -603,7 +603,16 @@ public class ImageWallpaper extends WallpaperService {
 
             final FloatBuffer triangleVertices = createMesh(left, top, right, bottom);
 
-            final int texture = loadTexture(mBackground);
+            int texture = 0;
+            try {
+                texture = loadTexture(mBackground);
+            } catch (IllegalArgumentException e) {
+                mEgl.eglMakeCurrent(mEglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+                mEgl.eglDestroySurface(mEglDisplay, mEglSurface);
+                mEgl.eglDestroyContext(mEglDisplay, mEglContext);
+                mEgl.eglTerminate(mEglDisplay);
+                return false;
+            }
             final int program = buildProgram(sSimpleVS, sSimpleFS);
 
             final int attribPosition = glGetAttribLocation(program, "position");
