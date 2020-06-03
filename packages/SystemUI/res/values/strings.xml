@@ -2667,6 +2667,11 @@
     <string name="inattentive_sleep_warning_title">Standby</string>
 
     <!-- Priority conversation onboarding screen -->
+    <!--  title of priority onboarding [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_title">Conversation set to priority</string>
+    <!--  Text explaining that the following actions are the behaviors of priority conversations.
+    E.g. priority conversations will show at the top of the conversation section [CHAR LIMIT=75]  -->
+    <string name="priority_onboarding_behavior">Priority conversations will:</string>
     <!--  Text explaining that priority conversations show at the top of the conversation section [CHAR LIMIT=75]  -->
     <string name="priority_onboarding_show_at_top_text">Show at top of conversation section</string>
     <!--  Text explaining that priority conversations show an avatar on the lock screen [CHAR LIMIT=75]  -->
@@ -2677,6 +2682,8 @@
     <string name="priority_onboarding_ignores_dnd_text">Interrupt Do Not Disturb</string>
     <!--  Title for the affirmative button [CHAR LIMIT=50]  -->
     <string name="priority_onboarding_done_button_title">Got it</string>
+    <!--  Title for the settings button button [CHAR LIMIT=50]  -->
+    <string name="priority_onboarding_settings_button_title">Settings</string>
 
     <!-- Window Magnification strings -->
     <!-- Title for Magnification Overlay Window [CHAR LIMIT=NONE] -->
