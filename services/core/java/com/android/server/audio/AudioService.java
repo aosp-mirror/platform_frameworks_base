@@ -1908,8 +1908,11 @@ public class AudioService extends IAudioService.Stub
     /** @see AudioManager#adjustVolume(int, int) */
     public void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
             String callingPackage, String caller) {
+        boolean hasModifyAudioSettings =
+                mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED;
         adjustSuggestedStreamVolume(direction, suggestedStreamType, flags, callingPackage,
-                caller, Binder.getCallingUid(), hasModifyAudioSettings(), VOL_ADJUST_NORMAL);
+                caller, Binder.getCallingUid(), hasModifyAudioSettings, VOL_ADJUST_NORMAL);
     }
 
     private void adjustSuggestedStreamVolume(int direction, int suggestedStreamType, int flags,
@@ -2014,10 +2017,13 @@ public class AudioService extends IAudioService.Stub
                     + "CHANGE_ACCESSIBILITY_VOLUME / callingPackage=" + callingPackage);
             return;
         }
+        final boolean hasModifyAudioSettings =
+                mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                        == PackageManager.PERMISSION_GRANTED;
         sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_ADJUST_STREAM_VOL, streamType,
                 direction/*val1*/, flags/*val2*/, callingPackage));
         adjustStreamVolume(streamType, direction, flags, callingPackage, callingPackage,
-                Binder.getCallingUid(), hasModifyAudioSettings(), VOL_ADJUST_NORMAL);
+                Binder.getCallingUid(), hasModifyAudioSettings, VOL_ADJUST_NORMAL);
     }
 
     protected void adjustStreamVolume(int streamType, int direction, int flags,
@@ -2528,10 +2534,13 @@ public class AudioService extends IAudioService.Stub
                     + " MODIFY_AUDIO_ROUTING  callingPackage=" + callingPackage);
             return;
         }
+        final boolean hasModifyAudioSettings =
+                mContext.checkCallingOrSelfPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                        == PackageManager.PERMISSION_GRANTED;
         sVolumeLogger.log(new VolumeEvent(VolumeEvent.VOL_SET_STREAM_VOL, streamType,
                 index/*val1*/, flags/*val2*/, callingPackage));
         setStreamVolume(streamType, index, flags, callingPackage, callingPackage,
-                Binder.getCallingUid(), hasModifyAudioSettings());
+                Binder.getCallingUid(), hasModifyAudioSettings);
     }
 
     private boolean canChangeAccessibilityVolume() {
@@ -3197,7 +3206,8 @@ public class AudioService extends IAudioService.Stub
         ensureValidStreamType(streamType);
         final boolean isPrivileged =
                 Binder.getCallingUid() == Process.SYSTEM_UID
-                 || (hasModifyAudioSettings())
+                 || (mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                        == PackageManager.PERMISSION_GRANTED)
                  || (mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_ROUTING)
                         == PackageManager.PERMISSION_GRANTED);
         return (mStreamStates[streamType].getMinIndex(isPrivileged) + 5) / 10;
@@ -4755,18 +4765,9 @@ public class AudioService extends IAudioService.Stub
         handler.sendMessageAtTime(handler.obtainMessage(msg, arg1, arg2, obj), time);
     }
 
-    private boolean hasModifyAudioSettings() {
-        return mContext.checkCallingPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
-    private boolean hasModifyAudioSettings(int pid, int uid) {
-        return mContext.checkPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS, pid, uid)
-                == PackageManager.PERMISSION_GRANTED;
-    }
-
     boolean checkAudioSettingsPermission(String method) {
-        if (hasModifyAudioSettings()) {
+        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.MODIFY_AUDIO_SETTINGS)
+                == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
         String msg = "Audio Settings Permission Denial: " + method + " from pid="
@@ -7712,10 +7713,13 @@ public class AudioService extends IAudioService.Stub
         @Override
         public void adjustSuggestedStreamVolumeForUid(int streamType, int direction, int flags,
                 String callingPackage, int uid, int pid) {
+            final boolean hasModifyAudioSettings =
+                    mContext.checkPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS, pid, uid)
+                    == PackageManager.PERMISSION_GRANTED;
             // direction and stream type swap here because the public
             // adjustSuggested has a different order than the other methods.
             adjustSuggestedStreamVolume(direction, streamType, flags, callingPackage,
-                    callingPackage, uid, hasModifyAudioSettings(pid, uid), VOL_ADJUST_NORMAL);
+                    callingPackage, uid, hasModifyAudioSettings, VOL_ADJUST_NORMAL);
         }
 
         @Override
@@ -7726,15 +7730,21 @@ public class AudioService extends IAudioService.Stub
                         direction/*val1*/, flags/*val2*/, new StringBuilder(callingPackage)
                         .append(" uid:").append(uid).toString()));
             }
+            final boolean hasModifyAudioSettings =
+                    mContext.checkPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS, pid, uid)
+                            == PackageManager.PERMISSION_GRANTED;
             adjustStreamVolume(streamType, direction, flags, callingPackage,
-                    callingPackage, uid, hasModifyAudioSettings(pid, uid), VOL_ADJUST_NORMAL);
+                    callingPackage, uid, hasModifyAudioSettings, VOL_ADJUST_NORMAL);
         }
 
         @Override
         public void setStreamVolumeForUid(int streamType, int direction, int flags,
                 String callingPackage, int uid, int pid) {
+            final boolean hasModifyAudioSettings =
+                    mContext.checkPermission(Manifest.permission.MODIFY_AUDIO_SETTINGS, pid, uid)
+                            == PackageManager.PERMISSION_GRANTED;
             setStreamVolume(streamType, direction, flags, callingPackage, callingPackage, uid,
-                    hasModifyAudioSettings(pid, uid));
+                    hasModifyAudioSettings);
         }
 
         @Override
