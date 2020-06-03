@@ -15,6 +15,7 @@
  */
 package com.android.systemui.shared.system;
 
+import android.graphics.HardwareRenderer;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewRootImpl;
@@ -50,7 +51,13 @@ public class ViewRootImplCompat {
 
     public void registerRtFrameCallback(LongConsumer callback) {
         if (mViewRoot != null) {
-            mViewRoot.registerRtFrameCallback(callback::accept);
+            mViewRoot.registerRtFrameCallback(
+                    new HardwareRenderer.FrameDrawingCallback() {
+                        @Override
+                        public void onFrameDraw(long l) {
+                            callback.accept(l);
+                        }
+                    });
         }
     }
 }
