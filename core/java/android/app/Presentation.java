@@ -19,24 +19,25 @@ package android.app;
 import static android.content.Context.DISPLAY_SERVICE;
 import static android.content.Context.WINDOW_SERVICE;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
+import static android.view.WindowManager.LayoutParams.TYPE_PRIVATE_PRESENTATION;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.os.Binder;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.WindowManagerImpl;
-import android.os.Handler;
-import android.os.Message;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.util.TypedValue;
 
 /**
  * Base class for presentations.
@@ -115,7 +116,9 @@ import android.util.TypedValue;
  * The display manager keeps track of all displays in the system.  However, not all
  * displays are appropriate for showing presentations.  For example, if an activity
  * attempted to show a presentation on the main display it might obscure its own content
- * (it's like opening a dialog on top of your activity).
+ * (it's like opening a dialog on top of your activity).  Creating a presentation on the main
+ * display will result in {@link android.view.WindowManager.InvalidDisplayException} being thrown
+ * when invoking {@link #show()}.
  * </p><p>
  * Here's how to identify suitable displays for showing presentations using
  * {@link DisplayManager#getDisplays(String)} and the
@@ -188,12 +191,16 @@ public class Presentation extends Dialog {
         mDisplay = display;
         mDisplayManager = (DisplayManager)getContext().getSystemService(DISPLAY_SERVICE);
 
+        final int windowType =
+                (display.getFlags() & Display.FLAG_PRIVATE) != 0 ? TYPE_PRIVATE_PRESENTATION
+                        : TYPE_PRESENTATION;
+
         final Window w = getWindow();
         final WindowManager.LayoutParams attr = w.getAttributes();
         attr.token = mToken;
         w.setAttributes(attr);
         w.setGravity(Gravity.FILL);
-        w.setType(TYPE_PRESENTATION);
+        w.setType(windowType);
         setCanceledOnTouchOutside(false);
     }
 
@@ -242,7 +249,7 @@ public class Presentation extends Dialog {
     /**
      * Inherited from {@link Dialog#show}. Will throw
      * {@link android.view.WindowManager.InvalidDisplayException} if the specified secondary
-     * {@link Display} can't be found.
+     * {@link Display} can't be found or if it does not have {@link Display#FLAG_PRESENTATION} set.
      */
     @Override
     public void show() {
