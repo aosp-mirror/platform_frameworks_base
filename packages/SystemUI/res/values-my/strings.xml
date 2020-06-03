@@ -42,7 +42,7 @@
     <string name="status_bar_settings_auto_rotation" msgid="8329080442278431708">"မျက်နှာပြင်အလိုအလျောက်လှည့်ရန်"</string>
     <string name="status_bar_settings_mute_label" msgid="914392730086057522">"MUTE"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="2151934479226017725">"AUTO"</string>
-    <string name="status_bar_settings_notifications" msgid="5285316949980621438">"သတိပေးချက်များ"</string>
+    <string name="status_bar_settings_notifications" msgid="5285316949980621438">"အကြောင်းကြားချက်များ"</string>
     <string name="bluetooth_tethered" msgid="4171071193052799041">"ဘလူးတုသ်မှတဆင့်ပြန်လည်ချိတ်ဆက်ခြင်း"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="2972273031043777851">"ထည့်သွင်းနည်းများ သတ်မှတ်ခြင်း"</string>
     <string name="status_bar_use_physical_keyboard" msgid="4849251850931213371">"ခလုတ်ပါဝင်သော ကီးဘုတ်"</string>
@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"ဇူးမ်အပြည့်ဆွဲခြင်း"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"ဖန်သားပြင်အပြည့်ဆန့်ခြင်း"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"ဖန်သားပြင်ဓာတ်ပုံ"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်ဖုန်းကို လော့ခ်ဖွင့်ပါ"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်တက်ဘလက်ကို လော့ခ်ဖွင့်ပါ"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"နောက်ထပ် ထိန်းချုပ်မှုများအတွက် သင့်စက်ကို လော့ခ်ဖွင့်ပါ"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"ပုံပို့ထားသည်"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"ဖန်သားပြင်ဓါတ်ပုံသိမ်းစဉ်.."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"ဖန်သားပြင်ဓါတ်ပုံရိုက်ခြင်းအား သိမ်းဆည်းပါမည်"</string>
@@ -595,7 +592,7 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ဖွင့်ရန်"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ပိတ်ရန်"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"အထွက် စက်ပစ္စည်းကို ပြောင်းပါ"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"အက်ပ်ကို ပင်ထိုးလိုက်သည်"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"အက်ပ်ကို ပင်ထိုးထားသည်"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"သင်ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် Back နှင့် Overview ကို ထိ၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"သင်က ပင်မဖြုတ်မခြင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် \'နောက်သို့\' နှင့် \'ပင်မ\' ခလုတ်တို့ကို တို့၍ဖိထားပါ။"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"သင်က ပင်မဖြုတ်မချင်း ၎င်းကို ပြသထားပါမည်။ ပင်ဖြုတ်ရန် အပေါ်သို့ပွတ်ဆွဲပြီး ဖိထားပါ။"</string>
@@ -722,7 +719,8 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"စကားဝိုင်းကဏ္ဍ၏ ထိပ်ပိုင်းတွင် ပြပြီး ပူဖောင်းကွက်အဖြစ် မြင်ရသည်၊ လော့ခ်ချထားချိန် မျက်နှာပြင်တွင် ပရိုဖိုင်ပုံကို ပြသည်"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ဆက်တင်များ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ဦးစားပေး"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> က စကားဝိုင်းအလိုက် ဆက်တင်များကို မပံ့ပိုးပါ"</string>
+    <!-- no translation found for no_shortcut (8257177117568230126) -->
+    <skip />
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"လတ်တလော ပူဖောင်းကွက်များ မရှိပါ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"လတ်တလော ပူဖောင်းကွက်များနှင့် ပိတ်လိုက်သော ပူဖောင်းကွက်များကို ဤနေရာတွင် မြင်ရပါမည်"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ဤအကြောင်းကြားချက်များကို ပြုပြင်၍ မရပါ။"</string>

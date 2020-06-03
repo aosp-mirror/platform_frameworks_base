@@ -170,6 +170,7 @@ private:
     bool findBootAnimationFileInternal(const std::vector<std::string>& files);
     bool preloadAnimation();
     EGLConfig getEglConfig(const EGLDisplay&);
+    ui::Size limitSurfaceSize(int width, int height) const;
     void resizeSurface(int newWidth, int newHeight);
 
     void checkExit();
@@ -181,6 +182,8 @@ private:
     Texture     mAndroid[2];
     int         mWidth;
     int         mHeight;
+    int         mMaxWidth = 0;
+    int         mMaxHeight = 0;
     int         mCurrentInset;
     int         mTargetInset;
     bool        mUseNpotTextures = false;

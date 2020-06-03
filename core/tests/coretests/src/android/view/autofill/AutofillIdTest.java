@@ -126,6 +126,32 @@ public class AutofillIdTest {
     }
 
     @Test
+    public void testVirtual_Long_withoutSession() {
+        final AutofillId id = new AutofillId(new AutofillId(42), 108L, 666);
+        final AutofillId idWithoutSession = AutofillId.withoutSession(id);
+        assertThat(idWithoutSession.getViewId()).isEqualTo(42);
+        assertThat(idWithoutSession.isVirtualLong()).isTrue();
+        assertThat(idWithoutSession.isVirtualInt()).isFalse();
+        assertThat(idWithoutSession.isNonVirtual()).isFalse();
+        assertThat(idWithoutSession.getVirtualChildLongId()).isEqualTo(108L);
+        assertThat(idWithoutSession.getVirtualChildIntId()).isEqualTo(View.NO_ID);
+        assertThat(idWithoutSession.getSessionId()).isEqualTo(NO_SESSION);
+    }
+
+    @Test
+    public void testVirtual_Int_withoutSession() {
+        final AutofillId id = new AutofillId(42, 108);
+        final AutofillId idWithoutSession = AutofillId.withoutSession(id);
+        assertThat(idWithoutSession.getViewId()).isEqualTo(42);
+        assertThat(idWithoutSession.isVirtualLong()).isFalse();
+        assertThat(idWithoutSession.isVirtualInt()).isTrue();
+        assertThat(idWithoutSession.isNonVirtual()).isFalse();
+        assertThat(idWithoutSession.getVirtualChildIntId()).isEqualTo(108);
+        assertThat(idWithoutSession.getVirtualChildLongId()).isEqualTo(View.NO_ID);
+        assertThat(idWithoutSession.getSessionId()).isEqualTo(NO_SESSION);
+    }
+
+    @Test
     public void testSetResetSession() {
         final AutofillId id = new AutofillId(42);
         assertNonVirtual(id, 42, NO_SESSION);

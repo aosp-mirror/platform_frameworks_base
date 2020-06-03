@@ -3203,14 +3203,8 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
-    void onSurfaceShown(SurfaceControl.Transaction t) {
-        super.onSurfaceShown(t);
-        t.unsetColor(mSurfaceControl);
-    }
-
-    @Override
     void setInitialSurfaceControlProperties(SurfaceControl.Builder b) {
-        b.setColorLayer().setMetadata(METADATA_TASK_ID, mTaskId);
+        b.setEffectLayer().setMetadata(METADATA_TASK_ID, mTaskId);
         super.setInitialSurfaceControlProperties(b);
     }
 
@@ -3510,7 +3504,7 @@ class Task extends WindowContainer<WindowContainer> {
                 ProtoLog.d(WM_DEBUG_RECENTS_ANIMATIONS,
                         "applyAnimationUnchecked, control: %s, task: %s, transit: %s",
                         control, asTask(), AppTransition.appTransitionToString(transit));
-                control.addTaskToTargets(getRootTask(), finishedCallback);
+                control.addTaskToTargets(this, finishedCallback);
             }
         } else {
             super.applyAnimationUnchecked(lp, enter, transit, isVoiceInteraction, finishedCallback);

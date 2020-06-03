@@ -816,7 +816,7 @@ public final class DefaultPermissionGrantPolicy {
         if (!TextUtils.isEmpty(contentCapturePackageName)) {
             grantPermissionsToSystemPackage(pm, contentCapturePackageName, userId,
                     PHONE_PERMISSIONS, SMS_PERMISSIONS, ALWAYS_LOCATION_PERMISSIONS,
-                    CONTACTS_PERMISSIONS, STORAGE_PERMISSIONS);
+                    CONTACTS_PERMISSIONS);
         }
 
         // Atthention Service
