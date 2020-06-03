@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -166,6 +167,18 @@ public class CarKeyguardViewControllerTest extends SysuiTestCase {
                 any());
         inOrder.verify(mOverlayViewGlobalStateController).hideView(eq(mCarKeyguardViewController),
                 any());
+    }
+
+    @Test
+    public void setOccludedFalse_currentlyOccluded_bouncerReset() {
+        when(mBouncer.isSecure()).thenReturn(true);
+        mCarKeyguardViewController.show(/* options= */ null);
+        mCarKeyguardViewController.setOccluded(/* occluded= */ true, /* animate= */ false);
+        reset(mBouncer);
+
+        mCarKeyguardViewController.setOccluded(/* occluded= */ false, /* animate= */ false);
+
+        verify(mBouncer).show(/* resetSecuritySelection= */ true);
     }
 
     @Test
