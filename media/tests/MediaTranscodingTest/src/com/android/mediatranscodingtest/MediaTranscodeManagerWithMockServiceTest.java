@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.mediaframeworktest.functional;
+package com.android.mediatranscodingtest;
 
 import static org.testng.Assert.assertThrows;
 
@@ -35,9 +35,6 @@ import android.os.RemoteException;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
-import com.android.mediaframeworktest.MediaFrameworkTest;
-import com.android.mediaframeworktest.R;
-
 import org.junit.Test;
 
 import java.io.File;
@@ -54,21 +51,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /*
  * Functional tests for MediaTranscodeManager in the media framework.
+ * The test uses a mock Transcoding service as backend to test the API functionality.
  *
  * To run this test suite:
-     make frameworks/base/media/tests/MediaFrameworkTest
-     make mediaframeworktest
+     make frameworks/base/media/tests/MediaTranscodingTest
+     make mediatranscodingtest
 
-     adb install -r out/target/product/dream/data/app/mediaframeworktest.apk
+     adb install -r testcases/mediatranscodingtest/arm64/mediatranscodingtest.apk
 
      adb shell am instrument -e class \
-     com.android.mediaframeworktest.functional.MediaTranscodeManagerTest \
-     -w com.android.mediaframeworktest/.MediaFrameworkTestRunner
+     com.android.mediatranscodingtest.MediaTranscodeManagerWithMockServiceTest \
+     -w com.android.mediatranscodingtest/.MediaTranscodingTestRunner
  *
  */
-public class MediaTranscodeManagerTest
-        extends ActivityInstrumentationTestCase2<MediaFrameworkTest> {
-    private static final String TAG = "MediaTranscodeManagerTest";
+public class MediaTranscodeManagerWithMockServiceTest
+        extends ActivityInstrumentationTestCase2<MediaTranscodingTest> {
+    private static final String TAG = "MediaTranscodeManagerWithMockServiceTest";
     /** The time to wait for the transcode operation to complete before failing the test. */
     private static final int TRANSCODE_TIMEOUT_SECONDS = 2;
     private Context mContext;
@@ -194,8 +192,8 @@ public class MediaTranscodeManagerTest
         }
     }
 
-    public MediaTranscodeManagerTest() {
-        super("com.android.MediaTranscodeManagerTest", MediaFrameworkTest.class);
+    public MediaTranscodeManagerWithMockServiceTest() {
+        super("com.android.MediaTranscodeManagerWithMockServiceTest", MediaTranscodingTest.class);
     }
 
 

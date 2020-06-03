@@ -229,7 +229,14 @@ public class MtpStorageManager {
         }
 
         private void setParent(MtpObject parent) {
+            if (this.getStorageId() != parent.getStorageId()) {
+                mStorage = Preconditions.checkNotNull(parent.getStorage());
+            }
             mParent = parent;
+        }
+
+        private MtpStorage getStorage() {
+            return mStorage;
         }
 
         private void setDir(boolean dir) {

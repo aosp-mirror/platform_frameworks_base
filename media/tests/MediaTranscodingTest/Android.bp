@@ -1,0 +1,15 @@
+android_test {
+    name: "mediatranscodingtest",
+    srcs: ["**/*.java"],
+    libs: [
+        "android.test.runner",
+        "android.test.base",
+    ],
+    static_libs: [
+        "androidx.test.ext.junit",
+        "androidx.test.rules",
+        "android-support-test",
+        "testng"
+    ],
+    platform_apis: true,
+}

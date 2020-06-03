@@ -24,7 +24,6 @@ import androidx.test.filters.LargeTest;
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -56,13 +55,13 @@ public class OpenImeWindowTest extends NonRotationTestBase {
     @Test
     public void checkVisibility_imeWindowBecomesVisible() {
         checkResults(result -> WmTraceSubject.assertThat(result)
+                .skipUntilFirstAssertion()
                 .hidesImeWindow(IME_WINDOW_TITLE)
                 .then()
                 .showsImeWindow(IME_WINDOW_TITLE)
                 .forAllEntries());
     }
 
-    @Ignore("Flaky. Pending debug")
     @Test
     public void checkVisibility_imeLayerBecomesVisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)

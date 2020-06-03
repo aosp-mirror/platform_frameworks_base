@@ -54,7 +54,7 @@ import java.util.stream.Collectors;
  * Media Router 2 allows applications to control the routing of media channels
  * and streams from the current device to remote speakers and devices.
  */
-// TODO: Add method names at the beginning of log messages. (e.g. updateControllerOnHandler)
+// TODO(b/157873330): Add method names at the beginning of log messages. (e.g. selectRoute)
 //       Not only MediaRouter2, but also to service / manager / provider.
 // TODO: ensure thread-safe and document it
 public final class MediaRouter2 {
@@ -399,7 +399,7 @@ public final class MediaRouter2 {
         Objects.requireNonNull(controller, "controller must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
-        // TODO: Check thread-safety
+        // TODO(b/157873496): Check thread-safety, at least check "sRouterLock" for every variable
         if (!mRoutes.containsKey(route.getId())) {
             notifyTransferFailure(route);
             return;
@@ -501,7 +501,7 @@ public final class MediaRouter2 {
     }
 
     void addRoutesOnHandler(List<MediaRoute2Info> routes) {
-        // TODO: When onRoutesAdded is first called,
+        // TODO(b/157874065): When onRoutesAdded is first called,
         //  1) clear mRoutes before adding the routes
         //  2) Call onRouteSelected(system_route, reason_fallback) if previously selected route
         //     does not exist anymore. => We may need 'boolean MediaRoute2Info#isSystemRoute()'.
@@ -1214,7 +1214,7 @@ public final class MediaRouter2 {
          * Any operations on this controller after calling this method will be ignored.
          * The devices that are playing media will stop playing it.
          */
-        // TODO: Add tests using {@link MediaRouter2Manager#getActiveSessions()}.
+        // TODO(b/157872573): Add tests using {@link MediaRouter2Manager#getActiveSessions()}.
         public void release() {
             releaseInternal(/* shouldReleaseSession= */ true, /* shouldNotifyStop= */ true);
         }

@@ -372,7 +372,7 @@ java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
         "framework-appsearch-stubs", // TODO: Update to module_libs_api when there is one.
-        "framework-graphics-stubs-module_libs_api",
+        "framework-graphics.stubs.module_lib",
         "framework-media.stubs.module_lib",
         "framework-mediaprovider.stubs.module_lib",
         "framework-permission.stubs.module_lib",

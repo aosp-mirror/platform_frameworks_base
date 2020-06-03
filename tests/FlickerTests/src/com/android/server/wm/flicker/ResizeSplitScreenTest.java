@@ -25,6 +25,7 @@ import static com.android.server.wm.flicker.helpers.AutomationUtils.isInSplitScr
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.Instrumentation;
 import android.graphics.Rect;
 import android.util.Rational;
 import android.view.Surface;
@@ -65,8 +66,9 @@ public class ResizeSplitScreenTest extends FlickerTestBase {
 
     @Override
     TransitionRunner getTransitionToRun() {
-        ImeAppHelper bottomApp = new ImeAppHelper(InstrumentationRegistry.getInstrumentation());
-        return resizeSplitScreen(mTestApp, bottomApp, mUiDevice, Surface.ROTATION_0,
+        Instrumentation instr = InstrumentationRegistry.getInstrumentation();
+        ImeAppHelper bottomApp = new ImeAppHelper(instr);
+        return resizeSplitScreen(instr, mTestApp, bottomApp, mUiDevice, Surface.ROTATION_0,
                 new Rational(1, 3), new Rational(2, 3))
                 .includeJankyRuns().build();
     }

@@ -212,6 +212,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final List<NotifCallback> mCallbacks = new ArrayList<>();
 
     /**
+     * Whether the IME is visible, as reported by the BubbleStackView. If it is, we'll make the
+     * Bubbles window NOT_FOCUSABLE so that touches on the Bubbles UI doesn't steal focus from the
+     * ActivityView and hide the IME.
+     */
+    private boolean mImeVisible = false;
+
+    /**
      * Listener to find out about stack expansion / collapse events.
      */
     public interface BubbleExpandListener {
@@ -598,7 +605,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
-                    mSysUiState, mNotificationShadeWindowController, this::onAllBubblesAnimatedOut);
+                    mSysUiState, mNotificationShadeWindowController, this::onAllBubblesAnimatedOut,
+                    this::onImeVisibilityChanged);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -650,6 +658,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
+    private void onImeVisibilityChanged(boolean imeVisible) {
+        mImeVisible = imeVisible;
+        updateWmFlags();
+    }
+
     /** Removes the BubbleStackView from the WindowManager if it's there. */
     private void removeFromWindowManagerMaybe() {
         if (!mAddedToWindowManager) {
@@ -677,13 +690,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * the new params if the stack has been added.
      */
     private void updateWmFlags() {
-        if (isStackExpanded()) {
-            // If we're expanded, we want to be focusable so that the ActivityView can receive focus
-            // and show the IME.
+        if (isStackExpanded() && !mImeVisible) {
+            // If we're expanded, and the IME isn't visible, we want to be focusable. This ensures
+            // that any taps within Bubbles (including on the ActivityView) results in Bubbles
+            // receiving focus and clearing it from any other windows that might have it.
             mWmLayoutParams.flags &= ~WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         } else {
-            // If we're collapsed, we don't want to be able to receive focus. Doing so would
-            // preclude applications from using the IME since we are always above them.
+            // If we're collapsed, we don't want to be focusable since tapping on the stack would
+            // steal focus from apps. We also don't want to be focusable if the IME is visible,
             mWmLayoutParams.flags |= WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         }
 
@@ -785,6 +799,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }
+
+            mStackView.onLayoutDirectionChanged();
         }
     }
 
