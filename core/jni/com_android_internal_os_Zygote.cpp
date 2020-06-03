@@ -526,8 +526,16 @@ static void UnsetChldSignalHandler() {
 
 // Calls POSIX setgroups() using the int[] object as an argument.
 // A nullptr argument is tolerated.
-static void SetGids(JNIEnv* env, jintArray managed_gids, fail_fn_t fail_fn) {
+static void SetGids(JNIEnv* env, jintArray managed_gids, jboolean is_child_zygote,
+                    fail_fn_t fail_fn) {
   if (managed_gids == nullptr) {
+    if (is_child_zygote) {
+      // For child zygotes like webview and app zygote, we want to clear out
+      // any supplemental groups the parent zygote had.
+      if (setgroups(0, NULL) == -1) {
+        fail_fn(CREATE_ERROR("Failed to remove supplementary groups for child zygote"));
+      }
+    }
     return;
   }
 
@@ -1665,7 +1673,7 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
     }
   }
 
-  SetGids(env, gids, fail_fn);
+  SetGids(env, gids, is_child_zygote, fail_fn);
   SetRLimits(env, rlimits, fail_fn);
 
   if (need_pre_initialize_native_bridge) {
