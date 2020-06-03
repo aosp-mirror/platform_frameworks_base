@@ -18,7 +18,6 @@ package com.android.server.biometrics.sensors.face;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
-import static android.Manifest.permission.RESET_FACE_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.app.ActivityManager;
@@ -1047,16 +1046,6 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected String getLockoutResetIntent() {
-        return ACTION_LOCKOUT_RESET;
-    }
-
-    @Override
-    protected String getLockoutBroadcastPermission() {
-        return RESET_FACE_LOCKOUT;
-    }
-
-    @Override
     protected void handleUserSwitching(int userId) {
         super.handleUserSwitching(userId);
         // Will be updated when we get the callback from HAL
@@ -1103,7 +1092,7 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getLockoutMode() {
+    protected int getLockoutMode(int userId) {
         return mCurrentUserLockoutMode;
     }
 

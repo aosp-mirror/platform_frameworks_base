@@ -4462,10 +4462,6 @@
     <permission android:name="android.permission.MANAGE_BIOMETRIC_DIALOG"
         android:protectionLevel="signature" />
 
-    <!-- Allows an app to reset face authentication attempt counter. Reserved for the system. @hide -->
-    <permission android:name="android.permission.RESET_FACE_LOCKOUT"
-        android:protectionLevel="signature" />
-
     <!-- Allows an application to control keyguard.  Only allowed for system processes.
         @hide -->
     <permission android:name="android.permission.CONTROL_KEYGUARD"

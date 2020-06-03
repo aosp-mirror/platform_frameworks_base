@@ -73,16 +73,6 @@ public class BiometricServiceBaseTest {
         }
 
         @Override
-        protected String getLockoutResetIntent() {
-            return null;
-        }
-
-        @Override
-        protected String getLockoutBroadcastPermission() {
-            return null;
-        }
-
-        @Override
         protected boolean hasEnrolledBiometrics(int userId) {
             return false;
         }
@@ -113,7 +103,7 @@ public class BiometricServiceBaseTest {
         }
 
         @Override
-        protected int getLockoutMode() {
+        protected int getLockoutMode(int userId) {
             return 0;
         }
     }

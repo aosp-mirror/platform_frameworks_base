@@ -106,16 +106,6 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected String getLockoutResetIntent() {
-        return null;
-    }
-
-    @Override
-    protected String getLockoutBroadcastPermission() {
-        return null;
-    }
-
-    @Override
     protected boolean hasEnrolledBiometrics(int userId) {
         return false;
     }
@@ -146,7 +136,7 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getLockoutMode() {
+    protected int getLockoutMode(int userId) {
         return AuthenticationClient.LOCKOUT_NONE;
     }
 }
