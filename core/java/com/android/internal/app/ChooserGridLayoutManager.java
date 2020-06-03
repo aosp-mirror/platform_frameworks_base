@@ -28,6 +28,8 @@ import com.android.internal.widget.RecyclerView;
  */
 public class ChooserGridLayoutManager extends GridLayoutManager {
 
+    private boolean mVerticalScrollEnabled = true;
+
     /**
      * Constructor used when layout manager is set in XML by RecyclerView attribute
      * "layoutManager". If spanCount is not specified in the XML, it defaults to a
@@ -66,5 +68,14 @@ public class ChooserGridLayoutManager extends GridLayoutManager {
             RecyclerView.State state) {
         // Do not count the footer view in the official count
         return super.getRowCountForAccessibility(recycler, state) - 1;
+    }
+
+    void setVerticalScrollEnabled(boolean verticalScrollEnabled) {
+        mVerticalScrollEnabled = verticalScrollEnabled;
+    }
+
+    @Override
+    public boolean canScrollVertically() {
+        return mVerticalScrollEnabled && super.canScrollVertically();
     }
 }
