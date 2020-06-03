@@ -129,7 +129,10 @@ class ControlsUiControllerImpl @Inject constructor (
                         SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
                     }
                     uiExecutor.execute {
-                        onResult(lastItems)
+                        parent.removeAllViews()
+                        if (lastItems.size > 0) {
+                            onResult(lastItems)
+                        }
                     }
                 }
             }
@@ -189,8 +192,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showSeedingView(items: List<SelectionItem>) {
-        parent.removeAllViews()
-
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
         val subtitle = parent.requireViewById<TextView>(R.id.controls_subtitle)
@@ -198,8 +199,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showInitialSetupView(items: List<SelectionItem>) {
-        parent.removeAllViews()
-
         val inflater = LayoutInflater.from(context)
         inflater.inflate(R.layout.controls_no_favorites, parent, true)
 
@@ -263,7 +262,6 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun showControlsView(items: List<SelectionItem>) {
-        parent.removeAllViews()
         controlViewsById.clear()
 
         createListView()
