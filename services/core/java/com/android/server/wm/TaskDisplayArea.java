@@ -1741,21 +1741,23 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         // reparenting stack finished.
         // Keep the order from bottom to top.
         int numStacks = getStackCount();
+
+        final boolean splitScreenActivated = toDisplayArea.isSplitScreenModeActivated();
+        final ActivityStack rootStack = splitScreenActivated ? toDisplayArea
+                .getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) : null;
         for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
             final ActivityStack stack = getStackAt(stackNdx);
             // Always finish non-standard type stacks.
             if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
                 stack.finishAllActivitiesImmediately();
             } else {
-                // If default display is in split-window mode, set windowing mode of the
-                // stack to split-screen secondary. Otherwise, set the windowing mode to
-                // undefined by default to let stack inherited the windowing mode from the
-                // new display.
-                final int windowingMode = toDisplayArea.isSplitScreenModeActivated()
-                        ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                        : WINDOWING_MODE_UNDEFINED;
-                stack.reparent(toDisplayArea, true /* onTop */);
-                stack.setWindowingMode(windowingMode);
+                // Reparent the stack to the root task of secondary-split-screen or display area.
+                stack.reparent(stack.supportsSplitScreenWindowingMode() && rootStack != null
+                        ? rootStack : toDisplayArea, POSITION_TOP);
+
+                // Set the windowing mode to undefined by default to let the stack inherited the
+                // windowing mode.
+                stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                 lastReparentedStack = stack;
             }
             // Stacks may be removed from this display. Ensure each stack will be processed
@@ -1763,6 +1765,17 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             stackNdx -= numStacks - getStackCount();
             numStacks = getStackCount();
         }
+        if (lastReparentedStack != null && splitScreenActivated) {
+            if (!lastReparentedStack.supportsSplitScreenWindowingMode()) {
+                mAtmService.getTaskChangeNotificationController()
+                        .notifyActivityDismissingDockedStack();
+                toDisplayArea.onSplitScreenModeDismissed(lastReparentedStack);
+            } else if (rootStack != null) {
+                // update focus
+                rootStack.moveToFront("display-removed");
+            }
+        }
+
         mRemoved = true;
 
         return lastReparentedStack;
