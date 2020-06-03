@@ -28,6 +28,9 @@ import static android.os.PowerManager.locationPowerSaveModeToString;
 
 import static com.android.server.location.CallerIdentity.PERMISSION_COARSE;
 import static com.android.server.location.CallerIdentity.PERMISSION_FINE;
+import static com.android.server.location.UserInfoHelper.UserListener.CURRENT_USER_CHANGED;
+import static com.android.server.location.UserInfoHelper.UserListener.USER_STARTED;
+import static com.android.server.location.UserInfoHelper.UserListener.USER_STOPPED;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
@@ -101,7 +104,7 @@ import com.android.server.location.AbstractLocationProvider.State;
 import com.android.server.location.CallerIdentity.PermissionLevel;
 import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
-import com.android.server.location.UserInfoHelper.UserListener;
+import com.android.server.location.UserInfoHelper.UserListener.UserChange;
 import com.android.server.location.gnss.GnssManagerService;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
@@ -132,11 +135,13 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     public static class Lifecycle extends SystemService {
 
+        private final UserInfoHelper mUserInfoHelper;
         private final LocationManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
-            mService = new LocationManagerService(context);
+            mUserInfoHelper = new SystemUserInfoHelper(context);
+            mService = new LocationManagerService(context, mUserInfoHelper);
         }
 
         @Override
@@ -159,6 +164,29 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // some providers rely on third party code, so we wait to initialize
                 // providers until third party code is allowed to run
                 mService.onSystemThirdPartyAppsCanStart();
+            }
+        }
+
+        @Override
+        public void onUserStarting(TargetUser user) {
+            mUserInfoHelper.dispatchOnUserStarted(user.getUserIdentifier());
+        }
+
+        @Override
+        public void onUserSwitching(TargetUser from, TargetUser to) {
+            mUserInfoHelper.dispatchOnCurrentUserChanged(from.getUserIdentifier(),
+                    to.getUserIdentifier());
+        }
+
+        @Override
+        public void onUserStopped(TargetUser user) {
+            mUserInfoHelper.dispatchOnUserStopped(user.getUserIdentifier());
+        }
+
+        private static class SystemUserInfoHelper extends UserInfoHelper {
+
+            SystemUserInfoHelper(Context context) {
+                super(context);
             }
         }
     }
@@ -232,7 +260,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @PowerManager.LocationPowerSaveMode
     private int mBatterySaverMode;
 
-    private LocationManagerService(Context context) {
+    private LocationManagerService(Context context, UserInfoHelper userInfoHelper) {
         mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mHandler = FgThread.getHandler();
         mLocalService = new LocalService();
@@ -240,7 +268,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         LocalServices.addService(LocationManagerInternal.class, mLocalService);
 
         mAppOpsHelper = new AppOpsHelper(mContext);
-        mUserInfoHelper = new UserInfoHelper(mContext);
+        mUserInfoHelper = userInfoHelper;
         mSettingsHelper = new SettingsHelper(mContext, mHandler);
         mAppForegroundHelper = new AppForegroundHelper(mContext);
         mLocationUsageLogger = new LocationUsageLogger();
@@ -342,7 +370,7 @@ public class LocationManagerService extends ILocationManager.Stub {
             // initialize the current users. we would get the user started notifications for these
             // users eventually anyways, but this takes care of it as early as possible.
             for (int userId: mUserInfoHelper.getCurrentUserIds()) {
-                onUserChanged(userId, UserListener.USER_STARTED);
+                onUserChanged(userId, USER_STARTED);
             }
         }
     }
@@ -596,32 +624,23 @@ public class LocationManagerService extends ILocationManager.Stub {
         }
     }
 
-    private void onUserChanged(@UserIdInt int userId, @UserListener.UserChange int change) {
+    private void onUserChanged(@UserIdInt int userId, @UserChange int change) {
         switch (change) {
-            case UserListener.USER_SWITCHED:
-                if (D) {
-                    Log.d(TAG, "user " + userId + " current status changed");
-                }
+            case CURRENT_USER_CHANGED:
                 synchronized (mLock) {
                     for (LocationProviderManager manager : mProviderManagers) {
                         manager.onEnabledChangedLocked(userId);
                     }
                 }
                 break;
-            case UserListener.USER_STARTED:
-                if (D) {
-                    Log.d(TAG, "user " + userId + " started");
-                }
+            case USER_STARTED:
                 synchronized (mLock) {
                     for (LocationProviderManager manager : mProviderManagers) {
                         manager.onUserStarted(userId);
                     }
                 }
                 break;
-            case UserListener.USER_STOPPED:
-                if (D) {
-                    Log.d(TAG, "user " + userId + " stopped");
-                }
+            case USER_STOPPED:
                 synchronized (mLock) {
                     for (LocationProviderManager manager : mProviderManagers) {
                         manager.onUserStopped(userId);
@@ -957,10 +976,22 @@ public class LocationManagerService extends ILocationManager.Stub {
                 pw.increaseIndent();
 
                 // for now we only dump for the parent user
-                int userId = mUserInfoHelper.getCurrentUserIds()[0];
-                pw.println("last location=" + mLastLocation.get(userId));
-                pw.println("last coarse location=" + mLastCoarseLocation.get(userId));
-                pw.println("enabled=" + isEnabled(userId));
+                int[] userIds = mUserInfoHelper.getCurrentUserIds();
+                if (userIds.length == 1) {
+                    int userId = userIds[0];
+                    pw.println("last location=" + mLastLocation.get(userId));
+                    pw.println("last coarse location=" + mLastCoarseLocation.get(userId));
+                    pw.println("enabled=" + isEnabled(userId));
+                } else {
+                    for (int userId : userIds) {
+                        pw.println("user " + userId + ":");
+                        pw.increaseIndent();
+                        pw.println("last location=" + mLastLocation.get(userId));
+                        pw.println("last coarse location=" + mLastCoarseLocation.get(userId));
+                        pw.println("enabled=" + isEnabled(userId));
+                        pw.decreaseIndent();
+                    }
+                }
             }
 
             mProvider.dump(fd, pw, args);
