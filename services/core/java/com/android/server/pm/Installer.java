@@ -680,17 +680,18 @@ public class Installer extends SystemService {
      * @param snapshotId id of this snapshot.
      * @param storageFlags flags controlling which data (CE or DE) to snapshot.
      *
-     * @return inode of the snapshot of users CE package data, or {@code 0} if a remote calls
-     *  shouldn't be continued. See {@link #checkBeforeRemote}.
+     * @return {@code true} if the snapshot was taken successfully, or {@code false} if a remote
+     * call shouldn't be continued. See {@link #checkBeforeRemote}.
      *
      * @throws InstallerException if failed to snapshot user data.
      */
-    public long snapshotAppData(String pkg, @UserIdInt int userId, int snapshotId, int storageFlags)
-            throws InstallerException {
-        if (!checkBeforeRemote()) return 0;
+    public boolean snapshotAppData(String pkg, @UserIdInt int userId, int snapshotId,
+            int storageFlags) throws InstallerException {
+        if (!checkBeforeRemote()) return false;
 
         try {
-            return mInstalld.snapshotAppData(null, pkg, userId, snapshotId, storageFlags);
+            mInstalld.snapshotAppData(null, pkg, userId, snapshotId, storageFlags);
+            return true;
         } catch (Exception e) {
             throw InstallerException.from(e);
         }
@@ -728,7 +729,6 @@ public class Installer extends SystemService {
      *
      * @param pkg name of the package to delete user data snapshot for.
      * @param userId id of the user whose user data snapshot to delete.
-     * @param ceSnapshotInode inode of CE user data snapshot.
      * @param snapshotId id of the snapshot to delete.
      * @param storageFlags flags controlling which user data snapshot (CE or DE) to delete.
      *
@@ -737,13 +737,12 @@ public class Installer extends SystemService {
      *
      * @throws InstallerException if failed to delete user data snapshot.
      */
-    public boolean destroyAppDataSnapshot(String pkg, @UserIdInt int userId, long ceSnapshotInode,
+    public boolean destroyAppDataSnapshot(String pkg, @UserIdInt int userId,
             int snapshotId, int storageFlags) throws InstallerException {
         if (!checkBeforeRemote()) return false;
 
         try {
-            mInstalld.destroyAppDataSnapshot(null, pkg, userId, ceSnapshotInode, snapshotId,
-                    storageFlags);
+            mInstalld.destroyAppDataSnapshot(null, pkg, userId, 0, snapshotId, storageFlags);
             return true;
         } catch (Exception e) {
             throw InstallerException.from(e);

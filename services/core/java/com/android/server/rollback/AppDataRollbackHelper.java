@@ -133,7 +133,7 @@ public class AppDataRollbackHelper {
         } else {
             // APK
             try {
-                mInstaller.snapshotAppData(
+                return mInstaller.snapshotAppData(
                         packageRollbackInfo.getPackageName(), userId, rollbackId, flags);
             } catch (InstallerException ie) {
                 Slog.e(TAG, "Unable to create app data snapshot for: "
@@ -198,7 +198,7 @@ public class AppDataRollbackHelper {
         try {
             // Delete both DE and CE snapshots if any
             mInstaller.destroyAppDataSnapshot(packageRollbackInfo.getPackageName(), user,
-                    0, rollbackId, Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE);
+                    rollbackId, Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE);
         } catch (InstallerException ie) {
             Slog.e(TAG, "Unable to delete app data snapshot for "
                         + packageRollbackInfo.getPackageName(), ie);
