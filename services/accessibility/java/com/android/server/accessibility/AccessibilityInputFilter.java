@@ -533,9 +533,10 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                 & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0;
         MagnificationGestureHandler magnificationGestureHandler;
         if (mAms.getMagnificationMode(displayId)
-                == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW && triggerable) {
+                == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW) {
             magnificationGestureHandler = new WindowMagnificationGestureHandler(displayContext,
-                    mAms.getWindowMagnificationMgr(), mAms::onMagnificationScaleChanged, displayId);
+                    mAms.getWindowMagnificationMgr(), mAms::onMagnificationScaleChanged,
+                    detectControlGestures, triggerable, displayId);
         } else {
             magnificationGestureHandler = new FullScreenMagnificationGestureHandler(displayContext,
                     mAms.getMagnificationController(), mAms::onMagnificationScaleChanged,
