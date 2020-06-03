@@ -30,7 +30,11 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Interface to access and modify the power save whitelist.
+ * Interface to access and modify the permanent and temporary power save whitelist. The two lists
+ * are kept separately. Apps placed on the permanent whitelist are only removed via an explicit
+ * removeFromWhitelist call. Apps whitelisted by default by the system cannot be removed. Apps
+ * placed on the temporary whitelist are removed from that whitelist after a predetermined amount of
+ * time.
  *
  * @hide
  */
@@ -141,10 +145,26 @@ public class PowerWhitelistManager {
     }
 
     /**
+     * Remove an app from the permanent power save whitelist. Only apps that were added via
+     * {@link #addToWhitelist(String)} or {@link #addToWhitelist(List)} will be removed. Apps
+     * whitelisted by default by the system cannot be removed.
+     *
+     * @param packageName The app to remove from the whitelist
+     */
+    @RequiresPermission(android.Manifest.permission.DEVICE_POWER)
+    public void removeFromWhitelist(@NonNull String packageName) {
+        try {
+            mService.removePowerSaveWhitelistApp(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Add an app to the temporary whitelist for a short amount of time.
      *
      * @param packageName The package to add to the temp whitelist
-     * @param durationMs How long to keep the app on the temp whitelist for (in milliseconds)
+     * @param durationMs  How long to keep the app on the temp whitelist for (in milliseconds)
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)
     public void whitelistAppTemporarily(@NonNull String packageName, long durationMs) {
@@ -158,12 +178,14 @@ public class PowerWhitelistManager {
     }
 
     /**
-     * Add an app to the temporary whitelist for a short amount of time for a specific reason.
+     * Add an app to the temporary whitelist for a short amount of time for a specific reason. The
+     * temporary whitelist is kept separately from the permanent whitelist and apps are
+     * automatically removed from the temporary whitelist after a predetermined amount of time.
      *
      * @param packageName The package to add to the temp whitelist
-     * @param event The reason to add the app to the temp whitelist
-     * @param reason A human-readable reason explaining why the app is temp whitelisted. Only used
-     *               for logging purposes
+     * @param event       The reason to add the app to the temp whitelist
+     * @param reason      A human-readable reason explaining why the app is temp whitelisted. Only
+     *                    used for logging purposes
      * @return The duration (in milliseconds) that the app is whitelisted for
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST)

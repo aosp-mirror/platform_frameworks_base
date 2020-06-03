@@ -2665,6 +2665,7 @@ package android.os {
   public class PowerWhitelistManager {
     method @RequiresPermission("android.permission.DEVICE_POWER") public void addToWhitelist(@NonNull String);
     method @RequiresPermission("android.permission.DEVICE_POWER") public void addToWhitelist(@NonNull java.util.List<java.lang.String>);
+    method @RequiresPermission("android.permission.DEVICE_POWER") public void removeFromWhitelist(@NonNull String);
     method @RequiresPermission("android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST") public void whitelistAppTemporarily(@NonNull String, long);
     method @RequiresPermission("android.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST") public long whitelistAppTemporarilyForEvent(@NonNull String, int, @NonNull String);
     field public static final int EVENT_MMS = 2; // 0x2
