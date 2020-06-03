@@ -701,12 +701,7 @@ public class IpServer extends StateMachine {
             final String upstreamIface = v6only.getInterfaceName();
 
             params = new RaParams();
-            // When BPF offload is enabled, we advertise an mtu lower by 16, which is the closest
-            // multiple of 8 >= 14, the ethernet header size. This makes kernel ebpf tethering
-            // offload happy. This hack should be reverted once we have the kernel fixed up.
-            // Note: this will automatically clamp to at least 1280 (ipv6 minimum mtu)
-            // see RouterAdvertisementDaemon.java putMtu()
-            params.mtu = mUsingBpfOffload ? v6only.getMtu() - 16 : v6only.getMtu();
+            params.mtu = v6only.getMtu();
             params.hasDefaultRoute = v6only.hasIpv6DefaultRoute();
 
             if (params.hasDefaultRoute) params.hopLimit = getHopLimit(upstreamIface, ttlAdjustment);
