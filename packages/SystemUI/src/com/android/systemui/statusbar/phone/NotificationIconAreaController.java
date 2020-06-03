@@ -572,6 +572,9 @@ public class NotificationIconAreaController implements DarkReceiver,
                     .setInterpolator(Interpolators.LINEAR)
                     .setDuration(AOD_ICONS_APPEAR_DURATION)
                     .start();
+        } else {
+            mAodIcons.setAlpha(1.0f);
+            mAodIcons.setTranslationY(0);
         }
     }
 
