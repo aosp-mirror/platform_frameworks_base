@@ -3043,10 +3043,6 @@ public class ChooserActivity extends ResolverActivity implements
         currentRootAdapter.updateDirectShareExpansion();
     }
 
-    void prepareIntentForCrossProfileLaunch(Intent intent) {
-        intent.fixUris(UserHandle.myUserId());
-    }
-
     @Override
     protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
         if (shouldShowTabs()) {
