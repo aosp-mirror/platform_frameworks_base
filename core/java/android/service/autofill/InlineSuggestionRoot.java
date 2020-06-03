@@ -58,7 +58,9 @@ public class InlineSuggestionRoot extends FrameLayout {
             case MotionEvent.ACTION_DOWN: {
                 mDownX = event.getX();
                 mDownY = event.getY();
-            } break;
+            }
+            // Intentionally fall through to the next case so that when the window is obscured
+            // we transfer the touch to the remote IME window and don't handle it locally.
 
             case MotionEvent.ACTION_MOVE: {
                 final float distance = MathUtils.dist(mDownX, mDownY,
