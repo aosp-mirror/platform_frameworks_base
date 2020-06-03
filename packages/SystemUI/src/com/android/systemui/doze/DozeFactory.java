@@ -71,7 +71,7 @@ public class DozeFactory {
             DockManager dockManager, @Nullable IWallpaperManager wallpaperManager,
             ProximitySensor proximitySensor,
             DelayedWakeLock.Builder delayedWakeLockBuilder, @Main Handler handler,
-            DelayableExecutor delayableExecutor,
+            @Main DelayableExecutor delayableExecutor,
             BiometricUnlockController biometricUnlockController,
             BroadcastDispatcher broadcastDispatcher, DozeHost dozeHost) {
         mFalsingManager = falsingManager;
