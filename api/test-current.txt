@@ -5136,6 +5136,7 @@ package android.view.autofill {
     ctor public AutofillId(int, int);
     ctor public AutofillId(@NonNull android.view.autofill.AutofillId, long, int);
     method public boolean equalsIgnoreSession(@Nullable android.view.autofill.AutofillId);
+    method @NonNull public static android.view.autofill.AutofillId withoutSession(@NonNull android.view.autofill.AutofillId);
   }
 
   public final class AutofillManager {
