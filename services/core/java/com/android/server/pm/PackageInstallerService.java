@@ -40,6 +40,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
 import android.content.pm.PackageInstaller.SessionParams;
+import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.VersionedPackage;
@@ -126,8 +127,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
     private static final long MAX_AGE_MILLIS = 3 * DateUtils.DAY_IN_MILLIS;
     /** Automatically destroy staged sessions that have not changed state in this time */
     private static final long MAX_TIME_SINCE_UPDATE_MILLIS = 7 * DateUtils.DAY_IN_MILLIS;
-    /** Upper bound on number of active sessions for a UID */
-    private static final long MAX_ACTIVE_SESSIONS = 1024;
+    /** Upper bound on number of active sessions for a UID that has INSTALL_PACKAGES */
+    private static final long MAX_ACTIVE_SESSIONS_WITH_PERMISSION = 1024;
+    /** Upper bound on number of active sessions for a UID without INSTALL_PACKAGES */
+    private static final long MAX_ACTIVE_SESSIONS_NO_PERMISSION = 50;
     /** Upper bound on number of historical sessions for a UID */
     private static final long MAX_HISTORICAL_SESSIONS = 1048576;
 
@@ -503,7 +506,18 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                     + "to use a data loader");
         }
 
-        String requestedInstallerPackageName = params.installerPackageName != null
+        // App package name and label length is restricted so that really long strings aren't
+        // written to disk.
+        if (params.appPackageName != null
+                && params.appPackageName.length() > SessionParams.MAX_PACKAGE_NAME_LENGTH) {
+            params.appPackageName = null;
+        }
+
+        params.appLabel = TextUtils.trimToSize(params.appLabel,
+                PackageItemInfo.MAX_SAFE_LABEL_LENGTH);
+
+        String requestedInstallerPackageName = (params.installerPackageName != null
+                && params.installerPackageName.length() < SessionParams.MAX_PACKAGE_NAME_LENGTH)
                 ? params.installerPackageName : installerPackageName;
 
         if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
@@ -635,12 +649,23 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
             }
         }
 
+        if (params.whitelistedRestrictedPermissions != null) {
+            mPermissionManager.retainHardAndSoftRestrictedPermissions(
+                    params.whitelistedRestrictedPermissions);
+        }
+
         final int sessionId;
         final PackageInstallerSession session;
         synchronized (mSessions) {
             // Sanity check that installer isn't going crazy
             final int activeCount = getSessionCount(mSessions, callingUid);
-            if (activeCount >= MAX_ACTIVE_SESSIONS) {
+            if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                    == PackageManager.PERMISSION_GRANTED) {
+                if (activeCount >= MAX_ACTIVE_SESSIONS_WITH_PERMISSION) {
+                    throw new IllegalStateException(
+                            "Too many active sessions for UID " + callingUid);
+                }
+            } else if (activeCount >= MAX_ACTIVE_SESSIONS_NO_PERMISSION) {
                 throw new IllegalStateException(
                         "Too many active sessions for UID " + callingUid);
             }

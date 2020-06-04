@@ -64,6 +64,10 @@ class DetailDialog(
         }
 
         override fun onActivityViewDestroyed(view: ActivityView) {}
+
+        override fun onTaskRemovalStarted(taskId: Int) {
+            dismiss()
+        }
     }
 
     init {

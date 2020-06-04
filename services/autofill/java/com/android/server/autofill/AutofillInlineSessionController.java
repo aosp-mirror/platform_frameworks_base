@@ -75,9 +75,7 @@ final class AutofillInlineSessionController {
             @NonNull Consumer<InlineSuggestionsRequest> requestConsumer, @NonNull Bundle uiExtras) {
         // TODO(b/151123764): rename the method to better reflect what it does.
         if (mSession != null) {
-            // Send an empty response to IME and destroy the existing session.
-            mSession.onInlineSuggestionsResponseLocked(
-                    InlineFillUi.emptyUi(mSession.getAutofillIdLocked()));
+            // Destroy the existing session.
             mSession.destroySessionLocked();
             mInlineFillUi = null;
         }
