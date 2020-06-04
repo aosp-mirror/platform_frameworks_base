@@ -20,6 +20,8 @@ import android.annotation.NonNull;
 
 /**
  * Utility class for IO.
+ *
+ * @hide
  */
 public class IoUtils {
 

@@ -102,6 +102,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.ViewTreeObserver;
+import android.view.WindowInsets;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
@@ -129,6 +130,7 @@ import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.widget.GridLayoutManager;
 import com.android.internal.widget.RecyclerView;
 import com.android.internal.widget.ResolverDrawerLayout;
+import com.android.internal.widget.ViewPager;
 
 import com.google.android.collect.Lists;
 
@@ -203,6 +205,10 @@ public class ChooserActivity extends ResolverActivity implements
     public static final int SELECTION_TYPE_APP = 2;
     public static final int SELECTION_TYPE_STANDARD = 3;
     public static final int SELECTION_TYPE_COPY = 4;
+
+    private static final int SCROLL_STATUS_IDLE = 0;
+    private static final int SCROLL_STATUS_SCROLLING_VERTICAL = 1;
+    private static final int SCROLL_STATUS_SCROLLING_HORIZONTAL = 2;
 
     // statsd logger wrapper
     protected ChooserActivityLogger mChooserActivityLogger;
@@ -293,6 +299,7 @@ public class ChooserActivity extends ResolverActivity implements
     protected MetricsLogger mMetricsLogger;
 
     private ContentPreviewCoordinator mPreviewCoord;
+    private int mScrollStatus = SCROLL_STATUS_IDLE;
 
     @VisibleForTesting
     protected ChooserMultiProfilePagerAdapter mChooserMultiProfilePagerAdapter;
@@ -2680,7 +2687,7 @@ public class ChooserActivity extends ResolverActivity implements
                         offset = Math.min(offset, minHeight);
                     }
                 } else {
-                    ViewGroup currentEmptyStateView = getCurrentEmptyStateView();
+                    ViewGroup currentEmptyStateView = getActiveEmptyStateView();
                     if (currentEmptyStateView.getVisibility() == View.VISIBLE) {
                         offset += currentEmptyStateView.getHeight();
                     }
@@ -2705,7 +2712,7 @@ public class ChooserActivity extends ResolverActivity implements
         return -1;
     }
 
-    private ViewGroup getCurrentEmptyStateView() {
+    private ViewGroup getActiveEmptyStateView() {
         int currentPage = mChooserMultiProfilePagerAdapter.getCurrentPage();
         return mChooserMultiProfilePagerAdapter.getItem(currentPage).getEmptyStateView();
     }
@@ -2822,10 +2829,20 @@ public class ChooserActivity extends ResolverActivity implements
         final float defaultElevation = elevatedView.getElevation();
         final float chooserHeaderScrollElevation =
                 getResources().getDimensionPixelSize(R.dimen.chooser_header_scroll_elevation);
-
         mChooserMultiProfilePagerAdapter.getActiveAdapterView().addOnScrollListener(
                 new RecyclerView.OnScrollListener() {
                     public void onScrollStateChanged(RecyclerView view, int scrollState) {
+                        if (scrollState == RecyclerView.SCROLL_STATE_IDLE) {
+                            if (mScrollStatus == SCROLL_STATUS_SCROLLING_VERTICAL) {
+                                mScrollStatus = SCROLL_STATUS_IDLE;
+                                setHorizontalScrollingEnabled(true);
+                            }
+                        } else if (scrollState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                            if (mScrollStatus == SCROLL_STATUS_IDLE) {
+                                mScrollStatus = SCROLL_STATUS_SCROLLING_VERTICAL;
+                                setHorizontalScrollingEnabled(false);
+                            }
+                        }
                     }
 
                     public void onScrolled(RecyclerView view, int dx, int dy) {
@@ -3026,8 +3043,42 @@ public class ChooserActivity extends ResolverActivity implements
         currentRootAdapter.updateDirectShareExpansion();
     }
 
-    void prepareIntentForCrossProfileLaunch(Intent intent) {
-        intent.fixUris(UserHandle.myUserId());
+    @Override
+    protected WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+        if (shouldShowTabs()) {
+            mChooserMultiProfilePagerAdapter
+                    .setEmptyStateBottomOffset(insets.getSystemWindowInsetBottom());
+            mChooserMultiProfilePagerAdapter.setupContainerPadding(
+                    getActiveEmptyStateView().findViewById(R.id.resolver_empty_state_container));
+        }
+        return super.onApplyWindowInsets(v, insets);
+    }
+
+    private void setHorizontalScrollingEnabled(boolean enabled) {
+        ResolverViewPager viewPager = findViewById(R.id.profile_pager);
+        viewPager.setSwipingEnabled(enabled);
+    }
+
+    private void setVerticalScrollEnabled(boolean enabled) {
+        ChooserGridLayoutManager layoutManager =
+                (ChooserGridLayoutManager) mChooserMultiProfilePagerAdapter.getActiveAdapterView()
+                        .getLayoutManager();
+        layoutManager.setVerticalScrollEnabled(enabled);
+    }
+
+    @Override
+    void onHorizontalSwipeStateChanged(int state) {
+        if (state == ViewPager.SCROLL_STATE_DRAGGING) {
+            if (mScrollStatus == SCROLL_STATUS_IDLE) {
+                mScrollStatus = SCROLL_STATUS_SCROLLING_HORIZONTAL;
+                setVerticalScrollEnabled(false);
+            }
+        } else if (state == ViewPager.SCROLL_STATE_IDLE) {
+            if (mScrollStatus == SCROLL_STATUS_SCROLLING_VERTICAL) {
+                mScrollStatus = SCROLL_STATUS_IDLE;
+                setVerticalScrollEnabled(true);
+            }
+        }
     }
 
     /**
