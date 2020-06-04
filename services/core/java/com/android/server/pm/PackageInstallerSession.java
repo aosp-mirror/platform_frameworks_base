@@ -1747,21 +1747,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void verifyNonStaged(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
-        final PackageManagerService.ActiveInstallSession verifyingSession =
-                makeSessionActiveForVerification();
+        final PackageManagerService.VerificationParams verifyingSession =
+                makeVerificationParams();
         if (verifyingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            List<PackageManagerService.ActiveInstallSession> verifyingChildSessions =
+            List<PackageManagerService.VerificationParams> verifyingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.ActiveInstallSession verifyingChildSession =
-                            session.makeSessionActiveForVerification();
+                    final PackageManagerService.VerificationParams verifyingChildSession =
+                            session.makeVerificationParams();
                     if (verifyingChildSession != null) {
                         verifyingChildSessions.add(verifyingChildSession);
                     }
@@ -1829,10 +1829,11 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Stages this session for verification and returns a
-     * {@link PackageManagerService.ActiveInstallSession} representing this new staged state or null
+     * {@link PackageManagerService.VerificationParams} representing this new staged state or null
      * in case permissions need to be requested before verification can proceed.
      */
-    private PackageManagerService.ActiveInstallSession makeSessionActiveForVerification()
+    @Nullable
+    private PackageManagerService.VerificationParams makeVerificationParams()
             throws PackageManagerException {
         assertNotLocked("makeSessionActive");
 
@@ -1873,12 +1874,12 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return makeSessionActiveForVerificationLocked();
+            return makeVerificationParamsLocked();
         }
     }
 
     @GuardedBy("mLock")
-    private PackageManagerService.ActiveInstallSession makeSessionActiveForVerificationLocked()
+    private PackageManagerService.VerificationParams makeVerificationParamsLocked()
             throws PackageManagerException {
         if (!params.isMultiPackage) {
             Objects.requireNonNull(mPackageName);
@@ -1974,11 +1975,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         mRelinquished = true;
-        // TODO(159331446): create VerificationParams directly by passing information that is
-        //  required for verification only
-        return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
-                localObserver, sessionId, params, mInstallerUid, mInstallSource, user,
-                mSigningDetails);
+
+        return mPm.new VerificationParams(user, stageDir, localObserver, params,
+                mInstallSource, mInstallerUid, mSigningDetails, sessionId);
     }
 
     private void onVerificationComplete() {

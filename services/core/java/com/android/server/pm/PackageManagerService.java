@@ -12869,17 +12869,16 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
-    void verifyStage(ActiveInstallSession activeInstallSession) {
-        final VerificationParams params = new VerificationParams(activeInstallSession);
+    void verifyStage(VerificationParams params) {
         mHandler.post(()-> {
             params.startCopy();
         });
     }
 
-    void verifyStage(ActiveInstallSession parent, List<ActiveInstallSession> children)
+    void verifyStage(VerificationParams parent, List<VerificationParams> children)
             throws PackageManagerException {
         final MultiPackageVerificationParams params =
-                new MultiPackageVerificationParams(UserHandle.ALL, parent, children);
+                new MultiPackageVerificationParams(parent, children);
         mHandler.post(()-> {
             params.startCopy();
         });
@@ -15052,27 +15051,25 @@ public class PackageManagerService extends IPackageManager.Stub
      */
     class MultiPackageVerificationParams extends HandlerParams {
         private final IPackageInstallObserver2 mObserver;
-        private final ArrayList<VerificationParams> mChildParams;
+        private final List<VerificationParams> mChildParams;
         private final Map<VerificationParams, Integer> mVerificationState;
 
         MultiPackageVerificationParams(
-                @NonNull UserHandle user,
-                @NonNull ActiveInstallSession parent,
-                @NonNull List<ActiveInstallSession> activeInstallSessions)
+                VerificationParams parent,
+                List<VerificationParams> children)
                 throws PackageManagerException {
-            super(user);
-            if (activeInstallSessions.size() == 0) {
+            super(parent.getUser());
+            if (children.size() == 0) {
                 throw new PackageManagerException("No child sessions found!");
             }
-            mChildParams = new ArrayList<>(activeInstallSessions.size());
-            for (int i = 0; i < activeInstallSessions.size(); i++) {
-                final VerificationParams childParams =
-                        new VerificationParams(activeInstallSessions.get(i));
+            mChildParams = children;
+            // Provide every child with reference to this object as parent
+            for (int i = 0; i < children.size(); i++) {
+                final VerificationParams childParams = children.get(i);
                 childParams.mParentVerificationParams = this;
-                this.mChildParams.add(childParams);
             }
             this.mVerificationState = new ArrayMap<>(mChildParams.size());
-            mObserver = parent.getObserver();
+            mObserver = parent.observer;
         }
 
         @Override
@@ -15130,31 +15127,26 @@ public class PackageManagerService extends IPackageManager.Stub
         private boolean mWaitForEnableRollbackToComplete;
         private int mRet;
 
-        VerificationParams(ActiveInstallSession activeInstallSession) {
-            super(activeInstallSession.getUser());
-            final PackageInstaller.SessionParams sessionParams =
-                    activeInstallSession.getSessionParams();
-            if (DEBUG_INSTANT) {
-                if ((sessionParams.installFlags
-                        & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                    Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
-                }
-            }
+        VerificationParams(UserHandle user, File stagedDir, IPackageInstallObserver2 observer,
+                PackageInstaller.SessionParams sessionParams, InstallSource installSource,
+                int installerUid, SigningDetails signingDetails, int sessionId) {
+            super(user);
+            origin = OriginInfo.fromStagedFile(stagedDir);
+            this.observer = observer;
+            installFlags = sessionParams.installFlags;
+            this.installSource = installSource;
+            packageAbiOverride = sessionParams.abiOverride;
             verificationInfo = new VerificationInfo(
                     sessionParams.originatingUri,
                     sessionParams.referrerUri,
                     sessionParams.originatingUid,
-                    activeInstallSession.getInstallerUid());
-            origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
-            observer = activeInstallSession.getObserver();
-            installFlags = sessionParams.installFlags;
-            installSource = activeInstallSession.getInstallSource();
-            packageAbiOverride = sessionParams.abiOverride;
-            signingDetails = activeInstallSession.getSigningDetails();
+                    installerUid
+            );
+            this.signingDetails = signingDetails;
             requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
-            mSessionId = activeInstallSession.getSessionId();
+            mSessionId = sessionId;
         }
 
         @Override
