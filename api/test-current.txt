@@ -3208,6 +3208,7 @@ package android.provider {
     field public static final String DATA_CODING_SCHEME = "dcs";
     field public static final String DEFAULT_SORT_ORDER = "date DESC";
     field public static final String DELIVERY_TIME = "date";
+    field public static final String ETWS_IS_PRIMARY = "etws_is_primary";
     field public static final String ETWS_WARNING_TYPE = "etws_warning_type";
     field public static final String GEOGRAPHICAL_SCOPE = "geo_scope";
     field public static final String GEOMETRIES = "geometries";

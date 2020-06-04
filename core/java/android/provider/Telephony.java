@@ -4325,11 +4325,13 @@ public final class Telephony {
         public static final String ETWS_WARNING_TYPE = "etws_warning_type";
 
         /**
-         * ETWS (Earthquake and Tsunami Warning System) primary message or not (ETWS alerts only).
+         * ETWS (Earthquake and Tsunami Warning System, Japan only) primary message or not. The
+         * primary message is sent as soon as the emergency occurs. It does not provide any
+         * information except the emergency type (e.g. earthquake, tsunami). The ETWS secondary
+         * message is sent afterwards and provides the details of the emergency.
+         *
          * <p>See {@link android.telephony.SmsCbEtwsInfo}</p>
          * <P>Type: BOOLEAN</P>
-         *
-         * @hide        // TODO: Unhide this for S.
          */
         public static final String ETWS_IS_PRIMARY = "etws_is_primary";
 
