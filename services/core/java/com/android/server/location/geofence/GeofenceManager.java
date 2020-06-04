@@ -121,7 +121,12 @@ public class GeofenceManager extends
 
         @Override
         protected ListenerOperation<PendingIntent> onActive() {
-            return onLocationChanged(getLastLocation());
+            Location location = getLastLocation();
+            if (location != null) {
+                return onLocationChanged(location);
+            } else {
+                return null;
+            }
         }
 
         boolean isAppOpsAllowed() {
