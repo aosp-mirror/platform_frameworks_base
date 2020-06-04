@@ -20,11 +20,16 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.hardware.soundtrigger.V2_1.ISoundTriggerHwCallback;
 import android.hardware.soundtrigger.V2_2.ISoundTriggerHw;
+import android.media.audio.common.AudioConfig;
+import android.media.audio.common.AudioOffloadInfo;
 import android.media.soundtrigger_middleware.ISoundTriggerCallback;
 import android.media.soundtrigger_middleware.ISoundTriggerModule;
 import android.media.soundtrigger_middleware.ModelParameterRange;
+import android.media.soundtrigger_middleware.PhraseRecognitionEvent;
+import android.media.soundtrigger_middleware.PhraseRecognitionExtra;
 import android.media.soundtrigger_middleware.PhraseSoundModel;
 import android.media.soundtrigger_middleware.RecognitionConfig;
+import android.media.soundtrigger_middleware.RecognitionEvent;
 import android.media.soundtrigger_middleware.SoundModel;
 import android.media.soundtrigger_middleware.SoundModelType;
 import android.media.soundtrigger_middleware.SoundTriggerModuleProperties;
@@ -540,20 +545,20 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                     switch (mModelType) {
                         case SoundModelType.GENERIC: {
                             android.media.soundtrigger_middleware.RecognitionEvent event =
-                                    new android.media.soundtrigger_middleware.RecognitionEvent();
+                                    newEmptyRecognitionEvent();
                             event.status =
                                     android.media.soundtrigger_middleware.RecognitionStatus.ABORTED;
+                            event.type = SoundModelType.GENERIC;
                             mCallback.onRecognition(mHandle, event);
                         }
                         break;
 
                         case SoundModelType.KEYPHRASE: {
                             android.media.soundtrigger_middleware.PhraseRecognitionEvent event =
-                                    new android.media.soundtrigger_middleware.PhraseRecognitionEvent();
-                            event.common =
-                                    new android.media.soundtrigger_middleware.RecognitionEvent();
+                                    newEmptyPhraseRecognitionEvent();
                             event.common.status =
                                     android.media.soundtrigger_middleware.RecognitionStatus.ABORTED;
+                            event.common.type = SoundModelType.KEYPHRASE;
                             mCallback.onPhraseRecognition(mHandle, event);
                         }
                         break;
@@ -613,5 +618,36 @@ class SoundTriggerModule implements IHwBinder.DeathRecipient {
                 }
             }
         }
+    }
+
+    /**
+     * Creates a default-initialized recognition event.
+     *
+     * Object fields are default constructed.
+     * Array fields are initialized to 0 length.
+     *
+     * @return The event.
+     */
+    private static RecognitionEvent newEmptyRecognitionEvent() {
+        RecognitionEvent result = new RecognitionEvent();
+        result.audioConfig = new AudioConfig();
+        result.audioConfig.offloadInfo = new AudioOffloadInfo();
+        result.data = new byte[0];
+        return result;
+    }
+
+    /**
+     * Creates a default-initialized phrase recognition event.
+     *
+     * Object fields are default constructed.
+     * Array fields are initialized to 0 length.
+     *
+     * @return The event.
+     */
+    private static PhraseRecognitionEvent newEmptyPhraseRecognitionEvent() {
+        PhraseRecognitionEvent result = new PhraseRecognitionEvent();
+        result.common = newEmptyRecognitionEvent();
+        result.phraseExtras = new PhraseRecognitionExtra[0];
+        return result;
     }
 }
