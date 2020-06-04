@@ -761,11 +761,8 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  1;
             case TYPE_PRESENTATION:
             case TYPE_PRIVATE_PRESENTATION:
-                return  APPLICATION_LAYER;
             case TYPE_DOCK_DIVIDER:
-                return  APPLICATION_LAYER;
             case TYPE_QS_DIALOG:
-                return  APPLICATION_LAYER;
             case TYPE_PHONE:
                 return  3;
             case TYPE_SEARCH_BAR:
@@ -852,7 +849,7 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
                 return  35;
             default:
                 Slog.e("WindowManager", "Unknown window type: " + type);
-                return APPLICATION_LAYER;
+                return 3;
         }
     }
 
