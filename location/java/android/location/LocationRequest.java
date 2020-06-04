@@ -150,6 +150,8 @@ public final class LocationRequest implements Parcelable {
 
     @UnsupportedAppUsage
     private String mProvider;
+    // if true, client requests coarse location, if false, client requests fine location
+    private boolean mCoarseLocation;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mQuality;
     @UnsupportedAppUsage
@@ -255,6 +257,7 @@ public final class LocationRequest implements Parcelable {
     public LocationRequest() {
         this(
                 /* provider= */ LocationManager.FUSED_PROVIDER,
+                /* coarseLocation= */ false,
                 /* quality= */ POWER_LOW,
                 /* interval= */ DEFAULT_INTERVAL_MS,
                 /* fastestInterval= */ (long) (DEFAULT_INTERVAL_MS / FASTEST_INTERVAL_FACTOR),
@@ -273,6 +276,7 @@ public final class LocationRequest implements Parcelable {
     public LocationRequest(LocationRequest src) {
         this(
                 src.mProvider,
+                src.mCoarseLocation,
                 src.mQuality,
                 src.mInterval,
                 src.mFastestInterval,
@@ -289,6 +293,7 @@ public final class LocationRequest implements Parcelable {
 
     private LocationRequest(
             @NonNull String provider,
+            boolean coarseLocation,
             int quality,
             long intervalMs,
             long fastestIntervalMs,
@@ -305,6 +310,7 @@ public final class LocationRequest implements Parcelable {
         checkQuality(quality);
 
         mProvider = provider;
+        mCoarseLocation = coarseLocation;
         mQuality = quality;
         mInterval = intervalMs;
         mFastestInterval = fastestIntervalMs;
@@ -318,6 +324,20 @@ public final class LocationRequest implements Parcelable {
         mLowPowerMode = lowPowerMode;
         mLocationSettingsIgnored = locationSettingsIgnored;
         mWorkSource = workSource;
+    }
+
+    /**
+     * @hide
+     */
+    public boolean isCoarse() {
+        return mCoarseLocation;
+    }
+
+    /**
+     * @hide
+     */
+    public void setCoarse(boolean coarse) {
+        mCoarseLocation = coarse;
     }
 
     /**
@@ -700,6 +720,7 @@ public final class LocationRequest implements Parcelable {
                 public LocationRequest createFromParcel(Parcel in) {
                     return new LocationRequest(
                             /* provider= */ in.readString(),
+                            /* coarseLocation= */ in.readBoolean(),
                             /* quality= */ in.readInt(),
                             /* interval= */ in.readLong(),
                             /* fastestInterval= */ in.readLong(),
@@ -728,6 +749,7 @@ public final class LocationRequest implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
         parcel.writeString(mProvider);
+        parcel.writeBoolean(mCoarseLocation);
         parcel.writeInt(mQuality);
         parcel.writeLong(mInterval);
         parcel.writeLong(mFastestInterval);

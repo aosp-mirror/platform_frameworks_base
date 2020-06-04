@@ -22,8 +22,9 @@ import static android.app.AppOpsManager.OP_FINE_LOCATION;
 import static android.app.AppOpsManager.OP_MOCK_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
-import static android.location.util.identity.CallerIdentity.PERMISSION_COARSE;
-import static android.location.util.identity.CallerIdentity.PERMISSION_FINE;
+
+import static com.android.server.location.LocationPermissions.PERMISSION_COARSE;
+import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -105,63 +106,58 @@ public class AppOpsHelperTest {
 
     @Test
     public void testCheckLocationAccess() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).checkOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity)).isTrue();
+        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_FINE)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).checkOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity)).isFalse();
+        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_FINE)).isFalse();
 
-        identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_COARSE);
+        identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).checkOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity)).isTrue();
+        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_COARSE)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).checkOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"));
-        assertThat(mHelper.checkLocationAccess(identity)).isFalse();
+        assertThat(mHelper.checkLocationAccess(identity, PERMISSION_COARSE)).isFalse();
     }
 
     @Test
     public void testNoteLocationAccess() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).noteOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity)).isTrue();
+        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_FINE)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).noteOpNoThrow(eq(OP_FINE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity)).isFalse();
+        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_FINE)).isFalse();
 
 
-        identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_COARSE);
+        identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).noteOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity)).isTrue();
+        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_COARSE)).isTrue();
 
         doReturn(MODE_IGNORED).when(
                 mAppOps).noteOpNoThrow(eq(OP_COARSE_LOCATION), eq(1000), eq("mypackage"),
                         eq("myfeature"), nullable(String.class));
-        assertThat(mHelper.noteLocationAccess(identity)).isFalse();
+        assertThat(mHelper.noteLocationAccess(identity, PERMISSION_COARSE)).isFalse();
     }
 
     @Test
     public void testStartLocationMonitoring() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).startOpNoThrow(eq(OP_MONITOR_LOCATION), eq(1000), eq("mypackage"),
@@ -176,8 +172,7 @@ public class AppOpsHelperTest {
 
     @Test
     public void testStartHighPowerLocationMonitoring() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).startOpNoThrow(eq(OP_MONITOR_HIGH_POWER_LOCATION), eq(1000),
@@ -194,8 +189,7 @@ public class AppOpsHelperTest {
 
     @Test
     public void testStopLocationMonitoring() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         mHelper.stopLocationMonitoring(identity);
         verify(mAppOps).finishOp(OP_MONITOR_LOCATION, 1000, "mypackage", "myfeature");
@@ -203,8 +197,7 @@ public class AppOpsHelperTest {
 
     @Test
     public void testStopHighPowerLocationMonitoring() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         mHelper.stopHighPowerLocationMonitoring(identity);
         verify(mAppOps).finishOp(OP_MONITOR_HIGH_POWER_LOCATION, 1000, "mypackage", "myfeature");
@@ -212,8 +205,7 @@ public class AppOpsHelperTest {
 
     @Test
     public void testNoteMockLocationAccess() {
-        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature",
-                PERMISSION_FINE);
+        CallerIdentity identity = CallerIdentity.forTest(1000, 1000, "mypackage", "myfeature");
 
         doReturn(MODE_ALLOWED).when(
                 mAppOps).noteOp(eq(OP_MOCK_LOCATION), eq(1000), eq("mypackage"), eq("myfeature"),

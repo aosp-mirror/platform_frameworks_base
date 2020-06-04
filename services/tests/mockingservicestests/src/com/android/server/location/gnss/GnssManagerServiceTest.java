@@ -158,8 +158,10 @@ public class GnssManagerServiceTest {
 
         when(mUserInfoHelper.isCurrentUserId(anyInt())).thenReturn(true);
         when(mSettingsHelper.isLocationEnabled(anyInt())).thenReturn(true);
-        when(mAppOpsHelper.checkLocationAccess(any(CallerIdentity.class))).thenReturn(true);
-        when(mAppOpsHelper.noteLocationAccess(any(CallerIdentity.class))).thenReturn(true);
+        when(mAppOpsHelper.checkLocationAccess(any(CallerIdentity.class), anyInt())).thenReturn(
+                true);
+        when(mAppOpsHelper.noteLocationAccess(any(CallerIdentity.class), anyInt())).thenReturn(
+                true);
         when(mAppForegroundHelper.isAppForeground(anyInt())).thenReturn(true);
 
         LocalServices.addService(LocationManagerInternal.class, mLocationManagerInternal);

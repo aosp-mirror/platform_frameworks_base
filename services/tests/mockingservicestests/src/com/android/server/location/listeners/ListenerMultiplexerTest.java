@@ -327,8 +327,7 @@ public class ListenerMultiplexerTest {
                 Consumer<TestListenerRegistration> consumer,
                 boolean outOfProcess) {
             super(integer, CallerIdentity.forTest(Process.myUid(),
-                    Process.myPid() + (outOfProcess ? 1 : 0), "test", "test",
-                    CallerIdentity.PERMISSION_FINE), consumer);
+                    Process.myPid() + (outOfProcess ? 1 : 0), "test", "test"), consumer);
         }
     }
 

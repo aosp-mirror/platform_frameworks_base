@@ -18,9 +18,9 @@ package com.android.server.location.geofence;
 
 import static android.Manifest.permission;
 import static android.location.LocationManager.KEY_PROXIMITY_ENTERING;
-import static android.location.util.identity.CallerIdentity.PERMISSION_FINE;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
+import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
@@ -43,6 +43,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.PendingIntentUtils;
 import com.android.server.location.AppOpsHelper;
+import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationUsageLogger;
 import com.android.server.location.SettingsHelper;
 import com.android.server.location.UserInfoHelper;
@@ -88,9 +89,9 @@ public class GeofenceManager extends
         private @Nullable Location mCachedLocation;
         private float mCachedLocationDistanceM;
 
-        protected GeofenceRegistration(Geofence geofence, CallerIdentity callerIdentity,
+        protected GeofenceRegistration(Geofence geofence, CallerIdentity identity,
                 PendingIntent pendingIntent) {
-            super(geofence, callerIdentity, pendingIntent);
+            super(geofence, identity, pendingIntent);
 
             mCenter = new Location("");
             mCenter.setLatitude(geofence.getLatitude());
@@ -102,9 +103,9 @@ public class GeofenceManager extends
             }
 
             mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-                    TAG + ":" + callerIdentity.packageName);
+                    TAG + ":" + identity.getPackageName());
             mWakeLock.setReferenceCounted(true);
-            mWakeLock.setWorkSource(new WorkSource(callerIdentity.uid, callerIdentity.packageName));
+            mWakeLock.setWorkSource(identity.addToWorkSource(null));
         }
 
         @Override
@@ -115,7 +116,7 @@ public class GeofenceManager extends
         @Override
         protected boolean onPendingIntentRegister(Object key) {
             mGeofenceState = STATE_UNKNOWN;
-            mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
+            mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(), PERMISSION_FINE);
             return true;
         }
 
@@ -129,8 +130,9 @@ public class GeofenceManager extends
         }
 
         boolean onAppOpsChanged(String packageName) {
-            if (getIdentity().packageName.equals(packageName)) {
-                boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
+            if (getIdentity().getPackageName().equals(packageName)) {
+                boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(),
+                        PERMISSION_FINE);
                 if (appOpsAllowed != mAppOpsAllowed) {
                     mAppOpsAllowed = appOpsAllowed;
                     return true;
@@ -266,10 +268,10 @@ public class GeofenceManager extends
      */
     public void addGeofence(Geofence geofence, PendingIntent pendingIntent, String packageName,
             @Nullable String attributionTag) {
+        LocationPermissions.enforceCallingOrSelfLocationPermission(mContext, PERMISSION_FINE);
+
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag,
                 AppOpsManager.toReceiverId(pendingIntent));
-        identity.enforceLocationPermission(PERMISSION_FINE);
-
         addRegistration(new GeofenceKey(pendingIntent, geofence),
                 new GeofenceRegistration(geofence, identity, pendingIntent));
     }
@@ -285,10 +287,10 @@ public class GeofenceManager extends
     protected boolean isActive(GeofenceRegistration registration) {
         CallerIdentity identity = registration.getIdentity();
         return registration.isAppOpsAllowed()
-                && mUserInfoHelper.isCurrentUserId(identity.userId)
-                && mSettingsHelper.isLocationEnabled(identity.userId)
-                && !mSettingsHelper.isLocationPackageBlacklisted(identity.userId,
-                identity.packageName);
+                && mUserInfoHelper.isCurrentUserId(identity.getUserId())
+                && mSettingsHelper.isLocationEnabled(identity.getUserId())
+                && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
+                identity.getPackageName());
     }
 
     @Override
@@ -314,7 +316,7 @@ public class GeofenceManager extends
         mLocationUsageLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REQUEST_GEOFENCE,
-                registration.getIdentity().packageName,
+                registration.getIdentity().getPackageName(),
                 /* LocationRequest= */ null,
                 /* hasListener= */ false,
                 true,
@@ -327,7 +329,7 @@ public class GeofenceManager extends
         mLocationUsageLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_REQUEST_GEOFENCE,
-                registration.getIdentity().packageName,
+                registration.getIdentity().getPackageName(),
                 /* LocationRequest= */ null,
                 /* hasListener= */ false,
                 true,
@@ -367,12 +369,7 @@ public class GeofenceManager extends
                 continue;
             }
 
-            CallerIdentity identity = registration.getIdentity();
-            if (workSource == null) {
-                workSource = new WorkSource(identity.uid, identity.packageName);
-            } else {
-                workSource.add(identity.uid, identity.packageName);
-            }
+            workSource = registration.getIdentity().addToWorkSource(workSource);
 
             if (location != null) {
                 double fenceDistanceM = registration.getDistanceToBoundary(location);
@@ -439,16 +436,16 @@ public class GeofenceManager extends
 
     private void onUserChanged(int userId, int change) {
         if (change == UserInfoHelper.UserListener.USER_SWITCHED) {
-            updateRegistrations(registration -> registration.getIdentity().userId == userId);
+            updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }
 
     private void onLocationEnabledChanged(int userId) {
-        updateRegistrations(registration -> registration.getIdentity().userId == userId);
+        updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
     private void onLocationPackageBlacklistChanged(int userId) {
-        updateRegistrations(registration -> registration.getIdentity().userId == userId);
+        updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
     private void onAppOpsChanged(String packageName) {
