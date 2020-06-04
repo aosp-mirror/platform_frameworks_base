@@ -20,6 +20,7 @@ import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
 
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
@@ -37,6 +38,7 @@ import android.view.WindowManager;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.util.ScreenshotHelper;
+import com.android.systemui.shared.recents.utilities.BitmapUtil;
 
 import java.util.function.Consumer;
 
@@ -107,16 +109,19 @@ public class TakeScreenshotService extends Service {
                     }
                     break;
                 case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
-                    Bitmap screenshot = screenshotRequest.getBitmap();
+                    Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
+                            screenshotRequest.getBitmapBundle());
                     Rect screenBounds = screenshotRequest.getBoundsInScreen();
                     Insets insets = screenshotRequest.getInsets();
                     int taskId = screenshotRequest.getTaskId();
+                    int userId = screenshotRequest.getUserId();
+                    ComponentName topComponent = screenshotRequest.getTopComponent();
                     if (useCornerFlow) {
-                        mScreenshot.handleImageAsScreenshot(
-                                screenshot, screenBounds, insets, taskId, uriConsumer, onComplete);
+                        mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                                taskId, userId, topComponent, uriConsumer, onComplete);
                     } else {
-                        mScreenshotLegacy.handleImageAsScreenshot(
-                                screenshot, screenBounds, insets, taskId, uriConsumer);
+                        mScreenshotLegacy.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                                taskId, userId, topComponent, uriConsumer);
                     }
                     break;
                 default:

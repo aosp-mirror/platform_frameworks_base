@@ -23,10 +23,11 @@ import android.os.Bundle;
 import android.view.MotionEvent;
 
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
+import com.android.systemui.shared.recents.model.Task;
 
 /**
  * Temporary callbacks into SystemUI.
- * Next id = 26
+ * Next id = 27
  */
 interface ISystemUiProxy {
 
@@ -122,6 +123,9 @@ interface ISystemUiProxy {
 
     /**
      * Handle the provided image as if it was a screenshot.
+     *
+     * Deprecated, use handleImageBundleAsScreenshot with image bundle and UserTask
+     * @deprecated
      */
     void handleImageAsScreenshot(in Bitmap screenImage, in Rect locationInScreen,
               in Insets visibleInsets, int taskId) = 21;
@@ -146,4 +150,10 @@ interface ISystemUiProxy {
      * @param rotation indicates which Surface.Rotation the gesture was started in
      */
     void onQuickSwitchToNewTask(int rotation) = 25;
+
+    /**
+     * Handle the provided image as if it was a screenshot.
+     */
+    void handleImageBundleAsScreenshot(in Bundle screenImageBundle, in Rect locationInScreen,
+              in Insets visibleInsets, in Task.TaskKey task) = 26;
 }
