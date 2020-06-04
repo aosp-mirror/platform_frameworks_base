@@ -1,4 +1,5 @@
-/*
+<?xml version="1.0" encoding="utf-8"?>
+<!--
  * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,29 +13,17 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ -->
 
-package com.android.permission.persistence;
+<manifest
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.android.frameworks.coretests.package_installer_sessions"
+    >
 
-import android.annotation.NonNull;
+    <application>
+        <uses-library android:name="android.test.runner" />
+    </application>
 
-/**
- * Utility class for IO.
- *
- * @hide
- */
-public class IoUtils {
-
-    private IoUtils() {}
-
-    /**
-     * Close 'closeable' ignoring any exceptions.
-     */
-    public static void closeQuietly(@NonNull AutoCloseable closeable) {
-        try {
-            closeable.close();
-        } catch (Exception ignored) {
-            // Ignored.
-        }
-    }
-}
+    <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.frameworks.coretests.package_installer_sessions"/>
+</manifest>

@@ -225,8 +225,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 res.getString(R.string.screenrecord_name));
 
         String notificationTitle = mAudioSource == ScreenRecordingAudioSource.NONE
-                ? res.getString(R.string.screenrecord_ongoing_screen_and_audio)
-                : res.getString(R.string.screenrecord_ongoing_screen_only);
+                ? res.getString(R.string.screenrecord_ongoing_screen_only)
+                : res.getString(R.string.screenrecord_ongoing_screen_and_audio);
 
         mRecordingNotificationBuilder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)

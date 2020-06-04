@@ -21,19 +21,21 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
+import android.text.SpannableStringBuilder
+import android.text.style.BulletSpan
 import android.view.Gravity
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
 import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManager
-import android.widget.LinearLayout
+import android.widget.ImageView
 import android.widget.TextView
 import com.android.systemui.Prefs
 import com.android.systemui.R
-import java.lang.IllegalStateException
+import com.android.systemui.statusbar.notification.row.NotificationConversationInfo.OnConversationSettingsClickListener
 import javax.inject.Inject
 
 /**
@@ -43,7 +45,9 @@ class PriorityOnboardingDialogController @Inject constructor(
     val view: View,
     val context: Context,
     val ignoresDnd: Boolean,
-    val showsAsBubble: Boolean
+    val showsAsBubble: Boolean,
+    val icon : Drawable,
+    val onConversationSettingsClickListener : OnConversationSettingsClickListener
 ) {
 
     private lateinit var dialog: Dialog
@@ -62,11 +66,21 @@ class PriorityOnboardingDialogController @Inject constructor(
         dialog.dismiss()
     }
 
+    private fun settings() {
+        // Log that the user has seen the onboarding
+        Prefs.putBoolean(context, Prefs.Key.HAS_SEEN_PRIORITY_ONBOARDING, true)
+        dialog.dismiss()
+        onConversationSettingsClickListener?.onClick()
+    }
+
     class Builder @Inject constructor() {
         private lateinit var view: View
         private lateinit var context: Context
         private var ignoresDnd = false
         private var showAsBubble = false
+        private lateinit var icon: Drawable
+        private lateinit var onConversationSettingsClickListener
+                : OnConversationSettingsClickListener
 
         fun setView(v: View): Builder {
             view = v
@@ -88,9 +102,20 @@ class PriorityOnboardingDialogController @Inject constructor(
             return this
         }
 
+        fun setIcon(draw : Drawable) : Builder {
+            icon = draw
+            return this
+        }
+
+        fun setOnSettingsClick(onClick : OnConversationSettingsClickListener) : Builder {
+            onConversationSettingsClickListener = onClick
+            return this
+        }
+
         fun build(): PriorityOnboardingDialogController {
             val controller = PriorityOnboardingDialogController(
-                    view, context, ignoresDnd, showAsBubble)
+                    view, context, ignoresDnd, showAsBubble, icon,
+                    onConversationSettingsClickListener)
             return controller
         }
     }
@@ -113,13 +138,32 @@ class PriorityOnboardingDialogController @Inject constructor(
                 done()
             }
 
-            if (!ignoresDnd) {
-                findViewById<LinearLayout>(R.id.ignore_dnd_tip).visibility = GONE
+            findViewById<TextView>(R.id.settings_button)?.setOnClickListener {
+                settings()
             }
 
-            if (!showsAsBubble) {
-                findViewById<LinearLayout>(R.id.floating_bubble_tip).visibility = GONE
+            findViewById<ImageView>(R.id.conversation_icon)?.setImageDrawable(icon)
+
+            val gapWidth = dialog.context.getResources().getDimensionPixelSize(
+                    R.dimen.conversation_onboarding_bullet_gap_width)
+            val description = SpannableStringBuilder()
+            description.append(context.getText(R.string.priority_onboarding_show_at_top_text),
+                    BulletSpan(gapWidth),  /* flags */0)
+            description.append(System.lineSeparator())
+            description.append(context.getText(R.string.priority_onboarding_show_avatar_text),
+                    BulletSpan(gapWidth),  /* flags */0)
+            if (showsAsBubble) {
+                description.append(System.lineSeparator())
+                description.append(context.getText(
+                        R.string.priority_onboarding_appear_as_bubble_text),
+                        BulletSpan(gapWidth),  /* flags */0)
             }
+            if (ignoresDnd) {
+                description.append(System.lineSeparator())
+                description.append(context.getText(R.string.priority_onboarding_ignores_dnd_text),
+                        BulletSpan(gapWidth),  /* flags */0)
+            }
+            findViewById<TextView>(R.id.behaviors).setText(description)
 
             window?.apply {
                 setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
@@ -129,7 +173,7 @@ class PriorityOnboardingDialogController @Inject constructor(
 
                 attributes = attributes.apply {
                     format = PixelFormat.TRANSLUCENT
-                    title = ChannelEditorDialogController::class.java.simpleName
+                    title = PriorityOnboardingDialogController::class.java.simpleName
                     gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                     fitInsetsTypes = attributes.fitInsetsTypes and statusBars().inv()
                     width = MATCH_PARENT
