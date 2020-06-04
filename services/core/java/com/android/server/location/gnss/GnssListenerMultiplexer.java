@@ -16,6 +16,8 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
+
 import android.annotation.Nullable;
 import android.location.LocationManagerInternal;
 import android.location.util.identity.CallerIdentity;
@@ -85,14 +87,15 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
         @Override
         protected boolean onBinderRegister(Object key) {
-            mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
-            mForeground = mAppForegroundHelper.isAppForeground(getIdentity().uid);
+            mAppOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(), PERMISSION_FINE);
+            mForeground = mAppForegroundHelper.isAppForeground(getIdentity().getUid());
             return true;
         }
 
         boolean onAppOpsChanged(String packageName) {
-            if (getIdentity().packageName.equals(packageName)) {
-                boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity());
+            if (getIdentity().getPackageName().equals(packageName)) {
+                boolean appOpsAllowed = mAppOpsHelper.checkLocationAccess(getIdentity(),
+                        PERMISSION_FINE);
                 if (appOpsAllowed != mAppOpsAllowed) {
                     mAppOpsAllowed = appOpsAllowed;
                     return true;
@@ -103,7 +106,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         }
 
         boolean onForegroundChanged(int uid, boolean foreground) {
-            if (getIdentity().uid == uid && foreground != mForeground) {
+            if (getIdentity().getUid() == uid && foreground != mForeground) {
                 mForeground = foreground;
                 return true;
             }
@@ -206,19 +209,19 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
         //  but this is the same for now.
         return registration.isAppOpsAllowed()
                 && (registration.isForeground() || isBackgroundRestrictionExempt(identity))
-                && mUserInfoHelper.isCurrentUserId(identity.userId)
-                && mSettingsHelper.isLocationEnabled(identity.userId)
-                && !mSettingsHelper.isLocationPackageBlacklisted(identity.userId,
-                identity.packageName);
+                && mUserInfoHelper.isCurrentUserId(identity.getUserId())
+                && mSettingsHelper.isLocationEnabled(identity.getUserId())
+                && !mSettingsHelper.isLocationPackageBlacklisted(identity.getUserId(),
+                identity.getPackageName());
     }
 
     private boolean isBackgroundRestrictionExempt(CallerIdentity identity) {
-        if (identity.uid == Process.SYSTEM_UID) {
+        if (identity.getUid() == Process.SYSTEM_UID) {
             return true;
         }
 
         if (mSettingsHelper.getBackgroundThrottlePackageWhitelist().contains(
-                identity.packageName)) {
+                identity.getPackageName())) {
             return true;
         }
 
@@ -259,12 +262,12 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
     private void onUserChanged(int userId, int change) {
         if (change == UserInfoHelper.UserListener.USER_SWITCHED) {
-            updateRegistrations(registration -> registration.getIdentity().userId == userId);
+            updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }
 
     private void onLocationEnabledChanged(int userId) {
-        updateRegistrations(registration -> registration.getIdentity().userId == userId);
+        updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
     private void onBackgroundThrottlePackageWhitelistChanged() {
@@ -272,7 +275,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     }
 
     private void onLocationPackageBlacklistChanged(int userId) {
-        updateRegistrations(registration -> registration.getIdentity().userId == userId);
+        updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
     }
 
     private void onAppOpsChanged(String packageName) {
