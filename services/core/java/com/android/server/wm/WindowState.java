@@ -5404,10 +5404,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * {@link android.view.inputmethod.InputMethodManager#showSoftInput(View, int)} is unknown,
      * use {@link DisplayContent#getImeControlTarget()} instead.
      *
-     * @return {@link WindowState} of host that controls the IME.
+     * @return {@link InsetsControlTarget} of host that controls the IME.
      *         When window is doesn't have a parent, it is returned as-is.
      */
-    WindowState getImeControlTarget() {
+    InsetsControlTarget getImeControlTarget() {
         final DisplayContent dc = getDisplayContent();
         final WindowState parentWindow = dc.getParentWindow();
 
