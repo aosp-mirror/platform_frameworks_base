@@ -643,6 +643,18 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     private void showUiOnActionsReady(SavedImageData imageData) {
         logSuccessOnActionsReady(imageData);
+
+        AccessibilityManager accessibilityManager = (AccessibilityManager)
+                mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        long timeoutMs = accessibilityManager.getRecommendedTimeoutMillis(
+                SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
+                AccessibilityManager.FLAG_CONTENT_CONTROLS);
+
+        mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
+        mScreenshotHandler.sendMessageDelayed(
+                mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
+                timeoutMs);
+
         if (imageData.uri != null) {
             mScreenshotHandler.post(() -> {
                 if (mScreenshotAnimation != null && mScreenshotAnimation.isRunning()) {
@@ -656,17 +668,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 } else {
                     createScreenshotActionsShadeAnimation(imageData).start();
                 }
-
-                AccessibilityManager accessibilityManager = (AccessibilityManager)
-                        mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-                long timeoutMs = accessibilityManager.getRecommendedTimeoutMillis(
-                        SCREENSHOT_CORNER_DEFAULT_TIMEOUT_MILLIS,
-                        AccessibilityManager.FLAG_CONTENT_CONTROLS);
-
-                mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
-                mScreenshotHandler.sendMessageDelayed(
-                        mScreenshotHandler.obtainMessage(MESSAGE_CORNER_TIMEOUT),
-                        timeoutMs);
             });
         }
     }
