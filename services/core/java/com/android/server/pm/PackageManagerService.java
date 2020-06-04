@@ -14818,23 +14818,18 @@ public class PackageManagerService extends IPackageManager.Stub
         final String[] grantedRuntimePermissions;
         final List<String> whitelistedRestrictedPermissions;
         final int autoRevokePermissionsMode;
-        final VerificationInfo verificationInfo;
         final PackageParser.SigningDetails signingDetails;
         final int installReason;
-        @Nullable
-        MultiPackageInstallParams mParentInstallParams;
-        final long requiredInstalledVersionCode;
+        @Nullable MultiPackageInstallParams mParentInstallParams;
         final boolean forceQueryableOverride;
         final int mDataLoaderType;
-        final int mSessionId;
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
-                VerificationInfo verificationInfo, UserHandle user, String packageAbiOverride,
+                UserHandle user, String packageAbiOverride,
                 String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
                 int autoRevokePermissionsMode,
-                SigningDetails signingDetails, int installReason,
-                long requiredInstalledVersionCode, int dataLoaderType) {
+                SigningDetails signingDetails, int installReason, int dataLoaderType) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -14842,17 +14837,14 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installFlags = installFlags;
             this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
-            this.verificationInfo = verificationInfo;
             this.packageAbiOverride = packageAbiOverride;
             this.grantedRuntimePermissions = grantedPermissions;
             this.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
             this.autoRevokePermissionsMode = autoRevokePermissionsMode;
             this.signingDetails = signingDetails;
             this.installReason = installReason;
-            this.requiredInstalledVersionCode = requiredInstalledVersionCode;
             this.forceQueryableOverride = false;
             this.mDataLoaderType = dataLoaderType;
-            this.mSessionId = -1;
         }
 
         InstallParams(ActiveInstallSession activeInstallSession) {
@@ -14865,11 +14857,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
                 }
             }
-            verificationInfo = new VerificationInfo(
-                    sessionParams.originatingUri,
-                    sessionParams.referrerUri,
-                    sessionParams.originatingUid,
-                    activeInstallSession.getInstallerUid());
             origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
             move = null;
             installReason = fixUpInstallReason(
@@ -14885,11 +14872,9 @@ public class PackageManagerService extends IPackageManager.Stub
             whitelistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
             autoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
             signingDetails = activeInstallSession.getSigningDetails();
-            requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
-            mSessionId = activeInstallSession.getSessionId();
         }
 
         @Override
@@ -15129,28 +15114,21 @@ public class PackageManagerService extends IPackageManager.Stub
 
     class VerificationParams extends HandlerParams {
         final OriginInfo origin;
-        final MoveInfo move;
         final IPackageInstallObserver2 observer;
-        int installFlags;
+        final int installFlags;
         @NonNull final InstallSource installSource;
-        final String volumeUuid;
+        final String packageAbiOverride;
+        final VerificationInfo verificationInfo;
+        final PackageParser.SigningDetails signingDetails;
+        @Nullable MultiPackageVerificationParams mParentVerificationParams;
+        final long requiredInstalledVersionCode;
+        final int mDataLoaderType;
+        final int mSessionId;
+
         private boolean mWaitForVerificationToComplete;
         private boolean mWaitForIntegrityVerificationToComplete;
         private boolean mWaitForEnableRollbackToComplete;
-        int mRet;
-        final String packageAbiOverride;
-        final String[] grantedRuntimePermissions;
-        final List<String> whitelistedRestrictedPermissions;
-        final int autoRevokePermissionsMode;
-        final VerificationInfo verificationInfo;
-        final PackageParser.SigningDetails signingDetails;
-        final int installReason;
-        @Nullable
-        MultiPackageVerificationParams mParentVerificationParams;
-        final long requiredInstalledVersionCode;
-        final boolean forceQueryableOverride;
-        final int mDataLoaderType;
-        final int mSessionId;
+        private int mRet;
 
         VerificationParams(ActiveInstallSession activeInstallSession) {
             super(activeInstallSession.getUser());
@@ -15168,22 +15146,12 @@ public class PackageManagerService extends IPackageManager.Stub
                     sessionParams.originatingUid,
                     activeInstallSession.getInstallerUid());
             origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
-            move = null;
-            installReason = fixUpInstallReason(
-                    activeInstallSession.getInstallSource().installerPackageName,
-                    activeInstallSession.getInstallerUid(),
-                    sessionParams.installReason);
             observer = activeInstallSession.getObserver();
             installFlags = sessionParams.installFlags;
             installSource = activeInstallSession.getInstallSource();
-            volumeUuid = sessionParams.volumeUuid;
             packageAbiOverride = sessionParams.abiOverride;
-            grantedRuntimePermissions = sessionParams.grantedRuntimePermissions;
-            whitelistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
-            autoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
             signingDetails = activeInstallSession.getSigningDetails();
             requiredInstalledVersionCode = sessionParams.requiredInstalledVersionCode;
-            forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
             mSessionId = activeInstallSession.getSessionId();
@@ -23469,12 +23437,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, null /*verificationInfo*/, user,
+                installSource, volumeUuid, user,
                 packageAbiOverride, null /*grantedPermissions*/,
                 null /*whitelistedRestrictedPermissions*/, MODE_DEFAULT /* autoRevokePermissions */,
                 PackageParser.SigningDetails.UNKNOWN,
-                PackageManager.INSTALL_REASON_UNKNOWN, PackageManager.VERSION_CODE_HIGHEST,
-                DataLoaderType.NONE);
+                PackageManager.INSTALL_REASON_UNKNOWN, DataLoaderType.NONE);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
