@@ -207,6 +207,15 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return mRootSplitScreenPrimaryTask;
     }
 
+    ActivityStack getRootSplitScreenSecondaryTask() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).inSplitScreenSecondaryWindowingMode()) {
+                return mChildren.get(i);
+            }
+        }
+        return null;
+    }
+
     ArrayList<Task> getVisibleTasks() {
         final ArrayList<Task> visibleTasks = new ArrayList<>();
         forAllTasks(task -> {
