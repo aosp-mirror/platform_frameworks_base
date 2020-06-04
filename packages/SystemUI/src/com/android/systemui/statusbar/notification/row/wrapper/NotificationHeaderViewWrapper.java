@@ -317,6 +317,11 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     }
 
     @Override
+    public View getExpandButton() {
+        return mExpandButton;
+    }
+
+    @Override
     public int getOriginalIconColor() {
         return mIcon.getOriginalIconColor();
     }
