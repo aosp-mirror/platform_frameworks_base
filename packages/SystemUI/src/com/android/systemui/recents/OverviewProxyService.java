@@ -73,6 +73,7 @@ import com.android.systemui.settings.CurrentUserTracker;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.recents.IPinnedStackAnimationListener;
 import com.android.systemui.shared.recents.ISystemUiProxy;
+import com.android.systemui.shared.recents.model.Task;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.stackdivider.Divider;
@@ -383,8 +384,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
         @Override
         public void handleImageAsScreenshot(Bitmap screenImage, Rect locationInScreen,
                 Insets visibleInsets, int taskId) {
-            mScreenshotHelper.provideScreenshot(screenImage, locationInScreen, visibleInsets,
-                    taskId, SCREENSHOT_OVERVIEW, mHandler, null);
+            // Deprecated
         }
 
         @Override
@@ -432,6 +432,21 @@ public class OverviewProxyService extends CurrentUserTracker implements
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
+        }
+
+        @Override
+        public void handleImageBundleAsScreenshot(Bundle screenImageBundle, Rect locationInScreen,
+                Insets visibleInsets, Task.TaskKey task) {
+            mScreenshotHelper.provideScreenshot(
+                    screenImageBundle,
+                    locationInScreen,
+                    visibleInsets,
+                    task.id,
+                    task.userId,
+                    task.sourceComponent,
+                    SCREENSHOT_OVERVIEW,
+                    mHandler,
+                    null);
         }
 
         private boolean verifyCaller(String reason) {
