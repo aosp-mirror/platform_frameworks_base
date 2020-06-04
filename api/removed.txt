@@ -61,10 +61,6 @@ package android.app.slice {
 
 package android.app.usage {
 
-  public final class StorageStats implements android.os.Parcelable {
-    method @Deprecated public long getCodeBytes();
-  }
-
   public class StorageStatsManager {
     method @Deprecated public long getFreeBytes(String) throws java.io.IOException;
     method @Deprecated public long getTotalBytes(String) throws java.io.IOException;
