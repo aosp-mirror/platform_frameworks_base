@@ -17,12 +17,8 @@
 package com.android.systemui.media;
 
 import android.app.PendingIntent;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -35,7 +31,6 @@ import android.graphics.drawable.RippleDrawable;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
-import android.service.media.MediaBrowserService;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
@@ -55,7 +50,6 @@ import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.qs.QSMediaBrowser;
 import com.android.systemui.util.animation.TransitionLayout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 
@@ -81,7 +75,6 @@ public class MediaControlPanel {
 
     private final SeekBarViewModel mSeekBarViewModel;
     private SeekBarObserver mSeekBarObserver;
-    private final Executor mForegroundExecutor;
     protected final Executor mBackgroundExecutor;
     private final ActivityStarter mActivityStarter;
 
@@ -91,48 +84,18 @@ public class MediaControlPanel {
     private MediaSession.Token mToken;
     private MediaController mController;
     private int mBackgroundColor;
-    protected ComponentName mServiceComponent;
-    private boolean mIsRegistered = false;
-    private String mKey;
     private int mAlbumArtSize;
     private int mAlbumArtRadius;
-    private int mViewWidth;
-
-    public static final String MEDIA_PREFERENCES = "media_control_prefs";
-    public static final String MEDIA_PREFERENCE_KEY = "browser_components";
-    private SharedPreferences mSharedPrefs;
-    private boolean mCheckedForResumption = false;
-    private QSMediaBrowser mQSMediaBrowser;
-
-    private final MediaController.Callback mSessionCallback = new MediaController.Callback() {
-        @Override
-        public void onSessionDestroyed() {
-            Log.d(TAG, "session destroyed");
-            mController.unregisterCallback(mSessionCallback);
-            clearControls();
-        }
-        @Override
-        public void onPlaybackStateChanged(PlaybackState state) {
-            final int s = state != null ? state.getState() : PlaybackState.STATE_NONE;
-            if (s == PlaybackState.STATE_NONE) {
-                Log.d(TAG, "playback state change will trigger resumption, state=" + state);
-                clearControls();
-            }
-        }
-    };
 
     /**
      * Initialize a new control panel
      * @param context
-     * @param foregroundExecutor foreground executor
      * @param backgroundExecutor background executor, used for processing artwork
      * @param activityStarter activity starter
      */
-    public MediaControlPanel(Context context, Executor foregroundExecutor,
-            DelayableExecutor backgroundExecutor, ActivityStarter activityStarter,
-            MediaHostStatesManager mediaHostStatesManager) {
+    public MediaControlPanel(Context context, DelayableExecutor backgroundExecutor,
+            ActivityStarter activityStarter, MediaHostStatesManager mediaHostStatesManager) {
         mContext = context;
-        mForegroundExecutor = foregroundExecutor;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
         mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
@@ -214,44 +177,17 @@ public class MediaControlPanel {
         MediaSession.Token token = data.getToken();
         mBackgroundColor = data.getBackgroundColor();
         if (mToken == null || !mToken.equals(token)) {
-            if (mQSMediaBrowser != null) {
-                Log.d(TAG, "Disconnecting old media browser");
-                mQSMediaBrowser.disconnect();
-                mQSMediaBrowser = null;
-            }
             mToken = token;
-            mServiceComponent = null;
-            mCheckedForResumption = false;
         }
 
-        mController = new MediaController(mContext, mToken);
+        if (mToken != null) {
+            mController = new MediaController(mContext, mToken);
+        } else {
+            mController = null;
+        }
 
         ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
         ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
-
-        // Try to find a browser service component for this app
-        // TODO also check for a media button receiver intended for restarting (b/154127084)
-        // Only check if we haven't tried yet or the session token changed
-        final String pkgName = data.getPackageName();
-        if (mServiceComponent == null && !mCheckedForResumption) {
-            Log.d(TAG, "Checking for service component");
-            PackageManager pm = mContext.getPackageManager();
-            Intent resumeIntent = new Intent(MediaBrowserService.SERVICE_INTERFACE);
-            List<ResolveInfo> resumeInfo = pm.queryIntentServices(resumeIntent, 0);
-            // TODO: look into this resumption
-            if (resumeInfo != null) {
-                for (ResolveInfo inf : resumeInfo) {
-                    if (inf.serviceInfo.packageName.equals(mController.getPackageName())) {
-                        mBackgroundExecutor.execute(() ->
-                                tryUpdateResumptionList(inf.getComponentInfo().getComponentName()));
-                        break;
-                    }
-                }
-            }
-            mCheckedForResumption = true;
-        }
-
-        mController.registerCallback(mSessionCallback);
 
         mViewHolder.getPlayer().setBackgroundTintList(
                 ColorStateList.valueOf(mBackgroundColor));
@@ -267,12 +203,22 @@ public class MediaControlPanel {
         ImageView albumView = mViewHolder.getAlbumView();
         // TODO: migrate this to a view with rounded corners instead of baking the rounding
         // into the bitmap
-        Drawable artwork = createRoundedBitmap(data.getArtwork());
-        albumView.setImageDrawable(artwork);
+        boolean hasArtwork = data.getArtwork() != null;
+        if (hasArtwork) {
+            Drawable artwork = createRoundedBitmap(data.getArtwork());
+            albumView.setImageDrawable(artwork);
+        }
+        setVisibleAndAlpha(collapsedSet, R.id.album_art, hasArtwork);
+        setVisibleAndAlpha(expandedSet, R.id.album_art, hasArtwork);
 
         // App icon
         ImageView appIcon = mViewHolder.getAppIcon();
-        appIcon.setImageDrawable(data.getAppIcon());
+        if (data.getAppIcon() != null) {
+            appIcon.setImageDrawable(data.getAppIcon());
+        } else {
+            Drawable iconDrawable = mContext.getDrawable(R.drawable.ic_music_note);
+            appIcon.setImageDrawable(iconDrawable);
+        }
 
         // Song name
         TextView titleText = mViewHolder.getTitleText();
@@ -294,7 +240,7 @@ public class MediaControlPanel {
             final Intent intent = new Intent()
                     .setAction(MediaOutputSliceConstants.ACTION_MEDIA_OUTPUT)
                     .putExtra(MediaOutputSliceConstants.EXTRA_PACKAGE_NAME,
-                            mController.getPackageName())
+                            data.getPackageName())
                     .putExtra(MediaOutputSliceConstants.KEY_MEDIA_SESSION_TOKEN, mToken);
             mActivityStarter.startActivity(intent, false, true /* dismissShade */,
                     Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
@@ -350,15 +296,11 @@ public class MediaControlPanel {
             MediaAction mediaAction = actionIcons.get(i);
             button.setImageDrawable(mediaAction.getDrawable());
             button.setContentDescription(mediaAction.getContentDescription());
-            PendingIntent actionIntent = mediaAction.getIntent();
+            Runnable action = mediaAction.getAction();
 
             button.setOnClickListener(v -> {
-                if (actionIntent != null) {
-                    try {
-                        actionIntent.send();
-                    } catch (PendingIntent.CanceledException e) {
-                        e.printStackTrace();
-                    }
+                if (action != null) {
+                    action.run();
                 }
             });
             boolean visibleInCompat = actionsWhenCollapsed.contains(i);
@@ -444,14 +386,6 @@ public class MediaControlPanel {
     }
 
     /**
-     * Return the original notification's key
-     * @return The notification key
-     */
-    public String getKey()  {
-        return mKey;
-    }
-
-    /**
      * Check whether this player has an attached media session.
      * @return whether there is a controller with a current media session.
      */
@@ -485,150 +419,8 @@ public class MediaControlPanel {
         return (state.getState() == PlaybackState.STATE_PLAYING);
     }
 
-    /**
-     * Puts controls into a resumption state if possible, or calls removePlayer if no component was
-     * found that could resume playback
-     */
-    public void clearControls() {
-        Log.d(TAG, "clearControls to resumption state package=" + getMediaPlayerPackage());
-        if (mServiceComponent == null) {
-            // If we don't have a way to resume, just remove the player altogether
-            Log.d(TAG, "Removing unresumable controls");
-            removePlayer();
-            return;
-        }
-        resetButtons();
-    }
-
-    /**
-     * Hide the media buttons and show only a restart button
-     */
-    protected void resetButtons() {
-        if (mViewHolder == null) {
-            return;
-        }
-        // Hide all the old buttons
-
-        ConstraintSet expandedSet = mMediaViewController.getExpandedLayout();
-        ConstraintSet collapsedSet = mMediaViewController.getCollapsedLayout();
-        for (int i = 1; i < ACTION_IDS.length; i++) {
-            setVisibleAndAlpha(expandedSet, ACTION_IDS[i], false /*visible */);
-            setVisibleAndAlpha(collapsedSet, ACTION_IDS[i], false /*visible */);
-        }
-
-        // Add a restart button
-        ImageButton btn = mViewHolder.getAction0();
-        btn.setOnClickListener(v -> {
-            Log.d(TAG, "Attempting to restart session");
-            if (mQSMediaBrowser != null) {
-                mQSMediaBrowser.disconnect();
-            }
-            mQSMediaBrowser = new QSMediaBrowser(mContext, new QSMediaBrowser.Callback(){
-                @Override
-                public void onConnected() {
-                    Log.d(TAG, "Successfully restarted");
-                }
-                @Override
-                public void onError() {
-                    Log.e(TAG, "Error restarting");
-                    mQSMediaBrowser.disconnect();
-                    mQSMediaBrowser = null;
-                }
-            }, mServiceComponent);
-            mQSMediaBrowser.restart();
-        });
-        btn.setImageDrawable(mContext.getResources().getDrawable(R.drawable.lb_ic_play));
-        setVisibleAndAlpha(expandedSet, ACTION_IDS[0], true /*visible */);
-        setVisibleAndAlpha(collapsedSet, ACTION_IDS[0], true /*visible */);
-
-        mSeekBarViewModel.clearController();
-        // TODO: fix guts
-        //        View guts = mMediaNotifView.findViewById(R.id.media_guts);
-        View options = mViewHolder.getOptions();
-
-        mViewHolder.getPlayer().setOnLongClickListener(v -> {
-            // Replace player view with close/cancel view
-//            guts.setVisibility(View.GONE);
-            options.setVisibility(View.VISIBLE);
-            return true; // consumed click
-        });
-        mMediaViewController.refreshState();
-    }
-
     private void setVisibleAndAlpha(ConstraintSet set, int actionId, boolean visible) {
         set.setVisibility(actionId, visible? ConstraintSet.VISIBLE : ConstraintSet.GONE);
         set.setAlpha(actionId, visible ? 1.0f : 0.0f);
     }
-
-    /**
-     * Verify that we can connect to the given component with a MediaBrowser, and if so, add that
-     * component to the list of resumption components
-     */
-    private void tryUpdateResumptionList(ComponentName componentName) {
-        Log.d(TAG, "Testing if we can connect to " + componentName);
-        if (mQSMediaBrowser != null) {
-            mQSMediaBrowser.disconnect();
-        }
-        mQSMediaBrowser = new QSMediaBrowser(mContext,
-                new QSMediaBrowser.Callback() {
-                    @Override
-                    public void onConnected() {
-                        Log.d(TAG, "yes we can resume with " + componentName);
-                        mServiceComponent = componentName;
-                        updateResumptionList(componentName);
-                        mQSMediaBrowser.disconnect();
-                        mQSMediaBrowser = null;
-                    }
-
-                    @Override
-                    public void onError() {
-                        Log.d(TAG, "Cannot resume with " + componentName);
-                        mServiceComponent = null;
-                        if (!hasMediaSession()) {
-                            // If it's not active and we can't resume, remove
-                            removePlayer();
-                        }
-                        mQSMediaBrowser.disconnect();
-                        mQSMediaBrowser = null;
-                    }
-                },
-                componentName);
-        mQSMediaBrowser.testConnection();
-    }
-
-    /**
-     * Add the component to the saved list of media browser services, checking for duplicates and
-     * removing older components that exceed the maximum limit
-     * @param componentName
-     */
-    private synchronized void updateResumptionList(ComponentName componentName) {
-        // Add to front of saved list
-        if (mSharedPrefs == null) {
-            mSharedPrefs = mContext.getSharedPreferences(MEDIA_PREFERENCES, 0);
-        }
-        String componentString = componentName.flattenToString();
-        String listString = mSharedPrefs.getString(MEDIA_PREFERENCE_KEY, null);
-        if (listString == null) {
-            listString = componentString;
-        } else {
-            String[] components = listString.split(QSMediaBrowser.DELIMITER);
-            StringBuilder updated = new StringBuilder(componentString);
-            int nBrowsers = 1;
-            for (int i = 0; i < components.length
-                    && nBrowsers < QSMediaBrowser.MAX_RESUMPTION_CONTROLS; i++) {
-                if (componentString.equals(components[i])) {
-                    continue;
-                }
-                updated.append(QSMediaBrowser.DELIMITER).append(components[i]);
-                nBrowsers++;
-            }
-            listString = updated.toString();
-        }
-        mSharedPrefs.edit().putString(MEDIA_PREFERENCE_KEY, listString).apply();
-    }
-
-    /**
-     * Called when a player can't be resumed to give it an opportunity to hide or remove itself
-     */
-    protected void removePlayer() { }
 }

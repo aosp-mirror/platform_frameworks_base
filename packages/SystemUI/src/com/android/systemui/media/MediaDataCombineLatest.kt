@@ -32,9 +32,15 @@ class MediaDataCombineLatest @Inject constructor(
 
     init {
         dataSource.addListener(object : MediaDataManager.Listener {
-            override fun onMediaDataLoaded(key: String, data: MediaData) {
-                entries[key] = data to entries[key]?.second
-                update(key)
+            override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+                if (oldKey != null && !oldKey.equals(key)) {
+                    val s = entries[oldKey]?.second
+                    entries[key] = data to entries[oldKey]?.second
+                    entries.remove(oldKey)
+                } else {
+                    entries[key] = data to entries[key]?.second
+                }
+                update(key, oldKey)
             }
             override fun onMediaDataRemoved(key: String) {
                 remove(key)
@@ -43,7 +49,7 @@ class MediaDataCombineLatest @Inject constructor(
         deviceSource.addListener(object : MediaDeviceManager.Listener {
             override fun onMediaDeviceChanged(key: String, data: MediaDeviceData?) {
                 entries[key] = entries[key]?.first to data
-                update(key)
+                update(key, key)
             }
             override fun onKeyRemoved(key: String) {
                 remove(key)
@@ -61,13 +67,13 @@ class MediaDataCombineLatest @Inject constructor(
      */
     fun removeListener(listener: MediaDataManager.Listener) = listeners.remove(listener)
 
-    private fun update(key: String) {
+    private fun update(key: String, oldKey: String?) {
         val (entry, device) = entries[key] ?: null to null
         if (entry != null && device != null) {
             val data = entry.copy(device = device)
             val listenersCopy = listeners.toSet()
             listenersCopy.forEach {
-                it.onMediaDataLoaded(key, data)
+                it.onMediaDataLoaded(key, oldKey, data)
             }
         }
     }
