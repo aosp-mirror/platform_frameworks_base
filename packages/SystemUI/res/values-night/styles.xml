@@ -29,4 +29,9 @@
         <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
+    <style name="qs_security_footer" parent="@style/qs_theme">
+        <item name="android:textColor">#B3FFFFFF</item> <!-- 70% white -->
+        <item name="android:tint">#FFFFFFFF</item>
+    </style>
+
 </resources>
