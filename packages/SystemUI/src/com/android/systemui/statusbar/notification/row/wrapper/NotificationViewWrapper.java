@@ -240,6 +240,13 @@ public abstract class NotificationViewWrapper implements TransformableView {
         return null;
     }
 
+    /**
+     * @return the expand button if it exists
+     */
+    public @Nullable View getExpandButton() {
+        return null;
+    }
+
     public int getOriginalIconColor() {
         return Notification.COLOR_INVALID;
     }
