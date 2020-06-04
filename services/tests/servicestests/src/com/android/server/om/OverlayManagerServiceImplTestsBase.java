@@ -42,7 +42,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Base class for creating {@link OverlayManagerServiceImplTests} tests. */
@@ -82,14 +81,6 @@ class OverlayManagerServiceImplTestsBase {
 
     DummyListener getListener() {
         return mListener;
-    }
-
-    DummyPackageManagerHelper getPackageManager() {
-        return mPackageManager;
-    }
-
-    DummyIdmapDaemon getIdmapDaemon() {
-        return mIdmapDaemon;
     }
 
     void assertState(@State int expected, final String overlayPackageName, int userId) {
@@ -314,8 +305,6 @@ class OverlayManagerServiceImplTestsBase {
     static final class DummyPackageManagerHelper implements PackageManagerHelper,
             OverlayableInfoCallback {
         private final DummyDeviceState mState;
-        String[] overlayableConfiguratorTargets = new String[0];
-        String overlayableConfigurator = "";
 
         private DummyPackageManagerHelper(DummyDeviceState state) {
             mState = state;
@@ -386,16 +375,6 @@ class OverlayManagerServiceImplTestsBase {
         @Override
         public void enforcePermission(String permission, String message) throws SecurityException {
             throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public String[] getOverlayableConfiguratorTargets() {
-            return overlayableConfiguratorTargets;
-        }
-
-        @Override
-        public String getOverlayableConfigurator() {
-            return overlayableConfigurator;
         }
     }
 

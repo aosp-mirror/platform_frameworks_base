@@ -26,7 +26,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import android.content.om.OverlayInfo;
-import android.os.OverlayablePolicy;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -204,50 +203,5 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
 
         impl.setEnabled(OVERLAY, true, USER);
         assertEquals(0, listener.count);
-    }
-
-    @Test
-    public void testConfigurator() {
-        final DummyPackageManagerHelper packageManager = getPackageManager();
-        packageManager.overlayableConfigurator = "actor";
-        packageManager.overlayableConfiguratorTargets = new String[]{TARGET};
-        reinitializeImpl();
-
-        installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET)
-                .addOverlayable("TestResources")
-                .setCertificate("two"), USER);
-
-        final DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
-                .setCertificate("one");
-        installNewPackage(overlay, USER);
-
-        final DummyIdmapDaemon idmapDaemon = getIdmapDaemon();
-        final DummyIdmapDaemon.IdmapHeader idmap = idmapDaemon.getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(OverlayablePolicy.ACTOR_SIGNATURE,
-                idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-    }
-
-    @Test
-    public void testConfiguratorDifferentSignatures() {
-        final DummyPackageManagerHelper packageManager = getPackageManager();
-        packageManager.overlayableConfigurator = "actor";
-        packageManager.overlayableConfiguratorTargets = new String[]{TARGET};
-        reinitializeImpl();
-
-        installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET)
-                .addOverlayable("TestResources")
-                .setCertificate("two"), USER);
-
-        final DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
-                .setCertificate("two");
-        installNewPackage(overlay, USER);
-
-        final DummyIdmapDaemon idmapDaemon = getIdmapDaemon();
-        final DummyIdmapDaemon.IdmapHeader idmap = idmapDaemon.getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(0, idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
     }
 }
