@@ -446,6 +446,9 @@ message Atom {
             277 [(module) = "settings"];
         CellBroadcastMessageFiltered cb_message_filtered =
             278 [(module) = "cellbroadcast"];
+        TvTunerDvrStatus tv_tuner_dvr_status = 279 [(module) = "framework"];
+        TvCasSessionOpenStatus tv_cas_session_open_status =
+            280 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -9255,6 +9258,58 @@ message TvTunerStateChanged {
     //  new state
     optional State state = 2;
 }
+
+/**
+ * Logs the status of a dvr playback or record.
+ * This is atom ID 279.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/tv/tuner/dvr
+ */
+message TvTunerDvrStatus {
+    enum Type {
+        UNKNOWN_TYPE = 0;
+        PLAYBACK = 1; // is a playback
+        RECORD = 2; // is a record
+    }
+    enum State {
+        UNKNOWN_STATE = 0;
+        STARTED = 1; // DVR is started
+        STOPPED = 2; // DVR is stopped
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    // DVR type
+    optional Type type = 2;
+    //  DVR state
+    optional State state = 3;
+    //  Identify the segment of a record or playback
+    optional int32 segment_id = 4;
+    // indicate how many overflow or underflow happened between started to stopped
+    optional int32 overflow_underflow_count = 5;
+}
+
+/**
+ * Logs when a cas session opened through MediaCas.
+ * This is atom ID 280.
+ *
+ * Logged from:
+ *   frameworks/base/media/java/android/media/MediaCas.java
+ */
+message TvCasSessionOpenStatus {
+    enum State {
+        UNKNOWN = 0;
+        SUCCEEDED = 1; // indicate that the session is opened successfully.
+        FAILED = 2; // indicate that the session isn’t opened successfully.
+    }
+    // The uid of the application that sent this custom atom.
+    optional int32 uid = 1 [(is_uid) = true];
+    //  Cas system Id
+    optional int32 cas_system_id = 2;
+    // State of the session
+    optional State state = 3;
+}
+
 /**
  * Logs when an app is frozen or unfrozen.
  *
