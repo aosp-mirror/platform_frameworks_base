@@ -19,11 +19,11 @@ package com.android.server.location;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.SystemClock;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.TimeUtils;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 
 import java.util.ArrayList;
 import java.util.Comparator;
