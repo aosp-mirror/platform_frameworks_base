@@ -23,7 +23,7 @@
     android:paddingStart="@dimen/qs_footer_padding_start"
     android:paddingEnd="@dimen/qs_footer_padding_end"
     android:gravity="center_vertical"
-    android:background="?android:attr/colorPrimary" >
+    android:background="@android:color/transparent">
 
     <TextView
         android:id="@+id/footer_text"
@@ -32,7 +32,7 @@
         android:gravity="start"
         android:layout_weight="1"
         android:textAppearance="@style/TextAppearance.QS.TileLabel"
-        android:textColor="?android:attr/textColorSecondary"/>
+        style="@style/qs_security_footer"/>
 
     <ImageView
         android:id="@+id/footer_icon"
@@ -40,6 +40,6 @@
         android:layout_height="@dimen/qs_footer_icon_size"
         android:contentDescription="@null"
         android:src="@drawable/ic_info_outline"
-        android:tint="?android:attr/textColorSecondary"/>
+        style="@style/qs_security_footer"/>
 
 </LinearLayout>
