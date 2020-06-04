@@ -19,6 +19,7 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_BADGE;
 
 import android.content.Context;
 import android.util.Slog;
+import android.app.Notification;
 
 /**
  * Determines whether a badge should be shown for this notification
@@ -61,6 +62,10 @@ public class BadgeExtractor implements NotificationSignalExtractor {
             record.setShowBadge(false);
         }
 
+        Notification.BubbleMetadata metadata = record.getNotification().getBubbleMetadata();
+        if (metadata != null && metadata.isNotificationSuppressed()) {
+            record.setShowBadge(false);
+        }
         return null;
     }
 
