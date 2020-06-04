@@ -363,6 +363,16 @@ public class HdmiAudioSystemClientTest {
         public boolean isHdmiCecVolumeControlEnabled() {
             return true;
         }
+
+        @Override
+        public void addHdmiCecVolumeControlFeatureListener(
+                IHdmiCecVolumeControlFeatureListener listener) {
+        }
+
+        @Override
+        public void removeHdmiCecVolumeControlFeatureListener(
+                IHdmiCecVolumeControlFeatureListener listener) {
+        }
     }
 
 }
