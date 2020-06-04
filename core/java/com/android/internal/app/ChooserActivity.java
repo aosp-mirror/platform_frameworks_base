@@ -1803,7 +1803,8 @@ public class ChooserActivity extends ResolverActivity implements
         }
     }
 
-    void queryTargetServices(ChooserListAdapter adapter) {
+    @VisibleForTesting
+    protected void queryTargetServices(ChooserListAdapter adapter) {
         mQueriedTargetServicesTimeMs = System.currentTimeMillis();
 
         Context selectedProfileContext = createContextAsUser(
@@ -1956,7 +1957,8 @@ public class ChooserActivity extends ResolverActivity implements
         return driList;
     }
 
-    private void queryDirectShareTargets(
+    @VisibleForTesting
+    protected void queryDirectShareTargets(
                 ChooserListAdapter adapter, boolean skipAppPredictionService) {
         mQueriedSharingShortcutsTimeMs = System.currentTimeMillis();
         UserHandle userHandle = adapter.getUserHandle();
