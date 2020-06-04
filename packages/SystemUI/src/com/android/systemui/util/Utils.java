@@ -133,4 +133,13 @@ public class Utils {
                 Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1);
         return flag > 0;
     }
+
+    /**
+     * Allow media resumption controls. Requires {@link #useQsMediaPlayer(Context)} to be enabled.
+     * Off by default, but can be enabled by setting to 1
+     */
+    public static boolean useMediaResumption(Context context) {
+        int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_resumption", 0);
+        return useQsMediaPlayer(context) && flag > 0;
+    }
 }
