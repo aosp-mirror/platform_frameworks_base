@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"Menyambung ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="3028983857109369308">"Mengautentikasi dengan <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="4287401332778341890">"Mendapatkan alamat IP dari <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
-    <item msgid="1043944043827424501">"Tersambung ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
+    <item msgid="1043944043827424501">"Terhubung ke <xliff:g id="NETWORK_NAME">%1$s</xliff:g>"</item>
     <item msgid="7445993821842009653">"Ditangguhkan"</item>
     <item msgid="1175040558087735707">"Diputus dari <xliff:g id="NETWORK_NAME">%1$s</xliff:g>…"</item>
     <item msgid="699832486578171722">"Sambungan terputus"</item>
