@@ -42,4 +42,10 @@
               android:layout_height="match_parent"
               android:layout="@layout/car_user_switching_dialog"/>
 
+    <!-- Should be at bottom to get the highest Z-order. -->
+    <ViewStub android:id="@+id/rear_view_camera_stub"
+              android:layout_width="@dimen/rear_view_camera_width"
+              android:layout_height="@dimen/rear_view_camera_height"
+              android:layout_gravity="center"
+              android:layout="@layout/rear_view_camera"/>
 </FrameLayout>

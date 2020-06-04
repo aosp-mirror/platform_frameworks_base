@@ -108,6 +108,7 @@
         <item>com.android.systemui.car.keyguard.CarKeyguardViewMediator</item>
         <item>com.android.systemui.car.userswitcher.FullscreenUserSwitcherViewMediator</item>
         <item>com.android.systemui.car.userswitcher.UserSwitchTransitionViewMediator</item>
+        <item>com.android.systemui.car.rvc.RearViewCameraViewMediator</item>
     </string-array>
 
     <!--
@@ -150,4 +151,7 @@
 
     <!-- How many milliseconds to wait before force hiding the UserSwitchTransitionView -->
     <integer name="config_userSwitchTransitionViewShownTimeoutMs" translatable="false">5000</integer>
+
+    <!-- The Activity name for the Rear View Camera, if empty, the feature will be disabled. -->
+    <string name="config_rearViewCameraActivity" translatable="false"></string>
 </resources>
