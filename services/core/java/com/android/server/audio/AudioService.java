@@ -1893,7 +1893,7 @@ public class AudioService extends IAudioService.Stub
                             Binder.getCallingUid(), true, keyEventMode);
                 break;
             case KeyEvent.KEYCODE_VOLUME_MUTE:
-                if (event.getRepeatCount() == 0) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0) {
                     adjustSuggestedStreamVolume(AudioManager.ADJUST_TOGGLE_MUTE,
                             AudioManager.USE_DEFAULT_STREAM_TYPE, flags, callingPackage, caller,
                             Binder.getCallingUid(), true, VOL_ADJUST_NORMAL);
@@ -2155,7 +2155,8 @@ public class AudioService extends IAudioService.Stub
         }
         int oldIndex = mStreamStates[streamType].getIndex(device);
 
-        if (adjustVolume && (direction != AudioManager.ADJUST_SAME)) {
+        if (adjustVolume
+                && (direction != AudioManager.ADJUST_SAME) && (keyEventMode != VOL_ADJUST_END)) {
             mAudioHandler.removeMessages(MSG_UNMUTE_STREAM);
 
             if (isMuteAdjust) {
@@ -2238,6 +2239,11 @@ public class AudioService extends IAudioService.Stub
             if (streamTypeAlias == AudioSystem.STREAM_MUSIC) {
                 setSystemAudioVolume(oldIndex, newIndex, getStreamMaxVolume(streamType), flags);
             }
+        }
+
+        final int newIndex = mStreamStates[streamType].getIndex(device);
+
+        if (adjustVolume) {
             synchronized (mHdmiClientLock) {
                 if (mHdmiManager != null) {
                     // mHdmiCecSink true => mHdmiPlaybackClient != null
@@ -2290,8 +2296,7 @@ public class AudioService extends IAudioService.Stub
                 }
             }
         }
-        int index = mStreamStates[streamType].getIndex(device);
-        sendVolumeUpdate(streamType, oldIndex, index, flags, device);
+        sendVolumeUpdate(streamType, oldIndex, newIndex, flags, device);
     }
 
     // Called after a delay when volume down is pressed while muted
