@@ -208,134 +208,45 @@ public class OverlayManagerServiceImplTests extends OverlayManagerServiceImplTes
 
     @Test
     public void testConfigurator() {
-        mOverlayableConfigurator = "actor";
-        mOverlayableConfiguratorTargets = new String[]{TARGET};
+        final DummyPackageManagerHelper packageManager = getPackageManager();
+        packageManager.overlayableConfigurator = "actor";
+        packageManager.overlayableConfiguratorTargets = new String[]{TARGET};
         reinitializeImpl();
 
         installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET).addOverlayable("TestResources").setCertificate("two"),
-                USER);
+        installNewPackage(target(TARGET)
+                .addOverlayable("TestResources")
+                .setCertificate("two"), USER);
 
-        DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
+        final DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
                 .setCertificate("one");
         installNewPackage(overlay, USER);
 
-        DummyIdmapDaemon.IdmapHeader idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
+        final DummyIdmapDaemon idmapDaemon = getIdmapDaemon();
+        final DummyIdmapDaemon.IdmapHeader idmap = idmapDaemon.getIdmap(overlay.build().apkPath);
         assertNotNull(idmap);
         assertEquals(OverlayablePolicy.ACTOR_SIGNATURE,
                 idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-    }
-
-    @Test
-    public void testConfiguratorWithoutOverlayable() {
-        mOverlayableConfigurator = "actor";
-        mOverlayableConfiguratorTargets = new String[]{TARGET};
-        reinitializeImpl();
-
-        installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET).setCertificate("two"), USER);
-
-        DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET).setCertificate("one");
-        installNewPackage(overlay, USER);
-
-        DummyIdmapDaemon.IdmapHeader idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(OverlayablePolicy.ACTOR_SIGNATURE,
-                idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-    }
-
-    @Test
-    public void testConfiguratorDifferentTargets() {
-        // The target package is not listed in the configurator target list, so the actor policy
-        // should not be granted.
-        mOverlayableConfigurator = "actor";
-        mOverlayableConfiguratorTargets = new String[]{"somethingElse"};
-        reinitializeImpl();
-
-        installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET).setCertificate("two"), USER);
-
-        DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET).setCertificate("one");
-        installNewPackage(overlay, USER);
-
-        DummyIdmapDaemon.IdmapHeader idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(0, idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
     }
 
     @Test
     public void testConfiguratorDifferentSignatures() {
-        mOverlayableConfigurator = "actor";
-        mOverlayableConfiguratorTargets = new String[]{TARGET};
+        final DummyPackageManagerHelper packageManager = getPackageManager();
+        packageManager.overlayableConfigurator = "actor";
+        packageManager.overlayableConfiguratorTargets = new String[]{TARGET};
         reinitializeImpl();
 
         installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET).addOverlayable("TestResources").setCertificate("two"),
-                USER);
+        installNewPackage(target(TARGET)
+                .addOverlayable("TestResources")
+                .setCertificate("two"), USER);
 
-        DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
+        final DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
                 .setCertificate("two");
         installNewPackage(overlay, USER);
 
-        DummyIdmapDaemon.IdmapHeader idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(0, idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-    }
-
-    @Test
-    public void testConfiguratorWithoutOverlayableDifferentSignatures() {
-        mOverlayableConfigurator = "actor";
-        mOverlayableConfiguratorTargets = new String[]{TARGET};
-        reinitializeImpl();
-
-        installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET).setCertificate("two"), USER);
-
-        DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET).setCertificate("two");
-        installNewPackage(overlay, USER);
-
-        DummyIdmapDaemon.IdmapHeader idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(0, idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-    }
-
-    @Test
-    public void testConfiguratorChanges() {
-        mOverlayableConfigurator = "actor";
-        mOverlayableConfiguratorTargets = new String[]{TARGET};
-        reinitializeImpl();
-
-        installNewPackage(target("actor").setCertificate("one"), USER);
-        installNewPackage(target(TARGET).addOverlayable("TestResources").setCertificate("two"),
-                USER);
-
-        DummyDeviceState.PackageBuilder overlay = overlay(OVERLAY, TARGET, "TestResources")
-                .setCertificate("one");
-        installNewPackage(overlay, USER);
-
-        DummyIdmapDaemon.IdmapHeader idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(OverlayablePolicy.ACTOR_SIGNATURE,
-                idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-
-        // Change the configurator to a different package. The overlay should still be granted the
-        // actor policy.
-        mOverlayableConfigurator = "differentActor";
-        OverlayManagerServiceImpl impl = reinitializeImpl();
-        impl.updateOverlaysForUser(USER);
-
-        idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
-        assertNotNull(idmap);
-        assertEquals(OverlayablePolicy.ACTOR_SIGNATURE,
-                idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
-
-        // Reset the setting persisting that the overlay once fulfilled the actor policy implicitly
-        // through the configurator. The overlay should lose the actor policy.
-        impl = reinitializeImpl();
-        getSettings().setHasConfiguratorActorPolicy(OVERLAY, USER, false);
-        impl.updateOverlaysForUser(USER);
-
-        idmap = getIdmapDaemon().getIdmap(overlay.build().apkPath);
+        final DummyIdmapDaemon idmapDaemon = getIdmapDaemon();
+        final DummyIdmapDaemon.IdmapHeader idmap = idmapDaemon.getIdmap(overlay.build().apkPath);
         assertNotNull(idmap);
         assertEquals(0, idmap.policies & OverlayablePolicy.ACTOR_SIGNATURE);
     }
