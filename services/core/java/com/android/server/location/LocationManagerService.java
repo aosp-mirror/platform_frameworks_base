@@ -65,6 +65,7 @@ import android.location.LocationTime;
 import android.location.util.identity.CallerIdentity;
 import android.location.util.identity.CallerIdentity.PermissionLevel;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Handler;
@@ -1679,6 +1680,9 @@ public class LocationManagerService extends ILocationManager.Stub {
          * Note: must be constructed with lock held.
          */
         private UpdateRecord(String provider, LocationRequest request, Receiver receiver) {
+            if (Build.IS_DEBUGGABLE) {
+                Preconditions.checkState(Thread.holdsLock(mLock));
+            }
             mExpirationRealtimeMs = request.getExpirationRealtimeMs(SystemClock.elapsedRealtime());
             mProvider = provider;
             mRealRequest = request;
@@ -1716,6 +1720,10 @@ public class LocationManagerService extends ILocationManager.Stub {
          * Method to be called when a record will no longer be used.
          */
         private void disposeLocked(boolean removeReceiver) {
+            if (Build.IS_DEBUGGABLE) {
+                Preconditions.checkState(Thread.holdsLock(mLock));
+            }
+
             CallerIdentity identity = mReceiver.mCallerIdentity;
             mRequestStatistics.stopRequesting(identity.packageName, identity.attributionTag,
                     mProvider);
