@@ -340,6 +340,10 @@ public class PhoneStateListener {
     /**
      *  Listen for display info changed event.
      *
+     *  Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE
+     *  READ_PHONE_STATE} or that the calling app has carrier privileges (see
+     *  {@link TelephonyManager#hasCarrierPrivileges}).
+     *
      *  @see #onDisplayInfoChanged
      */
     public static final int LISTEN_DISPLAY_INFO_CHANGED = 0x00100000;
