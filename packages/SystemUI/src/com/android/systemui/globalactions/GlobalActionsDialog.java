@@ -175,7 +175,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
     private static final String GLOBAL_ACTION_KEY_USERS = "users";
     private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
-    private static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
+    static final String GLOBAL_ACTION_KEY_LOCKDOWN = "lockdown";
     private static final String GLOBAL_ACTION_KEY_VOICEASSIST = "voiceassist";
     private static final String GLOBAL_ACTION_KEY_ASSIST = "assist";
     static final String GLOBAL_ACTION_KEY_RESTART = "restart";
@@ -213,7 +213,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     protected final ArrayList<Action> mItems = new ArrayList<>();
     @VisibleForTesting
-    final ArrayList<Action> mOverflowItems = new ArrayList<>();
+    protected final ArrayList<Action> mOverflowItems = new ArrayList<>();
+    @VisibleForTesting
+    protected final ArrayList<Action> mPowerItems = new ArrayList<>();
 
     @VisibleForTesting
     protected ActionsDialog mDialog;
@@ -223,6 +225,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private MyAdapter mAdapter;
     private MyOverflowAdapter mOverflowAdapter;
+    private MyPowerOptionsAdapter mPowerAdapter;
 
     private boolean mKeyguardShowing = false;
     private boolean mDeviceProvisioned = false;
@@ -584,14 +587,19 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mItems.clear();
         mOverflowItems.clear();
-
+        mPowerItems.clear();
         String[] defaultActions = getDefaultActions();
+
+        ShutDownAction shutdownAction = new ShutDownAction();
+        RestartAction restartAction = new RestartAction();
+        ArraySet<String> addedKeys = new ArraySet<String>();
+
         // make sure emergency affordance action is first, if needed
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
             addActionItem(new EmergencyAffordanceAction());
+            addedKeys.add(GLOBAL_ACTION_KEY_EMERGENCY);
         }
 
-        ArraySet<String> addedKeys = new ArraySet<String>();
         for (int i = 0; i < defaultActions.length; i++) {
             String actionKey = defaultActions[i];
             if (addedKeys.contains(actionKey)) {
@@ -599,7 +607,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 continue;
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
-                addActionItem(new PowerAction());
+                addActionItem(shutdownAction);
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
                 addActionItem(mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
@@ -618,10 +626,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
                 addActionItem(getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
-                int userId = getCurrentUser().id;
-                if (Settings.Secure.getIntForUser(mContentResolver,
-                        Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, userId) != 0
-                        && shouldDisplayLockdown(userId)) {
+                if (shouldDisplayLockdown(getCurrentUser())) {
                     addActionItem(getLockdownAction());
                 }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
@@ -629,7 +634,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             } else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
                 addActionItem(getAssistAction());
             } else if (GLOBAL_ACTION_KEY_RESTART.equals(actionKey)) {
-                addActionItem(new RestartAction());
+                addActionItem(restartAction);
             } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
                 addActionItem(new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
@@ -638,14 +643,31 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     addActionItem(new LogoutAction());
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                if (!mEmergencyAffordanceManager.needsEmergencyAffordance()) {
-                    addActionItem(new EmergencyDialerAction());
-                }
+                addActionItem(new EmergencyDialerAction());
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
             // Add here so we don't add more than one.
             addedKeys.add(actionKey);
+        }
+
+        // replace power and restart with a single power options action, if needed
+        if (mItems.contains(shutdownAction) && mItems.contains(restartAction)
+                && mOverflowItems.size() > 0) {
+            // transfer shutdown and restart to their own list of power actions
+            mItems.remove(shutdownAction);
+            mItems.remove(restartAction);
+            mPowerItems.add(shutdownAction);
+            mPowerItems.add(restartAction);
+
+            // add the PowerOptionsAction after Emergency, if present
+            int powerIndex = addedKeys.contains(GLOBAL_ACTION_KEY_EMERGENCY) ? 1 : 0;
+            mItems.add(powerIndex, new PowerOptionsAction());
+
+            // transfer the first overflow action to the main set of items
+            Action firstOverflowAction = mOverflowItems.get(0);
+            mOverflowItems.remove(0);
+            mItems.add(firstOverflowAction);
         }
     }
 
@@ -664,6 +686,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mAdapter = new MyAdapter();
         mOverflowAdapter = new MyOverflowAdapter();
+        mPowerAdapter = new MyPowerOptionsAdapter();
 
         mDepthController.setShowingHomeControls(true);
         GlobalActionsPanelPlugin.PanelViewController walletViewController =
@@ -676,7 +699,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 walletViewController, mDepthController, mSysuiColorExtractor,
                 mStatusBarService, mNotificationShadeWindowController,
                 controlsAvailable(), uiController,
-                mSysUiState, this::onRotate, mKeyguardShowing);
+                mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter);
         boolean walletViewAvailable = walletViewController != null
                 && walletViewController.getPanelContent() != null;
         if (shouldShowLockMessage(walletViewAvailable)) {
@@ -689,7 +712,20 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return dialog;
     }
 
-    private boolean shouldDisplayLockdown(int userId) {
+    @VisibleForTesting
+    protected boolean shouldDisplayLockdown(UserInfo user) {
+        if (user == null) {
+            return false;
+        }
+
+        int userId = user.id;
+
+        // No lockdown option if it's not turned on in Settings
+        if (Settings.Secure.getIntForUser(mContentResolver,
+                Settings.Secure.LOCKDOWN_IN_POWER_MENU, 0, userId) == 0) {
+            return false;
+        }
+
         // Lockdown is meaningless without a place to go.
         if (!mKeyguardStateController.isMethodSecure()) {
             return false;
@@ -740,8 +776,32 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         mActivityStarter.startPendingIntentDismissingKeyguard(pendingIntent);
     }
 
-    private final class PowerAction extends SinglePressAction implements LongPressAction {
-        private PowerAction() {
+    @VisibleForTesting
+    protected final class PowerOptionsAction extends SinglePressAction {
+        private PowerOptionsAction() {
+            super(R.drawable.ic_lock_power_off, R.string.global_action_power_options);
+        }
+
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
+
+        @Override
+        public boolean showBeforeProvisioning() {
+            return true;
+        }
+
+        @Override
+        public void onPress() {
+            if (mDialog != null) {
+                mDialog.showPowerOptionsMenu();
+            }
+        }
+    }
+
+    private final class ShutDownAction extends SinglePressAction implements LongPressAction {
+        private ShutDownAction() {
             super(R.drawable.ic_lock_power_off,
                     R.string.global_action_power_off);
         }
@@ -772,7 +832,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private abstract class EmergencyAction extends SinglePressAction {
+    @VisibleForTesting
+    protected abstract class EmergencyAction extends SinglePressAction {
         EmergencyAction(int iconResId, int messageResId) {
             super(iconResId, messageResId);
         }
@@ -1317,7 +1378,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             Action item = mAdapter.getItem(position);
             if (!(item instanceof SilentModeTriStateAction)) {
                 if (mDialog != null) {
-                    mDialog.dismiss();
+                    // don't dismiss the dialog if we're opening the power options menu
+                    if (!(item instanceof PowerOptionsAction)) {
+                        mDialog.dismiss();
+                    }
                 } else {
                     Log.w(TAG, "Action clicked while mDialog is null.");
                 }
@@ -1333,6 +1397,70 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     /**
      * The adapter used for items in the overflow menu.
+     */
+    public class MyPowerOptionsAdapter extends BaseAdapter {
+        @Override
+        public int getCount() {
+            return mPowerItems.size();
+        }
+
+        @Override
+        public Action getItem(int position) {
+            return mPowerItems.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            Action action = getItem(position);
+            if (action == null) {
+                Log.w(TAG, "No power options action found at position: " + position);
+                return null;
+            }
+            int viewLayoutResource = com.android.systemui.R.layout.controls_more_item;
+            View view = convertView != null ? convertView
+                    : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
+            TextView textView = (TextView) view;
+            if (action.getMessageResId() != 0) {
+                textView.setText(action.getMessageResId());
+            } else {
+                textView.setText(action.getMessage());
+            }
+            return textView;
+        }
+
+        private boolean onLongClickItem(int position) {
+            final Action action = getItem(position);
+            if (action instanceof LongPressAction) {
+                if (mDialog != null) {
+                    mDialog.dismiss();
+                } else {
+                    Log.w(TAG, "Action long-clicked while mDialog is null.");
+                }
+                return ((LongPressAction) action).onLongPress();
+            }
+            return false;
+        }
+
+        private void onClickItem(int position) {
+            Action item = getItem(position);
+            if (!(item instanceof SilentModeTriStateAction)) {
+                if (mDialog != null) {
+                    mDialog.dismiss();
+                } else {
+                    Log.w(TAG, "Action clicked while mDialog is null.");
+                }
+                item.onPress();
+            }
+        }
+    }
+
+    /**
+     * The adapter used for items in the power options menu, triggered by the PowerOptionsAction.
      */
     public class MyOverflowAdapter extends BaseAdapter {
         @Override
@@ -1373,7 +1501,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             final Action action = getItem(position);
             if (action instanceof LongPressAction) {
                 if (mDialog != null) {
-                    mDialog.hidePowerOverflowMenu();
                     mDialog.dismiss();
                 } else {
                     Log.w(TAG, "Action long-clicked while mDialog is null.");
@@ -1387,7 +1514,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             Action item = getItem(position);
             if (!(item instanceof SilentModeTriStateAction)) {
                 if (mDialog != null) {
-                    mDialog.hidePowerOverflowMenu();
                     mDialog.dismiss();
                 } else {
                     Log.w(TAG, "Action clicked while mDialog is null.");
@@ -1494,7 +1620,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 return context.getString(mMessageResId);
             }
         }
-
 
         public int getMessageResId() {
             return mMessageResId;
@@ -1846,6 +1971,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             mAirplaneState = inAirplaneMode ? ToggleState.On : ToggleState.Off;
             mAirplaneModeOn.updateState(mAirplaneState);
             mAdapter.notifyDataSetChanged();
+            mOverflowAdapter.notifyDataSetChanged();
+            mPowerAdapter.notifyDataSetChanged();
         }
     };
 
@@ -1928,6 +2055,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final Context mContext;
         private final MyAdapter mAdapter;
         private final MyOverflowAdapter mOverflowAdapter;
+        private final MyPowerOptionsAdapter mPowerOptionsAdapter;
         private final IStatusBarService mStatusBarService;
         private final IBinder mToken = new Binder();
         private MultiListLayout mGlobalActionsLayout;
@@ -1943,6 +2071,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final NotificationShadeDepthController mDepthController;
         private final SysUiState mSysUiState;
         private ListPopupWindow mOverflowPopup;
+        private ListPopupWindow mPowerOptionsPopup;
         private final Runnable mOnRotateCallback;
         private final boolean mControlsAvailable;
 
@@ -1958,11 +2087,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 SysuiColorExtractor sysuiColorExtractor, IStatusBarService statusBarService,
                 NotificationShadeWindowController notificationShadeWindowController,
                 boolean controlsAvailable, @Nullable ControlsUiController controlsUiController,
-                SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing) {
+                SysUiState sysuiState, Runnable onRotateCallback, boolean keyguardShowing,
+                MyPowerOptionsAdapter powerAdapter) {
             super(context, com.android.systemui.R.style.Theme_SystemUI_Dialog_GlobalActions);
             mContext = context;
             mAdapter = adapter;
             mOverflowAdapter = overflowAdapter;
+            mPowerOptionsAdapter = powerAdapter;
             mDepthController = depthController;
             mColorExtractor = sysuiColorExtractor;
             mStatusBarService = statusBarService;
@@ -2076,6 +2207,21 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
+        private ListPopupWindow createPowerOptionsPopup() {
+            GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
+                    new ContextThemeWrapper(
+                            mContext,
+                            com.android.systemui.R.style.Control_ListPopupWindow
+                    ), false /* isDropDownMode */);
+            popup.setOnItemClickListener(
+                    (parent, view, position, id) -> mPowerOptionsAdapter.onClickItem(position));
+            popup.setOnItemLongClickListener(
+                    (parent, view, position, id) -> mPowerOptionsAdapter.onLongClickItem(position));
+            popup.setAnchorView(mGlobalActionsLayout);
+            popup.setAdapter(mPowerOptionsAdapter);
+            return popup;
+        }
+
         private ListPopupWindow createPowerOverflowPopup() {
             GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
                     new ContextThemeWrapper(
@@ -2093,14 +2239,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return popup;
         }
 
+        public void showPowerOptionsMenu() {
+            mPowerOptionsPopup = createPowerOptionsPopup();
+            mPowerOptionsPopup.show();
+        }
+
         private void showPowerOverflowMenu() {
             mOverflowPopup = createPowerOverflowPopup();
             mOverflowPopup.show();
-        }
-
-        private void hidePowerOverflowMenu() {
-            mOverflowPopup.dismiss();
-            mOverflowPopup = null;
         }
 
         private void initializeLayout() {
@@ -2278,6 +2424,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
                 // close first, as popup windows will not fade during the animation
                 dismissOverflow(false);
+                dismissPowerOptions(false);
                 if (mControlsUiController != null) mControlsUiController.closeDialogs(false);
             });
         }
@@ -2302,6 +2449,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             resetOrientation();
             dismissWallet();
             dismissOverflow(true);
+            dismissPowerOptions(true);
             if (mControlsUiController != null) mControlsUiController.hide();
             mNotificationShadeWindowController.setForceHasTopUi(mHadTopUi);
             mDepthController.updateGlobalDialogVisibility(0, null /* view */);
@@ -2322,6 +2470,16 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     mOverflowPopup.dismissImmediate();
                 } else {
                     mOverflowPopup.dismiss();
+                }
+            }
+        }
+
+        private void dismissPowerOptions(boolean immediate) {
+            if (mPowerOptionsPopup != null) {
+                if (immediate) {
+                    mPowerOptionsPopup.dismissImmediate();
+                } else {
+                    mPowerOptionsPopup.dismiss();
                 }
             }
         }
@@ -2369,6 +2527,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             // ensure dropdown menus are dismissed before re-initializing the dialog
             dismissWallet();
             dismissOverflow(true);
+            dismissPowerOptions(true);
             if (mControlsUiController != null) {
                 mControlsUiController.hide();
             }

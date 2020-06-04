@@ -19,6 +19,7 @@ package com.android.systemui.globalactions;
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -244,7 +245,7 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testCreateActionItems_maxThree() {
+    public void testCreateActionItems_maxThree_noOverflow() {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         // allow 3 items to be shown
         doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
@@ -254,13 +255,129 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(3, mGlobalActionsDialog.mItems.size());
+        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+        assertEquals(0, mGlobalActionsDialog.mPowerItems.size());
+    }
+
+    @Test
+    public void testCreateActionItems_maxThree_condensePower() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow 3 items to be shown
+        doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // ensure items are not blocked by keyguard or device provisioning
+        doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        // make sure lockdown action will be shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(3, mGlobalActionsDialog.mItems.size());
+        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+        assertEquals(2, mGlobalActionsDialog.mPowerItems.size());
+
+        // PowerOptionsAction should appear immediately after the Emergency action
+
+        GlobalActionsDialog.Action firstItem = mGlobalActionsDialog.mItems.get(0);
+        GlobalActionsDialog.Action secondItem = mGlobalActionsDialog.mItems.get(1);
+
+        assertTrue(firstItem instanceof GlobalActionsDialog.EmergencyAction);
+        assertTrue(secondItem instanceof GlobalActionsDialog.PowerOptionsAction);
+    }
+
+    @Test
+    public void testCreateActionItems_maxThree_condensePower_noEmergency() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow 3 items to be shown
+        doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // make sure lockdown action will be shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
+        // ensure items are not blocked by keyguard or device provisioning
+        doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(3, mGlobalActionsDialog.mItems.size());
+        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+        assertEquals(2, mGlobalActionsDialog.mPowerItems.size());
+
+        // When Emergency isn't used, PowerOptionsAction should be first
+
+        GlobalActionsDialog.Action firstItem = mGlobalActionsDialog.mItems.get(0);
+        GlobalActionsDialog.Action secondItem = mGlobalActionsDialog.mItems.get(1);
+
+        assertTrue(firstItem instanceof GlobalActionsDialog.PowerOptionsAction);
+        assertTrue(secondItem instanceof GlobalActionsDialog.ScreenshotAction);
+    }
+
+    @Test
+    public void testCreateActionItems_maxFour_condensePower() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow 3 items to be shown
+        doReturn(4).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // make sure lockdown action will be shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
+        // ensure items are not blocked by keyguard or device provisioning
+        doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertEquals(4, mGlobalActionsDialog.mItems.size());
+        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+        assertEquals(2, mGlobalActionsDialog.mPowerItems.size());
+
+        // with four items, make sure power still shows up immediately after Emergency
+        GlobalActionsDialog.Action firstItem = mGlobalActionsDialog.mItems.get(0);
+        GlobalActionsDialog.Action secondItem = mGlobalActionsDialog.mItems.get(1);
+
+        assertTrue(firstItem instanceof GlobalActionsDialog.EmergencyAction);
+        assertTrue(secondItem instanceof GlobalActionsDialog.PowerOptionsAction);
+    }
+
+    @Test
+    public void testCreateActionItems_maxThree_doNotCondensePower() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow 3 items to be shown
+        doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // make sure lockdown action will be shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
+        // ensure items are not blocked by keyguard or device provisioning
+        doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
         assertEquals(3, mGlobalActionsDialog.mItems.size());
         assertEquals(1, mGlobalActionsDialog.mOverflowItems.size());
+        assertEquals(0, mGlobalActionsDialog.mPowerItems.size());
     }
 
     @Test
@@ -270,11 +387,13 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(Integer.MAX_VALUE).when(mGlobalActionsDialog).getMaxShownPowerItems();
         // ensure items are not blocked by keyguard or device provisioning
         doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
+        // make sure lockdown action will be shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
         String[] actions = {
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
@@ -288,10 +407,12 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         // allow only 3 items to be shown
         doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        // make sure lockdown action will NOT be shown
+        doReturn(false).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
         String[] actions = {
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
-                // screenshot blocked because device not provisioned
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                // lockdown action not allowed
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
         };
