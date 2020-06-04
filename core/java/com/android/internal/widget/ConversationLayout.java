@@ -161,6 +161,7 @@ public class ConversationLayout extends FrameLayout
     private Rect mAppOpsTouchRect = new Rect();
     private float mMinTouchSize;
     private Icon mConversationIcon;
+    private Icon mShortcutIcon;
     private View mAppNameDivider;
 
     public ConversationLayout(@NonNull Context context) {
@@ -465,10 +466,9 @@ public class ConversationLayout extends FrameLayout
     private void updateConversationLayout() {
         // Set avatar and name
         CharSequence conversationText = mConversationTitle;
+        mConversationIcon = mShortcutIcon;
         if (mIsOneToOne) {
             // Let's resolve the icon / text from the last sender
-            mConversationIconView.setVisibility(VISIBLE);
-            mConversationFacePile.setVisibility(GONE);
             CharSequence userKey = getKey(mUser);
             for (int i = mGroups.size() - 1; i >= 0; i--) {
                 MessagingGroup messagingGroup = mGroups.get(i);
@@ -490,22 +490,21 @@ public class ConversationLayout extends FrameLayout
                     break;
                 }
             }
+        }
+        if (mConversationIcon == null) {
+            mConversationIcon = mLargeIcon;
+        }
+        if (mIsOneToOne || mConversationIcon != null) {
+            mConversationIconView.setVisibility(VISIBLE);
+            mConversationFacePile.setVisibility(GONE);
+            mConversationIconView.setImageIcon(mConversationIcon);
         } else {
-            if (mConversationIcon == null && mLargeIcon != null) {
-                mConversationIcon = mLargeIcon;
-            }
-            if (mConversationIcon != null) {
-                mConversationIconView.setVisibility(VISIBLE);
-                mConversationFacePile.setVisibility(GONE);
-                mConversationIconView.setImageIcon(mConversationIcon);
-            } else {
-                mConversationIconView.setVisibility(GONE);
-                // This will also inflate it!
-                mConversationFacePile.setVisibility(VISIBLE);
-                // rebind the value to the inflated view instead of the stub
-                mConversationFacePile = findViewById(R.id.conversation_face_pile);
-                bindFacePile();
-            }
+            mConversationIconView.setVisibility(GONE);
+            // This will also inflate it!
+            mConversationFacePile.setVisibility(VISIBLE);
+            // rebind the value to the inflated view instead of the stub
+            mConversationFacePile = findViewById(R.id.conversation_face_pile);
+            bindFacePile();
         }
         if (TextUtils.isEmpty(conversationText)) {
             conversationText = mIsOneToOne ? mFallbackChatName : mFallbackGroupChatName;
@@ -712,7 +711,7 @@ public class ConversationLayout extends FrameLayout
     }
 
     @RemotableViewMethod
-    public void setConversationIcon(Icon conversationIcon) {
+    public void setShortcutIcon(Icon conversationIcon) {
         mConversationIcon = conversationIcon;
     }
 
