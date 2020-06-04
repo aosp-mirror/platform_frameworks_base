@@ -7388,10 +7388,26 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
     }
 
+    public Bundle getCoreSettings() {
+        return mCoreSettings;
+    }
+
     public int getIntCoreSetting(String key, int defaultValue) {
         synchronized (mResourcesManager) {
             if (mCoreSettings != null) {
                 return mCoreSettings.getInt(key, defaultValue);
+            }
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Get the string value of the given key from core settings.
+     */
+    public String getStringCoreSetting(String key, String defaultValue) {
+        synchronized (mResourcesManager) {
+            if (mCoreSettings != null) {
+                return mCoreSettings.getString(key, defaultValue);
             }
             return defaultValue;
         }
