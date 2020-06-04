@@ -1259,7 +1259,12 @@
         <!-- Can be combined with <var>text</var> and its variations to
              allow multiple lines of text in the field.  If this flag is not set,
              the text field will be constrained to a single line.  Corresponds to
-             {@link android.text.InputType#TYPE_TEXT_FLAG_MULTI_LINE}. -->
+             {@link android.text.InputType#TYPE_TEXT_FLAG_MULTI_LINE}.
+
+             Note: If this flag is not set and the text field doesn't have max length limit, the
+             framework automatically set maximum length of the characters to 5000 for the
+             performance reasons.
+             -->
         <flag name="textMultiLine" value="0x00020001" />
         <!-- Can be combined with <var>text</var> and its variations to
              indicate that though the regular text view should not be multiple
