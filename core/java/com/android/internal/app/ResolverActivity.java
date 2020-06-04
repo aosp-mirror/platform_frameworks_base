@@ -1807,6 +1807,12 @@ public class ResolverActivity extends Activity implements
         ResolverListAdapter activeListAdapter =
                 mMultiProfilePagerAdapter.getActiveListAdapter();
         View buttonBarDivider = findViewById(R.id.resolver_button_bar_divider);
+        if (!useLayoutWithDefault()) {
+            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
+            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
+                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
+                            R.dimen.resolver_button_bar_spacing) + inset);
+        }
         if (activeListAdapter.isTabLoaded()
                 && mMultiProfilePagerAdapter.shouldShowEmptyStateScreen(activeListAdapter)
                 && !useLayoutWithDefault()) {
@@ -1823,12 +1829,6 @@ public class ResolverActivity extends Activity implements
         buttonLayout.setVisibility(View.VISIBLE);
         setButtonBarIgnoreOffset(/* ignoreOffset */ true);
 
-        if (!useLayoutWithDefault()) {
-            int inset = mSystemWindowInsets != null ? mSystemWindowInsets.bottom : 0;
-            buttonLayout.setPadding(buttonLayout.getPaddingLeft(), buttonLayout.getPaddingTop(),
-                    buttonLayout.getPaddingRight(), getResources().getDimensionPixelSize(
-                            R.dimen.resolver_button_bar_spacing) + inset);
-        }
         mOnceButton = (Button) buttonLayout.findViewById(R.id.button_once);
         mAlwaysButton = (Button) buttonLayout.findViewById(R.id.button_always);
 
