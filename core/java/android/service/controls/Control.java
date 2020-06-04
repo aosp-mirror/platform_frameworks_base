@@ -73,25 +73,37 @@ public final class Control implements Parcelable {
     })
     public @interface Status {};
 
+    /**
+     * Reserved for use with the {@link StatelessBuilder}, and while loading. When state is
+     * requested via {@link ControlsProviderService#createPublisherFor}, use other status codes
+     * to indicate the proper device state.
+     */
     public static final int STATUS_UNKNOWN = 0;
 
     /**
-     * The device corresponding to the {@link Control} is responding correctly.
+     * Used to indicate that the state of the device was successfully retrieved. This includes
+     * all scenarios where the device may have a warning for the user, such as "Lock jammed",
+     * or "Vacuum stuck". Any information for the user should be set through
+     * {@link StatefulBuilder#setStatusText}.
      */
     public static final int STATUS_OK = 1;
 
     /**
-     * The device corresponding to the {@link Control} cannot be found or was removed.
+     * The device corresponding to the {@link Control} cannot be found or was removed. The user
+     * will be alerted and directed to the application to resolve.
      */
     public static final int STATUS_NOT_FOUND = 2;
 
     /**
-     * The device corresponding to the {@link Control} is in an error state.
+     * Used to indicate that there was a temporary error while loading the device state. A default
+     * error message will be displayed in place of any custom text that was set through
+     * {@link StatefulBuilder#setStatusText}.
      */
     public static final int STATUS_ERROR = 3;
 
     /**
-     * The {@link Control} is currently disabled.
+     * The {@link Control} is currently disabled.  A default error message will be displayed in
+     * place of any custom text that was set through {@link StatefulBuilder#setStatusText}.
      */
     public static final int STATUS_DISABLED = 4;
 
