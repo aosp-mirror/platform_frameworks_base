@@ -45,7 +45,7 @@ class MediaTimeoutListener @Inject constructor(
 
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
-    override fun onMediaDataLoaded(key: String, data: MediaData) {
+    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
         if (mediaListeners.containsKey(key)) {
             return
         }
@@ -67,15 +67,20 @@ class MediaTimeoutListener @Inject constructor(
 
         var timedOut = false
 
-        private val mediaController = mediaControllerFactory.create(data.token)
+        // Resume controls may have null token
+        private val mediaController = if (data.token != null) {
+            mediaControllerFactory.create(data.token)
+        } else {
+            null
+        }
         private var cancellation: Runnable? = null
 
         init {
-            mediaController.registerCallback(this)
+            mediaController?.registerCallback(this)
         }
 
         fun destroy() {
-            mediaController.unregisterCallback(this)
+            mediaController?.unregisterCallback(this)
         }
 
         override fun onPlaybackStateChanged(state: PlaybackState?) {
