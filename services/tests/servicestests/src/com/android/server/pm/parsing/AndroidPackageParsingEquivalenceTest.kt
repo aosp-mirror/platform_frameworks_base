@@ -18,8 +18,8 @@ package com.android.server.pm.parsing
 
 import android.content.pm.PackageManager
 import android.platform.test.annotations.Presubmit
+import androidx.test.filters.LargeTest
 import com.google.common.truth.Expect
-import com.google.common.truth.Truth.assertWithMessage
 import org.junit.Rule
 import org.junit.Test
 
@@ -52,6 +52,7 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
         }
     }
 
+    @LargeTest
     @Test
     fun packageInfoEquality() {
         val flags = PackageManager.GET_ACTIVITIES or
@@ -65,7 +66,9 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
                 PackageManager.GET_SERVICES or
                 PackageManager.GET_SHARED_LIBRARY_FILES or
                 PackageManager.GET_SIGNATURES or
-                PackageManager.GET_SIGNING_CERTIFICATES
+                PackageManager.GET_SIGNING_CERTIFICATES or
+                PackageManager.MATCH_DIRECT_BOOT_UNAWARE or
+                PackageManager.MATCH_DIRECT_BOOT_AWARE
         val oldPackageInfo = oldPackages.asSequence().map { oldPackageInfo(it, flags) }
         val newPackageInfo = newPackages.asSequence().map { newPackageInfo(it, flags) }
 
@@ -77,11 +80,79 @@ class AndroidPackageParsingEquivalenceTest : AndroidPackageParsingTestBase() {
             } else {
                 "$firstName | $secondName"
             }
-            expect.withMessage("${it.first?.applicationInfo?.sourceDir} $packageName")
-                    .that(it.first?.dumpToString())
-                    .isEqualTo(it.second?.dumpToString())
+
+            // Main components are asserted independently to separate the failures. Otherwise the
+            // comparison would include every component in one massive string.
+
+            val prefix = "${it.first?.applicationInfo?.sourceDir} $packageName"
+
+            expect.withMessage("$prefix PackageInfo")
+                    .that(it.second?.dumpToString())
+                    .isEqualTo(it.first?.dumpToString())
+
+            expect.withMessage("$prefix ApplicationInfo")
+                    .that(it.second?.applicationInfo?.dumpToString())
+                    .isEqualTo(it.first?.applicationInfo?.dumpToString())
+
+            val firstActivityNames = it.first?.activities?.map { it.name } ?: emptyList()
+            val secondActivityNames = it.second?.activities?.map { it.name } ?: emptyList()
+            expect.withMessage("$prefix activities")
+                    .that(secondActivityNames)
+                    .containsExactlyElementsIn(firstActivityNames)
+                    .inOrder()
+
+            if (!it.first?.activities.isNullOrEmpty() && !it.second?.activities.isNullOrEmpty()) {
+                it.first?.activities?.zip(it.second?.activities!!)?.forEach {
+                    expect.withMessage("$prefix ${it.first.name}")
+                            .that(it.second.dumpToString())
+                            .isEqualTo(it.first.dumpToString())
+                }
+            }
+
+            val firstReceiverNames = it.first?.receivers?.map { it.name } ?: emptyList()
+            val secondReceiverNames = it.second?.receivers?.map { it.name } ?: emptyList()
+            expect.withMessage("$prefix receivers")
+                    .that(secondReceiverNames)
+                    .containsExactlyElementsIn(firstReceiverNames)
+                    .inOrder()
+
+            if (!it.first?.receivers.isNullOrEmpty() && !it.second?.receivers.isNullOrEmpty()) {
+                it.first?.receivers?.zip(it.second?.receivers!!)?.forEach {
+                    expect.withMessage("$prefix ${it.first.name}")
+                            .that(it.second.dumpToString())
+                            .isEqualTo(it.first.dumpToString())
+                }
+            }
+
+            val firstProviderNames = it.first?.providers?.map { it.name } ?: emptyList()
+            val secondProviderNames = it.second?.providers?.map { it.name } ?: emptyList()
+            expect.withMessage("$prefix providers")
+                    .that(secondProviderNames)
+                    .containsExactlyElementsIn(firstProviderNames)
+                    .inOrder()
+
+            if (!it.first?.providers.isNullOrEmpty() && !it.second?.providers.isNullOrEmpty()) {
+                it.first?.providers?.zip(it.second?.providers!!)?.forEach {
+                    expect.withMessage("$prefix ${it.first.name}")
+                            .that(it.second.dumpToString())
+                            .isEqualTo(it.first.dumpToString())
+                }
+            }
+
+            val firstServiceNames = it.first?.services?.map { it.name } ?: emptyList()
+            val secondServiceNames = it.second?.services?.map { it.name } ?: emptyList()
+            expect.withMessage("$prefix services")
+                    .that(secondServiceNames)
+                    .containsExactlyElementsIn(firstServiceNames)
+                    .inOrder()
+
+            if (!it.first?.services.isNullOrEmpty() && !it.second?.services.isNullOrEmpty()) {
+                it.first?.services?.zip(it.second?.services!!)?.forEach {
+                    expect.withMessage("$prefix ${it.first.name}")
+                            .that(it.second.dumpToString())
+                            .isEqualTo(it.first.dumpToString())
+                }
+            }
         }
     }
 }
-
-
