@@ -1,10 +1,6 @@
 // Signature format: 2.0
 package android.app {
 
-  public class ActivityManager {
-    method @Deprecated public static int getMaxNumPictureInPictureActions();
-  }
-
   public class Notification implements android.os.Parcelable {
     method @Deprecated public String getChannel();
     method public static Class<? extends android.app.Notification.Style> getNotificationStyleClass(String);
