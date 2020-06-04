@@ -244,7 +244,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         mAppOpsHelper = new AppOpsHelper(mContext);
         mUserInfoHelper = new UserInfoHelper(mContext);
-        mSettingsHelper = new SettingsHelper(mContext, mHandler);
+        mSettingsHelper = new SettingsHelper(mContext);
         mAppForegroundHelper = new AppForegroundHelper(mContext);
         mLocationUsageLogger = new LocationUsageLogger();
 
