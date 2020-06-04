@@ -26,6 +26,8 @@ import android.os.SystemClock;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.util.Arrays;
+
 /**
  * StatsEvent builds and stores the buffer sent over the statsd socket.
  * This class defines and encapsulates the socket protocol.
@@ -224,7 +226,9 @@ public final class StatsEvent {
 
     // Max payload size is 4 bytes less as 4 bytes are reserved for statsEventTag.
     // See android_util_StatsLog.cpp.
-    private static final int MAX_PAYLOAD_SIZE = LOGGER_ENTRY_MAX_PAYLOAD - 4;
+    private static final int MAX_PUSH_PAYLOAD_SIZE = LOGGER_ENTRY_MAX_PAYLOAD - 4;
+
+    private static final int MAX_PULL_PAYLOAD_SIZE = 50 * 1024; // 50 KB
 
     private final int mAtomId;
     private final byte[] mPayload;
@@ -619,6 +623,7 @@ public final class StatsEvent {
         @NonNull
         public Builder usePooledBuffer() {
             mUsePooledBuffer = true;
+            mBuffer.setMaxSize(MAX_PUSH_PAYLOAD_SIZE, mPos);
             return this;
         }
 
@@ -694,8 +699,9 @@ public final class StatsEvent {
         @GuardedBy("sLock")
         private static Buffer sPool;
 
-        private final byte[] mBytes = new byte[MAX_PAYLOAD_SIZE];
+        private byte[] mBytes = new byte[MAX_PUSH_PAYLOAD_SIZE];
         private boolean mOverflow = false;
+        private int mMaxSize = MAX_PULL_PAYLOAD_SIZE;
 
         @NonNull
         private static Buffer obtain() {
@@ -717,15 +723,26 @@ public final class StatsEvent {
         }
 
         private void release() {
-            synchronized (sLock) {
-                if (null == sPool) {
-                    sPool = this;
+            // Recycle this Buffer if its size is MAX_PUSH_PAYLOAD_SIZE or under.
+            if (mBytes.length <= MAX_PUSH_PAYLOAD_SIZE) {
+                synchronized (sLock) {
+                    if (null == sPool) {
+                        sPool = this;
+                    }
                 }
             }
         }
 
         private void reset() {
             mOverflow = false;
+            mMaxSize = MAX_PULL_PAYLOAD_SIZE;
+        }
+
+        private void setMaxSize(final int maxSize, final int numBytesWritten) {
+            mMaxSize = maxSize;
+            if (numBytesWritten > maxSize) {
+                mOverflow = true;
+            }
         }
 
         private boolean hasOverflowed() {
@@ -740,11 +757,28 @@ public final class StatsEvent {
          * @return true if space is available, false otherwise.
          **/
         private boolean hasEnoughSpace(final int index, final int numBytes) {
-            final boolean result = index + numBytes < MAX_PAYLOAD_SIZE;
-            if (!result) {
+            final int totalBytesNeeded = index + numBytes;
+
+            if (totalBytesNeeded > mMaxSize) {
                 mOverflow = true;
+                return false;
             }
-            return result;
+
+            // Expand buffer if needed.
+            if (mBytes.length < mMaxSize && totalBytesNeeded > mBytes.length) {
+                int newSize = mBytes.length;
+                do {
+                    newSize *= 2;
+                } while (newSize <= totalBytesNeeded);
+
+                if (newSize > mMaxSize) {
+                    newSize = mMaxSize;
+                }
+
+                mBytes = Arrays.copyOf(mBytes, newSize);
+            }
+
+            return true;
         }
 
         /**
