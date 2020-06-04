@@ -42,6 +42,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /** Base class for creating {@link OverlayManagerServiceImplTests} tests. */
@@ -52,9 +53,6 @@ class OverlayManagerServiceImplTestsBase {
     private DummyPackageManagerHelper mPackageManager;
     private DummyIdmapDaemon mIdmapDaemon;
     private OverlayConfig mOverlayConfig;
-    private OverlayManagerSettings mSettings;
-    String mOverlayableConfigurator;
-    String[] mOverlayableConfiguratorTargets;
 
     @Before
     public void setUp() {
@@ -62,26 +60,20 @@ class OverlayManagerServiceImplTestsBase {
         mListener = new DummyListener();
         mPackageManager = new DummyPackageManagerHelper(mState);
         mIdmapDaemon = new DummyIdmapDaemon(mState);
-        mSettings = new OverlayManagerSettings();
         mOverlayConfig = mock(OverlayConfig.class);
         when(mOverlayConfig.getPriority(any())).thenReturn(OverlayConfig.DEFAULT_PRIORITY);
         when(mOverlayConfig.isEnabled(any())).thenReturn(false);
         when(mOverlayConfig.isMutable(any())).thenReturn(true);
-        mOverlayableConfigurator = null;
-        mOverlayableConfiguratorTargets = null;
         reinitializeImpl();
     }
 
-    OverlayManagerServiceImpl reinitializeImpl() {
+    void reinitializeImpl() {
         mImpl = new OverlayManagerServiceImpl(mPackageManager,
                 new IdmapManager(mIdmapDaemon, mPackageManager),
-                mSettings,
+                new OverlayManagerSettings(),
                 mOverlayConfig,
                 new String[0],
-                mListener,
-                mOverlayableConfigurator,
-                mOverlayableConfiguratorTargets);
-        return mImpl;
+                mListener);
     }
 
     OverlayManagerServiceImpl getImpl() {
@@ -92,12 +84,12 @@ class OverlayManagerServiceImplTestsBase {
         return mListener;
     }
 
-    DummyIdmapDaemon getIdmapDaemon() {
-        return mIdmapDaemon;
+    DummyPackageManagerHelper getPackageManager() {
+        return mPackageManager;
     }
 
-    OverlayManagerSettings getSettings() {
-        return mSettings;
+    DummyIdmapDaemon getIdmapDaemon() {
+        return mIdmapDaemon;
     }
 
     void assertState(@State int expected, final String overlayPackageName, int userId) {
@@ -322,6 +314,8 @@ class OverlayManagerServiceImplTestsBase {
     static final class DummyPackageManagerHelper implements PackageManagerHelper,
             OverlayableInfoCallback {
         private final DummyDeviceState mState;
+        String[] overlayableConfiguratorTargets = new String[0];
+        String overlayableConfigurator = "";
 
         private DummyPackageManagerHelper(DummyDeviceState state) {
             mState = state;
@@ -392,6 +386,16 @@ class OverlayManagerServiceImplTestsBase {
         @Override
         public void enforcePermission(String permission, String message) throws SecurityException {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public String[] getOverlayableConfiguratorTargets() {
+            return overlayableConfiguratorTargets;
+        }
+
+        @Override
+        public String getOverlayableConfigurator() {
+            return overlayableConfigurator;
         }
     }
 
