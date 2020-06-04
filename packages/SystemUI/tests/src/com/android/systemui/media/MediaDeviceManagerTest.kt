@@ -23,8 +23,6 @@ import android.media.MediaRouter2Manager
 import android.media.RoutingSessionInfo
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
-import android.os.Process
-import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import androidx.test.filters.SmallTest
@@ -67,6 +65,7 @@ private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 public class MediaDeviceManagerTest : SysuiTestCase() {
 
     private lateinit var manager: MediaDeviceManager
+    @Mock private lateinit var mediaDataManager: MediaDataManager
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
@@ -80,13 +79,14 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     private lateinit var metadataBuilder: MediaMetadata.Builder
     private lateinit var playbackBuilder: PlaybackState.Builder
     private lateinit var notifBuilder: Notification.Builder
-    private lateinit var sbn: StatusBarNotification
+    private lateinit var mediaData: MediaData
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(context, lmmFactory, mr2, featureFlag, fakeExecutor)
+        manager = MediaDeviceManager(context, lmmFactory, mr2, featureFlag, fakeExecutor,
+            mediaDataManager)
         manager.addListener(listener)
 
         // Configure mocks.
@@ -117,8 +117,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
             setSmallIcon(android.R.drawable.ic_media_pause)
             setStyle(Notification.MediaStyle().setMediaSession(session.getSessionToken()))
         }
-        sbn = StatusBarNotification(PACKAGE, PACKAGE, 0, "TAG", Process.myUid(), 0, 0,
-                notifBuilder.build(), Process.myUserHandle(), 0)
+        mediaData = MediaData(true, 0, PACKAGE, null, null, SESSION_TITLE, null,
+            emptyList(), emptyList(), PACKAGE, session.sessionToken, null, null, null)
     }
 
     @After
@@ -128,33 +128,33 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun removeUnknown() {
-        manager.onNotificationRemoved("unknown")
+        manager.onMediaDataRemoved("unknown")
     }
 
     @Test
     fun addNotification() {
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         verify(lmmFactory).create(PACKAGE)
     }
 
     @Test
     fun featureDisabled() {
         whenever(featureFlag.enabled).thenReturn(false)
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         verify(lmmFactory, never()).create(PACKAGE)
     }
 
     @Test
     fun addAndRemoveNotification() {
-        manager.onNotificationAdded(KEY, sbn)
-        manager.onNotificationRemoved(KEY)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        manager.onMediaDataRemoved(KEY)
         verify(lmm).unregisterCallback(any())
     }
 
     @Test
     fun deviceEventOnAddNotification() {
         // WHEN a notification is added
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         val deviceCallback = captureCallback()
         // THEN the update is dispatched to the listener
         val data = captureDeviceData(KEY)
@@ -165,7 +165,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun deviceListUpdate() {
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         val deviceCallback = captureCallback()
         // WHEN the device list changes
         deviceCallback.onDeviceListUpdate(mutableListOf(device))
@@ -179,7 +179,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun selectedDeviceStateChanged() {
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         val deviceCallback = captureCallback()
         // WHEN the selected device changes state
         deviceCallback.onSelectedDeviceStateChanged(device, 1)
@@ -193,9 +193,9 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
 
     @Test
     fun listenerReceivesKeyRemoved() {
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         // WHEN the notification is removed
-        manager.onNotificationRemoved(KEY)
+        manager.onMediaDataRemoved(KEY)
         // THEN the listener receives key removed event
         verify(listener).onKeyRemoved(eq(KEY))
     }
@@ -205,7 +205,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         // GIVEN that MR2Manager returns null for routing session
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
         // WHEN a notification is added
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         // THEN the device is disabled
         val data = captureDeviceData(KEY)
         assertThat(data.enabled).isFalse()
@@ -216,7 +216,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun deviceDisabledWhenMR2ReturnsNullRouteInfoOnDeviceChanged() {
         // GIVEN a notif is added
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         reset(listener)
         // AND MR2Manager returns null for routing session
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
@@ -234,7 +234,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Test
     fun deviceDisabledWhenMR2ReturnsNullRouteInfoOnDeviceListUpdate() {
         // GIVEN a notif is added
-        manager.onNotificationAdded(KEY, sbn)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
         reset(listener)
         // GIVEN that MR2Manager returns null for routing session
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
