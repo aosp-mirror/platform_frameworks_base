@@ -427,13 +427,15 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         if (Utils.useQsMediaPlayer(getContext())) {
             mContainer.getLocationOnScreen(mTmpLocation);
             float absoluteBottomPosition = mTmpLocation[1] + mContainer.getHeight();
-            pinToBottom(absoluteBottomPosition, mQSPanel.getMediaHost());
+            // The expanded media host should never move below the laid out position
+            pinToBottom(absoluteBottomPosition, mQSPanel.getMediaHost(), true /* expanded */);
+            // The expanded media host should never move above the laid out position
             pinToBottom(absoluteBottomPosition - mHeader.getPaddingBottom(),
-                    mHeader.getHeaderQsPanel().getMediaHost());
+                    mHeader.getHeaderQsPanel().getMediaHost(), false /* expanded */);
         }
     }
 
-    private void pinToBottom(float absoluteBottomPosition, MediaHost mediaHost) {
+    private void pinToBottom(float absoluteBottomPosition, MediaHost mediaHost, boolean expanded) {
         View hostView = mediaHost.getHostView();
         if (mLastQSExpansion > 0) {
             ViewGroup.MarginLayoutParams params =
@@ -442,7 +444,15 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
                     - hostView.getHeight();
             float currentPosition = mediaHost.getCurrentBounds().top
                     - hostView.getTranslationY();
-            hostView.setTranslationY(targetPosition - currentPosition);
+            float translationY = targetPosition - currentPosition;
+            if (expanded) {
+                // Never go below the laid out position. This is necessary since the qs panel can
+                // change in height and we don't want to ever go below it's position
+                translationY = Math.min(translationY, 0);
+            } else {
+                translationY = Math.max(translationY, 0);
+            }
+            hostView.setTranslationY(translationY);
         } else {
             hostView.setTranslationY(0);
         }
