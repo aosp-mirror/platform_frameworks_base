@@ -1595,7 +1595,10 @@ public class DeviceIdleController extends SystemService
                     null);
             long ident = Binder.clearCallingIdentity();
             try {
-                removePowerSaveWhitelistAppInternal(name);
+                if (!removePowerSaveWhitelistAppInternal(name)
+                        && mPowerSaveWhitelistAppsExceptIdle.containsKey(name)) {
+                    throw new UnsupportedOperationException("Cannot remove system whitelisted app");
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }

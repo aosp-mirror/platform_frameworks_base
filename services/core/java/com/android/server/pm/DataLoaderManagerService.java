@@ -21,7 +21,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.content.pm.ApplicationInfo;
 import android.content.pm.DataLoaderParamsParcel;
 import android.content.pm.IDataLoader;
 import android.content.pm.IDataLoaderManager;
@@ -122,19 +121,7 @@ public class DataLoaderManagerService extends SystemService {
                         ri.serviceInfo.packageName, ri.serviceInfo.name);
                 // There should only be one matching provider inside the given package.
                 // If there's more than one, return the first one found.
-                try {
-                    ApplicationInfo ai = pm.getApplicationInfo(resolved.getPackageName(), 0);
-                    if (!ai.isPrivilegedApp()) {
-                        Slog.w(TAG,
-                                "Data loader: " + resolved + " is not a privileged app, skipping.");
-                        continue;
-                    }
-                    return resolved;
-                } catch (PackageManager.NameNotFoundException ex) {
-                    Slog.w(TAG,
-                            "Privileged data loader: " + resolved + " not found, skipping.");
-                }
-
+                return resolved;
             }
             Slog.e(TAG, "Didn't find any matching data loader service provider.");
             return null;

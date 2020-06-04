@@ -268,7 +268,7 @@ class ToggleRangeBehavior : Behavior {
 
     private fun format(primaryFormat: String, backupFormat: String, value: Float): String {
         return try {
-            String.format(primaryFormat, value)
+            String.format(primaryFormat, findNearestStep(value))
         } catch (e: IllegalFormatException) {
             Log.w(ControlsUiController.TAG, "Illegal format in range template", e)
             if (backupFormat == "") {

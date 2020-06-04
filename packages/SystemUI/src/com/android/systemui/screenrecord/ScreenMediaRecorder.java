@@ -55,9 +55,9 @@ import java.util.Date;
  */
 public class ScreenMediaRecorder {
     private static final int TOTAL_NUM_TRACKS = 1;
-    private static final int VIDEO_BIT_RATE = 10000000;
     private static final int VIDEO_FRAME_RATE = 30;
-    private static final int AUDIO_BIT_RATE = 16;
+    private static final int VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO = 6;
+    private static final int AUDIO_BIT_RATE = 196000;
     private static final int AUDIO_SAMPLE_RATE = 44100;
     private static final int MAX_DURATION_MS = 60 * 60 * 1000;
     private static final long MAX_FILESIZE_BYTES = 5000000000L;
@@ -108,7 +108,7 @@ public class ScreenMediaRecorder {
 
         // Set up audio source
         if (mAudioSource == MIC) {
-            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.DEFAULT);
         }
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
 
@@ -121,10 +121,13 @@ public class ScreenMediaRecorder {
         wm.getDefaultDisplay().getRealMetrics(metrics);
         int screenWidth = metrics.widthPixels;
         int screenHeight = metrics.heightPixels;
+        int refereshRate = (int) wm.getDefaultDisplay().getRefreshRate();
+        int vidBitRate = screenHeight * screenWidth * refereshRate / VIDEO_FRAME_RATE
+                * VIDEO_FRAME_RATE_TO_RESOLUTION_RATIO;
         mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
         mMediaRecorder.setVideoSize(screenWidth, screenHeight);
-        mMediaRecorder.setVideoFrameRate(VIDEO_FRAME_RATE);
-        mMediaRecorder.setVideoEncodingBitRate(VIDEO_BIT_RATE);
+        mMediaRecorder.setVideoFrameRate(refereshRate);
+        mMediaRecorder.setVideoEncodingBitRate(vidBitRate);
         mMediaRecorder.setMaxDuration(MAX_DURATION_MS);
         mMediaRecorder.setMaxFileSize(MAX_FILESIZE_BYTES);
 

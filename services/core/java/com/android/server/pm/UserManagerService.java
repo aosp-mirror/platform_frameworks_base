@@ -2246,9 +2246,6 @@ public class UserManagerService extends IUserManager.Stub {
         // Managed profiles have their own specific rules.
         final boolean isManagedProfile = type.isManagedProfile();
         if (isManagedProfile) {
-            if (ActivityManager.isLowRamDeviceStatic()) {
-                return false;
-            }
             if (!mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_MANAGED_USERS)) {
                 return false;

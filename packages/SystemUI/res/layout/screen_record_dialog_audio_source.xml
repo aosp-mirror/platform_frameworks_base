@@ -16,21 +16,20 @@
   -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
+    android:layout_width="250dp"
     android:layout_height="48dp"
     android:orientation="vertical"
-    android:padding="10dp"
-    android:layout_weight="1">
+    android:padding="13dp">
     <TextView
         android:id="@+id/screen_recording_dialog_source_text"
-        android:layout_width="match_parent"
+        android:layout_width="250dp"
         android:layout_height="match_parent"
         android:layout_gravity="center_vertical"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorPrimary"/>
     <TextView
         android:id="@+id/screen_recording_dialog_source_description"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="?android:attr/textColorSecondary"/>

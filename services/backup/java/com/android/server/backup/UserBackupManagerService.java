@@ -129,7 +129,6 @@ import com.android.server.backup.transport.TransportNotRegisteredException;
 import com.android.server.backup.utils.AppBackupUtils;
 import com.android.server.backup.utils.BackupManagerMonitorUtils;
 import com.android.server.backup.utils.BackupObserverUtils;
-import com.android.server.backup.utils.FileUtils;
 import com.android.server.backup.utils.SparseArrayUtils;
 
 import com.google.android.collect.Sets;
@@ -2720,7 +2719,9 @@ public class UserBackupManagerService {
                 TAG,
                 addUserIdToLogMessage(
                         mUserId, "Setting ancestral work profile id to " + ancestralSerialNumber));
-        try (RandomAccessFile af = getAncestralSerialNumberFile()) {
+
+        try (RandomAccessFile af =
+                new RandomAccessFile(getAncestralSerialNumberFile(), /* mode */ "rwd")) {
             af.writeLong(ancestralSerialNumber);
         } catch (IOException e) {
             Slog.w(
@@ -2736,26 +2737,28 @@ public class UserBackupManagerService {
      * {@link #setAncestralSerialNumber(long)}. Will return {@code -1} if not set.
      */
     public long getAncestralSerialNumber() {
-        try (RandomAccessFile af = getAncestralSerialNumberFile()) {
+        try (RandomAccessFile af =
+                new RandomAccessFile(getAncestralSerialNumberFile(), /* mode */ "r")) {
             return af.readLong();
+        } catch (FileNotFoundException e) {
+            // It's OK not to have the file present, so we just return -1 to indicate no value.
         } catch (IOException e) {
             Slog.w(
                     TAG,
                     addUserIdToLogMessage(
-                            mUserId, "Unable to write to work profile serial number file:"),
+                            mUserId, "Unable to read work profile serial number file:"),
                     e);
-            return -1;
         }
+        return -1;
     }
 
-    private RandomAccessFile getAncestralSerialNumberFile() throws FileNotFoundException {
+    private File getAncestralSerialNumberFile() {
         if (mAncestralSerialNumberFile == null) {
             mAncestralSerialNumberFile = new File(
                 UserBackupManagerFiles.getBaseStateDir(getUserId()),
                 SERIAL_ID_FILE);
-            FileUtils.createNewFile(mAncestralSerialNumberFile);
         }
-        return new RandomAccessFile(mAncestralSerialNumberFile, "rwd");
+        return mAncestralSerialNumberFile;
     }
 
     @VisibleForTesting

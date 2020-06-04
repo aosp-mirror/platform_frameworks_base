@@ -4590,6 +4590,9 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
      * @param sc The new SurfaceControl, where the DisplayContent's surfaces will be re-parented to.
      */
     void reparentDisplayContent(WindowState win, SurfaceControl sc) {
+        if (mParentWindow != null) {
+            mParentWindow.removeEmbeddedDisplayContent(this);
+        }
         mParentWindow = win;
         mParentWindow.addEmbeddedDisplayContent(this);
         mParentSurfaceControl = sc;

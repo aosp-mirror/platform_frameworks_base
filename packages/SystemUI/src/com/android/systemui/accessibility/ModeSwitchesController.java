@@ -145,12 +145,10 @@ public class ModeSwitchesController {
 
         void showButton(int mode) {
             if (mImageView == null) {
-                createView();
+                createView(mode);
                 mWindowManager.addView(mImageView, mParams);
             } else if (mMagnificationMode != mode) {
-                // TODO(b/145780606): wait for designer provide icon asset for window mode.
-                final int resId = R.drawable.ic_open_in_new_fullscreen;
-                mImageView.setImageResource(resId);
+                mImageView.setImageResource(getIconResId(mode));
             }
             mMagnificationMode = mode;
 
@@ -167,17 +165,13 @@ public class ModeSwitchesController {
                             () -> removeButton());
         }
 
-        private void createView() {
-            // TODO(b/145780606): wait for designer provide icon asset for window mode.
-            final int resId = R.drawable.ic_open_in_new_fullscreen;
+        private void createView(int mode) {
             mImageView = new ImageView(mContext);
-            mImageView.setImageResource(resId);
+            mImageView.setImageResource(getIconResId(mode));
             mImageView.setClickable(true);
             mImageView.setFocusable(true);
             mImageView.setPadding(mPadding, mPadding, mPadding, mPadding);
             mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            // TODO(b/145780606): switch magnification mode between full-screen and window by
-            //  clicking the button.
             mImageView.setOnClickListener(
                     view -> {
                         if (view != null) {
@@ -186,6 +180,12 @@ public class ModeSwitchesController {
                             toggleMagnificationMode();
                         }
                     });
+        }
+
+        private int getIconResId(int mode) {
+            return (mode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
+                    ? R.drawable.ic_open_in_new_window
+                    : R.drawable.ic_open_in_new_fullscreen;
         }
 
         private void toggleMagnificationMode() {

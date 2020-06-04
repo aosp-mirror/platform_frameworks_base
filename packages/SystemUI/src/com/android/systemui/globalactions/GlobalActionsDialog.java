@@ -183,8 +183,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     static final String GLOBAL_ACTION_KEY_EMERGENCY = "emergency";
     static final String GLOBAL_ACTION_KEY_SCREENSHOT = "screenshot";
 
-    private static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
-    private static final String PREFS_CONTROLS_FILE = "controls_prefs";
+    public static final String PREFS_CONTROLS_SEEDING_COMPLETED = "SeedingCompleted";
+    public static final String PREFS_CONTROLS_FILE = "controls_prefs";
     private static final int SEEDING_MAX = 2;
 
     private final Context mContext;
@@ -391,7 +391,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         if (controlsComponent.getControlsListingController().isPresent()) {
             controlsComponent.getControlsListingController().get()
-                    .addCallback(list -> mControlsServiceInfos = list);
+                    .addCallback(list -> {
+                        mControlsServiceInfos = list;
+                        // This callback may occur after the dialog has been shown.
+                        // If so, add controls into the already visible space
+                        if (mDialog != null && !mDialog.isShowingControls()
+                                && shouldShowControls()) {
+                            mDialog.showControls(mControlsUiControllerOptional.get());
+                        }
+                    });
         }
 
         // Need to be user-specific with the context to make sure we read the correct prefs

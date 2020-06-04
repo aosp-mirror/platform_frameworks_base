@@ -159,7 +159,6 @@ public class Editor {
 
     static final int BLINK = 500;
     private static final int DRAG_SHADOW_MAX_TEXT_LENGTH = 20;
-    private static final float LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS = 0.5f;
     private static final int UNSET_X_VALUE = -1;
     private static final int UNSET_LINE = -1;
     // Tag used when the Editor maintains its own separate UndoManager.
@@ -405,9 +404,13 @@ public class Editor {
     private float mInitialZoom = 1f;
 
     // For calculating the line change slops while moving cursor/selection.
+    // The slop value as ratio of the current line height. It indicates the tolerant distance to
+    // avoid the cursor jumps to upper/lower line when the hit point is moving vertically out of
+    // the current line.
+    private final float mLineSlopRatio;
     // The slop max/min value include line height and the slop on the upper/lower line.
     private static final int LINE_CHANGE_SLOP_MAX_DP = 45;
-    private static final int LINE_CHANGE_SLOP_MIN_DP = 12;
+    private static final int LINE_CHANGE_SLOP_MIN_DP = 8;
     private int mLineChangeSlopMax;
     private int mLineChangeSlopMin;
 
@@ -428,6 +431,9 @@ public class Editor {
         mNewMagnifierEnabled = AppGlobals.getIntCoreSetting(
                 WidgetFlags.KEY_ENABLE_NEW_MAGNIFIER,
                 WidgetFlags.ENABLE_NEW_MAGNIFIER_DEFAULT ? 1 : 0) != 0;
+        mLineSlopRatio = AppGlobals.getFloatCoreSetting(
+                WidgetFlags.KEY_LINE_SLOP_RATIO,
+                WidgetFlags.LINE_SLOP_RATIO_DEFAULT);
         if (TextView.DEBUG_CURSOR) {
             logCursor("Editor", "Cursor drag from anywhere is %s.",
                     mFlagCursorDragFromAnywhereEnabled ? "enabled" : "disabled");
@@ -6048,7 +6054,7 @@ public class Editor {
         }
 
         final int lineHeight = layout.getLineBottom(prevLine) - layout.getLineTop(prevLine);
-        int slop = (int)(LINE_SLOP_MULTIPLIER_FOR_HANDLEVIEWS
+        int slop = (int)(mLineSlopRatio
                 * (layout.getLineBottom(trueLine) - layout.getLineTop(trueLine)));
         slop = Math.max(mLineChangeSlopMin,
                 Math.min(mLineChangeSlopMax, lineHeight + slop)) - lineHeight;
