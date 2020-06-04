@@ -2977,12 +2977,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         pw.println();
         mWallpaperController.dump(pw, "  ");
 
-        pw.println();
-        pw.print("mSystemGestureExclusion=");
         if (mSystemGestureExclusionListeners.getRegisteredCallbackCount() > 0) {
+            pw.println();
+            pw.print("  mSystemGestureExclusion=");
             pw.println(mSystemGestureExclusion);
-        } else {
-            pw.println("<no lstnrs>");
         }
 
         pw.println();
