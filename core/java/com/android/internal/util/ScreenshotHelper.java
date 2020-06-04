@@ -351,8 +351,11 @@ public class ScreenshotHelper {
                                 mContext.unbindService(mScreenshotConnection);
                                 mScreenshotConnection = null;
                                 mScreenshotService = null;
-                                handler.removeCallbacks(mScreenshotTimeout);
-                                notifyScreenshotError();
+                                // only log an error if we're still within the timeout period
+                                if (handler.hasCallbacks(mScreenshotTimeout)) {
+                                    handler.removeCallbacks(mScreenshotTimeout);
+                                    notifyScreenshotError();
+                                }
                             }
                         }
                     }
