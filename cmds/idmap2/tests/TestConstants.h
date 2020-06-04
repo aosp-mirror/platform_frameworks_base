@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP2_TESTS_TESTCONSTANTS_H
-#define IDMAP2_TESTS_TESTCONSTANTS_H
+#ifndef IDMAP2_TESTS_TESTCONSTANTS_H_
+#define IDMAP2_TESTS_TESTCONSTANTS_H_
 
 namespace android::idmap2::TestConstants {
 
@@ -27,4 +27,4 @@ constexpr const auto OVERLAY_CRC_STRING = "c054fb26";
 
 }  // namespace android::idmap2::TestConstants
 
-#endif  // IDMAP2_TESTS_TESTCONSTANTS_H
+#endif  // IDMAP2_TESTS_TESTCONSTANTS_H_
