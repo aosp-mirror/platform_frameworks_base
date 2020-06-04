@@ -29,18 +29,15 @@ import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
 import android.util.Slog;
 
-import com.android.internal.util.ArrayUtils;
-
 import java.io.IOException;
 
 /**
  * Handle the creation and deletion of idmap files.
  *
- * The actual work is performed by the idmap binary, launched through idmap2d.
- *
- * Note: this class is subclassed in the OMS unit tests, and hence not marked as final.
+ * The actual work is performed by idmap2d.
+ * @see IdmapDaemon
  */
-class IdmapManager {
+final class IdmapManager {
     private static final boolean VENDOR_IS_Q_OR_LATER;
     static {
         final String value = SystemProperties.get("ro.vndk.version", "29");
@@ -57,14 +54,10 @@ class IdmapManager {
 
     private final IdmapDaemon mIdmapDaemon;
     private final OverlayableInfoCallback mOverlayableCallback;
-    private final String mOverlayableConfigurator;
-    private final String[] mOverlayableConfiguratorTargets;
 
     IdmapManager(final IdmapDaemon idmapDaemon, final OverlayableInfoCallback verifyCallback) {
         mOverlayableCallback = verifyCallback;
         mIdmapDaemon = idmapDaemon;
-        mOverlayableConfigurator = verifyCallback.getOverlayableConfigurator();
-        mOverlayableConfiguratorTargets = verifyCallback.getOverlayableConfiguratorTargets() ;
     }
 
     /**
@@ -190,14 +183,6 @@ class IdmapManager {
         String targetOverlayableName = overlayPackage.targetOverlayableName;
         if (targetOverlayableName != null) {
             try {
-                if (!mOverlayableConfigurator.isEmpty()
-                        && ArrayUtils.contains(mOverlayableConfiguratorTargets,
-                                targetPackage.packageName)
-                        && mOverlayableCallback.signaturesMatching(mOverlayableConfigurator,
-                                overlayPackage.packageName, userId)) {
-                    return true;
-                }
-
                 OverlayableInfo overlayableInfo = mOverlayableCallback.getOverlayableForTarget(
                         targetPackage.packageName, targetOverlayableName, userId);
                 if (overlayableInfo != null && overlayableInfo.actor != null) {
