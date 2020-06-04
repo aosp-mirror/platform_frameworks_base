@@ -241,7 +241,6 @@ public class PartialConversationInfo extends LinearLayout implements
         } catch (PackageManager.NameNotFoundException e) {
             mPkgIcon = mPm.getDefaultActivityIcon();
         }
-        ((TextView) findViewById(R.id.pkg_name)).setText(mAppName);
     }
 
     private void bindDelegate() {

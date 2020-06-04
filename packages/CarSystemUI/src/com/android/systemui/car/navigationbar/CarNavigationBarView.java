@@ -74,8 +74,10 @@ public class CarNavigationBarView extends LinearLayout {
             mDarkIconManager.setShouldLog(true);
             Dependency.get(StatusBarIconController.class).addIconGroup(mDarkIconManager);
         }
-        // needs to be clickable so that it will receive ACTION_MOVE events
+        // Needs to be clickable so that it will receive ACTION_MOVE events.
         setClickable(true);
+        // Needs to not be focusable so rotary won't highlight the entire nav bar.
+        setFocusable(false);
     }
 
     @Override

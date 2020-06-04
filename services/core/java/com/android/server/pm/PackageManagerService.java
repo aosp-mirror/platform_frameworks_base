@@ -148,6 +148,8 @@ import android.app.ResourcesManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.admin.SecurityLog;
 import android.app.backup.IBackupManager;
+import android.compat.annotation.ChangeId;
+import android.compat.annotation.EnabledAfter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -638,6 +640,19 @@ public class PackageManagerService extends IPackageManager.Stub
      * PackageManager.VERIFICATION_REJECT.
      */
     private static final int DEFAULT_VERIFICATION_RESPONSE = PackageManager.VERIFICATION_ALLOW;
+
+    /**
+     * Adding an installer package name to a package that does not have one set requires the
+     * INSTALL_PACKAGES permission.
+     *
+     * If the caller targets R, this will throw a SecurityException. Otherwise the request will
+     * fail silently. In both cases, and regardless of whether this change is enabled, the
+     * installer package will remain unchanged.
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
+    private static final long THROW_EXCEPTION_ON_REQUIRE_INSTALL_PACKAGES_TO_ADD_INSTALLER_PACKAGE =
+            150857253;
 
     public static final String PLATFORM_PACKAGE_NAME = "android";
 
@@ -5259,15 +5274,17 @@ public class PackageManagerService extends IPackageManager.Stub
      * </ul>
      */
     int updateFlagsForResolve(int flags, int userId, int callingUid, boolean wantInstantApps,
-            boolean matchSystemOnly) {
+            boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         return updateFlagsForResolve(flags, userId, callingUid,
-                wantInstantApps, matchSystemOnly, false /*onlyExposedExplicitly*/);
+                wantInstantApps, false /*onlyExposedExplicitly*/,
+                isImplicitImageCaptureIntentAndNotSetByDpc);
     }
 
     int updateFlagsForResolve(int flags, int userId, int callingUid,
-            boolean wantInstantApps, boolean onlyExposedExplicitly, boolean matchSystemOnly) {
+            boolean wantInstantApps, boolean onlyExposedExplicitly,
+            boolean isImplicitImageCaptureIntentAndNotSetByDpc) {
         // Safe mode means we shouldn't match any third-party components
-        if (mSafeMode || matchSystemOnly) {
+        if (mSafeMode || isImplicitImageCaptureIntentAndNotSetByDpc) {
             flags |= PackageManager.MATCH_SYSTEM_ONLY;
         }
         if (getInstantAppPackageName(callingUid) != null) {
@@ -6400,7 +6417,8 @@ public class PackageManagerService extends IPackageManager.Stub
             if (!mUserManager.exists(userId)) return null;
             final int callingUid = Binder.getCallingUid();
             flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
-                    intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                    isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                            flags));
             mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                     false /*requireFullPermission*/, false /*checkShell*/, "resolve intent");
 
@@ -6438,7 +6456,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final String resolvedType = intent.resolveTypeIfNeeded(mContext.getContentResolver());
         final int flags = updateFlagsForResolve(
                 0, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType, 0));
         final List<ResolveInfo> query = queryIntentActivitiesInternal(intent, resolvedType, flags,
                 userId);
         synchronized (mLock) {
@@ -6684,6 +6702,40 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    /**
+     * From Android R, camera intents have to match system apps. The only exception to this is if
+     * the DPC has set the camera persistent preferred activity. This case was introduced
+     * because it is important that the DPC has the ability to set both system and non-system
+     * camera persistent preferred activities.
+     *
+     * @return {@code true} if the intent is a camera intent and the persistent preferred
+     * activity was not set by the DPC.
+     */
+    @GuardedBy("mLock")
+    private boolean isImplicitImageCaptureIntentAndNotSetByDpcLocked(Intent intent, int userId,
+            String resolvedType, int flags) {
+        return intent.isImplicitImageCaptureIntent() && !isPersistentPreferredActivitySetByDpm(
+                intent, userId, resolvedType, flags);
+    }
+
+    private boolean isPersistentPreferredActivitySetByDpm(Intent intent, int userId,
+            String resolvedType, int flags) {
+        PersistentPreferredIntentResolver ppir = mSettings.mPersistentPreferredActivities
+                .get(userId);
+        //TODO(b/158003772): Remove double query
+        List<PersistentPreferredActivity> pprefs = ppir != null
+                ? ppir.queryIntent(intent, resolvedType,
+                (flags & PackageManager.MATCH_DEFAULT_ONLY) != 0,
+                userId)
+                : new ArrayList<>();
+        for (PersistentPreferredActivity ppa : pprefs) {
+            if (ppa.mIsSetByDpm) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @GuardedBy("mLock")
     private ResolveInfo findPersistentPreferredActivityLP(Intent intent, String resolvedType,
             int flags, List<ResolveInfo> query, boolean debug, int userId) {
@@ -6767,7 +6819,8 @@ public class PackageManagerService extends IPackageManager.Stub
                         android.provider.Settings.Global.DEVICE_PROVISIONED, 0) == 1;
         flags = updateFlagsForResolve(
                 flags, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         intent = updateIntentForResolve(intent);
         // writer
         synchronized (mLock) {
@@ -6980,7 +7033,8 @@ public class PackageManagerService extends IPackageManager.Stub
             synchronized (mLock) {
                 int flags = updateFlagsForResolve(0, parent.id, callingUid,
                         false /*includeInstantApps*/,
-                        intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                        isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, parent.id,
+                                resolvedType, 0));
                 CrossProfileDomainInfo xpDomainInfo = getCrossProfileDomainPreferredLpr(
                         intent, resolvedType, flags, sourceUserId, parent.id);
                 return xpDomainInfo != null;
@@ -7067,7 +7121,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
         flags = updateFlagsForResolve(flags, userId, filterCallingUid, resolveForStart,
                 comp != null || pkgName != null /*onlyExposedExplicitly*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         if (comp != null) {
             final List<ResolveInfo> list = new ArrayList<>(1);
             final ActivityInfo ai = getActivityInfo(comp, flags, userId);
@@ -7856,7 +7911,8 @@ public class PackageManagerService extends IPackageManager.Stub
         if (!mUserManager.exists(userId)) return Collections.emptyList();
         final int callingUid = Binder.getCallingUid();
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         mPermissionManager.enforceCrossUserPermission(callingUid, userId,
                 false /*requireFullPermission*/, false /*checkShell*/,
                 "query intent activity options");
@@ -8043,7 +8099,8 @@ public class PackageManagerService extends IPackageManager.Stub
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                intent.isImplicitImageCaptureIntent() /*matchSystemOnly*/);
+                isImplicitImageCaptureIntentAndNotSetByDpcLocked(intent, userId, resolvedType,
+                        flags));
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -8134,7 +8191,7 @@ public class PackageManagerService extends IPackageManager.Stub
             int userId, int callingUid) {
         if (!mUserManager.exists(userId)) return null;
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                false /* matchSystemOnly */);
+                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         List<ResolveInfo> query = queryIntentServicesInternal(
                 intent, resolvedType, flags, userId, callingUid, false /*includeInstantApps*/);
         if (query != null) {
@@ -8166,7 +8223,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 "query intent receivers");
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, includeInstantApps,
-                false /* matchSystemOnly */);
+                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -8304,7 +8361,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final int callingUid = Binder.getCallingUid();
         final String instantAppPkgName = getInstantAppPackageName(callingUid);
         flags = updateFlagsForResolve(flags, userId, callingUid, false /*includeInstantApps*/,
-                false /* matchSystemOnly */);
+                false /* isImplicitImageCaptureIntentAndNotSetByDpc */);
         ComponentName comp = intent.getComponent();
         if (comp == null) {
             if (intent.getSelector() != null) {
@@ -14130,19 +14187,38 @@ public class PackageManagerService extends IPackageManager.Stub
             // be signed with the same cert as the caller.
             String targetInstallerPackageName =
                     targetPackageSetting.installSource.installerPackageName;
-            if (targetInstallerPackageName != null) {
-                PackageSetting setting = mSettings.mPackages.get(
-                        targetInstallerPackageName);
-                // If the currently set package isn't valid, then it's always
-                // okay to change it.
-                if (setting != null) {
-                    if (compareSignatures(callerSignature,
-                            setting.signatures.mSigningDetails.signatures)
-                            != PackageManager.SIGNATURE_MATCH) {
-                        throw new SecurityException(
-                                "Caller does not have same cert as old installer package "
-                                + targetInstallerPackageName);
+            PackageSetting targetInstallerPkgSetting = targetInstallerPackageName == null ? null :
+                    mSettings.mPackages.get(targetInstallerPackageName);
+
+            if (targetInstallerPkgSetting != null) {
+                if (compareSignatures(callerSignature,
+                        targetInstallerPkgSetting.signatures.mSigningDetails.signatures)
+                        != PackageManager.SIGNATURE_MATCH) {
+                    throw new SecurityException(
+                            "Caller does not have same cert as old installer package "
+                            + targetInstallerPackageName);
+                }
+            } else if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES)
+                    != PackageManager.PERMISSION_GRANTED) {
+                // This is probably an attempt to exploit vulnerability b/150857253 of taking
+                // privileged installer permissions when the installer has been uninstalled or
+                // was never set.
+                EventLog.writeEvent(0x534e4554, "150857253", callingUid, "");
+
+                long binderToken = Binder.clearCallingIdentity();
+                try {
+                    if (mInjector.getCompatibility().isChangeEnabledByUid(
+                            THROW_EXCEPTION_ON_REQUIRE_INSTALL_PACKAGES_TO_ADD_INSTALLER_PACKAGE,
+                            callingUid)) {
+                        throw new SecurityException("Neither user " + callingUid
+                                + " nor current process has "
+                                + Manifest.permission.INSTALL_PACKAGES);
+                    } else {
+                        // If change disabled, fail silently for backwards compatibility
+                        return;
                     }
+                } finally {
+                    Binder.restoreCallingIdentity(binderToken);
                 }
             }
 
@@ -19837,7 +19913,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         synchronized (mLock) {
             mSettings.editPersistentPreferredActivitiesLPw(userId).addFilter(
-                    new PersistentPreferredActivity(filter, activity));
+                    new PersistentPreferredActivity(filter, activity, true));
             scheduleWritePackageRestrictionsLocked(userId);
         }
         updateDefaultHomeNotLocked(userId);

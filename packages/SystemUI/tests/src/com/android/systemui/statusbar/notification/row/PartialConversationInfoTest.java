@@ -161,25 +161,6 @@ public class PartialConversationInfoTest extends SysuiTestCase {
     }
 
     @Test
-    public void testBindNotification_SetsTextApplicationName() throws Exception {
-        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("App Name");
-        mInfo.bindNotification(
-                mMockPackageManager,
-                mMockINotificationManager,
-                mChannelEditorDialogController,
-                TEST_PACKAGE_NAME,
-                mNotificationChannel,
-                mNotificationChannelSet,
-                mEntry,
-                null,
-                true,
-                false);
-        final TextView textView = mInfo.findViewById(R.id.pkg_name);
-        assertTrue(textView.getText().toString().contains("App Name"));
-        assertEquals(VISIBLE, mInfo.findViewById(R.id.header).getVisibility());
-    }
-
-    @Test
     public void testBindNotification_SetsName() {
         mInfo.bindNotification(
                 mMockPackageManager,

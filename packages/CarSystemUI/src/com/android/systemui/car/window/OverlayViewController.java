@@ -138,4 +138,11 @@ public class OverlayViewController {
     protected boolean shouldShowNavigationBar() {
         return false;
     }
+
+    /**
+     * Returns {@code true} if this view should be hidden during the occluded state.
+     */
+    protected boolean shouldShowWhenOccluded() {
+        return false;
+    }
 }

@@ -19,11 +19,13 @@ package com.android.server.wm.flicker;
 import static com.android.server.wm.flicker.CommonTransitions.editTextLoseFocusToHome;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
 
 import com.android.server.wm.flicker.helpers.ImeAppHelper;
 
 import org.junit.FixMethodOrder;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -61,6 +63,8 @@ public class CloseImeWindowToHomeTest extends NonRotationTestBase {
                 .forAllEntries());
     }
 
+    @FlakyTest(bugId = 153739621)
+    @Ignore
     @Test
     public void checkVisibility_imeLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)
@@ -71,6 +75,8 @@ public class CloseImeWindowToHomeTest extends NonRotationTestBase {
                 .forAllEntries());
     }
 
+    @FlakyTest(bugId = 153739621)
+    @Ignore
     @Test
     public void checkVisibility_imeAppLayerBecomesInvisible() {
         checkResults(result -> LayersTraceSubject.assertThat(result)

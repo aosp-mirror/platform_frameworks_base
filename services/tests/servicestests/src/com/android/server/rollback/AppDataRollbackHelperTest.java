@@ -83,7 +83,7 @@ public class AppDataRollbackHelperTest {
         // One of the users is unlocked but the other isn't
         doReturn(false).when(helper).isUserCredentialLocked(eq(10));
         doReturn(true).when(helper).isUserCredentialLocked(eq(11));
-        when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(239L);
+        when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(true);
 
         PackageRollbackInfo info2 = createPackageRollbackInfo("com.foo.bar");
         helper.snapshotAppData(7, info2, new int[]{10, 11});
@@ -204,10 +204,10 @@ public class AppDataRollbackHelperTest {
 
         InOrder inOrder = Mockito.inOrder(installer);
         inOrder.verify(installer).destroyAppDataSnapshot(
-                eq("com.foo.bar"), eq(10) /* userId */, eq(0L) /* ceSnapshotInode */,
+                eq("com.foo.bar"), eq(10) /* userId */,
                 eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
         inOrder.verify(installer).destroyAppDataSnapshot(
-                eq("com.foo.bar"), eq(11) /* userId */, eq(0L) /* ceSnapshotInode */,
+                eq("com.foo.bar"), eq(11) /* userId */,
                 eq(5) /* rollbackId */, eq(Installer.FLAG_STORAGE_DE | Installer.FLAG_STORAGE_CE));
         inOrder.verifyNoMoreInteractions();
     }
@@ -217,7 +217,7 @@ public class AppDataRollbackHelperTest {
         Installer installer = mock(Installer.class);
         AppDataRollbackHelper helper = new AppDataRollbackHelper(installer, mApexManager);
 
-        when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(53L);
+        when(installer.snapshotAppData(anyString(), anyInt(), anyInt(), anyInt())).thenReturn(true);
 
         // This one should be backed up.
         PackageRollbackInfo pendingBackup = createPackageRollbackInfo("com.foo", new int[]{37, 73});
