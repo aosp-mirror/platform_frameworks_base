@@ -22,8 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.system.Os;
@@ -234,6 +234,32 @@ public final class MediaTranscodeManager {
     // Just forwards all the events to the event handler.
     private ITranscodingClientCallback mTranscodingClientCallback =
             new ITranscodingClientCallback.Stub() {
+                // TODO(hkuang): Add more unit test to test difference file open mode.
+                @Override
+                public ParcelFileDescriptor openFileDescriptor(String fileUri, String mode)
+                        throws RemoteException {
+                    if (!mode.equals("r") && !mode.equals("w") && !mode.equals("rw")) {
+                        Log.e(TAG, "Unsupport mode: " + mode);
+                        return null;
+                    }
+
+                    Uri uri = Uri.parse(fileUri);
+                    try {
+                        ParcelFileDescriptor pfd = mContentResolver.openFileDescriptor(uri,
+                                mode);
+                        if (pfd != null) {
+                            return pfd;
+                        }
+                    } catch (FileNotFoundException e) {
+                        Log.w(TAG, "Cannot find content uri: " + uri, e);
+                    } catch (SecurityException e) {
+                        Log.w(TAG, "Cannot open content uri: " + uri, e);
+                    } catch (Exception e) {
+                        Log.w(TAG, "Unknown content uri: " + uri, e);
+                    }
+                    return null;
+                }
+
                 @Override
                 public void onTranscodingFinished(int jobId, TranscodingResultParcel result)
                         throws RemoteException {
@@ -369,6 +395,8 @@ public final class MediaTranscodeManager {
             // TODO(hkuang): Implement all the fields here to pass to service.
             parcel.priority = mPriority;
             parcel.transcodingType = mType;
+            parcel.sourceFilePath = mSourceUri.getPath();
+            parcel.destinationFilePath = mDestinationUri.getPath();
             if (mProcessingDelayMs != 0) {
                 parcel.isForTesting = true;
                 parcel.testConfig = new TranscodingTestConfig();
@@ -783,20 +811,12 @@ public final class MediaTranscodeManager {
         Objects.requireNonNull(listenerExecutor, "listenerExecutor must not be null");
         Objects.requireNonNull(listener, "listener must not be null");
 
+        // Converts the request to TranscodingRequestParcel.
         TranscodingRequestParcel requestParcel = transcodingRequest.writeToParcel();
 
-        // TODO(hkuang): move to use Uri string instead of FileDescriptor.
-        // Open the source file descriptor.
-        AssetFileDescriptor sourceFd = mContentResolver.openAssetFileDescriptor(
-                transcodingRequest.getSourceUri(), "r");
-
-        // Open the destination file descriptor.
-        AssetFileDescriptor destinationFd = mContentResolver.openAssetFileDescriptor(
-                transcodingRequest.getDestinationUri(), "w");
-
         // Submits the request to MediaTranscoding service.
-        TranscodingJobParcel jobParcel = new TranscodingJobParcel();
         try {
+            TranscodingJobParcel jobParcel = new TranscodingJobParcel();
             // Synchronizes the access to mPendingTranscodingJobs to make sure the job Id is
             // inserted in the mPendingTranscodingJobs in the callback handler.
             synchronized (mPendingTranscodingJobs) {
