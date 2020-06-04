@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.cas.V1_0.HidlCasPluginDescriptor;
 import android.hardware.cas.V1_0.ICas;
@@ -42,6 +43,8 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.util.Log;
 import android.util.Singleton;
+
+import com.android.internal.util.FrameworkStatsLog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -122,6 +125,7 @@ public final class MediaCas implements AutoCloseable {
     private String mTvInputServiceSessionId;
     private int mClientId;
     private int mCasSystemId;
+    private int mUserId;
     private TunerResourceManager mTunerResourceManager = null;
     private final Map<Session, Integer> mSessionMap = new HashMap<>();
 
@@ -673,6 +677,8 @@ public final class MediaCas implements AutoCloseable {
      */
     public MediaCas(int CA_system_id) throws UnsupportedCasException {
         try {
+            mCasSystemId = CA_system_id;
+            mUserId = ActivityManager.getCurrentUser();
             IMediaCasService service = getService();
             android.hardware.cas.V1_2.IMediaCasService serviceV12 =
                     android.hardware.cas.V1_2.IMediaCasService.castFrom(service);
@@ -721,7 +727,6 @@ public final class MediaCas implements AutoCloseable {
         this(casSystemId);
 
         Objects.requireNonNull(context, "context must not be null");
-        mCasSystemId = casSystemId;
         mTunerResourceManager = (TunerResourceManager)
                 context.getSystemService(Context.TV_TUNER_RESOURCE_MGR_SERVICE);
         if (mTunerResourceManager != null) {
@@ -925,10 +930,18 @@ public final class MediaCas implements AutoCloseable {
             mICas.openSession(cb);
             MediaCasException.throwExceptionIfNeeded(cb.mStatus);
             addSessionToResourceMap(cb.mSession, sessionResourceHandle);
+            Log.d(TAG, "Write Stats Log for succeed to Open Session.");
+            FrameworkStatsLog
+                    .write(FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS, mUserId, mCasSystemId,
+                        FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__SUCCEEDED);
             return cb.mSession;
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
+        Log.d(TAG, "Write Stats Log for fail to Open Session.");
+        FrameworkStatsLog
+                .write(FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS, mUserId, mCasSystemId,
+                    FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__FAILED);
         return null;
     }
 
@@ -964,10 +977,18 @@ public final class MediaCas implements AutoCloseable {
             mICasV12.openSession_1_2(sessionUsage, scramblingMode, cb);
             MediaCasException.throwExceptionIfNeeded(cb.mStatus);
             addSessionToResourceMap(cb.mSession, sessionResourceHandle);
+            Log.d(TAG, "Write Stats Log for succeed to Open Session.");
+            FrameworkStatsLog
+                    .write(FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS, mUserId, mCasSystemId,
+                        FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__SUCCEEDED);
             return cb.mSession;
         } catch (RemoteException e) {
             cleanupAndRethrowIllegalState();
         }
+        Log.d(TAG, "Write Stats Log for fail to Open Session.");
+        FrameworkStatsLog
+                .write(FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS, mUserId, mCasSystemId,
+                    FrameworkStatsLog.TV_CAS_SESSION_OPEN_STATUS__STATE__FAILED);
         return null;
     }
 

@@ -1778,6 +1778,15 @@ public final class Settings {
             = "android.settings.NOTIFICATION_SETTINGS";
 
     /**
+     * Activity Action: Show conversation settings.
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_CONVERSATION_SETTINGS
+            = "android.settings.CONVERSATION_SETTINGS";
+
+    /**
      * Activity Action: Show notification history screen.
      *
      * @hide
@@ -14243,15 +14252,6 @@ public final class Settings {
          * @hide
          */
         public static final String KERNEL_CPU_THREAD_READER = "kernel_cpu_thread_reader";
-
-        /**
-         * Persistent user id that is last logged in to.
-         *
-         * They map to user ids, for example, 10, 11, 12.
-         *
-         * @hide
-         */
-        public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
 
         /**
          * Whether we've enabled native flags health check on this device. Takes effect on

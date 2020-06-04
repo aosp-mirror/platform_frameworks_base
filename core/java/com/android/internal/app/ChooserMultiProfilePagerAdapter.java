@@ -38,6 +38,7 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
 
     private final ChooserProfileDescriptor[] mItems;
     private final boolean mIsSendAction;
+    private int mBottomOffset;
 
     ChooserMultiProfilePagerAdapter(Context context,
             ChooserActivity.ChooserGridAdapter adapter,
@@ -243,6 +244,16 @@ public class ChooserMultiProfilePagerAdapter extends AbstractMultiProfilePagerAd
                     R.string.resolver_no_work_apps_available_resolve,
                     /* subtitleRes */ 0);
         }
+    }
+
+    void setEmptyStateBottomOffset(int bottomOffset) {
+        mBottomOffset = bottomOffset;
+    }
+
+    @Override
+    protected void setupContainerPadding(View container) {
+        container.setPadding(container.getPaddingLeft(), container.getPaddingTop(),
+                container.getPaddingRight(), container.getPaddingBottom() + mBottomOffset);
     }
 
     class ChooserProfileDescriptor extends ProfileDescriptor {

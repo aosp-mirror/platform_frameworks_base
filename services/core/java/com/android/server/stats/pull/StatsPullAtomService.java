@@ -3319,8 +3319,8 @@ public class StatsPullAtomService extends SystemService {
                         public void run() {
                             try {
                                 estimateAppOpsSamplingRate();
-                            } catch (Exception e) {
-                                Slog.e(TAG, "AppOps sampling ratio estimation failed");
+                            } catch (Throwable e) {
+                                Slog.e(TAG, "AppOps sampling ratio estimation failed: ", e);
                                 synchronized (mAppOpsSamplingRateLock) {
                                     mAppOpsSamplingRate = min(mAppOpsSamplingRate, 10);
                                 }
@@ -3361,7 +3361,7 @@ public class StatsPullAtomService extends SystemService {
                         Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli(),
                         Long.MAX_VALUE).setFlags(
                         OP_FLAGS_PULLED).build();
-        appOps.getHistoricalOps(histOpsRequest, mContext.getMainExecutor(), ops::complete);
+        appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR, ops::complete);
         HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                 TimeUnit.MILLISECONDS);
         List<AppOpEntry> opsList =
