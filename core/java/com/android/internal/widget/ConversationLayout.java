@@ -1223,7 +1223,6 @@ public class ConversationLayout extends FrameLayout
             mExpandButtonContainer.setVisibility(VISIBLE);
             mExpandButtonInnerContainer.setOnClickListener(onClickListener);
         } else {
-            // TODO: handle content paddings to end of layout
             mExpandButtonContainer.setVisibility(GONE);
         }
         updateContentEndPaddings();
