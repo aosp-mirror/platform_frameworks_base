@@ -21,6 +21,7 @@ import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PRIVATE;
 
+import android.annotation.DimenRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -104,27 +105,39 @@ class Bubble implements BubbleViewProvider {
     private Path mDotPath;
     private int mFlags;
 
+    @NonNull
+    private UserHandle mUser;
+    @NonNull
+    private String mPackageName;
+    private int mDesiredHeight;
+    @DimenRes
+    private int mDesiredHeightResId;
+
     /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
-    Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo) {
+    Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
+            final int desiredHeight, final int desiredHeightResId) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mShortcutInfo = shortcutInfo;
         mKey = key;
         mFlags = 0;
+        mUser = shortcutInfo.getUserHandle();
+        mPackageName = shortcutInfo.getPackage();
+        mDesiredHeight = desiredHeight;
+        mDesiredHeightResId = desiredHeightResId;
     }
 
     /** Used in tests when no UI is required. */
     @VisibleForTesting(visibility = PRIVATE)
-    Bubble(NotificationEntry e,
-            BubbleController.NotificationSuppressionChangedListener listener) {
-        mEntry = e;
+    Bubble(@NonNull final NotificationEntry e,
+            @Nullable final BubbleController.NotificationSuppressionChangedListener listener) {
+        Objects.requireNonNull(e);
         mKey = e.getKey();
-        mLastUpdated = e.getSbn().getPostTime();
         mSuppressionListener = listener;
-        mFlags = e.getSbn().getNotification().flags;
+        setEntry(e);
     }
 
     @Override
@@ -137,17 +150,14 @@ class Bubble implements BubbleViewProvider {
         return mEntry;
     }
 
-    @Nullable
+    @NonNull
     public UserHandle getUser() {
-        if (mEntry != null) return mEntry.getSbn().getUser();
-        if (mShortcutInfo != null) return mShortcutInfo.getUserHandle();
-        return null;
+        return mUser;
     }
 
+    @NonNull
     public String getPackageName() {
-        return mEntry == null
-                ? mShortcutInfo == null ? null : mShortcutInfo.getPackage()
-                : mEntry.getSbn().getPackageName();
+        return mPackageName;
     }
 
     @Override
@@ -318,9 +328,18 @@ class Bubble implements BubbleViewProvider {
     /**
      * Sets the entry associated with this bubble.
      */
-    void setEntry(NotificationEntry entry) {
+    void setEntry(@NonNull final NotificationEntry entry) {
+        Objects.requireNonNull(entry);
+        Objects.requireNonNull(entry.getSbn());
         mEntry = entry;
         mLastUpdated = entry.getSbn().getPostTime();
+        mFlags = entry.getSbn().getNotification().flags;
+        mPackageName = entry.getSbn().getPackageName();
+        mUser = entry.getSbn().getUser();
+        if (entry.getBubbleMetadata() != null) {
+            mDesiredHeight = entry.getBubbleMetadata().getDesiredHeight();
+            mDesiredHeightResId = entry.getBubbleMetadata().getDesiredHeightResId();
+        }
     }
 
     /**
@@ -434,28 +453,30 @@ class Bubble implements BubbleViewProvider {
         return mFlyoutMessage;
     }
 
+    int getRawDesiredHeight() {
+        return mDesiredHeight;
+    }
+
+    int getRawDesiredHeightResId() {
+        return mDesiredHeightResId;
+    }
+
     float getDesiredHeight(Context context) {
-        if (mEntry == null) return 0;
-        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
-        boolean useRes = data.getDesiredHeightResId() != 0;
+        boolean useRes = mDesiredHeightResId != 0;
         if (useRes) {
-            return getDimenForPackageUser(context, data.getDesiredHeightResId(),
-                    mEntry.getSbn().getPackageName(),
-                    mEntry.getSbn().getUser().getIdentifier());
+            return getDimenForPackageUser(context, mDesiredHeightResId, mPackageName,
+                    mUser.getIdentifier());
         } else {
-            return data.getDesiredHeight()
-                    * context.getResources().getDisplayMetrics().density;
+            return mDesiredHeight * context.getResources().getDisplayMetrics().density;
         }
     }
 
     String getDesiredHeightString() {
-        if (mEntry == null) return String.valueOf(0);
-        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
-        boolean useRes = data.getDesiredHeightResId() != 0;
+        boolean useRes = mDesiredHeightResId != 0;
         if (useRes) {
-            return String.valueOf(data.getDesiredHeightResId());
+            return String.valueOf(mDesiredHeightResId);
         } else {
-            return String.valueOf(data.getDesiredHeight());
+            return String.valueOf(mDesiredHeight);
         }
     }
 
