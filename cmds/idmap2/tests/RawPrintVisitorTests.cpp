@@ -43,6 +43,8 @@ namespace android::idmap2 {
         << str << "--------";                                     \
   } while (0)
 
+#define ADDRESS "[0-9a-f]{8}: "
+
 TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   fclose(stderr);  // silence expected warnings
 
@@ -62,15 +64,16 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   RawPrintVisitor visitor(stream);
   (*idmap)->accept(&visitor);
 
-#define ADDRESS "[0-9a-f]{8}: "
   ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
-  ASSERT_CONTAINS_REGEX(ADDRESS "00000003  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  version\n", stream.str());
   ASSERT_CONTAINS_REGEX(
       StringPrintf(ADDRESS "%s  target crc\n", android::idmap2::TestConstants::TARGET_CRC_STRING),
       stream.str());
   ASSERT_CONTAINS_REGEX(
       StringPrintf(ADDRESS "%s  overlay crc\n", android::idmap2::TestConstants::OVERLAY_CRC_STRING),
       stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000001  fulfilled policies: public\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      01  enforce overlayable\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "      7f  target package id\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "      7f  overlay package id\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "00000004  target entry count\n", stream.str());
@@ -83,7 +86,6 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitor) {
   ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  value: integer/int1\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  overlay id: integer/int1\n", stream.str());
   ASSERT_CONTAINS_REGEX(ADDRESS "7f010000  target id: integer/int1\n", stream.str());
-#undef ADDRESS
 }
 
 TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
@@ -99,22 +101,23 @@ TEST(RawPrintVisitorTests, CreateRawPrintVisitorWithoutAccessToApks) {
   RawPrintVisitor visitor(stream);
   (*idmap)->accept(&visitor);
 
-  ASSERT_NE(stream.str().find("00000000: 504d4449  magic\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000004: 00000003  version\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000008: 00001234  target crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000000c: 00005678  overlay crc\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021c:       7f  target package id\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021d:       7f  overlay package id\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000021e: 00000003  target entry count\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000222: 00000003  overlay entry count\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000226: 00000000  string pool index offset\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000022a: 00000000  string pool byte length\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000022e: 7f020000  target id\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000232:       01  type: reference\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("00000233: 7f020000  value\n"), std::string::npos);
-
-  ASSERT_NE(stream.str().find("00000249: 7f020000  overlay id\n"), std::string::npos);
-  ASSERT_NE(stream.str().find("0000024d: 7f020000  target id\n"), std::string::npos);
+  ASSERT_CONTAINS_REGEX(ADDRESS "504d4449  magic\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000004  version\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00001234  target crc\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00005678  overlay crc\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000011  fulfilled policies: public|signature\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      01  enforce overlayable\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      7f  target package id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      7f  overlay package id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000003  target entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000003  overlay entry count\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000000  string pool index offset\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "00000000  string pool byte length\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  target id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "      01  type: reference\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  value\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  overlay id\n", stream.str());
+  ASSERT_CONTAINS_REGEX(ADDRESS "7f020000  target id\n", stream.str());
 }
 
 }  // namespace android::idmap2
