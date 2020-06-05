@@ -882,6 +882,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
     }
 
+    /**
+     * True if:
+     * (1) The current notification entry same as selected bubble notification entry and the
+     * stack is currently expanded.
+     *
+     * False otherwise.
+     */
+    public boolean isBubbleExpanded(NotificationEntry entry) {
+        return isStackExpanded() && mBubbleData != null && mBubbleData.getSelectedBubble() != null
+                && mBubbleData.getSelectedBubble().getKey().equals(entry.getKey()) ? true : false;
+    }
+
     void promoteBubbleFromOverflow(Bubble bubble) {
         bubble.setInflateSynchronously(mInflateSynchronously);
         setIsBubble(bubble, /* isBubble */ true);
