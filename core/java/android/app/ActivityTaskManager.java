@@ -31,6 +31,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.util.DisplayMetrics;
 import android.util.Singleton;
 
 import java.util.List;
@@ -139,6 +140,8 @@ public class ActivityTaskManager {
     public static final String EXTRA_IGNORE_TARGET_SECURITY =
             "android.app.extra.EXTRA_IGNORE_TARGET_SECURITY";
 
+    /** The minimal size of a display's long-edge needed to support split-screen multi-window. */
+    public static final int DEFAULT_MINIMAL_SPLIT_SCREEN_DISPLAY_SIZE_DP = 440;
 
     private static int sMaxRecentTasks = -1;
 
@@ -282,8 +285,23 @@ public class ActivityTaskManager {
                 com.android.internal.R.bool.config_supportsMultiWindow);
     }
 
-    /** Returns true if the system supports split screen multi-window. */
+    /**
+     * Returns {@code true} if the display the context is associated with supports split screen
+     * multi-window.
+     *
+     * @throws UnsupportedOperationException if the supplied {@link Context} is not associated with
+     * a display.
+     */
     public static boolean supportsSplitScreenMultiWindow(Context context) {
+        DisplayMetrics dm = new DisplayMetrics();
+        context.getDisplay().getRealMetrics(dm);
+
+        int widthDp = (int) (dm.widthPixels / dm.density);
+        int heightDp = (int) (dm.heightPixels / dm.density);
+        if (Math.max(widthDp, heightDp) < DEFAULT_MINIMAL_SPLIT_SCREEN_DISPLAY_SIZE_DP) {
+            return false;
+        }
+
         return supportsMultiWindow(context)
                 && Resources.getSystem().getBoolean(
                 com.android.internal.R.bool.config_supportsSplitScreenMultiWindow);
