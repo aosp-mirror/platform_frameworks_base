@@ -45,7 +45,7 @@ class MediaTimeoutListener @Inject constructor(
 
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
-    override fun onMediaDataLoaded(key: String, data: MediaData) {
+    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
         if (mediaListeners.containsKey(key)) {
             return
         }
@@ -67,26 +67,34 @@ class MediaTimeoutListener @Inject constructor(
 
         var timedOut = false
 
-        private val mediaController = mediaControllerFactory.create(data.token)
+        // Resume controls may have null token
+        private val mediaController = if (data.token != null) {
+            mediaControllerFactory.create(data.token)
+        } else {
+            null
+        }
         private var cancellation: Runnable? = null
 
         init {
-            mediaController.registerCallback(this)
+            mediaController?.registerCallback(this)
         }
 
         fun destroy() {
-            mediaController.unregisterCallback(this)
+            mediaController?.unregisterCallback(this)
         }
 
         override fun onPlaybackStateChanged(state: PlaybackState?) {
             if (DEBUG) {
                 Log.v(TAG, "onPlaybackStateChanged: $state")
             }
-            expireMediaTimeout(key, "playback state ativity - $state, $key")
 
             if (state == null || !isPlayingState(state.state)) {
                 if (DEBUG) {
                     Log.v(TAG, "schedule timeout for $key")
+                }
+                if (cancellation != null) {
+                    if (DEBUG) Log.d(TAG, "cancellation already exists, continuing.")
+                    return
                 }
                 expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state")
                 cancellation = mainExecutor.executeDelayed({
@@ -98,6 +106,7 @@ class MediaTimeoutListener @Inject constructor(
                     timeoutCallback(key, timedOut)
                 }, PAUSED_MEDIA_TIMEOUT)
             } else {
+                expireMediaTimeout(key, "playback started - $state, $key")
                 timedOut = false
                 timeoutCallback(key, timedOut)
             }

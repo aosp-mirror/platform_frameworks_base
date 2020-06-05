@@ -13,16 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.android.systemui.bubbles.storage
 
-import android.annotation.DimenRes
-import android.annotation.UserIdInt
+package com.android.systemui.util.concurrency;
 
-data class BubbleEntity(
-    @UserIdInt val userId: Int,
-    val packageName: String,
-    val shortcutId: String,
-    val key: String,
-    val desiredHeight: Int,
-    @DimenRes val desiredHeightResId: Int
-)
+/**
+ * A fake to use in tests.
+ */
+public class FakeRepeatableExecutor extends RepeatableExecutorImpl {
+
+    /**
+     * Initializes a fake RepeatableExecutor from a fake executor.
+     *
+     * Use the fake executor to actually process tasks.
+     *
+     * @param executor fake executor.
+     */
+    public FakeRepeatableExecutor(FakeExecutor executor) {
+        super(executor);
+    }
+}

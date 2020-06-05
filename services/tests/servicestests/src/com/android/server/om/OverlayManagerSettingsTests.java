@@ -367,8 +367,7 @@ public class OverlayManagerSettingsTests {
                 + "      isEnabled='false'\n"
                 + "      category='dummy-category'\n"
                 + "      isStatic='false'\n"
-                + "      priority='0'"
-                + "      hasConfiguratorActorPolicy='true' />\n"
+                + "      priority='0' />\n"
                 + "</overlays>\n";
         ByteArrayInputStream is = new ByteArrayInputStream(xml.getBytes("utf-8"));
 
@@ -381,7 +380,6 @@ public class OverlayManagerSettingsTests {
         assertEquals(1234, oi.userId);
         assertEquals(STATE_DISABLED, oi.state);
         assertFalse(mSettings.getEnabled("com.dummy.overlay", 1234));
-        assertTrue(mSettings.hasConfiguratorActorPolicy("com.dummy.overlay", 1234));
     }
 
     @Test

@@ -29,6 +29,7 @@ import androidx.test.filters.SmallTest
 
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.concurrency.FakeRepeatableExecutor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 
@@ -71,7 +72,7 @@ public class SeekBarViewModelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        viewModel = SeekBarViewModel(fakeExecutor)
+        viewModel = SeekBarViewModel(FakeRepeatableExecutor(fakeExecutor))
         mockController = mock(MediaController::class.java)
         whenever(mockController.sessionToken).thenReturn(token1)
         mockTransport = mock(MediaController.TransportControls::class.java)
