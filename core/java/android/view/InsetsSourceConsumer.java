@@ -21,6 +21,8 @@ import static android.view.InsetsController.AnimationType;
 import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
 
+import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.graphics.Rect;
@@ -253,10 +255,13 @@ public class InsetsSourceConsumer {
         // no-op for types that always return ShowResult#SHOW_IMMEDIATELY.
     }
 
-    void updateSource(InsetsSource newSource) {
+    @VisibleForTesting(visibility = PACKAGE)
+    public void updateSource(InsetsSource newSource) {
         InsetsSource source = mState.peekSource(mType);
         if (source == null || mController.getAnimationType(mType) == ANIMATION_TYPE_NONE
                 || source.getFrame().equals(newSource.getFrame())) {
+            mPendingFrame = null;
+            mPendingVisibleFrame = null;
             mState.addSource(newSource);
             return;
         }
@@ -273,7 +278,8 @@ public class InsetsSourceConsumer {
         mState.addSource(newSource);
     }
 
-    boolean notifyAnimationFinished() {
+    @VisibleForTesting(visibility = PACKAGE)
+    public boolean notifyAnimationFinished() {
         if (mPendingFrame != null) {
             InsetsSource source = mState.getSource(mType);
             source.setFrame(mPendingFrame);
