@@ -21,6 +21,7 @@ import static com.android.internal.util.function.pooled.PooledLambda.obtainMessa
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
+import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -83,7 +84,8 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         final long identity = Binder.clearCallingIdentity();
         try {
             mIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, mSystemSupport.getPendingIntentActivity(
-                    mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS), 0));
+                    mContext, 0, new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS),
+                    PendingIntent.FLAG_IMMUTABLE));
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
