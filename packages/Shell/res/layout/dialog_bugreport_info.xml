@@ -14,58 +14,63 @@
      limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:paddingTop="15dp"
-    android:paddingStart="24dp"
-    android:paddingEnd="24dp"
-    android:focusableInTouchMode="false"
-    android:focusable="false"
-    android:importantForAutofill="noExcludeDescendants"
-    android:layout_width="wrap_content"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content">
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
+        android:paddingTop="15dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
         android:focusableInTouchMode="false"
         android:focusable="false"
-        android:inputType="textNoSuggestions"
+        android:importantForAutofill="noExcludeDescendants"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/bugreport_info_name"/>
-    <EditText
-        android:id="@+id/name"
-        android:nextFocusDown="@+id/title"
-        android:maxLength="30"
-        android:singleLine="true"
-        android:inputType="textNoSuggestions"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:focusableInTouchMode="false"
-        android:focusable="false"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/bugreport_info_title"/>
-    <EditText
-        android:id="@+id/title"
-        android:nextFocusUp="@+id/name"
-        android:nextFocusDown="@+id/description"
-        android:maxLength="80"
-        android:singleLine="true"
-        android:inputType="textAutoCorrect|textCapSentences"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-    <TextView
-        android:focusableInTouchMode="false"
-        android:focusable="false"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:editable="false"
-        android:text="@string/bugreport_info_description"/>
-    <EditText
-        android:id="@+id/description"
-        android:nextFocusUp="@+id/title"
-        android:singleLine="false"
-        android:inputType="textMultiLine|textAutoCorrect|textCapSentences"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+        android:layout_height="wrap_content">
+        <TextView
+            android:focusableInTouchMode="false"
+            android:focusable="false"
+            android:inputType="textNoSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bugreport_info_name"/>
+        <EditText
+            android:id="@+id/name"
+            android:nextFocusDown="@+id/title"
+            android:maxLength="30"
+            android:singleLine="true"
+            android:inputType="textNoSuggestions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:focusableInTouchMode="false"
+            android:focusable="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bugreport_info_title"/>
+        <EditText
+            android:id="@+id/title"
+            android:nextFocusUp="@+id/name"
+            android:nextFocusDown="@+id/description"
+            android:maxLength="80"
+            android:singleLine="true"
+            android:inputType="textAutoCorrect|textCapSentences"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:focusableInTouchMode="false"
+            android:focusable="false"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:editable="false"
+            android:text="@string/bugreport_info_description"/>
+        <EditText
+            android:id="@+id/description"
+            android:nextFocusUp="@+id/title"
+            android:singleLine="false"
+            android:inputType="textMultiLine|textAutoCorrect|textCapSentences"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+</ScrollView>
