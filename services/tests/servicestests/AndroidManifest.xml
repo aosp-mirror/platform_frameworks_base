@@ -18,6 +18,7 @@
         package="com.android.frameworks.servicestests">
 
     <uses-permission android:name="android.permission.READ_LOGS" />
+    <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS" />
     <uses-permission android:name="android.permission.ACCESS_VR_MANAGER" />
     <uses-permission android:name="android.permission.ACCOUNT_MANAGER" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
