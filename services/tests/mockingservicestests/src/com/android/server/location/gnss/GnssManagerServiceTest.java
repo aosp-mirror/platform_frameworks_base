@@ -63,14 +63,14 @@ import android.os.Message;
 import android.os.RemoteException;
 
 import com.android.server.LocalServices;
-import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.AppOpsHelper;
-import com.android.server.location.LocationUsageLogger;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
 import com.android.server.location.gnss.GnssAntennaInfoProvider.GnssAntennaInfoProviderNative;
 import com.android.server.location.gnss.GnssMeasurementsProvider.GnssMeasurementProviderNative;
 import com.android.server.location.gnss.GnssNavigationMessageProvider.GnssNavigationMessageProviderNative;
+import com.android.server.location.util.AppForegroundHelper;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
 
 import org.junit.After;
 import org.junit.Before;
