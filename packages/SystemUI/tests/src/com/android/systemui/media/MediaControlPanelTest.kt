@@ -31,6 +31,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
@@ -41,6 +42,7 @@ import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
@@ -48,6 +50,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
 private const val APP = "APP"
@@ -73,6 +76,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var holder: PlayerViewHolder
     @Mock private lateinit var view: TransitionLayout
     @Mock private lateinit var mediaHostStatesManager: MediaHostStatesManager
+    @Mock private lateinit var seekBarViewModel: SeekBarViewModel
+    @Mock private lateinit var seekBarData: LiveData<SeekBarViewModel.Progress>
     private lateinit var appIcon: ImageView
     private lateinit var appName: TextView
     private lateinit var albumView: ImageView
@@ -94,18 +99,17 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private val device = MediaDeviceData(true, null, DEVICE_NAME)
     private val disabledDevice = MediaDeviceData(false, null, null)
 
+    @JvmField @Rule val mockito = MockitoJUnit.rule()
+
     @Before
     fun setUp() {
         bgExecutor = FakeExecutor(FakeSystemClock())
 
-        activityStarter = mock(ActivityStarter::class.java)
-        mediaHostStatesManager = mock(MediaHostStatesManager::class.java)
-
-        player = MediaControlPanel(context, bgExecutor, activityStarter, mediaHostStatesManager)
+        player = MediaControlPanel(context, bgExecutor, activityStarter, mediaHostStatesManager,
+                seekBarViewModel)
+        whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
         // Mock out a view holder for the player to attach to.
-        holder = mock(PlayerViewHolder::class.java)
-        view = mock(TransitionLayout::class.java)
         whenever(holder.player).thenReturn(view)
         appIcon = ImageView(context)
         whenever(holder.appIcon).thenReturn(appIcon)

@@ -49,14 +49,16 @@ import com.android.settingslib.Utils;
 import com.android.settingslib.media.MediaOutputSliceConstants;
 import com.android.settingslib.widget.AdaptiveIcon;
 import com.android.systemui.R;
+import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.util.animation.TransitionLayout;
-import com.android.systemui.util.concurrency.DelayableExecutor;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.Executor;
+
+import javax.inject.Inject;
 
 /**
  * A view controller used for Media Playback.
@@ -93,12 +95,14 @@ public class MediaControlPanel {
      * @param backgroundExecutor background executor, used for processing artwork
      * @param activityStarter activity starter
      */
-    public MediaControlPanel(Context context, DelayableExecutor backgroundExecutor,
-            ActivityStarter activityStarter, MediaHostStatesManager mediaHostStatesManager) {
+    @Inject
+    public MediaControlPanel(Context context, @Background Executor backgroundExecutor,
+            ActivityStarter activityStarter, MediaHostStatesManager mediaHostStatesManager,
+            SeekBarViewModel seekBarViewModel) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
-        mSeekBarViewModel = new SeekBarViewModel(backgroundExecutor);
+        mSeekBarViewModel = seekBarViewModel;
         mMediaViewController = new MediaViewController(context, mediaHostStatesManager);
         loadDimens();
     }
