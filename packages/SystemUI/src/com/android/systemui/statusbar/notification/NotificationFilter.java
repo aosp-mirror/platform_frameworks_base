@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static com.android.systemui.media.MediaDataManagerKt.isMediaNotification;
+
 import android.Manifest;
 import android.app.AppGlobals;
 import android.app.Notification;
@@ -27,6 +29,7 @@ import android.service.notification.StatusBarNotification;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -46,6 +49,7 @@ public class NotificationFilter {
     private final NotificationGroupManager mGroupManager = Dependency.get(
             NotificationGroupManager.class);
     private final StatusBarStateController mStatusBarStateController;
+    private final Boolean mIsMediaFlagEnabled;
 
     private NotificationEntryManager.KeyguardEnvironment mEnvironment;
     private ShadeController mShadeController;
@@ -53,8 +57,11 @@ public class NotificationFilter {
     private NotificationLockscreenUserManager mUserManager;
 
     @Inject
-    public NotificationFilter(StatusBarStateController statusBarStateController) {
+    public NotificationFilter(
+            StatusBarStateController statusBarStateController,
+            MediaFeatureFlag mediaFeatureFlag) {
         mStatusBarStateController = statusBarStateController;
+        mIsMediaFlagEnabled = mediaFeatureFlag.getEnabled();
     }
 
     private NotificationEntryManager.KeyguardEnvironment getEnvironment() {
@@ -132,6 +139,10 @@ public class NotificationFilter {
                     return true;
                 }
             }
+        }
+
+        if (mIsMediaFlagEnabled && isMediaNotification(sbn)) {
+            return true;
         }
         return false;
     }
