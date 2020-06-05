@@ -606,11 +606,9 @@ public class PipTouchHandler {
 
         MotionEvent ev = (MotionEvent) inputEvent;
 
-
-        if (mPipResizeGestureHandler.isWithinTouchRegion((int) ev.getX(), (int) ev.getY())) {
+        if (mPipResizeGestureHandler.isWithinTouchRegion((int) ev.getRawX(), (int) ev.getRawY())) {
             return true;
         }
-
         if (mMagnetizedPip.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
             // to the touch state. Touch state needs a DOWN event in order to later process MOVE
