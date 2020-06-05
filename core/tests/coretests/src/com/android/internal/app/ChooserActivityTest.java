@@ -34,9 +34,11 @@ import static com.android.internal.app.ChooserListAdapter.SHORTCUT_TARGET_SCORE_
 import static com.android.internal.app.ChooserWrapperActivity.sOverrides;
 import static com.android.internal.app.MatcherUtils.first;
 
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
 
+import static org.hamcrest.CoreMatchers.allOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.notNullValue;
@@ -1327,7 +1329,6 @@ public class ChooserActivityTest {
         assertThat(activity.getWorkListAdapter().getCount(), is(workProfileTargets));
     }
 
-    @Ignore // b/148156663
     @Test
     public void testWorkTab_selectingWorkTabAppOpensAppInWorkProfile() throws InterruptedException {
         // enable the work tab feature flag
@@ -1354,8 +1355,10 @@ public class ChooserActivityTest {
         // wait for the share sheet to expand
         Thread.sleep(ChooserActivity.LIST_VIEW_UPDATE_INTERVAL_IN_MILLIS);
 
-        onView(first(withText(workResolvedComponentInfos.get(0)
-                .getResolveInfoAt(0).activityInfo.applicationInfo.name)))
+        onView(first(allOf(
+                withText(workResolvedComponentInfos.get(0)
+                        .getResolveInfoAt(0).activityInfo.applicationInfo.name),
+                isDisplayed())))
                 .perform(click());
         waitForIdle();
         assertThat(chosen[0], is(workResolvedComponentInfos.get(0).getResolveInfoAt(0)));
@@ -1951,6 +1954,45 @@ public class ChooserActivityTest {
         assertThat(activity.getAdapter().getCount(), is(4));
         assertThat(activity.getAdapter().getCallerTargetCount(), is(1));
         assertThat(activity.getAdapter().getRankedTargetCount(), is(3));
+    }
+
+    @Test
+    public void testWorkTab_selectingWorkTabWithPausedWorkProfile_directShareTargetsNotQueried() {
+        // enable the work tab feature flag
+        ResolverActivity.ENABLE_TABBED_VIEW = true;
+        markWorkProfileUserAvailable();
+        List<ResolvedComponentInfo> personalResolvedComponentInfos =
+                createResolvedComponentsForTestWithOtherProfile(3, /* userId */ 10);
+        List<ResolvedComponentInfo> workResolvedComponentInfos =
+                createResolvedComponentsForTest(3);
+        setupResolverControllers(personalResolvedComponentInfos, workResolvedComponentInfos);
+        sOverrides.isQuietModeEnabled = true;
+        boolean[] isQueryDirectShareCalledOnWorkProfile = new boolean[] { false };
+        sOverrides.onQueryDirectShareTargets = chooserListAdapter -> {
+            isQueryDirectShareCalledOnWorkProfile[0] =
+                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
+            return null;
+        };
+        boolean[] isQueryTargetServicesCalledOnWorkProfile = new boolean[] { false };
+        sOverrides.onQueryTargetServices = chooserListAdapter -> {
+            isQueryTargetServicesCalledOnWorkProfile[0] =
+                    (chooserListAdapter.getUserHandle().getIdentifier() == 10);
+            return null;
+        };
+        Intent sendIntent = createSendTextIntent();
+        sendIntent.setType("TestType");
+
+        mActivityRule.launchActivity(Intent.createChooser(sendIntent, "work tab test"));
+        waitForIdle();
+        onView(withId(R.id.contentPanel))
+                .perform(swipeUp());
+        onView(withText(R.string.resolver_work_tab)).perform(click());
+        waitForIdle();
+
+        assertFalse("Direct share targets were queried on a paused work profile",
+                isQueryDirectShareCalledOnWorkProfile[0]);
+        assertFalse("Target services were queried on a paused work profile",
+                isQueryTargetServicesCalledOnWorkProfile[0]);
     }
 
     private Intent createChooserIntent(Intent intent, Intent[] initialIntents) {
