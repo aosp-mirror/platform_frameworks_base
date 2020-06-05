@@ -4722,6 +4722,46 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     EXPECT_EQ(5, report.value_metrics().data(4).bucket_info(1).values(0).value_long());
 }
 
+/*
+ * Test bucket splits when condition is unknown.
+ */
+TEST(ValueMetricProducerTest, TestForcedBucketSplitWhenConditionUnknownSkipsBucket) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(
+                    pullerManager, metric,
+                    ConditionState::kUnknown);
+
+    // App update event.
+    int64_t appUpdateTimeNs = bucketStartTimeNs + 1000;
+    valueProducer->notifyAppUpgrade(appUpdateTimeNs);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucketStartTimeNs + 10000000000; // 10 seconds
+    valueProducer->onDumpReport(dumpReportTimeNs, false /* include current buckets */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(0, report.value_metrics().data_size());
+    ASSERT_EQ(1, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(appUpdateTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(appUpdateTimeNs), dropEvent.drop_time_millis());
+}
+
 }  // namespace statsd
 }  // namespace os
 }  // namespace android
