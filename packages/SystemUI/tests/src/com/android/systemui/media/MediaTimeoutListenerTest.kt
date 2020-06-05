@@ -16,7 +16,9 @@
 
 package com.android.systemui.media
 
+import android.media.MediaMetadata
 import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
@@ -41,6 +43,10 @@ import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "KEY"
+private const val PACKAGE = "PKG"
+private const val SESSION_KEY = "SESSION_KEY"
+private const val SESSION_ARTIST = "SESSION_ARTIST"
+private const val SESSION_TITLE = "SESSION_TITLE"
 
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
@@ -54,12 +60,15 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Mock private lateinit var mediaControllerFactory: MediaControllerFactory
     @Mock private lateinit var mediaController: MediaController
     @Mock private lateinit var executor: DelayableExecutor
-    @Mock private lateinit var mediaData: MediaData
     @Mock private lateinit var timeoutCallback: (String, Boolean) -> Unit
     @Mock private lateinit var cancellationRunnable: Runnable
     @Captor private lateinit var timeoutCaptor: ArgumentCaptor<Runnable>
     @Captor private lateinit var mediaCallbackCaptor: ArgumentCaptor<MediaController.Callback>
     @JvmField @Rule val mockito = MockitoJUnit.rule()
+    private lateinit var metadataBuilder: MediaMetadata.Builder
+    private lateinit var playbackBuilder: PlaybackState.Builder
+    private lateinit var session: MediaSession
+    private lateinit var mediaData: MediaData
     private lateinit var mediaTimeoutListener: MediaTimeoutListener
 
     @Before
@@ -68,22 +77,39 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         `when`(executor.executeDelayed(any(), anyLong())).thenReturn(cancellationRunnable)
         mediaTimeoutListener = MediaTimeoutListener(mediaControllerFactory, executor)
         mediaTimeoutListener.timeoutCallback = timeoutCallback
+
+        // Create a media session and notification for testing.
+        metadataBuilder = MediaMetadata.Builder().apply {
+            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
+            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
+        }
+        playbackBuilder = PlaybackState.Builder().apply {
+            setState(PlaybackState.STATE_PAUSED, 6000L, 1f)
+            setActions(PlaybackState.ACTION_PLAY)
+        }
+        session = MediaSession(context, SESSION_KEY).apply {
+            setMetadata(metadataBuilder.build())
+            setPlaybackState(playbackBuilder.build())
+        }
+        session.setActive(true)
+        mediaData = MediaData(true, 0, PACKAGE, null, null, SESSION_TITLE, null,
+            emptyList(), emptyList(), PACKAGE, session.sessionToken, null, null, null)
     }
 
     @Test
     fun testOnMediaDataLoaded_registersPlaybackListener() {
-        mediaTimeoutListener.onMediaDataLoaded(KEY, mediaData)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         verify(mediaController).registerCallback(capture(mediaCallbackCaptor))
 
         // Ignores is same key
         clearInvocations(mediaController)
-        mediaTimeoutListener.onMediaDataLoaded(KEY, mediaData)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, KEY, mediaData)
         verify(mediaController, never()).registerCallback(anyObject())
     }
 
     @Test
     fun testOnMediaDataRemoved_unregistersPlaybackListener() {
-        mediaTimeoutListener.onMediaDataLoaded(KEY, mediaData)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         mediaTimeoutListener.onMediaDataRemoved(KEY)
         verify(mediaController).unregisterCallback(anyObject())
 
@@ -124,7 +150,7 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Test
     fun testIsTimedOut() {
-        mediaTimeoutListener.onMediaDataLoaded(KEY, mediaData)
+        mediaTimeoutListener.onMediaDataLoaded(KEY, null, mediaData)
         assertThat(mediaTimeoutListener.isTimedOut(KEY)).isFalse()
     }
 }

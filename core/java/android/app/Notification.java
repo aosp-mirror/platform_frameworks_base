@@ -7625,6 +7625,7 @@ public class Notification implements Parcelable
             }
             boolean isConversationLayout = mConversationType != CONVERSATION_TYPE_LEGACY;
             boolean isImportantConversation = mConversationType == CONVERSATION_TYPE_IMPORTANT;
+            Icon conversationIcon = mShortcutIcon;
             Icon largeIcon = mBuilder.mN.mLargeIcon;
             TemplateBindResult bindResult = new TemplateBindResult();
             StandardTemplateParams p = mBuilder.mParams.reset()
@@ -7670,7 +7671,7 @@ public class Notification implements Parcelable
                     "setConversationTitle", conversationTitle);
             if (isConversationLayout) {
                 contentView.setIcon(R.id.status_bar_latest_event_content,
-                        "setShortcutIcon", mShortcutIcon);
+                        "setConversationIcon", conversationIcon);
                 contentView.setBoolean(R.id.status_bar_latest_event_content,
                         "setIsImportantConversation", isImportantConversation);
             }
