@@ -62,6 +62,7 @@
                   android:resumeWhilePausing="true"/>
         <activity android:name="com.android.server.wm.ScreenDecorWindowTests$TestActivity"
                   android:showWhenLocked="true" android:allowEmbedded="true"/>
+        <activity android:name="com.android.server.wm.ActivityLeakTests$DetectLeakActivity" />
     </application>
 
     <instrumentation
