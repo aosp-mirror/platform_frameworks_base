@@ -16,9 +16,13 @@
 
 package android.app.blob;
 
+import static android.text.format.Formatter.FLAG_IEC_UNITS;
+
 import android.annotation.NonNull;
+import android.app.AppGlobals;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.format.Formatter;
 
 import java.util.Collections;
 import java.util.List;
@@ -32,13 +36,15 @@ public final class BlobInfo implements Parcelable {
     private final long mId;
     private final long mExpiryTimeMs;
     private final CharSequence mLabel;
+    private final long mSizeBytes;
     private final List<LeaseInfo> mLeaseInfos;
 
-    public BlobInfo(long id, long expiryTimeMs, CharSequence label,
+    public BlobInfo(long id, long expiryTimeMs, CharSequence label, long sizeBytes,
             List<LeaseInfo> leaseInfos) {
         mId = id;
         mExpiryTimeMs = expiryTimeMs;
         mLabel = label;
+        mSizeBytes = sizeBytes;
         mLeaseInfos = leaseInfos;
     }
 
@@ -46,6 +52,7 @@ public final class BlobInfo implements Parcelable {
         mId = in.readLong();
         mExpiryTimeMs = in.readLong();
         mLabel = in.readCharSequence();
+        mSizeBytes = in.readLong();
         mLeaseInfos = in.readArrayList(null /* classloader */);
     }
 
@@ -61,6 +68,10 @@ public final class BlobInfo implements Parcelable {
         return mLabel;
     }
 
+    public long getSizeBytes() {
+        return mSizeBytes;
+    }
+
     public List<LeaseInfo> getLeases() {
         return Collections.unmodifiableList(mLeaseInfos);
     }
@@ -70,6 +81,7 @@ public final class BlobInfo implements Parcelable {
         dest.writeLong(mId);
         dest.writeLong(mExpiryTimeMs);
         dest.writeCharSequence(mLabel);
+        dest.writeLong(mSizeBytes);
         dest.writeList(mLeaseInfos);
     }
 
@@ -83,8 +95,14 @@ public final class BlobInfo implements Parcelable {
                 + "id: " + mId + ","
                 + "expiryMs: " + mExpiryTimeMs + ","
                 + "label: " + mLabel + ","
+                + "size: " + formatBlobSize(mSizeBytes) + ","
                 + "leases: " + LeaseInfo.toShortString(mLeaseInfos) + ","
                 + "}";
+    }
+
+    private static String formatBlobSize(long sizeBytes) {
+        return Formatter.formatFileSize(AppGlobals.getInitialApplication(),
+                sizeBytes, FLAG_IEC_UNITS);
     }
 
     @Override
