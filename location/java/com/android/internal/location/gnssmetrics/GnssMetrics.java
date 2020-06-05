@@ -124,8 +124,6 @@ public class GnssMetrics {
     private long mL5SvStatusReportsUsedInFix;
     /** Stats manager service for reporting atoms */
     private StatsManager mStatsManager;
-    /** Pull atom callback, this is called when atom pull request occurs */
-    private StatsPullAtomCallbackImpl mPullAtomCallback;
     /* Statds Logging Variables Section End */
 
     public GnssMetrics(Context context, IBatteryStats stats) {
@@ -468,7 +466,7 @@ public class GnssMetrics {
     }
 
     /** Class for storing statistics */
-    private class Statistics {
+    private static class Statistics {
 
         private int mCount;
         private double mSum;
@@ -623,11 +621,11 @@ public class GnssMetrics {
     }
 
     private void registerGnssStats() {
-        mPullAtomCallback = new StatsPullAtomCallbackImpl();
+        StatsPullAtomCallbackImpl pullAtomCallback = new StatsPullAtomCallbackImpl();
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.GNSS_STATS,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), mPullAtomCallback);
+                BackgroundThread.getExecutor(), pullAtomCallback);
     }
 
     /**
