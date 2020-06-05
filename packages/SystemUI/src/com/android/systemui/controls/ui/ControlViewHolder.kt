@@ -156,6 +156,8 @@ class ControlViewHolder(
                 controlActionCoordinator.longPress(this@ControlViewHolder)
                 true
             })
+
+            controlActionCoordinator.runPendingAction(cws.ci.controlId)
         }
 
         isLoading = false
@@ -164,6 +166,8 @@ class ControlViewHolder(
     }
 
     fun actionResponse(@ControlAction.ResponseResult response: Int) {
+        controlActionCoordinator.enableActionOnTouch(cws.ci.controlId)
+
         // OK responses signal normal behavior, and the app will provide control updates
         val failedAttempt = lastChallengeDialog != null
         when (response) {

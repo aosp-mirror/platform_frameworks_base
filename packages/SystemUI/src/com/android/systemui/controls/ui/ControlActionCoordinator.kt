@@ -55,6 +55,28 @@ interface ControlActionCoordinator {
     fun drag(isEdge: Boolean)
 
     /**
+     * Send a request to update the value of a device using the [FloatAction].
+     *
+     * @param cvh [ControlViewHolder] for the control
+     * @param templateId id of the control's template, as given by the service
+     * @param newValue value to set for the device
+     */
+    fun setValue(cvh: ControlViewHolder, templateId: String, newValue: Float)
+
+    /**
+     * Actions may have been put on hold while the device is unlocked. Invoke this action if
+     * present.
+     */
+    fun runPendingAction(controlId: String)
+
+    /**
+     * User interaction with a control may be blocked for a period of time while actions are being
+     * executed by the application.  When the response returns, run this method to enable further
+     * user interaction.
+     */
+    fun enableActionOnTouch(controlId: String)
+
+    /**
      * All long presses will be shown in a 3/4 height bottomsheet panel, in order for the user to
      * retain context with their favorited controls in the power menu.
      */
