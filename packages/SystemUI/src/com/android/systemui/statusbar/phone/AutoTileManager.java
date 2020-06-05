@@ -333,7 +333,7 @@ public class AutoTileManager implements UserAwareController {
             }
             if (value != 0) {
                 if (mSpec.startsWith(CustomTile.PREFIX)) {
-                    mHost.addTile(CustomTile.getComponentFromSpec(mSpec));
+                    mHost.addTile(CustomTile.getComponentFromSpec(mSpec), /* end */ true);
                 } else {
                     mHost.addTile(mSpec);
                 }
