@@ -423,7 +423,6 @@ public class ResolverListAdapter extends BaseAdapter {
     // We assume that at this point we've already filtered out the only intent for a different
     // targetUserId which we're going to use.
     private void addResolveInfo(DisplayResolveInfo dri) {
-        // TODO(arangelov): Is that UserHandle.USER_CURRENT check okay?
         if (dri != null && dri.getResolveInfo() != null
                 && dri.getResolveInfo().targetUserId == UserHandle.USER_CURRENT) {
             if (shouldAddResolveInfo(dri)) {

@@ -159,9 +159,6 @@ public class ResolverActivity extends Activity implements
     protected static final String METRICS_CATEGORY_RESOLVER = "intent_resolver";
     protected static final String METRICS_CATEGORY_CHOOSER = "intent_chooser";
 
-    /**
-     * TODO(arangelov): Remove a couple of weeks after work/personal tabs are finalized.
-     */
     @VisibleForTesting
     public static boolean ENABLE_TABBED_VIEW = true;
     private static final String TAB_TAG_PERSONAL = "personal";
