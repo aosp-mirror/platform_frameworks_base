@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Móstrase na parte superior da sección de conversas en forma de burbulla flotante e aparece a imaxe do perfil na pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridade"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non admite funcións de conversa"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Non hai burbullas recentes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"As burbullas recentes e ignoradas aparecerán aquí."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificacións non se poden modificar."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Actualizouse a navegación do sistema. Para facer cambios, vai a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Para actualizar a navegación do sistema, vai a Configuración"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Modo de espera"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"A conversa definiuse como prioritaria"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"As conversas prioritarias farán o seguinte:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Mostrar na parte superior da sección de conversas"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar imaxe do perfil na pantalla de bloqueo"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Mostrar como burbulla flotante sobre outras apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromper modo Non molestar"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entendido"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Configuración"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ampliación da ventá de superposición"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventá de superposición"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controis de ampliación da ventá"</string>
