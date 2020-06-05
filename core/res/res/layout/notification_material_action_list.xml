@@ -22,10 +22,11 @@
         android:layout_gravity="bottom">
 
         <LinearLayout
+            android:id="@+id/actions_container_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingEnd="12dp"
+            android:paddingEnd="@dimen/bubble_gone_padding_end"
             >
 
             <com.android.internal.widget.NotificationActionListLayout
