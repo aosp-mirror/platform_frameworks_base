@@ -24,7 +24,6 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.service.controls.Control
-import android.service.controls.actions.FloatAction
 import android.service.controls.templates.ControlTemplate
 import android.service.controls.templates.RangeTemplate
 import android.service.controls.templates.TemperatureControlTemplate
@@ -293,8 +292,8 @@ class ToggleRangeBehavior : Behavior {
         cvh.setStatusTextSize(context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_normal).toFloat())
         cvh.setStatusText("$currentStatusText $currentRangeValue", /* immediately */ true)
-        cvh.action(FloatAction(rangeTemplate.getTemplateId(),
-            findNearestStep(levelToRangeValue(clipLayer.getLevel()))))
+        cvh.controlActionCoordinator.setValue(cvh, rangeTemplate.getTemplateId(),
+            findNearestStep(levelToRangeValue(clipLayer.getLevel())))
     }
 
     fun findNearestStep(value: Float): Float {
