@@ -1365,6 +1365,7 @@ public class StorageManager {
                 String[] packageNames = ActivityThread.getPackageManager().getPackagesForUid(
                         android.os.Process.myUid());
                 if (packageNames == null || packageNames.length <= 0) {
+                    Log.w(TAG, "Missing package names; no storage volumes available");
                     return new StorageVolume[0];
                 }
                 packageName = packageNames[0];
@@ -1372,6 +1373,7 @@ public class StorageManager {
             final int uid = ActivityThread.getPackageManager().getPackageUid(packageName,
                     PackageManager.MATCH_DEBUG_TRIAGED_MISSING, userId);
             if (uid <= 0) {
+                Log.w(TAG, "Missing UID; no storage volumes available");
                 return new StorageVolume[0];
             }
             return storageManager.getVolumeList(uid, packageName, flags);
