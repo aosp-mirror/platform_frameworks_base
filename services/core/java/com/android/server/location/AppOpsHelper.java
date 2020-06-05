@@ -33,6 +33,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.FgThread;
+import com.android.server.location.LocationPermissions.PermissionLevel;
 
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -112,13 +113,15 @@ public class AppOpsHelper {
 
     /**
      * Checks if the given identity may have locations delivered without noting that a location is
-     * being delivered. This is a looser guarantee than {@link #noteLocationAccess(CallerIdentity)},
-     * and this function does not validate package arguments and so should not be used with
-     * unvalidated arguments or before actually delivering locations.
+     * being delivered. This is a looser guarantee than
+     * {@link #noteLocationAccess(CallerIdentity, int)}, and this function does not validate package
+     * arguments and so should not be used with unvalidated arguments or before actually delivering
+     * locations.
      *
      * @see AppOpsManager#checkOpNoThrow(int, int, String)
      */
-    public boolean checkLocationAccess(CallerIdentity callerIdentity) {
+    public boolean checkLocationAccess(CallerIdentity callerIdentity,
+            @PermissionLevel int permissionLevel) {
         synchronized (this) {
             Preconditions.checkState(mAppOps != null);
         }
@@ -126,9 +129,9 @@ public class AppOpsHelper {
         long identity = Binder.clearCallingIdentity();
         try {
             return mAppOps.checkOpNoThrow(
-                    CallerIdentity.asAppOp(callerIdentity.permissionLevel),
-                    callerIdentity.uid,
-                    callerIdentity.packageName) == AppOpsManager.MODE_ALLOWED;
+                    LocationPermissions.asAppOp(permissionLevel),
+                    callerIdentity.getUid(),
+                    callerIdentity.getPackageName()) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -139,8 +142,9 @@ public class AppOpsHelper {
      * called right before a location is delivered, and if it returns false, the location should not
      * be delivered.
      */
-    public boolean noteLocationAccess(CallerIdentity identity) {
-        return noteOpNoThrow(CallerIdentity.asAppOp(identity.permissionLevel), identity);
+    public boolean noteLocationAccess(CallerIdentity identity,
+            @PermissionLevel int permissionLevel) {
+        return noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel), identity);
     }
 
     /**
@@ -189,10 +193,10 @@ public class AppOpsHelper {
             // note that this is not the no throw version of noteOp, this call may throw exceptions
             return mAppOps.noteOp(
                     AppOpsManager.OP_MOCK_LOCATION,
-                    callerIdentity.uid,
-                    callerIdentity.packageName,
-                    callerIdentity.attributionTag,
-                    callerIdentity.listenerId) == AppOpsManager.MODE_ALLOWED;
+                    callerIdentity.getUid(),
+                    callerIdentity.getPackageName(),
+                    callerIdentity.getAttributionTag(),
+                    callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -207,11 +211,11 @@ public class AppOpsHelper {
         try {
             return mAppOps.startOpNoThrow(
                     appOp,
-                    callerIdentity.uid,
-                    callerIdentity.packageName,
+                    callerIdentity.getUid(),
+                    callerIdentity.getPackageName(),
                     false,
-                    callerIdentity.attributionTag,
-                    callerIdentity.listenerId) == AppOpsManager.MODE_ALLOWED;
+                    callerIdentity.getAttributionTag(),
+                    callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -226,9 +230,9 @@ public class AppOpsHelper {
         try {
             mAppOps.finishOp(
                     appOp,
-                    callerIdentity.uid,
-                    callerIdentity.packageName,
-                    callerIdentity.attributionTag);
+                    callerIdentity.getUid(),
+                    callerIdentity.getPackageName(),
+                    callerIdentity.getAttributionTag());
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
@@ -243,10 +247,10 @@ public class AppOpsHelper {
         try {
             return mAppOps.noteOpNoThrow(
                     appOp,
-                    callerIdentity.uid,
-                    callerIdentity.packageName,
-                    callerIdentity.attributionTag,
-                    callerIdentity.listenerId) == AppOpsManager.MODE_ALLOWED;
+                    callerIdentity.getUid(),
+                    callerIdentity.getPackageName(),
+                    callerIdentity.getAttributionTag(),
+                    callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

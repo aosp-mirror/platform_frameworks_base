@@ -38,6 +38,7 @@ import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.FileUtils;
+import android.os.GraphicsEnvironment;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Process;
@@ -46,6 +47,7 @@ import android.os.StrictMode;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.security.net.config.NetworkSecurityConfigProvider;
 import android.sysprop.VndkProperties;
 import android.text.TextUtils;
@@ -823,6 +825,32 @@ public final class LoadedApk {
         }
 
         final String librarySearchPath = TextUtils.join(File.pathSeparator, libPaths);
+
+        if (mActivityThread != null) {
+            final String gpuDebugApp = mActivityThread.getStringCoreSetting(
+                    Settings.Global.GPU_DEBUG_APP, "");
+            if (!gpuDebugApp.isEmpty() && mPackageName.equals(gpuDebugApp)) {
+
+                // The current application is used to debug, attempt to get the debug layers.
+                try {
+                    // Get the ApplicationInfo from PackageManager so that metadata fields present.
+                    final ApplicationInfo ai = ActivityThread.getPackageManager()
+                            .getApplicationInfo(mPackageName, PackageManager.GET_META_DATA,
+                                    UserHandle.myUserId());
+                    final String debugLayerPath = GraphicsEnvironment.getInstance()
+                            .getDebugLayerPathsFromSettings(mActivityThread.getCoreSettings(),
+                                    ActivityThread.getPackageManager(), mPackageName, ai);
+                    if (debugLayerPath != null) {
+                        libraryPermittedPath += File.pathSeparator + debugLayerPath;
+                    }
+                } catch (RemoteException e) {
+                    // Unlikely to fail for applications, but in case of failure, something is wrong
+                    // inside the system server, hence just skip.
+                    Slog.e(ActivityThread.TAG,
+                            "RemoteException when fetching debug layer paths for: " + mPackageName);
+                }
+            }
+        }
 
         // If we're not asked to include code, we construct a classloader that has
         // no code path included. We still need to set up the library search paths

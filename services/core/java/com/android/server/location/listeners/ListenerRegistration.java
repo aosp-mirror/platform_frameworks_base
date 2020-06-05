@@ -62,7 +62,7 @@ public class ListenerRegistration<TRequest, TListener> {
             TListener listener) {
         // if a client is in the same process as us, binder calls will execute synchronously and
         // we shouldn't run callbacks directly since they might be run under lock and deadlock
-        if (callerIdentity.pid == Process.myPid()) {
+        if (callerIdentity.getPid() == Process.myPid()) {
             // there's a slight loophole here for pending intents - pending intent callbacks can
             // always be run on the direct executor since they're always asynchronous, but honestly
             // you shouldn't be using pending intent callbacks within the same process anyways
