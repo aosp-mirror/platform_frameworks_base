@@ -80,4 +80,24 @@ public interface OverlayableInfoCallback {
      *     in the system returns {@link PackageManager#SIGNATURE_MATCH}
      */
     boolean signaturesMatching(@NonNull String pkgName1, @NonNull String pkgName2, int userId);
+
+    /**
+     * Retrieves the package name that is recognized as an actor for the packages specified by
+     * {@link #getOverlayableConfiguratorTargets()}.
+     */
+    @NonNull
+    default String getOverlayableConfigurator() {
+        return "";
+    }
+
+    /**
+     * Retrieves the target packages that recognize the {@link #getOverlayableConfigurator} as an
+     * actor for its overlayable declarations. Overlays targeting one of the specified targets that
+     * are signed with the same signature as the overlayable configurator will be granted the
+     * "actor" policy.
+     */
+    @NonNull
+    default String[] getOverlayableConfiguratorTargets() {
+        return new String[0];
+    }
 }
