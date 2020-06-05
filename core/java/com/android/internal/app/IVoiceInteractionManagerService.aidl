@@ -265,4 +265,16 @@ interface IVoiceInteractionManagerService {
     void performDirectAction(in IBinder token, String actionId, in Bundle arguments, int taskId,
             IBinder assistToken, in RemoteCallback cancellationCallback,
             in RemoteCallback resultCallback);
+
+    /**
+     * Temporarily disables voice interaction (for example, on Automotive when the display is off).
+     *
+     * It will shutdown the service, and only re-enable it after it's called again (or after a
+     * system restart).
+     *
+     * NOTE: it's only effective when the service itself is available / enabled in the device, so
+     * calling setDisable(false) would be a no-op when it isn't.
+     */
+    void setDisabled(boolean disabled);
+
 }
