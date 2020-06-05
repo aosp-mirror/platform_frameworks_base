@@ -523,8 +523,18 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 // this could happen if rotation finishes before the animation
                 mLastReportedBounds.set(destinationBoundsOut);
                 scheduleFinishResizePip(mLastReportedBounds);
-            } else if (!mLastReportedBounds.isEmpty()) {
-                destinationBoundsOut.set(mLastReportedBounds);
+            } else  {
+                // There could be an animation on-going. If there is one on-going, last-reported
+                // bounds isn't yet updated. We'll use the animator's bounds instead.
+                if (animator != null && animator.isRunning()) {
+                    if (!animator.getDestinationBounds().isEmpty()) {
+                        destinationBoundsOut.set(animator.getDestinationBounds());
+                    }
+                } else {
+                    if (!mLastReportedBounds.isEmpty()) {
+                        destinationBoundsOut.set(mLastReportedBounds);
+                    }
+                }
             }
             return;
         }
