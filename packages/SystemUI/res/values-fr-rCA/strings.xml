@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"S\'affiche en haut de la section des conversations sous forme de bulle flottante et affiche la photo du profil sur l\'écran de verrouillage"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Paramètres"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorité"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ne prend pas en charge les fonctionnalités de conversation"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Aucune bulle récente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Les bulles récentes et les bulles ignorées s\'afficheront ici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ces notifications ne peuvent pas être modifiées"</string>
@@ -1014,17 +1013,20 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"La navigation système a été mise à jour. Pour apporter des modifications, accédez au menu Paramètres."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accédez au menu Paramètres pour mettre à jour la navigation système"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Veille"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"La conversation a été définie comme prioritaire"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Les conversations prioritaires :"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Afficher dans le haut de la section des conversations"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Afficher la photo de profil sur l\'écran verrouillé"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Sous forme de bulle flottante, par-dessus les applis"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompre le mode Ne pas déranger"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Paramètres"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Fenêtre d\'agrandissement superposée"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fenêtre d\'agrandissement"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Commandes pour la fenêtre d\'agrandissement"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes de contrôle des appareils"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Commandes des appareils"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ajoutez des commandes pour vos appareils connectés"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes de contrôle des appareils"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurer les commandes des appareils"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Maintenez l\'interrupteur enfoncé pour accéder à vos commandes"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Sélectionnez l\'application pour laquelle ajouter des commandes"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
@@ -1045,7 +1047,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modifications non enregistrées"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Impossible de charger la liste des commandes."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Autre"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes de contrôle des appareils"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"Ajouter aux commandes des appareils"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Ajouter"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"Suggestion de <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Commandes mises à jour"</string>

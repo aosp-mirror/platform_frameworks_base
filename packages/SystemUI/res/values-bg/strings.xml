@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Показва се като плаващо балонче в горната част на секцията с разговори и показва снимката на потребителския профил на заключения екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Настройки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддържа функциите за разговор"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Няма скорошни балончета"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Скорошните и отхвърлените балончета ще се показват тук"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Тези известия не могат да бъдат променяни."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Режимът за навигиране в системата е актуализиран. За да извършите промени, отворете настройките."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Отворете настройките, за да актуализирате режима за навигиране в системата"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим на готовност"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговорът е зададен като приоритетен"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетните разговори ще:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Показване върху секцията с разговори"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Показване на снимката на потр. профил на закл. екран"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Показва се като плаващо балонче върху приложенията"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Прекъсване на режима „Не безпокойте“"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Разбрах"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Настройки"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Прозорец с наслагване за ниво на мащаба"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за ниво на мащаба"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли за прозореца за ниво на мащаба"</string>

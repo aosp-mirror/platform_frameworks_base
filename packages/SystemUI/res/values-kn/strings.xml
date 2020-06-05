@@ -592,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ಸಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಿ"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"ಔಟ್‌ಪುಟ್ ಸಾಧನವನ್ನು ಬದಲಿಸಿ"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ಆ್ಯಪ್ ಅನ್ನು ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕಿಸಿ."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹಿಡಿದುಕೊಳ್ಳಿ ಹಾಗೂ ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟಕ್ಕೆ ಹಿಂತಿರುಗಿ."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಮೇಲೆ ಸ್ವೈಪ್ ಮಾಡಿ ಮತ್ತು ಅನ್‌ಪಿನ್ ಮಾಡಲು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಅವಲೋಕನವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಹೋಲ್ಡ್ ಮಾಡಿ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ನೀವು ಅನ್‌ಪಿನ್ ಮಾಡುವವರೆಗೆ ಅದನ್ನು ವೀಕ್ಷಣೆಯಲ್ಲಿಡುತ್ತದೆ. ಅನ್‌ಪಿನ್ ಮಾಡಲು ಮುಖಪುಟವನ್ನು ಸ್ಪರ್ಶಿಸಿ ಮತ್ತು ಒತ್ತಿಹಿಡಿಯಿರಿ."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ವೈಯಕ್ತಿಕ ಡೇಟಾವನ್ನು ಪ್ರವೇಶಿಸಬಹುದು (ಉದಾ, ಸಂಪರ್ಕಗಳು ಮತ್ತು ಇಮೇಲ್ ವಿಷಯ)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ಪಿನ್ ಮಾಡಲಾದ ಆ್ಯಪ್ ಇತರ ಆ್ಯಪ್‌ಗಳನ್ನು ತೆರೆಯಬಹುದು."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಸಮಗ್ರ ನೋಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ಈ ಆ್ಯಪ್ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಹಿಂದಕ್ಕೆ ಮತ್ತು ಮುಖಪುಟ ಬಟನ್‌ಗಳನ್ನು ಸ್ಪರ್ಶಿಸಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಪಿನ್ ಮಾಡಲು, ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ &amp; ಒತ್ತಿಹಿಡಿಯಿರಿ"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"ತಿಳಿಯಿತು"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ಧನ್ಯವಾದಗಳು"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ಆ್ಯಪ್ ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ಆ್ಯಪ್ ಅನ್‌ಪಿನ್ ಮಾಡಲಾಗಿದೆ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ಮರೆಮಾಡುವುದೇ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"ನೀವು ಸೆಟ್ಟಿಂಗ್‌ಗಳಲ್ಲಿ ಅದನ್ನು ಆನ್ ಮಾಡಿದಾಗ ಅದು ಮರುಕಾಣಿಸಿಕೊಳ್ಳುತ್ತದೆ."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"ಮರೆಮಾಡಿ"</string>
@@ -727,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ಸಂಭಾಷಣೆ ವಿಭಾಗದ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೇಲುವ ಬಬಲ್‌ ಆಗಿ ಗೋಚರಿಸುತ್ತದೆ ಮತ್ತು ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ಲಾಕ್‌ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ‌ ಗೋಚರಿಸುತ್ತದೆ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ಆದ್ಯತೆ"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"ಸಂವಾದ ಫೀಚರ್‌ಗಳನ್ನು <xliff:g id="APP_NAME">%1$s</xliff:g> ಬೆಂಬಲಿಸುವುದಿಲ್ಲ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ಯಾವುದೇ ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಇಲ್ಲ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ಇತ್ತೀಚಿನ ಬಬಲ್ಸ್ ಮತ್ತು ವಜಾಗೊಳಿಸಿದ ಬಬಲ್ಸ್ ಇಲ್ಲಿ ಗೋಚರಿಸುತ್ತವೆ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಮಾರ್ಪಡಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
@@ -1022,11 +1013,17 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ"</string>
+    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
+    <skip />
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ಸಂಭಾಷಣೆ ವಿಭಾಗದ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸಿ"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ತೋರಿಸಿ"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ಆ್ಯಪ್‌ಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೇಲುವ ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸಲಿ"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ಅಡಚಣೆ ಮಾಡಬೇಡ ಅನ್ನು ಅಡ್ಡಿಪಡಿಸಿ"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ಅರ್ಥವಾಯಿತು"</string>
+    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ವರ್ಧನೆಯ ಓವರ್‌ಲೇ ವಿಂಡೋ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>

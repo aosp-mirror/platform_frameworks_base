@@ -725,8 +725,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"מוצגת בחלק העליון של קטע התראות השיחה, מופיעה בבועה צפה, תוצג תמונת פרופיל במסך הנעילה"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"הגדרות"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"עדיפות"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> לא תומכת בתכונות השיחה"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"אין בועות מהזמן האחרון"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"בועות אחרונות ובועות שנסגרו יופיעו כאן"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"לא ניתן לשנות את ההתראות האלה."</string>
@@ -1024,11 +1023,17 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"הניווט במערכת עודכן. אפשר לערוך שינויים דרך ההגדרות."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"יש לעבור להגדרות כדי לעדכן את הניווט במערכת"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"המתנה"</string>
+    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
+    <skip />
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"מופיעות בחלק העליון של קטע השיחות"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"מציגות תמונת פרופיל במסך הנעילה"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"מופיעות כבועה צפה מעל האפליקציות שלך"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"גוברות על ההגדרה \'נא לא להפריע\'"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"הבנתי"</string>
+    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"חלון ליצירת שכבת-על להגדלה"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"חלון הגדלה"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"בקרות של חלון ההגדלה"</string>

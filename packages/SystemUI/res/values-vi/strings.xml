@@ -598,8 +598,8 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Màn hình tiếp tục hiển thị cho tới khi bạn bỏ ghim. Hãy vuốt lên và giữ để bỏ ghim."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Tổng quan để bỏ ghim."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Màn hình chính để bỏ ghim."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Bạn có thể truy cập được vào dữ liệu cá nhân (chẳng hạn như danh bạ và nội dung email)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Ứng dụng đã ghim có thể mở ứng dụng khác."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dữ liệu cá nhân có thể bị truy cập (chẳng hạn như danh bạ và nội dung email)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Ứng dụng đã ghim có thể mở các ứng dụng khác."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Để bỏ ghim ứng dụng này, hãy chạm và giữ nút Quay lại và nút Tổng quan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Để bỏ ghim ứng dụng này, hãy chạm và giữ nút Quay lại và nút Màn hình chính"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Để bỏ ghim ứng dụng này, hãy vuốt lên và giữ"</string>
@@ -713,14 +713,13 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"Bong bóng"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Không phát âm thanh hoặc rung"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Không phát âm thanh hoặc rung và xuất hiện phía dưới trong phần cuộc trò chuyện"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo phần cài đặt trên điện thoại"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo phần cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Có thể đổ chuông hoặc rung tùy theo chế độ cài đặt trên điện thoại. Theo mặc định, các cuộc trò chuyện từ <xliff:g id="APP_NAME">%1$s</xliff:g> được phép hiển thị dưới dạng bong bóng."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Luôn chú ý vào nội dung này bằng phím tắt nổi."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Hiển thị cuộc trò chuyện ở đầu phần cuộc trò chuyện và dưới dạng bong bóng nổi, hiển thị ảnh hồ sơ trên màn hình khóa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cài đặt"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Mức độ ưu tiên"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> không hỗ trợ các tính năng trò chuyện"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Không có bong bóng trò chuyện nào gần đây"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bong bóng trò chuyện đã đóng và bong bóng trò chuyện gần đây sẽ xuất hiện ở đây"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Không thể sửa đổi các thông báo này."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Đã cập nhật chế độ di chuyển trên hệ thống. Để thay đổi, hãy chuyển đến phần Cài đặt."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Chuyển đến phần Cài đặt để cập nhật chế độ di chuyển trên hệ thống"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Chế độ chờ"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Đặt cuộc trò chuyện thành ưu tiên"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Cuộc trò chuyện ưu tiên sẽ:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Hiển thị ở đầu phần cuộc trò chuyện"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Hiển thị ảnh hồ sơ trên màn hình khóa"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Hiện ở dạng bong bóng nổi ở trên cùng của ứng dụng"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Làm gián đoạn chế độ Không làm phiền"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Cài đặt"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Cửa sổ lớp phủ phóng to"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Cửa sổ phóng to"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Các tùy chọn điều khiển cửa sổ phóng to"</string>

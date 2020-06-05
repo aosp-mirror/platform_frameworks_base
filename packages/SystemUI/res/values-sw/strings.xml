@@ -600,8 +600,8 @@
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Hali hii huifanya ionekane hadi utakapoibandua. Gusa na ushikilie kitufe cha Mwanzo ili ubandue."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Data binafsi inaweza kufikiwa (kama vile maudhui ya barua pepe na anwani)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Programu iliyobandikwa inaweza kufungua programu zingine."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"Ili ubandue programu hii, gusa na ushikilie kitufe cha Nyuma na Muhtasari"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Ili ubandue programu hii, gusa na ushikilie kitufe cha Nyuma na Ukurasa wa Mwanzo"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Ili ubandue programu hii, gusa na ushikilie vitufe vya Nyuma na Muhtasari"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Ili ubandue programu hii, gusa na ushikilie vitufe vya Nyuma na Ukurasa wa Mwanzo"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Ili ubandue programu hii, telezesha kidole juu na ushikilie"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Nimeelewa"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Hapana"</string>
@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Huonyeshwa kwenye sehemu ya juu ya mazungumzo, huonekana kama kiputo, huonyesha picha ya wasifu kwenye skrini iliyofungwa"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mipangilio"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Kipaumbele"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> haitumii vipengele vya mazungumzo"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Hakuna viputo vya hivi majuzi"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Viputo vya hivi karibuni na vile vilivyoondolewa vitaonekana hapa"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Arifa hizi haziwezi kubadilishwa."</string>
@@ -1014,16 +1013,19 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Umesasisha usogezaji kwenye mfumo. Ili ubadilishe, nenda kwenye Mipangilio."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Nenda kwenye mipangilio ili usasishe usogezaji kwenye mfumo"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Mazungumzo yamepewa kipaumbele"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Mazungumzo yaliyopewa kipaumbele:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Onyesha kwenye sehemu ya juu ya mazungumzo"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Onyesha picha ya wasifu kwenye skrini iliyofungwa"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Yataonekana kama kiputo kinachoelea juu ya programu"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Katiza kipengele cha Usinisumbue"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Nimeelewa"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Mipangilio"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Dirisha la Kuwekelea Linalokuza"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Dirisha la Ukuzaji"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Vidhibiti vya Dirisha la Ukuzaji"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Vidhibiti vya vifaa"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Weka vidhibiti vya vifaa vyako vilivyounganishwa"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Weka vidhibiti vya vifaa ulivyounganisha"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Weka mipangilio ya vidhibiti vya vifaa"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Shikilia Kitufe cha kuwasha/kuzima ili ufikie vidhibiti vyako"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Chagua programu ili uweke vidhibiti"</string>
@@ -1040,7 +1042,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Sogeza kwenye nafasi ya <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Vidhibiti"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Chagua vidhibiti vya kufikia ukitumia menyu ya kuwasha/kuzima"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange upya vidhibiti"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange vidhibiti upya"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Umeondoa vidhibiti vyote"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Mabadiliko hayajahifadhiwa"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"Imeshindwa kupakia orodha ya vidhibiti vyote."</string>
