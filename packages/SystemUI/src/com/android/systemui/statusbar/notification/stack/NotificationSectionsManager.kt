@@ -287,21 +287,17 @@ class NotificationSectionsManager @Inject internal constructor(
                     // Is there a section discontinuity? This usually occurs due to HUNs
                     if (prev?.entry?.bucket?.let { it > child.entry.bucket } == true) {
                         // Remove existing headers, and move the Incoming header if necessary
-                        if (alertingHeaderTarget != -1) {
-                            if (showHeaders && incomingHeaderTarget != -1) {
-                                incomingHeaderTarget = alertingHeaderTarget
-                            }
-                            alertingHeaderTarget = -1
+                        incomingHeaderTarget = when {
+                            !showHeaders -> -1
+                            incomingHeaderTarget != -1 -> incomingHeaderTarget
+                            peopleHeaderTarget != -1 -> peopleHeaderTarget
+                            alertingHeaderTarget != -1 -> alertingHeaderTarget
+                            gentleHeaderTarget != -1 -> gentleHeaderTarget
+                            else -> 0
                         }
-                        if (peopleHeaderTarget != -1) {
-                            if (showHeaders && incomingHeaderTarget != -1) {
-                                incomingHeaderTarget = peopleHeaderTarget
-                            }
-                            peopleHeaderTarget = -1
-                        }
-                        if (showHeaders && incomingHeaderTarget == -1) {
-                            incomingHeaderTarget = 0
-                        }
+                        peopleHeaderTarget = -1
+                        alertingHeaderTarget = -1
+                        gentleHeaderTarget = -1
                         // Walk backwards changing all previous notifications to the Incoming
                         // section
                         for (j in i - 1 downTo lastIncomingIndex + 1) {
@@ -323,6 +319,9 @@ class NotificationSectionsManager @Inject internal constructor(
                                 peopleHeaderTarget = i
                                 // Offset the target if there are other headers before this that
                                 // will be moved.
+                                if (currentIncomingHeaderIdx != -1 && incomingHeaderTarget == -1) {
+                                    peopleHeaderTarget--
+                                }
                                 if (currentPeopleHeaderIdx != -1) {
                                     peopleHeaderTarget--
                                 }
@@ -340,6 +339,13 @@ class NotificationSectionsManager @Inject internal constructor(
                                 alertingHeaderTarget = i
                                 // Offset the target if there are other headers before this that
                                 // will be moved.
+                                if (currentIncomingHeaderIdx != -1 && incomingHeaderTarget == -1) {
+                                    alertingHeaderTarget--
+                                }
+                                if (currentPeopleHeaderIdx != -1 && peopleHeaderTarget == -1) {
+                                    // People header will be removed
+                                    alertingHeaderTarget--
+                                }
                                 if (currentAlertingHeaderIdx != -1) {
                                     alertingHeaderTarget--
                                 }
@@ -354,6 +360,17 @@ class NotificationSectionsManager @Inject internal constructor(
                                 gentleHeaderTarget = i
                                 // Offset the target if there are other headers before this that
                                 // will be moved.
+                                if (currentIncomingHeaderIdx != -1 && incomingHeaderTarget == -1) {
+                                    gentleHeaderTarget--
+                                }
+                                if (currentPeopleHeaderIdx != -1 && peopleHeaderTarget == -1) {
+                                    // People header will be removed
+                                    gentleHeaderTarget--
+                                }
+                                if (currentAlertingHeaderIdx != -1 && alertingHeaderTarget == -1) {
+                                    // Alerting header will be removed
+                                    gentleHeaderTarget--
+                                }
                                 if (currentGentleHeaderIdx != -1) {
                                     gentleHeaderTarget--
                                 }
