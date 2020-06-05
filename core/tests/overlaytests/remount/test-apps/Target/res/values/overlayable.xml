@@ -20,5 +20,8 @@
         <policy type="public">
             <item type="bool" name="target_overlaid" />
         </policy>
+        <policy type="signature">
+            <item type="bool" name="signature_policy_overlaid" />
+        </policy>
     </overlayable>
 </resources>

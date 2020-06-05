@@ -291,13 +291,6 @@ Result<ResourceMapping> ResourceMapping::FromApkAssets(const ApkAssets& target_a
                                                        const PolicyBitmask& fulfilled_policies,
                                                        bool enforce_overlayable,
                                                        LogInfo& log_info) {
-  if (enforce_overlayable) {
-    log_info.Info(LogMessage() << "fulfilled_policies="
-                               << ConcatPolicies(BitmaskToPolicies(fulfilled_policies))
-                               << " enforce_overlayable="
-                               << (enforce_overlayable ? "true" : "false"));
-  }
-
   AssetManager2 target_asset_manager;
   if (!target_asset_manager.SetApkAssets({&target_apk_assets}, true /* invalidate_caches */,
                                          false /* filter_incompatible_configs*/)) {

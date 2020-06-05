@@ -66,6 +66,8 @@ void BinaryStreamVisitor::visit(const IdmapHeader& header) {
   Write32(header.GetVersion());
   Write32(header.GetTargetCrc());
   Write32(header.GetOverlayCrc());
+  Write32(header.GetFulfilledPolicies());
+  Write8(static_cast<uint8_t>(header.GetEnforceOverlayable()));
   WriteString256(header.GetTargetPath());
   WriteString256(header.GetOverlayPath());
   WriteString(header.GetDebugInfo());

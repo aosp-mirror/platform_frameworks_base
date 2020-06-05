@@ -27,8 +27,11 @@
 #include "Commands.h"
 #include "android-base/properties.h"
 #include "idmap2/CommandLineOptions.h"
+#include "idmap2/CommandUtils.h"
 #include "idmap2/FileUtils.h"
 #include "idmap2/Idmap.h"
+#include "idmap2/Policies.h"
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/ResourceUtils.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
@@ -48,6 +51,7 @@ using android::idmap2::policy::kPolicyVendor;
 using android::idmap2::utils::ExtractOverlayManifestInfo;
 using android::idmap2::utils::FindFiles;
 using android::idmap2::utils::OverlayManifestInfo;
+using android::idmap2::utils::PoliciesToBitmaskResult;
 
 using PolicyBitmask = android::ResTable_overlayable_policy_header::PolicyBitmask;
 
@@ -215,7 +219,15 @@ Result<Unit> Scan(const std::vector<std::string>& args) {
 
   std::stringstream stream;
   for (const auto& overlay : interesting_apks) {
-    if (!Verify(std::vector<std::string>({"--idmap-path", overlay.idmap_path}))) {
+    const auto policy_bitmask = PoliciesToBitmaskResult(overlay.policies);
+    if (!policy_bitmask) {
+      LOG(WARNING) << "failed to create idmap for overlay apk path \"" << overlay.apk_path
+                   << "\": " << policy_bitmask.GetErrorMessage();
+      continue;
+    }
+
+    if (!Verify(overlay.idmap_path, target_apk_path, overlay.apk_path, *policy_bitmask,
+                !overlay.ignore_overlayable)) {
       std::vector<std::string> create_args = {"--target-apk-path",  target_apk_path,
                                               "--overlay-apk-path", overlay.apk_path,
                                               "--idmap-path",       overlay.idmap_path};
