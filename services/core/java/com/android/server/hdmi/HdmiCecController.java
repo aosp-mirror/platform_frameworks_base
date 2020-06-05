@@ -27,7 +27,6 @@ import android.hardware.tv.cec.V1_0.SendMessageResult;
 import android.os.Handler;
 import android.os.IHwBinder;
 import android.os.Looper;
-import android.os.MessageQueue;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -720,21 +719,6 @@ final class HdmiCecController {
         void nativeEnableAudioReturnChannel(int port, boolean flag);
         boolean nativeIsConnected(int port);
     }
-
-    private static native long nativeInit(HdmiCecController handler, MessageQueue messageQueue);
-    private static native int nativeSendCecCommand(long controllerPtr, int srcAddress,
-        int dstAddress, byte[] body);
-    private static native int nativeAddLogicalAddress(long controllerPtr, int logicalAddress);
-    private static native void nativeClearLogicalAddress(long controllerPtr);
-    private static native int nativeGetPhysicalAddress(long controllerPtr);
-    private static native int nativeGetVersion(long controllerPtr);
-    private static native int nativeGetVendorId(long controllerPtr);
-    private static native HdmiPortInfo[] nativeGetPortInfos(long controllerPtr);
-    private static native void nativeSetOption(long controllerPtr, int flag, boolean enabled);
-    private static native void nativeSetLanguage(long controllerPtr, String language);
-    private static native void nativeEnableAudioReturnChannel(long controllerPtr,
-        int port, boolean flag);
-    private static native boolean nativeIsConnected(long controllerPtr, int port);
 
     private static final class NativeWrapperImpl implements NativeWrapper,
             IHwBinder.DeathRecipient, getPhysicalAddressCallback {
