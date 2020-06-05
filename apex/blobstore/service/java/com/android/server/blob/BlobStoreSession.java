@@ -27,7 +27,6 @@ import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.SEEK_SET;
 
-import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 
 import android.annotation.BytesLong;
@@ -405,9 +404,10 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 mState = STATE_VERIFIED_VALID;
                 // Commit callback will be sent once the data is persisted.
             } else {
-                if (LOGV) {
-                    Slog.v(TAG, "Digest of the data didn't match the given BlobHandle.digest");
-                }
+                Slog.d(TAG, "Digest of the data ("
+                        + (mDataDigest == null ? "null" : BlobHandle.safeDigest(mDataDigest))
+                        + ") didn't match the given BlobHandle.digest ("
+                        + BlobHandle.safeDigest(mBlobHandle.digest) + ")");
                 mState = STATE_VERIFIED_INVALID;
                 sendCommitCallbackResult(COMMIT_RESULT_ERROR);
             }
