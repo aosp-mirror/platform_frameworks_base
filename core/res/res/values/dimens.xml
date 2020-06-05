@@ -312,6 +312,12 @@
     <!-- The margin of the content to an image-->
     <dimen name="notification_content_image_margin_end">8dp</dimen>
 
+    <!-- The padding at the end of actions when the bubble button is visible-->
+    <dimen name="bubble_visible_padding_end">3dp</dimen>
+
+    <!-- The padding at the end of actions when the bubble button is gone-->
+    <dimen name="bubble_gone_padding_end">12dp</dimen>
+
     <!-- The spacing between messages in Notification.MessagingStyle -->
     <dimen name="notification_messaging_spacing">6dp</dimen>
 
