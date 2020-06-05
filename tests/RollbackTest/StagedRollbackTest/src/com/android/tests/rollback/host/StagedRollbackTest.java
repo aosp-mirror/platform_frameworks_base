@@ -256,11 +256,19 @@ public class StagedRollbackTest extends BaseHostJUnit4Test {
 
     @Test
     public void testRollbackDataPolicy() throws Exception {
+        List<String> before = getSnapshotDirectories("/data/misc_ce/0/rollback");
+
         runPhase("testRollbackDataPolicy_Phase1");
         getDevice().reboot();
         runPhase("testRollbackDataPolicy_Phase2");
         getDevice().reboot();
         runPhase("testRollbackDataPolicy_Phase3");
+
+        // Verify snapshots are deleted after restoration
+        List<String> after = getSnapshotDirectories("/data/misc_ce/0/rollback");
+        // Only check directories newly created during the test
+        after.removeAll(before);
+        after.forEach(dir -> assertDirectoryIsEmpty(dir));
     }
 
     /**
