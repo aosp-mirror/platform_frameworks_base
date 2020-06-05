@@ -23,4 +23,6 @@
     <bool name="target_overlaid">false</bool>
     <public type="bool" name="target_overlaid" id="0x7f010000" />
     <bool name="target_reference">@bool/target_overlaid</bool>
+
+    <bool name="signature_policy_overlaid">false</bool>
 </resources>
