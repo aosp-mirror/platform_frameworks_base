@@ -184,6 +184,32 @@ public class HdmiCecLocalDevicePlaybackTest {
     }
 
     @Test
+    public void handleOnStandby_ScreenOff_NotActiveSource() {
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(false);
+        mHdmiCecLocalDevicePlayback.setAutoDeviceOff(true);
+        mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(
+                mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
+
+        assertThat(mNativeWrapper.getResultMessages()).doesNotContain(standbyMessage);
+    }
+
+    @Test
+    public void handleOnStandby_ScreenOff_ActiveSource() {
+        mHdmiCecLocalDevicePlayback.setIsActiveSource(true);
+        mHdmiCecLocalDevicePlayback.setAutoDeviceOff(true);
+        mHdmiCecLocalDevicePlayback.onStandby(false, HdmiControlService.STANDBY_SCREEN_OFF);
+        mTestLooper.dispatchAll();
+
+        HdmiCecMessage standbyMessage = HdmiCecMessageBuilder.buildStandby(
+                mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
+
+        assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessage);
+    }
+
+    @Test
     public void sendVolumeKeyEvent_up_volumeEnabled() {
         mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
         mHdmiCecLocalDevicePlayback.sendVolumeKeyEvent(KeyEvent.KEYCODE_VOLUME_UP, true);
