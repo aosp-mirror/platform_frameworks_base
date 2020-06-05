@@ -44,6 +44,7 @@ public class PipSurfaceTransactionHelper implements ConfigurationController.Conf
     private final float[] mTmpFloat9 = new float[9];
     private final RectF mTmpSourceRectF = new RectF();
     private final RectF mTmpDestinationRectF = new RectF();
+    private final Rect mTmpDestinationRect = new Rect();
 
     @Inject
     public PipSurfaceTransactionHelper(Context context, ConfigurationController configController) {
@@ -90,7 +91,30 @@ public class PipSurfaceTransactionHelper implements ConfigurationController.Conf
         mTmpDestinationRectF.set(destinationBounds);
         mTmpTransform.setRectToRect(mTmpSourceRectF, mTmpDestinationRectF, Matrix.ScaleToFit.FILL);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
-                .setPosition(leash, destinationBounds.left, destinationBounds.top);
+                .setPosition(leash, mTmpDestinationRectF.left, mTmpDestinationRectF.top);
+        return this;
+    }
+
+    /**
+     * Operates the scale (setMatrix) on a given transaction and leash
+     * @return same {@link PipSurfaceTransactionHelper} instance for method chaining
+     */
+    PipSurfaceTransactionHelper scaleAndCrop(SurfaceControl.Transaction tx, SurfaceControl leash,
+            Rect sourceBounds, Rect destinationBounds, Rect insets) {
+        mTmpSourceRectF.set(sourceBounds);
+        mTmpDestinationRect.set(sourceBounds);
+        mTmpDestinationRect.inset(insets);
+        // Scale by the shortest edge and offset such that the top/left of the scaled inset source
+        // rect aligns with the top/left of the destination bounds
+        final float scale = sourceBounds.width() <= sourceBounds.height()
+                ? (float) destinationBounds.width() / sourceBounds.width()
+                : (float) destinationBounds.height() / sourceBounds.height();
+        final float left = destinationBounds.left - insets.left * scale;
+        final float top = destinationBounds.top - insets.top * scale;
+        mTmpTransform.setScale(scale, scale);
+        tx.setMatrix(leash, mTmpTransform, mTmpFloat9)
+                .setWindowCrop(leash, mTmpDestinationRect)
+                .setPosition(leash, left, top);
         return this;
     }
 
