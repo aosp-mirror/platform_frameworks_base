@@ -40,23 +40,18 @@ public class MultiUserRollbackTest extends BaseHostJUnit4Test {
     private static final long SWITCH_USER_COMPLETED_NUMBER_OF_POLLS = 60;
     private static final long SWITCH_USER_COMPLETED_POLL_INTERVAL_IN_MILLIS = 1000;
 
-    private void cleanUp() throws Exception {
-        getDevice().executeShellCommand("pm rollback-app com.android.cts.install.lib.testapp.A");
-        getDevice().executeShellCommand("pm uninstall com.android.cts.install.lib.testapp.A");
-    }
-
     @After
     public void tearDown() throws Exception {
-        cleanUp();
         removeSecondaryUserIfNecessary();
+        runPhaseForUsers("cleanUp", mOriginalUserId);
     }
 
     @Before
     public void setup() throws Exception {
-        cleanUp();
         mOriginalUserId = getDevice().getCurrentUser();
         createAndStartSecondaryUser();
         installPackage("RollbackTest.apk", "--user all");
+        runPhaseForUsers("cleanUp", mOriginalUserId);
     }
 
     @Test

@@ -48,6 +48,8 @@ import com.android.cts.rollback.lib.Rollback;
 import com.android.cts.rollback.lib.RollbackBroadcastReceiver;
 import com.android.cts.rollback.lib.RollbackUtils;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -79,6 +81,21 @@ public class RollbackTest {
         return rollbacks.stream().anyMatch(
                 ri -> ri.getPackages().stream().anyMatch(
                         pri -> packageName.equals(pri.getPackageName())));
+    }
+
+    @Before
+    @After
+    public void cleanUp() {
+        try {
+            InstallUtils.adoptShellPermissionIdentity(Manifest.permission.TEST_MANAGE_ROLLBACKS);
+            RollbackManager rm = RollbackUtils.getRollbackManager();
+            rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                    .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+            rm.getRecentlyCommittedRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                    .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        } finally {
+            InstallUtils.dropShellPermissionIdentity();
+        }
     }
 
     /**
