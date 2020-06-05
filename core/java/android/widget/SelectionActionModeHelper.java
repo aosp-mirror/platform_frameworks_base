@@ -971,7 +971,8 @@ public final class SelectionActionModeHelper {
             return new TextClassifierEvent.LanguageDetectionEvent.Builder(eventType)
                     .setEventContext(classificationContext)
                     .setResultId(classification.getId())
-                    .setEntityTypes(language)
+                    // b/158481016: Disable language logging.
+                    //.setEntityTypes(language)
                     .setScores(score)
                     .setActionIndices(classification.getActions().indexOf(translateAction))
                     .setModelName(model)
