@@ -557,9 +557,9 @@ public class NotificationContentView extends FrameLayout {
 
     private void focusExpandButtonIfNecessary() {
         if (mFocusOnVisibilityChange) {
-            NotificationHeaderView header = getVisibleNotificationHeader();
-            if (header != null) {
-                ImageView expandButton = header.getExpandButton();
+            NotificationViewWrapper wrapper = getVisibleWrapper(mVisibleType);
+            if (wrapper != null) {
+                View expandButton = wrapper.getExpandButton();
                 if (expandButton != null) {
                     expandButton.requestAccessibilityFocus();
                 }
