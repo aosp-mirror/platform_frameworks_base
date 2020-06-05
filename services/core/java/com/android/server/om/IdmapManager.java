@@ -29,15 +29,18 @@ import android.os.OverlayablePolicy;
 import android.os.SystemProperties;
 import android.util.Slog;
 
+import com.android.internal.util.ArrayUtils;
+
 import java.io.IOException;
 
 /**
  * Handle the creation and deletion of idmap files.
  *
- * The actual work is performed by idmap2d.
- * @see IdmapDaemon
+ * The actual work is performed by the idmap binary, launched through idmap2d.
+ *
+ * Note: this class is subclassed in the OMS unit tests, and hence not marked as final.
  */
-final class IdmapManager {
+class IdmapManager {
     private static final boolean VENDOR_IS_Q_OR_LATER;
     static {
         final String value = SystemProperties.get("ro.vndk.version", "29");
@@ -54,10 +57,14 @@ final class IdmapManager {
 
     private final IdmapDaemon mIdmapDaemon;
     private final OverlayableInfoCallback mOverlayableCallback;
+    private final String mOverlayableConfigurator;
+    private final String[] mOverlayableConfiguratorTargets;
 
     IdmapManager(final IdmapDaemon idmapDaemon, final OverlayableInfoCallback verifyCallback) {
         mOverlayableCallback = verifyCallback;
         mIdmapDaemon = idmapDaemon;
+        mOverlayableConfigurator = verifyCallback.getOverlayableConfigurator();
+        mOverlayableConfiguratorTargets = verifyCallback.getOverlayableConfiguratorTargets() ;
     }
 
     /**
@@ -65,7 +72,7 @@ final class IdmapManager {
      * modified.
      */
     boolean createIdmap(@NonNull final PackageInfo targetPackage,
-            @NonNull final PackageInfo overlayPackage, int additionalPolicies, int userId) {
+            @NonNull final PackageInfo overlayPackage, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.packageName + " and "
                     + overlayPackage.packageName);
@@ -73,14 +80,13 @@ final class IdmapManager {
         final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
+            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
             boolean enforce = enforceOverlayable(overlayPackage);
-            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId)
-                    | additionalPolicies;
             if (mIdmapDaemon.verifyIdmap(targetPath, overlayPath, policies, enforce, userId)) {
                 return false;
             }
-            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies, enforce, userId)
-                    != null;
+            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
+                    enforce, userId) != null;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayPath + ": " + e.getMessage());
@@ -184,6 +190,14 @@ final class IdmapManager {
         String targetOverlayableName = overlayPackage.targetOverlayableName;
         if (targetOverlayableName != null) {
             try {
+                if (!mOverlayableConfigurator.isEmpty()
+                        && ArrayUtils.contains(mOverlayableConfiguratorTargets,
+                                targetPackage.packageName)
+                        && mOverlayableCallback.signaturesMatching(mOverlayableConfigurator,
+                                overlayPackage.packageName, userId)) {
+                    return true;
+                }
+
                 OverlayableInfo overlayableInfo = mOverlayableCallback.getOverlayableForTarget(
                         targetPackage.packageName, targetOverlayableName, userId);
                 if (overlayableInfo != null && overlayableInfo.actor != null) {
