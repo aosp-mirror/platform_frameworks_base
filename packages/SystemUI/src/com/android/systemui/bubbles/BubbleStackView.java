@@ -652,6 +652,7 @@ public class BubbleStackView extends FrameLayout
         }
     };
 
+    private View mDismissTargetCircle;
     private ViewGroup mDismissTargetContainer;
     private PhysicsAnimator<View> mDismissTargetAnimator;
     private PhysicsAnimator.SpringConfig mDismissTargetSpring = new PhysicsAnimator.SpringConfig(
@@ -758,12 +759,12 @@ public class BubbleStackView extends FrameLayout
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
         final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
-        final View targetView = new DismissCircleView(context);
+        mDismissTargetCircle = new DismissCircleView(context);
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(targetSize, targetSize);
         newParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        targetView.setLayoutParams(newParams);
-        mDismissTargetAnimator = PhysicsAnimator.getInstance(targetView);
+        mDismissTargetCircle.setLayoutParams(newParams);
+        mDismissTargetAnimator = PhysicsAnimator.getInstance(mDismissTargetCircle);
 
         mDismissTargetContainer = new FrameLayout(context);
         mDismissTargetContainer.setLayoutParams(new FrameLayout.LayoutParams(
@@ -776,14 +777,14 @@ public class BubbleStackView extends FrameLayout
         mDismissTargetContainer.setPadding(0, 0, 0, bottomMargin);
         mDismissTargetContainer.setClipToPadding(false);
         mDismissTargetContainer.setClipChildren(false);
-        mDismissTargetContainer.addView(targetView);
+        mDismissTargetContainer.addView(mDismissTargetCircle);
         mDismissTargetContainer.setVisibility(View.INVISIBLE);
         mDismissTargetContainer.setBackgroundResource(
                 R.drawable.floating_dismiss_gradient_transition);
         addView(mDismissTargetContainer);
 
         // Start translated down so the target springs up.
-        targetView.setTranslationY(
+        mDismissTargetCircle.setTranslationY(
                 getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height));
 
         final ContentResolver contentResolver = getContext().getContentResolver();
@@ -792,7 +793,7 @@ public class BubbleStackView extends FrameLayout
 
         // Save the MagneticTarget instance for the newly set up view - we'll add this to the
         // MagnetizedObjects.
-        mMagneticTarget = new MagnetizedObject.MagneticTarget(targetView, dismissRadius);
+        mMagneticTarget = new MagnetizedObject.MagneticTarget(mDismissTargetCircle, dismissRadius);
 
         mExpandedViewXAnim =
                 new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
@@ -1174,6 +1175,13 @@ public class BubbleStackView extends FrameLayout
         }
         mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
         mStackAnimationController.updateResources(mOrientation);
+
+        final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
+        mDismissTargetCircle.getLayoutParams().width = targetSize;
+        mDismissTargetCircle.getLayoutParams().height = targetSize;
+        mDismissTargetCircle.requestLayout();
+
+        mMagneticTarget.setMagneticFieldRadiusPx(mBubbleSize * 2);
     }
 
     @Override
