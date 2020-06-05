@@ -27,8 +27,10 @@ import static org.mockito.Mockito.when;
 
 import android.Manifest;
 import android.app.Notification;
+import android.app.Notification.MediaStyle;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
+import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.service.notification.StatusBarNotification;
 import android.testing.AndroidTestingRunner;
@@ -40,6 +42,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.media.MediaFeatureFlag;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager.KeyguardEnvironment;
@@ -51,6 +54,7 @@ import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -73,16 +77,28 @@ public class NotificationFilterTest extends SysuiTestCase {
     ForegroundServiceController mFsc;
     @Mock
     KeyguardEnvironment mEnvironment;
+    @Mock
+    MediaFeatureFlag mMediaFeatureFlag;
+    @Mock
+    StatusBarStateController mStatusBarStateController;
     private final IPackageManager mMockPackageManager = mock(IPackageManager.class);
 
     private NotificationFilter mNotificationFilter;
     private ExpandableNotificationRow mRow;
+    private NotificationEntry mMediaEntry;
+    private MediaSession mMediaSession;
 
     @Before
     public void setUp() throws Exception {
         allowTestableLooperAsMainThread();
         MockitoAnnotations.initMocks(this);
         when(mMockStatusBarNotification.getUid()).thenReturn(UID_NORMAL);
+
+        mMediaSession = new MediaSession(mContext, "TEST_MEDIA_SESSION");
+        NotificationEntryBuilder builder = new NotificationEntryBuilder();
+        builder.modifyNotification(mContext).setStyle(
+                new MediaStyle().setMediaSession(mMediaSession.getSessionToken()));
+        mMediaEntry = builder.build();
 
         when(mMockPackageManager.checkUidPermission(
                 eq(Manifest.permission.NOTIFICATION_DURING_SETUP),
@@ -107,7 +123,12 @@ public class NotificationFilterTest extends SysuiTestCase {
                 mDependency,
                 TestableLooper.get(this));
         mRow = testHelper.createRow();
-        mNotificationFilter = new NotificationFilter(mock(StatusBarStateController.class));
+        mNotificationFilter = new NotificationFilter(mStatusBarStateController, mMediaFeatureFlag);
+    }
+
+    @After
+    public void tearDown() {
+        mMediaSession.release();
     }
 
     @Test
@@ -216,6 +237,56 @@ public class NotificationFilterTest extends SysuiTestCase {
                 .setSuspended(false)
                 .build();
         assertFalse(mNotificationFilter.shouldFilterOut(entry));
+    }
+
+    @Test
+    public void shouldFilterOtherNotificationWhenDisabled() {
+        // GIVEN that the media feature is disabled
+        when(mMediaFeatureFlag.getEnabled()).thenReturn(false);
+        NotificationFilter filter = new NotificationFilter(mStatusBarStateController,
+                mMediaFeatureFlag);
+        // WHEN the media filter is asked about an entry
+        NotificationEntry otherEntry = new NotificationEntryBuilder().build();
+        final boolean shouldFilter = filter.shouldFilterOut(otherEntry);
+        // THEN it shouldn't be filtered
+        assertFalse(shouldFilter);
+    }
+
+    @Test
+    public void shouldFilterOtherNotificationWhenEnabled() {
+        // GIVEN that the media feature is enabled
+        when(mMediaFeatureFlag.getEnabled()).thenReturn(true);
+        NotificationFilter filter = new NotificationFilter(mStatusBarStateController,
+                mMediaFeatureFlag);
+        // WHEN the media filter is asked about an entry
+        NotificationEntry otherEntry = new NotificationEntryBuilder().build();
+        final boolean shouldFilter = filter.shouldFilterOut(otherEntry);
+        // THEN it shouldn't be filtered
+        assertFalse(shouldFilter);
+    }
+
+    @Test
+    public void shouldFilterMediaNotificationWhenDisabled() {
+        // GIVEN that the media feature is disabled
+        when(mMediaFeatureFlag.getEnabled()).thenReturn(false);
+        NotificationFilter filter = new NotificationFilter(mStatusBarStateController,
+                mMediaFeatureFlag);
+        // WHEN the media filter is asked about a media entry
+        final boolean shouldFilter = filter.shouldFilterOut(mMediaEntry);
+        // THEN it shouldn't be filtered
+        assertFalse(shouldFilter);
+    }
+
+    @Test
+    public void shouldFilterMediaNotificationWhenEnabled() {
+        // GIVEN that the media feature is enabled
+        when(mMediaFeatureFlag.getEnabled()).thenReturn(true);
+        NotificationFilter filter = new NotificationFilter(mStatusBarStateController,
+                mMediaFeatureFlag);
+        // WHEN the media filter is asked about a media entry
+        final boolean shouldFilter = filter.shouldFilterOut(mMediaEntry);
+        // THEN it should be filtered
+        assertTrue(shouldFilter);
     }
 
     private void initStatusBarNotification(boolean allowDuringSetup) {
