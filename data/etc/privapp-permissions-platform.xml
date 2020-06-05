@@ -358,6 +358,8 @@ applications that come with the platform
         <permission name="android.permission.REBOOT"/>
         <!-- Permission required for testing system audio effect APIs. -->
         <permission name="android.permission.MODIFY_DEFAULT_AUDIO_EFFECTS"/>
+        <!-- Permissions required for GTS test - GtsDialerAudioTestCases -->
+        <permission name="android.permission.CAPTURE_AUDIO_OUTPUT" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
