@@ -27,8 +27,10 @@ import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
-
-import com.android.systemui.util.concurrency.DelayableExecutor
+import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.util.concurrency.RepeatableExecutor
+import java.util.concurrent.Executor
+import javax.inject.Inject
 
 private const val POSITION_UPDATE_INTERVAL_MILLIS = 100L
 
@@ -65,7 +67,7 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 }
 
 /** ViewModel for seek bar in QS media player. */
-class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
+class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: RepeatableExecutor) {
 
     private var _data = Progress(false, false, null, null)
         set(value) {
@@ -89,10 +91,10 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
     private var callback = object : MediaController.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackState) {
             playbackState = state
-            if (shouldPollPlaybackPosition()) {
-                checkPlaybackPosition()
-            } else if (PlaybackState.STATE_NONE.equals(playbackState)) {
+            if (PlaybackState.STATE_NONE.equals(playbackState)) {
                 clearController()
+            } else {
+                checkIfPollingNeeded()
             }
         }
 
@@ -100,12 +102,14 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
             clearController()
         }
     }
+    private var cancel: Runnable? = null
 
     /** Listening state (QS open or closed) is used to control polling of progress. */
     var listening = true
-        set(value) {
-            if (value) {
-                checkPlaybackPosition()
+        set(value) = bgExecutor.execute {
+            if (field != value) {
+                field = value
+                checkIfPollingNeeded()
             }
         }
 
@@ -137,9 +141,7 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
                 playbackState?.getState() == PlaybackState.STATE_NONE ||
                 (duration != null && duration <= 0)) false else true
         _data = Progress(enabled, seekAvailable, position, duration)
-        if (shouldPollPlaybackPosition()) {
-            checkPlaybackPosition()
-        }
+        checkIfPollingNeeded()
     }
 
     /**
@@ -151,6 +153,8 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
     fun clearController() = bgExecutor.execute {
         controller = null
         playbackState = null
+        cancel?.run()
+        cancel = null
         _data = _data.copy(enabled = false)
     }
 
@@ -158,26 +162,34 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
      * Call to clean up any resources.
      */
     @AnyThread
-    fun onDestroy() {
+    fun onDestroy() = bgExecutor.execute {
         controller = null
         playbackState = null
+        cancel?.run()
+        cancel = null
     }
 
-    @AnyThread
-    private fun checkPlaybackPosition(): Runnable = bgExecutor.executeDelayed({
+    @WorkerThread
+    private fun checkPlaybackPosition() {
         val duration = _data.duration ?: -1
         val currentPosition = playbackState?.computePosition(duration.toLong())?.toInt()
         if (currentPosition != null && _data.elapsedTime != currentPosition) {
             _data = _data.copy(elapsedTime = currentPosition)
         }
-        if (shouldPollPlaybackPosition()) {
-            checkPlaybackPosition()
-        }
-    }, POSITION_UPDATE_INTERVAL_MILLIS)
+    }
 
     @WorkerThread
-    private fun shouldPollPlaybackPosition(): Boolean {
-        return listening && playbackState?.isInMotion() ?: false
+    private fun checkIfPollingNeeded() {
+        val needed = listening && playbackState?.isInMotion() ?: false
+        if (needed) {
+            if (cancel == null) {
+                cancel = bgExecutor.executeRepeatedly(this::checkPlaybackPosition, 0L,
+                        POSITION_UPDATE_INTERVAL_MILLIS)
+            }
+        } else {
+            cancel?.run()
+            cancel = null
+        }
     }
 
     /** Gets a listener to attach to the seek bar to handle seeking. */
@@ -194,7 +206,7 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
 
     private class SeekBarChangeListener(
         val viewModel: SeekBarViewModel,
-        val bgExecutor: DelayableExecutor
+        val bgExecutor: Executor
     ) : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
             if (fromUser) {
