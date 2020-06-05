@@ -787,7 +787,6 @@ public class ChooserActivity extends ResolverActivity implements
     private AppPredictor.Callback createAppPredictorCallback(
             ChooserListAdapter chooserListAdapter) {
         return resultList -> {
-            //TODO(arangelov) Take care of edge case when callback called after swiping tabs
             if (isFinishing() || isDestroyed()) {
                 return;
             }
@@ -796,8 +795,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
             if (resultList.isEmpty()) {
                 // APS may be disabled, so try querying targets ourselves.
-                //TODO(arangelov) queryDirectShareTargets indirectly uses mIntents.
-                // Investigate implications for work tab.
                 queryDirectShareTargets(chooserListAdapter, true);
                 return;
             }
@@ -1968,7 +1965,6 @@ public class ChooserActivity extends ResolverActivity implements
             }
         }
         // Default to just querying ShortcutManager if AppPredictor not present.
-        //TODO(arangelov) we're using mIntents here, investicate possible implications on work tab
         final IntentFilter filter = getTargetIntentFilter();
         if (filter == null) {
             return;
