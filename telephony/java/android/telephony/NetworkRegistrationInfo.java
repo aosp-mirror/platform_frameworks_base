@@ -389,7 +389,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if registered on roaming network, {@code false} otherwise.
+     * @return {@code true} if registered on roaming or home network, {@code false} otherwise.
      */
     public boolean isRegistered() {
         return mRegistrationState == REGISTRATION_STATE_HOME
@@ -397,7 +397,7 @@ public final class NetworkRegistrationInfo implements Parcelable {
     }
 
     /**
-     * @return {@code true} if registered on roaming network, {@code false} otherwise.
+     * @return {@code true} if searching for service, {@code false} otherwise.
      */
     public boolean isSearching() {
         return mRegistrationState == REGISTRATION_STATE_NOT_REGISTERED_SEARCHING;
