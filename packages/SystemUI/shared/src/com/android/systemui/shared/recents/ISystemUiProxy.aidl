@@ -27,7 +27,7 @@ import com.android.systemui.shared.recents.model.Task;
 
 /**
  * Temporary callbacks into SystemUI.
- * Next id = 29
+ * Next id = 30
  */
 interface ISystemUiProxy {
 
@@ -160,10 +160,15 @@ interface ISystemUiProxy {
      * Stop the one-handed mode.
      */
     void stopOneHandedMode() = 27;
- 
+
     /**
      * Handle the provided image as if it was a screenshot.
      */
     void handleImageBundleAsScreenshot(in Bundle screenImageBundle, in Rect locationInScreen,
               in Insets visibleInsets, in Task.TaskKey task) = 28;
+
+    /**
+     * Notifies to expand notification panel.
+     */
+    void expandNotificationPanel() = 29;
 }
