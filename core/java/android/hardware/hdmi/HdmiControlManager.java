@@ -27,6 +27,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Binder;
@@ -55,6 +56,7 @@ import java.util.concurrent.Executor;
  * @hide
  */
 @SystemApi
+@TestApi
 @SystemService(Context.HDMI_CONTROL_SERVICE)
 @RequiresFeature(PackageManager.FEATURE_HDMI_CEC)
 public final class HdmiControlManager {
@@ -137,6 +139,8 @@ public final class HdmiControlManager {
     public static final int POWER_STATUS_TRANSIENT_TO_ON = 2;
     public static final int POWER_STATUS_TRANSIENT_TO_STANDBY = 3;
 
+    /** @hide */
+    @SystemApi
     @IntDef ({
         RESULT_SUCCESS,
         RESULT_TIMEOUT,
@@ -397,8 +401,11 @@ public final class HdmiControlManager {
      * See {@link HdmiDeviceInfo#DEVICE_PLAYBACK}
      * See {@link HdmiDeviceInfo#DEVICE_TV}
      * See {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM}
+     *
+     * @hide
      */
     @Nullable
+    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiClient getClient(int type) {
         if (mService == null) {
@@ -427,8 +434,11 @@ public final class HdmiControlManager {
      * system if the system is configured to host more than one type of HDMI-CEC logical devices.
      *
      * @return {@link HdmiPlaybackClient} instance. {@code null} on failure.
+     *
+     * @hide
      */
     @Nullable
+    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiPlaybackClient getPlaybackClient() {
         return (HdmiPlaybackClient) getClient(HdmiDeviceInfo.DEVICE_PLAYBACK);
@@ -442,8 +452,11 @@ public final class HdmiControlManager {
      * system if the system is configured to host more than one type of HDMI-CEC logical devices.
      *
      * @return {@link HdmiTvClient} instance. {@code null} on failure.
+     *
+     * @hide
      */
     @Nullable
+    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiTvClient getTvClient() {
         return (HdmiTvClient) getClient(HdmiDeviceInfo.DEVICE_TV);
@@ -475,10 +488,8 @@ public final class HdmiControlManager {
      * system if the system is configured to host more than one type of HDMI-CEC logical device.
      *
      * @return {@link HdmiSwitchClient} instance. {@code null} on failure.
-     * @hide
      */
     @Nullable
-    @SystemApi
     @SuppressLint("Doclava125")
     public HdmiSwitchClient getSwitchClient() {
         return (HdmiSwitchClient) getClient(HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
@@ -787,7 +798,10 @@ public final class HdmiControlManager {
 
     /**
      * Listener used to get hotplug event from HDMI port.
+     *
+     * @hide
      */
+    @SystemApi
     public interface HotplugEventListener {
         void onReceived(HdmiHotplugEvent event);
     }
@@ -837,7 +851,10 @@ public final class HdmiControlManager {
 
     /**
      * Listener used to get vendor-specific commands.
+     *
+     * @hide
      */
+    @SystemApi
     public interface VendorCommandListener {
         /**
          * Called when a vendor command is received.
@@ -876,7 +893,10 @@ public final class HdmiControlManager {
      *
      * @param listener {@link HotplugEventListener} instance
      * @see HdmiControlManager#removeHotplugEventListener(HotplugEventListener)
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void addHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
@@ -900,7 +920,10 @@ public final class HdmiControlManager {
      * Removes a listener to stop getting informed of {@link HdmiHotplugEvent}.
      *
      * @param listener {@link HotplugEventListener} instance to be removed
+     *
+     * @hide
      */
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.HDMI_CEC)
     public void removeHotplugEventListener(HotplugEventListener listener) {
         if (mService == null) {
