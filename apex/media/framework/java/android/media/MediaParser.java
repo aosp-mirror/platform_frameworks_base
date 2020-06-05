@@ -219,7 +219,8 @@ public final class MediaParser {
          * duration is unknown.
          */
         public long getDurationMicros() {
-            return mExoPlayerSeekMap.getDurationUs();
+            long durationUs = mExoPlayerSeekMap.getDurationUs();
+            return durationUs != C.TIME_UNSET ? durationUs : UNKNOWN_DURATION;
         }
 
         /**
