@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha desactivat la impressió."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa el perfil de treball"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Les teves aplicacions personals estan bloquejades fins que activis el perfil de treball"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Les aplicacions personals es bloquejaran el dia <xliff:g id="DATE">%1$s</xliff:g> a les <xliff:g id="TIME">%2$s</xliff:g>. L\'administrador de TI no permet desactivar el teu perfil de treball durant més de: <xliff:g id="NUMBER">%3$d</xliff:g> dies."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activa"</string>
     <string name="me" msgid="6207584824693813140">"Mi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opcions de la tauleta"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opcions d\'Android TV"</string>

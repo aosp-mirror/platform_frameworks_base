@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"<xliff:g id="OWNER_APP">%s</xliff:g> ha inhabilitado la impresión."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Activa tu perfil de trabajo"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Tus aplicaciones personales estarán bloqueadas hasta que actives tu perfil de trabajo"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Las aplicaciones personales se bloquearán el <xliff:g id="DATE">%1$s</xliff:g> a las <xliff:g id="TIME">%2$s</xliff:g>. Tu administrador de TI no permite que tu perfil de trabajo esté más de <xliff:g id="NUMBER">%3$d</xliff:g> días desactivado."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Activar"</string>
     <string name="me" msgid="6207584824693813140">"Yo"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opciones del tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opciones de Android TV"</string>
@@ -2057,10 +2055,10 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Trabajo"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Ver contenido personal"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Ver contenido de trabajo"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"No se puede compartir con una aplicación de trabajo"</string>
-    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Tu administrador de TI no te permite compartir este contenido con ninguna aplicación de tu perfil de trabajo"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"No se puede compartir con aplicaciones de trabajo"</string>
+    <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Tu administrador de TI no te permite compartir este contenido con aplicaciones de tu perfil de trabajo"</string>
     <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"No se puede abrir con una aplicación de trabajo"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Tu administrador de TI no te permite abrir este contenido con ninguna aplicación de tu perfil de trabajo"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Tu administrador de TI no te permite abrir este contenido con aplicaciones de tu perfil de trabajo"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"No se puede compartir con una aplicación personal"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Tu administrador de TI no te permite compartir este contenido con ninguna aplicación de tu perfil personal"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"No se puede abrir con una aplicación personal"</string>
