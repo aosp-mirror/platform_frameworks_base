@@ -87,11 +87,14 @@ class MediaTimeoutListener @Inject constructor(
             if (DEBUG) {
                 Log.v(TAG, "onPlaybackStateChanged: $state")
             }
-            expireMediaTimeout(key, "playback state ativity - $state, $key")
 
             if (state == null || !isPlayingState(state.state)) {
                 if (DEBUG) {
                     Log.v(TAG, "schedule timeout for $key")
+                }
+                if (cancellation != null) {
+                    if (DEBUG) Log.d(TAG, "cancellation already exists, continuing.")
+                    return
                 }
                 expireMediaTimeout(key, "PLAYBACK STATE CHANGED - $state")
                 cancellation = mainExecutor.executeDelayed({
@@ -103,6 +106,7 @@ class MediaTimeoutListener @Inject constructor(
                     timeoutCallback(key, timedOut)
                 }, PAUSED_MEDIA_TIMEOUT)
             } else {
+                expireMediaTimeout(key, "playback started - $state, $key")
                 timedOut = false
                 timeoutCallback(key, timedOut)
             }
