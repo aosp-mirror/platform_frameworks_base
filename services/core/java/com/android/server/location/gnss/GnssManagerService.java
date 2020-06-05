@@ -17,7 +17,8 @@
 package com.android.server.location.gnss;
 
 import static android.location.LocationManager.GPS_PROVIDER;
-import static android.location.util.identity.CallerIdentity.PERMISSION_FINE;
+
+import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import android.Manifest;
 import android.annotation.Nullable;
@@ -39,11 +40,11 @@ import android.location.LocationManagerInternal;
 import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.util.IndentingPrintWriter;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.AppForegroundHelper;
@@ -53,7 +54,6 @@ import com.android.server.location.SettingsHelper;
 import com.android.server.location.UserInfoHelper;
 
 import java.io.FileDescriptor;
-import java.io.PrintWriter;
 import java.util.List;
 
 /** Manages Gnss providers and related Gnss functions for LocationManagerService. */
@@ -205,7 +205,7 @@ public class GnssManagerService implements GnssNative.Callbacks {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        if (!mAppOpsHelper.checkLocationAccess(identity)) {
+        if (!mAppOpsHelper.checkLocationAccess(identity, PERMISSION_FINE)) {
             return false;
         }
 
@@ -227,9 +227,9 @@ public class GnssManagerService implements GnssNative.Callbacks {
     public boolean setGnssBatchingCallback(IBatchedLocationCallback callback, String packageName,
             @Nullable String attributionTag) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
         CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        identity.enforceLocationPermission(PERMISSION_FINE);
 
         synchronized (mGnssBatchingLock) {
             Binder.DeathRecipient deathRecipient = () -> {
@@ -299,9 +299,9 @@ public class GnssManagerService implements GnssNative.Callbacks {
      */
     public void registerGnssStatusCallback(IGnssStatusListener listener, String packageName,
             @Nullable String attributionTag) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        identity.enforceLocationPermission(PERMISSION_FINE);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         mGnssStatusProvider.addListener(identity, listener);
     }
 
@@ -317,13 +317,12 @@ public class GnssManagerService implements GnssNative.Callbacks {
      */
     public void addGnssMeasurementsListener(GnssRequest request, IGnssMeasurementsListener listener,
             String packageName, @Nullable String attributionTag) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        identity.enforceLocationPermission(PERMISSION_FINE);
-
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
         if (request.isFullTracking()) {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
         }
 
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         mGnssMeasurementsProvider.addListener(request, identity, listener);
     }
 
@@ -354,9 +353,9 @@ public class GnssManagerService implements GnssNative.Callbacks {
      */
     public void addGnssAntennaInfoListener(IGnssAntennaInfoListener listener, String packageName,
             @Nullable String attributionTag) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        identity.enforceLocationPermission(PERMISSION_FINE);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         mGnssAntennaInfoProvider.addListener(identity, listener);
     }
 
@@ -374,9 +373,9 @@ public class GnssManagerService implements GnssNative.Callbacks {
      */
     public void addGnssNavigationMessageListener(IGnssNavigationMessageListener listener,
             String packageName, @Nullable String attributionTag) {
-        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
-        identity.enforceLocationPermission(PERMISSION_FINE);
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
+        CallerIdentity identity = CallerIdentity.fromBinder(mContext, packageName, attributionTag);
         mGnssNavigationMessageProvider.addListener(identity, listener);
     }
 
@@ -413,7 +412,8 @@ public class GnssManagerService implements GnssNative.Callbacks {
             return;
         }
 
-        if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER, identity.userId)) {
+        if (!mLocationManagerInternal.isProviderEnabledForUser(GPS_PROVIDER,
+                identity.getUserId())) {
             Log.w(TAG, "reportLocationBatch() called without user permission");
             return;
         }
@@ -428,12 +428,10 @@ public class GnssManagerService implements GnssNative.Callbacks {
     /**
      * Dump info for debugging.
      */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-
+    public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
         if (args.length > 0 && args[0].equals("--gnssmetrics")) {
             if (mGnssMetricsProvider != null) {
-                pw.append(mGnssMetricsProvider.getGnssMetricsAsProtoString());
+                ipw.append(mGnssMetricsProvider.getGnssMetricsAsProtoString());
             }
             return;
         }

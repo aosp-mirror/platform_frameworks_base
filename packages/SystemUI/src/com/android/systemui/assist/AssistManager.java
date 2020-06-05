@@ -40,8 +40,11 @@ import android.widget.ImageView;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
+import com.android.internal.logging.InstanceId;
+import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
@@ -121,6 +124,7 @@ public class AssistManager {
 
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
+    private static final int INSTANCE_ID_MAX = 1 << 20;
 
     protected final Context mContext;
     private final WindowManager mWindowManager;
@@ -130,6 +134,8 @@ public class AssistManager {
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
+    protected final InstanceIdSequence mInstanceIdSequence =
+            new InstanceIdSequence(INSTANCE_ID_MAX);
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -299,7 +305,8 @@ public class AssistManager {
         int phoneState = mPhoneStateMonitor.getPhoneState();
         args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
-        logStartAssist(invocationType, phoneState);
+        logStartAssist(/* instanceId = */ null, invocationType, phoneState);
+        logStartAssistLegacy(invocationType, phoneState);
         startAssistInternal(args, assistComponent, isService);
     }
 
@@ -499,7 +506,35 @@ public class AssistManager {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
     }
 
-    protected void logStartAssist(int invocationType, int phoneState) {
+    protected void logStartAssist(
+            @Nullable InstanceId instanceId, int invocationType, int deviceState) {
+        InstanceId currentInstanceId =
+                instanceId == null ? mInstanceIdSequence.newInstanceId() : instanceId;
+        ComponentName assistantComponent =
+                mAssistUtils.getAssistComponentForUser(UserHandle.USER_CURRENT);
+        int assistantUid = 0;
+        try {
+            assistantUid =
+                    mContext.getPackageManager()
+                            .getApplicationInfo(
+                                    assistantComponent.getPackageName(),
+                                    /* flags = */ 0)
+                            .uid;
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Unable to find Assistant UID", e);
+        }
+
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.ASSISTANT_INVOCATION_REPORTED,
+                AssistantInvocationEvent.Companion.eventIdFromLegacyInvocationType(invocationType),
+                assistantUid,
+                assistantComponent.flattenToString(),
+                currentInstanceId.getId(),
+                AssistantInvocationEvent.Companion.deviceStateFromLegacyDeviceState(deviceState),
+                mHandleController.areHandlesShowing());
+    }
+
+    protected void logStartAssistLegacy(int invocationType, int phoneState) {
         MetricsLogger.action(
                 new LogMaker(MetricsEvent.ASSISTANT)
                         .setType(MetricsEvent.TYPE_OPEN)

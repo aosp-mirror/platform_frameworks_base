@@ -16,6 +16,7 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -96,7 +97,7 @@ public class GnssNavigationMessageProvider extends
      */
     public void onNavigationMessageAvailable(GnssNavigationMessage event) {
         deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity())) {
+            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity(), PERMISSION_FINE)) {
                 return listener -> listener.onGnssNavigationMessageReceived(event);
             } else {
                 return null;

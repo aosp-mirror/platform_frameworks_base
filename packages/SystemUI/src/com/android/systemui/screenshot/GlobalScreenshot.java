@@ -35,6 +35,7 @@ import android.app.ActivityOptions;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -494,8 +495,10 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     }
 
     void handleImageAsScreenshot(Bitmap screenshot, Rect screenshotScreenBounds,
-            Insets visibleInsets, int taskId, Consumer<Uri> finisher, Runnable onComplete) {
-        // TODO use taskId and visibleInsets
+            Insets visibleInsets, int taskId, int userId, ComponentName topComponent,
+            Consumer<Uri> finisher, Runnable onComplete) {
+        // TODO: use task Id, userId, topComponent for smart handler
+        // TODO: use visibleInsets for animation
         mOnCompleteRunnable = onComplete;
         takeScreenshot(screenshot, finisher, screenshotScreenBounds);
     }

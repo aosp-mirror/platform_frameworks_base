@@ -387,6 +387,11 @@
         <item name="android:homeAsUpIndicator">@drawable/ic_arrow_back</item>
     </style>
 
+    <style name="qs_security_footer" parent="@style/qs_theme">
+        <item name="android:textColor">?android:attr/textColorSecondary</item>
+        <item name="android:tint">?android:attr/textColorSecondary</item>
+    </style>
+
     <style name="systemui_theme_remote_input" parent="@android:style/Theme.DeviceDefault.Light">
         <item name="android:colorAccent">@color/remote_input_accent</item>
     </style>

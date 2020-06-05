@@ -147,7 +147,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
 
                 // we don't need to verify the package name because we're getting it straight from
                 // the service watcher
-                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(mContext, packageName,
+                CallerIdentity identity = CallerIdentity.fromBinderUnsafe(packageName,
                         attributionTag);
                 setIdentity(identity);
             }
@@ -167,7 +167,7 @@ public class LocationProviderProxy extends AbstractLocationProvider {
                     if (packageName != null) {
                         // we don't need to verify the package name because we're getting it
                         // straight from the service watcher
-                        setIdentity(CallerIdentity.fromBinderUnsafe(mContext, packageName, null));
+                        setIdentity(CallerIdentity.fromBinderUnsafe(packageName, null));
                     }
                 }
 

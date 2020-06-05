@@ -16,6 +16,7 @@
 
 package com.android.server.location.gnss;
 
+import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 import static com.android.server.location.gnss.GnssManagerService.D;
 import static com.android.server.location.gnss.GnssManagerService.TAG;
 
@@ -144,7 +145,7 @@ public class GnssMeasurementsProvider extends
         mLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_STARTED,
                 LocationStatsEnums.API_ADD_GNSS_MEASUREMENTS_LISTENER,
-                registration.getIdentity().packageName,
+                registration.getIdentity().getPackageName(),
                 /* LocationRequest= */ null,
                 /* hasListener= */ true,
                 /* hasIntent= */ false,
@@ -157,7 +158,7 @@ public class GnssMeasurementsProvider extends
         mLogger.logLocationApiUsage(
                 LocationStatsEnums.USAGE_ENDED,
                 LocationStatsEnums.API_ADD_GNSS_MEASUREMENTS_LISTENER,
-                registration.getIdentity().packageName,
+                registration.getIdentity().getPackageName(),
                 /* LocationRequest= */ null,
                 /* hasListener= */ true,
                 /* hasIntent= */ false,
@@ -170,7 +171,7 @@ public class GnssMeasurementsProvider extends
      */
     public void onMeasurementsAvailable(GnssMeasurementsEvent event) {
         deliverToListeners(registration -> {
-            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity())) {
+            if (mAppOpsHelper.noteLocationAccess(registration.getIdentity(), PERMISSION_FINE)) {
                 return listener -> listener.onGnssMeasurementsReceived(event);
             } else {
                 return null;
