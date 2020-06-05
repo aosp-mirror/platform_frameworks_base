@@ -79,13 +79,13 @@ import com.android.server.DeviceIdleInternal;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.location.AbstractLocationProvider;
-import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.AppOpsHelper;
-import com.android.server.location.LocationUsageLogger;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
 import com.android.server.location.gnss.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
+import com.android.server.location.util.AppForegroundHelper;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
