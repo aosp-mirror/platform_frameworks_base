@@ -2779,6 +2779,8 @@
 
     <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->
     <string name="controls_media_close_session">Close this media session</string>
+    <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_resume">Resume</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
