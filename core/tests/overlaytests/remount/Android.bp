@@ -28,5 +28,6 @@ java_test_host {
         ":OverlayRemountedTest_Target",
         ":OverlayRemountedTest_TargetUpgrade",
         ":OverlayRemountedTest_Overlay",
+        ":OverlayRemountedTest_Overlay_SameCert",
     ],
 }
