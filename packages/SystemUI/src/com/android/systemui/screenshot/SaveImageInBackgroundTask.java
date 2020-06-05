@@ -123,6 +123,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         if (isCancelled()) {
             return null;
         }
+        Thread.currentThread().setPriority(Thread.MAX_PRIORITY);
 
         ContentResolver resolver = mContext.getContentResolver();
         Bitmap image = mParams.image;
