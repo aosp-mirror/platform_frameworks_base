@@ -15,6 +15,12 @@
 -->
 <configuration description="Runs rollback tests for multiple users">
     <option name="test-suite-tag" value="MultiUserRollbackTest" />
+    <target_preparer class="com.android.tradefed.targetprep.RunCommandTargetPreparer">
+        <option name="run-command" value="pm uninstall com.android.cts.install.lib.testapp.A" />
+        <option name="run-command" value="pm uninstall com.android.cts.install.lib.testapp.B" />
+        <option name="teardown-command" value="pm uninstall com.android.cts.install.lib.testapp.A" />
+        <option name="teardown-command" value="pm uninstall com.android.cts.install.lib.testapp.B" />
+    </target_preparer>
     <test class="com.android.tradefed.testtype.HostTest" >
         <option name="class" value="com.android.tests.rollback.host.MultiUserRollbackTest" />
     </test>
