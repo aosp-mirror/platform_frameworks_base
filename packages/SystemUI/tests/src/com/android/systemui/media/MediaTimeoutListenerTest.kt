@@ -131,12 +131,23 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
 
     @Test
     fun testOnPlaybackStateChanged_cancelsTimeout_whenResumed() {
-        // Assuming we're have a pending timeout
+        // Assuming we have a pending timeout
         testOnPlaybackStateChanged_schedulesTimeout_whenPaused()
 
         mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
                 .setState(PlaybackState.STATE_PLAYING, 0L, 0f).build())
         verify(cancellationRunnable).run()
+    }
+
+    @Test
+    fun testOnPlaybackStateChanged_reusesTimeout_whenNotPlaying() {
+        // Assuming we have a pending timeout
+        testOnPlaybackStateChanged_schedulesTimeout_whenPaused()
+
+        clearInvocations(cancellationRunnable)
+        mediaCallbackCaptor.value.onPlaybackStateChanged(PlaybackState.Builder()
+                .setState(PlaybackState.STATE_STOPPED, 0L, 0f).build())
+        verify(cancellationRunnable, never()).run()
     }
 
     @Test
