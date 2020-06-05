@@ -33,9 +33,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.Settings;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.Size;
 import android.widget.Toast;
 
 import com.android.systemui.R;
@@ -247,7 +245,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         startForeground(NOTIFICATION_RECORDING_ID, notification);
     }
 
-    private Notification createSaveNotification(Uri uri) {
+    private Notification createSaveNotification(ScreenMediaRecorder.SavedRecording recording) {
+        Uri uri = recording.getUri();
         Intent viewIntent = new Intent(Intent.ACTION_VIEW)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 .setDataAndType(uri, "video/mp4");
@@ -290,16 +289,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 .addExtras(extras);
 
         // Add thumbnail if available
-        Bitmap thumbnailBitmap = null;
-        try {
-            ContentResolver resolver = getContentResolver();
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            Size size = new Size(metrics.widthPixels, metrics.heightPixels / 2);
-            thumbnailBitmap = resolver.loadThumbnail(uri, size, null);
-        } catch (IOException e) {
-            Log.e(TAG, "Error creating thumbnail: " + e.getMessage());
-            e.printStackTrace();
-        }
+        Bitmap thumbnailBitmap = recording.getThumbnail();
         if (thumbnailBitmap != null) {
             Notification.BigPictureStyle pictureStyle = new Notification.BigPictureStyle()
                     .bigPicture(thumbnailBitmap)
