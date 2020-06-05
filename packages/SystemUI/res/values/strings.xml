@@ -2788,7 +2788,13 @@
          a retry will be attempted [CHAR LIMIT=30] -->
     <string name="controls_error_retryable">Error, retrying\u2026</string>
     <!-- Error message indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
-    <string name="controls_error_removed">Device removed</string>
+    <string name="controls_error_removed">Not found</string>
+    <!-- Title for dialog indicating that the control is no longer available in the application [CHAR LIMIT=30] -->
+    <string name="controls_error_removed_title">Control is unavailable</string>
+    <!-- Message body for dialog indicating that the control is no longer available in the application [CHAR LIMIT=NONE] -->
+    <string name="controls_error_removed_message">Couldn\u2019t access <xliff:g id="device" example="Backdoor lock">%1$s</xliff:g>. Check the <xliff:g id="application" example="Google Home">%2$s</xliff:g> app to make sure the control is still available and that the app settings haven\u2019t changed.</string>
+    <!-- Text for button to open the corresponding application [CHAR_LIMIT=20] -->
+    <string name="controls_open_app">Open app</string>
     <!-- Error message indicating that an unspecified error occurred while getting the status [CHAR LIMIT=30] -->
     <string name="controls_error_generic">Can\u2019t load status</string>
     <!-- Error message indicating that a control action failed [CHAR_LIMIT=30] -->
