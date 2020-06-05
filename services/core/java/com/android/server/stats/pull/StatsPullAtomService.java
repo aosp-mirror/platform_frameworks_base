@@ -2184,7 +2184,7 @@ public class StatsPullAtomService extends SystemService {
                 pulledData.add(e);
             }
         } catch (IOException | JSONException e) {
-            Slog.e(TAG, "exception reading diskstats cache file", e);
+            Slog.w(TAG, "Unable to read diskstats cache file within pullAppSize");
             return StatsManager.PULL_SKIP;
         }
         return StatsManager.PULL_SUCCESS;
@@ -2288,7 +2288,7 @@ public class StatsPullAtomService extends SystemService {
                     .build();
             pulledData.add(e);
         } catch (IOException | JSONException e) {
-            Slog.e(TAG, "exception reading diskstats cache file", e);
+            Slog.w(TAG, "Unable to read diskstats cache file within pullCategorySize");
             return StatsManager.PULL_SKIP;
         }
         return StatsManager.PULL_SUCCESS;
