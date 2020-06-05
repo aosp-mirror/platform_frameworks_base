@@ -322,7 +322,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @VisibleForTesting
     final SparseArray<UidState> mUidStates = new SparseArray<>();
 
-    final HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
+    volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
 
     long mLastRealtime;
 
@@ -1978,6 +1978,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED && mWriteNoteOpsScheduled) {
             writeNoteOps();
         }
+
+        mHistoricalRegistry.shutdown();
     }
 
     private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
@@ -5879,6 +5881,25 @@ public class AppOpsService extends IAppOpsService.Stub {
                 "clearHistory");
         // Must not hold the appops lock
         mHistoricalRegistry.clearHistory();
+    }
+
+    @Override
+    public void rebootHistory(long offlineDurationMillis) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
+                "rebootHistory");
+
+        Preconditions.checkArgument(offlineDurationMillis >= 0);
+
+        // Must not hold the appops lock
+        mHistoricalRegistry.shutdown();
+
+        if (offlineDurationMillis > 0) {
+            SystemClock.sleep(offlineDurationMillis);
+        }
+
+        mHistoricalRegistry = new HistoricalRegistry(mHistoricalRegistry);
+        mHistoricalRegistry.systemReady(mContext.getContentResolver());
+        mHistoricalRegistry.persistPendingHistory();
     }
 
     /**
