@@ -201,6 +201,6 @@ public abstract class TaskStackListener extends ITaskStackListener.Stub {
     }
 
     @Override
-    public void onActivityRotation() {
+    public void onActivityRotation(int displayId) {
     }
 }

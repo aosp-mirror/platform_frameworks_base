@@ -224,6 +224,8 @@ oneway interface ITaskStackListener {
      *   * forced rotation
      *   * rotation settings set through adb command line
      *   * rotation that occurs when rotation tile is toggled in quick settings
+     *
+     * @param displayId id of the display where activity will rotate
      */
-     void onActivityRotation();
+     void onActivityRotation(int displayId);
 }

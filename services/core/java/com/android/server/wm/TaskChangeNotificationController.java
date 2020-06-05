@@ -185,7 +185,7 @@ class TaskChangeNotificationController {
     };
 
     private final TaskStackConsumer mNotifyOnActivityRotation = (l, m) -> {
-        l.onActivityRotation();
+        l.onActivityRotation(m.arg1);
     };
 
     @FunctionalInterface
@@ -583,9 +583,10 @@ class TaskChangeNotificationController {
         msg.sendToTarget();
     }
 
-    /** @see android.app.ITaskStackListener#onActivityRotation() */
-    void notifyOnActivityRotation() {
-        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_ROTATED_MSG);
+    /** @see android.app.ITaskStackListener#onActivityRotation(int) */
+    void notifyOnActivityRotation(int displayId) {
+        final Message msg = mHandler.obtainMessage(NOTIFY_ACTIVITY_ROTATED_MSG,
+                displayId, 0 /* unused */);
         forAllLocalListeners(mNotifyOnActivityRotation, msg);
         msg.sendToTarget();
     }

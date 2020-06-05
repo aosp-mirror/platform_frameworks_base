@@ -238,8 +238,9 @@ public class TaskStackChangeListeners extends TaskStackListener {
     }
 
     @Override
-    public void onActivityRotation() {
-        mHandler.obtainMessage(H.ON_ACTIVITY_ROTATION).sendToTarget();
+    public void onActivityRotation(int displayId) {
+        mHandler.obtainMessage(H.ON_ACTIVITY_ROTATION, displayId, 0 /* unused */)
+                .sendToTarget();
     }
 
     private final class H extends Handler {
@@ -435,7 +436,7 @@ public class TaskStackChangeListeners extends TaskStackListener {
                     }
                     case ON_ACTIVITY_ROTATION: {
                         for (int i = mTaskStackListeners.size() - 1; i >= 0; i--) {
-                            mTaskStackListeners.get(i).onActivityRotation();
+                            mTaskStackListeners.get(i).onActivityRotation(msg.arg1);
                         }
                         break;
                     }
