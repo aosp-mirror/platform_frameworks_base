@@ -23,6 +23,7 @@ import static com.android.internal.accessibility.common.ShortcutConstants.Shortc
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.createEnableDialogContentView;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getInstalledTargets;
 import static com.android.internal.accessibility.dialog.AccessibilityTargetHelper.getTargets;
+import static com.android.internal.accessibility.util.AccessibilityUtils.isUserSetupCompleted;
 
 import android.annotation.Nullable;
 import android.app.Activity;
@@ -61,18 +62,8 @@ public class AccessibilityShortcutChooserActivity extends Activity {
         }
 
         mTargets.addAll(getTargets(this, mShortcutType));
-
-        final String selectDialogTitle =
-                getString(R.string.accessibility_select_shortcut_menu_title);
         mTargetAdapter = new ShortcutTargetAdapter(mTargets);
-        mMenuDialog = new AlertDialog.Builder(this)
-                .setTitle(selectDialogTitle)
-                .setAdapter(mTargetAdapter, /* listener= */ null)
-                .setPositiveButton(
-                        getString(R.string.edit_accessibility_shortcut_menu_button),
-                        /* listener= */ null)
-                .setOnDismissListener(dialog -> finish())
-                .create();
+        mMenuDialog = createMenuDialog();
         mMenuDialog.setOnShowListener(dialog -> updateDialogListeners());
         mMenuDialog.show();
     }
@@ -153,5 +144,23 @@ public class AccessibilityShortcutChooserActivity extends Activity {
                 isEditMenuMode ? view -> onDoneButtonClicked() : view -> onEditButtonClicked());
         mMenuDialog.getListView().setOnItemClickListener(
                 isEditMenuMode ? this::onTargetChecked : this::onTargetSelected);
+    }
+
+    private AlertDialog createMenuDialog() {
+        final String dialogTitle =
+                getString(R.string.accessibility_select_shortcut_menu_title);
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle(dialogTitle)
+                .setAdapter(mTargetAdapter, /* listener= */ null)
+                .setOnDismissListener(dialog -> finish());
+
+        if (isUserSetupCompleted(this)) {
+            final String positiveButtonText =
+                    getString(R.string.edit_accessibility_shortcut_menu_button);
+            builder.setPositiveButton(positiveButtonText, /* listener= */ null);
+        }
+
+        return builder.create();
     }
 }
