@@ -5228,7 +5228,7 @@
         </activity>
 
         <activity android:name="com.android.internal.app.SuspendedAppActivity"
-                  android:theme="@style/Theme.Dialog.Confirmation"
+                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:excludeFromRecents="true"
                   android:process=":ui">
         </activity>
