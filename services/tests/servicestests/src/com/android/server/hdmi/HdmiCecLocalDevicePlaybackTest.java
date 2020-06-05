@@ -60,6 +60,7 @@ public class HdmiCecLocalDevicePlaybackTest {
     private ArrayList<HdmiCecLocalDevice> mLocalDevices = new ArrayList<>();
     private int mPlaybackPhysicalAddress;
     private boolean mWokenUp;
+    private boolean mStandby;
 
     @Mock private IPowerManager mIPowerManagerMock;
     @Mock private IThermalService mIThermalServiceMock;
@@ -77,6 +78,11 @@ public class HdmiCecLocalDevicePlaybackTest {
                 @Override
                 void wakeUp() {
                     mWokenUp = true;
+                }
+
+                @Override
+                void standby() {
+                    mStandby = true;
                 }
 
                 @Override
@@ -341,6 +347,52 @@ public class HdmiCecLocalDevicePlaybackTest {
                 mHdmiCecLocalDevicePlayback.mAddress, ADDR_TV);
 
         assertThat(mNativeWrapper.getResultMessages()).contains(standbyMessage);
+    }
+
+    @Test
+    public void handleActiveSource_ActiveSource_None() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mStandby = false;
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                                         mPlaybackPhysicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleActiveSource_notActiveSource_None() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.NONE;
+        mStandby = false;
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleActiveSource_ActiveSource_StandbyNow() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mStandby = false;
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_PLAYBACK_1,
+                                         mPlaybackPhysicalAddress);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mStandby).isFalse();
+    }
+
+    @Test
+    public void handleActiveSource_notActiveSource_StandbyNow() {
+        mHdmiCecLocalDevicePlayback.mPowerStateChangeOnActiveSourceLost =
+            HdmiProperties.power_state_change_on_active_source_lost_values.STANDBY_NOW;
+        mStandby = false;
+        HdmiCecMessage message = HdmiCecMessageBuilder.buildActiveSource(ADDR_TV, 0x0000);
+        assertThat(mHdmiCecLocalDevicePlayback.handleActiveSource(message)).isTrue();
+        mTestLooper.dispatchAll();
+        assertThat(mStandby).isTrue();
     }
 
     @Test
