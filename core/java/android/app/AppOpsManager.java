@@ -8606,6 +8606,25 @@ public class AppOpsManager {
     }
 
     /**
+     * Reboots the ops history.
+     *
+     * @param offlineDurationMillis The duration to wait between
+     * tearing down and initializing the history. Must be greater
+     * than or equal to zero.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_APPOPS)
+    public void rebootHistory(long offlineDurationMillis) {
+        try {
+            mService.rebootHistory(offlineDurationMillis);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Pulls current AppOps access report and picks package and op to watch for next access report
      * Returns null if no reports were collected since last call. There is no guarantee of report
      * collection, hence this method should be called periodically even if no report was collected
