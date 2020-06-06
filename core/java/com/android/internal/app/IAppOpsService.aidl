@@ -76,6 +76,7 @@ interface IAppOpsService {
     void addHistoricalOps(in AppOpsManager.HistoricalOps ops);
     void resetHistoryParameters();
     void clearHistory();
+    void rebootHistory(long offlineDurationMillis);
     List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
     void setUidMode(int code, int uid, int mode);
     @UnsupportedAppUsage
