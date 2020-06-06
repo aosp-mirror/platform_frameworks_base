@@ -54,10 +54,11 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"アップデートのアンインストール"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> は次のアプリの一部です。"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"このアプリをアンインストールしますか？"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"このアプリを"<b>"すべての"</b>"ユーザーからアンインストールしますか？このアプリとそのデータはデバイスの"<b>"すべての"</b>"ユーザーから削除されます。"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"このアプリを"<b>"すべての"</b>"ユーザーからアンインストールしますか？このアプリとそのデータは端末の"<b>"すべての"</b>"ユーザーから削除されます。"</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> さんのアプリをアンインストールしますか？"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"このアプリを出荷時の状態に戻しますか？データがすべて削除されます。"</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"このアプリを出荷時の状態に戻しますか？データがすべて削除されます。これは、仕事用プロファイルを設定しているユーザーも含めて、このデバイスを使用するすべてのユーザーが対象となります。"</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"このアプリを出荷時の状態に戻しますか？データがすべて削除されます。これは、仕事用プロファイルを設定しているユーザーも含めて、この端末を使用するすべてのユーザーが対象となります。"</string>
+    <string name="uninstall_remove_contributed_files" msgid="2048594420923203453">"関連付けられたメディア ファイル（<xliff:g id="SIZE">%1$s</xliff:g>）も削除する。"</string>
     <string name="uninstall_keep_data" msgid="7002379587465487550">"アプリのデータ（<xliff:g id="SIZE">%1$s</xliff:g>）を保持"</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"アンインストールを実行しています"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"エラーになったアンインストール"</string>
@@ -67,12 +68,12 @@
     <string name="uninstall_done_app" msgid="4588850984473605768">"「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」をアンインストールしました"</string>
     <string name="uninstall_failed" msgid="1847750968168364332">"アンインストールできませんでした。"</string>
     <string name="uninstall_failed_app" msgid="5506028705017601412">"「<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>」をアンインストールできませんでした。"</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"有効なデバイス管理アプリはアンインストールできません"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> さんの有効なデバイス管理アプリはアンインストールできません"</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"有効な端末管理アプリはアンインストールできません"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> さんの有効な端末管理アプリはアンインストールできません"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"このアプリは一部のユーザーやプロフィールに必要なため、アンインストールできませんでした"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"このアプリはプロファイルに必要なため、アンインストールできません。"</string>
-    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"このアプリはデバイス管理者が必要としているため、アンインストールできません。"</string>
-    <string name="manage_device_administrators" msgid="3092696419363842816">"デバイス管理アプリを管理"</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"このアプリは端末管理者が必要としているため、アンインストールできません。"</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"端末管理アプリを管理"</string>
     <string name="manage_users" msgid="1243995386982560813">"ユーザーを管理"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> をアンインストールできませんでした。"</string>
     <string name="Parse_error_dlg_text" msgid="1661404001063076789">"パッケージの解析中に問題が発生しました。"</string>

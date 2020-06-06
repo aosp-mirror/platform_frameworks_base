@@ -31,7 +31,6 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Size;
 import android.view.DisplayInfo;
-import android.view.WindowManager;
 
 import com.android.systemui.R;
 
@@ -70,8 +69,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
         }
 
         DisplayInfo displayInfo = new DisplayInfo();
-        WindowManager wm = context.getSystemService(WindowManager.class);
-        wm.getDefaultDisplay().getDisplayInfo(displayInfo);
+        context.getDisplay().getDisplayInfo(displayInfo);
 
         // We only do transition in portrait currently, b/137962047.
         int orientation = context.getResources().getConfiguration().orientation;
@@ -115,12 +113,7 @@ public class ImageWallpaperRenderer implements GLWallpaperRenderer,
             mBitmap = mWallpaperManager.getBitmap();
             mWallpaperManager.forgetLoadedWallpaper();
             if (mBitmap != null) {
-                float scale = (float) mScissor.height() / mBitmap.getHeight();
-                int surfaceHeight = Math.max(mScissor.height(), mBitmap.getHeight());
-                int surfaceWidth = scale > 1f
-                        ? Math.round(mBitmap.getWidth() * scale)
-                        : mBitmap.getWidth();
-                mSurfaceSize.set(0, 0, surfaceWidth, surfaceHeight);
+                mSurfaceSize.set(0, 0, mBitmap.getWidth(), mBitmap.getHeight());
             }
         }
         if (DEBUG) {

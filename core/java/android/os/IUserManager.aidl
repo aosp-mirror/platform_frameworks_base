@@ -106,4 +106,5 @@ interface IUserManager {
     String getUserName();
     long getUserStartRealtime();
     long getUserUnlockRealtime();
+    void notifyOnNextUserRemoveForTest();
 }

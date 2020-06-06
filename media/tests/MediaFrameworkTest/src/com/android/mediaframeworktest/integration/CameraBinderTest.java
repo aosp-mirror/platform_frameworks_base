@@ -313,6 +313,15 @@ public class CameraBinderTest extends AndroidTestCase {
         public void onCameraAccessPrioritiesChanged() {
             Log.v(TAG, "Camera access permission change");
         }
+        @Override
+        public void onCameraOpened(String cameraId, String clientPackageName) {
+            Log.v(TAG, String.format("Camera %s is opened by client package %s",
+                    cameraId, clientPackageName));
+        }
+        @Override
+        public void onCameraClosed(String cameraId) {
+            Log.v(TAG, String.format("Camera %s is closed", cameraId));
+        }
     }
 
     /**

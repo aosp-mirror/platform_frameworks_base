@@ -18,14 +18,11 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.os.LocaleList
-
-import com.android.systemui.ConfigurationChangedReceiver
 import com.android.systemui.statusbar.policy.ConfigurationController
 
 import java.util.ArrayList
 
-class ConfigurationControllerImpl(context: Context)
-    : ConfigurationController, ConfigurationChangedReceiver {
+class ConfigurationControllerImpl(context: Context) : ConfigurationController {
 
     private val listeners: MutableList<ConfigurationController.ConfigurationListener> = ArrayList()
     private val lastConfig = Configuration()
