@@ -18,6 +18,7 @@ package android.hardware.hdmi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -28,6 +29,7 @@ import android.os.Parcelable;
  * @hide
  */
 @SystemApi
+@TestApi
 public final class HdmiPortInfo implements Parcelable {
     /** HDMI port type: Input */
     public static final int PORT_INPUT = 0;
@@ -153,7 +155,9 @@ public final class HdmiPortInfo implements Parcelable {
      * @param dest The Parcel in which the object should be written.
      * @param flags Additional flags about how the object should be written.
      *        May be 0 or {@link Parcelable#PARCELABLE_WRITE_RETURN_VALUE}.
+     * @hide
      */
+    @SystemApi
     @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeInt(mId);
@@ -186,5 +190,10 @@ public final class HdmiPortInfo implements Parcelable {
         return mId == other.mId && mType == other.mType && mAddress == other.mAddress
                 && mCecSupported == other.mCecSupported && mArcSupported == other.mArcSupported
                 && mMhlSupported == other.mMhlSupported;
+    }
+
+    @Override
+    public int hashCode() {
+        return mId;
     }
 }

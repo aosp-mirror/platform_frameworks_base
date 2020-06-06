@@ -360,7 +360,10 @@ public class StagedRollbackTest {
         RollbackManager rm = RollbackUtils.getRollbackManager();
         rm.getAvailableRollbacks().stream().flatMap(info -> info.getPackages().stream())
                 .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
-        assertThat(RollbackUtils.getRollbackManager().getAvailableRollbacks()).isEmpty();
+        rm.getRecentlyCommittedRollbacks().stream().flatMap(info -> info.getPackages().stream())
+                .map(info -> info.getPackageName()).forEach(rm::expireRollbackForPackage);
+        assertThat(rm.getAvailableRollbacks()).isEmpty();
+        assertThat(rm.getRecentlyCommittedRollbacks()).isEmpty();
     }
 
     private static final String APK_IN_APEX_TESTAPEX_NAME = "com.android.apex.apkrollback.test";

@@ -514,7 +514,7 @@
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silenciadas"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificaciones"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversaciones"</string>
-    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciadas"</string>
+    <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Borrar todas las notificaciones silenciosas"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Notificaciones pausadas por el modo No molestar"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Empezar ahora"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"No hay notificaciones"</string>
@@ -598,11 +598,11 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Se mantiene visible hasta que dejas de fijarla. Para ello, desliza el dedo hacia arriba y mantén pulsado."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Aplicaciones recientes."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"La pantalla se mantiene visible hasta que dejas de fijarla. Para ello, mantén pulsado el botón Inicio."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Quizá se pueda acceder a datos personales, como contactos o el contenido de correos."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Es posible que se revelen datos personales, como contactos o el contenido de correos."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Se pueden abrir otras aplicaciones desde aplicaciones fijadas."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Para dejar de fijar esta aplicación, mantén pulsados los botones Atrás y Aplicaciones recientes"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Para dejar de fijar esta aplicación, mantén pulsados los botones Atrás e Inicio"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para dejar de fijar esta aplicación, desliza el dedo hacia arriba y mantén pulsada la pantalla"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Para dejar de fijar esta aplicación, desliza el dedo hacia arriba y mantenlo pulsado"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Entendido"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"No, gracias"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Aplicación fijada"</string>
@@ -709,18 +709,17 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Desactivar notificaciones"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"¿Quieres seguir viendo las notificaciones de esta aplicación?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Silencio"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminada"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"Predeterminado"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Burbuja"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sin sonido ni vibración"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sin sonido ni vibración y se muestra más abajo en la sección de conversaciones"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Según los ajustes definidos en el teléfono, es posible que suene o vibre"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Según los ajustes definidos en el teléfono, es posible que suene o vibre. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Es posible que suene o vibre según los ajustes del teléfono"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Es posible que suene o vibre según los ajustes del teléfono. Las conversaciones de <xliff:g id="APP_NAME">%1$s</xliff:g> aparecen como burbujas de forma predeterminada."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Llama tu atención con un acceso directo flotante a este contenido."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se muestra en la parte superior de la sección de conversaciones en forma de burbuja flotante, y la imagen de perfil aparece en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ajustes"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"No se pueden usar funciones de conversación con <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las cerradas aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Estas notificaciones no se pueden modificar."</string>
@@ -1014,16 +1013,19 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Se ha actualizado la navegación del sistema. Para hacer cambios, ve a Ajustes."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ve a Ajustes para actualizar la navegación del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversación marcada como prioritaria"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Las conversaciones prioritarias:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Se muestran en la parte superior de la sección de conversaciones"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Muestran tu imagen de perfil en la pantalla de bloqueo"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecen como burbuja sobre las aplicaciones"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrumpen el modo No molestar"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entendido"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Ajustes"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Ventana de superposición de ampliación"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ventana de controles de ampliación"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Control de dispositivos"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Añade controles a tus dispositivos conectados"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Añade controles para tus dispositivos conectados"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configurar control de dispositivos"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Mantén pulsado el botón de encendido para acceder a tus controles"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Elige una aplicación para añadir controles"</string>
@@ -1050,7 +1052,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugerido por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controles actualizados"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"El PIN contiene letras o símbolos"</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"Verificar <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Verifica <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorrecto"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Verificando…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Introduce el PIN"</string>

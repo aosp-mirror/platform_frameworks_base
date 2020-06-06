@@ -1,6 +1,7 @@
 package android.hardware.hdmi;
 
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.hardware.hdmi.HdmiControlManager.VendorCommandListener;
 import android.os.RemoteException;
@@ -84,7 +85,8 @@ public abstract class HdmiClient {
      * @param hasVendorId {@code true} if the command type will be &lt;Vendor Command With ID&gt;.
      *                    {@code false} if the command will be &lt;Vendor Command&gt;
      */
-    public void sendVendorCommand(int targetAddress, byte[] params, boolean hasVendorId) {
+    public void sendVendorCommand(int targetAddress,
+            @SuppressLint("MissingNullability") byte[] params, boolean hasVendorId) {
         try {
             mService.sendVendorCommand(getDeviceType(), targetAddress, params, hasVendorId);
         } catch (RemoteException e) {

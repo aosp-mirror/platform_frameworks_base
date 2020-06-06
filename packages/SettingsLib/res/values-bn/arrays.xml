@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> এর সাথে কানেক্ট হচ্ছে…"</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> দিয়ে যাচাইকরণ করা হচ্ছে..."</item>
     <item msgid="4287401332778341890">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> থেকে আইপি অ্যাড্রেস জানা হচ্ছে…"</item>
-    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> তে কানেক্ট হয়েছে"</item>
+    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>-এ কানেক্ট হয়েছে"</item>
     <item msgid="7445993821842009653">"স্থগিত করা হয়েছে"</item>
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> থেকে ডিসকানেক্ট হচ্ছে…"</item>
     <item msgid="699832486578171722">"ডিসকানেক্ট করা হয়েছে"</item>

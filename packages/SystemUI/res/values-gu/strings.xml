@@ -592,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"ચાલુ કરો"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"બંધ કરો"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"આઉટપુટ ઉપકરણ સ્વિચ કરો"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"ઍપને પિન કરેલી છે"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે પાછળ અને ઝલકને સ્પર્શ કરી રાખો."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે પાછળ અને હોમને સ્પર્શ કરી રાખો."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"તમે જ્યાં સુધી અનપિન નહીં કરો ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. ઉપરની તરફ સ્વાઇપ કરો અને અનપિન કરવા માટે દબાવી રાખો."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે ઝલકને સ્પર્શ કરી રાખો."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"તમે જ્યાં સુધી અનપિન કરશો નહીં ત્યાં સુધી આ તેને દૃશ્યક્ષમ રાખે છે. અનપિન કરવા માટે હોમને સ્પર્શ કરી રાખો."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"વ્યક્તિગત ડેટા ઍક્સેસ કરી શકાતો હોઈ શકે (જેમ કે સંપર્કો અને ઇમેઇલનું કન્ટેન્ટ)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"પિન કરેલી ઍપ અન્ય ઍપને ખોલી શકે છે."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"આ ઍપને અનપિન કરવા માટે, પાછળ અને ઓવરવ્યૂ બટનને સ્પર્શ કરી રાખો"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"આ ઍપને અનપિન કરવા માટે, પાછળ અને હોમ બટનને સ્પર્શ કરી રાખો"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"આ ઍપને અનપિન કરવા માટે, ઉપર સ્વાઇપ કરીને બટન દબાવી રાખો"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"સમજાઈ ગયું"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"ના, આભાર"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"ઍપ પિન કરી"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ઍપ અનપિન કરી"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ને છુપાવીએ?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"તે સેટિંગ્સમાં તમે તેને ચાલુ કરશો ત્યારે આગલી વખતે ફરીથી દેખાશે."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"છુપાવો"</string>
@@ -727,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"એને વાતચીત વિભાગની ટોચ પર બતાવે છે, તરતા બબલ તરીકે દેખાય છે, લૉક સ્ક્રીન પર પ્રોફાઇલ ફોટા તરીકે બતાવે છે"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"સેટિંગ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"પ્રાધાન્યતા"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> વાતચીતની સુવિધાઓને સપોર્ટ આપતી નથી"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"તાજેતરના કોઈ બબલ નથી"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"એકદમ નવા બબલ અને છોડી દીધેલા બબલ અહીં દેખાશે"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"આ નોટિફિકેશનમાં કોઈ ફેરફાર થઈ શકશે નહીં."</string>
@@ -1022,11 +1013,17 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"સિસ્ટમ નૅવિગેશન અપડેટ કર્યું. ફેરફારો કરવા માટે, સેટિંગ પર જાઓ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"સિસ્ટમ નૅવિગેશનને અપડેટ કરવા માટે સેટિંગ પર જાઓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
+    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
+    <skip />
+    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
+    <skip />
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"વાતચીત વિભાગની ટોચ પર બતાવો"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"લૉક સ્ક્રીન પર પ્રોફાઇલ ફોટો બતાવો"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ઍપની ટોચ પર તરતા બબલ તરીકે દેખાય છે"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ખલેલ પાડશો નહીં સેટિંગમાં હસ્તક્ષેપ કરી શકે છે"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"સમજાઈ ગયું"</string>
+    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
+    <skip />
     <string name="magnification_overlay_title" msgid="6584179429612427958">"વિસ્તૃતીકરણ ઓવરલે વિંડો"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"વિસ્તૃતીકરણ વિંડોના નિયંત્રણો"</string>

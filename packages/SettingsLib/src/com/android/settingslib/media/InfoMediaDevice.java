@@ -55,9 +55,9 @@ public class InfoMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        //TODO(b/120669861): Return remote device icon uri once api is ready.
-        return BluetoothUtils.buildBtRainbowDrawable(mContext,
-                mContext.getDrawable(getDrawableResId()), getId().hashCode());
+        final Drawable drawable = getIconWithoutBackground();
+        setColorFilter(drawable);
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
     }
 
     @Override

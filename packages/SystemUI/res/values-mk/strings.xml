@@ -511,7 +511,7 @@
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управувајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
     <string name="notification_section_header_incoming" msgid="5295312809341711367">"Дојдовни"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Тивко"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"Безгласно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известувања"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Избриши ги сите тивки известувања"</string>
@@ -702,13 +702,13 @@
     <string name="inline_block_button" msgid="479892866568378793">"Блокирај"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Продолжи да ги прикажуваш"</string>
     <string name="inline_minimize_button" msgid="1474436209299333445">"Минимизирај"</string>
-    <string name="inline_silent_button_silent" msgid="525243786649275816">"Тивко"</string>
+    <string name="inline_silent_button_silent" msgid="525243786649275816">"Безгласно"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Продолжи со безгласно прикажување"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Предупредувај"</string>
     <string name="inline_silent_button_keep_alerting" msgid="6577845442184724992">"Продолжи да ме предупредуваш"</string>
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Исклучи известувања"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Дали да продолжат да се прикажуваат известувања од апликацијава?"</string>
-    <string name="notification_silence_title" msgid="8608090968400832335">"Тивко"</string>
+    <string name="notification_silence_title" msgid="8608090968400832335">"Безгласно"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Стандардно"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Балонче"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звук или вибрации"</string>
@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Се појавува на горниот дел од секцијата на разговорот во вид на лебдечко меурче, покажувајќи ја профилната слика на заклучениот екран"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Поставки"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не поддржува функции за разговор"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема неодамнешни балончиња"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Неодамнешните и отфрлените балончиња ќе се појавуваат тука"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Овие известувања не може да се изменат"</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигацијата на системот е ажурирана. За да извршите промени, одете во „Поставки“."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Одете во „Поставки“ за да ја ажурирате навигацијата на системот"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Подготвеност"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговорот е поставен како приоритетен"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приорететните разговори ќе:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Се прикажува најгоре во делот со разговори"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Се прикажува профилна слика на заклучен екран"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Се појавува како лебдечко балонче врз апликациите"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Прекинува „Не вознемирувај“"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Сфатив"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Поставки"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Прозорец за преклопување на зголемувањето"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозорец за зголемување"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроли на прозорец за зголемување"</string>

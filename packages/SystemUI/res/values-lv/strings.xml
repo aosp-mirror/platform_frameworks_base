@@ -722,8 +722,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Parādās sarunu sadaļas augšdaļā un kā peldošs burbulis, kā arī bloķēšanas ekrānā tiek rādīts profila attēls"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Iestatījumi"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritārs"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"Lietotnē <xliff:g id="APP_NAME">%1$s</xliff:g> netiek atbalstītas sarunu funkcijas."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nav nesen aizvērtu burbuļu"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Šeit būs redzami nesen rādītie burbuļi un aizvērtie burbuļi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Šos paziņojumus nevar modificēt."</string>
@@ -1019,11 +1018,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistēmas navigācija ir atjaunināta. Lai veiktu izmaiņas, atveriet iestatījumus."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Atveriet iestatījumus, lai atjauninātu sistēmas navigāciju"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gaidstāve"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Saruna iestatīta kā prioritāra"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritārās sarunas:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Tiek rādītas sarunu sadaļas augšdaļā"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tiek rādīts profila attēls bloķēšanas ekrānā"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Tiek rādītas kā peldošs burbulis virs lietotnēm"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Var tikt rādītas režīmā “Netraucēt”"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Labi"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Iestatījumi"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Palielināšanas pārklājuma logs"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Palielināšanas logs"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Palielināšanas loga vadīklas"</string>
