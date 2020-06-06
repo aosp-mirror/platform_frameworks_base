@@ -193,6 +193,7 @@ package android.app {
     method public static int opToDefaultMode(@NonNull String);
     method public static String opToPermission(int);
     method public static int permissionToOpCode(String);
+    method @RequiresPermission("android.permission.MANAGE_APPOPS") public void rebootHistory(long);
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void reloadNonHistoricalState();
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void resetHistoryParameters();
     method @RequiresPermission("android.permission.MANAGE_APPOPS") public void setHistoryParameters(int, long, int);
