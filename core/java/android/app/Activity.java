@@ -5152,6 +5152,10 @@ public class Activity extends ContextThemeWrapper
      * the signature of the app declaring the permissions.
      * </p>
      * <p>
+     * Call {@link #shouldShowRequestPermissionRationale(String)} before calling this API to
+     * check if the system recommends to show a rationale UI before asking for a permission.
+     * </p>
+     * <p>
      * If your app does not have the requested permissions the user will be presented
      * with UI for accepting them. After the user has accepted or rejected the
      * requested permissions you will receive a callback on {@link
@@ -5241,20 +5245,10 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Gets whether you should show UI with rationale for requesting a permission.
-     * You should do this only if you do not have the permission and the context in
-     * which the permission is requested does not clearly communicate to the user
-     * what would be the benefit from granting this permission.
-     * <p>
-     * For example, if you write a camera app, requesting the camera permission
-     * would be expected by the user and no rationale for why it is requested is
-     * needed. If however, the app needs location for tagging photos then a non-tech
-     * savvy user may wonder how location is related to taking photos. In this case
-     * you may choose to show UI with rationale of requesting this permission.
-     * </p>
+     * Gets whether you should show UI with rationale before requesting a permission.
      *
      * @param permission A permission your app wants to request.
-     * @return Whether you can show permission rationale UI.
+     * @return Whether you should show permission rationale UI.
      *
      * @see #checkSelfPermission(String)
      * @see #requestPermissions(String[], int)
