@@ -31,6 +31,9 @@ import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
@@ -38,6 +41,8 @@ import android.text.TextUtils;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
+
+import com.android.settingslib.R;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -129,6 +134,14 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
         ConnectionRecordManager.getInstance().fetchLastSelectedDevice(mContext);
         mConnectedRecord = ConnectionRecordManager.getInstance().fetchConnectionRecord(mContext,
                 getId());
+    }
+
+    void setColorFilter(Drawable drawable) {
+        final ColorStateList list =
+                mContext.getResources().getColorStateList(
+                        R.color.advanced_icon_color, mContext.getTheme());
+        drawable.setColorFilter(new PorterDuffColorFilter(list.getDefaultColor(),
+                PorterDuff.Mode.SRC_IN));
     }
 
     /**

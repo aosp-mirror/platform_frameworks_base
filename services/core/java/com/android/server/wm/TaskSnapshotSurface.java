@@ -391,6 +391,7 @@ class TaskSnapshotSurface implements StartingSurface {
             frame = null;
             mTmpSnapshotSize.set(0, 0, buffer.getWidth(), buffer.getHeight());
             mTmpDstFrame.set(mFrame);
+            mTmpDstFrame.offsetTo(0, 0);
         }
 
         // Scale the mismatch dimensions to fill the task bounds

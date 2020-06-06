@@ -16,11 +16,8 @@
 
 package com.android.systemui.media
 
-import android.app.Notification
 import android.content.Context
-import android.service.notification.StatusBarNotification
 import android.media.MediaRouter2Manager
-import android.media.session.MediaSession
 import android.media.session.MediaController
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
@@ -38,10 +35,15 @@ class MediaDeviceManager @Inject constructor(
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
     private val featureFlag: MediaFeatureFlag,
-    @Main private val fgExecutor: Executor
-) {
+    @Main private val fgExecutor: Executor,
+    private val mediaDataManager: MediaDataManager
+) : MediaDataManager.Listener {
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val entries: MutableMap<String, Token> = mutableMapOf()
+
+    init {
+        mediaDataManager.addListener(this)
+    }
 
     /**
      * Add a listener for changes to the media route (ie. device).
@@ -53,23 +55,25 @@ class MediaDeviceManager @Inject constructor(
      */
     fun removeListener(listener: Listener) = listeners.remove(listener)
 
-    fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
-        if (featureFlag.enabled && isMediaNotification(sbn)) {
+    override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+        if (featureFlag.enabled) {
+            if (oldKey != null && oldKey != key) {
+                val oldToken = entries.remove(oldKey)
+                oldToken?.stop()
+            }
             var tok = entries[key]
-            if (tok == null) {
-                val token = sbn.notification.extras.getParcelable(Notification.EXTRA_MEDIA_SESSION)
-                        as MediaSession.Token?
-                val controller = MediaController(context, token)
-                tok = Token(key, controller, localMediaManagerFactory.create(sbn.packageName))
+            if (tok == null && data.token != null) {
+                val controller = MediaController(context, data.token!!)
+                tok = Token(key, controller, localMediaManagerFactory.create(data.packageName))
                 entries[key] = tok
                 tok.start()
             }
         } else {
-            onNotificationRemoved(key)
+            onMediaDataRemoved(key)
         }
     }
 
-    fun onNotificationRemoved(key: String) {
+    override fun onMediaDataRemoved(key: String) {
         val token = entries.remove(key)
         token?.stop()
         token?.let {

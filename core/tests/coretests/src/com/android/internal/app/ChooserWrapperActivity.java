@@ -205,6 +205,23 @@ public class ChooserWrapperActivity extends ChooserActivity {
         return getApplicationContext();
     }
 
+    @Override
+    protected void queryDirectShareTargets(ChooserListAdapter adapter,
+            boolean skipAppPredictionService) {
+        if (sOverrides.onQueryDirectShareTargets != null) {
+            sOverrides.onQueryDirectShareTargets.apply(adapter);
+        }
+        super.queryDirectShareTargets(adapter, skipAppPredictionService);
+    }
+
+    @Override
+    protected void queryTargetServices(ChooserListAdapter adapter) {
+        if (sOverrides.onQueryTargetServices != null) {
+            sOverrides.onQueryTargetServices.apply(adapter);
+        }
+        super.queryTargetServices(adapter);
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
@@ -214,6 +231,8 @@ public class ChooserWrapperActivity extends ChooserActivity {
         @SuppressWarnings("Since15")
         public Function<PackageManager, PackageManager> createPackageManager;
         public Function<TargetInfo, Boolean> onSafelyStartCallback;
+        public Function<ChooserListAdapter, Void> onQueryDirectShareTargets;
+        public Function<ChooserListAdapter, Void> onQueryTargetServices;
         public ResolverListController resolverListController;
         public ResolverListController workResolverListController;
         public Boolean isVoiceInteraction;
@@ -233,6 +252,8 @@ public class ChooserWrapperActivity extends ChooserActivity {
 
         public void reset() {
             onSafelyStartCallback = null;
+            onQueryDirectShareTargets = null;
+            onQueryTargetServices = null;
             isVoiceInteraction = null;
             createPackageManager = null;
             previewThumbnail = null;

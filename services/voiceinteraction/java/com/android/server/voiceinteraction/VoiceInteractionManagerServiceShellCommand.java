@@ -52,6 +52,8 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
                 return requestShow(pw);
             case "hide":
                 return requestHide(pw);
+            case "disable":
+                return requestDisable(pw);
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -69,6 +71,8 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             pw.println("");
             pw.println("  hide");
             pw.println("    Hides the current session");
+            pw.println("  disable [true|false]");
+            pw.println("    Temporarily disable (when true) service");
             pw.println("");
         }
     }
@@ -123,6 +127,17 @@ final class VoiceInteractionManagerServiceShellCommand extends ShellCommand {
             mService.hideCurrentSession();
         } catch (Exception e) {
             return handleError(pw, "requestHide()", e);
+        }
+        return 0;
+    }
+
+    private int requestDisable(PrintWriter pw) {
+        boolean disabled = Boolean.parseBoolean(getNextArgRequired());
+        Slog.i(TAG, "requestDisable(): " + disabled);
+        try {
+            mService.setDisabled(disabled);
+        } catch (Exception e) {
+            return handleError(pw, "requestDisable()", e);
         }
         return 0;
     }

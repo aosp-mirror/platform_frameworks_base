@@ -4657,9 +4657,8 @@ class StorageManagerService extends IStorageManager.Stub
         private void killAppForOpChange(int code, int uid, String packageName) {
             final IActivityManager am = ActivityManager.getService();
             try {
-                am.killApplication(packageName,
-                        UserHandle.getAppId(uid),
-                        UserHandle.USER_ALL, AppOpsManager.opToName(code) + " changed.");
+                am.killUid(UserHandle.getAppId(uid), UserHandle.USER_ALL,
+                        AppOpsManager.opToName(code) + " changed.");
             } catch (RemoteException e) {
             }
         }
@@ -4681,7 +4680,12 @@ class StorageManagerService extends IStorageManager.Stub
                                 // results in a bad UX, especially since the gid only gives access
                                 // to unreliable volumes, USB OTGs that are rarely mounted. The app
                                 // will get the external_storage gid on next organic restart.
-                                killAppForOpChange(code, uid, packageName);
+                                if (packageName != null) {
+                                    killAppForOpChange(code, uid, packageName);
+                                } else {
+                                    // TODO(b/158283222) this can happen, figure out if we need
+                                    // to kill in this case as well.
+                                }
                             }
                             return;
                         case OP_LEGACY_STORAGE:
