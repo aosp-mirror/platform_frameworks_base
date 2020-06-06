@@ -103,10 +103,16 @@ import com.android.server.location.AbstractLocationProvider.State;
 import com.android.server.location.LocationPermissions.PermissionLevel;
 import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
-import com.android.server.location.UserInfoHelper.UserListener;
 import com.android.server.location.geofence.GeofenceManager;
 import com.android.server.location.geofence.GeofenceProxy;
 import com.android.server.location.gnss.GnssManagerService;
+import com.android.server.location.util.AppForegroundHelper;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.Injector;
+import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.util.UserInfoHelper.UserListener;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
 
 import java.io.ByteArrayOutputStream;
@@ -135,11 +141,14 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     public static class Lifecycle extends SystemService {
 
+        private final SystemUserInfoHelper mUserInfoHelper;
         private final LocationManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
-            mService = new LocationManagerService(context);
+            context = context.createAttributionContext(ATTRIBUTION_TAG);
+            mUserInfoHelper = new SystemUserInfoHelper(context);
+            mService = new LocationManagerService(new SystemInjector(context, mUserInfoHelper));
         }
 
         @Override
@@ -162,6 +171,44 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // some providers rely on third party code, so we wait to initialize
                 // providers until third party code is allowed to run
                 mService.onSystemThirdPartyAppsCanStart();
+            }
+        }
+
+        @Override
+        public void onUserStarting(TargetUser user) {
+            mUserInfoHelper.dispatchOnUserStarted(user.getUserIdentifier());
+        }
+
+        @Override
+        public void onUserSwitching(TargetUser from, TargetUser to) {
+            mUserInfoHelper.dispatchOnCurrentUserChanged(from.getUserIdentifier(),
+                    to.getUserIdentifier());
+        }
+
+        @Override
+        public void onUserStopped(TargetUser user) {
+            mUserInfoHelper.dispatchOnUserStopped(user.getUserIdentifier());
+        }
+
+        private static class SystemUserInfoHelper extends UserInfoHelper {
+
+            SystemUserInfoHelper(Context context) {
+                super(context);
+            }
+
+            @Override
+            protected void dispatchOnUserStarted(int userId) {
+                super.dispatchOnUserStarted(userId);
+            }
+
+            @Override
+            protected void dispatchOnUserStopped(int userId) {
+                super.dispatchOnUserStopped(userId);
+            }
+
+            @Override
+            protected void dispatchOnCurrentUserChanged(int fromUserId, int toUserId) {
+                super.dispatchOnCurrentUserChanged(fromUserId, toUserId);
             }
         }
     }
@@ -197,9 +244,10 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final Object mLock = new Object();
 
-    private final Context mContext;
     private final Handler mHandler;
     private final LocalService mLocalService;
+
+    private final Context mContext;
     private final AppOpsHelper mAppOpsHelper;
     private final UserInfoHelper mUserInfoHelper;
     private final SettingsHelper mSettingsHelper;
@@ -237,21 +285,20 @@ public class LocationManagerService extends ILocationManager.Stub {
     @PowerManager.LocationPowerSaveMode
     private int mBatterySaverMode;
 
-    LocationManagerService(Context context) {
-        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
+    LocationManagerService(Injector injector) {
         mHandler = FgThread.getHandler();
         mLocalService = new LocalService();
 
         LocalServices.addService(LocationManagerInternal.class, mLocalService);
 
-        mAppOpsHelper = new AppOpsHelper(mContext);
-        mUserInfoHelper = new UserInfoHelper(mContext);
-        mSettingsHelper = new SettingsHelper(mContext);
-        mAppForegroundHelper = new AppForegroundHelper(mContext);
-        mLocationUsageLogger = new LocationUsageLogger();
+        mContext = injector.getContext();
+        mUserInfoHelper = injector.getUserInfoHelper();
+        mAppOpsHelper = injector.getAppOpsHelper();
+        mSettingsHelper = injector.getSettingsHelper();
+        mAppForegroundHelper = injector.getAppForegroundHelper();
+        mLocationUsageLogger = injector.getLocationUsageLogger();
 
-        mGeofenceManager = new GeofenceManager(mContext, mUserInfoHelper, mSettingsHelper,
-                mAppOpsHelper, mLocationUsageLogger);
+        mGeofenceManager = new GeofenceManager(injector);
 
         // set up passive provider - we do this early because it has no dependencies on system
         // services or external code that isn't ready yet, and because this allows the variable to
@@ -277,7 +324,6 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     void onSystemReady() {
         mAppOpsHelper.onSystemReady();
-        mUserInfoHelper.onSystemReady();
         mSettingsHelper.onSystemReady();
         mAppForegroundHelper.onSystemReady();
 
@@ -350,9 +396,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // initialize the current users. we would get the user started notifications for these
             // users eventually anyways, but this takes care of it as early as possible.
-            for (int userId: mUserInfoHelper.getCurrentUserIds()) {
-                onUserChanged(userId, UserListener.USER_STARTED);
-            }
+            onUserChanged(UserHandle.USER_ALL, UserListener.USER_STARTED);
         }
     }
 
@@ -607,10 +651,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private void onUserChanged(@UserIdInt int userId, @UserListener.UserChange int change) {
         switch (change) {
-            case UserListener.USER_SWITCHED:
-                if (D) {
-                    Log.d(TAG, "user " + userId + " current status changed");
-                }
+            case UserListener.CURRENT_USER_CHANGED:
                 synchronized (mLock) {
                     for (LocationProviderManager manager : mProviderManagers) {
                         manager.onEnabledChangedLocked(userId);
@@ -618,9 +659,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
                 break;
             case UserListener.USER_STARTED:
-                if (D) {
-                    Log.d(TAG, "user " + userId + " started");
-                }
                 synchronized (mLock) {
                     for (LocationProviderManager manager : mProviderManagers) {
                         manager.onUserStarted(userId);
@@ -628,9 +666,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
                 break;
             case UserListener.USER_STOPPED:
-                if (D) {
-                    Log.d(TAG, "user " + userId + " stopped");
-                }
                 synchronized (mLock) {
                     for (LocationProviderManager manager : mProviderManagers) {
                         manager.onUserStopped(userId);
@@ -827,7 +862,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
             // update last location if the provider is enabled or if servicing a bypass request
             boolean locationSettingsIgnored = mProvider.getCurrentRequest().locationSettingsIgnored;
-            for (int userId : mUserInfoHelper.getCurrentUserIds()) {
+            for (int userId : mUserInfoHelper.getRunningUserIds()) {
                 if (locationSettingsIgnored || isEnabled(userId)) {
                     setLastLocation(location, userId);
                 }
@@ -850,26 +885,47 @@ public class LocationManagerService extends ILocationManager.Stub {
         @Override
         public void onStateChanged(State oldState, State newState) {
             if (oldState.allowed != newState.allowed) {
+                if (D) {
+                    Log.d(TAG, mName + " provider allowed = " + newState.allowed);
+                }
+
                 onEnabledChangedLocked(UserHandle.USER_ALL);
             }
         }
 
         public void onUserStarted(int userId) {
+            if (userId == UserHandle.USER_NULL) {
+                return;
+            } else if (userId == UserHandle.USER_ALL) {
+                for (int runningUserId : mUserInfoHelper.getRunningUserIds()) {
+                    onUserStarted(runningUserId);
+                }
+                return;
+            }
+
+            Preconditions.checkArgument(userId >= 0);
+
             synchronized (mLock) {
-                // clear the user's enabled state in order to force a reevalution of whether the
-                // provider is enabled or disabled for the given user. we clear the user's state
-                // first to ensure that a user starting never causes any change notifications. it's
-                // possible for us to observe a user before we observe it's been started (for
-                // example, another component gets a user started notification before us and
-                // registers a location request immediately), which would cause us to already have
-                // some state in place. when we eventually do get the user started notification
-                // ourselves we don't want to send a change notification based on the prior state
+                // clear the user's prior enabled state to prevent broadcast of enabled state
+                // change. user starts should never result in a broadcast since the state has
+                // technically not changed.
                 mEnabled.put(userId, null);
                 onEnabledChangedLocked(userId);
             }
         }
 
         public void onUserStopped(int userId) {
+            if (userId == UserHandle.USER_NULL) {
+                return;
+            } else if (userId == UserHandle.USER_ALL) {
+                mEnabled.clear();
+                mLastLocation.clear();
+                mLastCoarseLocation.clear();
+                return;
+            }
+
+            Preconditions.checkArgument(userId >= 0);
+
             synchronized (mLock) {
                 mEnabled.remove(userId);
                 mLastLocation.remove(userId);
@@ -883,6 +939,8 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // settings for instance) do not support the null user
                 return false;
             }
+
+            Preconditions.checkArgument(userId >= 0);
 
             synchronized (mLock) {
                 Boolean enabled = mEnabled.get(userId);
@@ -905,13 +963,13 @@ public class LocationManagerService extends ILocationManager.Stub {
                 // settings for instance) do not support the null user
                 return;
             } else if (userId == UserHandle.USER_ALL) {
-                // we know enabled changes can only happen for current users since providers are
-                // always disabled for all non-current users
-                for (int currentUserId : mUserInfoHelper.getCurrentUserIds()) {
-                    onEnabledChangedLocked(currentUserId);
+                for (int runningUserId : mUserInfoHelper.getRunningUserIds()) {
+                    onEnabledChangedLocked(runningUserId);
                 }
                 return;
             }
+
+            Preconditions.checkArgument(userId >= 0);
 
             // if any property that contributes to "enabled" here changes state, it MUST result
             // in a direct or indrect call to onEnabledChangedLocked. this allows the provider to
@@ -963,11 +1021,19 @@ public class LocationManagerService extends ILocationManager.Stub {
 
                 pw.increaseIndent();
 
-                // for now we only dump for the parent user
-                int userId = mUserInfoHelper.getCurrentUserIds()[0];
-                pw.println("last location=" + mLastLocation.get(userId));
-                pw.println("last coarse location=" + mLastCoarseLocation.get(userId));
-                pw.println("enabled=" + isEnabled(userId));
+                int[] userIds = mUserInfoHelper.getRunningUserIds();
+                for (int userId : userIds) {
+                    if (userIds.length != 1) {
+                        pw.println("user " + userId + ":");
+                        pw.increaseIndent();
+                    }
+                    pw.println("last location=" + mLastLocation.get(userId));
+                    pw.println("last coarse location=" + mLastCoarseLocation.get(userId));
+                    pw.println("enabled=" + isEnabled(userId));
+                    if (userIds.length != 1) {
+                        pw.decreaseIndent();
+                    }
+                }
             }
 
             mProvider.dump(fd, pw, args);
@@ -2803,6 +2869,67 @@ public class LocationManagerService extends ILocationManager.Stub {
             if (mGnssManagerService != null) {
                 mGnssManagerService.sendNiResponse(notifId, userResponse);
             }
+        }
+    }
+
+    private static class SystemInjector implements Injector {
+
+        private final Context mContext;
+        private final UserInfoHelper mUserInfoHelper;
+        private final AppOpsHelper mAppOpsHelper;
+        private final SettingsHelper mSettingsHelper;
+        private final AppForegroundHelper mAppForegroundHelper;
+        private final LocationUsageLogger mLocationUsageLogger;
+
+        SystemInjector(Context context, UserInfoHelper userInfoHelper) {
+            this(
+                    context,
+                    userInfoHelper,
+                    new AppOpsHelper(context),
+                    new SettingsHelper(context),
+                    new AppForegroundHelper(context),
+                    new LocationUsageLogger());
+        }
+
+        SystemInjector(Context context, UserInfoHelper userInfoHelper, AppOpsHelper appOpsHelper,
+                SettingsHelper settingsHelper, AppForegroundHelper appForegroundHelper,
+                LocationUsageLogger locationUsageLogger) {
+            mContext = context;
+            mUserInfoHelper = userInfoHelper;
+            mAppOpsHelper = appOpsHelper;
+            mSettingsHelper = settingsHelper;
+            mAppForegroundHelper = appForegroundHelper;
+            mLocationUsageLogger = locationUsageLogger;
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
+        }
+
+        @Override
+        public UserInfoHelper getUserInfoHelper() {
+            return mUserInfoHelper;
+        }
+
+        @Override
+        public AppOpsHelper getAppOpsHelper() {
+            return mAppOpsHelper;
+        }
+
+        @Override
+        public SettingsHelper getSettingsHelper() {
+            return mSettingsHelper;
+        }
+
+        @Override
+        public AppForegroundHelper getAppForegroundHelper() {
+            return mAppForegroundHelper;
+        }
+
+        @Override
+        public LocationUsageLogger getLocationUsageLogger() {
+            return mLocationUsageLogger;
         }
     }
 }

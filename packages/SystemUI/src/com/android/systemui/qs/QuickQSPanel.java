@@ -41,7 +41,6 @@ import com.android.systemui.qs.customize.QSCustomizer;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
-import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,8 +81,7 @@ public class QuickQSPanel extends QSPanel {
             MediaHost mediaHost,
             UiEventLogger uiEventLogger
     ) {
-        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost,
-                uiEventLogger);
+        super(context, attrs, dumpManager, broadcastDispatcher, qsLogger, mediaHost, uiEventLogger);
         if (mFooter != null) {
             removeView(mFooter.getView());
         }

@@ -29,6 +29,10 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.Notification.Builder;
 import android.app.NotificationChannel;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
+
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -71,6 +75,37 @@ public class BadgeExtractorTest extends UiServiceTestCase {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setDefaults(Notification.DEFAULT_SOUND);
+
+        Notification n = builder.build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        return r;
+    }
+
+    private NotificationRecord getNotificationRecordWithBubble(boolean suppressNotif) {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_UNSPECIFIED);
+        channel.setShowBadge(/* showBadge */ true);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
+
+        Notification.BubbleMetadata metadata = new Notification.BubbleMetadata.Builder(
+                PendingIntent.getActivity(mContext, 0, new Intent(), 0),
+                        Icon.createWithResource("", 0)).build();
+
+        int flags = metadata.getFlags();
+        if (suppressNotif) {
+            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+        } else {
+            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+        }
+        metadata.setFlags(flags);
+
+        final Builder builder = new Builder(getContext())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_SOUND)
+                .setBubbleMetadata(metadata);
 
         Notification n = builder.build();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
@@ -147,6 +182,20 @@ public class BadgeExtractorTest extends UiServiceTestCase {
         when(mConfig.badgingEnabled(mUser)).thenReturn(false);
         when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
         NotificationRecord r = getNotificationRecord(true, IMPORTANCE_HIGH);
+
+        extractor.process(r);
+
+        assertFalse(r.canShowBadge());
+    }
+
+    @Test
+    public void testHideNotifOverridesYes() throws Exception {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+        NotificationRecord r = getNotificationRecordWithBubble(/* suppressNotif */ true);
 
         extractor.process(r);
 

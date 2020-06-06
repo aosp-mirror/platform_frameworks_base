@@ -11,16 +11,12 @@ import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
 import androidx.core.view.GestureDetectorCompat
 import com.android.systemui.R
-import com.android.systemui.dagger.qualifiers.Background
-import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.VisualStabilityManager
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
-import com.android.systemui.util.concurrency.DelayableExecutor
-import java.util.concurrent.Executor
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 private const val FLING_SLOP = 1000000
@@ -32,10 +28,8 @@ private const val FLING_SLOP = 1000000
 @Singleton
 class MediaViewManager @Inject constructor(
     private val context: Context,
-    @Main private val foregroundExecutor: Executor,
-    @Background private val backgroundExecutor: DelayableExecutor,
+    private val mediaControlPanelFactory: Provider<MediaControlPanel>,
     private val visualStabilityManager: VisualStabilityManager,
-    private val activityStarter: ActivityStarter,
     private val mediaHostStatesManager: MediaHostStatesManager,
     mediaManager: MediaDataCombineLatest
 ) {
@@ -147,8 +141,8 @@ class MediaViewManager @Inject constructor(
         visualStabilityManager.addReorderingAllowedCallback(visualStabilityCallback,
                 true /* persistent */)
         mediaManager.addListener(object : MediaDataManager.Listener {
-            override fun onMediaDataLoaded(key: String, data: MediaData) {
-                updateView(key, data)
+            override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+                updateView(key, oldKey, data)
                 updatePlayerVisibilities()
                 mediaCarousel.requiresRemeasuring = true
             }
@@ -259,11 +253,16 @@ class MediaViewManager @Inject constructor(
         }
     }
 
-    private fun updateView(key: String, data: MediaData) {
+    private fun updateView(key: String, oldKey: String?, data: MediaData) {
+        // If the key was changed, update entry
+        val oldData = mediaPlayers[oldKey]
+        if (oldData != null) {
+            val oldData = mediaPlayers.remove(oldKey)
+            mediaPlayers.put(key, oldData!!)
+        }
         var existingPlayer = mediaPlayers[key]
         if (existingPlayer == null) {
-            existingPlayer = MediaControlPanel(context, foregroundExecutor, backgroundExecutor,
-                    activityStarter, mediaHostStatesManager)
+            existingPlayer = mediaControlPanelFactory.get()
             existingPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context),
                     mediaContent))
             mediaPlayers[key] = existingPlayer
@@ -286,7 +285,7 @@ class MediaViewManager @Inject constructor(
                 needsReordering = true
             }
         }
-        existingPlayer.bind(data)
+        existingPlayer?.bind(data)
         updateMediaPaddings()
         updatePageIndicator()
     }

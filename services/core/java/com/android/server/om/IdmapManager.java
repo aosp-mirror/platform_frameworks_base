@@ -65,7 +65,7 @@ final class IdmapManager {
      * modified.
      */
     boolean createIdmap(@NonNull final PackageInfo targetPackage,
-            @NonNull final PackageInfo overlayPackage, int additionalPolicies, int userId) {
+            @NonNull final PackageInfo overlayPackage, int userId) {
         if (DEBUG) {
             Slog.d(TAG, "create idmap for " + targetPackage.packageName + " and "
                     + overlayPackage.packageName);
@@ -73,14 +73,13 @@ final class IdmapManager {
         final String targetPath = targetPackage.applicationInfo.getBaseCodePath();
         final String overlayPath = overlayPackage.applicationInfo.getBaseCodePath();
         try {
+            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId);
             boolean enforce = enforceOverlayable(overlayPackage);
-            int policies = calculateFulfilledPolicies(targetPackage, overlayPackage, userId)
-                    | additionalPolicies;
             if (mIdmapDaemon.verifyIdmap(targetPath, overlayPath, policies, enforce, userId)) {
                 return false;
             }
-            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies, enforce, userId)
-                    != null;
+            return mIdmapDaemon.createIdmap(targetPath, overlayPath, policies,
+                    enforce, userId) != null;
         } catch (Exception e) {
             Slog.w(TAG, "failed to generate idmap for " + targetPath + " and "
                     + overlayPath + ": " + e.getMessage());

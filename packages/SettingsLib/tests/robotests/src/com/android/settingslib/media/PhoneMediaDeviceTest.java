@@ -79,13 +79,11 @@ public class PhoneMediaDeviceTest {
     public void getDrawableResId_returnCorrectResId() {
         when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADPHONES);
 
-        assertThat(mPhoneMediaDevice.getDrawableResId())
-                .isEqualTo(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
+        assertThat(mPhoneMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_headphone);
 
         when(mInfo.getType()).thenReturn(TYPE_WIRED_HEADSET);
 
-        assertThat(mPhoneMediaDevice.getDrawableResId())
-                .isEqualTo(com.android.internal.R.drawable.ic_bt_headphones_a2dp);
+        assertThat(mPhoneMediaDevice.getDrawableResId()).isEqualTo(R.drawable.ic_headphone);
 
         when(mInfo.getType()).thenReturn(TYPE_BUILTIN_SPEAKER);
 

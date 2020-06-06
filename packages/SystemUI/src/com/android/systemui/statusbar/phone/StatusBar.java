@@ -2253,6 +2253,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updateHideIconsForBouncer(false /* animate */);
             }
         }
+
+        updateBubblesVisibility();
     }
 
     @Override
@@ -2268,6 +2270,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
         mLightBarController.onStatusBarAppearanceChanged(appearanceRegions, barModeChanged,
                 mStatusBarMode, navbarColorManagedByIme);
+
+        updateBubblesVisibility();
     }
 
     @Override
@@ -2311,6 +2315,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int barMode = barMode(mTransientShown, mAppearance);
         if (updateBarMode(barMode)) {
             mLightBarController.onStatusBarModeChanged(barMode);
+            updateBubblesVisibility();
         }
     }
 
@@ -2393,6 +2398,14 @@ public class StatusBar extends SystemUI implements DemoMode,
     // Called by NavigationBarFragment
     void setQsScrimEnabled(boolean scrimEnabled) {
         mNotificationPanelViewController.setQsScrimEnabled(scrimEnabled);
+    }
+
+    /** Temporarily hides Bubbles if the status bar is hidden. */
+    private void updateBubblesVisibility() {
+        mBubbleController.onStatusBarVisibilityChanged(
+                mStatusBarMode != MODE_LIGHTS_OUT
+                        && mStatusBarMode != MODE_LIGHTS_OUT_TRANSPARENT
+                        && !mStatusBarWindowHidden);
     }
 
     void checkBarMode(@TransitionMode int mode, @WindowVisibleState int windowState,

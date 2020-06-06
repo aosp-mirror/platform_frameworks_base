@@ -318,8 +318,8 @@ class DisplayAreaPolicyBuilder {
         DisplayArea.Tokens findAreaForToken(WindowToken token) {
             int windowLayerFromType = token.getWindowLayerFromType();
             if (windowLayerFromType == APPLICATION_LAYER) {
-                // TODO(display-area): Better handle AboveAppWindows in APPLICATION_LAYER
-                windowLayerFromType += 1;
+                throw new IllegalArgumentException(
+                        "There shouldn't be WindowToken on APPLICATION_LAYER");
             } else if (token.mRoundedCornerOverlay) {
                 windowLayerFromType = mMaxWindowLayer - 1;
             }

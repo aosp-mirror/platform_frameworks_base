@@ -41,7 +41,7 @@
 namespace android {
 
 constexpr const static uint32_t kIdmapMagic = 0x504D4449u;
-constexpr const static uint32_t kIdmapCurrentVersion = 0x00000003u;
+constexpr const static uint32_t kIdmapCurrentVersion = 0x00000004u;
 
 /**
  * In C++11, char16_t is defined as *at least* 16 bits. We do a lot of
@@ -1745,6 +1745,9 @@ struct Idmap_header {
 
   uint32_t target_crc32;
   uint32_t overlay_crc32;
+
+  uint32_t fulfilled_policies;
+  uint8_t enforce_overlayable;
 
   uint8_t target_path[256];
   uint8_t overlay_path[256];

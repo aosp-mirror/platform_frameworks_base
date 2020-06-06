@@ -21,7 +21,6 @@ import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.media.MediaRoute2Info;
 import android.media.MediaRouter2Manager;
-import android.util.Pair;
 
 import com.android.settingslib.R;
 import com.android.settingslib.bluetooth.BluetoothUtils;
@@ -57,13 +56,11 @@ public class BluetoothMediaDevice extends MediaDevice {
 
     @Override
     public Drawable getIcon() {
-        final Pair<Drawable, String> pair = BluetoothUtils
-                .getBtRainbowDrawableWithDescription(mContext, mCachedDevice);
-        return isFastPairDevice()
-                ? pair.first
-                : BluetoothUtils.buildBtRainbowDrawable(mContext,
-                        mContext.getDrawable(R.drawable.ic_headphone),
-                        mCachedDevice.getAddress().hashCode());
+        final Drawable drawable = getIconWithoutBackground();
+        if (!isFastPairDevice()) {
+            setColorFilter(drawable);
+        }
+        return BluetoothUtils.buildAdvancedDrawable(mContext, drawable);
     }
 
     @Override

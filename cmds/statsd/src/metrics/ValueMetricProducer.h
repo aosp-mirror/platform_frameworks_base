@@ -75,7 +75,7 @@ public:
         if (!mSplitBucketForAppUpgrade) {
             return;
         }
-        if (mIsPulled && mCondition) {
+        if (mIsPulled && mCondition == ConditionState::kTrue) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);
@@ -84,7 +84,7 @@ public:
     // ValueMetric needs special logic if it's a pulled atom.
     void onStatsdInitCompleted(const int64_t& eventTimeNs) override {
         std::lock_guard<std::mutex> lock(mMutex);
-        if (mIsPulled && mCondition) {
+        if (mIsPulled && mCondition == ConditionState::kTrue) {
             pullAndMatchEventsLocked(eventTimeNs);
         }
         flushCurrentBucketLocked(eventTimeNs, eventTimeNs);

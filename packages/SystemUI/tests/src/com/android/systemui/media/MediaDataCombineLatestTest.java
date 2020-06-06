@@ -79,16 +79,16 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         mManager.addListener(mListener);
 
         mMediaData = new MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null,
-                new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null, KEY);
+                new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null, null, KEY, false);
         mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME);
     }
 
     @Test
     public void eventNotEmittedWithoutDevice() {
         // WHEN data source emits an event without device data
-        mDataListener.onMediaDataLoaded(KEY, mMediaData);
+        mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
         // THEN an event isn't emitted
-        verify(mListener, never()).onMediaDataLoaded(eq(KEY), any());
+        verify(mListener, never()).onMediaDataLoaded(eq(KEY), any(), any());
     }
 
     @Test
@@ -96,7 +96,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         // WHEN device source emits an event without media data
         mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
         // THEN an event isn't emitted
-        verify(mListener, never()).onMediaDataLoaded(eq(KEY), any());
+        verify(mListener, never()).onMediaDataLoaded(eq(KEY), any(), any());
     }
 
     @Test
@@ -104,22 +104,22 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         // GIVEN that a device event has already been received
         mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
         // WHEN media event is received
-        mDataListener.onMediaDataLoaded(KEY, mMediaData);
+        mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
         // THEN the listener receives a combined event
         ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
-        verify(mListener).onMediaDataLoaded(eq(KEY), captor.capture());
+        verify(mListener).onMediaDataLoaded(eq(KEY), any(), captor.capture());
         assertThat(captor.getValue().getDevice()).isNotNull();
     }
 
     @Test
     public void emitEventAfterMediaFirst() {
         // GIVEN that media event has already been received
-        mDataListener.onMediaDataLoaded(KEY, mMediaData);
+        mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
         // WHEN device event is received
         mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
         // THEN the listener receives a combined event
         ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
-        verify(mListener).onMediaDataLoaded(eq(KEY), captor.capture());
+        verify(mListener).onMediaDataLoaded(eq(KEY), any(), captor.capture());
         assertThat(captor.getValue().getDevice()).isNotNull();
     }
 
@@ -133,7 +133,7 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
 
     @Test
     public void mediaDataRemovedAfterMediaEvent() {
-        mDataListener.onMediaDataLoaded(KEY, mMediaData);
+        mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
         mDataListener.onMediaDataRemoved(KEY);
         verify(mListener).onMediaDataRemoved(eq(KEY));
     }
@@ -143,6 +143,18 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
         mDataListener.onMediaDataRemoved(KEY);
         verify(mListener).onMediaDataRemoved(eq(KEY));
+    }
+
+    @Test
+    public void mediaDataKeyUpdated() {
+        // GIVEN that device and media events have already been received
+        mDataListener.onMediaDataLoaded(KEY, null, mMediaData);
+        mDeviceListener.onMediaDeviceChanged(KEY, mDeviceData);
+        // WHEN the key is changed
+        mDataListener.onMediaDataLoaded("NEW_KEY", KEY, mMediaData);
+        // THEN the listener gets a load event with the correct keys
+        ArgumentCaptor<MediaData> captor = ArgumentCaptor.forClass(MediaData.class);
+        verify(mListener).onMediaDataLoaded(eq("NEW_KEY"), any(), captor.capture());
     }
 
     private MediaDataManager.Listener captureDataListener() {

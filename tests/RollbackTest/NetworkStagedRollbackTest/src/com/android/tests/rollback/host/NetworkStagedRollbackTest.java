@@ -59,12 +59,14 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
 
     @Before
     public void setUp() throws Exception {
+        runPhase("cleanUp");
         mLogger.start(getDevice());
     }
 
     @After
     public void tearDown() throws Exception {
         mLogger.stop();
+        runPhase("cleanUp");
     }
 
     /**

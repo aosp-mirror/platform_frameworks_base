@@ -27,12 +27,13 @@ import android.os.Process;
 import android.util.ArraySet;
 
 import com.android.server.LocalServices;
-import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.AppOpsHelper;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
 import com.android.server.location.listeners.BinderListenerRegistration;
 import com.android.server.location.listeners.ListenerMultiplexer;
+import com.android.server.location.util.AppForegroundHelper;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.util.UserInfoHelper.UserListener;
 
 import java.io.PrintWriter;
 import java.util.Objects;
@@ -143,7 +144,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     protected final AppForegroundHelper mAppForegroundHelper;
     protected final LocationManagerInternal mLocationManagerInternal;
 
-    private final UserInfoHelper.UserListener mUserChangedListener = this::onUserChanged;
+    private final UserListener mUserChangedListener = this::onUserChanged;
     private final SettingsHelper.UserSettingChangedListener mLocationEnabledChangedListener =
             this::onLocationEnabledChanged;
     private final SettingsHelper.GlobalSettingChangedListener
@@ -261,7 +262,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     }
 
     private void onUserChanged(int userId, int change) {
-        if (change == UserInfoHelper.UserListener.USER_SWITCHED) {
+        if (change == UserListener.CURRENT_USER_CHANGED) {
             updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }

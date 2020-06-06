@@ -32,17 +32,19 @@ data class MediaData(
     val artwork: Icon?,
     val actions: List<MediaAction>,
     val actionsToShowInCompact: List<Int>,
-    val packageName: String?,
+    val packageName: String,
     val token: MediaSession.Token?,
     val clickIntent: PendingIntent?,
     val device: MediaDeviceData?,
-    val notificationKey: String = "INVALID"
+    var resumeAction: Runnable?,
+    val notificationKey: String = "INVALID",
+    var hasCheckedForResume: Boolean = false
 )
 
 /** State of a media action. */
 data class MediaAction(
     val drawable: Drawable?,
-    val intent: PendingIntent?,
+    val action: Runnable?,
     val contentDescription: CharSequence?
 )
 

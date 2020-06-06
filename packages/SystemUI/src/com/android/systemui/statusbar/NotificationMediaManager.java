@@ -52,7 +52,6 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.media.MediaDataManager;
-import com.android.systemui.media.MediaDeviceManager;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
@@ -101,6 +100,12 @@ public class NotificationMediaManager implements Dumpable {
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_PAUSED);
         PAUSED_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
+    }
+    private static final HashSet<Integer> INACTIVE_MEDIA_STATES = new HashSet<>();
+    static {
+        INACTIVE_MEDIA_STATES.add(PlaybackState.STATE_NONE);
+        INACTIVE_MEDIA_STATES.add(PlaybackState.STATE_STOPPED);
+        INACTIVE_MEDIA_STATES.add(PlaybackState.STATE_ERROR);
     }
 
     private final NotificationEntryManager mEntryManager;
@@ -190,8 +195,7 @@ public class NotificationMediaManager implements Dumpable {
             KeyguardBypassController keyguardBypassController,
             @Main DelayableExecutor mainExecutor,
             DeviceConfigProxy deviceConfig,
-            MediaDataManager mediaDataManager,
-            MediaDeviceManager mediaDeviceManager) {
+            MediaDataManager mediaDataManager) {
         mContext = context;
         mMediaArtworkProcessor = mediaArtworkProcessor;
         mKeyguardBypassController = keyguardBypassController;
@@ -212,13 +216,11 @@ public class NotificationMediaManager implements Dumpable {
             @Override
             public void onPendingEntryAdded(NotificationEntry entry) {
                 mediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
-                mediaDeviceManager.onNotificationAdded(entry.getKey(), entry.getSbn());
             }
 
             @Override
             public void onPreEntryUpdated(NotificationEntry entry) {
                 mediaDataManager.onNotificationAdded(entry.getKey(), entry.getSbn());
-                mediaDeviceManager.onNotificationAdded(entry.getKey(), entry.getSbn());
             }
 
             @Override
@@ -239,7 +241,6 @@ public class NotificationMediaManager implements Dumpable {
                     int reason) {
                 onNotificationRemoved(entry.getKey());
                 mediaDataManager.onNotificationRemoved(entry.getKey());
-                mediaDeviceManager.onNotificationRemoved(entry.getKey());
             }
         });
 
@@ -252,8 +253,22 @@ public class NotificationMediaManager implements Dumpable {
                 mPropertiesChangedListener);
     }
 
+    /**
+     * Check if a state should be considered actively playing
+     * @param state a PlaybackState
+     * @return true if playing
+     */
     public static boolean isPlayingState(int state) {
         return !PAUSED_MEDIA_STATES.contains(state);
+    }
+
+    /**
+     * Check if a state should be considered active (playing or paused)
+     * @param state a PlaybackState
+     * @return true if active
+     */
+    public static boolean isActiveState(int state) {
+        return !INACTIVE_MEDIA_STATES.contains(state);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter) {
