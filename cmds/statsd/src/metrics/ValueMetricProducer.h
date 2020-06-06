@@ -313,6 +313,7 @@ private:
     FRIEND_TEST(ValueMetricProducerTest, TestSlicedState);
     FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithMap);
     FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions);
+    FRIEND_TEST(ValueMetricProducerTest, TestSlicedStateWithCondition);
     FRIEND_TEST(ValueMetricProducerTest, TestTrimUnusedDimensionKey);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBase);
     FRIEND_TEST(ValueMetricProducerTest, TestUseZeroDefaultBaseWithPullFailures);
