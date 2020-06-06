@@ -167,6 +167,32 @@ public:
         return valueProducer;
     }
 
+    static sp<ValueMetricProducer> createValueProducerWithConditionAndState(
+            sp<MockStatsPullerManager>& pullerManager, ValueMetric& metric,
+            vector<int32_t> slicedStateAtoms,
+            unordered_map<int, unordered_map<int, int64_t>> stateGroupMap,
+            ConditionState conditionAfterFirstBucketPrepared) {
+        UidMap uidMap;
+        SimpleAtomMatcher atomMatcher;
+        atomMatcher.set_atom_id(tagId);
+        sp<EventMatcherWizard> eventMatcherWizard =
+                new EventMatcherWizard({new SimpleLogMatchingTracker(
+                        atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+        sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+        EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, kConfigKey, _, _, _))
+                .WillOnce(Return());
+        EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, kConfigKey, _))
+                .WillRepeatedly(Return());
+
+        sp<ValueMetricProducer> valueProducer = new ValueMetricProducer(
+                kConfigKey, metric, 0 /* condition tracker index */, {ConditionState::kUnknown},
+                wizard, logEventMatcherIndex, eventMatcherWizard, tagId, bucketStartTimeNs,
+                bucketStartTimeNs, pullerManager, {}, {}, slicedStateAtoms, stateGroupMap);
+        valueProducer->prepareFirstBucket();
+        valueProducer->mCondition = conditionAfterFirstBucketPrepared;
+        return valueProducer;
+    }
+
     static ValueMetric createMetric() {
         ValueMetric metric;
         metric.set_id(metricId);
@@ -185,6 +211,13 @@ public:
 
     static ValueMetric createMetricWithState(string state) {
         ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+        metric.add_slice_by_state(StringToId(state));
+        return metric;
+    }
+
+    static ValueMetric createMetricWithConditionAndState(string state) {
+        ValueMetric metric = ValueMetricProducerTestHelper::createMetric();
+        metric.set_condition(StringToId("SCREEN_ON"));
         metric.add_slice_by_state(StringToId(state));
         return metric;
     }
@@ -3893,13 +3926,13 @@ TEST(ValueMetricProducerTest, TestSlicedState) {
                 return true;
             }));
 
+    StateManager::getInstance().clear();
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithState(
                     pullerManager, metric, {util::SCREEN_STATE_CHANGED}, {});
     EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
 
     // Set up StateManager and check that StateTrackers are initialized.
-    StateManager::getInstance().clear();
     StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
     EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
@@ -4105,12 +4138,12 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithMap) {
         }
     }
 
+    StateManager::getInstance().clear();
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithState(
                     pullerManager, metric, {util::SCREEN_STATE_CHANGED}, stateGroupMap);
 
     // Set up StateManager and check that StateTrackers are initialized.
-    StateManager::getInstance().clear();
     StateManager::getInstance().registerListener(SCREEN_STATE_ATOM_ID, valueProducer);
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
     EXPECT_EQ(1, StateManager::getInstance().getListenersCount(SCREEN_STATE_ATOM_ID));
@@ -4357,12 +4390,12 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
                 return true;
             }));
 
+    StateManager::getInstance().clear();
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithState(
                     pullerManager, metric, {UID_PROCESS_STATE_ATOM_ID}, {});
 
     // Set up StateManager and check that StateTrackers are initialized.
-    StateManager::getInstance().clear();
     StateManager::getInstance().registerListener(UID_PROCESS_STATE_ATOM_ID, valueProducer);
     EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
     EXPECT_EQ(1, StateManager::getInstance().getListenersCount(UID_PROCESS_STATE_ATOM_ID));
@@ -4720,6 +4753,172 @@ TEST(ValueMetricProducerTest, TestSlicedStateWithPrimaryField_WithDimensions) {
     ASSERT_EQ(2, report.value_metrics().data(4).bucket_info_size());
     EXPECT_EQ(6, report.value_metrics().data(4).bucket_info(0).values(0).value_long());
     EXPECT_EQ(5, report.value_metrics().data(4).bucket_info(1).values(0).value_long());
+}
+
+TEST(ValueMetricProducerTest, TestSlicedStateWithCondition) {
+    // Set up ValueMetricProducer.
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithConditionAndState(
+            "BATTERY_SAVER_MODE_STATE");
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+            // Condition changed to true.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 20 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 20 * NS_PER_SEC, 3));
+                return true;
+            }))
+            // Battery saver mode state changed to OFF.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucketStartTimeNs + 30 * NS_PER_SEC);
+                data->clear();
+                data->push_back(
+                        CreateRepeatedValueLogEvent(tagId, bucketStartTimeNs + 30 * NS_PER_SEC, 5));
+                return true;
+            }))
+            // Condition changed to false.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucket2StartTimeNs + 10 * NS_PER_SEC, 15));
+                return true;
+            }));
+
+    StateManager::getInstance().clear();
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithConditionAndState(
+                    pullerManager, metric, {util::BATTERY_SAVER_MODE_STATE_CHANGED}, {},
+                    ConditionState::kFalse);
+    EXPECT_EQ(1, valueProducer->mSlicedStateAtoms.size());
+
+    // Set up StateManager and check that StateTrackers are initialized.
+    StateManager::getInstance().registerListener(util::BATTERY_SAVER_MODE_STATE_CHANGED,
+                                                 valueProducer);
+    EXPECT_EQ(1, StateManager::getInstance().getStateTrackersCount());
+    EXPECT_EQ(1, StateManager::getInstance().getListenersCount(
+                         util::BATTERY_SAVER_MODE_STATE_CHANGED));
+
+    // Bucket status after battery saver mode ON event.
+    // Condition is false so we do nothing.
+    unique_ptr<LogEvent> batterySaverOnEvent =
+            CreateBatterySaverOnEvent(/*timestamp=*/bucketStartTimeNs + 10 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOnEvent);
+    EXPECT_EQ(0UL, valueProducer->mCurrentSlicedBucket.size());
+    EXPECT_EQ(0UL, valueProducer->mCurrentBaseInfo.size());
+
+    // Bucket status after condition change to true.
+    valueProducer->onConditionChanged(true, bucketStartTimeNs + 20 * NS_PER_SEC);
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    std::unordered_map<HashableDimensionKey, std::vector<ValueMetricProducer::BaseInfo>>::iterator
+            itBase = valueProducer->mCurrentBaseInfo.find(DEFAULT_DIMENSION_KEY);
+    EXPECT_TRUE(itBase->second[0].hasBase);
+    EXPECT_EQ(3, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, -1}
+    ASSERT_EQ(1UL, valueProducer->mCurrentSlicedBucket.size());
+    std::unordered_map<MetricDimensionKey, std::vector<ValueMetricProducer::Interval>>::iterator
+            it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(-1 /*StateTracker::kUnknown*/,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_FALSE(it->second[0].hasValue);
+
+    // Bucket status after battery saver mode OFF event.
+    unique_ptr<LogEvent> batterySaverOffEvent =
+            CreateBatterySaverOffEvent(/*timestamp=*/bucketStartTimeNs + 30 * NS_PER_SEC);
+    StateManager::getInstance().onLogEvent(*batterySaverOffEvent);
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    itBase = valueProducer->mCurrentBaseInfo.find(DEFAULT_DIMENSION_KEY);
+    EXPECT_TRUE(itBase->second[0].hasBase);
+    EXPECT_EQ(5, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, ON}
+    ASSERT_EQ(2UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
+    EXPECT_EQ(2, it->second[0].value.long_value);
+
+    // Pull at end of first bucket.
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs, 11));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    EXPECT_EQ(2UL, valueProducer->mPastBuckets.size());
+    EXPECT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    itBase = valueProducer->mCurrentBaseInfo.find(DEFAULT_DIMENSION_KEY);
+    EXPECT_TRUE(itBase->second[0].hasBase);
+    EXPECT_EQ(11, itBase->second[0].base.long_value);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+
+    // Bucket 2 status after condition change to false.
+    valueProducer->onConditionChanged(false, bucket2StartTimeNs + 10 * NS_PER_SEC);
+    // Base for dimension key {}
+    ASSERT_EQ(1UL, valueProducer->mCurrentBaseInfo.size());
+    itBase = valueProducer->mCurrentBaseInfo.find(DEFAULT_DIMENSION_KEY);
+    EXPECT_FALSE(itBase->second[0].hasBase);
+    EXPECT_TRUE(itBase->second[0].hasCurrentState);
+    ASSERT_EQ(1, itBase->second[0].currentState.getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              itBase->second[0].currentState.getValues()[0].mValue.int_value);
+    // Value for key {{}, OFF}
+    ASSERT_EQ(3UL, valueProducer->mCurrentSlicedBucket.size());
+    it = valueProducer->mCurrentSlicedBucket.begin();
+    EXPECT_EQ(0, it->first.getDimensionKeyInWhat().getValues().size());
+    ASSERT_EQ(1, it->first.getStateValuesKey().getValues().size());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF,
+              it->first.getStateValuesKey().getValues()[0].mValue.int_value);
+    EXPECT_TRUE(it->second[0].hasValue);
+    EXPECT_EQ(4, it->second[0].value.long_value);
+
+    // Start dump report and check output.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    valueProducer->onDumpReport(bucket2StartTimeNs + 50 * NS_PER_SEC,
+                                true /* include recent buckets */, true, NO_TIME_CONSTRAINTS,
+                                &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(2, report.value_metrics().data_size());
+
+    ValueMetricData data = report.value_metrics().data(0);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(BatterySaverModeStateChanged::ON, data.slice_by_state(0).value());
+    ASSERT_EQ(1, data.bucket_info_size());
+    EXPECT_EQ(2, data.bucket_info(0).values(0).value_long());
+
+    data = report.value_metrics().data(1);
+    EXPECT_EQ(util::BATTERY_SAVER_MODE_STATE_CHANGED, data.slice_by_state(0).atom_id());
+    EXPECT_TRUE(data.slice_by_state(0).has_value());
+    EXPECT_EQ(BatterySaverModeStateChanged::OFF, data.slice_by_state(0).value());
+    ASSERT_EQ(2, data.bucket_info_size());
+    EXPECT_EQ(6, data.bucket_info(0).values(0).value_long());
+    EXPECT_EQ(4, data.bucket_info(1).values(0).value_long());
 }
 
 /*
