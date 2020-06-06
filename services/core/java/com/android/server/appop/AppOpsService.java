@@ -249,7 +249,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             OP_CAMERA,
     };
 
-    private static final int MAX_UNFORWARED_OPS = 10;
+    private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
@@ -3371,7 +3371,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     unforwardedOps.add(asyncNotedOp);
-                    if (unforwardedOps.size() > MAX_UNFORWARED_OPS) {
+                    if (unforwardedOps.size() > MAX_UNFORWARDED_OPS) {
                         unforwardedOps.remove(0);
                     }
                 }
