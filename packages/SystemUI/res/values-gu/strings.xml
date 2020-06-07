@@ -1065,9 +1065,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"વધુ જોવા માટે સ્વાઇપ કરો"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"આ મીડિયા સત્રને બંધ કરો"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ભૂલ, ફરી પ્રયાસ કરી રહ્યા છીએ…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"ડિવાઇસ કાઢી નાખ્યું"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"મળ્યું નથી"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"નિયંત્રણ ઉપલબ્ધ નથી"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ને ઍક્સેસ કરી શક્યાં નહીં. નિયંત્રણ હજી પણ ઉપલબ્ધ છે અને તે કે ઍપના સેટિંગ બદલાયા નથી તેની ખાતરી કરવા માટે <xliff:g id="APPLICATION">%2$s</xliff:g> ઍપ ચેક કરો."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ઍપ ખોલો"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"સ્ટેટસ લોડ કરી શકાતું નથી"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ભૂલ, ફરીથી પ્રયાસ કરો"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"પ્રક્રિયા ચાલુ છે"</string>

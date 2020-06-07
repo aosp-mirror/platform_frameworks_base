@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Batafsil axborot olish uchun suring"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tavsiyalar yuklanmoqda"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Bu media seansni yopish"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Davom etish"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nofaol. Ilovani tekshiring"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Xato, qayta urinilmoqda…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Qurilma olib tashlandi"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Topilmadi"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Boshqarish imkonsiz"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ochilmadi. <xliff:g id="APPLICATION">%2$s</xliff:g> ilovasining sozlamalari oʻzgarmaganini va hali ham boshqarishga ruxsat borligini tekshiring."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ilovani ochish"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Holat axboroti yuklanmadi"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Xato, qayta urining"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Bajarilmoqda"</string>

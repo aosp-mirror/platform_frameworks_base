@@ -1062,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Balayer l\'écran pour voir plus d\'annonces"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Chargement des recommandations"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Fermer cette session multimédia"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Reprendre"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifier l\'appli"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Erreur. Nouvelle tentative…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Appareil supprimé"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Impossible de charger l\'état"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En cours"</string>

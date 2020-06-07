@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe to see more"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Loading recommendations"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Close this media session"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Resume"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactive, check app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Error, retrying…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Device removed"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Not found"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Control is unavailable"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Couldn’t access <xliff:g id="DEVICE">%1$s</xliff:g>. Check the <xliff:g id="APPLICATION">%2$s</xliff:g> app to make sure that the control is still available and that the app settings haven’t changed."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Open app"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Can’t load status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Error, try again"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"In progress"</string>

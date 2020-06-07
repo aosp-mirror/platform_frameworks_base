@@ -1062,9 +1062,14 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Pasatu hatza aukera gehiago ikusteko"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Gomendioak kargatzen"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Itxi multimedia-saio hau"</string>
+    <!-- no translation found for controls_media_resume (1933520684481586053) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktibo; egiaztatu aplikazioa"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Errorea. Berriro saiatzen…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Gailua kendu da"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Ez da aurkitu"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Ez dago kontrolatzeko aukera"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Ezin izan da atzitu <xliff:g id="DEVICE">%1$s</xliff:g>. Joan <xliff:g id="APPLICATION">%2$s</xliff:g> aplikaziora eta ziurtatu kontrolatzeko aukera oraindik ere erabilgarri dagoela eta aplikazioaren ezarpenak aldatu ez direla."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ireki aplikazioa"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Ezin da kargatu egoera"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Errorea. Saiatu berriro."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Abian"</string>

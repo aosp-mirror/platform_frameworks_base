@@ -1065,9 +1065,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"थप हेर्न स्वाइप गर्नुहोस्"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"सिफारिसहरू लोड गर्दै"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"यो मिडिया सत्र बन्द गर्नुहोस्"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"सुचारु गर्नुहोस्"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय छ, एप जाँच गर्नु…"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"त्रुटि भयो, फेरि प्रयास गर्दै…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"यन्त्र हटाइयो"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"फेला परेन"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"नियन्त्रण सुविधा उपलब्ध छैन"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> माथि पहुँच राख्न सकिएन। यो नियन्त्रण सुविधा अझै पनि उपलब्ध छ र <xliff:g id="APPLICATION">%2$s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न यो एप जाँच्नुहोस्।"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"एप खोल्नुहोस्"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"वस्तुस्थिति लोड गर्न सकिएन"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"त्रुटि भयो, फेरि प्रयास गर्नु…"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"कार्य हुँदै छ"</string>
