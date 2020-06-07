@@ -450,13 +450,14 @@ message Atom {
         TvCasSessionOpenStatus tv_cas_session_open_status =
             280 [(module) = "framework"];
         AssistantInvocationReported assistant_invocation_reported = 281 [(module) = "framework"];
+        DisplayWakeReported display_wake_reported = 282 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10084
+    // Next: 10081
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -547,7 +548,7 @@ message Atom {
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
-        DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
+        //10081 free for use
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
@@ -5817,7 +5818,7 @@ message ProcessStatsProto {
     optional string process = 1;
 
     // Uid of the process.
-    optional int32 uid = 2;
+    optional int32 uid = 2 [(is_uid) = true];
 
     // Information about how often kills occurred
     message Kill {
@@ -5844,13 +5845,16 @@ message ProcessStatsProto {
     repeated ProcessStatsAssociationProto assocs = 7;
 }
 
-// Next Tag: 5
+// Next Tag: 6
 message ProcessStatsAssociationProto {
     // Procss Name of the associated process (client process of service binding)
     optional string assoc_process_name = 1;
 
     // Package Name of the associated package (client package of service binding)
-    optional string assoc_package_name = 2;
+    optional string assoc_package_name = 2 [deprecated = true];
+
+    // UID of the associated process/package (client package of service binding)
+    optional int32 assoc_uid = 5 [(is_uid) = true];
 
     // Total count of the times this association (service binding) appeared.
     optional int32 total_count = 3;
@@ -9827,15 +9831,20 @@ message AccessibilityServiceReported {
     optional android.stats.accessibility.ServiceStatus service_status = 2;
 }
 
-message DisplayWakeReason {
+/**
+ * Logs when display wake up.
+ *
+ * Logged from:
+ *   services/core/java/com/android/server/power/Notifier.java
+ */
+
+message DisplayWakeReported {
     // Wake_up_reason code
     // If LOWORD(wake_up_reason) = 0
     //     reference to HIWORD(wake_up_reason) PowerManager.WAKE_REASON_XXX
     //     else reference wake_up_reason to
-    //     frameworks/base/services/core/java/com/android/server/power/Notifier.java#DispWakeupReason
+    //     services/core/java/com/android/server/power/Notifier.java#onWakeUp
     optional int32 wake_up_reason = 1;
-    // Count of wake up by reason
-    optional int32 wake_times = 2;
 }
 
 /**

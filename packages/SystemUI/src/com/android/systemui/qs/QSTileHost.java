@@ -358,10 +358,23 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
     }
 
     public void addTile(ComponentName tile) {
+        addTile(tile, /* end */ false);
+    }
+
+    /**
+     * Adds a custom tile to the set of current tiles.
+     * @param tile the component name of the {@link android.service.quicksettings.TileService}
+     * @param end if true, the tile will be added at the end. If false, at the beginning.
+     */
+    public void addTile(ComponentName tile, boolean end) {
         String spec = CustomTile.toSpec(tile);
         if (!mTileSpecs.contains(spec)) {
             List<String> newSpecs = new ArrayList<>(mTileSpecs);
-            newSpecs.add(0, spec);
+            if (end) {
+                newSpecs.add(spec);
+            } else {
+                newSpecs.add(0, spec);
+            }
             changeTiles(mTileSpecs, newSpecs);
         }
     }

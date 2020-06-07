@@ -182,6 +182,8 @@ public class AppOpsManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     public static final long CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE = 148180766L;
 
+    private static final int MAX_UNFORWARDED_OPS = 10;
+
     final Context mContext;
 
     @UnsupportedAppUsage
@@ -215,6 +217,17 @@ public class AppOpsManager {
     /** Current {@link OnOpNotedCallback}. Change via {@link #setOnOpNotedCallback} */
     @GuardedBy("sLock")
     private static @Nullable OnOpNotedCallback sOnOpNotedCallback;
+
+    /**
+     * Sync note-ops collected from {@link #readAndLogNotedAppops(Parcel)} that have not been
+     * delivered to a callback yet.
+     *
+     * Similar to {@link com.android.server.appop.AppOpsService#mUnforwardedAsyncNotedOps} for
+     * {@link COLLECT_ASYNC}. Used in situation when AppOpsManager asks to collect stacktrace with
+     * {@link #sMessageCollector}, which forces {@link COLLECT_SYNC} mode.
+     */
+    @GuardedBy("sLock")
+    private static ArrayList<SyncNotedAppOp> sUnforwardedOps = new ArrayList<>();
 
     /**
      * Additional collector that collect accesses and forwards a few of them them via
@@ -8163,6 +8176,11 @@ public class AppOpsManager {
                             code = notedAppOps.nextSetBit(code + 1)) {
                         if (sOnOpNotedCallback != null) {
                             sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, attributionTag));
+                        } else {
+                            sUnforwardedOps.add(new SyncNotedAppOp(code, attributionTag));
+                            if (sUnforwardedOps.size() > MAX_UNFORWARDED_OPS) {
+                                sUnforwardedOps.remove(0);
+                            }
                         }
                     }
                 }
@@ -8228,6 +8246,17 @@ public class AppOpsManager {
                                     () -> sOnOpNotedCallback.onAsyncNoted(asyncNotedAppOp));
                         }
                     }
+                }
+                synchronized (this) {
+                    int numMissedSyncOps = sUnforwardedOps.size();
+                    for (int i = 0; i < numMissedSyncOps; i++) {
+                        final SyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                        if (sOnOpNotedCallback != null) {
+                            sOnOpNotedCallback.getAsyncNotedExecutor().execute(
+                                    () -> sOnOpNotedCallback.onNoted(syncNotedAppOp));
+                        }
+                    }
+                    sUnforwardedOps.clear();
                 }
             }
         }
@@ -8571,6 +8600,25 @@ public class AppOpsManager {
     public void clearHistory() {
         try {
             mService.clearHistory();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Reboots the ops history.
+     *
+     * @param offlineDurationMillis The duration to wait between
+     * tearing down and initializing the history. Must be greater
+     * than or equal to zero.
+     *
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_APPOPS)
+    public void rebootHistory(long offlineDurationMillis) {
+        try {
+            mService.rebootHistory(offlineDurationMillis);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

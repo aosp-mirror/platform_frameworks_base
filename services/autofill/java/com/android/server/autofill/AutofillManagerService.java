@@ -192,7 +192,7 @@ public final class AutofillManagerService
     public AutofillManagerService(Context context) {
         super(context,
                 new SecureSettingsServiceNameResolver(context, Settings.Secure.AUTOFILL_SERVICE),
-                UserManager.DISALLOW_AUTOFILL);
+                UserManager.DISALLOW_AUTOFILL, PACKAGE_UPDATE_POLICY_REFRESH_EAGER);
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
         mAm = LocalServices.getService(ActivityManagerInternal.class);
 

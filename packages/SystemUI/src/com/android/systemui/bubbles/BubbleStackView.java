@@ -80,6 +80,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.ViewClippingUtil;
+import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.animation.ExpandedAnimationController;
@@ -89,6 +90,7 @@ import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
+import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -243,6 +245,9 @@ public class BubbleStackView extends FrameLayout
     /** Whether a touch gesture, such as a stack/bubble drag or flyout drag, is in progress. */
     private boolean mIsGestureInProgress = false;
 
+    /** Whether or not the stack is temporarily invisible off the side of the screen. */
+    private boolean mTemporarilyInvisible = false;
+
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
@@ -265,7 +270,7 @@ public class BubbleStackView extends FrameLayout
     private boolean mShowingDismiss = false;
 
     /** The view to desaturate/darken when magneted to the dismiss target. */
-    private View mDesaturateAndDarkenTargetView;
+    @Nullable private View mDesaturateAndDarkenTargetView;
 
     private LayoutInflater mInflater;
 
@@ -647,6 +652,7 @@ public class BubbleStackView extends FrameLayout
         }
     };
 
+    private View mDismissTargetCircle;
     private ViewGroup mDismissTargetContainer;
     private PhysicsAnimator<View> mDismissTargetAnimator;
     private PhysicsAnimator.SpringConfig mDismissTargetSpring = new PhysicsAnimator.SpringConfig(
@@ -753,12 +759,12 @@ public class BubbleStackView extends FrameLayout
         mFlyoutTransitionSpring.addEndListener(mAfterFlyoutTransitionSpring);
 
         final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
-        final View targetView = new DismissCircleView(context);
+        mDismissTargetCircle = new DismissCircleView(context);
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(targetSize, targetSize);
         newParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        targetView.setLayoutParams(newParams);
-        mDismissTargetAnimator = PhysicsAnimator.getInstance(targetView);
+        mDismissTargetCircle.setLayoutParams(newParams);
+        mDismissTargetAnimator = PhysicsAnimator.getInstance(mDismissTargetCircle);
 
         mDismissTargetContainer = new FrameLayout(context);
         mDismissTargetContainer.setLayoutParams(new FrameLayout.LayoutParams(
@@ -771,14 +777,14 @@ public class BubbleStackView extends FrameLayout
         mDismissTargetContainer.setPadding(0, 0, 0, bottomMargin);
         mDismissTargetContainer.setClipToPadding(false);
         mDismissTargetContainer.setClipChildren(false);
-        mDismissTargetContainer.addView(targetView);
+        mDismissTargetContainer.addView(mDismissTargetCircle);
         mDismissTargetContainer.setVisibility(View.INVISIBLE);
         mDismissTargetContainer.setBackgroundResource(
                 R.drawable.floating_dismiss_gradient_transition);
         addView(mDismissTargetContainer);
 
         // Start translated down so the target springs up.
-        targetView.setTranslationY(
+        mDismissTargetCircle.setTranslationY(
                 getResources().getDimensionPixelSize(R.dimen.floating_dismiss_gradient_height));
 
         final ContentResolver contentResolver = getContext().getContentResolver();
@@ -787,7 +793,7 @@ public class BubbleStackView extends FrameLayout
 
         // Save the MagneticTarget instance for the newly set up view - we'll add this to the
         // MagnetizedObjects.
-        mMagneticTarget = new MagnetizedObject.MagneticTarget(targetView, dismissRadius);
+        mMagneticTarget = new MagnetizedObject.MagneticTarget(mDismissTargetCircle, dismissRadius);
 
         mExpandedViewXAnim =
                 new SpringAnimation(mExpandedViewContainer, DynamicAnimation.TRANSLATION_X);
@@ -903,7 +909,10 @@ public class BubbleStackView extends FrameLayout
 
             // Update the paint and apply it to the bubble container.
             mDesaturateAndDarkenPaint.setColorFilter(new ColorMatrixColorFilter(animatedMatrix));
-            mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
+
+            if (mDesaturateAndDarkenTargetView != null) {
+                mDesaturateAndDarkenTargetView.setLayerPaint(mDesaturateAndDarkenPaint);
+            }
         });
 
         // If the stack itself is touched, it means none of its touchable views (bubbles, flyouts,
@@ -919,6 +928,38 @@ public class BubbleStackView extends FrameLayout
 
             return true;
         });
+
+        animate()
+                .setInterpolator(Interpolators.PANEL_CLOSE_ACCELERATED)
+                .setDuration(CollapsedStatusBarFragment.FADE_IN_DURATION);
+    }
+
+    /**
+     * Sets whether or not the stack should become temporarily invisible by moving off the side of
+     * the screen.
+     *
+     * If a flyout comes in while it's invisible, it will animate back in while the flyout is
+     * showing but disappear again when the flyout is gone.
+     */
+    public void setTemporarilyInvisible(boolean invisible) {
+        mTemporarilyInvisible = invisible;
+        animateTemporarilyInvisible();
+    }
+
+    /**
+     * Animates onto or off the screen depending on whether we're temporarily invisible, and whether
+     * a flyout is visible.
+     */
+    private void animateTemporarilyInvisible() {
+        if (mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE) {
+            if (mStackAnimationController.isStackOnLeftSide()) {
+                animate().translationX(-mBubbleSize).start();
+            } else {
+                animate().translationX(mBubbleSize).start();
+            }
+        } else {
+            animate().translationX(0).start();
+        }
     }
 
     private void setUpManageMenu() {
@@ -1134,6 +1175,13 @@ public class BubbleStackView extends FrameLayout
         }
         mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
         mStackAnimationController.updateResources(mOrientation);
+
+        final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
+        mDismissTargetCircle.getLayoutParams().width = targetSize;
+        mDismissTargetCircle.getLayoutParams().height = targetSize;
+        mDismissTargetCircle.requestLayout();
+
+        mMagneticTarget.setMagneticFieldRadiusPx(mBubbleSize * 2);
     }
 
     @Override
@@ -1857,6 +1905,10 @@ public class BubbleStackView extends FrameLayout
     private void animateDesaturateAndDarken(View targetView, boolean desaturateAndDarken) {
         mDesaturateAndDarkenTargetView = targetView;
 
+        if (mDesaturateAndDarkenTargetView == null) {
+            return;
+        }
+
         if (desaturateAndDarken) {
             // Use the animated paint for the bubbles.
             mDesaturateAndDarkenTargetView.setLayerType(
@@ -1878,9 +1930,14 @@ public class BubbleStackView extends FrameLayout
     }
 
     private void resetDesaturationAndDarken() {
+
         mDesaturateAndDarkenAnimator.removeAllListeners();
         mDesaturateAndDarkenAnimator.cancel();
-        mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
+
+        if (mDesaturateAndDarkenTargetView != null) {
+            mDesaturateAndDarkenTargetView.setLayerType(View.LAYER_TYPE_NONE, null);
+            mDesaturateAndDarkenTargetView = null;
+        }
     }
 
     /** Animates in the dismiss target. */
@@ -1989,6 +2046,9 @@ public class BubbleStackView extends FrameLayout
             // Stop suppressing the dot now that the flyout has morphed into the dot.
             bubbleView.removeDotSuppressionFlag(
                     BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
+
+            mFlyout.setVisibility(INVISIBLE);
+            animateTemporarilyInvisible();
         };
         mFlyout.setVisibility(INVISIBLE);
 
@@ -2006,6 +2066,7 @@ public class BubbleStackView extends FrameLayout
             final Runnable expandFlyoutAfterDelay = () -> {
                 mAnimateInFlyout = () -> {
                     mFlyout.setVisibility(VISIBLE);
+                    animateTemporarilyInvisible();
                     mFlyoutDragDeltaX =
                             mStackAnimationController.isStackOnLeftSide()
                                     ? -mFlyout.getWidth()

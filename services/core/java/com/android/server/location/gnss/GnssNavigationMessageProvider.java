@@ -27,10 +27,10 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.AppOpsHelper;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
+import com.android.server.location.util.AppForegroundHelper;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
 
 /**
  * An base implementation for GPS navigation messages provider.

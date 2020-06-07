@@ -98,7 +98,7 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
 
     // Stores atom id to primary key pairs for each state atom that the metric is
     // sliced by.
-    std::map<int, HashableDimensionKey> statePrimaryKeys;
+    std::map<int32_t, HashableDimensionKey> statePrimaryKeys;
 
     // For states with primary fields, use MetricStateLinks to get the primary
     // field values from the log event. These values will form a primary key

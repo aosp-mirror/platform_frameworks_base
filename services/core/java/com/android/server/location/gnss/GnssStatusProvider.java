@@ -27,11 +27,11 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
-import com.android.server.location.AppForegroundHelper;
-import com.android.server.location.AppOpsHelper;
-import com.android.server.location.LocationUsageLogger;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
+import com.android.server.location.util.AppForegroundHelper;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
 
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.

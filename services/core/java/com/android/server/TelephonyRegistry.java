@@ -2623,14 +2623,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 .setCallingUid(Binder.getCallingUid());
 
         boolean shouldCheckLocationPermissions = false;
-        if ((events & ENFORCE_COARSE_LOCATION_PERMISSION_MASK) != 0) {
-            locationQueryBuilder.setMinSdkVersionForCoarse(0);
-            shouldCheckLocationPermissions = true;
-        }
 
         if ((events & ENFORCE_FINE_LOCATION_PERMISSION_MASK) != 0) {
             // Everything that requires fine location started in Q. So far...
             locationQueryBuilder.setMinSdkVersionForFine(Build.VERSION_CODES.Q);
+            // If we're enforcing fine starting in Q, we also want to enforce coarse starting in Q.
+            locationQueryBuilder.setMinSdkVersionForCoarse(Build.VERSION_CODES.Q);
+            locationQueryBuilder.setMinSdkVersionForEnforcement(Build.VERSION_CODES.Q);
+            shouldCheckLocationPermissions = true;
+        }
+
+        if ((events & ENFORCE_COARSE_LOCATION_PERMISSION_MASK) != 0) {
+            locationQueryBuilder.setMinSdkVersionForCoarse(0);
+            locationQueryBuilder.setMinSdkVersionForEnforcement(0);
             shouldCheckLocationPermissions = true;
         }
 
@@ -2740,6 +2745,19 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    private boolean checkFineLocationAccess(Record r) {
+        return checkFineLocationAccess(r, Build.VERSION_CODES.BASE);
+    }
+
+    private boolean checkCoarseLocationAccess(Record r) {
+        return checkCoarseLocationAccess(r, Build.VERSION_CODES.BASE);
+    }
+
+    /**
+     * Note -- this method should only be used at the site of a permission check if you need to
+     * explicitly allow apps below a certain SDK level access regardless of location permissions.
+     * If you don't need app compat logic, use {@link #checkFineLocationAccess(Record)}.
+     */
     private boolean checkFineLocationAccess(Record r, int minSdk) {
         LocationAccessPolicy.LocationPermissionQuery query =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
@@ -2749,6 +2767,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setMethod("TelephonyRegistry push")
                         .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForFine(minSdk)
+                        .setMinSdkVersionForCoarse(minSdk)
+                        .setMinSdkVersionForEnforcement(minSdk)
                         .build();
 
         return Binder.withCleanCallingIdentity(() -> {
@@ -2758,6 +2778,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         });
     }
 
+    /**
+     * Note -- this method should only be used at the site of a permission check if you need to
+     * explicitly allow apps below a certain SDK level access regardless of location permissions.
+     * If you don't need app compat logic, use {@link #checkCoarseLocationAccess(Record)}.
+     */
     private boolean checkCoarseLocationAccess(Record r, int minSdk) {
         LocationAccessPolicy.LocationPermissionQuery query =
                 new LocationAccessPolicy.LocationPermissionQuery.Builder()
@@ -2767,6 +2792,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                         .setMethod("TelephonyRegistry push")
                         .setLogAsInfo(true) // we don't need to log an error every time we push
                         .setMinSdkVersionForCoarse(minSdk)
+                        .setMinSdkVersionForFine(Integer.MAX_VALUE)
+                        .setMinSdkVersionForEnforcement(minSdk)
                         .build();
 
         return Binder.withCleanCallingIdentity(() -> {

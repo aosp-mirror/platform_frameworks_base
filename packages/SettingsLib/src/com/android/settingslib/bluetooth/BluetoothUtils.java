@@ -1,5 +1,7 @@
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.widget.AdaptiveOutlineDrawable.AdaptiveOutlineIconType.TYPE_ADVANCED;
+
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothProfile;
@@ -7,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -210,6 +213,46 @@ public class BluetoothUtils {
         }
 
         return new Pair<>(pair.first, pair.second);
+    }
+
+    /**
+     * Build device icon with advanced outline
+     */
+    public static Drawable buildAdvancedDrawable(Context context, Drawable drawable) {
+        final int iconSize = context.getResources().getDimensionPixelSize(
+                R.dimen.advanced_icon_size);
+        final Resources resources = context.getResources();
+
+        Bitmap bitmap = null;
+        if (drawable instanceof BitmapDrawable) {
+            bitmap = ((BitmapDrawable) drawable).getBitmap();
+        } else {
+            final int width = drawable.getIntrinsicWidth();
+            final int height = drawable.getIntrinsicHeight();
+            bitmap = createBitmap(drawable,
+                    width > 0 ? width : 1,
+                    height > 0 ? height : 1);
+        }
+
+        if (bitmap != null) {
+            final Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, iconSize,
+                    iconSize, false);
+            bitmap.recycle();
+            return new AdaptiveOutlineDrawable(resources, resizedBitmap, TYPE_ADVANCED);
+        }
+
+        return drawable;
+    }
+
+    /**
+     * Creates a drawable with specified width and height.
+     */
+    public static Bitmap createBitmap(Drawable drawable, int width, int height) {
+        final Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        final Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+        return bitmap;
     }
 
     /**

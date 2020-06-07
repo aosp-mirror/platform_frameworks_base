@@ -42,13 +42,15 @@ import android.util.ArraySet;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 import com.android.server.PendingIntentUtils;
-import com.android.server.location.AppOpsHelper;
 import com.android.server.location.LocationPermissions;
-import com.android.server.location.LocationUsageLogger;
-import com.android.server.location.SettingsHelper;
-import com.android.server.location.UserInfoHelper;
 import com.android.server.location.listeners.ListenerMultiplexer;
 import com.android.server.location.listeners.PendingIntentListenerRegistration;
+import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.Injector;
+import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.util.UserInfoHelper.UserListener;
 
 import java.util.Collection;
 
@@ -221,7 +223,7 @@ public class GeofenceManager extends
 
     protected final Context mContext;
 
-    private final UserInfoHelper.UserListener mUserChangedListener = this::onUserChanged;
+    private final UserListener mUserChangedListener = this::onUserChanged;
     private final SettingsHelper.UserSettingChangedListener mLocationEnabledChangedListener =
             this::onLocationEnabledChanged;
     private final SettingsHelper.UserSettingChangedListener
@@ -240,14 +242,12 @@ public class GeofenceManager extends
     @GuardedBy("mLock")
     private @Nullable Location mLastLocation;
 
-    public GeofenceManager(Context context, UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            LocationUsageLogger locationUsageLogger) {
-        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
-        mUserInfoHelper = userInfoHelper;
-        mSettingsHelper = settingsHelper;
-        mAppOpsHelper = appOpsHelper;
-        mLocationUsageLogger = locationUsageLogger;
+    public GeofenceManager(Injector injector) {
+        mContext = injector.getContext().createAttributionContext(ATTRIBUTION_TAG);
+        mUserInfoHelper = injector.getUserInfoHelper();
+        mSettingsHelper = injector.getSettingsHelper();
+        mAppOpsHelper = injector.getAppOpsHelper();
+        mLocationUsageLogger = injector.getLocationUsageLogger();
     }
 
     /** Called when system is ready. */
@@ -257,7 +257,6 @@ public class GeofenceManager extends
                 return;
             }
 
-            mUserInfoHelper.onSystemReady();
             mSettingsHelper.onSystemReady();
             mAppOpsHelper.onSystemReady();
 
@@ -440,7 +439,7 @@ public class GeofenceManager extends
     }
 
     private void onUserChanged(int userId, int change) {
-        if (change == UserInfoHelper.UserListener.USER_SWITCHED) {
+        if (change == UserListener.CURRENT_USER_CHANGED) {
             updateRegistrations(registration -> registration.getIdentity().getUserId() == userId);
         }
     }

@@ -23,12 +23,14 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityThread;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.inputmethodservice.InputMethodService;
 import android.media.ImageReader;
 import android.os.UserHandle;
 import android.view.Display;
@@ -133,6 +135,13 @@ public class ContextTest {
                 ActivityThread.currentActivityThread().getSystemUiContext();
 
         assertThat(systemUiContext.isUiContext()).isTrue();
+    }
+
+    @Test
+    public void testIsUiContext_InputMethodService_returnsTrue() {
+        final InputMethodService ims = new InputMethodService();
+
+        assertTrue(ims.isUiContext());
     }
 
     @Test
