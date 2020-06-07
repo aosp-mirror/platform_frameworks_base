@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Printimi është çaktivizuar nga <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Aktivizo profilin e punës"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Aplikacionet e tua personale janë bllokuar derisa të aktivizosh profilin tënd të punës"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Aplikacionet personale do të bllokohen më <xliff:g id="DATE">%1$s</xliff:g> në <xliff:g id="TIME">%2$s</xliff:g>. Administratori yt i teknologjisë së informacionit nuk lejon që profili yt i punës të qëndrojë joaktiv për më shumë se <xliff:g id="NUMBER">%3$d</xliff:g> ditë."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Aktivizo"</string>
     <string name="me" msgid="6207584824693813140">"Unë"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opsionet e tabletit"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opsionet e Android TV"</string>
@@ -1161,7 +1159,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> vazhdon të ndalojë"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"Hap përsëri aplikacionin"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"Dërgo koment"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"Dërgo reagim"</string>
     <string name="aerr_close" msgid="3398336821267021852">"Mbyll"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"Vendose në heshtje deri kur të riniset pajisja"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"Prit!"</string>
