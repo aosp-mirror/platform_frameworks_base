@@ -20,6 +20,8 @@ import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import junit.framework.Assert.assertEquals
+import junit.framework.Assert.assertNotNull
+import junit.framework.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -42,6 +44,11 @@ class BubblePersistentRepositoryTest : SysuiTestCase() {
 
     @Test
     fun testReadWriteOperation() {
+        // Verify read before write doesn't cause FileNotFoundException
+        val actual = repository.readFromDisk()
+        assertNotNull(actual)
+        assertTrue(actual.isEmpty())
+
         repository.persistsToDisk(bubbles)
         assertEquals(bubbles, repository.readFromDisk())
     }

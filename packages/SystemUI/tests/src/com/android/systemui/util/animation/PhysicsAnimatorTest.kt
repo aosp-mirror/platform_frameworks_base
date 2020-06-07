@@ -21,6 +21,7 @@ import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Ignore
@@ -590,8 +591,10 @@ class PhysicsAnimatorTest : SysuiTestCase() {
                 updatesForProperty.remove(update)
             }
 
+            val target = animator.weakTarget.get()
+            assertNotNull(target)
             // Mark this invocation verified.
-            verify(mockUpdateListener).onAnimationUpdateForProperty(animator.target, updateMap)
+            verify(mockUpdateListener).onAnimationUpdateForProperty(target!!, updateMap)
         }
 
         verifyNoMoreInteractions(mockUpdateListener)

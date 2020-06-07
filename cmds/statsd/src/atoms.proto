@@ -449,6 +449,7 @@ message Atom {
         TvTunerDvrStatus tv_tuner_dvr_status = 279 [(module) = "framework"];
         TvCasSessionOpenStatus tv_cas_session_open_status =
             280 [(module) = "framework"];
+        AssistantInvocationReported assistant_invocation_reported = 281 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -5803,7 +5804,7 @@ message ProcessStatsProto {
     optional string process = 1;
 
     // Uid of the process.
-    optional int32 uid = 2;
+    optional int32 uid = 2 [(is_uid) = true];
 
     // Information about how often kills occurred
     message Kill {
@@ -5830,13 +5831,16 @@ message ProcessStatsProto {
     repeated ProcessStatsAssociationProto assocs = 7;
 }
 
-// Next Tag: 5
+// Next Tag: 6
 message ProcessStatsAssociationProto {
     // Procss Name of the associated process (client process of service binding)
     optional string assoc_process_name = 1;
 
     // Package Name of the associated package (client package of service binding)
-    optional string assoc_package_name = 2;
+    optional string assoc_package_name = 2 [deprecated = true];
+
+    // UID of the associated process/package (client package of service binding)
+    optional int32 assoc_uid = 5 [(is_uid) = true];
 
     // Total count of the times this association (service binding) appeared.
     optional int32 total_count = 3;
@@ -9994,4 +9998,43 @@ message MediaOutputOpSwitchReported {
 
     // The amount of applied devices within a remote dynamic group after a switching is done.
     optional int32 applied_device_count_within_remote_group = 9;
+}
+
+/**
+ * Logs when the Assistant is invoked.
+ *
+ * Logged from:
+ *   frameworks/base/packages/SystemUI/src/com/android/systemui/assist/AssistManager.java
+ */
+message AssistantInvocationReported {
+
+    // The event_id (as for UiEventReported).
+    optional int32 event_id = 1;
+
+    // The registered Assistant's uid and package (as for UiEventReported).
+    optional int32 uid = 2 [(is_uid) = true];
+    optional string package_name = 3;
+
+    // An identifier used to disambiguate which logs refer to a particular invocation of the
+    // Assistant  (as for UiEventReported).
+    optional int32 instance_id = 4;
+
+    // The state of the device at the time of invocation.
+    enum DeviceState {
+        UNKNOWN_DEVICE_STATE = 0;
+        AOD1 = 1;
+        AOD2 = 2;
+        BOUNCER = 3;
+        UNLOCKED_LOCKSCREEN = 4;
+        LAUNCHER_HOME = 5;
+        LAUNCHER_OVERVIEW = 6;
+        LAUNCHER_ALL_APPS = 7;
+        APP_DEFAULT = 8;
+        APP_IMMERSIVE = 9;
+        APP_FULLSCREEN = 10;
+    }
+    optional DeviceState device_state = 5;
+
+    // Whether the Assistant handles were showing at the time of invocation.
+    optional bool assistant_handles_showing = 6;
 }

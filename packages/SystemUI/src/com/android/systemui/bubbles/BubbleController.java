@@ -578,6 +578,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
+     * Called when the status bar has become visible or invisible (either permanently or
+     * temporarily).
+     */
+    public void onStatusBarVisibilityChanged(boolean visible) {
+        if (mStackView != null) {
+            // Hide the stack temporarily if the status bar has been made invisible, and the stack
+            // is collapsed. An expanded stack should remain visible until collapsed.
+            mStackView.setTemporarilyInvisible(!visible && !isStackExpanded());
+        }
+    }
+
+    /**
      * Sets whether to perform inflation on the same thread as the caller. This method should only
      * be used in tests, not in production.
      */
@@ -867,6 +879,18 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         boolean isSuppressedSummary = mBubbleData.isSummarySuppressed(groupKey);
         boolean isSummary = key.equals(mBubbleData.getSummaryKey(groupKey));
         return (isSummary && isSuppressedSummary) || isSuppressedBubble;
+    }
+
+    /**
+     * True if:
+     * (1) The current notification entry same as selected bubble notification entry and the
+     * stack is currently expanded.
+     *
+     * False otherwise.
+     */
+    public boolean isBubbleExpanded(NotificationEntry entry) {
+        return isStackExpanded() && mBubbleData != null && mBubbleData.getSelectedBubble() != null
+                && mBubbleData.getSelectedBubble().getKey().equals(entry.getKey()) ? true : false;
     }
 
     void promoteBubbleFromOverflow(Bubble bubble) {

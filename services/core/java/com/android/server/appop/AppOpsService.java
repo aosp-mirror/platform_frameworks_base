@@ -16,6 +16,11 @@
 
 package com.android.server.appop;
 
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_CAMERA;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION;
 import static android.app.ActivityManager.PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
@@ -66,11 +71,6 @@ import static android.content.Intent.EXTRA_REPLACING;
 import static android.content.pm.PermissionInfo.PROTECTION_DANGEROUS;
 import static android.content.pm.PermissionInfo.PROTECTION_FLAG_APPOP;
 
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
-import static android.app.ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
 import static com.android.server.appop.AppOpsService.ModeCallback.ALL_OPS;
 
 import static java.lang.Long.max;
@@ -249,7 +249,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             OP_CAMERA,
     };
 
-    private static final int MAX_UNFORWARED_OPS = 10;
+    private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
@@ -322,7 +322,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @VisibleForTesting
     final SparseArray<UidState> mUidStates = new SparseArray<>();
 
-    final HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
+    volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
 
     long mLastRealtime;
 
@@ -1776,8 +1776,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHandler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                List<String> packageNames = getPackageNamesForSampling();
-                resamplePackageAndAppOpLocked(packageNames);
+                List<String> packageNames = getPackageListAndResample();
                 initializeRarelyUsedPackagesList(new ArraySet<>(packageNames));
             }
         }, RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS);
@@ -1978,6 +1977,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED && mWriteNoteOpsScheduled) {
             writeNoteOps();
         }
+
+        mHistoricalRegistry.shutdown();
     }
 
     private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
@@ -3372,7 +3373,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     unforwardedOps.add(asyncNotedOp);
-                    if (unforwardedOps.size() > MAX_UNFORWARED_OPS) {
+                    if (unforwardedOps.size() > MAX_UNFORWARDED_OPS) {
                         unforwardedOps.remove(0);
                     }
                 }
@@ -5881,6 +5882,25 @@ public class AppOpsService extends IAppOpsService.Stub {
         mHistoricalRegistry.clearHistory();
     }
 
+    @Override
+    public void rebootHistory(long offlineDurationMillis) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
+                "rebootHistory");
+
+        Preconditions.checkArgument(offlineDurationMillis >= 0);
+
+        // Must not hold the appops lock
+        mHistoricalRegistry.shutdown();
+
+        if (offlineDurationMillis > 0) {
+            SystemClock.sleep(offlineDurationMillis);
+        }
+
+        mHistoricalRegistry = new HistoricalRegistry(mHistoricalRegistry);
+        mHistoricalRegistry.systemReady(mContext.getContentResolver());
+        mHistoricalRegistry.persistPendingHistory();
+    }
+
     /**
      * Report runtime access to AppOp together with message (including stack trace)
      *
@@ -5967,11 +5987,13 @@ public class AppOpsService extends IAppOpsService.Stub {
         mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
                 Binder.getCallingPid(), Binder.getCallingUid(), null);
         RuntimeAppOpAccessMessage result;
-        List<String> packageNames = getPackageNamesForSampling();
         synchronized (this) {
             result = mCollectedRuntimePermissionMessage;
-            resamplePackageAndAppOpLocked(packageNames);
+            mCollectedRuntimePermissionMessage = null;
         }
+        mHandler.sendMessage(PooledLambda.obtainMessage(
+                AppOpsService::getPackageListAndResample,
+                this));
         return result;
     }
 
@@ -5995,6 +6017,15 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
+    /** Obtains package list and resamples package and appop to watch. */
+    private List<String> getPackageListAndResample() {
+        List<String> packageNames = getPackageNamesForSampling();
+        synchronized (this) {
+            resamplePackageAndAppOpLocked(packageNames);
+        }
+        return packageNames;
+    }
+
     /** Resamples package and appop to watch from the list provided. */
     private void resamplePackageAndAppOpLocked(@NonNull List<String> packageNames) {
         if (!packageNames.isEmpty()) {
@@ -6010,7 +6041,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         mSampledAppOpCode = ThreadLocalRandom.current().nextInt(_NUM_OP);
         mAcceptableLeftDistance = _NUM_OP;
         mSampledPackage = packageName;
-        mCollectedRuntimePermissionMessage = null;
     }
 
     /**

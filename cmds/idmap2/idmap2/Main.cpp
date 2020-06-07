@@ -53,9 +53,8 @@ void PrintUsage(const NameToFunctionMap& commands, std::ostream& out) {
 int main(int argc, char** argv) {
   SYSTRACE << "main";
   const NameToFunctionMap commands = {
-      {"create", Create}, {"create-multiple", CreateMultiple},
-      {"dump", Dump},     {"lookup", Lookup},
-      {"scan", Scan},     {"verify", Verify},
+      {"create", Create}, {"create-multiple", CreateMultiple}, {"dump", Dump}, {"lookup", Lookup},
+      {"scan", Scan},
   };
   if (argc <= 1) {
     PrintUsage(commands, std::cerr);
