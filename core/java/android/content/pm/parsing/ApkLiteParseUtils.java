@@ -20,7 +20,6 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_BAD_PACKAGE
 import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_MANIFEST_MALFORMED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import android.compat.annotation.UnsupportedAppUsage;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
@@ -303,6 +302,7 @@ public class ApkLiteParseUtils {
         int revisionCode = 0;
         boolean coreApp = false;
         boolean debuggable = false;
+        boolean profilableByShell = false;
         boolean multiArch = false;
         boolean use32bitAbi = false;
         boolean extractNativeLibs = true;
@@ -379,6 +379,10 @@ public class ApkLiteParseUtils {
                     switch (attr) {
                         case "debuggable":
                             debuggable = attrs.getAttributeBooleanValue(i, false);
+                            if (debuggable) {
+                                // Debuggable implies profileable
+                                profilableByShell = true;
+                            }
                             break;
                         case "multiArch":
                             multiArch = attrs.getAttributeBooleanValue(i, false);
@@ -431,6 +435,13 @@ public class ApkLiteParseUtils {
                         minSdkVersion = attrs.getAttributeIntValue(i, DEFAULT_MIN_SDK_VERSION);
                     }
                 }
+            } else if (PackageParser.TAG_PROFILEABLE.equals(parser.getName())) {
+                for (int i = 0; i < attrs.getAttributeCount(); ++i) {
+                    final String attr = attrs.getAttributeName(i);
+                    if ("shell".equals(attr)) {
+                        profilableByShell = attrs.getAttributeBooleanValue(i, profilableByShell);
+                    }
+                }
             }
         }
 
@@ -445,12 +456,13 @@ public class ApkLiteParseUtils {
             overlayPriority = 0;
         }
 
-        return input.success(new PackageParser.ApkLite(codePath, packageSplit.first,
-                packageSplit.second, isFeatureSplit, configForSplit, usesSplitName, isSplitRequired,
-                versionCode, versionCodeMajor, revisionCode, installLocation, verifiers,
-                signingDetails, coreApp, debuggable, multiArch, use32bitAbi, useEmbeddedDex,
-                extractNativeLibs, isolatedSplits, targetPackage, overlayIsStatic, overlayPriority,
-                minSdkVersion, targetSdkVersion));
+        return input.success(
+                new PackageParser.ApkLite(codePath, packageSplit.first, packageSplit.second,
+                        isFeatureSplit, configForSplit, usesSplitName, isSplitRequired, versionCode,
+                        versionCodeMajor, revisionCode, installLocation, verifiers, signingDetails,
+                        coreApp, debuggable, profilableByShell, multiArch, use32bitAbi,
+                        useEmbeddedDex, extractNativeLibs, isolatedSplits, targetPackage,
+                        overlayIsStatic, overlayPriority, minSdkVersion, targetSdkVersion));
     }
 
     public static ParseResult<Pair<String, String>> parsePackageSplitNames(ParseInput input,
