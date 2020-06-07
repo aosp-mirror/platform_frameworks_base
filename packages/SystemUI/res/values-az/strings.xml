@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ekranı doldurmaq üçün yaxınlaşdır"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ekranı doldurmaq üçün uzat"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinşot"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Daha çox seçim üçün telefonu kiliddən çıxarın"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Daha çox seçim üçün planşeti kiliddən çıxarın"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Daha çox seçim üçün cihazı kiliddən çıxarın"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"şəkil göndərdi"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skrinşot yadda saxlanılır..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinşot yadda saxlanır..."</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"aktiv edin"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktiv edin"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Çıxış cihazına keçin"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Tətbiq bərkidilib"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və İcmal düymələrinə basıb saxlayın."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri və Əsas səhifə düymələrinə basıb saxlayın."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Bu, onu çıxarana qədər görünəcək. Çıxarmaq üçün yuxarı sürüşdürün &amp; basıb saxlayın."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Geri düyməsinə basıb saxlayın."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Sancaq götürülənə qədər bu görünəcək. Sancağı götürmək üçün Əsas səhifə düyməsinə basıb saxlayın."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Şəxsi məlumatlar (məsələn, kontaktlar və e-poçt məzmunu) əlçatan ola bilər."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Bərkidilmiş tətbiq digər tətbiqləri aça bilər."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu tətbiqi çıxarmaq üçün Geri və İcmal düymələrinə basıb saxlayın"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu tətbiqi çıxarmaq üçün Geri və Əsas ekran düymələrinə basıb saxlayın"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu tətbiqi çıxarmaq üçün yuxarı sürüşdürüb saxlayın"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Anladım!"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Yox, çox sağ olun"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Tətbiq bərkidildi"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Tətbiq çıxarıldı"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> gizlədilsin?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Ayarlarda onu aktivləşdirəcəyiniz vaxta qədər o, yenidən görünəcək."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Gizlədin"</string>
@@ -730,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Söhbət bölməsinin yuxarısında göstərilir, üzən qabarcıq kimi görünür, kilid ekranında profil şəkli göstərir"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> söhbətə aid ayarları dəstəkləmir"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> söhbət funksiyalarını dəstəkləmir"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Yumrucuqlar yoxdur"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Son yumrucuqlar və buraxılmış yumrucuqlar burada görünəcək"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirişlər dəyişdirilə bilməz."</string>
@@ -1024,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Sistem naviqasiyası yeniləndi. Dəyişiklik etmək üçün Ayarlara daxil olun."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Sistem naviqasiyasını yeniləmək üçün Ayarlara keçin"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Gözləmə rejimi"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Söhbət prioritet olaraq ayarlanıb"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritet söhbətlər bunları edəcək:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Söhbət bölməsinin yuxarısında göstərilir"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Kilid ekranında profil şəkli göstərilir"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Tətbiqlərin üzərində üzən qabarcıq kimi görünəcək"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Narahat Etməyin rejimində göstərilsin"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Anladım"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Ayarlar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Böyütmə Pəncərəsi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Böyütmə Pəncərəsi Kontrolları"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Cihaz idarəetmələri"</string>
@@ -1069,9 +1061,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Digərlərini görmək üçün sürüşdürün"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tövsiyələr yüklənir"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Bu media sessiyasını bağlayın"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Davam edin"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Aktiv deyil, tətbiqi yoxlayın"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Xəta, yenidən cəhd edilir…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Cihaz silindi"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Statusu yükləmək alınmadı"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Xəta, yenidən cəhd edin"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Davam edir"</string>

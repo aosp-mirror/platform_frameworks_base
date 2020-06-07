@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Ekranga moslashtirish"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Ekran hajmida cho‘zish"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skrinshot"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Boshqa parametrlar uchun telefoningiz qulfini oching"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Boshqa parametrlar uchun planshetingiz qulfini oching"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Boshqa parametrlar uchun qurilmangiz qulfini oching"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"rasm yuborildi"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Skrinshot saqlanmoqda…"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Skrinshot saqlanmoqda…"</string>
@@ -439,7 +436,7 @@
     <string name="recents_swipe_up_onboarding" msgid="2820265886420993995">"Ilovalarni almashtirish uchun ekranni tepaga suring"</string>
     <string name="recents_quick_scrub_onboarding" msgid="765934300283514912">"Ilovalarni tezkor almashtirish uchun o‘ngga torting"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7908949976727578403">"Umumiy nazar rejimini almashtirish"</string>
-    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Batareya quvvati to‘ldi"</string>
+    <string name="expanded_header_battery_charged" msgid="5307907517976548448">"Quvvat oldi"</string>
     <string name="expanded_header_battery_charging" msgid="1717522253171025549">"Quvvat olmoqda"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="757991461445765011">"<xliff:g id="CHARGING_TIME">%s</xliff:g>da to‘ladi"</string>
     <string name="expanded_header_battery_not_charging" msgid="809409140358955848">"Quvvat olmayapti"</string>
@@ -595,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"faollashtirish"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"faolsizlantirish"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Audiochiqish qurilmasini almashtirish"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Ilova mahkamlandi"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Orqaga” va “Umumiy ma’lumot” tugmalarini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmalarni birga bosib turing."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Yechilmaguncha chiqib turadi. Yechish uchun tepaga suring va qoʻlingizni kerakli holatda tutib turing."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran yechilmaguncha u o‘zgarmas holatda qoladi. Uni yechish uchun “Umumiy ma’lumot” tugmasini bosib turing."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ekran yechib olinmagunicha u mahkamlangan holatda qoladi. Uni yechish uchun Orqaga va Asosiy tugmlarni birga bosib turing."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Shaxsiy maʼlumotlarga kira oladi (masalan, kontaktlar va email ichidagilarga)"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Mahkamlangan ilova boshqa ilovalarni ochishi mumkin."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Bu ilovadan chiqish uchun Orqaga va Menyu tugmalarini bosib turing"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Bu ilovani olib tashlash uchun Orqaga va Bosh ekran tugmalarini bosib turing"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Bu ilovani olib tashlash uchun tepaga surib, bosib turing"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Yo‘q, kerakmas"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Ilova mahkamlandi"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Ilova olib tashlandi"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Berkitish"</string>
@@ -730,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Suhbatlar ruknining tepasida qalqib chiquvchi bulutcha shaklida chiqadi, ekran qulfida profil rasmi chiqadi"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Sozlamalar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Muhim"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat sozlamalari ishlamaydi"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasida suhbat funksiyalari ishlamaydi"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Avvalgi bulutchalar topilmadi"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Bu yerda oxirgi va yopilgan bulutcha shaklidagi bildirishnomalar chiqadi"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
@@ -1024,15 +1013,18 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Tizim navigatsiyasi yangilandi. Buni Sozlamalar orqali oʻzgartirishingiz mumkin."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Tizim navigatsiyasini yangilash uchun Sozlamalarni oching"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Kutib turing"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Suhbat muhim deb belgilandi"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Muhim suhbatlar quyidagi amallarni bajaradi:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Suhbatlar ruknining tepasida chiqarish"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ekran qulfida profil rasmini chiqarish"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Ilovalar ustida bulutchali xabar sifatida chiqadi"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Bezovta qilinmasin rejimida chiqarish"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Sozlamalar"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Kattalashtirish oynasi"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kattalashtirish oynasi sozlamalari"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Qurilma boshqaruv elementlari"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ulangan qurilmalarga boshqaruv elementlarini kiriting"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Qurilmalarni boshqarish"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Ulangan qurilmalar uchun boshqaruv elementlari"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Qurilma boshqaruv elementlarini sozlash"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Boshqaruv elementlariga kirish uchun oʻchirib-yoqish tugmasini bosib turing"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Boshqaruv elementlarini kiritish uchun ilovani tanlang"</string>
@@ -1058,7 +1050,7 @@
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Kiritish"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"<xliff:g id="APP">%s</xliff:g> taklif etgan"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Boshqaruv elementlari yangilandi"</string>
-    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN kod harflar va belgilardan iborat boʻladi"</string>
+    <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"Harflar yoki maxsus belgilardan iborat PIN kod"</string>
     <string name="controls_pin_verify" msgid="3452778292918877662">"Tekshirish: <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN kod xato"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Tekshirilmoqda…"</string>
@@ -1069,13 +1061,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Batafsil axborot olish uchun suring"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Tavsiyalar yuklanmoqda"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Bu media seansni yopish"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Davom etish"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Nofaol. Ilovani tekshiring"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Xato, qayta urinilmoqda…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Qurilma olib tashlandi"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Topilmadi"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Boshqarish imkonsiz"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ochilmadi. <xliff:g id="APPLICATION">%2$s</xliff:g> ilovasining sozlamalari oʻzgarmaganini va hali ham boshqarishga ruxsat borligini tekshiring."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ilovani ochish"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Holat axboroti yuklanmadi"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Xato, qayta urining"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Bajarilmoqda"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Yangi boshqaruv elementlari bilan tanishish uchun quvvat tugmasini bosib turing"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Boshqaruv elementlarini kiritish"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Boshqaruv elementlarini tahrirlash"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Element kiritish"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Elementlarni tahrirlash"</string>
 </resources>
