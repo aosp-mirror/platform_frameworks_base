@@ -94,6 +94,10 @@ public:
         Permanent = 1,
     };
 
+    enum StorageFlags {
+        ReadLogsEnabled = 1,
+    };
+
     static FileId idFromMetadata(std::span<const uint8_t> metadata);
     static inline FileId idFromMetadata(std::span<const char> metadata) {
         return idFromMetadata({(const uint8_t*)metadata.data(), metadata.size()});
@@ -116,6 +120,7 @@ public:
     int unbind(StorageId storage, std::string_view target);
     void deleteStorage(StorageId storage);
 
+    void disableReadLogs(StorageId storage);
     int setStorageParams(StorageId storage, bool enableReadLogs);
 
     int makeFile(StorageId storage, std::string_view path, int mode, FileId id,
@@ -264,6 +269,7 @@ private:
         const std::string root;
         Control control;
         /*const*/ MountId mountId;
+        int32_t flags = StorageFlags::ReadLogsEnabled;
         StorageMap storages;
         BindMap bindPoints;
         DataLoaderStubPtr dataLoaderStub;
@@ -281,6 +287,9 @@ private:
         ~IncFsMount();
 
         StorageMap::iterator makeStorage(StorageId id);
+
+        void disableReadLogs() { flags &= ~StorageFlags::ReadLogsEnabled; }
+        int32_t readLogsEnabled() const { return (flags & StorageFlags::ReadLogsEnabled); }
 
         static void cleanupFilesystem(std::string_view root);
     };
