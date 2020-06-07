@@ -204,10 +204,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Kipengele cha kuchapisha kimezimwa na <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Washa wasifu wako wa kazini"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Programu zako za binafsi zimezuiwa hadi uwashe wasifu wako wa kazini"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Programu za binafsi zitazuiwa tarehe <xliff:g id="DATE">%1$s</xliff:g> saa <xliff:g id="TIME">%2$s</xliff:g>. Msimamizi wako wa TEHAMA haruhusu wasifu wako wa kazini kuzimwa kwa zaidi ya siku <xliff:g id="NUMBER">%3$d</xliff:g>."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Washa"</string>
     <string name="me" msgid="6207584824693813140">"Mimi"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Chaguo za kompyuta ndogo"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Chaguo za Android TV"</string>
@@ -2057,11 +2055,11 @@
     <string name="resolver_work_tab" msgid="2690019516263167035">"Kazini"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"Mwonekano wa binafsi"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Mwonekano wa kazini"</string>
-    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Imeshindwa kushiriki maudhui haya na programu za kazini"</string>
+    <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Huwezi kushiriki maudhui haya na programu za kazini"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Msimamizi wako wa TEHAMA hakuruhusu ushiriki maudhui haya ukitumia programu zilizo kwenye wasifu wako wa kazini"</string>
     <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Huwezi kufungua maudhui haya ukitumia programu za kazini"</string>
     <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Msimamizi wako wa TEHAMA hakuruhusu ufungue maudhui haya ukitumia programu zilizo kwenye wasifu wako wa kazini"</string>
-    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Imeshindwa kushiriki maudhui haya na programu za binafsi"</string>
+    <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Huwezi kushiriki maudhui haya na programu za binafsi"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Msimamizi wako wa TEHAMA hakuruhusu ushiriki maudhui haya ukitumia programu zilizo kwenye wasifu wako wa binafsi"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Huwezi kufungua maudhui haya ukitumia programu za binafsi"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Msimamizi wako wa TEHAMA hakuruhusu ufungue maudhui haya ukitumia programu zilizo kwenye wasifu wako wa binafsi"</string>
