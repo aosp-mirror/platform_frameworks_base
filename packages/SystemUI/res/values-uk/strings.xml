@@ -419,7 +419,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Обмеження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Застереження: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Робочий профіль"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний режим"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Нічний екран"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вмикається ввечері"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До сходу сонця"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Вмикається о <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -725,8 +725,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"З\'являється вгорі розділу розмов у спливаючому сповіщенні та показує зображення профілю на заблокованому екрані"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Налаштування"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Пріоритет"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не підтримує функції розмов"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Немає нещодавніх спливаючих чатів"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Тут з\'являтимуться нещодавні й закриті спливаючі чати"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ці сповіщення не можна змінити."</string>
@@ -1024,15 +1023,18 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навігацію в системі оновлено. Щоб внести зміни, перейдіть у налаштування."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Перейдіть у налаштування, щоб оновити навігацію в системі"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим очікування"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Розмову призначено важливою"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Важливі розмови:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"З\'являються вгорі розділу розмов"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Показують фото профілю на заблокованому екрані"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"З\'являються як спливаючі чати поверх додатків"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Переривають режим \"Не турбувати\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Налаштування"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Вікно збільшення з накладанням"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Вікно збільшення"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Елементи керування вікна збільшення"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Елементи керування пристроями"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Керування пристроями"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"Додайте елементи керування для підключених пристроїв"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Налаштувати елементи керування пристроями"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Щоб відкрити елементи керування, утримуйте кнопку живлення"</string>
@@ -1051,7 +1053,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"видалити з вибраного"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Перемістити на позицію <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Елементи керування"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Виберіть, які елементи керування будуть у меню \"Живлення\""</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Виберіть, які елементи керування будуть у меню кнопки живлення"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Щоб змінити порядок елементів керування, перетягуйте їх"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Усі елементи керування вилучено"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Зміни не збережено"</string>
@@ -1062,7 +1064,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Запропоновано додатком <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Елементи керування оновлено"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"PIN-код містить літери чи символи"</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>: підтвердити"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"<xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Неправильний PIN-код"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Підтвердження…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Введіть PIN-код"</string>
@@ -1072,9 +1074,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Гортайте, щоб переглянути інші"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Завантаження рекомендацій"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Закрити цей сеанс медіа"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Відновити"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно, перейдіть у додаток"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Помилка. Повторна спроба…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Пристрій вилучено"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Не вдалося завантажити статус"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Помилка. Спробуйте знову"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Виконується"</string>

@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ, ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਈ ਜਾਂਦੀ ਹੈ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ਤਰਜੀਹ"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਐਪ ਗੱਲਬਾਤ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਦਾ ਸਮਰਥਨ ਨਹੀਂ ਕਰਦੀ"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ਕੋਈ ਹਾਲੀਆ ਬਬਲ ਨਹੀਂ"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ਹਾਲੀਆ ਬਬਲ ਅਤੇ ਖਾਰਜ ਕੀਤੇ ਬਬਲ ਇੱਥੇ ਦਿਸਣਗੇ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਸੋਧਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ।"</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਅੱਪਡੇਟ ਹੋ ਗਿਆ। ਤਬਦੀਲੀਆਂ ਕਰਨ ਲਈ, ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"ਗੱਲਬਾਤ ਨੂੰ ਤਰਜੀਹੀ ਗੱਲਬਾਤ ਵਜੋਂ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ ਇਹ ਹੋਣਗੀਆਂ:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਓ"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ਐਪਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਫਲੋਟਿੰਗ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਸੈਟਿੰਗਾਂ ਵਿੱਚ ਵਿਘਨ ਪੈ ਸਕਦਾ ਹੈ"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ਸਮਝ ਲਿਆ"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ਵੱਡਦਰਸ਼ੀਕਰਨ ਓਵਰਲੇ Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ਵੱਡਦਰਸ਼ੀਕਰਨ Window ਦੇ ਕੰਟਰੋਲ"</string>
@@ -1026,7 +1028,7 @@
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"ਆਪਣੇ ਕਨੈਕਟ ਕੀਤੇ ਡੀਵਾਈਸਾਂ ਲਈ ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ਡੀਵਾਈਸ ਕੰਟਰੋਲਾਂ ਦਾ ਸੈੱਟਅੱਪ ਕਰੋ"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"ਆਪਣੇ ਕੰਟਰੋਲਾਂ ਤੱਕ ਪਹੁੰਚ ਕਰਨ ਲਈ ਪਾਵਰ ਬਟਨ ਦਬਾ ਕੇ ਰੱਖੋ"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕਰਨ ਲਈ ਐਪ ਚੁਣੋ"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="one"><xliff:g id="NUMBER_1">%s</xliff:g> ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤਾ ਗਿਆ।</item>
       <item quantity="other"><xliff:g id="NUMBER_1">%s</xliff:g> ਕੰਟਰੋਲ ਸ਼ਾਮਲ ਕੀਤੇ ਗਏ।</item>
@@ -1060,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ਹੋਰ ਦੇਖਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ਸਿਫ਼ਾਰਸ਼ਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"ਇਸ ਮੀਡੀਆ ਸੈਸ਼ਨ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ਗੜਬੜ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"ਡੀਵਾਈਸ ਹਟਾਇਆ ਗਿਆ"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"ਨਹੀਂ ਮਿਲਿਆ"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"ਕੰਟਰੋਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ <xliff:g id="APPLICATION">%2$s</xliff:g> ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿ ਕੰਟਰੋਲ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੈ ਅਤੇ ਐਪ ਸੈਟਿੰਗ ਬਦਲੀ ਨਹੀਂ ਹੈ।"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ਸਥਿਤੀ ਲੋਡ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ਗੜਬੜ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"ਜਾਰੀ ਹੈ"</string>
