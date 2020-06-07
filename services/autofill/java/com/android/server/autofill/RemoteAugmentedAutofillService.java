@@ -245,6 +245,11 @@ final class RemoteAugmentedAutofillService
         if (inlineSuggestionsData == null || inlineSuggestionsData.isEmpty()
                 || inlineSuggestionsCallback == null || request == null
                 || remoteRenderService == null) {
+            // If it was an inline request and the response doesn't have any inline suggestions,
+            // we will send an empty response to IME.
+            if (inlineSuggestionsCallback != null && request != null) {
+                inlineSuggestionsCallback.apply(InlineFillUi.emptyUi(focusedId));
+            }
             return;
         }
         mCallbacks.setLastResponse(sessionId);
