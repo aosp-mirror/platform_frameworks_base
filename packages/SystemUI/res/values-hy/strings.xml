@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ցուցադրվում է զրույցների ցանկի վերևում, հայտնվում է լողացող ամպիկի տեսքով, ցուցադրում է պրոֆիլի նկարը կողպէկրանին"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Կարգավորումներ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Կարևոր"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածը զրույցի գործառույթներ չի աջակցում"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Վերջին ամպիկներ չկան"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Այստեղ կցուցադրվեն վերջերս օգտագործված և փակված ամպիկները, որոնք կկարողանաք հեշտությամբ վերաբացել"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Այս ծանուցումները չեն կարող փոփոխվել:"</string>
@@ -746,7 +745,7 @@
     <string name="inline_undo" msgid="9026953267645116526">"Հետարկել"</string>
     <string name="demote" msgid="6225813324237153980">"Նշել այս ծանուցումը որպես ոչ զրույց"</string>
     <string name="notification_conversation_favorite" msgid="1905240206975921907">"Կարևոր զրույց"</string>
-    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Ոչ կարևոր զրույց"</string>
+    <string name="notification_conversation_unfavorite" msgid="181383708304763807">"Կարևոր զրույց չէ"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"Լռեցված"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"Միացնել ծանուցումների ձայնը"</string>
     <string name="notification_conversation_bubble" msgid="2242180995373949022">"Ցուցադրել ամպիկը"</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Համակարգի նավիգացիան թարմացվեց: Փոփոխություններ անելու համար անցեք կարգավորումներ:"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Թարմացրեք համակարգի նավիգացիան կարգավորումներում"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Սպասման ռեժիմ"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Զրույցը նշված է որպես կարևոր"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Կարևոր զրույցները՝"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Ցուցադրել զրույցների ցանկի վերևում"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ցուցադրել պրոֆիլի նկարը կողպէկրանին"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Հայտնվում են որպես լողացող ամպիկ հավելվածների վրայից"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ընդհատել «Չանհանգստացնել» ռեժիմը"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Եղավ"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Կարգավորումներ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Խոշորացման պատուհանի վրադրում"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Խոշորացման պատուհան"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Խոշորացման պատուհանի կառավարման տարրեր"</string>
@@ -1060,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Սահեցրեք մատը՝ ավելին իմանալու համար"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Փակել աշխատաշրջանը"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Վերսկսել"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ակտիվ չէ, ստուգեք հավելվածը"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Սխալ. նորից ենք փորձում…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Սարքը հեռացված է"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Չի գտնվել"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Կառավարման տարրը հասանելի չէ"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> սարքն անհասանելի է։ Ստուգեք <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածը՝ համոզվելու, որ կառավարման տարրը դեռ հասանելի է և հավելվածի կարգավորումները չեն փոխվել։"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Բացել հավելվածը"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Չհաջողվեց բեռնել կարգավիճակը"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Ընթացքի մեջ է"</string>

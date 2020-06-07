@@ -722,8 +722,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Приказује се у врху одељка за конверзације као плутајући облачић, приказује слику профила на закључаном екрану"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Подешавања"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> не подржава функције конверзације"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Нема недавних облачића"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Овде се приказују недавни и одбачени облачићи"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Ова обавештења не могу да се мењају."</string>
@@ -1019,11 +1018,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навигација система је ажурирана. Да бисте унели измене, идите у Подешавања."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Конверзација је подешена на приоритетну"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације ће:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Приказује се у врху одељка за конверзације"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Приказује слику профила на закључаном екрану"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Приказују се плутајући облачићи преко апликација"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Омета подешавање Не узнемиравај"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Важи"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Подешавања"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Преклопни прозор за увећање"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Прозор за увећање"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Контроле прозора за увећање"</string>
@@ -1060,19 +1062,27 @@
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Погрешан PIN"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Верификује се…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Унесите PIN"</string>
-    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Пробајте помоћу другог PIN-а"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Пробајте други PIN"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Потврђује се…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Потврдите промену за: <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Превуците да бисте видели још"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Учитавају се препоруке"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Затворите ову сесију медија"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Настави"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно. Видите апликацију"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Грешка, покушава се поново…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Уређај је уклоњен"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Учитавање статуса није успело"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка. Пробајте поново"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"У току"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Задржите дугме за укључивање да бисте видели нове контроле"</string>
     <string name="controls_menu_add" msgid="4447246119229920050">"Додај контроле"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Измените контроле"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Измени контроле"</string>
 </resources>
