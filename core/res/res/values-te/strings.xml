@@ -204,10 +204,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"ముద్రణ <xliff:g id="OWNER_APP">%s</xliff:g> ద్వారా నిలిపివేయబడింది."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"మీ పని ప్రొఫైల్‌ను‌ ఆన్ చేయి"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ప్రారంభించే వరకు, మీ వ్యక్తిగత యాప్‌లు బ్లాక్ చేయబడతాయి"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"<xliff:g id="DATE">%1$s</xliff:g> తేదీన <xliff:g id="TIME">%2$s</xliff:g>కు వ్యక్తిగత యాప్‌లు బ్లాక్ చేయబడతాయి. <xliff:g id="NUMBER">%3$d</xliff:g> రోజులకు మించి మీ కార్యాలయ ప్రొఫైల్‌ను ఆఫ్‌లో ఉంచటానికి మీ IT అడ్మిన్ అనుమతించరు."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"ఆన్ చేయి"</string>
     <string name="me" msgid="6207584824693813140">"నేను"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"టాబ్లెట్ ఎంపికలు"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV ఎంపికలు"</string>
@@ -2032,7 +2030,7 @@
       <item quantity="other"><xliff:g id="FILE_NAME_2">%s</xliff:g> + <xliff:g id="COUNT_3">%d</xliff:g> ఫైల్‌లు</item>
       <item quantity="one"><xliff:g id="FILE_NAME_0">%s</xliff:g> + <xliff:g id="COUNT_1">%d</xliff:g> ఫైల్</item>
     </plurals>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ఎవరికి షేర్ చేయాలనేదానికి సంబంధించి సిఫార్సులేవీ లేవు"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"ఎవరికి షేర్ చేయాలనే దానికి సంబంధించి సిఫార్సులేవీ లేవు"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"యాప్‌ల జాబితా"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"ఈ యాప్‌కు రికార్డ్ చేసే అనుమతి మంజూరు కాలేదు, అయినా ఈ USB పరికరం ద్వారా ఆడియోను క్యాప్చర్ చేయగలదు."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"హోమ్"</string>
@@ -2060,7 +2058,7 @@
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"వర్క్ యాప్‌లతో దీనిని షేర్ చేయడం సాధ్యపడదు"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"మీ కార్యాలయ ప్రొఫైల్‌లోని యాప్‌లతో ఈ కంటెంట్‌ను మీరు షేర్ చేయడానికి మీ IT అడ్మిన్ అనుమతించరు"</string>
     <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"వర్క్ యాప్‌లతో తెరవడం సాధ్యపడదు"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"మీ కార్యాలయ ప్రొఫైల్‌లోని యాప్‌లతో ఈ కంటెంట్‌ను మీరు తెరవడానికి మీ IT అడ్మిన్ అనుమతించరు"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"కార్యాలయ ప్రొఫైల్‌లోని యాప్‌లతో ఈ కంటెంట్‌ను మీరు తెరవడానికి మీ IT అడ్మిన్ అనుమతించరు"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"వ్యక్తిగత యాప్‌లతో దీనిని షేర్ చేయడం సాధ్యపడదు"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"మీ వ్యక్తిగత ప్రొఫైల్‌లోని యాప్‌లతో ఈ కంటెంట్‌ను మీరు షేర్ చేయడానికి మీ IT అడ్మిన్ అనుమతించరు"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"దీనిని, వ్యక్తిగత యాప్‌లతో తెరవడం సాధ్యపడదు"</string>

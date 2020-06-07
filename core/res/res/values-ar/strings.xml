@@ -212,10 +212,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"تم إيقاف الطباعة بواسطة <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"تفعيل الملف الشخصي للعمل"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"تم حظر تطبيقاتك الشخصية إلى أن تفعِّل ملفك الشخصي للعمل."</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"سيتم حظر التطبيقات الشخصية في <xliff:g id="DATE">%1$s</xliff:g> في <xliff:g id="TIME">%2$s</xliff:g>. لا يسمح مشرف تكنولوجيا المعلومات في مؤسستك بإيقاف الملف الشخصي للعمل أكثر من <xliff:g id="NUMBER">%3$d</xliff:g> يوم."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"تفعيل"</string>
     <string name="me" msgid="6207584824693813140">"أنا"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"خيارات الجهاز اللوحي"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"‏خيارات Android TV"</string>
@@ -2190,7 +2188,7 @@
     <string name="conversation_title_fallback_group_chat" msgid="456073374993104303">"محادثة جماعية"</string>
     <string name="unread_convo_overflow" msgid="920517615597353833">"<xliff:g id="MAX_UNREAD_COUNT">%1$d</xliff:g>+"</string>
     <string name="resolver_personal_tab" msgid="2051260504014442073">"شخصي"</string>
-    <string name="resolver_work_tab" msgid="2690019516263167035">"عمل"</string>
+    <string name="resolver_work_tab" msgid="2690019516263167035">"للعمل"</string>
     <string name="resolver_personal_tab_accessibility" msgid="5739524949153091224">"عرض المحتوى الشخصي"</string>
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"عرض محتوى العمل"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"تتعذّر مشاركة هذا المحتوى باستخدام تطبيقات العمل"</string>
@@ -2201,9 +2199,9 @@
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"لا يسمح لك مشرف تكنولوجيا المعلومات بمشاركة هذا المحتوى باستخدام التطبيقات في ملفك الشخصي."</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"يتعذّر فتح هذا المحتوى باستخدام التطبيقات الشخصية"</string>
     <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"لا يسمح لك مشرف تكنولوجيا المعلومات بفتح هذا المحتوى باستخدام التطبيقات في ملفك الشخصي."</string>
-    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"تم إيقاف الملف الشخصي للعمل مؤقتًا."</string>
+    <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"الملف الشخصي للعمل متوقف مؤقتًا."</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"تفعيل"</string>
-    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"لا يمكن لتطبيقات العمل أن تدعم هذا المحتوى."</string>
+    <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"لا يمكن لتطبيقات العمل أن تتوافق مع هذا المحتوى."</string>
     <string name="resolver_no_work_apps_available_resolve" msgid="1244844292366099399">"لا يمكن لتطبيقات العمل أن تفتح هذا المحتوى."</string>
     <string name="resolver_no_personal_apps_available_share" msgid="5639102815174748732">"لا يمكن للتطبيقات الشخصية أن تدعم هذا المحتوى."</string>
     <string name="resolver_no_personal_apps_available_resolve" msgid="5120671970531446978">"لا يمكن للتطبيقات الشخصية أن تفتح هذا المحتوى."</string>

@@ -56,8 +56,8 @@
     </plurals>
     <string name="imei" msgid="2157082351232630390">"IMEI"</string>
     <string name="meid" msgid="3291227361605924674">"MEID"</string>
-    <string name="ClipMmi" msgid="4110549342447630629">"ID do chamador de entrada"</string>
-    <string name="ClirMmi" msgid="4702929460236547156">"ID do chamador de saída"</string>
+    <string name="ClipMmi" msgid="4110549342447630629">"Identificador de chamadas recebidas"</string>
+    <string name="ClirMmi" msgid="4702929460236547156">"Identificador de chamadas realizadas"</string>
     <string name="ColpMmi" msgid="4736462893284419302">"ID de linha conectada"</string>
     <string name="ColrMmi" msgid="5889782479745764278">"Restrição de ID de linha conectada"</string>
     <string name="CfMmi" msgid="8390012691099787178">"Encaminhamento de chamada"</string>
@@ -71,12 +71,12 @@
     <string name="RuacMmi" msgid="1876047385848991110">"Rejeição das chamadas indesejadas"</string>
     <string name="CndMmi" msgid="185136449405618437">"Chamando número de entrega"</string>
     <string name="DndMmi" msgid="8797375819689129800">"Não perturbe"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"O ID do chamador assume o padrão de restrito. Próxima chamada: Restrita"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O ID do chamador assume o padrão de restrito. Próxima chamada: Não restrita"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O ID do chamador assume o padrão de não restrito. Próxima chamada: Restrita"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O ID do chamador assume o padrão de não restrito. Próxima chamada: Não restrita"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="4511621022859867988">"O identificador de chamadas assume o padrão de restrito. Próxima chamada: Restrita"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"O identificador de chamadas assume o padrão de restrito. Próxima chamada: Não restrita"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Restrita"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"O identificador de chamadas assume o padrão de não restrito. Próxima chamada: Não restrita"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"O serviço não foi habilitado."</string>
-    <string name="CLIRPermanent" msgid="166443681876381118">"Não é possível alterar a configuração de identificação de chamadas."</string>
+    <string name="CLIRPermanent" msgid="166443681876381118">"Não é possível alterar a configuração do identificador de chamadas."</string>
     <string name="RestrictedOnDataTitle" msgid="1500576417268169774">"Nenhum serviço móvel de dados"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="2852916906106191866">"Chamadas de emergência indisponíveis"</string>
     <string name="RestrictedOnNormalTitle" msgid="7009474589746551737">"Sem serviço de voz"</string>
@@ -204,10 +204,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Impressão desativada por <xliff:g id="OWNER_APP">%s</xliff:g>."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Ativar perfil de trabalho"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Seus apps pessoais ficarão bloqueados até você ativar o perfil de trabalho"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Os apps pessoais serão bloqueados em <xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>. Seu administrador de TI não permite que o perfil de trabalho fique desativado por mais de <xliff:g id="NUMBER">%3$d</xliff:g> dias."</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Ativar"</string>
     <string name="me" msgid="6207584824693813140">"Eu"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Opções do tablet"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Opções do Android TV"</string>
@@ -1133,10 +1131,10 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"Abrir com"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"Abrir com %1$s"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"Abrir"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> com"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> usando"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Abrir links com"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Abrir links com <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> com <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Abrir links do domínio <xliff:g id="HOST">%1$s</xliff:g> usando <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Conceder acesso"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Editar com"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Editar com %1$s"</string>
@@ -2059,12 +2057,12 @@
     <string name="resolver_work_tab_accessibility" msgid="4753168230363802734">"Visualização de trabalho"</string>
     <string name="resolver_cant_share_with_work_apps" msgid="637686613606502219">"Não é possível compartilhar este conteúdo com apps de trabalho"</string>
     <string name="resolver_cant_share_with_work_apps_explanation" msgid="3332302070341130545">"Seu administrador de TI não permite que você compartilhe este conteúdo com apps no seu perfil de trabalho"</string>
-    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Não é possível abrir com apps de trabalho"</string>
-    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Seu administrador de TI não permite que você abra este conteúdo com apps no seu perfil de trabalho"</string>
+    <string name="resolver_cant_access_work_apps" msgid="2455757966397563223">"Não é possível abrir usando apps de trabalho"</string>
+    <string name="resolver_cant_access_work_apps_explanation" msgid="3626983885525445790">"Seu administrador de TI não permite que você abra este conteúdo usando apps do seu perfil de trabalho"</string>
     <string name="resolver_cant_share_with_personal_apps" msgid="3079139799233316203">"Não é possível compartilhar este conteúdo com apps pessoais"</string>
     <string name="resolver_cant_share_with_personal_apps_explanation" msgid="2959282422751315171">"Seu administrador de TI não permite que você compartilhe este conteúdo com apps no seu perfil pessoal"</string>
     <string name="resolver_cant_access_personal_apps" msgid="648291604475669395">"Não é possível abrir este conteúdo com apps pessoais"</string>
-    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Seu administrador de TI não permite que você abra este conteúdo com apps no seu perfil pessoal"</string>
+    <string name="resolver_cant_access_personal_apps_explanation" msgid="2298773629302296519">"Seu administrador de TI não permite que você abra este conteúdo usando apps do seu perfil pessoal"</string>
     <string name="resolver_turn_on_work_apps" msgid="884910835250037247">"O perfil de trabalho está pausado"</string>
     <string name="resolver_switch_on_work" msgid="2873009160846966379">"Ativar"</string>
     <string name="resolver_no_work_apps_available_share" msgid="7933949011797699505">"Apps de trabalho não são compatíveis com este conteúdo"</string>
