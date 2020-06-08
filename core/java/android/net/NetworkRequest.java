@@ -468,8 +468,8 @@ public class NetworkRequest implements Parcelable {
     }
 
     /**
-     * Returns true iff. the capabilities requested in this NetworkRequest are satisfied by the
-     * provided {@link NetworkCapabilities}.
+     * Returns true if and only if the capabilities requested in this NetworkRequest are satisfied
+     * by the provided {@link NetworkCapabilities}.
      *
      * @param nc Capabilities that should satisfy this NetworkRequest. null capabilities do not
      *           satisfy any request.
