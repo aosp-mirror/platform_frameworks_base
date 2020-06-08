@@ -21,11 +21,11 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.net.shared.InetAddressUtils;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.android.internal.util.Preconditions;
+import com.android.net.module.util.InetAddressUtils;
 
 import java.net.InetAddress;
 import java.util.ArrayList;

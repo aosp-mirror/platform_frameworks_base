@@ -22,11 +22,12 @@ import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.net.NetworkInfo.DetailedState;
-import android.net.shared.Inet4AddressUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+
+import com.android.net.module.util.Inet4AddressUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
