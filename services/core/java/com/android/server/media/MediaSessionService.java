@@ -2404,18 +2404,32 @@ public class MediaSessionService extends SystemService implements Monitor {
                 return;
             }
             MediaSessionRecord session = null;
+            MediaButtonReceiverHolder mediaButtonReceiverHolder = null;
 
-            // Retrieve custom session for key event if it exists.
             if (mCustomMediaKeyDispatcher != null) {
-                MediaSession.Token token = mCustomMediaKeyDispatcher.getSessionForKeyEvent(
-                        keyEvent, uid, asSystemService);
+                MediaSession.Token token = mCustomMediaKeyDispatcher.getMediaSession(keyEvent, uid,
+                        asSystemService);
                 if (token != null) {
                     session = getMediaSessionRecordLocked(token);
                 }
+
+                if (session == null) {
+                    PendingIntent pi = mCustomMediaKeyDispatcher.getMediaButtonReceiver(keyEvent,
+                            uid, asSystemService);
+                    if (pi != null) {
+                        mediaButtonReceiverHolder = MediaButtonReceiverHolder.create(mContext,
+                                mCurrentFullUserRecord.mFullUserId, pi);
+                    }
+                }
             }
 
-            if (session == null) {
+            if (session == null && mediaButtonReceiverHolder == null) {
                 session = (MediaSessionRecord) mCurrentFullUserRecord.getMediaButtonSessionLocked();
+
+                if (session == null) {
+                    mediaButtonReceiverHolder =
+                            mCurrentFullUserRecord.mLastMediaButtonReceiverHolder;
+                }
             }
 
             if (session != null) {
@@ -2438,16 +2452,12 @@ public class MediaSessionService extends SystemService implements Monitor {
                 } catch (RemoteException e) {
                     Log.w(TAG, "Failed to send callback", e);
                 }
-            } else if (mCurrentFullUserRecord.mLastMediaButtonReceiverHolder != null) {
+            } else if (mediaButtonReceiverHolder != null) {
                 if (needWakeLock) {
                     mKeyEventReceiver.acquireWakeLockLocked();
                 }
                 String callingPackageName =
                         (asSystemService) ? mContext.getPackageName() : packageName;
-
-                MediaButtonReceiverHolder mediaButtonReceiverHolder =
-                        mCurrentFullUserRecord.mLastMediaButtonReceiverHolder;
-
                 boolean sent = mediaButtonReceiverHolder.send(
                         mContext, keyEvent, callingPackageName,
                         needWakeLock ? mKeyEventReceiver.mLastTimeoutId : -1, mKeyEventReceiver,
