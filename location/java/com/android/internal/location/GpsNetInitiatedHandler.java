@@ -18,7 +18,6 @@ package com.android.internal.location;
 
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -392,13 +391,9 @@ public class GpsNetInitiatedHandler {
             mNiNotificationBuilder.setDefaults(0);
         }
 
-        // if not to popup dialog immediately, pending intent will open the dialog
-        Intent intent = !mPopupImmediately ? getDlgIntent(notif) : new Intent();
-        PendingIntent pi = PendingIntent.getBroadcast(mContext, 0, intent, 0);
         mNiNotificationBuilder.setTicker(getNotifTicker(notif, mContext))
                 .setContentTitle(title)
-                .setContentText(message)
-                .setContentIntent(pi);
+                .setContentText(message);
 
         notificationManager.notifyAsUser(null, notif.notificationId, mNiNotificationBuilder.build(),
                 UserHandle.ALL);
