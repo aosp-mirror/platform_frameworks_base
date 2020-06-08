@@ -108,7 +108,7 @@ public class NotificationHistoryDatabase {
     public void init() {
         synchronized (mLock) {
             try {
-                if (!mHistoryDir.mkdir()) {
+                if (!mHistoryDir.exists() && !mHistoryDir.mkdir()) {
                     throw new IllegalStateException("could not create history directory");
                 }
                 mVersionFile.createNewFile();
@@ -197,7 +197,7 @@ public class NotificationHistoryDatabase {
                     readLocked(
                             file, notifications, new NotificationHistoryFilter.Builder().build());
                 } catch (Exception e) {
-                    Slog.e(TAG, "error reading " + file.getBaseFile().getName(), e);
+                    Slog.e(TAG, "error reading " + file.getBaseFile().getAbsolutePath(), e);
                 }
             }
 
@@ -223,7 +223,7 @@ public class NotificationHistoryDatabase {
                         break;
                     }
                 } catch (Exception e) {
-                    Slog.e(TAG, "error reading " + file.getBaseFile().getName(), e);
+                    Slog.e(TAG, "error reading " + file.getBaseFile().getAbsolutePath(), e);
                 }
             }
 
@@ -279,7 +279,7 @@ public class NotificationHistoryDatabase {
         }
         file.delete();
         // TODO: delete all relevant bitmaps, once they exist
-        mHistoryFiles.removeLast();
+        mHistoryFiles.remove(file);
     }
 
     private void scheduleDeletion(File file, long creationTime, int retentionDays) {
@@ -317,11 +317,17 @@ public class NotificationHistoryDatabase {
 
     private static void readLocked(AtomicFile file, NotificationHistory notificationsOut,
             NotificationHistoryFilter filter) throws IOException {
-        try (FileInputStream in = file.openRead()) {
+        FileInputStream in = null;
+        try {
+            in = file.openRead();
             NotificationHistoryProtoHelper.read(in, notificationsOut, filter);
         } catch (FileNotFoundException e) {
-            Slog.e(TAG, "Cannot file " + file.getBaseFile().getName(), e);
+            Slog.e(TAG, "Cannot open " + file.getBaseFile().getAbsolutePath(), e);
             throw e;
+        } finally {
+            if (in != null) {
+                in.close();
+            }
         }
     }
 
@@ -334,9 +340,15 @@ public class NotificationHistoryDatabase {
             }
             if (ACTION_HISTORY_DELETION.equals(action)) {
                 try {
-                    final String filePath = intent.getStringExtra(EXTRA_KEY);
-                    AtomicFile fileToDelete = new AtomicFile(new File(filePath));
-                    fileToDelete.delete();
+                    synchronized (mLock) {
+                        final String filePath = intent.getStringExtra(EXTRA_KEY);
+                        AtomicFile fileToDelete = new AtomicFile(new File(filePath));
+                        if (DEBUG) {
+                            Slog.d(TAG, "Removed " + fileToDelete.getBaseFile().getName());
+                        }
+                        fileToDelete.delete();
+                        mHistoryFiles.remove(fileToDelete);
+                    }
                 } catch (Exception e) {
                     Slog.e(TAG, "Failed to delete notification history file", e);
                 }
@@ -345,27 +357,23 @@ public class NotificationHistoryDatabase {
     };
 
     final class WriteBufferRunnable implements Runnable {
-        long currentTime = 0;
-        AtomicFile latestNotificationsFile;
 
         @Override
         public void run() {
-            if (DEBUG) Slog.d(TAG, "WriteBufferRunnable");
+            long time = System.currentTimeMillis();
+            run(time, new AtomicFile(new File(mHistoryDir, String.valueOf(time))));
+        }
+
+        void run(long time, AtomicFile file) {
             synchronized (mLock) {
-                if (currentTime == 0) {
-                    currentTime = System.currentTimeMillis();
-                }
-                if (latestNotificationsFile == null) {
-                    latestNotificationsFile = new AtomicFile(
-                            new File(mHistoryDir, String.valueOf(currentTime)));
-                }
+                if (DEBUG) Slog.d(TAG, "WriteBufferRunnable "
+                        + file.getBaseFile().getAbsolutePath());
                 try {
-                    writeLocked(latestNotificationsFile, mBuffer);
-                    mHistoryFiles.addFirst(latestNotificationsFile);
+                    writeLocked(file, mBuffer);
+                    mHistoryFiles.addFirst(file);
                     mBuffer = new NotificationHistory();
 
-                    scheduleDeletion(latestNotificationsFile.getBaseFile(), currentTime,
-                            HISTORY_RETENTION_DAYS);
+                    scheduleDeletion(file.getBaseFile(), time, HISTORY_RETENTION_DAYS);
                 } catch (IOException e) {
                     Slog.e(TAG, "Failed to write buffer to disk. not flushing buffer", e);
                 }
@@ -382,7 +390,7 @@ public class NotificationHistoryDatabase {
 
         @Override
         public void run() {
-            if (DEBUG) Slog.d(TAG, "RemovePackageRunnable");
+            if (DEBUG) Slog.d(TAG, "RemovePackageRunnable " + mPkg);
             synchronized (mLock) {
                 // Remove packageName entries from pending history
                 mBuffer.removeNotificationsFromWrite(mPkg);
@@ -398,7 +406,7 @@ public class NotificationHistoryDatabase {
                         writeLocked(af, notifications);
                     } catch (Exception e) {
                         Slog.e(TAG, "Cannot clean up file on pkg removal "
-                                + af.getBaseFile().getName(), e);
+                                + af.getBaseFile().getAbsolutePath(), e);
                     }
                 }
             }
