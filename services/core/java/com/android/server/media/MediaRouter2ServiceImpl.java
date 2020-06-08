@@ -584,7 +584,7 @@ class MediaRouter2ServiceImpl {
         mAllRouterRecords.put(binder, routerRecord);
 
         userRecord.mHandler.sendMessage(
-                obtainMessage(UserHandler::notifyRoutesToRouter,
+                obtainMessage(UserHandler::notifyRouterRegistered,
                         userRecord.mHandler, routerRecord));
     }
 
@@ -1769,8 +1769,8 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyRoutesToRouter(@NonNull RouterRecord routerRecord) {
-            List<MediaRoute2Info> routes = new ArrayList<>();
+        private void notifyRouterRegistered(@NonNull RouterRecord routerRecord) {
+            List<MediaRoute2Info> currentRoutes = new ArrayList<>();
 
             MediaRoute2ProviderInfo systemProviderInfo = null;
             for (MediaRoute2ProviderInfo providerInfo : mLastProviderInfos) {
@@ -1780,27 +1780,32 @@ class MediaRouter2ServiceImpl {
                     systemProviderInfo = providerInfo;
                     continue;
                 }
-                routes.addAll(providerInfo.getRoutes());
+                currentRoutes.addAll(providerInfo.getRoutes());
             }
 
+            RoutingSessionInfo currentSystemSessionInfo;
             if (routerRecord.mHasModifyAudioRoutingPermission) {
                 if (systemProviderInfo != null) {
-                    routes.addAll(systemProviderInfo.getRoutes());
+                    currentRoutes.addAll(systemProviderInfo.getRoutes());
                 } else {
                     // This shouldn't happen.
                     Slog.w(TAG, "notifyRoutesToRouter: System route provider not found.");
                 }
+                currentSystemSessionInfo = mSystemProvider.getSessionInfos().get(0);
             } else {
-                routes.add(mSystemProvider.getDefaultRoute());
+                currentRoutes.add(mSystemProvider.getDefaultRoute());
+                currentSystemSessionInfo = mSystemProvider.getDefaultSessionInfo();
             }
 
-            if (routes.size() == 0) {
+            if (currentRoutes.size() == 0) {
                 return;
             }
+
             try {
-                routerRecord.mRouter.notifyRoutesAdded(routes);
+                routerRecord.mRouter.notifyRouterRegistered(
+                        currentRoutes, currentSystemSessionInfo);
             } catch (RemoteException ex) {
-                Slog.w(TAG, "Failed to notify all routes. Router probably died.", ex);
+                Slog.w(TAG, "Failed to notify router registered. Router probably died.", ex);
             }
         }
 
