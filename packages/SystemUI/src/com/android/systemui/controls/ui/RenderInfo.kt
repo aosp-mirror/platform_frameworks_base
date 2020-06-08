@@ -35,6 +35,7 @@ data class RenderInfo(
 ) {
     companion object {
         const val APP_ICON_ID = -1
+        const val ERROR_ICON = -1000
         private val iconMap = SparseArray<Drawable>()
         private val appIconMap = ArrayMap<ComponentName, Drawable>()
 
@@ -156,7 +157,8 @@ private val deviceIconMap = mapOf<Int, Int>(
     DeviceTypes.TYPE_CURTAIN to R.drawable.ic_device_blinds,
     DeviceTypes.TYPE_DOOR to R.drawable.ic_device_door,
     DeviceTypes.TYPE_SHUTTER to R.drawable.ic_device_window,
-    DeviceTypes.TYPE_HEATER to R.drawable.ic_device_thermostat
+    DeviceTypes.TYPE_HEATER to R.drawable.ic_device_thermostat,
+    RenderInfo.ERROR_ICON to R.drawable.ic_error_outline
 ).withDefault {
     R.drawable.ic_device_unknown
 }
