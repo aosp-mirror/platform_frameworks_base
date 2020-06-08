@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"বাৰ্তালাপ শাখাটোৰ শীৰ্ষত দেখুৱায়, ওপঙা বাবল হিচাপে দেখা পোৱা যায়, লক স্ক্ৰীনত প্ৰ’ফাইলৰ চিত্ৰ প্ৰদৰ্শন কৰে"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ছেটিংসমূহ"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"অগ্ৰাধিকাৰ"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বাৰ্তালাপৰ সুবিধাসমূহ সমৰ্থন নকৰে"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"কোনো শেহতীয়া bubbles নাই"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"শেহতীয়া bubbles আৰু অগ্ৰাহ্য কৰা bubbles ইয়াত প্ৰদর্শিত হ\'ব"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"এই জাননীসমূহ সংশোধন কৰিব নোৱাৰি।"</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰা হ’ল। সলনি কৰিবলৈ ছেটিংসমূহ-লৈ যাওক।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ছিষ্টেম নেভিগেশ্বন আপডে’ট কৰিবলৈ ছেটিংসমূহ-লৈ যাওক"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ষ্টেণ্ডবাই"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"বাৰ্তালাপসমূহ অগ্ৰাধিকাৰপ্ৰাপ্ত হিচাপে ছেট কৰা হৈছে"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"অগ্ৰাধিকাৰপ্ৰাপ্ত বাৰ্তালাপসমূহে এইসমূহ কৰিব:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"বাৰ্তালাপ শাখাটোৰ শীৰ্ষত দেখুৱাওক"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"লক স্ক্ৰীনত প্ৰ\'ফাইল-চিত্ৰ দেখুৱাওক"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"এপ্‌সমূহৰ ওপৰত ওপঙা বাবল হিচাপে দেখা পোৱা যাব"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"অসুবিধা নিদিব সুবিধাটোত ব্যাঘাত জন্মাওক"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"বুজি পালোঁ"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ছেটিংসমূহ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"বিবৰ্ধন অ’ভাৰলে’ৰ ৱিণ্ড’"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"বিবৰ্ধন ৱিণ্ড’"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"বিবৰ্ধন ৱিণ্ড’ৰ নিয়ন্ত্ৰণসমূহ"</string>

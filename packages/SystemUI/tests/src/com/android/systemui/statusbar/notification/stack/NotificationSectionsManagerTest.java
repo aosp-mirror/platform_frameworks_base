@@ -403,11 +403,11 @@ public class NotificationSectionsManagerTest extends SysuiTestCase {
         enablePeopleFiltering();
 
         setupMockStack(
-                PERSON.headsUp(),
-                INCOMING_HEADER,
-                ALERTING.headsUp(),
-                PEOPLE_HEADER,
-                PERSON
+                PERSON.headsUp(),   // personHeaderTarget = 0
+                INCOMING_HEADER,    // currentIncomingHeaderIdx = 1
+                ALERTING.headsUp(), // alertingHeaderTarget = 1
+                PEOPLE_HEADER,      // currentPeopleHeaderIdx = 3
+                PERSON              //
         );
         mSectionsManager.updateSectionBoundaries();
 

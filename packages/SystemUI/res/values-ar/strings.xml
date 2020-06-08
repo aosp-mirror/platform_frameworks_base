@@ -604,21 +604,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"تفعيل"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"إيقاف"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"تبديل جهاز الاستماع"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"تم تثبيت التطبيق"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"تم تثبيت الشاشة على التطبيق"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"الشاشة الرئيسية\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. مرّر الشاشة بسرعة للأعلى مع الاستمرار لإزالة تثبيت الشاشة."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"الشاشة الرئيسية\" لإزالة التثبيت."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)"</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"يمكن للتطبيق المثبَّت فتح تطبيقات أخرى."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"لإزالة تثبيت هذا التطبيق، المس مع الاستمرار زرّي \"رجوع\" و\"نظرة عامة\"."</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"لإزالة تثبيت هذا التطبيق، المس مع الاستمرار زرّي \"رجوع\" و\"الشاشة الرئيسية\"."</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"مرّر الشاشة بسرعة للأعلى مع الاستمرار لإزالة تثبيت هذا التطبيق."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"عند تثبيت الشاشة على تطبيق معيّن، سيظل بإمكان التطبيق فتح تطبيقات أخرى."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"لمحة عامة\" (رمز المربّع)."</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"لإلغاء تثبيت الشاشة على هذا التطبيق، المس مع الاستمرار زرّي \"الرجوع\" و\"الشاشة الرئيسية\"."</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"لإلغاء تثبيت الشاشة على هذا التطبيق، اسحب بسرعة للأعلى مع إبقاء الإصبع على الشاشة."</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"حسنًا"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"لا، شكرًا"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"تم تثبيت التطبيق."</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"تمت إزالة تثبيت التطبيق"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"تم تثبيت الشاشة على التطبيق."</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"تم إلغاء تثبيت الشاشة"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"هل تريد إخفاء <xliff:g id="TILE_LABEL">%1$s</xliff:g>؟"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"سيظهر مرة أخرى عند تمكينه في الإعدادات المرة التالية."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"إخفاء"</string>
@@ -725,14 +725,13 @@
     <string name="notification_bubble_title" msgid="8330481035191903164">"فقاعة"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"بدون صوت أو اهتزاز"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"بدون صوت أو اهتزاز وتظهر في موضع أسفل في قسم المحادثات"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن الرن أو الاهتزاز بناءً على إعدادات الهاتف"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن الرن أو الاهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"يمكن إصدار رنين أو اهتزاز بناءً على إعدادات الهاتف. تظهر المحادثات من <xliff:g id="APP_NAME">%1$s</xliff:g> كفقاعات تلقائيًا."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"يلفِت هذا الإشعار انتباهك لهذا المحتوى باستخدام اختصار عائم."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"تظهر في أعلى قسم المحادثات وتظهر كفقاعة عائمة وتعرض صورة الملف الشخصي على شاشة القفل"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"الإعدادات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"الأولوية"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"لا يدعم تطبيق <xliff:g id="APP_NAME">%1$s</xliff:g> ميزات المحادثات."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ليس هناك فقاعات محادثات"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ستظهر هنا أحدث فقاعات المحادثات وفقاعات المحادثات التي تم إغلاقها."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"يتعذّر تعديل هذه الإشعارات."</string>
@@ -1034,11 +1033,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"تم تحديث التنقل داخل النظام. لإجراء التغييرات، يُرجى الانتقال إلى \"الإعدادات\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"الانتقال إلى \"الإعدادات\" لتعديل التنقل داخل النظام"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"وضع الاستعداد"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"تم ضبط المحادثة على أنها ذات أولوية"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"المحادثات ذات الأولوية:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"تظهر في أعلى قسم المحادثات"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"تظهر صورة الملف الشخصي على شاشة القفل"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"تظهر كفقاعة عائمة فوق التطبيقات"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"لا تتقيّد بميزة \"عدم الإزعاج\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"حسنًا"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"الإعدادات"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"نافذة تراكب التكبير"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"نافذة التكبير"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"عناصر التحكم في نافذة التكبير"</string>

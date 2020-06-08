@@ -593,20 +593,20 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"deaktivieren"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Ausgabegerät wechseln"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"App ist auf dem Bildschirm fixiert"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Dazu wischst du nach oben und hältst den Bildschirm gedrückt"</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Der Bildschirm bleibt so lange eingeblendet, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Der Bildschirm wird so lange angezeigt, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Zugriff auf personenbezogene Daten wie beispielsweise Kontakte oder E-Mails ist möglich."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Eine auf dem Bildschirm fixierte App kann ggf. andere Apps öffnen."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Übersicht\"."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Zurück\" und \"Startbildschirm\"."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Wische dazu nach oben und halte den Bildschirm gedrückt."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Übersicht\"."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Die App bleibt so lange auf dem Bildschirm fixiert, bis du die Fixierung aufhebst. Berühre und halte dazu \"Startbildschirm\"."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Möglicherweise kann auf personenbezogene Daten (Kontakte, E-Mails usw.) zugegriffen werden."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Die fixierte App kann ggf. andere Apps öffnen."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Übersicht\" halten"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Zum Aufheben der Fixierung dieser App \"Zurück\" und \"Startbildschirm\" halten"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Loslösen der App nach oben wischen und halten"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Zum Aufheben der Fixierung nach oben wischen und halten"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Ok"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nein danke"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Auf dem Bildschirm fixierte App"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"Vom Bildschirm gelöste App"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Bildschirm wurde fixiert"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Bildschirmfixierung aufgehoben"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ausblenden"</string>
@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wird oben im Bereich \"Unterhaltungen\" als unverankerte Bubble mit einem Profilbild auf dem Sperrbildschirm angezeigt"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Einstellungen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorität"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> unterstützt keine Funktionen für Unterhaltungen"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Keine kürzlich geschlossenen Bubbles"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Hier werden aktuelle und geschlossene Bubbles angezeigt"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Diese Benachrichtigungen können nicht geändert werden."</string>
@@ -1014,16 +1013,19 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemsteuerungseinstellungen wurden angepasst. Änderungen kannst du in den Einstellungen vornehmen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gehe zu den Einstellungen, um die Systemsteuerung anzupassen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Unterhaltung als vorrangig eingestuft"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Vorrangige Unterhaltungen:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Oben im Bereich \"Unterhaltungen\" anzeigen"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profilbild auf Sperrbildschirm anzeigen"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Unverankertes Infofeld über anderen Apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\"Bitte nicht stören\" unterbrechen"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Einstellungen"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay-Vergrößerungsfenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrößerungsfenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Einstellungen für Vergrößerungsfenster"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Gerätesteuerung"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Karten für deine verbundenen Geräte hinzufügen"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Steuerelemente für verbundene Geräte hinzufügen"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Gerätesteuerung einrichten"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Halte die Ein-/Aus-Taste gedrückt, um auf die Steuerelemente zuzugreifen."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"App zum Hinzufügen von Steuerelementen auswählen"</string>
@@ -1039,7 +1041,7 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"Zum Entfernen aus Favoriten"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Auf Position <xliff:g id="NUMBER">%d</xliff:g> verschieben"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Steuerelemente"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Karten auswählen, auf die man über das Ein-/Aus-Menü zugreifen kann"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Steuerelemente auswählen, auf die man über das Ein-/Aus-Menü zugreifen kann"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zum Verschieben von Steuerelementen halten und ziehen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle Steuerelemente entfernt"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Änderungen nicht gespeichert"</string>
@@ -1067,6 +1069,6 @@
     <string name="controls_error_failed" msgid="960228639198558525">"Fehler – versuch es noch mal"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Läuft"</string>
     <string name="controls_added_tooltip" msgid="4842812921719153085">"Zum Anzeigen der Karten für neue Geräte Ein-/Aus-Taste gedrückt halten"</string>
-    <string name="controls_menu_add" msgid="4447246119229920050">"Gerätekarten hinzufügen"</string>
-    <string name="controls_menu_edit" msgid="890623986951347062">"Gerätekarten bearbeiten"</string>
+    <string name="controls_menu_add" msgid="4447246119229920050">"Steuerelemente hinzufügen"</string>
+    <string name="controls_menu_edit" msgid="890623986951347062">"Steuerelemente bearbeiten"</string>
 </resources>

@@ -711,16 +711,15 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"静音"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"默认"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"气泡"</string>
-    <string name="notification_channel_summary_low" msgid="4860617986908931158">"不发出提示音也不振动"</string>
-    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不发出提示音也不振动，显示在对话部分的靠下位置"</string>
+    <string name="notification_channel_summary_low" msgid="4860617986908931158">"不发出提示音，也不振动"</string>
+    <string name="notification_conversation_summary_low" msgid="1734433426085468009">"不发出提示音，也不振动；显示在对话部分的靠下位置"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"可能会响铃或振动（取决于手机设置）"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"可能会响铃或振动（取决于手机设置）。默认情况下，来自<xliff:g id="APP_NAME">%1$s</xliff:g>的对话会以对话泡的形式显示。"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"通过可链接到这项内容的浮动快捷方式吸引您的注意。"</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"以悬浮对话泡形式显示在对话部分顶部，如果设备处于锁定状态，在锁定屏幕上显示个人资料照片"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"设置"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"优先"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g>不支持对话功能"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近没有对话泡"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"此处会显示最近的对话泡和已关闭的对话泡"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"无法修改这些通知。"</string>
@@ -1014,19 +1013,22 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系统导航已更新。要进行更改，请转到“设置”。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"转到“设置”即可更新系统导航"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待机"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"已设置为优先对话"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"优先对话将："</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"显示在对话部分顶部"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在锁定屏幕上显示个人资料照片"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"以悬浮对话泡的形式显示在应用之上"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"中断勿扰模式"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"知道了"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"设置"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"放大叠加窗口"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"放大窗口"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"放大窗口控件"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"设备控制器"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"设备控件"</string>
     <string name="quick_controls_subtitle" msgid="1667408093326318053">"为您所连接的设备添加控件"</string>
-    <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控制器"</string>
+    <string name="quick_controls_setup_title" msgid="8901436655997849822">"设置设备控件"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"按住电源按钮即可访问您的控件"</string>
-    <string name="controls_providers_title" msgid="6879775889857085056">"选择应用以添加控件"</string>
+    <string name="controls_providers_title" msgid="6879775889857085056">"选择要添加控制器的应用"</string>
     <plurals name="controls_number_of_favorites" formatted="false" msgid="1057347832073807380">
       <item quantity="other">已添加 <xliff:g id="NUMBER_1">%s</xliff:g> 个控件。</item>
       <item quantity="one">已添加 <xliff:g id="NUMBER_0">%s</xliff:g> 个控件。</item>
@@ -1045,7 +1047,7 @@
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未保存更改"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"无法加载所有控件的列表。"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
-    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控制器"</string>
+    <string name="controls_dialog_title" msgid="2343565267424406202">"添加到设备控件"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"添加"</string>
     <string name="controls_dialog_message" msgid="342066938390663844">"来自<xliff:g id="APP">%s</xliff:g>的建议"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"控件已更新"</string>

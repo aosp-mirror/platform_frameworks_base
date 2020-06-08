@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Ditunjukkan di sebelah atas bahagian perbualan, muncul sebagai gelembung terapung, memaparkan gambar profil pada skrin kunci"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Tetapan"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Keutamaan"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> tidak menyokong ciri perbualan"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Tiada gelembung terbaharu"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Gelembung baharu dan gelembung yang diketepikan akan dipaparkan di sini"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Pemberitahuan ini tidak boleh diubah suai."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigasi sistem dikemas kini. Untuk membuat perubahan, pergi ke Tetapan."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Pergi ke Tetapan untuk mengemas kini navigasi sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Tunggu sedia"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Perbualan ditetapkan kepada keutamaan"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Perbualan keutamaan akan:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Tunjukkan di atas bahagian perbualan"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tunjukkan gambar profil pada skrin kunci"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Dipaparkan sebagai gelembung terapung di atas apl"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ganggu ciri Jangan Ganggu"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Tetapan"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Tetingkap Tindanan Pembesaran"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Tetingkap Pembesaran"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kawalan Tetingkap Pembesaran"</string>

@@ -3158,7 +3158,7 @@
          @hide
     -->
     <permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS"
-                android:protectionLevel="signature|installer" />
+                android:protectionLevel="signature|preinstalled" />
 
     <!-- @SystemApi Allows an application to manage (create, destroy,
          Z-order) application tokens in the window manager.
@@ -5228,7 +5228,7 @@
         </activity>
 
         <activity android:name="com.android.internal.app.SuspendedAppActivity"
-                  android:theme="@style/Theme.Dialog.Confirmation"
+                  android:theme="@style/Theme.DeviceDefault.Dialog.Alert.DayNight"
                   android:excludeFromRecents="true"
                   android:process=":ui">
         </activity>

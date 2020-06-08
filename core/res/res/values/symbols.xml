@@ -1785,6 +1785,7 @@
   <java-symbol type="string" name="faceunlock_multiple_failures" />
   <java-symbol type="string" name="global_actions" />
   <java-symbol type="string" name="global_action_power_off" />
+  <java-symbol type="string" name="global_action_power_options" />
   <java-symbol type="string" name="global_action_restart" />
   <java-symbol type="string" name="global_actions_airplane_mode_off_status" />
   <java-symbol type="string" name="global_actions_airplane_mode_on_status" />
@@ -2766,6 +2767,7 @@
   <java-symbol type="bool" name="config_mainBuiltInDisplayIsRound" />
 
   <java-symbol type="id" name="actions_container" />
+  <java-symbol type="id" name="actions_container_layout" />
   <java-symbol type="id" name="smart_reply_container" />
   <java-symbol type="id" name="remote_input_tag" />
   <java-symbol type="id" name="pending_intent_tag" />
@@ -3533,6 +3535,8 @@
   <java-symbol type="id" name="clip_to_padding_tag" />
   <java-symbol type="id" name="clip_children_tag" />
   <java-symbol type="id" name="bubble_button" />
+  <java-symbol type="dimen" name="bubble_visible_padding_end" />
+  <java-symbol type="dimen" name="bubble_gone_padding_end" />
   <java-symbol type="dimen" name="messaging_avatar_size" />
   <java-symbol type="dimen" name="messaging_group_sending_progress_size" />
   <java-symbol type="dimen" name="messaging_image_rounding" />
@@ -3834,7 +3838,9 @@
   <java-symbol type="string" name="config_factoryResetPackage" />
   <java-symbol type="array" name="config_highRefreshRateBlacklist" />
 
+  <java-symbol type="layout" name="chooser_dialog" />
   <java-symbol type="layout" name="chooser_dialog_item" />
+  <java-symbol type="drawable" name="chooser_dialog_background" />
   <java-symbol type="id" name="chooser_copy_button" />
   <java-symbol type="layout" name="chooser_action_button" />
   <java-symbol type="dimen" name="chooser_action_button_icon_size" />

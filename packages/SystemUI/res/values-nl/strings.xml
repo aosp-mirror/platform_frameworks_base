@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gedeelte met gesprekken weergegeven, verschijnt als zwevende bubbel, geeft de profielfoto weer op het vergrendelingsscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen recente bubbels"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Recente bubbels en gesloten bubbels worden hier weergegeven"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Deze meldingen kunnen niet worden aangepast."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systeemnavigatie geüpdatet. Als je wijzigingen wilt aanbrengen, ga je naar Instellingen."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ga naar Instellingen om de systeemnavigatie te updaten"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stand-by"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Gesprek ingesteld als prioriteit"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Bij prioriteitsgesprekken gebeurt het volgende:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Worden bovenaan het gespreksgedeelte weergegeven"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tonen profielafbeelding op vergrendelingsscherm"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Worden als zwevende ballon weergegeven vóór apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Onderbreken \'Niet storen\'"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Instellingen"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overlay voor vergrotingsvenster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingsvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Bediening van vergrotingsvenster"</string>
@@ -1054,7 +1056,7 @@
     <string name="controls_pin_wrong" msgid="6162694056042164211">"Onjuiste pincode"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"Verifiëren…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Geef de pincode op"</string>
-    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Een andere pincode proberen"</string>
+    <string name="controls_pin_instructions_retry" msgid="1566667581012131046">"Andere pincode proberen"</string>
     <string name="controls_confirmation_confirming" msgid="2596071302617310665">"Bevestigen…"</string>
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Bevestig de wijziging voor <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swipe om meer te zien"</string>

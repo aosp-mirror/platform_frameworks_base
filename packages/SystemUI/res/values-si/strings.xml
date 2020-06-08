@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"සංවාද කොටසේ ඉහළම පෙන්වයි, බුබුළක් ලෙස දිස් වේ, අගුලු තිරයේ පැතිකඩ පින්තූරය සංදර්ශනය වේ"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"සැකසීම්"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ප්‍රමුඛතාව"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> සංවාද විශේෂාංගවලට සහාය නොදක්වයි"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"මෑත බුබුලු නැත"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"මෑත බුබුලු සහ ඉවත ලූ බුබුලු මෙහි දිස් වනු ඇත"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"මෙම දැනුම්දීම් වෙනස් කළ නොහැක."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"පද්ධති සංචලනය යාවත්කාලීන කළා. වෙනස්කම් සිදු කිරීමට, සැකසීම් වෙත යන්න."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"පද්ධති සංචලනය යාවත්කාලීන කිරීමට සැකසීම් වෙත යන්න"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"පොරොත්තු"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"සංවාදය ප්‍රමුඛතාව වෙත සකසන ලදී"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ප්‍රමුඛතා සංවාද:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"සංවාද කොටසේ ඉහළ දී පෙන්වන්න"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"පැතිකඩ පින්තූරය අගුලු තිරය මත පෙන්වන්න"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"යෙදුම්වල ඉහළම පාවෙන බුබුලක් ලෙස දිස් වේ"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"බාධා නොකරන්න හට බාධා කරන්න"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"තේරුණා"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"සැකසීම්"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"විශාලන උඩැතිරි කවුළුව"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"විශාලන කවුළුව"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"විශාලනය කිරීමේ කවුළු පාලන"</string>

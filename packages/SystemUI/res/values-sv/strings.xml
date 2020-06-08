@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Visas högst upp bland konversationerna som en flytande bubbla, visar profilbilden på låsskärmen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Inställningar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> har inte stöd för konversationsfunktioner"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Inga nya bubblor"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"De senaste bubblorna och ignorerade bubblor visas här"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Det går inte att ändra de här aviseringarna."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen har uppdaterats. Öppna inställningarna om du vill ändra något."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Öppna inställningarna och uppdatera systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Viloläge"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Konversationen har angetts som prioriterad"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Följande gäller för prioriterade konversationer:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Visa högst upp bland konversationerna"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Visa profilbild på låsskärmen"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Visa som en flytande bubbla ovanpå appar"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Avbryt Stör ej"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Inställningar"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Överlagrat förstoringsfönster"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Förstoringsfönster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Inställningar för förstoringsfönster"</string>

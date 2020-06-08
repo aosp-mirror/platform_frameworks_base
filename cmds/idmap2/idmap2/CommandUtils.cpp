@@ -19,30 +19,19 @@
 #include <string>
 #include <vector>
 
-#include "idmap2/CommandLineOptions.h"
 #include "idmap2/Idmap.h"
 #include "idmap2/Result.h"
 #include "idmap2/SysTrace.h"
 
-using android::idmap2::CommandLineOptions;
 using android::idmap2::Error;
 using android::idmap2::IdmapHeader;
 using android::idmap2::Result;
 using android::idmap2::Unit;
 
-Result<Unit> Verify(const std::vector<std::string>& args) {
-  SYSTRACE << "Verify " << args;
-  std::string idmap_path;
-
-  const CommandLineOptions opts =
-      CommandLineOptions("idmap2 verify")
-          .MandatoryOption("--idmap-path", "input: path to idmap file to verify", &idmap_path);
-
-  const auto opts_ok = opts.Parse(args);
-  if (!opts_ok) {
-    return opts_ok.GetError();
-  }
-
+Result<Unit> Verify(const std::string& idmap_path, const std::string& target_path,
+                    const std::string& overlay_path, uint32_t fulfilled_policies,
+                    bool enforce_overlayable) {
+  SYSTRACE << "Verify " << idmap_path;
   std::ifstream fin(idmap_path);
   const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
   fin.close();
@@ -50,7 +39,8 @@ Result<Unit> Verify(const std::vector<std::string>& args) {
     return Error("failed to parse idmap header");
   }
 
-  const auto header_ok = header->IsUpToDate();
+  const auto header_ok = header->IsUpToDate(target_path.c_str(), overlay_path.c_str(),
+                                            fulfilled_policies, enforce_overlayable);
   if (!header_ok) {
     return Error(header_ok.GetError(), "idmap not up to date");
   }

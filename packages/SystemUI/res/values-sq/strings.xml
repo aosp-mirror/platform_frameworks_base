@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Shfaqet në krye të seksionit të bisedës dhe shfaqet si flluskë pluskuese, shfaq fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Përparësia"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mbështet veçoritë e bisedës"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nuk ka flluska të fundit"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Flluskat e fundit dhe flluskat e hequra do të shfaqen këtu"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Këto njoftime nuk mund të modifikohen."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigimi i sistemit u përditësua. Për të bërë ndryshime, shko te \"Cilësimet\"."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Shko te \"Cilësimet\" për të përditësuar navigimin e sistemit"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Në gatishmëri"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Biseda u caktua me përparësi"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Bisedat me përparësi do të:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Shfaq në krye të seksionit të bisedës"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Shfaq figurën e profilit në ekranin e kyçjes"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Shfaq si flluskë pluskuese mbi aplikacione"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ndërprit \"Mos shqetëso\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"E kuptova"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Cilësimet"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Dritarja e mbivendosjes së zmadhimit"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Dritarja e zmadhimit"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontrollet e dritares së zmadhimit"</string>

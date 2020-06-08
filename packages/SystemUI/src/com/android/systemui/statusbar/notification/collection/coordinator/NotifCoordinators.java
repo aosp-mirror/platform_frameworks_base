@@ -57,7 +57,8 @@ public class NotifCoordinators implements Dumpable {
             BubbleCoordinator bubbleCoordinator,
             HeadsUpCoordinator headsUpCoordinator,
             ConversationCoordinator conversationCoordinator,
-            PreparationCoordinator preparationCoordinator) {
+            PreparationCoordinator preparationCoordinator,
+            MediaCoordinator mediaCoordinator) {
         dumpManager.registerDumpable(TAG, this);
         mCoordinators.add(new HideLocallyDismissedNotifsCoordinator());
         mCoordinators.add(hideNotifsForOtherUsersCoordinator);
@@ -72,6 +73,7 @@ public class NotifCoordinators implements Dumpable {
             mCoordinators.add(preparationCoordinator);
         }
         // TODO: add new Coordinators here! (b/112656837)
+        mCoordinators.add(mediaCoordinator);
 
         // TODO: add the sections in a particular ORDER (HeadsUp < People < Alerting)
         for (Coordinator c : mCoordinators) {

@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Vises øverst i samtaledelen, vises som en flytende boble, viser profilbildet på låseskjermen"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Innstillinger"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritet"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> støtter ikke samtalefunksjoner"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Ingen nylige bobler"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Nylige bobler og avviste bobler vises her"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Disse varslene kan ikke endres."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen er oppdatert. For å gjøre endringer, gå til Innstillinger."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gå til Innstillinger for å oppdatere systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ventemodus"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Samtalen er satt som prioritert"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Dette skjer med prioriterte samtaler:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Vis øverst i samtaledelen"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Vis profilbildet på låseskjermen"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Vises som en svevende boble over apper"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Overstyr «Ikke forstyrr»"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Greit"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Innstillinger"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Overleggsvindu for forstørring"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Forstørringsvindu"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Kontroller for forstørringsvindu"</string>

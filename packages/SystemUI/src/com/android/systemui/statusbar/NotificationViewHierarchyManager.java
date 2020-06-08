@@ -42,7 +42,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationListContain
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.util.Assert;
-import com.android.systemui.util.Utils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -150,9 +149,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationEntry ent = activeNotifications.get(i);
-            boolean hideMedia = Utils.useQsMediaPlayer(mContext);
             if (ent.isRowDismissed() || ent.isRowRemoved()
-                    || (ent.isMediaNotification() && hideMedia)
                     || mBubbleController.isBubbleNotificationSuppressedFromShade(ent)
                     || mFgsSectionController.hasEntry(ent)) {
                 // we don't want to update removed notifications because they could

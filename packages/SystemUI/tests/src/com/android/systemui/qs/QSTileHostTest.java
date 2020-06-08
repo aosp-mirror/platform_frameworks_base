@@ -219,10 +219,40 @@ public class QSTileHostTest extends SysuiTestCase {
     public void testNoRepeatedSpecs_customTile() {
         mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, CUSTOM_TILE_SPEC);
 
-        mQSTileHost.addTile(CUSTOM_TILE);
+        mQSTileHost.addTile(CUSTOM_TILE, /* end */ false);
 
         assertEquals(1, mQSTileHost.mTileSpecs.size());
         assertEquals(CUSTOM_TILE_SPEC, mQSTileHost.mTileSpecs.get(0));
+    }
+
+    @Test
+    public void testAddedAtBeginningOnDefault_customTile() {
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1"); // seed
+
+        mQSTileHost.addTile(CUSTOM_TILE);
+
+        assertEquals(2, mQSTileHost.mTileSpecs.size());
+        assertEquals(CUSTOM_TILE_SPEC, mQSTileHost.mTileSpecs.get(0));
+    }
+
+    @Test
+    public void testAddedAtBeginning_customTile() {
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1"); // seed
+
+        mQSTileHost.addTile(CUSTOM_TILE, /* end */ false);
+
+        assertEquals(2, mQSTileHost.mTileSpecs.size());
+        assertEquals(CUSTOM_TILE_SPEC, mQSTileHost.mTileSpecs.get(0));
+    }
+
+    @Test
+    public void testAddedAtEnd_customTile() {
+        mQSTileHost.onTuningChanged(QSTileHost.TILES_SETTING, "spec1"); // seed
+
+        mQSTileHost.addTile(CUSTOM_TILE, /* end */ true);
+
+        assertEquals(2, mQSTileHost.mTileSpecs.size());
+        assertEquals(CUSTOM_TILE_SPEC, mQSTileHost.mTileSpecs.get(1));
     }
 
     @Test

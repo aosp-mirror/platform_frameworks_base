@@ -701,7 +701,7 @@
     <string name="inline_deliver_silently_button" msgid="2714314213321223286">"Invia in modalità silenziosa"</string>
     <string name="inline_block_button" msgid="479892866568378793">"Blocca"</string>
     <string name="inline_keep_button" msgid="299631874103662170">"Continua a mostrare"</string>
-    <string name="inline_minimize_button" msgid="1474436209299333445">"Riduci a icona"</string>
+    <string name="inline_minimize_button" msgid="1474436209299333445">"Riduci"</string>
     <string name="inline_silent_button_silent" msgid="525243786649275816">"Modalità silenziosa"</string>
     <string name="inline_silent_button_stay_silent" msgid="2129254868305468743">"Continua con notifiche silenziose"</string>
     <string name="inline_silent_button_alert" msgid="5705343216858250354">"Avvisi"</string>
@@ -709,18 +709,17 @@
     <string name="inline_turn_off_notifications" msgid="8543989584403106071">"Disattiva notifiche"</string>
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Continuare a ricevere notifiche da questa app?"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Modalità silenziosa"</string>
-    <string name="notification_alert_title" msgid="3656229781017543655">"Livello predefinito"</string>
+    <string name="notification_alert_title" msgid="3656229781017543655">"Modalità predefinita"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Fumetto"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Nessun suono o vibrazione"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Nessun suono o vibrazione e appare più in basso nella sezione delle conversazioni"</string>
-    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Potrebbero essere attivati lo squillo o la vibrazione in base alle impostazioni del telefono"</string>
-    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Potrebbero essere attivati lo squillo o la vibrazione in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
+    <string name="notification_channel_summary_default" msgid="3282930979307248890">"Può suonare o vibrare in base alle impostazioni del telefono"</string>
+    <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Può suonare o vibrare in base alle impostazioni del telefono. Conversazioni dalla bolla <xliff:g id="APP_NAME">%1$s</xliff:g> per impostazione predefinita."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mantiene la tua attenzione con una scorciatoia mobile a questi contenuti."</string>
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Viene mostrata in cima alla sezione delle conversazioni, appare sotto forma di bolla mobile, mostra l\'immagine del profilo nella schermata di blocco"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Impostazioni"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorità"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> non supporta le funzionalità delle conversazioni"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nessuna bolla recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Le bolle recenti e ignorate verranno visualizzate qui"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Impossibile modificare queste notifiche."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigazione del sistema aggiornata. Per apportare modifiche, usa le Impostazioni."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Usa le Impostazioni per aggiornare la navigazione del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversazione impostata come prioritaria"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Le conversazioni prioritarie:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Appaiono in cima alla sezione delle conversazioni"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrano immagine profilo in schermata di blocco"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Vengono mostrate come bolle mobili sopra le app"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompono la modalità Non disturbare"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Impostazioni"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Finestra overlay ingrandimento"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Finestra ingrandimento"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Finestra controlli di ingrandimento"</string>
