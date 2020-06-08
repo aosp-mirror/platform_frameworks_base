@@ -118,6 +118,7 @@ class ControlViewHolder(
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
     var isLoading = false
+    var visibleDialog: Dialog? = null
     private var lastChallengeDialog: Dialog? = null
     private val onDialogCancel: () -> Unit = { lastChallengeDialog = null }
 
@@ -197,18 +198,24 @@ class ControlViewHolder(
     fun dismiss() {
         lastChallengeDialog?.dismiss()
         lastChallengeDialog = null
+        visibleDialog?.dismiss()
+        visibleDialog = null
     }
 
     fun setTransientStatus(tempStatus: String) {
         val previousText = status.getText()
 
         cancelUpdate = uiExecutor.executeDelayed({
-            setStatusText(previousText)
-            updateContentDescription()
+            animateStatusChange(/* animated */ true, {
+                setStatusText(previousText, /* immediately */ true)
+                updateContentDescription()
+            })
         }, UPDATE_DELAY_IN_MILLIS)
 
-        setStatusText(tempStatus)
-        updateContentDescription()
+        animateStatusChange(/* animated */ true, {
+            setStatusText(tempStatus, /* immediately */ true)
+            updateContentDescription()
+        })
     }
 
     private fun updateContentDescription() =

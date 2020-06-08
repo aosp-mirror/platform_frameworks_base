@@ -29,11 +29,12 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.WindowManager;
@@ -91,8 +92,7 @@ public final class ScreenshotHelperTest {
     @Test
     public void testProvidedImageScreenshot() {
         mScreenshotHelper.provideScreenshot(
-                Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888), new Rect(),
-                Insets.of(0, 0, 0, 0), 1,
+                new Bundle(), new Rect(), Insets.of(0, 0, 0, 0), 1, 1, new ComponentName("", ""),
                 WindowManager.ScreenshotSource.SCREENSHOT_OTHER, mHandler, null);
     }
 

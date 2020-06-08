@@ -91,7 +91,13 @@ class SeekBarViewModel(val bgExecutor: DelayableExecutor) {
             playbackState = state
             if (shouldPollPlaybackPosition()) {
                 checkPlaybackPosition()
+            } else if (PlaybackState.STATE_NONE.equals(playbackState)) {
+                clearController()
             }
+        }
+
+        override fun onSessionDestroyed() {
+            clearController()
         }
     }
 

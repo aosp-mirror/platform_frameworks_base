@@ -3164,6 +3164,11 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     @Override
+    public SurfaceControl.Builder makeAnimationLeash() {
+        return super.makeAnimationLeash().setMetadata(METADATA_TASK_ID, mTaskId);
+    }
+
+    @Override
     public SurfaceControl getAnimationLeashParent() {
         if (WindowManagerService.sHierarchicalAnimations) {
             return super.getAnimationLeashParent();

@@ -45,7 +45,6 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
 import android.content.res.ApkAssets;
-import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Environment;
@@ -63,7 +62,6 @@ import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.R;
 import com.android.internal.content.om.OverlayConfig;
 import com.android.server.FgThread;
 import com.android.server.IoThread;
@@ -252,8 +250,7 @@ public final class OverlayManagerService extends SystemService {
             mSettings = new OverlayManagerSettings();
             mImpl = new OverlayManagerServiceImpl(mPackageManager, im, mSettings,
                     OverlayConfig.getSystemInstance(), getDefaultOverlayPackages(),
-                    new OverlayChangeListener(), getOverlayableConfigurator(),
-                    getOverlayableConfiguratorTargets());
+                    new OverlayChangeListener());
             mActorEnforcer = new OverlayActorEnforcer(mPackageManager);
 
             final IntentFilter packageFilter = new IntentFilter();
@@ -334,28 +331,6 @@ public final class OverlayManagerService extends SystemService {
             }
         }
         return defaultPackages.toArray(new String[defaultPackages.size()]);
-    }
-
-
-    /**
-     * Retrieves the package name that is recognized as an actor for the packages specified by
-     * {@link #getOverlayableConfiguratorTargets()}.
-     */
-    @Nullable
-    private String getOverlayableConfigurator() {
-        return TextUtils.nullIfEmpty(Resources.getSystem()
-                .getString(R.string.config_overlayableConfigurator));
-    }
-
-    /**
-     * Retrieves the target packages that recognize the {@link #getOverlayableConfigurator} as an
-     * actor for itself. Overlays targeting one of the specified targets that are signed with the
-     * same signature as the overlayable configurator will be granted the "actor" policy.
-     */
-    @Nullable
-    private String[] getOverlayableConfiguratorTargets() {
-        return Resources.getSystem().getStringArray(
-                R.array.config_overlayableConfiguratorTargets);
     }
 
     private final class PackageReceiver extends BroadcastReceiver {

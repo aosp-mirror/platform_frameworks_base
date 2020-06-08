@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.qs;
+package com.android.systemui.media;
 
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -27,14 +27,17 @@ import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.os.Bundle;
 import android.service.media.MediaBrowserService;
+import android.text.TextUtils;
 import android.util.Log;
+
+import com.android.systemui.util.Utils;
 
 import java.util.List;
 
 /**
- * Media browser for managing resumption in QS media controls
+ * Media browser for managing resumption in media controls
  */
-public class QSMediaBrowser {
+public class ResumeMediaBrowser {
 
     /** Maximum number of controls to show on boot */
     public static final int MAX_RESUMPTION_CONTROLS = 5;
@@ -42,7 +45,8 @@ public class QSMediaBrowser {
     /** Delimiter for saved component names */
     public static final String DELIMITER = ":";
 
-    private static final String TAG = "QSMediaBrowser";
+    private static final String TAG = "ResumeMediaBrowser";
+    private boolean mIsEnabled = false;
     private final Context mContext;
     private final Callback mCallback;
     private MediaBrowser mMediaBrowser;
@@ -54,21 +58,25 @@ public class QSMediaBrowser {
      * @param callback used to report media items found
      * @param componentName Component name of the MediaBrowserService this browser will connect to
      */
-    public QSMediaBrowser(Context context, Callback callback, ComponentName componentName) {
+    public ResumeMediaBrowser(Context context, Callback callback, ComponentName componentName) {
+        mIsEnabled = Utils.useMediaResumption(context);
         mContext = context;
         mCallback = callback;
         mComponentName = componentName;
     }
 
     /**
-     * Connects to the MediaBrowserService and looks for valid media. If a media item is returned
-     * by the service, QSMediaBrowser.Callback#addTrack will be called with its MediaDescription.
-     * QSMediaBrowser.Callback#onConnected and QSMediaBrowser.Callback#onError will also be called
-     * when the initial connection is successful, or an error occurs. Note that it is possible for
-     * the service to connect but for no playable tracks to be found later.
-     * QSMediaBrowser#disconnect will be called automatically with this function.
+     * Connects to the MediaBrowserService and looks for valid media. If a media item is returned,
+     * ResumeMediaBrowser.Callback#addTrack will be called with the MediaDescription.
+     * ResumeMediaBrowser.Callback#onConnected and ResumeMediaBrowser.Callback#onError will also be
+     * called when the initial connection is successful, or an error occurs.
+     * Note that it is possible for the service to connect but for no playable tracks to be found.
+     * ResumeMediaBrowser#disconnect will be called automatically with this function.
      */
     public void findRecentMedia() {
+        if (!mIsEnabled) {
+            return;
+        }
         Log.d(TAG, "Connecting to " + mComponentName);
         disconnect();
         Bundle rootHints = new Bundle();
@@ -86,7 +94,7 @@ public class QSMediaBrowser {
         public void onChildrenLoaded(String parentId,
                 List<MediaBrowser.MediaItem> children) {
             if (children.size() == 0) {
-                Log.e(TAG, "No children found for " + mComponentName);
+                Log.d(TAG, "No children found for " + mComponentName);
                 return;
             }
             // We ask apps to return a playable item as the first child when sending
@@ -94,23 +102,24 @@ public class QSMediaBrowser {
             MediaBrowser.MediaItem child = children.get(0);
             MediaDescription desc = child.getDescription();
             if (child.isPlayable()) {
-                mCallback.addTrack(desc, mMediaBrowser.getServiceComponent(), QSMediaBrowser.this);
+                mCallback.addTrack(desc, mMediaBrowser.getServiceComponent(),
+                        ResumeMediaBrowser.this);
             } else {
-                Log.e(TAG, "Child found but not playable for " + mComponentName);
+                Log.d(TAG, "Child found but not playable for " + mComponentName);
             }
             disconnect();
         }
 
         @Override
         public void onError(String parentId) {
-            Log.e(TAG, "Subscribe error for " + mComponentName + ": " + parentId);
+            Log.d(TAG, "Subscribe error for " + mComponentName + ": " + parentId);
             mCallback.onError();
             disconnect();
         }
 
         @Override
         public void onError(String parentId, Bundle options) {
-            Log.e(TAG, "Subscribe error for " + mComponentName + ": " + parentId
+            Log.d(TAG, "Subscribe error for " + mComponentName + ": " + parentId
                     + ", options: " + options);
             mCallback.onError();
             disconnect();
@@ -149,7 +158,7 @@ public class QSMediaBrowser {
          */
         @Override
         public void onConnectionFailed() {
-            Log.e(TAG, "Connection failed for " + mComponentName);
+            Log.d(TAG, "Connection failed for " + mComponentName);
             mCallback.onError();
             disconnect();
         }
@@ -167,11 +176,15 @@ public class QSMediaBrowser {
     }
 
     /**
-     * Connects to the MediaBrowserService and starts playback. QSMediaBrowser.Callback#onError or
-     * QSMediaBrowser.Callback#onConnected will be called depending on whether it was successful.
-     * QSMediaBrowser#disconnect should be called after this to ensure the connection is closed.
+     * Connects to the MediaBrowserService and starts playback.
+     * ResumeMediaBrowser.Callback#onError or ResumeMediaBrowser.Callback#onConnected will be called
+     * depending on whether it was successful.
+     * ResumeMediaBrowser#disconnect should be called after this to ensure the connection is closed.
      */
     public void restart() {
+        if (!mIsEnabled) {
+            return;
+        }
         disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
@@ -224,18 +237,21 @@ public class QSMediaBrowser {
 
     /**
      * Used to test if SystemUI is allowed to connect to the given component as a MediaBrowser.
-     * QSMediaBrowser.Callback#onError or QSMediaBrowser.Callback#onConnected will be called
+     * ResumeMediaBrowser.Callback#onError or ResumeMediaBrowser.Callback#onConnected will be called
      * depending on whether it was successful.
-     * QSMediaBrowser#disconnect should be called after this to ensure the connection is closed.
+     * ResumeMediaBrowser#disconnect should be called after this to ensure the connection is closed.
      */
     public void testConnection() {
+        if (!mIsEnabled) {
+            return;
+        }
         disconnect();
         final MediaBrowser.ConnectionCallback connectionCallback =
                 new MediaBrowser.ConnectionCallback() {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "connected");
-                        if (mMediaBrowser.getRoot() == null) {
+                        if (TextUtils.isEmpty(mMediaBrowser.getRoot())) {
                             mCallback.onError();
                         } else {
                             mCallback.onConnected();
@@ -264,7 +280,7 @@ public class QSMediaBrowser {
     }
 
     /**
-     * Interface to handle results from QSMediaBrowser
+     * Interface to handle results from ResumeMediaBrowser
      */
     public static class Callback {
         /**
@@ -286,7 +302,7 @@ public class QSMediaBrowser {
          * @param browser reference to the browser
          */
         public void addTrack(MediaDescription track, ComponentName component,
-                QSMediaBrowser browser) {
+                ResumeMediaBrowser browser) {
         }
     }
 }

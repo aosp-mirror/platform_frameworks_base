@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -30,11 +29,13 @@ import android.app.AppOpsManager;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.widget.NotificationExpandButton;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.Before;
@@ -97,5 +98,43 @@ public class NotificationContentViewTest extends SysuiTestCase {
         verify(mockContracted, times(1)).setVisibility(View.VISIBLE);
         verify(mockExpanded, times(1)).setVisibility(View.VISIBLE);
         verify(mockHeadsUp, times(1)).setVisibility(View.VISIBLE);
+    }
+
+    @Test
+    @UiThreadTest
+    public void testExpandButtonFocusIsCalled() {
+        View mockContractedEB = mock(NotificationExpandButton.class);
+        View mockContracted = mock(NotificationHeaderView.class);
+        when(mockContracted.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        when(mockContracted.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
+                mockContractedEB);
+
+        View mockExpandedEB = mock(NotificationExpandButton.class);
+        View mockExpanded = mock(NotificationHeaderView.class);
+        when(mockExpanded.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        when(mockExpanded.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
+                mockExpandedEB);
+
+        View mockHeadsUpEB = mock(NotificationExpandButton.class);
+        View mockHeadsUp = mock(NotificationHeaderView.class);
+        when(mockHeadsUp.animate()).thenReturn(mock(ViewPropertyAnimator.class));
+        when(mockHeadsUp.findViewById(com.android.internal.R.id.expand_button)).thenReturn(
+                mockHeadsUpEB);
+
+        // Set up all 3 child forms
+        mView.setContractedChild(mockContracted);
+        mView.setExpandedChild(mockExpanded);
+        mView.setHeadsUpChild(mockHeadsUp);
+
+        // This is required to call requestAccessibilityFocus()
+        mView.setFocusOnVisibilityChange();
+
+        // The following will initialize the view and switch from not visible to expanded.
+        // (heads-up is actually an alternate form of contracted, hence this enters expanded state)
+        mView.setHeadsUp(true);
+
+        verify(mockContractedEB, times(0)).requestAccessibilityFocus();
+        verify(mockExpandedEB, times(1)).requestAccessibilityFocus();
+        verify(mockHeadsUpEB, times(0)).requestAccessibilityFocus();
     }
 }

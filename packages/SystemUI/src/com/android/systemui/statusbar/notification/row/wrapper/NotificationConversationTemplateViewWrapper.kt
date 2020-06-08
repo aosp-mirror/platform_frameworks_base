@@ -50,6 +50,7 @@ class NotificationConversationTemplateViewWrapper constructor(
     private lateinit var conversationBadgeBg: View
     private lateinit var expandButton: View
     private lateinit var expandButtonContainer: View
+    private lateinit var expandButtonInnerContainer: View
     private lateinit var imageMessageContainer: ViewGroup
     private lateinit var messagingLinearLayout: MessagingLinearLayout
     private lateinit var conversationTitleView: View
@@ -69,6 +70,8 @@ class NotificationConversationTemplateViewWrapper constructor(
             expandButton = requireViewById(com.android.internal.R.id.expand_button)
             expandButtonContainer =
                     requireViewById(com.android.internal.R.id.expand_button_container)
+            expandButtonInnerContainer =
+                    requireViewById(com.android.internal.R.id.expand_button_inner_container)
             importanceRing = requireViewById(com.android.internal.R.id.conversation_icon_badge_ring)
             appName = requireViewById(com.android.internal.R.id.app_name_text)
             conversationTitleView = requireViewById(com.android.internal.R.id.conversation_text)
@@ -133,6 +136,8 @@ class NotificationConversationTemplateViewWrapper constructor(
                 facePileBottomBg
         )
     }
+
+    override fun getExpandButton() = expandButtonInnerContainer
 
     override fun setShelfIconVisible(visible: Boolean) {
         if (conversationLayout.isImportantConversation) {

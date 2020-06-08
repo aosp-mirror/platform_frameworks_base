@@ -114,4 +114,7 @@ public abstract class TaskStackChangeListener {
 
     /** @see ITaskStackListener#onRecentTaskListFrozenChanged(boolean) */
     public void onRecentTaskListFrozenChanged(boolean frozen) { }
+
+    /** @see ITaskStackListener#onActivityRotation()*/
+    public void onActivityRotation() { }
 }

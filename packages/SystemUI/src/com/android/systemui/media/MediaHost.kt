@@ -50,7 +50,7 @@ class MediaHost @Inject constructor(
         }
 
     private val listener = object : MediaDataManager.Listener {
-        override fun onMediaDataLoaded(key: String, data: MediaData) {
+        override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
             updateViewVisibility()
         }
 

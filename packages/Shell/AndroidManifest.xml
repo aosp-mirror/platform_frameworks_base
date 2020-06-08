@@ -306,6 +306,9 @@
     <!-- Permission needed for CTS test - PrivilegedLocationPermissionTest -->
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
 
+    <!-- Permissions required for GTS test - GtsDialerAudioTestCases -->
+    <uses-permission android:name="android.permission.CAPTURE_AUDIO_OUTPUT" />
+
     <application android:label="@string/app_label"
                 android:theme="@android:style/Theme.DeviceDefault.DayNight"
                 android:defaultToDeviceProtectedStorage="true"
