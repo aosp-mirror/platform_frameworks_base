@@ -53,6 +53,9 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
     public static final String ROUTE_ID5_TO_TRANSFER_TO = "route_id5_to_transfer_to";
     public static final String ROUTE_NAME5 = "Sample Route 5 - Route to transfer to";
 
+    public static final String ROUTE_ID6_TO_BE_IGNORED = "route_id6_to_be_ignored";
+    public static final String ROUTE_NAME6 = "Sample Route 6 - Route to be ignored";
+
     public static final String ROUTE_ID_SPECIAL_FEATURE = "route_special_feature";
     public static final String ROUTE_NAME_SPECIAL_FEATURE = "Special Feature Route";
 
@@ -98,7 +101,10 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
                 ROUTE_ID5_TO_TRANSFER_TO, ROUTE_NAME5)
                 .addFeature(FEATURE_SAMPLE)
                 .build();
-
+        MediaRoute2Info route6 = new MediaRoute2Info.Builder(
+                ROUTE_ID6_TO_BE_IGNORED, ROUTE_NAME6)
+                .addFeature(FEATURE_SAMPLE)
+                .build();
         MediaRoute2Info routeSpecial =
                 new MediaRoute2Info.Builder(ROUTE_ID_SPECIAL_FEATURE, ROUTE_NAME_SPECIAL_FEATURE)
                         .addFeature(FEATURE_SAMPLE)
@@ -121,6 +127,7 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
         mRoutes.put(route3.getId(), route3);
         mRoutes.put(route4.getId(), route4);
         mRoutes.put(route5.getId(), route5);
+        mRoutes.put(route6.getId(), route6);
 
         mRoutes.put(routeSpecial.getId(), routeSpecial);
         mRoutes.put(fixedVolumeRoute.getId(), fixedVolumeRoute);
@@ -217,6 +224,10 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
         MediaRoute2Info route = mRoutes.get(routeId);
         if (route == null || TextUtils.equals(ROUTE_ID3_SESSION_CREATION_FAILED, routeId)) {
             notifyRequestFailed(requestId, REASON_UNKNOWN_ERROR);
+            return;
+        }
+        // Ignores the request intentionally for testing
+        if (TextUtils.equals(ROUTE_ID6_TO_BE_IGNORED, routeId)) {
             return;
         }
         maybeDeselectRoute(routeId);
