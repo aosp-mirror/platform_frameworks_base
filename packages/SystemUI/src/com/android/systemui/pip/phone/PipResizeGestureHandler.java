@@ -292,18 +292,27 @@ public class PipResizeGestureHandler {
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
-                    mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds, (Rect bounds) -> {
-                        new Handler(Looper.getMainLooper()).post(() -> {
-                            mMotionHelper.synchronizePinnedStackBounds();
-                            mUpdateMovementBoundsRunnable.run();
-                            mCtrlType = CTRL_NONE;
-                            mAllowGesture = false;
-                            mThresholdCrossed = false;
-                        });
-                    });
+                    if (!mLastResizeBounds.isEmpty()) {
+                        mPipTaskOrganizer.scheduleFinishResizePip(mLastResizeBounds,
+                                (Rect bounds) -> {
+                                    new Handler(Looper.getMainLooper()).post(() -> {
+                                        mMotionHelper.synchronizePinnedStackBounds();
+                                        mUpdateMovementBoundsRunnable.run();
+                                        resetState();
+                                    });
+                                });
+                    } else {
+                        resetState();
+                    }
                     break;
             }
         }
+    }
+
+    private void resetState() {
+        mCtrlType = CTRL_NONE;
+        mAllowGesture = false;
+        mThresholdCrossed = false;
     }
 
     void updateMaxSize(int maxX, int maxY) {

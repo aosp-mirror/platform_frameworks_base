@@ -249,7 +249,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             OP_CAMERA,
     };
 
-    private static final int MAX_UNFORWARED_OPS = 10;
+    private static final int MAX_UNFORWARDED_OPS = 10;
     private static final int MAX_UNUSED_POOLED_OBJECTS = 3;
     private static final int RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS = 300000;
 
@@ -322,7 +322,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @VisibleForTesting
     final SparseArray<UidState> mUidStates = new SparseArray<>();
 
-    final HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
+    volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
 
     long mLastRealtime;
 
@@ -1977,6 +1977,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         if (AppOpsManager.NOTE_OP_COLLECTION_ENABLED && mWriteNoteOpsScheduled) {
             writeNoteOps();
         }
+
+        mHistoricalRegistry.shutdown();
     }
 
     private ArrayList<AppOpsManager.OpEntry> collectOps(Ops pkgOps, int[] ops) {
@@ -3371,7 +3373,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
 
                     unforwardedOps.add(asyncNotedOp);
-                    if (unforwardedOps.size() > MAX_UNFORWARED_OPS) {
+                    if (unforwardedOps.size() > MAX_UNFORWARDED_OPS) {
                         unforwardedOps.remove(0);
                     }
                 }
@@ -5878,6 +5880,25 @@ public class AppOpsService extends IAppOpsService.Stub {
                 "clearHistory");
         // Must not hold the appops lock
         mHistoricalRegistry.clearHistory();
+    }
+
+    @Override
+    public void rebootHistory(long offlineDurationMillis) {
+        mContext.enforceCallingOrSelfPermission(android.Manifest.permission.MANAGE_APPOPS,
+                "rebootHistory");
+
+        Preconditions.checkArgument(offlineDurationMillis >= 0);
+
+        // Must not hold the appops lock
+        mHistoricalRegistry.shutdown();
+
+        if (offlineDurationMillis > 0) {
+            SystemClock.sleep(offlineDurationMillis);
+        }
+
+        mHistoricalRegistry = new HistoricalRegistry(mHistoricalRegistry);
+        mHistoricalRegistry.systemReady(mContext.getContentResolver());
+        mHistoricalRegistry.persistPendingHistory();
     }
 
     /**
