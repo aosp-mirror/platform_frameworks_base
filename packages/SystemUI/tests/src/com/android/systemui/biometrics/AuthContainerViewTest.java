@@ -44,6 +44,7 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -207,6 +208,14 @@ public class AuthContainerViewTest extends SysuiTestCase {
         final WindowManager.LayoutParams layoutParams =
                 AuthContainerView.getLayoutParams(windowToken);
         assertTrue((layoutParams.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0);
+    }
+
+    @Test
+    public void testLayoutParams_excludesImeInsets() {
+        final IBinder windowToken = mock(IBinder.class);
+        final WindowManager.LayoutParams layoutParams =
+                AuthContainerView.getLayoutParams(windowToken);
+        assertTrue((layoutParams.getFitInsetsTypes() & WindowInsets.Type.ime()) == 0);
     }
 
     private void initializeContainer(int authenticators) {

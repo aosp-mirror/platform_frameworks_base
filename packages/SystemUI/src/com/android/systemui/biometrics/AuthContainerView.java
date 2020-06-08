@@ -35,6 +35,7 @@ import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
@@ -625,6 +626,7 @@ public class AuthContainerView extends LinearLayout
                 windowFlags,
                 PixelFormat.TRANSLUCENT);
         lp.privateFlags |= WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS;
+        lp.setFitInsetsTypes(lp.getFitInsetsTypes() & ~WindowInsets.Type.ime());
         lp.setTitle("BiometricPrompt");
         lp.token = windowToken;
         return lp;
