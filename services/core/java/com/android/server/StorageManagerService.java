@@ -157,7 +157,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.server.pm.Installer;
-import com.android.server.pm.parsing.pkg.AndroidPackage;
 import com.android.server.storage.AppFuseBridge;
 import com.android.server.storage.StorageSessionController;
 import com.android.server.storage.StorageSessionController.ExternalStorageServiceException;
@@ -3343,15 +3342,23 @@ class StorageManagerService extends IStorageManager.Stub
     public void fixupAppDir(String path) {
         final Matcher matcher = KNOWN_APP_DIR_PATHS.matcher(path);
         if (matcher.matches()) {
-            AndroidPackage pkg = mPmInternal.getPackage(matcher.group(3));
-            if (pkg != null) {
+            if (matcher.group(2) == null) {
+                Log.e(TAG, "Asked to fixup an app dir without a userId: " + path);
+                return;
+            }
+            try {
+                int userId = Integer.parseInt(matcher.group(2));
+                String packageName = matcher.group(3);
+                int uid = mContext.getPackageManager().getPackageUidAsUser(packageName, userId);
                 try {
-                    mVold.fixupAppDir(path + "/", pkg.getUid());
+                    mVold.fixupAppDir(path + "/", uid);
                 } catch (RemoteException | ServiceSpecificException e) {
-                    Log.e(TAG, "Failed to fixup app dir for " + pkg.getPackageName(), e);
+                    Log.e(TAG, "Failed to fixup app dir for " + packageName, e);
                 }
-            } else {
-                Log.e(TAG, "Can't find package belonging to " + path);
+            } catch (NumberFormatException e) {
+                Log.e(TAG, "Invalid userId in path: " + path, e);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Couldn't find package to fixup app dir " + path, e);
             }
         } else {
             Log.e(TAG, "Path " + path + " is not a valid application-specific directory");
