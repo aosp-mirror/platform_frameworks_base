@@ -73,8 +73,8 @@ public abstract class SysuiTestCase {
     public void SysuiSetup() throws Exception {
         SystemUIFactory.createFromConfig(mContext);
         mDependency = new TestableDependency(mContext);
-        mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Handler.class),
-                mock(Looper.class), mock(DumpManager.class), mock(BroadcastDispatcherLogger.class));
+        mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Looper.class),
+                mock(DumpManager.class), mock(BroadcastDispatcherLogger.class));
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
