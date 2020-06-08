@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom pt. a umple ecranul"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Înt. pt. a umple ecranul"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captură de ecran"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Deblocați telefonul pentru mai multe opțiuni"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Deblocați tableta pentru mai multe opțiuni"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Deblocați dispozitivul pentru mai multe opțiuni"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"a trimis o imagine"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Se salv. captura de ecran..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Se salvează captura de ecran..."</string>
@@ -598,29 +595,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"activați"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"dezactivați"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Comutați dispozitivul de ieșire"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Aplicația este fixată"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunile Înapoi și Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunile Înapoi și Acasă pentru a anula fixarea."</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Astfel rămâne afișat până anulați fixarea. Glisați în sus și țineți apăsat pentru a anula fixarea."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunea Recente pentru a anula fixarea."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Astfel rămâne afișat până anulați fixarea. Atingeți lung opțiunea Acasă pentru a anula fixarea."</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Pot fi accesate date cu caracter personal (cum ar fi agenda și conținutul e-mailurilor)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Aplicațiile fixate pot deschide alte aplicații."</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"Pentru a anula fixarea acestei aplicații, atingeți lung butoanele Înapoi și Recente"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Pentru a anula fixarea acestei aplicații, atingeți lung butoanele Înapoi și Acasă"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Pentru a anula fixarea acestei aplicații, glisați în sus și mențineți"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Am înțeles"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Nu, mulțumesc"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Aplicație fixată"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"Aplicație nefixată"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Ascundeți <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Va reapărea la următoarea activare în setări."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"Ascundeți"</string>
@@ -733,7 +722,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Se afișează în partea de sus a secțiunii de conversație, apare ca un balon flotant, afișează fotografia de profil pe ecranul de blocare"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Setări"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioritate"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu acceptă setările pentru conversații"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> nu acceptă funcții pentru conversații"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Nu există baloane recente"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Baloanele recente și baloanele respinse vor apărea aici"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Aceste notificări nu pot fi modificate."</string>
@@ -1029,11 +1018,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigarea în sistem a fost actualizată. Pentru a face modificări, accesați Setările."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Accesați Setările pentru a actualiza navigarea în sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Standby"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversația a fost setată ca prioritară"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Conversațiile cu prioritate vor:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Apar în partea de sus a secțiunii de conversație"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Afișează fotografia de profil pe ecranul de blocare"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Apar ca un balon flotant deasupra aplicațiilor"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Întrerup modul Nu deranja"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Setări"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Fereastra de mărire"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Comenzi pentru fereastra de mărire"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Comenzile dispozitivelor"</string>
@@ -1075,9 +1067,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Glisați pentru a vedea mai multe"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Se încarcă recomandările"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Închideți această sesiune media"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Eroare, se încearcă din nou…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Dispozitivul a fost eliminat"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Starea nu se poate încărca"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Eroare, încercați din nou"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"În curs"</string>

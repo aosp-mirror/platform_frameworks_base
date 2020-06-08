@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoom para ocupar la pantalla"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Estirar p/ ocupar la pantalla"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Captura de pantalla"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Desbloquea el teléfono para ver más opciones"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Desbloquea la tablet para ver más opciones"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Desbloquea el dispositivo para ver más opciones"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"envió una imagen"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Guardando captura de pantalla"</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Guardando la captura de pantalla..."</string>
@@ -722,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Aparece en la parte superior de la sección de conversaciones, en forma de burbuja flotante, y muestra la foto de perfil en la pantalla de bloqueo"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Configuración"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioridad"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite opciones de configuración específicas de conversaciones"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> no admite funciones de conversación"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"No hay burbujas recientes"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Las burbujas recientes y las que se descartaron aparecerán aquí"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"No se pueden modificar estas notificaciones."</string>
@@ -1016,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Se actualizó el sistema de navegación. Para hacer cambios, ve a Configuración."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Ve a Configuración para actualizar la navegación del sistema"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Se estableció la conversación como prioritaria"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Las conversaciones prioritarias harán lo siguiente:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Se muestran en la parte superior de conversaciones"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Muestran una foto de perfil en pantalla de bloqueo"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecen como burbujas flotantes encima de apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Suspender No interrumpir"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entendido"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Configuración"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Ventana de ampliación"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controles de ampliación de la ventana"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Controles de dispositivos"</string>
@@ -1041,7 +1041,7 @@
     <string name="accessibility_control_move" msgid="8980344493796647792">"Mover a la posición <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Controles"</string>
     <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Elige los controles a los que quieres acceder desde el menú de encendido"</string>
-    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra para reorganizar los controles"</string>
+    <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén presionado y arrastra un control para reubicarlo"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Se quitaron todos los controles"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"No se guardaron los cambios"</string>
     <string name="controls_favorite_load_error" msgid="2533215155804455348">"No se cargó la lista completa de controles."</string>
@@ -1061,9 +1061,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Desliza el dedo para ver más elementos"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Cerrar esta sesión multimedia"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo. Verifica la app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hubo un error. Reintentando…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Se quitó el dispositivo"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"No se pudo cargar el estado"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Error. Vuelve a intentarlo."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>

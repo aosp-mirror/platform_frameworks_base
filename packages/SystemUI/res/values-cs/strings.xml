@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Přiblížit na celou obrazovku"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Na celou obrazovku"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Snímek obrazovky"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Chcete-li zobrazit další možnosti, odemkněte telefon"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Chcete-li zobrazit další možnosti, odemkněte tablet"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Chcete-li zobrazit další možnosti, odemkněte zařízení"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"odesílá obrázek"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Ukládání snímku obrazovky..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Ukládání snímku obrazovky..."</string>
@@ -728,7 +725,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Zobrazuje se v horní části sekce konverzace a má podobu plovoucí bubliny, zobrazuje profilovou fotku na obrazovce uzamčení"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Nastavení"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priorita"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> nepodporuje nastavení specifická pro konverzaci"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> funkce konverzace nepodporuje"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Žádné nedávné bubliny"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Zde se budou zobrazovat nedávné bubliny a zavřené bubliny"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Tato oznámení nelze upravit."</string>
@@ -1026,11 +1023,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systémová navigace byla aktualizována. Chcete-li provést změny, přejděte do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Přejděte do Nastavení a aktualizujte systémovou navigaci"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Konverzace byla nastavena jako prioritní"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Chování prioritních konverzací:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Zobrazovat v horní části sekce konverzace"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Zobrazovat profilovou fotku na zámku obrazovky"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Zobrazuje se jako plovoucí bublina nad aplikacemi"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Přerušit režim Nerušit"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Rozumím"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Nastavení"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Zvětšovací okno"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ovládací prvky zvětšovacího okna"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Ovládání zařízení"</string>
@@ -1073,9 +1073,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Přejetím prstem zobrazíte další položky"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Načítání doporučení"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Zavřít tuto mediální relaci"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovat"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Chyba. Nový pokus…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Zařízení bylo odebráno"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Stav nelze načíst"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Chyba, zkuste to znovu"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Probíhá"</string>

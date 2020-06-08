@@ -77,9 +77,6 @@
     <string name="compat_mode_on" msgid="4963711187149440884">"Zoem om skerm te vul"</string>
     <string name="compat_mode_off" msgid="7682459748279487945">"Strek om skerm te vul"</string>
     <string name="global_action_screenshot" msgid="2760267567509131654">"Skermkiekie"</string>
-    <string name="global_action_lock_message" product="default" msgid="4466026255205186456">"Ontsluit jou foon vir meer opsies"</string>
-    <string name="global_action_lock_message" product="tablet" msgid="7621167597240332986">"Ontsluit jou tablet vir meer opsies"</string>
-    <string name="global_action_lock_message" product="device" msgid="538790401275363781">"Ontsluit jou toestel vir meer opsies"</string>
     <string name="remote_input_image_insertion_text" msgid="4850791636452521123">"het \'n prent gestuur"</string>
     <string name="screenshot_saving_ticker" msgid="6519186952674544916">"Stoor tans skermkiekie..."</string>
     <string name="screenshot_saving_title" msgid="2298349784913287333">"Stoor tans skermkiekie..."</string>
@@ -722,7 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wys boaan die gespreksafdeling, verskyn as \'n swewende borrel, wys profielfoto op sluitskerm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellings"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
-    <string name="no_shortcut" msgid="7176375126961212514">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie gesprekspesifieke-instellings nie"</string>
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> steun nie gesprekskenmerke nie"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Geen onlangse borrels nie"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Onlangse borrels en borrels wat toegemaak is, sal hier verskyn"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hierdie kennisgewings kan nie gewysig word nie."</string>
@@ -1016,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Stelselnavigasie is opgedateer. Gaan na Instellings toe om veranderinge te maak."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gaan na Instellings toe om stelselnavigasie op te dateer"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Bystandmodus"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Gesprek is op prioriteit gestel"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioriteitgesprekke sal:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Wys boaan gespreksafdeling"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Wys profielprent op slotskerm"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Verskyn as \'n swewende borrel bo-oor programme"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Onderbreek Moenie Steur Nie"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Het dit"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Instellings"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Vergrotingvenster"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Vergrotingvensterkontroles"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Toestelkontroles"</string>
@@ -1061,9 +1061,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swiep om meer te sien"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Laai tans aanbevelings"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Maak hierdie mediasessie toe"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Hervat"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Onaktief, gaan program na"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fout, probeer tans weer …"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Toestel is verwyder"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrole is nie beskikbaar nie"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Kon nie by <xliff:g id="DEVICE">%1$s</xliff:g> ingaan nie. Gaan die <xliff:g id="APPLICATION">%2$s</xliff:g>-program na om seker te maak dat die kontrole steeds beskikbaar is en dat die programinstellings nie verander het nie."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Maak program oop"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Kan nie status laai nie"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fout, probeer weer"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Besig"</string>
