@@ -698,7 +698,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         if (mDownloadPsdsDataPending == STATE_PENDING_NETWORK) {
             if (mSupportsPsds) {
                 // Download only if supported, (prevents an unnecessary on-boot download)
-                psdsDownloadRequest();
+                psdsDownloadRequest(/* psdsType= */ GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
             }
         }
     }
@@ -818,7 +818,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         return false;
     }
 
-    private void handleDownloadPsdsData() {
+    private void handleDownloadPsdsData(int psdsType) {
         if (!mSupportsPsds) {
             // native code reports psds not supported, don't try
             Log.d(TAG, "handleDownloadPsdsData() called when PSDS not supported");
@@ -841,9 +841,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
         Log.i(TAG, "WakeLock acquired by handleDownloadPsdsData()");
         AsyncTask.THREAD_POOL_EXECUTOR.execute(() -> {
-            GpsPsdsDownloader psdsDownloader = new GpsPsdsDownloader(
+            GnssPsdsDownloader psdsDownloader = new GnssPsdsDownloader(
                     mGnssConfiguration.getProperties());
-            byte[] data = psdsDownloader.downloadPsdsData();
+            byte[] data = psdsDownloader.downloadPsdsData(psdsType);
             if (data != null) {
                 if (DEBUG) Log.d(TAG, "calling native_inject_psds_data");
                 native_inject_psds_data(data, data.length);
@@ -854,8 +854,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             if (data == null) {
                 // try again later
-                // since this is delayed and not urgent we do not hold a wake lock here
-                mHandler.sendEmptyMessageDelayed(DOWNLOAD_PSDS_DATA,
+                // since this is delayed and not urgent we do not hold a wake lock her
+                mHandler.sendMessageDelayed(
+                        mHandler.obtainMessage(DOWNLOAD_PSDS_DATA, psdsType, 1, null),
                         mPsdsBackOff.nextBackoffMillis());
             }
 
@@ -1151,7 +1152,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 requestUtcTime();
             } else if ("force_psds_injection".equals(command)) {
                 if (mSupportsPsds) {
-                    psdsDownloadRequest();
+                    psdsDownloadRequest(/* psdsType= */
+                            GnssPsdsDownloader.LONG_TERM_PSDS_SERVER_INDEX);
                 }
             } else {
                 Log.w(TAG, "sendExtraCommand: unknown command " + command);
@@ -1603,9 +1605,9 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         reportLocation(locations);
     }
 
-    void psdsDownloadRequest() {
-        if (DEBUG) Log.d(TAG, "psdsDownloadRequest");
-        sendMessage(DOWNLOAD_PSDS_DATA, 0, null);
+    void psdsDownloadRequest(int psdsType) {
+        if (DEBUG) Log.d(TAG, "psdsDownloadRequest. psdsType: " + psdsType);
+        sendMessage(DOWNLOAD_PSDS_DATA, psdsType, null);
     }
 
     /**
@@ -1916,7 +1918,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     handleRequestLocation(msg.arg1 == 1, (boolean) msg.obj);
                     break;
                 case DOWNLOAD_PSDS_DATA:
-                    handleDownloadPsdsData();
+                    handleDownloadPsdsData(msg.arg1);
                     break;
                 case DOWNLOAD_PSDS_DATA_FINISHED:
                     mDownloadPsdsDataPending = STATE_IDLE;
