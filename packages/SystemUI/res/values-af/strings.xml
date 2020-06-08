@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swiep om meer te sien"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Laai tans aanbevelings"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Maak hierdie mediasessie toe"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Hervat"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Onaktief, gaan program na"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fout, probeer tans weer …"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Toestel is verwyder"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nie gekry nie"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrole is nie beskikbaar nie"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Kon nie by <xliff:g id="DEVICE">%1$s</xliff:g> ingaan nie. Gaan die <xliff:g id="APPLICATION">%2$s</xliff:g>-program na om seker te maak dat die kontrole steeds beskikbaar is en dat die programinstellings nie verander het nie."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Maak program oop"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Kan nie status laai nie"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fout, probeer weer"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Besig"</string>

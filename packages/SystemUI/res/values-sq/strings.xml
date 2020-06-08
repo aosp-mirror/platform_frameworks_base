@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Rrëshqit shpejt për të shikuar më shumë"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Po ngarkon rekomandimet"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Mbyll këtë sesion të medias"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Vazhdo"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Joaktive, kontrollo aplikacionin"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Gabim, po provohet përsëri"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Pajisja u hoq"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nuk u gjet"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrolli është i padisponueshëm"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nuk mundi të qasej te <xliff:g id="DEVICE">%1$s</xliff:g>. Kontrollo aplikacionin <xliff:g id="APPLICATION">%2$s</xliff:g> për t\'u siguruar që kontrolli të jetë ende i disponueshëm dhe që cilësimet e aplikacionit të mos kenë ndryshuar."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Hap aplikacionin"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Statusi nuk mund të ngarkohet"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Gabim, provo sërish"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Në vazhdim"</string>

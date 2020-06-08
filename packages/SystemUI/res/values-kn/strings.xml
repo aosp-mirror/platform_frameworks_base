@@ -1065,9 +1065,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ಇನ್ನಷ್ಟು ನೋಡಲು ಸ್ವೈಪ್ ಮಾಡಿ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ಶಿಫಾರಸುಗಳು ಲೋಡ್ ಆಗುತ್ತಿವೆ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"ಈ ಮಾಧ್ಯಮ ಸೆಶನ್ ಅನ್ನು ಮುಚ್ಚಿರಿ"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"ಪುನರಾರಂಭಿಸಿ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ನಿಷ್ಕ್ರಿಯ, ಆ್ಯಪ್ ಪರಿಶೀಲಿಸಿ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ದೋಷ, ಮರುಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"ಸಾಧನವನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"ಕಂಡುಬಂದಿಲ್ಲ"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"ನಿಯಂತ್ರಣ ಲಭ್ಯವಿಲ್ಲ"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಯಂತ್ರಣ ಈಗಲೂ ಲಭ್ಯವಿದೆಯೇ ಮತ್ತು <xliff:g id="APPLICATION">%2$s</xliff:g> ಆ್ಯಪ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲಾಗಿಲ್ಲ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು ಆ್ಯಪ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ಆ್ಯಪ್ ತೆರೆಯಿರಿ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ಸ್ಥಿತಿ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ದೋಷ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"ಪ್ರಗತಿಯಲ್ಲಿದೆ"</string>

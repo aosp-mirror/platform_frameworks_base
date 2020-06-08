@@ -1065,9 +1065,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"अधिक पाहण्यासाठी स्वाइप करा"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"शिफारशी लोड करत आहे"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"हे मीडिया सेशन बंद करा"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"पुन्हा सुरू करा"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"निष्क्रिय, ॲप तपासा"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"एरर, पुन्हा प्रयत्न करत आहे…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"डिव्हाइस काढून टाकले आहे"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"आढळले नाही"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"नियंत्रण उपलब्ध नाही"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> अ‍ॅक्सेस करता आले नाही. नियंत्रण अजूनही उपलब्ध असल्याची आणि ॲपची सेटिंग्ज बदलली नसल्याची खात्री करण्यासाठी <xliff:g id="APPLICATION">%2$s</xliff:g> ॲप तपासा."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"अ‍ॅप उघडा"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"स्थिती लोड करू शकत नाही"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"एरर, पुन्हा प्रयत्न करा"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"प्रगतीपथावर आहे"</string>

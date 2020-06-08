@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"অধিক চাবলৈ ছোৱাইপ কৰক"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"চুপাৰিছসমূহ ল’ড কৰি থকা হৈছে"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"এই মিডিয়া ছেশ্বনটো বন্ধ কৰক"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"পুনৰ আৰম্ভ কৰক"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"সক্ৰিয় নহয়, এপ্‌টো পৰীক্ষা কৰক"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"আসোঁৱাহ, পুনৰ চেষ্টা কৰি আছে…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"ডিভাইচটো আঁতৰোৱা হৈছে"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"বিচাৰি পোৱা নগ’ল"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"নিয়ন্ত্ৰণটো উপলব্ধ নহয়"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> এক্সেছ কৰিব পৰা নগ’ল। নিয়ন্ত্ৰণটো যে এতিয়াও উপলব্ধ আৰু এপ্‌টোৰ ছেটিংসমূহ সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APPLICATION">%2$s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"এপ্‌টো খোলক"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"স্থিতি ল’ড কৰিব নোৱাৰি"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"আসোঁৱাহ হৈছে, আকৌ চেষ্টা কৰক"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"চলি আছে"</string>
