@@ -53,15 +53,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
     </HorizontalScrollView>
-    <ImageView
-        android:id="@+id/global_screenshot_animated_view"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:visibility="gone"
-        android:elevation="@dimen/screenshot_preview_elevation"
-        android:background="@drawable/screenshot_rounded_corners"
-        android:adjustViewBounds="true"/>
     <include layout="@layout/global_screenshot_preview"/>
     <FrameLayout
         android:id="@+id/global_screenshot_dismiss_button"
