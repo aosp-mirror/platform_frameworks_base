@@ -79,7 +79,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -291,20 +290,6 @@ public class BubbleStackView extends FrameLayout
 
     private ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
             this::updateSystemGestureExcludeRects;
-
-    private ViewClippingUtil.ClippingParameters mClippingParameters =
-            new ViewClippingUtil.ClippingParameters() {
-
-                @Override
-                public boolean shouldFinish(View view) {
-                    return false;
-                }
-
-                @Override
-                public boolean isClippingEnablingAllowed(View view) {
-                    return !mIsExpanded;
-                }
-            };
 
     /** Float property that 'drags' the flyout. */
     private final FloatPropertyCompat mFlyoutCollapseProperty =
@@ -1391,7 +1376,6 @@ public class BubbleStackView extends FrameLayout
 
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
