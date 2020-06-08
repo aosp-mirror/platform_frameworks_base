@@ -102,6 +102,13 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     @Override
     public boolean isChangeEnabled(long changeId, ApplicationInfo appInfo) {
         checkCompatChangeReadAndLogPermission();
+        return isChangeEnabledInternal(changeId, appInfo);
+    }
+
+    /**
+     * Internal version of the above method. Does not perform costly permission check.
+     */
+    public boolean isChangeEnabledInternal(long changeId, ApplicationInfo appInfo) {
         if (mCompatConfig.isChangeEnabled(changeId, appInfo)) {
             reportChange(changeId, appInfo.uid,
                     ChangeReporter.STATE_ENABLED);
