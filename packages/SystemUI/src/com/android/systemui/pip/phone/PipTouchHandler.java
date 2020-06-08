@@ -30,6 +30,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Log;
@@ -75,6 +76,9 @@ import java.io.PrintWriter;
  */
 public class PipTouchHandler {
     private static final String TAG = "PipTouchHandler";
+
+    /** Duration of the dismiss scrim fading in/out. */
+    private static final int DISMISS_TRANSITION_DURATION_MS = 200;
 
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDismissDragToEdge;
@@ -249,6 +253,8 @@ public class PipTouchHandler {
 
         mTargetView = new DismissCircleView(context);
         mTargetViewContainer = new FrameLayout(context);
+        mTargetViewContainer.setBackgroundDrawable(
+                context.getDrawable(R.drawable.floating_dismiss_gradient_transition));
         mTargetViewContainer.setClipChildren(false);
         mTargetViewContainer.addView(mTargetView);
 
@@ -553,6 +559,9 @@ public class PipTouchHandler {
             mMagneticTargetAnimator
                     .spring(DynamicAnimation.TRANSLATION_Y, 0f, mTargetSpringConfig)
                     .start();
+
+            ((TransitionDrawable) mTargetViewContainer.getBackground()).startTransition(
+                    DISMISS_TRANSITION_DURATION_MS);
         }
     }
 
@@ -565,6 +574,9 @@ public class PipTouchHandler {
                         mTargetSpringConfig)
                 .withEndActions(() ->  mTargetViewContainer.setVisibility(View.GONE))
                 .start();
+
+        ((TransitionDrawable) mTargetViewContainer.getBackground()).reverseTransition(
+                DISMISS_TRANSITION_DURATION_MS);
     }
 
     /**
