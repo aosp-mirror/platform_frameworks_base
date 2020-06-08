@@ -19,6 +19,7 @@ package com.android.systemui.controls.ui
 import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.DialogInterface
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.service.controls.Control
 import android.view.View
@@ -74,6 +75,7 @@ class StatusBehavior : Behavior {
                 DialogInterface.OnClickListener { dialog, _ ->
                     try {
                         cws.control?.getAppIntent()?.send()
+                        context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                     } catch (e: PendingIntent.CanceledException) {
                         cvh.setTransientStatus(
                             cvh.context.resources.getString(R.string.controls_error_failed))
