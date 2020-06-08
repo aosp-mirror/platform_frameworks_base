@@ -6912,62 +6912,54 @@ public class ActivityManagerService extends IActivityManager.Stub
         return msg;
     }
 
-    ContentProviderConnection incProviderCountLocked(ProcessRecord r,
+    @GuardedBy("this")
+    private ContentProviderConnection incProviderCountLocked(ProcessRecord r,
             final ContentProviderRecord cpr, IBinder externalProcessToken, int callingUid,
-            String callingPackage, String callingTag, boolean stable) {
+            String callingPackage, String callingTag, boolean stable,
+            boolean updateLru, long startTime) {
         if (r != null) {
             for (int i=0; i<r.conProviders.size(); i++) {
                 ContentProviderConnection conn = r.conProviders.get(i);
                 if (conn.provider == cpr) {
-                    if (DEBUG_PROVIDER) Slog.v(TAG_PROVIDER,
-                            "Adding provider requested by "
-                            + r.processName + " from process "
-                            + cpr.info.processName + ": " + cpr.name.flattenToShortString()
-                            + " scnt=" + conn.stableCount + " uscnt=" + conn.unstableCount);
-                    if (stable) {
-                        conn.stableCount++;
-                        conn.numStableIncs++;
-                    } else {
-                        conn.unstableCount++;
-                        conn.numUnstableIncs++;
-                    }
+                    conn.incrementCount(stable);
                     return conn;
                 }
             }
+
+            // Create a new ContentProviderConnection.  The reference count
+            // is known to be 1.
             ContentProviderConnection conn = new ContentProviderConnection(cpr, r, callingPackage);
             conn.startAssociationIfNeeded();
-            if (stable) {
-                conn.stableCount = 1;
-                conn.numStableIncs = 1;
-            } else {
-                conn.unstableCount = 1;
-                conn.numUnstableIncs = 1;
-            }
+            conn.initializeCount(stable);
             cpr.connections.add(conn);
             r.conProviders.add(conn);
             startAssociationLocked(r.uid, r.processName, r.getCurProcState(),
                     cpr.uid, cpr.appInfo.longVersionCode, cpr.name, cpr.info.processName);
+            if (updateLru && cpr.proc != null
+                    && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
+                // If this is a perceptible app accessing the provider, make
+                // sure to count it as being accessed and thus back up on
+                // the LRU list.  This is good because content providers are
+                // often expensive to start.  The calls to checkTime() use
+                // the "getContentProviderImpl" tag here, because it's part
+                // of the checktime log in getContentProviderImpl().
+                checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
+                mProcessList.updateLruProcessLocked(cpr.proc, false, null);
+                checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
+            }
             return conn;
         }
         cpr.addExternalProcessHandleLocked(externalProcessToken, callingUid, callingTag);
         return null;
     }
 
-    boolean decProviderCountLocked(ContentProviderConnection conn,
+    @GuardedBy("this")
+    private boolean decProviderCountLocked(ContentProviderConnection conn,
             ContentProviderRecord cpr, IBinder externalProcessToken, boolean stable) {
         if (conn != null) {
             cpr = conn.provider;
-            if (DEBUG_PROVIDER) Slog.v(TAG_PROVIDER,
-                    "Removing provider requested by "
-                    + conn.client.processName + " from process "
-                    + cpr.info.processName + ": " + cpr.name.flattenToShortString()
-                    + " scnt=" + conn.stableCount + " uscnt=" + conn.unstableCount);
-            if (stable) {
-                conn.stableCount--;
-            } else {
-                conn.unstableCount--;
-            }
-            if (conn.stableCount == 0 && conn.unstableCount == 0) {
+            final int referenceCount = conn.decrementCount(stable);
+            if (referenceCount == 0) {
                 conn.stopAssociation();
                 cpr.connections.remove(conn);
                 conn.client.conProviders.remove(conn);
@@ -7165,20 +7157,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // In this case the provider instance already exists, so we can
                 // return it right away.
-                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
-                        stable);
-                if (conn != null && (conn.stableCount+conn.unstableCount) == 1) {
-                    if (cpr.proc != null
-                            && r != null && r.setAdj <= ProcessList.PERCEPTIBLE_LOW_APP_ADJ) {
-                        // If this is a perceptible app accessing the provider,
-                        // make sure to count it as being accessed and thus
-                        // back up on the LRU list.  This is good because
-                        // content providers are often expensive to start.
-                        checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
-                        mProcessList.updateLruProcessLocked(cpr.proc, false, null);
-                        checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
-                    }
-                }
+                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage,
+                        callingTag, stable, true, startTime);
 
                 checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                 final int verifiedAdj = cpr.proc.verifiedAdj;
@@ -7423,8 +7403,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
 
                 mProviderMap.putProviderByName(name, cpr);
-                conn = incProviderCountLocked(r, cpr, token, callingUid, callingPackage, callingTag,
-                        stable);
+                conn = incProviderCountLocked(r, cpr, token, callingUid,
+                        callingPackage, callingTag, stable, false, startTime);
                 if (conn != null) {
                     conn.waiting = true;
                 }
@@ -7760,6 +7740,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    @Override
     public boolean refContentProvider(IBinder connection, int stable, int unstable) {
         ContentProviderConnection conn;
         try {
@@ -7774,31 +7755,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             throw new NullPointerException("connection is null");
         }
 
-        synchronized (this) {
-            if (stable > 0) {
-                conn.numStableIncs += stable;
-            }
-            stable = conn.stableCount + stable;
-            if (stable < 0) {
-                throw new IllegalStateException("stableCount < 0: " + stable);
-            }
-
-            if (unstable > 0) {
-                conn.numUnstableIncs += unstable;
-            }
-            unstable = conn.unstableCount + unstable;
-            if (unstable < 0) {
-                throw new IllegalStateException("unstableCount < 0: " + unstable);
-            }
-
-            if ((stable+unstable) <= 0) {
-                throw new IllegalStateException("ref counts can't go to zero here: stable="
-                        + stable + " unstable=" + unstable);
-            }
-            conn.stableCount = stable;
-            conn.unstableCount = unstable;
-            return !conn.dead;
-        }
+        conn.adjustCounts(stable, unstable);
+        return !conn.dead;
     }
 
     public void unstableProviderDied(IBinder connection) {
@@ -14732,7 +14690,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             ProcessRecord capp = conn.client;
             conn.dead = true;
-            if (conn.stableCount > 0) {
+            if (conn.stableCount() > 0) {
                 if (!capp.isPersistent() && capp.thread != null
                         && capp.pid != 0
                         && capp.pid != MY_PID) {
