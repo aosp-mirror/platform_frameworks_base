@@ -6052,7 +6052,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         List<String> runtimeAppOpsList = getRuntimeAppOpsList();
         AppOpsManager.HistoricalOpsRequest histOpsRequest =
                 new AppOpsManager.HistoricalOpsRequest.Builder(
-                        Instant.now().minus(7, ChronoUnit.DAYS).toEpochMilli(),
+                        Math.max(Instant.now().minus(7, ChronoUnit.DAYS).toEpochMilli(), 0),
                         Long.MAX_VALUE).setOpNames(runtimeAppOpsList).setFlags(
                         OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED).build();
         appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR,
