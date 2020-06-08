@@ -75,6 +75,20 @@ public class BubbleOverflowActivity extends Activity {
             }
             return false;
         }
+
+        @Override
+        public int getColumnCountForAccessibility(RecyclerView.Recycler recycler,
+                RecyclerView.State state) {
+            int bubbleCount = state.getItemCount();
+            int columnCount = super.getColumnCountForAccessibility(recycler, state);
+            if (bubbleCount < columnCount) {
+                // If there are 4 columns and bubbles <= 3,
+                // TalkBack says "AppName 1 of 4 in list 4 items"
+                // This is a workaround until TalkBack bug is fixed for GridLayoutManager
+                return bubbleCount;
+            }
+            return columnCount;
+        }
     }
 
     @Inject
