@@ -102,6 +102,14 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     public ActivityView(
             @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
             boolean singleTaskInstance, boolean usePublicVirtualDisplay) {
+        this(context, attrs, defStyle, singleTaskInstance, usePublicVirtualDisplay, false);
+    }
+
+    /** @hide */
+    public ActivityView(
+            @NonNull Context context, @NonNull AttributeSet attrs, int defStyle,
+            boolean singleTaskInstance, boolean usePublicVirtualDisplay,
+            boolean disableSurfaceViewBackgroundLayer) {
         super(context, attrs, defStyle);
         if (useTaskOrganizer()) {
             mTaskEmbedder = new TaskOrganizerTaskEmbedder(context, this);
@@ -109,7 +117,7 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             mTaskEmbedder = new VirtualDisplayTaskEmbedder(context, this, singleTaskInstance,
                     usePublicVirtualDisplay);
         }
-        mSurfaceView = new SurfaceView(context);
+        mSurfaceView = new SurfaceView(context, null, 0, 0, disableSurfaceViewBackgroundLayer);
         // Since ActivityView#getAlpha has been overridden, we should use parent class's alpha
         // as master to synchronize surface view's alpha value.
         mSurfaceView.setAlpha(super.getAlpha());
