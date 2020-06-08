@@ -779,7 +779,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     protected final class PowerOptionsAction extends SinglePressAction {
         private PowerOptionsAction() {
-            super(R.drawable.ic_lock_power_off, R.string.global_action_power_options);
+            super(com.android.systemui.R.drawable.ic_settings_power,
+                    R.string.global_action_power_options);
         }
 
         @Override
