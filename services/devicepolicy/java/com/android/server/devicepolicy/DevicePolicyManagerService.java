@@ -12675,7 +12675,8 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 for (ResolveInfo receiver : receivers) {
                     final String packageName = receiver.getComponentInfo().packageName;
                     if (checkCrossProfilePackagePermissions(packageName, userId,
-                            requiresPermission)) {
+                            requiresPermission)
+                            || checkModifyQuietModePermission(packageName, userId)) {
                         Slog.i(LOG_TAG,
                                 String.format("Sending %s broadcast to %s.", intent.getAction(),
                                         packageName));
@@ -12689,6 +12690,27 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
                 Slog.w(LOG_TAG,
                         String.format("Cannot get list of broadcast receivers for %s because: %s.",
                                 intent.getAction(), ex));
+            }
+        }
+
+        /**
+         * Checks whether the package {@code packageName} has the {@code MODIFY_QUIET_MODE}
+         * permission granted for the user {@code userId}.
+         */
+        private boolean checkModifyQuietModePermission(String packageName, @UserIdInt int userId) {
+            try {
+                final int uid = Objects.requireNonNull(
+                        mInjector.getPackageManager().getApplicationInfoAsUser(
+                                Objects.requireNonNull(packageName), /* flags= */ 0, userId)).uid;
+                return PackageManager.PERMISSION_GRANTED
+                        == ActivityManager.checkComponentPermission(
+                        android.Manifest.permission.MODIFY_QUIET_MODE, uid, /* owningUid= */
+                        -1, /* exported= */ true);
+            } catch (NameNotFoundException ex) {
+                Slog.w(LOG_TAG,
+                        String.format("Cannot find the package %s to check for permissions.",
+                                packageName));
+                return false;
             }
         }
 
