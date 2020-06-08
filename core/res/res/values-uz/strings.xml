@@ -202,10 +202,8 @@
     <string name="printing_disabled_by" msgid="3517499806528864633">"Chop etish funksiyasi <xliff:g id="OWNER_APP">%s</xliff:g> tomonidan faolsizlantirilgan."</string>
     <string name="personal_apps_suspension_title" msgid="7561416677884286600">"Ish profilingizni yoqing"</string>
     <string name="personal_apps_suspension_text" msgid="6115455688932935597">"Ish profilingiz yoniqligida shaxsiy ilovalaringiz bloklanadi"</string>
-    <!-- no translation found for personal_apps_suspension_soon_text (8123898693479590) -->
-    <skip />
-    <!-- no translation found for personal_apps_suspended_turn_profile_on (2758012869627513689) -->
-    <skip />
+    <string name="personal_apps_suspension_soon_text" msgid="8123898693479590">"Shaxsiy ilovalar <xliff:g id="DATE">%1$s</xliff:g> <xliff:g id="TIME">%2$s</xliff:g> da bloklanadi. AT administratoringiz ish profili <xliff:g id="NUMBER">%3$d</xliff:g> kundan ortiq oʻchiq qolishini taqiqlagan"</string>
+    <string name="personal_apps_suspended_turn_profile_on" msgid="2758012869627513689">"Yoqish"</string>
     <string name="me" msgid="6207584824693813140">"Men"</string>
     <string name="power_dialog" product="tablet" msgid="8333207765671417261">"Planshet sozlamalari"</string>
     <string name="power_dialog" product="tv" msgid="7792839006640933763">"Android TV parametrlari"</string>
@@ -1308,8 +1306,8 @@
     <string name="usb_power_notification_message" msgid="7284765627437897702">"Ulangan qurilma quvvatlanmoqda. Boshqa parametrlar uchun bosing."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Analogli audio uskuna aniqlandi"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Biriktirilgan qurilma mazkur telefon bilan mos emas. Batafsil axborot olish uchun bu yerga bosing."</string>
-    <string name="adb_active_notification_title" msgid="408390247354560331">"USB orqali nosozliklarni aniqlash"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB orqali nosozliklarni aniqlashni faolsizlantirish uchun bosing"</string>
+    <string name="adb_active_notification_title" msgid="408390247354560331">"USB debagging ulandi"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"USB debaggingni uzish uchun bosing"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"USB orqali nosozliklarni tuzatishni o‘chirib qo‘yish uchun bosing."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Wi-Fi orqali debagging yoqildi"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Wi-Fi orqali debagging uzilishi uchun bosing"</string>
