@@ -39,8 +39,6 @@
             android:layout_width="@dimen/kg_framed_avatar_size"
             android:layout_height="@dimen/kg_framed_avatar_size"
             android:contentDescription="@null"
-            android:backgroundTint="@color/qs_user_detail_avatar_tint"
-            android:backgroundTintMode="src_atop"
             sysui:frameWidth="@dimen/keyguard_user_switcher_border_thickness"
             sysui:framePadding="2.5dp"
             sysui:badgeDiameter="18dp"
