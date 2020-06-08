@@ -23,6 +23,9 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry;
 import com.android.systemui.statusbar.notification.collection.ListEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier;
+import com.android.systemui.statusbar.phone.NotificationGroupManager;
+
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -36,10 +39,14 @@ import javax.inject.Singleton;
 @Singleton
 public class HighPriorityProvider {
     private final PeopleNotificationIdentifier mPeopleNotificationIdentifier;
+    private final NotificationGroupManager mGroupManager;
 
     @Inject
-    public HighPriorityProvider(PeopleNotificationIdentifier peopleNotificationIdentifier) {
+    public HighPriorityProvider(
+            PeopleNotificationIdentifier peopleNotificationIdentifier,
+            NotificationGroupManager groupManager) {
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
+        mGroupManager = groupManager;
     }
 
     /**
@@ -74,13 +81,25 @@ public class HighPriorityProvider {
 
 
     private boolean hasHighPriorityChild(ListEntry entry) {
+        List<NotificationEntry> children = null;
+
         if (entry instanceof GroupEntry) {
-            for (NotificationEntry child : ((GroupEntry) entry).getChildren()) {
+            // New notification pipeline
+            children = ((GroupEntry) entry).getChildren();
+        } else if (entry.getRepresentativeEntry() != null
+                && mGroupManager.isGroupSummary(entry.getRepresentativeEntry().getSbn())) {
+            // Old notification pipeline
+            children = mGroupManager.getChildren(entry.getRepresentativeEntry().getSbn());
+        }
+
+        if (children != null) {
+            for (NotificationEntry child : children) {
                 if (isHighPriority(child)) {
                     return true;
                 }
             }
         }
+
         return false;
     }
 
