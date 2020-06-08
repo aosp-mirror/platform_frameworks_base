@@ -54,25 +54,28 @@ public class WirelessChargingAnimation {
      * before calling {@link #show} - can be done through {@link #makeWirelessChargingAnimation}.
      * @hide
      */
-    public WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper, int
-            batteryLevel, Callback callback, boolean isDozing) {
+    public WirelessChargingAnimation(@NonNull Context context, @Nullable Looper looper,
+            int transmittingBatteryLevel, int batteryLevel, Callback callback, boolean isDozing) {
         mCurrentWirelessChargingView = new WirelessChargingView(context, looper,
-                batteryLevel, callback, isDozing);
+                transmittingBatteryLevel, batteryLevel, callback, isDozing);
     }
 
     /**
      * Creates a wireless charging animation object populated with next view.
+     *
      * @hide
      */
     public static WirelessChargingAnimation makeWirelessChargingAnimation(@NonNull Context context,
-            @Nullable Looper looper, int batteryLevel, Callback callback, boolean isDozing) {
-        return new WirelessChargingAnimation(context, looper, batteryLevel, callback, isDozing);
+            @Nullable Looper looper, int transmittingBatteryLevel, int batteryLevel,
+            Callback callback, boolean isDozing) {
+        return new WirelessChargingAnimation(context, looper, transmittingBatteryLevel,
+                batteryLevel, callback, isDozing);
     }
 
     /**
      * Show the view for the specified duration.
      */
-    public void show() {
+    public void show(long delay) {
         if (mCurrentWirelessChargingView == null ||
                 mCurrentWirelessChargingView.mNextView == null) {
             throw new RuntimeException("setView must have been called");
@@ -83,8 +86,8 @@ public class WirelessChargingAnimation {
         }
 
         mPreviousWirelessChargingView = mCurrentWirelessChargingView;
-        mCurrentWirelessChargingView.show();
-        mCurrentWirelessChargingView.hide(DURATION);
+        mCurrentWirelessChargingView.show(delay);
+        mCurrentWirelessChargingView.hide(delay + DURATION);
     }
 
     private static class WirelessChargingView {
@@ -100,10 +103,12 @@ public class WirelessChargingAnimation {
         private WindowManager mWM;
         private Callback mCallback;
 
-        public WirelessChargingView(Context context, @Nullable Looper looper, int batteryLevel,
-                Callback callback, boolean isDozing) {
+        public WirelessChargingView(Context context, @Nullable Looper looper,
+                int transmittingBatteryLevel, int batteryLevel, Callback callback,
+                boolean isDozing) {
             mCallback = callback;
-            mNextView = new WirelessChargingLayout(context, batteryLevel, isDozing);
+            mNextView = new WirelessChargingLayout(context, transmittingBatteryLevel, batteryLevel,
+                    isDozing);
             mGravity = Gravity.CENTER_HORIZONTAL | Gravity.CENTER;
 
             final WindowManager.LayoutParams params = mParams;
@@ -149,9 +154,9 @@ public class WirelessChargingAnimation {
             };
         }
 
-        public void show() {
+        public void show(long delay) {
             if (DEBUG) Slog.d(TAG, "SHOW: " + this);
-            mHandler.obtainMessage(SHOW).sendToTarget();
+            mHandler.sendMessageDelayed(Message.obtain(mHandler, SHOW), delay);
         }
 
         public void hide(long duration) {
