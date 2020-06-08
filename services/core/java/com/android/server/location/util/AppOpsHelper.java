@@ -127,6 +127,10 @@ public class AppOpsHelper {
             Preconditions.checkState(mAppOps != null);
         }
 
+        if (permissionLevel == LocationPermissions.PERMISSION_NONE) {
+            return false;
+        }
+
         long identity = Binder.clearCallingIdentity();
         try {
             return mAppOps.checkOpNoThrow(
@@ -145,6 +149,10 @@ public class AppOpsHelper {
      */
     public boolean noteLocationAccess(CallerIdentity identity,
             @PermissionLevel int permissionLevel) {
+        if (permissionLevel == LocationPermissions.PERMISSION_NONE) {
+            return false;
+        }
+
         return noteOpNoThrow(LocationPermissions.asAppOp(permissionLevel), identity);
     }
 
