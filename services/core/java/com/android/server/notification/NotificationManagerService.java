@@ -2671,7 +2671,7 @@ public class NotificationManagerService extends SystemService {
                 mHistoryManager.addNotification(new HistoricalNotification.Builder()
                         .setPackage(r.getSbn().getPackageName())
                         .setUid(r.getSbn().getUid())
-                        .setUserId(r.getUserId())
+                        .setUserId(r.getSbn().getNormalizedUserId())
                         .setChannelId(r.getChannel().getId())
                         .setChannelName(r.getChannel().getName().toString())
                         .setPostedTimeMs(System.currentTimeMillis())
