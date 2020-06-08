@@ -592,29 +592,21 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"有効にする"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"無効にする"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"出力デバイスを選択"</string>
-    <!-- no translation found for screen_pinning_title (9058007390337841305) -->
-    <skip />
+    <string name="screen_pinning_title" msgid="9058007390337841305">"アプリは固定されています"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [最近] を同時に押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"固定を解除するまで画面が常に表示されるようになります。[戻る] と [ホーム] を同時に押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"固定を解除するまで常に表示されます。上にスワイプして長押しすると固定が解除されます。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"固定を解除するまで画面が常に表示されるようになります。[最近] を押し続けると固定が解除されます。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"固定を解除するまで画面が常に表示されるようになります。[ホーム] を押し続けると固定が解除されます。"</string>
-    <!-- no translation found for screen_pinning_exposes_personal_data (8189852022981524789) -->
-    <skip />
-    <!-- no translation found for screen_pinning_can_open_other_apps (7529756813231421455) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast (8177286912533744328) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_recents_invisible (6850978077443052594) -->
-    <skip />
-    <!-- no translation found for screen_pinning_toast_gesture_nav (170699893395336705) -->
-    <skip />
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人データ（連絡先やメールの内容など）にアクセスできる可能性があります。"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"固定したアプリが他のアプリを開く可能性があります。"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"このアプリの固定を解除するには [戻る] ボタンと [最近] ボタンを長押しします"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"このアプリの固定を解除するには [戻る] ボタンと [ホーム] ボタンを長押しします"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"このアプリの固定を解除するには、上にスワイプして長押しします"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"はい"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
-    <!-- no translation found for screen_pinning_start (7483998671383371313) -->
-    <skip />
-    <!-- no translation found for screen_pinning_exit (4553787518387346893) -->
-    <skip />
+    <string name="screen_pinning_start" msgid="7483998671383371313">"固定したアプリ"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"固定を解除したアプリ"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"非表示"</string>
@@ -727,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"会話セクションの一番上にふきだしとして表示され、プロフィール写真がロック画面に表示されます"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"設定"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"優先度"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> は会話機能に対応していません"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"最近閉じたバブルはありません"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"最近表示されたバブルや閉じたバブルが、ここに表示されます"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"これらの通知は変更できません。"</string>
@@ -1022,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"優先度を高く設定された会話"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先度の高い会話では、次のようになります。"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"会話セクションの一番上にバブルで表示"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ロック画面にプロフィール写真を表示"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"他のアプリに重ねてフローティング バブルとして表示"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"サイレント モードに割り込み"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"設定"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"拡大オーバーレイ ウィンドウ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"拡大ウィンドウ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"拡大ウィンドウ コントロール"</string>
@@ -1068,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"スワイプすると他の構造が表示されます"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"このメディア セッションを閉じる"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"デバイスを削除しました"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"ステータスを読み込めません"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"エラー: もう一度お試しください"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"処理中"</string>
