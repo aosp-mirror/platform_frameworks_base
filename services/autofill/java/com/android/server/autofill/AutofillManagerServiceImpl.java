@@ -815,6 +815,19 @@ final class AutofillManagerServiceImpl
         }
     }
 
+    void logAugmentedAutofillAuthenticationSelected(int sessionId, @Nullable String selectedDataset,
+            @Nullable Bundle clientState) {
+        synchronized (mLock) {
+            if (mAugmentedAutofillEventHistory == null
+                    || mAugmentedAutofillEventHistory.getSessionId() != sessionId) {
+                return;
+            }
+            mAugmentedAutofillEventHistory.addEvent(
+                    new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
+                            clientState, null, null, null, null, null, null, null, null));
+        }
+    }
+
     void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
             @Nullable Bundle clientState) {
         synchronized (mLock) {
@@ -1196,6 +1209,14 @@ final class AutofillManagerServiceImpl
                                 String suggestionId, Bundle clientState) {
                             AutofillManagerServiceImpl.this.logAugmentedAutofillSelected(sessionId,
                                     suggestionId, clientState);
+                        }
+
+                        @Override
+                        public void logAugmentedAutofillAuthenticationSelected(int sessionId,
+                                String suggestionId, Bundle clientState) {
+                            AutofillManagerServiceImpl.this
+                                    .logAugmentedAutofillAuthenticationSelected(
+                                            sessionId, suggestionId, clientState);
                         }
 
                         @Override
