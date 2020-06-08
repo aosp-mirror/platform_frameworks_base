@@ -44,7 +44,6 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
-import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
 import android.os.Handler;
@@ -59,7 +58,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.SystemUIFactory;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
@@ -70,20 +69,16 @@ import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationRemoveInterceptor;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryListener;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
-import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
-import com.android.systemui.statusbar.phone.LockscreenLockIconController;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowView;
@@ -93,7 +88,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.systemui.util.InjectionInflationController;
 
 import com.google.common.collect.ImmutableList;
 
@@ -173,11 +167,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     ColorExtractor.GradientColors mGradientColors;
     @Mock
-    private Resources mResources;
-    @Mock
     private ShadeController mShadeController;
-    @Mock
-    private NotificationRowComponent mNotificationRowComponent;
     @Mock
     private NotifPipeline mNotifPipeline;
     @Mock
@@ -185,11 +175,10 @@ public class BubbleControllerTest extends SysuiTestCase {
     @Mock
     private DumpManager mDumpManager;
     @Mock
-    private LockscreenLockIconController mLockIconController;
-    @Mock
     private NotificationShadeWindowView mNotificationShadeWindowView;
+    @Mock
+    private IStatusBarService mStatusBarService;
 
-    private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
 
     private TestableLooper mTestableLooper;
@@ -203,23 +192,6 @@ public class BubbleControllerTest extends SysuiTestCase {
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
 
-        mSuperStatusBarViewFactory = new SuperStatusBarViewFactory(mContext,
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
-                new NotificationRowComponent.Builder() {
-                    @Override
-                    public NotificationRowComponent.Builder activatableNotificationView(
-                            ActivatableNotificationView view) {
-                        return this;
-                    }
-
-                    @Override
-                    public NotificationRowComponent build() {
-                        return mNotificationRowComponent;
-                    }
-                },
-                mLockIconController);
-
-        // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
                 mWindowManager, mActivityManager, mDozeParameters, mStatusBarStateController,
                 mConfigurationController, mKeyguardBypassController, mColorExtractor,
@@ -282,6 +254,7 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mDataRepository,
                 mSysUiState,
                 mock(INotificationManager.class),
+                mStatusBarService,
                 mWindowManager);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
@@ -327,7 +300,7 @@ public class BubbleControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testPromoteBubble_autoExpand() {
+    public void testPromoteBubble_autoExpand() throws Exception {
         mBubbleController.updateBubble(mRow2.getEntry());
         mBubbleController.updateBubble(mRow.getEntry());
         mBubbleController.removeBubble(
@@ -337,13 +310,19 @@ public class BubbleControllerTest extends SysuiTestCase {
         assertThat(mBubbleData.getOverflowBubbles()).isEqualTo(ImmutableList.of(b));
         verify(mNotificationEntryManager, never()).performRemoveNotification(
                 eq(mRow.getEntry().getSbn()), anyInt());
-        assertFalse(mRow.getEntry().isBubble());
+        assertThat(mRow.getEntry().isBubble()).isFalse();
 
         Bubble b2 = mBubbleData.getBubbleInStackWithKey(mRow2.getEntry().getKey());
         assertThat(mBubbleData.getSelectedBubble()).isEqualTo(b2);
 
         mBubbleController.promoteBubbleFromOverflow(b);
-        assertThat(mBubbleData.getSelectedBubble()).isEqualTo(b);
+
+        assertThat(b.isBubble()).isTrue();
+        assertThat(b.shouldAutoExpand()).isTrue();
+        int flags = Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE
+                | Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+        verify(mStatusBarService, times(1)).onNotificationBubbleChanged(
+                eq(b.getKey()), eq(true), eq(flags));
     }
 
     @Test
