@@ -151,7 +151,7 @@ public class BiometricService extends SystemService {
                     handleOnAcquired(
                             args.argi1 /* sensorId */,
                             args.argi2 /* acquiredInfo */,
-                            (String) args.arg1 /* message */);
+                            args.argi3 /* vendorCode */);
                     args.recycle();
                     break;
                 }
@@ -418,11 +418,11 @@ public class BiometricService extends SystemService {
         }
 
         @Override
-        public void onAcquired(int sensorId, int acquiredInfo, String message) {
+        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode) {
             SomeArgs args = SomeArgs.obtain();
             args.argi1 = sensorId;
             args.argi2 = acquiredInfo;
-            args.arg1 = message;
+            args.argi3 = vendorCode;
             mHandler.obtainMessage(MSG_ON_ACQUIRED, args).sendToTarget();
         }
     };
@@ -915,7 +915,7 @@ public class BiometricService extends SystemService {
         }
     }
 
-    private void handleOnAcquired(int sensorId, int acquiredInfo, String message) {
+    private void handleOnAcquired(int sensorId, int acquiredInfo, int vendorCode) {
         // Should never happen, log this to catch bad HAL behavior (e.g. auth succeeded
         // after user dismissed/canceled dialog).
         if (mCurrentAuthSession == null) {
@@ -923,7 +923,7 @@ public class BiometricService extends SystemService {
             return;
         }
 
-        mCurrentAuthSession.onAcquired(sensorId, acquiredInfo, message);
+        mCurrentAuthSession.onAcquired(sensorId, acquiredInfo, vendorCode);
     }
 
     private void handleOnDismissed(@BiometricPrompt.DismissedReason int reason,
@@ -1063,8 +1063,8 @@ public class BiometricService extends SystemService {
         }
 
         final boolean debugEnabled = mInjector.isDebugEnabled(getContext(), userId);
-        mCurrentAuthSession = new AuthSession(mStatusBarService, mSysuiReceiver, mKeyStore, mRandom,
-                mClientDeathReceiver, preAuthInfo, token, operationId, userId,
+        mCurrentAuthSession = new AuthSession(getContext(), mStatusBarService, mSysuiReceiver,
+                mKeyStore, mRandom, mClientDeathReceiver, preAuthInfo, token, operationId, userId,
                 mBiometricSensorReceiver, receiver, opPackageName, promptInfo, callingUid,
                 callingPid, callingUserId, debugEnabled);
         try {

@@ -29,5 +29,5 @@ oneway interface IBiometricSensorReceiver {
     // on the cookie.
     void onError(int sensorId, int cookie, int error, int vendorCode);
     // Notifies that a biometric has been acquired.
-    void onAcquired(int sensorId, int acquiredInfo, String message);
+    void onAcquired(int sensorId, int acquiredInfo, int vendorCode);
 }

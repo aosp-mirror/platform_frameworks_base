@@ -20,7 +20,6 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
 import static android.Manifest.permission.RESET_FACE_LOCKOUT;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
-import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
@@ -67,6 +66,7 @@ import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
+import com.android.server.biometrics.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.Constants;
 import com.android.server.biometrics.RemovalClient;
 
@@ -213,11 +213,12 @@ public class FaceService extends BiometricServiceBase {
 
         public FaceAuthClient(Context context,
                 DaemonWrapper daemon, IBinder token,
-                ServiceListener listener, int targetUserId, int groupId, long opId,
+                ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation,
-                Surface surface) {
+                Surface surface, int sensorId, boolean isStrongBiometric) {
             super(context, daemon, token, listener, targetUserId, groupId, opId,
-                    restricted, owner, cookie, requireConfirmation, surface);
+                    restricted, owner, cookie, requireConfirmation, surface, sensorId,
+                    isStrongBiometric);
         }
 
         @Override
@@ -234,16 +235,6 @@ public class FaceService extends BiometricServiceBase {
         public boolean wasUserDetected() {
             return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED
                     && mLastAcquire != FaceManager.FACE_ACQUIRED_SENSOR_DIRTY;
-        }
-
-        @Override
-        public boolean isStrongBiometric() {
-            return FaceService.this.isStrongBiometric();
-        }
-
-        @Override
-        public int getSensorId() {
-            return FaceService.this.getSensorId();
         }
 
         @Override
@@ -302,7 +293,7 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override
-        public boolean onAcquired(int sensorId, int acquireInfo, int vendorCode) {
+        public boolean onAcquired(int acquireInfo, int vendorCode) {
 
             mLastAcquire = acquireInfo;
 
@@ -343,7 +334,7 @@ public class FaceService extends BiometricServiceBase {
                         UserHandle.CURRENT);
             }
 
-            return super.onAcquired(sensorId, acquireInfo, vendorCode);
+            return super.onAcquired(acquireInfo, vendorCode);
         }
     }
 
@@ -395,9 +386,9 @@ public class FaceService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
-                    token, new ServiceListenerImpl(receiver), mCurrentUserId,
+                    token, new ClientMonitorCallbackConverter(receiver), mCurrentUserId,
                     0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, surface) {
+                    ENROLL_TIMEOUT_SEC, surface, getSensorId()) {
 
                 @Override
                 public int[] getAcquireIgnorelist() {
@@ -445,9 +436,10 @@ public class FaceService extends BiometricServiceBase {
             updateActiveGroup(userId, opPackageName);
             final boolean restricted = isRestricted();
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
-                    mDaemonWrapper, token, new ServiceListenerImpl(receiver),
+                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    0 /* cookie */, false /* requireConfirmation */, null /* surface */);
+                    0 /* cookie */, false /* requireConfirmation */, null /* surface */,
+                    getSensorId(), isStrongBiometric());
             authenticateInternal(client, opId, opPackageName);
         }
 
@@ -461,9 +453,9 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, token,
-                    new BiometricPromptServiceListenerImpl(sensorReceiver),
+                    new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
-                    requireConfirmation, null /* surface */);
+                    requireConfirmation, null /* surface */, getSensorId(), isStrongBiometric());
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -508,8 +500,9 @@ public class FaceService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final RemovalClient client = new RemovalClient(getContext(), getConstants(),
-                    mDaemonWrapper, token, new ServiceListenerImpl(receiver), faceId,
-                    0 /* groupId */, userId, restricted, token.toString(), getBiometricUtils()) {
+                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver), faceId,
+                    0 /* groupId */, userId, restricted, token.toString(), getBiometricUtils(),
+                    getSensorId()) {
                 @Override
                 protected int statsModality() {
                     return FaceService.this.statsModality();
@@ -728,101 +721,6 @@ public class FaceService extends BiometricServiceBase {
         }
     }
 
-    /**
-     * Receives callbacks from the ClientMonitor implementations and forwards results to
-     * BiometricService.
-     */
-    private class BiometricPromptServiceListenerImpl extends BiometricServiceListener {
-        BiometricPromptServiceListenerImpl(IBiometricSensorReceiver sensorReceiver) {
-            super(sensorReceiver);
-        }
-
-        @Override
-        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
-                throws RemoteException {
-            /**
-             * Map the acquired codes onto existing {@link BiometricConstants} acquired codes.
-             */
-            if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAcquired(sensorId,
-                        FaceManager.getMappedAcquiredInfo(acquiredInfo, vendorCode),
-                        FaceManager.getAcquiredString(getContext(), acquiredInfo, vendorCode));
-            }
-        }
-
-        @Override
-        public void onError(int error, int vendorCode, int cookie)
-                throws RemoteException {
-            if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onError(getSensorId(), cookie, error, vendorCode);
-            }
-        }
-    }
-
-    /**
-     * Receives callbacks from the ClientMonitor implementations. The results are forwarded to
-     * the FaceManager.
-     */
-    private class ServiceListenerImpl implements ServiceListener {
-        private IFaceServiceReceiver mFaceServiceReceiver;
-
-        public ServiceListenerImpl(IFaceServiceReceiver receiver) {
-            mFaceServiceReceiver = receiver;
-        }
-
-        @Override
-        public void onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining)
-                throws RemoteException {
-            if (mFaceServiceReceiver != null) {
-                mFaceServiceReceiver.onEnrollResult((Face) identifier, remaining);
-            }
-        }
-
-        @Override
-        public void onAcquired(int sensorId, int acquiredInfo, int vendorCode)
-                throws RemoteException {
-            if (mFaceServiceReceiver != null) {
-                mFaceServiceReceiver.onAcquired(acquiredInfo, vendorCode);
-            }
-        }
-
-        @Override
-        public void onAuthenticationSucceeded(BiometricAuthenticator.Identifier biometric,
-                int userId) throws RemoteException {
-            if (mFaceServiceReceiver != null) {
-                if (biometric == null || biometric instanceof Face) {
-                    mFaceServiceReceiver.onAuthenticationSucceeded((Face) biometric,
-                            userId, isStrongBiometric());
-                } else {
-                    Slog.e(TAG, "onAuthenticationSucceeded received non-face biometric");
-                }
-            }
-        }
-
-        @Override
-        public void onAuthenticationFailed() throws RemoteException {
-            if (mFaceServiceReceiver != null) {
-                mFaceServiceReceiver.onAuthenticationFailed();
-            }
-        }
-
-        @Override
-        public void onError(int error, int vendorCode, int cookie)
-                throws RemoteException {
-            if (mFaceServiceReceiver != null) {
-                mFaceServiceReceiver.onError(error, vendorCode);
-            }
-        }
-
-        @Override
-        public void onRemoved(BiometricAuthenticator.Identifier biometric,
-                int remaining) throws RemoteException {
-            if (mFaceServiceReceiver != null) {
-                mFaceServiceReceiver.onRemoved((Face) biometric, remaining);
-            }
-        }
-    }
-
     private final FaceConstants mFaceConstants = new FaceConstants();
 
     @GuardedBy("this")
@@ -872,7 +770,7 @@ public class FaceService extends BiometricServiceBase {
         public void onAcquired(final long deviceId, final int userId, final int acquiredInfo,
                 final int vendorCode) {
             mHandler.post(() -> {
-                FaceService.super.handleAcquired(getSensorId(), acquiredInfo, vendorCode);
+                FaceService.super.handleAcquired(acquiredInfo, vendorCode);
             });
         }
 

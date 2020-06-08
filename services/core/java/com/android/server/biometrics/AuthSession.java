@@ -21,6 +21,7 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_NONE;
 
 import android.annotation.IntDef;
 import android.annotation.Nullable;
+import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager;
@@ -30,6 +31,8 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 import android.hardware.biometrics.IBiometricSysuiReceiver;
 import android.hardware.biometrics.PromptInfo;
+import android.hardware.face.FaceManager;
+import android.hardware.fingerprint.FingerprintManager;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
@@ -121,6 +124,7 @@ final class AuthSession implements IBinder.DeathRecipient {
         void onClientDied();
     }
 
+    private final Context mContext;
     private final IStatusBarService mStatusBarService;
     private final IBiometricSysuiReceiver mSysuiReceiver;
     private final KeyStore mKeyStore;
@@ -158,12 +162,13 @@ final class AuthSession implements IBinder.DeathRecipient {
     // Timestamp when hardware authentication occurred
     private long mAuthenticatedTimeMs;
 
-    AuthSession(IStatusBarService statusBarService, IBiometricSysuiReceiver sysuiReceiver,
-            KeyStore keystore, Random random, ClientDeathReceiver clientDeathReceiver,
-            PreAuthInfo preAuthInfo, IBinder token, long operationId, int userId,
-            IBiometricSensorReceiver sensorReceiver, IBiometricServiceReceiver clientReceiver,
-            String opPackageName, PromptInfo promptInfo,
+    AuthSession(Context context, IStatusBarService statusBarService,
+            IBiometricSysuiReceiver sysuiReceiver, KeyStore keystore, Random random,
+            ClientDeathReceiver clientDeathReceiver, PreAuthInfo preAuthInfo, IBinder token,
+            long operationId, int userId, IBiometricSensorReceiver sensorReceiver,
+            IBiometricServiceReceiver clientReceiver, String opPackageName, PromptInfo promptInfo,
             int callingUid, int callingPid, int callingUserId, boolean debugEnabled) {
+        mContext = context;
         mStatusBarService = statusBarService;
         mSysuiReceiver = sysuiReceiver;
         mKeyStore = keystore;
@@ -421,11 +426,14 @@ final class AuthSession implements IBinder.DeathRecipient {
         return false;
     }
 
-    void onAcquired(int sensorId, int acquiredInfo, String message) {
+    void onAcquired(int sensorId, int acquiredInfo, int vendorCode) {
+        final String message = getAcquiredMessageForSensor(sensorId, acquiredInfo, vendorCode);
+        Slog.d(TAG, "sensorId: " + sensorId + " acquiredInfo: " + acquiredInfo
+                + " message: " + message);
         if (message == null) {
-            Slog.w(TAG, "Ignoring null message: " + acquiredInfo);
             return;
         }
+
         try {
             mStatusBarService.onBiometricHelp(message);
         } catch (RemoteException e) {
@@ -754,6 +762,18 @@ final class AuthSession implements IBinder.DeathRecipient {
         }
         Slog.e(TAG, "Unknown sensor: " + sensorId);
         return TYPE_NONE;
+    }
+
+    private String getAcquiredMessageForSensor(int sensorId, int acquiredInfo, int vendorCode) {
+        final @BiometricAuthenticator.Modality int modality = sensorIdToModality(sensorId);
+        switch (modality) {
+            case BiometricAuthenticator.TYPE_FINGERPRINT:
+                return FingerprintManager.getAcquiredString(mContext, acquiredInfo, vendorCode);
+            case BiometricAuthenticator.TYPE_FACE:
+                return FaceManager.getAcquiredString(mContext, acquiredInfo, vendorCode);
+            default:
+                return null;
+        }
     }
 
     @Override
