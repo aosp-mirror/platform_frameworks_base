@@ -1097,13 +1097,11 @@ public class BubbleStackView extends FrameLayout
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
             mBubbleContainer.removeView(mBubbleOverflow.getBtn());
-            mBubbleOverflow.updateDimensions();
-            mBubbleOverflow.updateIcon(mContext,this);
+            mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
             overflowBtnIndex = mBubbleContainer.getChildCount();
         }
         mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-
         mBubbleOverflow.getBtn().setOnClickListener(v -> setSelectedBubble(mBubbleOverflow));
     }
     /**
@@ -1114,6 +1112,7 @@ public class BubbleStackView extends FrameLayout
         setUpOverflow();
         setUpUserEducation();
         setUpManageMenu();
+        updateExpandedViewTheme();
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -1213,6 +1212,18 @@ public class BubbleStackView extends FrameLayout
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         setupLocalMenu(info);
+    }
+
+    void updateExpandedViewTheme() {
+        final List<Bubble> bubbles = mBubbleData.getBubbles();
+        if (bubbles.isEmpty()) {
+            return;
+        }
+        bubbles.forEach(bubble -> {
+            if (bubble.getExpandedView() != null) {
+                bubble.getExpandedView().applyThemeAttrs();
+            }
+        });
     }
 
     void setupLocalMenu(AccessibilityNodeInfo info) {
