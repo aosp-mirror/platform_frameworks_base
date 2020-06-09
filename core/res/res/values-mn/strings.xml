@@ -1786,7 +1786,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"Ажлын <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3 дахь ажил <xliff:g id="LABEL">%1$s</xliff:g>"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Тогтоосныг суллахаас өмнө PIN асуух"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Бэхэлснийг болиулахаасаа өмнө PIN асуух"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Тогтоосныг суллахаас өмнө түгжээ тайлах хээ асуух"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Тогтоосныг суллахаас өмнө нууц үг асуух"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Таны админ суулгасан"</string>
@@ -1841,7 +1841,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"Ажлын өдрийн шөнө"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Амралтын өдөр"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Үйл явдал"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Идэвхгүй"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Унтлагын цаг"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> зарим дууны дууг хааж байна"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Таны төхөөрөмжид дотоод алдаа байна.Та төхөөрөмжөө үйлдвэрээс гарсан төлөвт шилжүүлэх хүртэл таны төхөөрөмж чинь тогтворгүй байж болох юм."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"Таны төхөөрөмжид дотоод алдаа байна. Дэлгэрэнгүй мэдээлэл авахыг хүсвэл үйлдвэрлэгчтэйгээ холбоо барина уу."</string>
