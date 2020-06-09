@@ -257,28 +257,38 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
         /**
          * Set the associated enterprise configuration for this network. Needed for authenticating
-         * to WPA2-EAP networks. See {@link WifiEnterpriseConfig} for description.
+         * to WPA2 enterprise networks. See {@link WifiEnterpriseConfig} for description.
          *
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @throws IllegalArgumentException if configuration CA certificate or
+         *                                  AltSubjectMatch/DomainSuffixMatch is not set.
          */
         public @NonNull Builder setWpa2EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
+            if (enterpriseConfig.isInsecure()) {
+                throw new IllegalArgumentException("Enterprise configuration is insecure");
+            }
             mWpa2EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
             return this;
         }
 
         /**
          * Set the associated enterprise configuration for this network. Needed for authenticating
-         * to WPA3-SuiteB networks. See {@link WifiEnterpriseConfig} for description.
+         * to WPA3 enterprise networks. See {@link WifiEnterpriseConfig} for description.
          *
          * @param enterpriseConfig Instance of {@link WifiEnterpriseConfig}.
          * @return Instance of {@link Builder} to enable chaining of the builder method.
+         * @throws IllegalArgumentException if configuration CA certificate or
+         *                                  AltSubjectMatch/DomainSuffixMatch is not set.
          */
         public @NonNull Builder setWpa3EnterpriseConfig(
                 @NonNull WifiEnterpriseConfig enterpriseConfig) {
             checkNotNull(enterpriseConfig);
+            if (enterpriseConfig.isInsecure()) {
+                throw new IllegalArgumentException("Enterprise configuration is insecure");
+            }
             mWpa3EnterpriseConfig = new WifiEnterpriseConfig(enterpriseConfig);
             return this;
         }

@@ -30,6 +30,7 @@
         android:clipToPadding="false"
         android:focusable="true"
         android:background="@drawable/ripple_drawable"
+        systemui:activatedTextAppearance="@style/TextAppearance.QS.UserSwitcher"
         systemui:regularTextAppearance="@style/TextAppearance.QS.UserSwitcher">
 
     <com.android.systemui.statusbar.phone.UserAvatarView
@@ -37,8 +38,6 @@
             android:layout_width="@dimen/qs_framed_avatar_size"
             android:layout_height="@dimen/qs_framed_avatar_size"
             android:layout_marginBottom="7dp"
-            android:backgroundTint="@color/qs_user_detail_avatar_tint"
-            android:backgroundTintMode="src_atop"
             systemui:frameWidth="6dp"
             systemui:badgeDiameter="18dp"
             systemui:badgeMargin="1dp"

@@ -5105,7 +5105,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         public static final int RANGE_TYPE_INT = 0;
         /** Range type: float. */
         public static final int RANGE_TYPE_FLOAT = 1;
-        /** Range type: percent with values from zero to one.*/
+        /** Range type: percent with values from zero to one hundred. */
         public static final int RANGE_TYPE_PERCENT = 2;
 
         private static final SynchronizedPool<RangeInfo> sPool =

@@ -33,7 +33,7 @@ import android.util.TimeUtils;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.location.nano.GnssLogsProto.GnssLog;
 import com.android.internal.location.nano.GnssLogsProto.PowerMetrics;
-import com.android.internal.os.BackgroundThread;
+import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.FrameworkStatsLog;
 
 import java.util.ArrayList;
@@ -435,7 +435,7 @@ public class GnssMetrics {
         mConstellationTypes = new boolean[GnssStatus.CONSTELLATION_COUNT];
     }
 
-    /** Class for storing statistics */
+    /** Thread-safe class for storing statistics */
     private static class Statistics {
 
         private int mCount;
@@ -446,7 +446,7 @@ public class GnssMetrics {
         Statistics() {}
 
         /** Resets statistics */
-        public void reset() {
+        public synchronized void reset() {
             mCount = 0;
             mSum = 0.0;
             mSumSquare = 0.0;
@@ -454,7 +454,7 @@ public class GnssMetrics {
         }
 
         /** Adds an item */
-        public void addItem(double item) {
+        public synchronized void addItem(double item) {
             mCount++;
             mSum += item;
             mSumSquare += item * item;
@@ -462,17 +462,17 @@ public class GnssMetrics {
         }
 
         /** Returns number of items added */
-        public int getCount() {
+        public synchronized int getCount() {
             return mCount;
         }
 
         /** Returns mean */
-        public double getMean() {
+        public synchronized double getMean() {
             return mSum / mCount;
         }
 
         /** Returns standard deviation */
-        public double getStandardDeviation() {
+        public synchronized double getStandardDeviation() {
             double m = mSum / mCount;
             m = m * m;
             double v = mSumSquare / mCount;
@@ -483,7 +483,7 @@ public class GnssMetrics {
         }
 
         /** Returns long sum */
-        public long getLongSum() {
+        public synchronized long getLongSum() {
             return mLongSum;
         }
     }
@@ -595,7 +595,7 @@ public class GnssMetrics {
         mStatsManager.setPullAtomCallback(
                 FrameworkStatsLog.GNSS_STATS,
                 null, // use default PullAtomMetadata values
-                BackgroundThread.getExecutor(), pullAtomCallback);
+                ConcurrentUtils.DIRECT_EXECUTOR, pullAtomCallback);
     }
 
     /**
