@@ -50,8 +50,9 @@ public @interface StartInputReason {
     int WINDOW_FOCUS_GAIN = 1;
     /**
      * {@link android.view.Window} gained focus but there is no {@link android.view.View} that is
-     * eligible to have IME focus. {@link android.view.inputmethod.InputMethodManager} just reports
-     * this window focus change event.
+     * eligible to have IME focus, or the focused view is same as current served view and its
+     * input connection remains. {@link android.view.inputmethod.InputMethodManager} just reports
+     * this window focus change event to sync IME input target for system.
      */
     int WINDOW_FOCUS_GAIN_REPORT_ONLY = 2;
     /**

@@ -125,6 +125,13 @@ public final class ImeFocusController {
         final View viewForWindowFocus = focusedView != null ? focusedView : mViewRootImpl.mView;
         onViewFocusChanged(viewForWindowFocus, true);
 
+        // Skip starting input when the next focused view is same as served view and the served
+        // input connection still exists.
+        final boolean nextFocusIsServedView = mServedView != null && mServedView == focusedView;
+        if (nextFocusIsServedView && immDelegate.isAcceptingText()) {
+            forceFocus = false;
+        }
+
         immDelegate.startInputAsyncOnWindowFocusGain(viewForWindowFocus,
                 windowAttribute.softInputMode, windowAttribute.flags, forceFocus);
     }
@@ -247,6 +254,7 @@ public final class ImeFocusController {
         void setCurrentRootView(ViewRootImpl rootView);
         boolean isCurrentRootView(ViewRootImpl rootView);
         boolean isRestartOnNextWindowFocus(boolean reset);
+        boolean isAcceptingText();
     }
 
     public View getServedView() {
