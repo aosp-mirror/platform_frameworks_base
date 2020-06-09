@@ -273,6 +273,9 @@
     <!-- The margin before and after each of the items in the notification header. -->
     <dimen name="notification_header_separating_margin">2dp</dimen>
 
+    <!-- The margin before and after each of the items in the conversation header. -->
+    <dimen name="notification_conversation_header_separating_margin">4dp</dimen>
+
     <!-- The absolute size of the notification expand icon. -2 for wrap_content. -->
     <dimen name="notification_header_expand_icon_size">-2px</dimen>
 
@@ -721,7 +724,7 @@
     <!-- The width of the protection of the face pile layout when expanded-->
     <dimen name="conversation_face_pile_protection_width_expanded">1dp</dimen>
     <!-- The padding of the expanded message container-->
-    <dimen name="expanded_group_conversation_message_padding">14dp</dimen>
+    <dimen name="expanded_group_conversation_message_padding">17dp</dimen>
     <!-- The stroke width of the ring used to visually mark a conversation as important -->
     <dimen name="importance_ring_stroke_width">2dp</dimen>
     <!-- The maximum stroke width used for the animation shown when a conversation is marked as important -->
@@ -730,7 +733,7 @@
     <dimen name="importance_ring_size">20dp</dimen>
 
     <!-- The top padding of the conversation icon container in the regular state-->
-    <dimen name="conversation_icon_container_top_padding">9dp</dimen>
+    <dimen name="conversation_icon_container_top_padding">12dp</dimen>
 
     <!-- The top padding of the conversation icon container when the avatar is small-->
     <dimen name="conversation_icon_container_top_padding_small_avatar">17.5dp</dimen>

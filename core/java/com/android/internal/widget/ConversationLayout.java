@@ -85,7 +85,7 @@ public class ConversationLayout extends FrameLayout
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
     /**
-     *  Pattren for filter some ingonable characters.
+     *  Pattern for filter some ignorable characters.
      *  p{Z} for any kind of whitespace or invisible separator.
      *  p{C} for any kind of punctuation character.
      */
@@ -1245,7 +1245,6 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateContentEndPaddings() {
-
         // Let's make sure the conversation header can't run into the expand button when we're
         // collapsed and update the paddings of the content
         int headerPaddingEnd;
