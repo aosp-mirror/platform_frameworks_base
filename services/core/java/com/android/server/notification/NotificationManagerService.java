@@ -4015,7 +4015,7 @@ public class NotificationManagerService extends SystemService {
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE | FLAG_BUBBLE,
+                    FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE,
                     true,
                     userId, REASON_LISTENER_CANCEL, info);
         }
@@ -6246,6 +6246,13 @@ public class NotificationManagerService extends SystemService {
                     // require the caller to also find the notification.
                     if (mReason == REASON_CLICK) {
                         mUsageStats.registerClickedByUser(r);
+                    }
+
+                    if (mReason == REASON_LISTENER_CANCEL
+                        && (r.getNotification().flags & FLAG_BUBBLE) != 0) {
+                        mNotificationDelegate.onBubbleNotificationSuppressionChanged(
+                            r.getKey(), /* suppressed */ true);
+                        return;
                     }
 
                     if ((r.getNotification().flags & mMustHaveFlags) != mMustHaveFlags) {
