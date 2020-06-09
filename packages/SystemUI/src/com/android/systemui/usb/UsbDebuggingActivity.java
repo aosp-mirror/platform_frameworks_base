@@ -51,6 +51,7 @@ public class UsbDebuggingActivity extends AlertActivity
     private UsbDisconnectedReceiver mDisconnectedReceiver;
     private final BroadcastDispatcher mBroadcastDispatcher;
     private String mKey;
+    private boolean mServiceNotified;
 
     @Inject
     public UsbDebuggingActivity(BroadcastDispatcher broadcastDispatcher) {
@@ -118,6 +119,7 @@ public class UsbDebuggingActivity extends AlertActivity
             }
             boolean connected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
             if (!connected) {
+                notifyService(false);
                 mActivity.finish();
             }
         }
@@ -126,14 +128,22 @@ public class UsbDebuggingActivity extends AlertActivity
     @Override
     public void onStart() {
         super.onStart();
-        IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
-        mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
+        if (mDisconnectedReceiver != null) {
+            IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
+            mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
+        }
     }
 
     @Override
     protected void onStop() {
         if (mDisconnectedReceiver != null) {
             mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
+        }
+        // If the ADB service has not yet been notified due to this dialog being closed in some
+        // other way then notify the service to deny the connection to ensure system_server sends
+        // a response to adbd.
+        if (!mServiceNotified) {
+            notifyService(false);
         }
         super.onStop();
     }
@@ -142,6 +152,30 @@ public class UsbDebuggingActivity extends AlertActivity
     public void onClick(DialogInterface dialog, int which) {
         boolean allow = (which == AlertDialog.BUTTON_POSITIVE);
         boolean alwaysAllow = allow && mAlwaysAllow.isChecked();
+        notifyService(allow, alwaysAllow);
+        finish();
+    }
+
+    /**
+     * Notifies the ADB service as to whether the current ADB request should be allowed; if the
+     * request is allowed it is only allowed for this session, and the user should be prompted again
+     * on subsequent requests from this key.
+     *
+     * @param allow whether the connection should be allowed for this session
+     */
+    private void notifyService(boolean allow) {
+        notifyService(allow, false);
+    }
+
+    /**
+     * Notifies the ADB service as to whether the current ADB request should be allowed, and if
+     * subsequent requests from this key should be allowed without user consent.
+     *
+     * @param allow whether the connection should be allowed
+     * @param alwaysAllow whether subsequent requests from this key should be allowed without user
+     *                    consent
+     */
+    private void notifyService(boolean allow, boolean alwaysAllow) {
         try {
             IBinder b = ServiceManager.getService(ADB_SERVICE);
             IAdbManager service = IAdbManager.Stub.asInterface(b);
@@ -150,9 +184,9 @@ public class UsbDebuggingActivity extends AlertActivity
             } else {
                 service.denyDebugging();
             }
+            mServiceNotified = true;
         } catch (Exception e) {
             Log.e(TAG, "Unable to notify Usb service", e);
         }
-        finish();
     }
 }

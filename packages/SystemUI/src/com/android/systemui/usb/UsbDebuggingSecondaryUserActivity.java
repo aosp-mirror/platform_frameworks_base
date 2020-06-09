@@ -22,9 +22,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.debug.IAdbManager;
 import android.hardware.usb.UsbManager;
 import android.os.Bundle;
+import android.os.IBinder;
+import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.SystemProperties;
+import android.util.Log;
 
 import com.android.internal.app.AlertActivity;
 import com.android.internal.app.AlertController;
@@ -35,6 +40,7 @@ import javax.inject.Inject;
 
 public class UsbDebuggingSecondaryUserActivity extends AlertActivity
         implements DialogInterface.OnClickListener {
+    private static final String TAG = "UsbDebuggingSecondaryUserActivity";
     private UsbDisconnectedReceiver mDisconnectedReceiver;
     private final BroadcastDispatcher mBroadcastDispatcher;
 
@@ -81,15 +87,23 @@ public class UsbDebuggingSecondaryUserActivity extends AlertActivity
     @Override
     public void onStart() {
         super.onStart();
-
-        IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
-        mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
+        if (mDisconnectedReceiver != null) {
+            IntentFilter filter = new IntentFilter(UsbManager.ACTION_USB_STATE);
+            mBroadcastDispatcher.registerReceiver(mDisconnectedReceiver, filter);
+        }
     }
 
     @Override
     protected void onStop() {
         if (mDisconnectedReceiver != null) {
             mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
+        }
+        try {
+            IBinder b = ServiceManager.getService(ADB_SERVICE);
+            IAdbManager service = IAdbManager.Stub.asInterface(b);
+            service.denyDebugging();
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to notify Usb service", e);
         }
         super.onStop();
     }
