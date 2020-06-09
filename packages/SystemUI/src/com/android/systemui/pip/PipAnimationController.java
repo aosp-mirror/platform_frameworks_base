@@ -17,7 +17,6 @@
 package com.android.systemui.pip;
 
 import android.animation.Animator;
-import android.animation.RectEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
 import android.content.Context;
@@ -27,7 +26,6 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.Interpolators;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -76,12 +74,15 @@ public class PipAnimationController {
                 || direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN;
     }
 
+    private final Interpolator mFastOutSlowInInterpolator;
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
 
     private PipTransitionAnimator mCurrentAnimator;
 
     @Inject
     PipAnimationController(Context context, PipSurfaceTransactionHelper helper) {
+        mFastOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
+                com.android.internal.R.interpolator.fast_out_slow_in);
         mSurfaceTransactionHelper = helper;
     }
 
@@ -103,11 +104,10 @@ public class PipAnimationController {
     }
 
     @SuppressWarnings("unchecked")
-    PipTransitionAnimator getAnimator(SurfaceControl leash, Rect startBounds, Rect endBounds,
-            Rect sourceHintRect) {
+    PipTransitionAnimator getAnimator(SurfaceControl leash, Rect startBounds, Rect endBounds) {
         if (mCurrentAnimator == null) {
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofBounds(leash, startBounds, endBounds, sourceHintRect));
+                    PipTransitionAnimator.ofBounds(leash, startBounds, endBounds));
         } else if (mCurrentAnimator.getAnimationType() == ANIM_TYPE_ALPHA
                 && mCurrentAnimator.isRunning()) {
             // If we are still animating the fade into pip, then just move the surface and ensure
@@ -122,7 +122,7 @@ public class PipAnimationController {
         } else {
             mCurrentAnimator.cancel();
             mCurrentAnimator = setupPipTransitionAnimator(
-                    PipTransitionAnimator.ofBounds(leash, startBounds, endBounds, sourceHintRect));
+                    PipTransitionAnimator.ofBounds(leash, startBounds, endBounds));
         }
         return mCurrentAnimator;
     }
@@ -133,7 +133,7 @@ public class PipAnimationController {
 
     private PipTransitionAnimator setupPipTransitionAnimator(PipTransitionAnimator animator) {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
-        animator.setInterpolator(Interpolators.FAST_OUT_SLOW_IN);
+        animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.setFloatValues(FRACTION_START, FRACTION_END);
         return animator;
     }
@@ -331,7 +331,6 @@ public class PipAnimationController {
                 @Override
                 void onStartTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
                     getSurfaceTransactionHelper()
-                            .resetScale(tx, leash, getDestinationBounds())
                             .crop(tx, leash, getDestinationBounds())
                             .round(tx, leash, shouldApplyCornerRadius());
                     tx.show(leash);
@@ -347,46 +346,35 @@ public class PipAnimationController {
         }
 
         static PipTransitionAnimator<Rect> ofBounds(SurfaceControl leash,
-                Rect startValue, Rect endValue, Rect sourceHintRect) {
-            // Just for simplicity we'll interpolate between the source rect hint insets and empty
-            // insets to calculate the window crop
-            final Rect initialStartValue = new Rect(startValue);
-            final Rect sourceHintRectInsets = sourceHintRect != null
-                    ? new Rect(sourceHintRect.left - startValue.left,
-                            sourceHintRect.top - startValue.top,
-                            startValue.right - sourceHintRect.right,
-                            startValue.bottom - sourceHintRect.bottom)
-                    : null;
-            final Rect sourceInsets = new Rect(0, 0, 0, 0);
-
+                Rect startValue, Rect endValue) {
             // construct new Rect instances in case they are recycled
             return new PipTransitionAnimator<Rect>(leash, ANIM_TYPE_BOUNDS,
                     endValue, new Rect(startValue), new Rect(endValue)) {
-                private final RectEvaluator mRectEvaluator = new RectEvaluator(new Rect());
-                private final RectEvaluator mInsetsEvaluator = new RectEvaluator(new Rect());
+                private final Rect mTmpRect = new Rect();
+
+                private int getCastedFractionValue(float start, float end, float fraction) {
+                    return (int) (start * (1 - fraction) + end * fraction + .5f);
+                }
 
                 @Override
                 void applySurfaceControlTransaction(SurfaceControl leash,
                         SurfaceControl.Transaction tx, float fraction) {
                     final Rect start = getStartValue();
                     final Rect end = getEndValue();
-                    Rect bounds = mRectEvaluator.evaluate(fraction, start, end);
-                    setCurrentValue(bounds);
+                    mTmpRect.set(
+                            getCastedFractionValue(start.left, end.left, fraction),
+                            getCastedFractionValue(start.top, end.top, fraction),
+                            getCastedFractionValue(start.right, end.right, fraction),
+                            getCastedFractionValue(start.bottom, end.bottom, fraction));
+                    setCurrentValue(mTmpRect);
                     if (inScaleTransition()) {
                         if (isOutPipDirection(getTransitionDirection())) {
-                            getSurfaceTransactionHelper().scale(tx, leash, end, bounds);
+                            getSurfaceTransactionHelper().scale(tx, leash, end, mTmpRect);
                         } else {
-                            getSurfaceTransactionHelper().scale(tx, leash, start, bounds);
+                            getSurfaceTransactionHelper().scale(tx, leash, start, mTmpRect);
                         }
                     } else {
-                        if (sourceHintRectInsets != null) {
-                            Rect insets = mInsetsEvaluator.evaluate(fraction, sourceInsets,
-                                    sourceHintRectInsets);
-                            getSurfaceTransactionHelper().scaleAndCrop(tx, leash, initialStartValue,
-                                    bounds, insets);
-                        } else {
-                            getSurfaceTransactionHelper().scale(tx, leash, start, bounds);
-                        }
+                        getSurfaceTransactionHelper().crop(tx, leash, mTmpRect);
                     }
                     tx.apply();
                 }
@@ -402,11 +390,11 @@ public class PipAnimationController {
 
                 @Override
                 void onEndTransaction(SurfaceControl leash, SurfaceControl.Transaction tx) {
+                    if (!inScaleTransition()) return;
                     // NOTE: intentionally does not apply the transaction here.
                     // this end transaction should get executed synchronously with the final
                     // WindowContainerTransaction in task organizer
-                    getSurfaceTransactionHelper()
-                            .resetScale(tx, leash, getDestinationBounds())
+                    getSurfaceTransactionHelper().resetScale(tx, leash, getDestinationBounds())
                             .crop(tx, leash, getDestinationBounds());
                 }
 
