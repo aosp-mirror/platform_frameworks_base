@@ -18,12 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.RectF;
 
 import com.android.systemui.R;
 
 /** Temporarily shown view when using QuickSwitch to switch between apps of different rotations */
 public class VerticalNavigationHandle extends NavigationHandle {
     private final int mWidth;
+    private final RectF mTmpBoundsRectF = new RectF();
 
     public VerticalNavigationHandle(Context context) {
         super(context);
@@ -32,16 +34,21 @@ public class VerticalNavigationHandle extends NavigationHandle {
 
     @Override
     protected void onDraw(Canvas canvas) {
+        canvas.drawRoundRect(computeHomeHandleBounds(), mRadius, mRadius, mPaint);
+    }
+
+    RectF computeHomeHandleBounds() {
         int left;
         int top;
         int bottom;
         int right;
-
+        int topStart = getLocationOnScreen()[1];
         int radiusOffset = mRadius * 2;
         right = getWidth() - mBottom;
-        top = getHeight() / 2 - (mWidth / 2); /* (height of screen / 2) - (height of bar / 2) */
+        top = getHeight() / 2 - (mWidth / 2) - (topStart / 2);
         left = getWidth() - mBottom - radiusOffset;
-        bottom = getHeight() / 2 + (mWidth / 2);
-        canvas.drawRoundRect(left, top, right, bottom, mRadius, mRadius, mPaint);
+        bottom = top + mWidth;
+        mTmpBoundsRectF.set(left, top, right, bottom);
+        return mTmpBoundsRectF;
     }
 }
