@@ -77,7 +77,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -271,9 +270,6 @@ public class IpServer extends StateMachine {
             sendMessage(CMD_NEIGHBOR_EVENT, e);
         }
     }
-
-    private final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> mIpv6ForwardingRules =
-            new LinkedHashMap<>();
 
     private final IpNeighborMonitor mIpNeighborMonitor;
 
@@ -843,43 +839,29 @@ public class IpServer extends StateMachine {
         // TODO: Perhaps remove this protection check.
         if (!mUsingBpfOffload) return;
 
-        try {
-            mNetd.tetherOffloadRuleAdd(rule.toTetherOffloadRuleParcel());
-            mIpv6ForwardingRules.put(rule.address, rule);
-        } catch (RemoteException | ServiceSpecificException e) {
-            mLog.e("Could not add IPv6 downstream rule: ", e);
-        }
+        mBpfCoordinator.tetherOffloadRuleAdd(this, rule);
     }
 
-    private void removeIpv6ForwardingRule(Ipv6ForwardingRule rule, boolean removeFromMap) {
-        // Theoretically, we don't need this check because IP neighbor monitor doesn't start if BPF
-        // offload is disabled. Add this check just in case.
+    private void removeIpv6ForwardingRule(Ipv6ForwardingRule rule) {
         // TODO: Perhaps remove this protection check.
+        // See the related comment in #addIpv6ForwardingRule.
         if (!mUsingBpfOffload) return;
 
-        try {
-            mNetd.tetherOffloadRuleRemove(rule.toTetherOffloadRuleParcel());
-            if (removeFromMap) {
-                mIpv6ForwardingRules.remove(rule.address);
-            }
-        } catch (RemoteException | ServiceSpecificException e) {
-            mLog.e("Could not remove IPv6 downstream rule: ", e);
-        }
+        mBpfCoordinator.tetherOffloadRuleRemove(this, rule);
     }
 
     private void clearIpv6ForwardingRules() {
-        for (Ipv6ForwardingRule rule : mIpv6ForwardingRules.values()) {
-            removeIpv6ForwardingRule(rule, false /*removeFromMap*/);
-        }
-        mIpv6ForwardingRules.clear();
+        if (!mUsingBpfOffload) return;
+
+        mBpfCoordinator.tetherOffloadRuleClear(this);
     }
 
-    // Convenience method to replace a rule with the same rule on a new upstream interface.
-    // Allows replacing the rules in one iteration pass without ConcurrentModificationExceptions.
-    // Relies on the fact that rules are in a map indexed by IP address.
-    private void updateIpv6ForwardingRule(Ipv6ForwardingRule rule, int newIfindex) {
-        addIpv6ForwardingRule(rule.onNewUpstream(newIfindex));
-        removeIpv6ForwardingRule(rule, false /*removeFromMap*/);
+    private void updateIpv6ForwardingRule(int newIfindex) {
+        // TODO: Perhaps remove this protection check.
+        // See the related comment in #addIpv6ForwardingRule.
+        if (!mUsingBpfOffload) return;
+
+        mBpfCoordinator.tetherOffloadRuleUpdate(this, newIfindex);
     }
 
     // Handles all updates to IPv6 forwarding rules. These can currently change only if the upstream
@@ -895,9 +877,7 @@ public class IpServer extends StateMachine {
         // If the upstream interface has changed, remove all rules and re-add them with the new
         // upstream interface.
         if (prevUpstreamIfindex != upstreamIfindex) {
-            for (Ipv6ForwardingRule rule : mIpv6ForwardingRules.values()) {
-                updateIpv6ForwardingRule(rule, upstreamIfindex);
-            }
+            updateIpv6ForwardingRule(upstreamIfindex);
         }
 
         // If we're here to process a NeighborEvent, do so now.
@@ -917,7 +897,7 @@ public class IpServer extends StateMachine {
         if (e.isValid()) {
             addIpv6ForwardingRule(rule);
         } else {
-            removeIpv6ForwardingRule(rule, true /*removeFromMap*/);
+            removeIpv6ForwardingRule(rule);
         }
     }
 

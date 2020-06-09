@@ -141,7 +141,7 @@ public class BpfCoordinatorTest {
         setupFunctioningNetdInterface();
 
         final BpfCoordinator coordinator = makeBpfCoordinator();
-        coordinator.start();
+        coordinator.startPolling();
 
         final String wlanIface = "wlan0";
         final Integer wlanIfIndex = 100;
@@ -197,7 +197,7 @@ public class BpfCoordinatorTest {
         // [3] Stop coordinator.
         // Shutdown the coordinator and clear the invocation history, especially the
         // tetherOffloadGetStats() calls.
-        coordinator.stop();
+        coordinator.stopPolling();
         clearInvocations(mNetd);
 
         // Verify the polling update thread stopped.
@@ -211,7 +211,7 @@ public class BpfCoordinatorTest {
         setupFunctioningNetdInterface();
 
         final BpfCoordinator coordinator = makeBpfCoordinator();
-        coordinator.start();
+        coordinator.startPolling();
 
         final String mobileIface = "rmnet_data0";
         final Integer mobileIfIndex = 100;
