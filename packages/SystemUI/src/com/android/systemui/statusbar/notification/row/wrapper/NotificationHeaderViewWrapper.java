@@ -262,7 +262,10 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         stack.push(mView);
         while (!stack.isEmpty()) {
             View child = stack.pop();
-            if (child instanceof ImageView) {
+            if (child instanceof ImageView
+                    // Skip the importance ring for conversations, disabled cropping is needed for
+                    // its animation
+                    && child.getId() != com.android.internal.R.id.conversation_icon_badge_ring) {
                 ((ImageView) child).setCropToPadding(true);
             } else if (child instanceof ViewGroup){
                 ViewGroup group = (ViewGroup) child;
