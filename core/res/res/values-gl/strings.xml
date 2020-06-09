@@ -1786,7 +1786,7 @@
     <string name="managed_profile_label_badge" msgid="6762559569999499495">"<xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_2" msgid="5673187309555352550">"2.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
     <string name="managed_profile_label_badge_3" msgid="6882151970556391957">"3.º <xliff:g id="LABEL">%1$s</xliff:g> do traballo"</string>
-    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para soltar fixación"</string>
+    <string name="lock_to_app_unlock_pin" msgid="3890940811866290782">"Solicitar PIN para deixar de fixar"</string>
     <string name="lock_to_app_unlock_pattern" msgid="2694204070499712503">"Solicitar un padrón de desbloqueo antes de deixar de fixar a pantalla"</string>
     <string name="lock_to_app_unlock_password" msgid="9126722403506560473">"Solicitar un contrasinal para deixar de fixar a pantalla"</string>
     <string name="package_installed_device_owner" msgid="7035926868974878525">"Instalado polo teu administrador"</string>
