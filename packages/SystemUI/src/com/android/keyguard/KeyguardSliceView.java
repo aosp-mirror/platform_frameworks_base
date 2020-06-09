@@ -141,14 +141,6 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
         mLayoutTransition.setAnimateParentHierarchy(false);
     }
 
-    // Temporary workaround to allow KeyguardStatusView to inflate a copy for Universal Smartspace.
-    // Eventually the existing copy will be reparented instead, and we won't need this.
-    public KeyguardSliceView(Context context, AttributeSet attributeSet) {
-        this(context, attributeSet, Dependency.get(ActivityStarter.class),
-                Dependency.get(ConfigurationController.class), Dependency.get(TunerService.class),
-                context.getResources());
-    }
-
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
