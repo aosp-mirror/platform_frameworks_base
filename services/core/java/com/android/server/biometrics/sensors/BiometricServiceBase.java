@@ -84,11 +84,12 @@ public abstract class BiometricServiceBase extends SystemService
 
     private final Context mContext;
     private final String mKeyguardPackage;
-    private final IActivityTaskManager mActivityTaskManager;
+    protected final IActivityTaskManager mActivityTaskManager;
     public final PowerManager mPowerManager;
     private final UserManager mUserManager;
     private final MetricsLogger mMetricsLogger;
-    private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
+    protected final BiometricTaskStackListener mTaskStackListener =
+            new BiometricTaskStackListener();
     private final ResetClientStateRunnable mResetClientState = new ResetClientStateRunnable();
     private final ArrayList<LockoutResetMonitor> mLockoutMonitors = new ArrayList<>();
 
@@ -191,41 +192,7 @@ public abstract class BiometricServiceBase extends SystemService
     /**
      * @return one of the AuthenticationClient LOCKOUT constants
      */
-    protected abstract int getLockoutMode(int userId);
-
-    protected abstract class AuthenticationClientImpl extends AuthenticationClient {
-
-        public AuthenticationClientImpl(Context context, DaemonWrapper daemon,
-                IBinder token, ClientMonitorCallbackConverter listener, int targetUserId,
-                int groupId, long opId, boolean shouldFrameworkHandleLockout, boolean restricted,
-                String owner, int cookie, boolean requireConfirmation, int sensorId,
-                boolean isStrongBiometric, int statsModality, int statsClient, Surface surface) {
-            super(context, getConstants(), daemon, token, listener, targetUserId,
-                    groupId, opId, shouldFrameworkHandleLockout, restricted, owner, cookie,
-                    requireConfirmation, sensorId, isStrongBiometric,
-                    statsModality, statsClient, mActivityTaskManager, mTaskStackListener,
-                    mPowerManager, surface);
-        }
-
-        @Override
-        public int handleFailedAttempt(int userId) {
-            final int lockoutMode = getLockoutMode(userId);
-            PerformanceTracker performanceTracker = PerformanceTracker.getInstanceForSensorId(
-                    BiometricServiceBase.this.getSensorId());
-
-            if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
-                performanceTracker.incrementPermanentLockoutForUser(userId);
-            } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
-                performanceTracker.incrementTimedLockoutForUser(userId);
-            }
-
-            // Failing multiple times will continue to push out the lockout time
-            if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
-                return lockoutMode;
-            }
-            return AuthenticationClient.LOCKOUT_NONE;
-        }
-    }
+    protected abstract @LockoutTracker.LockoutMode int getLockoutMode(int userId);
 
     /**
      * Wraps a portion of the interface from Service -> Daemon that is used by the ClientMonitor
@@ -455,7 +422,7 @@ public abstract class BiometricServiceBase extends SystemService
 
         if (client instanceof AuthenticationClient) {
             final int userId = client.getTargetUserId();
-            if (getLockoutMode(userId) == AuthenticationClient.LOCKOUT_NONE) {
+            if (getLockoutMode(userId) == LockoutTracker.LOCKOUT_NONE) {
                 mPerformanceTracker.incrementAcquireForUser(userId, client.isCryptoOperation());
             }
         }
@@ -570,7 +537,7 @@ public abstract class BiometricServiceBase extends SystemService
         });
     }
 
-    protected void authenticateInternal(AuthenticationClientImpl client, long opId,
+    protected void authenticateInternal(AuthenticationClient client, long opId,
             String opPackageName) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
@@ -578,7 +545,7 @@ public abstract class BiometricServiceBase extends SystemService
         authenticateInternal(client, opId, opPackageName, callingUid, callingPid, callingUserId);
     }
 
-    protected void authenticateInternal(AuthenticationClientImpl client, long opId,
+    protected void authenticateInternal(AuthenticationClient client, long opId,
             String opPackageName, int callingUid, int callingPid, int callingUserId) {
         if (!canUseBiometric(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
                 callingUserId)) {
@@ -658,15 +625,15 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     // Should be done on a handler thread - not on the Binder's thread.
-    private void startAuthentication(AuthenticationClientImpl client, String opPackageName) {
+    private void startAuthentication(AuthenticationClient client, String opPackageName) {
         if (DEBUG) Slog.v(getTag(), "startAuthentication(" + opPackageName + ")");
 
-        int lockoutMode = getLockoutMode(client.getTargetUserId());
-        if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
+        @LockoutTracker.LockoutMode int lockoutMode = getLockoutMode(client.getTargetUserId());
+        if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
             Slog.v(getTag(), "In lockout mode(" + lockoutMode + ") ; disallowing authentication");
-            int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
-                    BiometricConstants.BIOMETRIC_ERROR_LOCKOUT :
-                    BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
+            int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
+                    ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
+                    : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
             if (!client.onError(errorCode, 0 /* vendorCode */)) {
                 Slog.w(getTag(), "Cannot send permanent lockout message to client");
             }

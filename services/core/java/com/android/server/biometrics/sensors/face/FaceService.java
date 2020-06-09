@@ -68,6 +68,7 @@ import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
 
@@ -209,7 +210,7 @@ public class FaceService extends BiometricServiceBase {
         }
     }
 
-    private final class FaceAuthClient extends AuthenticationClientImpl {
+    private final class FaceAuthClient extends AuthenticationClient {
         private int mLastAcquire;
 
         public FaceAuthClient(Context context,
@@ -217,10 +218,11 @@ public class FaceService extends BiometricServiceBase {
                 ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation,
                 int statsClient, Surface surface) {
-            super(context, daemon, token, listener, targetUserId, groupId, opId,
+            super(context, getConstants(), daemon, token, listener, targetUserId, groupId, opId,
                     false /* shouldFrameworkHandleLockout */, restricted, owner, cookie,
                     requireConfirmation, FaceService.this.getSensorId(), isStrongBiometric(),
-                    statsModality(), statsClient, surface);
+                    statsModality(), statsClient, mActivityTaskManager, mTaskStackListener,
+                    mPowerManager, mLockoutTracker, surface);
         }
 
         @Override
@@ -420,7 +422,7 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_UNKNOWN;
-            final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
+            final AuthenticationClient client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
                     0 /* cookie */, false /* requireConfirmation */, statsClient,
@@ -436,7 +438,7 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
+            final AuthenticationClient client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
@@ -702,14 +704,13 @@ public class FaceService extends BiometricServiceBase {
         }
     }
 
+    private final LockoutHalImpl mLockoutTracker;
     private final FaceConstants mFaceConstants = new FaceConstants();
 
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
     private UsageStats mUsageStats;
     private boolean mRevokeChallengePending = false;
-    // One of the AuthenticationClient constants
-    private int mCurrentUserLockoutMode;
 
     private NotificationManager mNotificationManager;
 
@@ -823,13 +824,15 @@ public class FaceService extends BiometricServiceBase {
         public void onLockoutChanged(long duration) {
             Slog.d(TAG, "onLockoutChanged: " + duration);
 
+            final @LockoutTracker.LockoutMode int lockoutMode;
             if (duration == 0) {
-                mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_NONE;
+                lockoutMode = LockoutTracker.LOCKOUT_NONE;
             } else if (duration == -1 || duration == Long.MAX_VALUE) {
-                mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_PERMANENT;
+                lockoutMode = LockoutTracker.LOCKOUT_PERMANENT;
             } else {
-                mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_TIMED;
+                lockoutMode = LockoutTracker.LOCKOUT_TIMED;
             }
+            mLockoutTracker.setCurrentUserLockoutMode(lockoutMode);
 
             mHandler.post(() -> {
                 if (duration == 0) {
@@ -929,6 +932,7 @@ public class FaceService extends BiometricServiceBase {
 
     public FaceService(Context context) {
         super(context);
+        mLockoutTracker = new LockoutHalImpl();
 
         final boolean ignoreKeyguardBlacklist = Settings.Secure.getInt(context.getContentResolver(),
                 SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST, 0) != 0;
@@ -1050,7 +1054,7 @@ public class FaceService extends BiometricServiceBase {
     protected void handleUserSwitching(int userId) {
         super.handleUserSwitching(userId);
         // Will be updated when we get the callback from HAL
-        mCurrentUserLockoutMode = AuthenticationClient.LOCKOUT_NONE;
+        mLockoutTracker.setCurrentUserLockoutMode(LockoutTracker.LOCKOUT_NONE);
     }
 
     @Override
@@ -1093,8 +1097,8 @@ public class FaceService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getLockoutMode(int userId) {
-        return mCurrentUserLockoutMode;
+    protected @LockoutTracker.LockoutMode int getLockoutMode(int userId) {
+        return mLockoutTracker.getLockoutModeForUser(userId);
     }
 
     /** Gets the face daemon */

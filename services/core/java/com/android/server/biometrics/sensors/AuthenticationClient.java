@@ -37,12 +37,7 @@ import java.util.ArrayList;
  */
 public abstract class AuthenticationClient extends ClientMonitor {
 
-    public abstract int handleFailedAttempt(int userId);
     public void resetFailedAttempts(int userId) {}
-
-    public static final int LOCKOUT_NONE = 0;
-    public static final int LOCKOUT_TIMED = 1;
-    public static final int LOCKOUT_PERMANENT = 2;
 
     private final boolean mIsStrongBiometric;
     private final long mOpId;
@@ -51,6 +46,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     private final IActivityTaskManager mActivityTaskManager;
     private final TaskStackListener mTaskStackListener;
     private final PowerManager mPowerManager;
+    private final LockoutTracker mLockoutTracker;
     private final Surface mSurface;
 
     // We need to track this state since it's possible for applications to request for
@@ -90,7 +86,8 @@ public abstract class AuthenticationClient extends ClientMonitor {
             boolean shouldFrameworkHandleLockout, boolean restricted, String owner, int cookie,
             boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsModality,
             int statsClient, IActivityTaskManager activityTaskManager,
-            TaskStackListener taskStackListener, PowerManager powerManager, Surface surface) {
+            TaskStackListener taskStackListener, PowerManager powerManager,
+            LockoutTracker lockoutTracker, Surface surface) {
         super(context, constants, daemon, token, listener, targetUserId, groupId,
                 restricted, owner, cookie, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
@@ -101,7 +98,23 @@ public abstract class AuthenticationClient extends ClientMonitor {
         mActivityTaskManager = activityTaskManager;
         mTaskStackListener = taskStackListener;
         mPowerManager = powerManager;
+        mLockoutTracker = lockoutTracker;
         mSurface = surface;
+    }
+
+    public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
+        final @LockoutTracker.LockoutMode int lockoutMode =
+                mLockoutTracker.getLockoutModeForUser(userId);
+        final PerformanceTracker performanceTracker =
+                PerformanceTracker.getInstanceForSensorId(getSensorId());
+
+        if (lockoutMode == LockoutTracker.LOCKOUT_PERMANENT) {
+            performanceTracker.incrementPermanentLockoutForUser(userId);
+        } else if (lockoutMode == LockoutTracker.LOCKOUT_TIMED) {
+            performanceTracker.incrementTimedLockoutForUser(userId);
+        }
+
+        return lockoutMode;
     }
 
     protected long getStartTimeMs() {
@@ -222,12 +235,13 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
 
                 // Allow system-defined limit of number of attempts before giving up
-                final int lockoutMode = handleFailedAttempt(getTargetUserId());
-                if (lockoutMode != LOCKOUT_NONE && mShouldFrameworkHandleLockout) {
+                final @LockoutTracker.LockoutMode int lockoutMode =
+                        handleFailedAttempt(getTargetUserId());
+                if (lockoutMode != LockoutTracker.LOCKOUT_NONE && mShouldFrameworkHandleLockout) {
                     Slog.w(getLogTag(), "Forcing lockout (driver code should do this!), mode("
                             + lockoutMode + ")");
                     stop(false);
-                    final int errorCode = lockoutMode == LOCKOUT_TIMED
+                    final int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
                             ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                             : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
                     onError(errorCode, 0 /* vendorCode */);
@@ -239,7 +253,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                         listener.onAuthenticationFailed(getSensorId());
                     }
                 }
-                result = lockoutMode != LOCKOUT_NONE; // in a lockout mode
+                result = lockoutMode != LockoutTracker.LOCKOUT_NONE; // in a lockout mode
             }
         } catch (RemoteException e) {
             Slog.e(getLogTag(), "Remote exception", e);

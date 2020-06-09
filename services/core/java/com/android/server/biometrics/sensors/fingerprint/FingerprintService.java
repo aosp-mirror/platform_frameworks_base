@@ -59,11 +59,13 @@ import com.android.server.SystemServerInitThreadPool;
 import com.android.server.biometrics.fingerprint.FingerprintServiceDumpProto;
 import com.android.server.biometrics.fingerprint.FingerprintUserStatsProto;
 import com.android.server.biometrics.fingerprint.PerformanceStatsProto;
+import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
 
@@ -92,17 +94,17 @@ public class FingerprintService extends BiometricServiceBase {
     private static final boolean DEBUG = true;
     private static final String FP_DATA_DIR = "fpdata";
 
-    private final class FingerprintAuthClient extends AuthenticationClientImpl {
+    private final class FingerprintAuthClient extends AuthenticationClient {
         public FingerprintAuthClient(Context context,
                 DaemonWrapper daemon, IBinder token,
                 ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie,
                 boolean requireConfirmation, Surface surface, int statsClient) {
-            super(context, daemon, token, listener, targetUserId, groupId, opId,
-                    true /* shouldFrameworkHandleLockout */,
-                    restricted, owner, cookie, requireConfirmation,
-                    FingerprintService.this.getSensorId(), isStrongBiometric(), statsModality(),
-                    statsClient, surface);
+            super(context, getConstants(), daemon, token, listener, targetUserId, groupId, opId,
+                    true /* shouldFrameworkHandleLockout */, restricted, owner, cookie,
+                    requireConfirmation, FingerprintService.this.getSensorId(), isStrongBiometric(),
+                    statsModality(), statsClient, mActivityTaskManager, mTaskStackListener,
+                    mPowerManager, mLockoutTracker, surface);
         }
 
         @Override
@@ -117,7 +119,7 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override
-        public int handleFailedAttempt(int userId) {
+        public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
             mLockoutTracker.addFailedAttemptForUser(userId);
             return super.handleFailedAttempt(userId);
         }
@@ -178,7 +180,7 @@ public class FingerprintService extends BiometricServiceBase {
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
 
-            final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
+            final AuthenticationClient client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName,
                     0 /* cookie */, false /* requireConfirmation */,
@@ -194,7 +196,7 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
+            final AuthenticationClient client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
@@ -382,7 +384,7 @@ public class FingerprintService extends BiometricServiceBase {
         }
     }
 
-    private final LockoutTracker mLockoutTracker;
+    private final LockoutFrameworkImpl mLockoutTracker;
     private final FingerprintConstants mFingerprintConstants = new FingerprintConstants();
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
@@ -390,7 +392,7 @@ public class FingerprintService extends BiometricServiceBase {
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;
 
-    private final LockoutTracker.LockoutResetCallback mLockoutResetCallback = userId -> {
+    private final LockoutFrameworkImpl.LockoutResetCallback mLockoutResetCallback = userId -> {
         notifyLockoutResetMonitors();
     };
 
@@ -534,7 +536,7 @@ public class FingerprintService extends BiometricServiceBase {
 
     public FingerprintService(Context context) {
         super(context);
-        mLockoutTracker = new LockoutTracker(context, mLockoutResetCallback);
+        mLockoutTracker = new LockoutFrameworkImpl(context, mLockoutResetCallback);
     }
 
     @Override
@@ -689,7 +691,7 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
-    protected int getLockoutMode(int userId) {
+    protected @LockoutTracker.LockoutMode int getLockoutMode(int userId) {
         return mLockoutTracker.getLockoutModeForUser(userId);
     }
 

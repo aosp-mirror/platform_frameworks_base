@@ -29,13 +29,13 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
-import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.LockoutTracker;
 
 /**
  * Tracks and enforces biometric lockout for biometric sensors that do not support lockout in the
  * HAL.
  */
-public class LockoutTracker {
+public class LockoutFrameworkImpl implements LockoutTracker {
 
     private static final String TAG = "LockoutTracker";
     private static final String ACTION_LOCKOUT_RESET =
@@ -44,10 +44,6 @@ public class LockoutTracker {
     private static final int MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT = 20;
     private static final long FAIL_LOCKOUT_TIMEOUT_MS = 30 * 1000;
     private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
-
-    public static final int LOCKOUT_NONE = 0;
-    public static final int LOCKOUT_TIMED = 1;
-    public static final int LOCKOUT_PERMANENT = 2;
 
     private final class LockoutReceiver extends BroadcastReceiver {
         @Override
@@ -60,6 +56,9 @@ public class LockoutTracker {
         }
     }
 
+    /**
+     * Used to subscribe for callbacks when lockout state changes.
+     */
     public interface LockoutResetCallback {
         void onLockoutReset(int userId);
     }
@@ -71,7 +70,7 @@ public class LockoutTracker {
     private final AlarmManager mAlarmManager;
     private final LockoutReceiver mLockoutReceiver;
 
-    public LockoutTracker(Context context, LockoutResetCallback lockoutResetCallback) {
+    public LockoutFrameworkImpl(Context context, LockoutResetCallback lockoutResetCallback) {
         mContext = context;
         mLockoutResetCallback = lockoutResetCallback;
         mTimedLockoutCleared = new SparseBooleanArray();
@@ -87,7 +86,7 @@ public class LockoutTracker {
     // a biometric is successfully authenticated. Lockout should eventually be done below the HAL.
     // See AuthenticationClient#shouldFrameworkHandleLockout().
     void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
-        if (getLockoutModeForUser(userId) != AuthenticationClient.LOCKOUT_NONE) {
+        if (getLockoutModeForUser(userId) != LOCKOUT_NONE) {
             Slog.v(TAG, "Reset biometric lockout, clearAttemptCounter=" + clearAttemptCounter);
         }
         if (clearAttemptCounter) {
@@ -104,21 +103,22 @@ public class LockoutTracker {
         mFailedAttempts.put(userId, mFailedAttempts.get(userId, 0) + 1);
         mTimedLockoutCleared.put(userId, false);
 
-        if (getLockoutModeForUser(userId) != AuthenticationClient.LOCKOUT_NONE) {
+        if (getLockoutModeForUser(userId) != LOCKOUT_NONE) {
             scheduleLockoutResetForUser(userId);
         }
     }
 
-    int getLockoutModeForUser(int userId) {
+    @Override
+    public @LockoutMode int getLockoutModeForUser(int userId) {
         final int failedAttempts = mFailedAttempts.get(userId, 0);
         if (failedAttempts >= MAX_FAILED_ATTEMPTS_LOCKOUT_PERMANENT) {
-            return AuthenticationClient.LOCKOUT_PERMANENT;
+            return LOCKOUT_PERMANENT;
         } else if (failedAttempts > 0
                 && !mTimedLockoutCleared.get(userId, false)
                 && (failedAttempts % MAX_FAILED_ATTEMPTS_LOCKOUT_TIMED == 0)) {
-            return AuthenticationClient.LOCKOUT_TIMED;
+            return LOCKOUT_TIMED;
         }
-        return AuthenticationClient.LOCKOUT_NONE;
+        return LOCKOUT_NONE;
     }
 
     private void cancelLockoutResetForUser(int userId) {
