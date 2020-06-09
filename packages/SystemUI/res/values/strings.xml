@@ -1256,7 +1256,7 @@
     <string name="manage_notifications_history_text">History</string>
 
     <!-- Section title for notifications that have recently appeared. [CHAR LIMIT=40] -->
-    <string name="notification_section_header_incoming">Incoming</string>
+    <string name="notification_section_header_incoming">New</string>
 
     <!-- Section title for notifications that do not vibrate or make noise. [CHAR LIMIT=40] -->
     <string name="notification_section_header_gentle">Silent</string>
