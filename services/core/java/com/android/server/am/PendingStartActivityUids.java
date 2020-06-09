@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import android.content.Context;
 import android.os.SystemClock;
-import android.provider.Settings;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -58,8 +57,7 @@ final class PendingStartActivityUids {
             if (delay >= 1000 /*ms*/) {
                 Slog.i(TAG,
                         "PendingStartActivityUids startActivity to updateOomAdj delay:"
-                                + delay + "ms," + " uid:" + uid + " packageName:"
-                                + Settings.getPackageNameForUid(mContext, uid));
+                                + delay + "ms," + " uid:" + uid);
             }
             mPendingUids.delete(uid);
         }
