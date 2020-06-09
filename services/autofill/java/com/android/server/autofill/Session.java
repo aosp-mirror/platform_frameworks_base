@@ -2715,7 +2715,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final ViewState currentView = mViewStates.get(mCurrentViewId);
                 currentView.maybeCallOnFillReady(flags);
             }
-        } else if (viewState.id.equals(this.mCurrentViewId)
+        }
+
+        if (viewState.id.equals(this.mCurrentViewId)
                 && (viewState.getState() & ViewState.STATE_INLINE_SHOWN) != 0) {
             if ((viewState.getState() & ViewState.STATE_INLINE_DISABLED) != 0) {
                 mInlineSessionController.disableFilterMatching(viewState.id);
