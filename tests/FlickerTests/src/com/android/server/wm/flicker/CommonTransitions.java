@@ -228,8 +228,8 @@ class CommonTransitions {
             Rational stopRatio) {
         String testTag = "resizeSplitScreen_" + testAppTop.getLauncherName() + "_"
                 + testAppBottom.getLauncherName() + "_"
-                + startRatio.toString().replace("/", ":") + "_to_"
-                + stopRatio.toString().replace("/", ":") + "_"
+                + startRatio.toString().replace("/", "-") + "_to_"
+                + stopRatio.toString().replace("/", "-") + "_"
                 + rotationToString(beginRotation);
         return TransitionRunner.newBuilder()
                 .withTag(testTag)
