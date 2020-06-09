@@ -7636,8 +7636,12 @@ public class WindowManagerService extends IWindowManager.Stub
                 if (imeTarget == null) {
                     return;
                 }
-                imeTarget = imeTarget.getImeControlTarget();
-                imeTarget.getDisplayContent().getInsetsStateController().getImeSourceProvider()
+                imeTarget = imeTarget.getImeControlTarget().getWindow();
+                // If InsetsControlTarget doesn't have a window, its using remoteControlTarget which
+                // is controlled by default display
+                final DisplayContent dc = imeTarget != null
+                        ? imeTarget.getDisplayContent() : getDefaultDisplayContentLocked();
+                dc.getInsetsStateController().getImeSourceProvider()
                         .scheduleShowImePostLayout(imeTarget);
             }
         }
@@ -7650,7 +7654,9 @@ public class WindowManagerService extends IWindowManager.Stub
                     // The target window no longer exists.
                     return;
                 }
-                final DisplayContent dc = imeTarget.getImeControlTarget().getDisplayContent();
+                imeTarget = imeTarget.getImeControlTarget().getWindow();
+                final DisplayContent dc = imeTarget != null
+                        ? imeTarget.getDisplayContent() : getDefaultDisplayContentLocked();
                 // If there was a pending IME show(), reset it as IME has been
                 // requested to be hidden.
                 dc.getInsetsStateController().getImeSourceProvider().abortShowImePostLayout();
