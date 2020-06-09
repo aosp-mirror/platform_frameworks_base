@@ -1606,7 +1606,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 for (Record r : mRecords) {
                     if (r.matchPhoneStateListenerEvent(
                             PhoneStateListener.LISTEN_DISPLAY_INFO_CHANGED)
-                            && idMatch(r.subId, subId, phoneId)) {
+                            && idMatchWithoutDefaultPhoneCheck(r.subId, subId)) {
                         try {
                             r.callback.onDisplayInfoChanged(telephonyDisplayInfo);
                         } catch (RemoteException ex) {
@@ -2724,6 +2724,24 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private static void loge(String s) {
         Rlog.e(TAG, s);
+    }
+
+    /**
+     * If the registrant specified a subId, then we should only notify it if subIds match.
+     * If the registrant registered with DEFAULT subId, we should notify only when the related subId
+     * is default subId (which could be INVALID if there's no default subId).
+     *
+     * This should be the correct way to check record ID match. in idMatch the record's phoneId is
+     * speculated based on subId passed by the registrant so it's not a good reference.
+     * But to avoid triggering potential regression only replace idMatch with it when an issue with
+     * idMatch is reported. Eventually this should replace all instances of idMatch.
+     */
+    private boolean idMatchWithoutDefaultPhoneCheck(int subIdInRecord, int subIdToNotify) {
+        if (subIdInRecord == SubscriptionManager.DEFAULT_SUBSCRIPTION_ID) {
+            return (subIdToNotify == mDefaultSubId);
+        } else {
+            return (subIdInRecord == subIdToNotify);
+        }
     }
 
     boolean idMatch(int rSubId, int subId, int phoneId) {
