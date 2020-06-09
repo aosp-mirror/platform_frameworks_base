@@ -21,9 +21,11 @@ import android.os.SystemClock;
 import android.util.Slog;
 import android.util.TimeUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.AssociationState;
 import com.android.internal.app.procstats.ProcessStats;
 
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 
 /**
@@ -35,8 +37,15 @@ public final class ContentProviderConnection extends Binder {
     public final String clientPackage;
     public AssociationState.SourceState association;
     public final long createTime;
-    public int stableCount;
-    public int unstableCount;
+
+    /**
+     * Internal lock that guards access to the two counters.
+     */
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
+    private int mStableCount;
+    @GuardedBy("mLock")
+    private int mUnstableCount;
     // The client of this connection is currently waiting for the provider to appear.
     // Protected by the provider lock.
     public boolean waiting;
@@ -44,8 +53,8 @@ public final class ContentProviderConnection extends Binder {
     public boolean dead;
 
     // For debugging.
-    public int numStableIncs;
-    public int numUnstableIncs;
+    private int mNumStableIncs;
+    private int mNumUnstableIncs;
 
     public ContentProviderConnection(ContentProviderRecord _provider, ProcessRecord _client,
             String _clientPackage) {
@@ -120,14 +129,16 @@ public final class ContentProviderConnection extends Binder {
 
     public void toClientString(StringBuilder sb) {
         sb.append(client.toShortString());
-        sb.append(" s");
-        sb.append(stableCount);
-        sb.append("/");
-        sb.append(numStableIncs);
-        sb.append(" u");
-        sb.append(unstableCount);
-        sb.append("/");
-        sb.append(numUnstableIncs);
+        synchronized (mLock) {
+            sb.append(" s");
+            sb.append(mStableCount);
+            sb.append("/");
+            sb.append(mNumStableIncs);
+            sb.append(" u");
+            sb.append(mUnstableCount);
+            sb.append("/");
+            sb.append(mNumUnstableIncs);
+        }
         if (waiting) {
             sb.append(" WAITING");
         }
@@ -137,5 +148,121 @@ public final class ContentProviderConnection extends Binder {
         long nowReal = SystemClock.elapsedRealtime();
         sb.append(" ");
         TimeUtils.formatDuration(nowReal-createTime, sb);
+    }
+
+    /**
+     * Initializes the reference counts.  Either the stable or unstable count
+     * is set to 1; the other reference count is set to zero.
+     */
+    public void initializeCount(boolean stable) {
+        synchronized (mLock) {
+            if (stable) {
+                mStableCount = 1;
+                mNumStableIncs = 1;
+                mUnstableCount = 0;
+                mNumUnstableIncs = 0;
+            } else {
+                mStableCount = 0;
+                mNumStableIncs = 0;
+                mUnstableCount = 1;
+                mNumUnstableIncs = 1;
+            }
+        }
+    }
+
+    /**
+     * Increments the stable or unstable reference count and return the total
+     * number of references.
+     */
+    public int incrementCount(boolean stable) {
+        synchronized (mLock) {
+            if (DEBUG_PROVIDER) {
+                final ContentProviderRecord cpr = provider;
+                Slog.v(TAG_AM,
+                       "Adding provider requested by "
+                       + client.processName + " from process "
+                       + cpr.info.processName + ": " + cpr.name.flattenToShortString()
+                       + " scnt=" + mStableCount + " uscnt=" + mUnstableCount);
+            }
+            if (stable) {
+                mStableCount++;
+                mNumStableIncs++;
+            } else {
+                mUnstableCount++;
+                mNumUnstableIncs++;
+            }
+            return mStableCount + mUnstableCount;
+        }
+    }
+
+    /**
+     * Decrements either the stable or unstable count and return the total
+     * number of references.
+     */
+    public int decrementCount(boolean stable) {
+        synchronized (mLock) {
+            if (DEBUG_PROVIDER) {
+                final ContentProviderRecord cpr = provider;
+                Slog.v(TAG_AM,
+                       "Removing provider requested by "
+                       + client.processName + " from process "
+                       + cpr.info.processName + ": " + cpr.name.flattenToShortString()
+                       + " scnt=" + mStableCount + " uscnt=" + mUnstableCount);
+            }
+            if (stable) {
+                mStableCount--;
+            } else {
+                mUnstableCount--;
+            }
+            return mStableCount + mUnstableCount;
+        }
+    }
+
+    /**
+     * Adjusts the reference counts up or down (the inputs may be positive,
+     * zero, or negative.  This method does not return a total count because
+     * a return is not needed for the current use case.
+    */
+    public void adjustCounts(int stableIncrement, int unstableIncrement) {
+        synchronized (mLock) {
+            if (stableIncrement > 0) {
+                mNumStableIncs += stableIncrement;
+            }
+            final int stable = mStableCount + stableIncrement;
+            if (stable < 0) {
+                throw new IllegalStateException("stableCount < 0: " + stable);
+            }
+            if (unstableIncrement > 0) {
+                mNumUnstableIncs += unstableIncrement;
+            }
+            final int unstable = mUnstableCount + unstableIncrement;
+            if (unstable < 0) {
+                throw new IllegalStateException("unstableCount < 0: " + unstable);
+            }
+            if ((stable + unstable) <= 0) {
+                throw new IllegalStateException("ref counts can't go to zero here: stable="
+                                                + stable + " unstable=" + unstable);
+            }
+            mStableCount = stable;
+            mUnstableCount = unstable;
+        }
+    }
+
+    /**
+     * Returns the number of stable references.
+     */
+    public int stableCount() {
+        synchronized (mLock) {
+            return mStableCount;
+        }
+    }
+
+    /**
+     * Returns the number of unstable references.
+     */
+    public int unstableCount() {
+        synchronized (mLock) {
+            return mUnstableCount;
+        }
     }
 }

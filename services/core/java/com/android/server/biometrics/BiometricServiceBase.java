@@ -33,7 +33,6 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricManager.Authenticators;
 import android.hardware.biometrics.BiometricsProtoEnums;
-import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.Fingerprint;
@@ -234,11 +233,13 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon,
-                IBinder token, ServiceListener listener, int targetUserId, int groupId, long opId,
-                boolean restricted, String owner, int cookie, boolean requireConfirmation,
-                Surface surface) {
+                IBinder token, ClientMonitorCallbackConverter listener, int targetUserId,
+                int groupId, long opId, boolean restricted, String owner, int cookie,
+                boolean requireConfirmation, Surface surface, int sensorId,
+                boolean isStrongBiometric) {
             super(context, getConstants(), daemon, token, listener, targetUserId,
-                    groupId, opId, restricted, owner, cookie, requireConfirmation, surface);
+                    groupId, opId, restricted, owner, cookie, requireConfirmation, surface,
+                    sensorId, isStrongBiometric);
         }
 
         @Override
@@ -297,12 +298,12 @@ public abstract class BiometricServiceBase extends SystemService
     protected abstract class EnrollClientImpl extends EnrollClient {
 
         public EnrollClientImpl(Context context, DaemonWrapper daemon,
-                IBinder token, ServiceListener listener, int userId, int groupId,
+                IBinder token, ClientMonitorCallbackConverter listener, int userId, int groupId,
                 byte[] cryptoToken, boolean restricted, String owner,
-                final int[] disabledFeatures, int timeoutSec, Surface surface) {
+                final int[] disabledFeatures, int timeoutSec, Surface surface, int sensorId) {
             super(context, getConstants(), daemon, token, listener,
                     userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
-                    disabledFeatures, timeoutSec, surface);
+                    disabledFeatures, timeoutSec, surface, sensorId);
         }
 
         @Override
@@ -317,10 +318,10 @@ public abstract class BiometricServiceBase extends SystemService
     private final class InternalRemovalClient extends RemovalClient {
         InternalRemovalClient(Context context,
                 DaemonWrapper daemon, IBinder token,
-                ServiceListener listener, int templateId, int groupId, int userId,
-                boolean restricted, String owner) {
+                ClientMonitorCallbackConverter listener, int templateId, int groupId, int userId,
+                boolean restricted, String owner, int sensorId) {
             super(context, getConstants(), daemon, token, listener, templateId, groupId,
-                    userId, restricted, owner, getBiometricUtils());
+                    userId, restricted, owner, getBiometricUtils(), sensorId);
         }
 
         @Override
@@ -343,11 +344,12 @@ public abstract class BiometricServiceBase extends SystemService
 
         InternalEnumerateClient(Context context,
                 DaemonWrapper daemon, IBinder token,
-                ServiceListener listener, int groupId, int userId, boolean restricted,
-                String owner, List<? extends BiometricAuthenticator.Identifier> enrolledList,
-                BiometricUtils utils) {
+                ClientMonitorCallbackConverter listener, int groupId, int userId,
+                boolean restricted, String owner,
+                List<? extends BiometricAuthenticator.Identifier> enrolledList,
+                BiometricUtils utils, int sensorId) {
             super(context, getConstants(), daemon, token, listener, groupId, userId,
-                    restricted, owner);
+                    restricted, owner, sensorId);
             mEnrolledList = enrolledList;
             mUtils = utils;
         }
@@ -411,74 +413,6 @@ public abstract class BiometricServiceBase extends SystemService
         @Override
         protected int statsModality() {
             return BiometricServiceBase.this.statsModality();
-        }
-    }
-
-    /**
-     * Wraps the callback interface from Service -> Manager
-     */
-    protected interface ServiceListener {
-        default void onEnrollResult(BiometricAuthenticator.Identifier identifier,
-                int remaining) throws RemoteException {};
-
-        void onAcquired(int sensorId, int acquiredInfo, int vendorCode) throws RemoteException;
-
-        default void onAuthenticationSucceeded(BiometricAuthenticator.Identifier biometric,
-                int userId) throws RemoteException {
-            throw new UnsupportedOperationException("Stub!");
-        }
-
-        default void onAuthenticationSucceededInternal(int sensorId, byte[] token)
-                throws RemoteException {
-            throw new UnsupportedOperationException("Stub!");
-        }
-
-        default void onAuthenticationFailed() throws RemoteException {
-            throw new UnsupportedOperationException("Stub!");
-        }
-
-        default void onAuthenticationFailedInternal(int sensorId)
-                throws RemoteException {
-            throw new UnsupportedOperationException("Stub!");
-        }
-
-        void onError(int error, int vendorCode, int cookie) throws RemoteException;
-
-        default void onRemoved(BiometricAuthenticator.Identifier identifier,
-                int remaining) throws RemoteException {};
-
-        default void onEnumerated(BiometricAuthenticator.Identifier identifier,
-                int remaining) throws RemoteException {};
-    }
-
-    /**
-     * Wraps the callback interface from Service -> BiometricPrompt
-     */
-    protected abstract class BiometricServiceListener implements ServiceListener {
-        private IBiometricSensorReceiver mWrapperReceiver;
-
-        public BiometricServiceListener(IBiometricSensorReceiver wrapperReceiver) {
-            mWrapperReceiver = wrapperReceiver;
-        }
-
-        public IBiometricSensorReceiver getWrapperReceiver() {
-            return mWrapperReceiver;
-        }
-
-        @Override
-        public void onAuthenticationSucceededInternal(int sensorId, byte[] token)
-                throws RemoteException {
-            if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationSucceeded(sensorId, token);
-            }
-        }
-
-        @Override
-        public void onAuthenticationFailedInternal(int sensorId)
-                throws RemoteException {
-            if (getWrapperReceiver() != null) {
-                getWrapperReceiver().onAuthenticationFailed(sensorId);
-            }
         }
     }
 
@@ -715,9 +649,9 @@ public abstract class BiometricServiceBase extends SystemService
      * Callback handlers from the daemon. The caller must put this on a handler.
      */
 
-    protected void handleAcquired(int sensorId, int acquiredInfo, int vendorCode) {
+    protected void handleAcquired(int acquiredInfo, int vendorCode) {
         ClientMonitor client = mCurrentClient;
-        if (client != null && client.onAcquired(sensorId, acquiredInfo, vendorCode)) {
+        if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
             removeClient(client);
         }
         if (mPerformanceStats != null && getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
@@ -1284,7 +1218,7 @@ public abstract class BiometricServiceBase extends SystemService
             InternalRemovalClient client = new InternalRemovalClient(getContext(),
                     getDaemonWrapper(), mToken, null /* listener */,
                     template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
-                    restricted, getContext().getPackageName());
+                    restricted, getContext().getPackageName(), getSensorId());
             removeInternal(client);
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     statsModality(),
@@ -1309,7 +1243,7 @@ public abstract class BiometricServiceBase extends SystemService
         InternalEnumerateClient client = new InternalEnumerateClient(getContext(),
                 getDaemonWrapper(), mToken, null /* serviceListener */, userId,
                 userId, restricted, getContext().getOpPackageName(), enrolledList,
-                getBiometricUtils());
+                getBiometricUtils(), getSensorId());
         enumerateInternal(client);
     }
 
