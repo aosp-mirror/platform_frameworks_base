@@ -56,7 +56,7 @@ import java.util.concurrent.Executors;
 public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     @VisibleForTesting
     final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
     @VisibleForTesting
