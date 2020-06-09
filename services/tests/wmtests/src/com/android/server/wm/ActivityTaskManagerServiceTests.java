@@ -17,7 +17,6 @@
 package com.android.server.wm;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
@@ -111,12 +110,25 @@ public class ActivityTaskManagerServiceTests extends ActivityTestsBase {
         final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
         final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
         ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
-        doNothing().when(lifecycleManager).scheduleTransaction(any());
+        doReturn(false).when(activity).inPinnedWindowingMode();
         doReturn(false).when(activity).checkEnterPictureInPictureState(anyString(), anyBoolean());
 
         mService.requestPictureInPictureMode(activity.token);
 
         // Check enter no transactions with enter pip requests are made.
+        verify(lifecycleManager, times(0)).scheduleTransaction(any());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testOnPictureInPictureRequested_alreadyInPIPMode() throws RemoteException {
+        final ActivityStack stack = new StackBuilder(mRootWindowContainer).build();
+        final ActivityRecord activity = stack.getBottomMostTask().getTopNonFinishingActivity();
+        ClientLifecycleManager lifecycleManager = mService.getLifecycleManager();
+        doReturn(true).when(activity).inPinnedWindowingMode();
+
+        mService.requestPictureInPictureMode(activity.token);
+
+        // Check that no transactions with enter pip requests are made.
         verify(lifecycleManager, times(0)).scheduleTransaction(any());
     }
 
