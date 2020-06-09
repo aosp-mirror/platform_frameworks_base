@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"በውይይት ክፍል አናት ላይ ያሳያል፣ እንደ ተንሳፋፊ አረፋ ብቅ ይላል፣ በቆልፍ ማያ ገጽ ላይ የመገለጫ ሥዕልን ያሳያል"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ቅንብሮች"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ቅድሚያ"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> የውይይት ባህሪያትን አይደግፍም"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ምንም የቅርብ ጊዜ አረፋዎች የሉም"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"የቅርብ ጊዜ አረፋዎች እና የተሰናበቱ አረፋዎች እዚህ ብቅ ይላሉ"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"እነዚህ ማሳወቂያዎች ሊሻሻሉ አይችሉም።"</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"የስርዓት ዳሰሳ ተዘምኗል። ለውጦችን ለማድረግ ወደ ቅንብሮች ይሂዱ።"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"የስርዓት ዳሰሳን ለማዘመን ወደ ቅንብሮች ይሂዱ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ተጠባባቂ"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"ልወጣ ወደ ቅድሚያ ተቀናብሯል"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ቅድሚያ የሚሰጣቸው ልወጣዎች እነዚህን ያደርጋሉ፦"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"በውይይት ክፍል አናት ላይ አአሳይ"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"የመገለጫ ስዕልን በማያ ገጽ ቁልፍ ላይ አሳይ"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"በመተግበሪያዎች ላይ እንደ ተንሳፋፊ አረፋ ሆኖ ይታያሉ"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"አትረብሽን አቋርጥ"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ገባኝ"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ቅንብሮች"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"የማጉያ ንብርብር መስኮት"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"የማጉያ መስኮት"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"የማጉያ መስኮት መቆጣጠሪያዎች"</string>
@@ -1060,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ተጨማሪ ለማየት ያንሸራትቱ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ምክሮችን በመጫን ላይ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"ይህን የሚዲያ ክፍለ-ጊዜ ዝጋ"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"ከቆመበት ቀጥል"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ስህተት፣ እንደገና በመሞከር ላይ…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"መሣሪያ ተወግዷል"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"ሁኔታን መጫን አልተቻልም"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ስህተት፣ እንደገና ይሞክሩ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"በሂደት ላይ"</string>

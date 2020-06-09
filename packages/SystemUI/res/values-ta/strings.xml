@@ -598,15 +598,15 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"பின் செய்திருப்பதை அகற்றும் வரை இதைச் செயல்பாட்டில் வைத்திருக்கும். அதை அகற்றுவதற்கு மேல்நோக்கி ஸ்வைப் செய்து பிடித்திருக்கவும்."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"பொருத்தியதை அகற்றும் வரை இதைக் காட்சியில் வைக்கும். அகற்ற, மேலோட்டப் பார்வையைத் தொட்டுப் பிடிக்கவும்."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"இதற்கான பின்னை அகற்றும் வரை, இந்தப் பயன்முறை செயல்பாட்டிலேயே இருக்கும். அகற்றுவதற்கு, முகப்புப் பொத்தானைத் தொட்டுப் பிடிக்கவும்."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"(தொடர்புகள், மின்னஞ்சலின் உள்ளடக்கம் போன்ற) தனிப்பட்ட தரவு அணுகப்படக்கூடும்."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"தனிப்பட்ட தரவு அணுகப்படக்கூடும் (தொடர்புகள், மின்னஞ்சலின் உள்ளடக்கம் போன்றவை)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"பின் செய்யப்பட்டிருக்கும் ஆப்ஸ் பிற ஆப்ஸைத் திறக்கக்கூடும்."</string>
-    <string name="screen_pinning_toast" msgid="8177286912533744328">"இந்த ஆப்ஸை அகற்ற, பின்செல் மற்றும் மேலோட்டப் பார்வை பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
-    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"இந்த ஆப்ஸை அகற்ற, பின்செல் மற்றும் முகப்பு பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
-    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"இந்த ஆப்ஸை அகற்ற, மேல்நோக்கி ஸ்வைப் செய்தவாறு பிடித்திருக்கவும்"</string>
+    <string name="screen_pinning_toast" msgid="8177286912533744328">"இந்த ஆப்ஸைப் பின்னிலிருந்து அகற்ற, \'பின்செல்\' மற்றும் \'மேலோட்டப் பார்வை\' பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
+    <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"இந்த ஆப்ஸைப் பின்னிலிருந்து அகற்ற, \'பின்செல்\' மற்றும் \'முகப்பு\' பட்டன்களைத் தொட்டுப் பிடித்திருக்கவும்"</string>
+    <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"இந்த ஆப்ஸைப் பின்னிலிருந்து அகற்ற, மேல்நோக்கி ஸ்வைப் செய்தவாறு பிடித்திருக்கவும்"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"புரிந்தது"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"வேண்டாம்"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"ஆப்ஸ் பின் செய்யப்பட்டது"</string>
-    <string name="screen_pinning_exit" msgid="4553787518387346893">"ஆப்ஸ் அகற்றப்பட்டது"</string>
+    <string name="screen_pinning_exit" msgid="4553787518387346893">"ஆப்ஸ் பின்னிலிருந்து அகற்றப்பட்டது"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ஐ மறைக்கவா?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"அடுத்த முறை அமைப்புகளில் மீண்டும் இயக்கும்போது, இது மீண்டும் தோன்றும்."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="3341477479055016776">"மறை"</string>
@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"உரையாடல் பிரிவின் மேற்பகுதியில் மிதக்கும் குமிழாகத் தோன்றும். பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"உரையாடல் அம்சங்களை <xliff:g id="APP_NAME">%1$s</xliff:g> ஆதரிக்காது"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"சமீபத்திய குமிழ்கள் இல்லை"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"சமீபத்திய குமிழ்களும் நிராகரிக்கப்பட்ட குமிழ்களும் இங்கே தோன்றும்"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"இந்த அறிவிப்புகளை மாற்ற இயலாது."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"சிஸ்டம் நேவிகேஷன் மாற்றப்பட்டது. மாற்றங்களைச் செய்ய ‘அமைப்புகளுக்குச்’ செல்லவும்."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"சிஸ்டம் நேவிகேஷனை மாற்ற ’அமைப்புகளுக்குச்’ செல்லவும்"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"இயக்க நேரம்"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"முன்னுரிமை அளிக்கப்பட்ட உரையாடலாக அமைக்கப்பட்டது"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"முன்னுரிமை அளிக்கப்பட்ட உரையாடல்கள் இவ்வாறு இருக்கும்:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"உரையாடல் பிரிவின் மேல் காட்டும்"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ஆப்ஸின் மேல் மிதக்கும் குமிழாகத் தோன்றும்"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தைக் குறுக்கிடும்"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"சரி"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"அமைப்புகள்"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Magnification Overlay Window"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"பெரிதாக்கல் சாளரம்"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"பெரிதாக்கல் சாளரக் கட்டுப்பாடுகள்"</string>
@@ -1060,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"மேலும் பார்க்க ஸ்வைப் செய்யவும்"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"பரிந்துரைகளை ஏற்றுகிறது"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"இந்த மீடியா அமர்வை மூடுக"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"பிழை, மீண்டும் முயல்கிறது…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"சாதனம் அகற்றப்பட்டது"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"செயல்பாட்டிலுள்ளது"</string>

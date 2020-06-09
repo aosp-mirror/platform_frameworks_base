@@ -16,11 +16,15 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.database.DataSetObserver;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
@@ -46,8 +50,6 @@ public class KeyguardUserSwitcher {
 
     private static final String TAG = "KeyguardUserSwitcher";
     private static final boolean ALWAYS_ON = false;
-    private static final float USER_SWITCH_ENABLED_ALPHA = 1.0f;
-    private static final float USER_SWITCH_DISABLED_ALPHA = 0.38f;
 
     private final Container mUserSwitcherContainer;
     private final KeyguardStatusBarView mStatusBarView;
@@ -286,27 +288,34 @@ public class KeyguardUserSwitcher {
             if (item.picture == null) {
                 v.bind(name, getDrawable(mContext, item).mutate(), item.resolveId());
             } else {
-                v.bind(name, item.picture, item.info.id);
+                Drawable drawable = new BitmapDrawable(v.getResources(), item.picture);
+                drawable.setColorFilter(
+                        item.isSwitchToEnabled ? null : getDisabledUserAvatarColorFilter());
+                v.bind(name, drawable, item.info.id);
             }
-            // Disable the icon if switching is disabled
-            v.setAvatarEnabled(item.isSwitchToEnabled);
-            convertView.setActivated(item.isCurrent);
+            v.setActivated(item.isCurrent);
+            v.setDisabledByAdmin(item.isDisabledByAdmin);
+            v.setEnabled(item.isSwitchToEnabled);
+            v.setAlpha(v.isEnabled() ? USER_SWITCH_ENABLED_ALPHA : USER_SWITCH_DISABLED_ALPHA);
+
             if (item.isCurrent) {
-                mCurrentUserView = convertView;
+                mCurrentUserView = v;
             }
-            convertView.setTag(item);
-            convertView.setAlpha(
-                    item.isCurrent || item.isSwitchToEnabled ? USER_SWITCH_ENABLED_ALPHA
-                            : USER_SWITCH_DISABLED_ALPHA);
-            convertView.setEnabled(item.isSwitchToEnabled);
-            return convertView;
+            v.setTag(item);
+            return v;
         }
 
         private static Drawable getDrawable(Context context,
                 UserSwitcherController.UserRecord item) {
             Drawable drawable = getIconDrawable(context, item);
-            int iconColorRes = item.isCurrent ? R.color.kg_user_switcher_selected_avatar_icon_color
-                    : R.color.kg_user_switcher_avatar_icon_color;
+            int iconColorRes;
+            if (item.isCurrent) {
+                iconColorRes = R.color.kg_user_switcher_selected_avatar_icon_color;
+            } else if (!item.isSwitchToEnabled) {
+                iconColorRes = R.color.GM2_grey_600;
+            } else {
+                iconColorRes = R.color.kg_user_switcher_avatar_icon_color;
+            }
             drawable.setTint(context.getResources().getColor(iconColorRes, context.getTheme()));
 
             if (item.isCurrent) {

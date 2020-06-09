@@ -413,20 +413,18 @@ public final class StorageUserConnection {
                         resetUserSessions();
                     }
                 };
-            }
 
-            Slog.i(TAG, "Binding to the ExternalStorageService for user " + mUserId);
-            if (mContext.bindServiceAsUser(new Intent().setComponent(name), mServiceConnection,
-                            Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
-                            UserHandle.of(mUserId))) {
-                Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
-                return mLatch;
-            } else {
-                synchronized (mLock) {
+                Slog.i(TAG, "Binding to the ExternalStorageService for user " + mUserId);
+                if (mContext.bindServiceAsUser(new Intent().setComponent(name), mServiceConnection,
+                        Context.BIND_AUTO_CREATE | Context.BIND_IMPORTANT,
+                        UserHandle.of(mUserId))) {
+                    Slog.i(TAG, "Bound to the ExternalStorageService for user " + mUserId);
+                    return mLatch;
+                } else {
                     mIsConnecting = false;
+                    throw new ExternalStorageServiceException(
+                            "Failed to bind to the ExternalStorageService for user " + mUserId);
                 }
-                throw new ExternalStorageServiceException(
-                        "Failed to bind to the ExternalStorageService for user " + mUserId);
             }
         }
     }
