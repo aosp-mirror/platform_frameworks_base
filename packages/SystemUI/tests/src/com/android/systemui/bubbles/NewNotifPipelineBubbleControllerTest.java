@@ -55,7 +55,7 @@ import android.view.WindowManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.colorextraction.ColorExtractor;
-import com.android.systemui.SystemUIFactory;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dump.DumpManager;
@@ -64,14 +64,12 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.RankingBuilder;
-import com.android.systemui.statusbar.SuperStatusBarViewFactory;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationFilter;
 import com.android.systemui.statusbar.notification.collection.NotifPipeline;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper;
 import com.android.systemui.statusbar.notification.row.dagger.NotificationRowComponent;
@@ -87,7 +85,6 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.ZenModeController;
 import com.android.systemui.util.FloatingContentCoordinator;
-import com.android.systemui.util.InjectionInflationController;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -174,8 +171,9 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private DumpManager mDumpManager;
     @Mock
     private LockscreenLockIconController mLockIconController;
+    @Mock
+    private IStatusBarService mStatusBarService;
 
-    private SuperStatusBarViewFactory mSuperStatusBarViewFactory;
     private BubbleData mBubbleData;
 
     private TestableLooper mTestableLooper;
@@ -188,22 +186,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
 
         mContext.addMockSystemService(FaceManager.class, mFaceManager);
         when(mColorExtractor.getNeutralColors()).thenReturn(mGradientColors);
-
-        mSuperStatusBarViewFactory = new SuperStatusBarViewFactory(mContext,
-                new InjectionInflationController(SystemUIFactory.getInstance().getRootComponent()),
-                new NotificationRowComponent.Builder() {
-                    @Override
-                    public NotificationRowComponent.Builder activatableNotificationView(
-                            ActivatableNotificationView view) {
-                        return this;
-                    }
-
-                    @Override
-                    public NotificationRowComponent build() {
-                        return mNotificationRowComponent;
-                    }
-                },
-                mLockIconController);
 
         // Bubbles get added to status bar window view
         mNotificationShadeWindowController = new NotificationShadeWindowController(mContext,
@@ -257,6 +239,7 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mDataRepository,
                 mSysUiState,
                 mock(INotificationManager.class),
+                mStatusBarService,
                 mWindowManager);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setExpandListener(mBubbleExpandListener);

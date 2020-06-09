@@ -490,7 +490,7 @@ public class BubbleExpandedView extends LinearLayout {
         if (DEBUG_BUBBLE_EXPANDED_VIEW) {
             Log.d(TAG, "update: bubble=" + (bubble != null ? bubble.getKey() : "null"));
         }
-        boolean isNew = mBubble == null;
+        boolean isNew = mBubble == null || didBackingContentChange(bubble);
         if (isNew || bubble != null && bubble.getKey().equals(mBubble.getKey())) {
             mBubble = bubble;
             mSettingsIcon.setContentDescription(getResources().getString(
@@ -521,6 +521,12 @@ public class BubbleExpandedView extends LinearLayout {
             Log.w(TAG, "Trying to update entry with different key, new bubble: "
                     + bubble.getKey() + " old bubble: " + bubble.getKey());
         }
+    }
+
+    private boolean didBackingContentChange(Bubble newBubble) {
+        boolean prevWasIntentBased = mBubble != null && mPendingIntent != null;
+        boolean newIsIntentBased = newBubble.getBubbleIntent() != null;
+        return prevWasIntentBased != newIsIntentBased;
     }
 
     /**
