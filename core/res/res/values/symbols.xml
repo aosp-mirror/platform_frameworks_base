@@ -3901,6 +3901,12 @@
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionPkgs" />
   <java-symbol type="array" name="config_defaultImperceptibleKillingExemptionProcStates" />
 
+  <java-symbol type="color" name="conversation_important_highlight" />
+  <java-symbol type="dimen" name="importance_ring_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_anim_max_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_size" />
+  <java-symbol type="dimen" name="conversation_icon_size_badged" />
+
   <java-symbol type="id" name="header_icon_container" />
   <java-symbol type="attr" name="notificationHeaderTextAppearance" />
   <java-symbol type="string" name="conversation_single_line_name_display" />
