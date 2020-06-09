@@ -601,20 +601,6 @@ public class ActivityManager {
     @TestApi
     public static final int PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 2;
 
-    // TODO: remove this when development is done.
-    // These are debug flags used between OomAdjuster and AppOpsService to detect and report absence
-    // of the real flags.
-    /** @hide */
-    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q = 1 << 27;
-    /** @hide */
-    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q = 1 << 28;
-    /** @hide */
-    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE = 1 << 29;
-    /** @hide */
-    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA = 1 << 30;
-    /** @hide */
-    public static final int DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION = 1 << 31;
-
     /** @hide all capabilities, the ORing of all flags in {@link ProcessCapability}*/
     @TestApi
     public static final int PROCESS_CAPABILITY_ALL = PROCESS_CAPABILITY_FOREGROUND_LOCATION
@@ -653,29 +639,9 @@ public class ActivityManager {
      */
     public static void printCapabilitiesFull(PrintWriter pw, @ProcessCapability int caps) {
         printCapabilitiesSummary(pw, caps);
-        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION) != 0) {
-            pw.print(" !L");
-        }
-        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
-            pw.print(" !C");
-        }
-        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q) != 0) {
-            pw.print(" !Cq");
-        }
-        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
-            pw.print(" !M");
-        }
-        if ((caps & DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q) != 0) {
-            pw.print(" !Mq");
-        }
         final int remain = caps & ~(PROCESS_CAPABILITY_FOREGROUND_LOCATION
                 | PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION
-                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q
-                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                | DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q);
+                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE);
         if (remain != 0) {
             pw.print('+');
             pw.print(remain);
