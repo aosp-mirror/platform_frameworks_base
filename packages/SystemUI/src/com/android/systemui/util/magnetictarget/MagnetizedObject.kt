@@ -245,9 +245,6 @@ abstract class MagnetizedObject<T : Any>(
      */
     var hapticsEnabled = true
 
-    /** Whether the HAPTIC_FEEDBACK_ENABLED setting is true. */
-    private var systemHapticsEnabled = false
-
     /** Default spring configuration to use for animating the object into a target. */
     var springConfig = PhysicsAnimator.SpringConfig(
             SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_NO_BOUNCY)
@@ -259,24 +256,7 @@ abstract class MagnetizedObject<T : Any>(
     var flungIntoTargetSpringConfig = springConfig
 
     init {
-        val hapticSettingObserver =
-                object : ContentObserver(Handler.getMain()) {
-            override fun onChange(selfChange: Boolean) {
-                systemHapticsEnabled =
-                        Settings.System.getIntForUser(
-                                context.contentResolver,
-                                Settings.System.HAPTIC_FEEDBACK_ENABLED,
-                                0,
-                                UserHandle.USER_CURRENT) != 0
-            }
-        }
-
-        context.contentResolver.registerContentObserver(
-                Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),
-                true /* notifyForDescendants */, hapticSettingObserver)
-
-        // Trigger the observer once to initialize systemHapticsEnabled.
-        hapticSettingObserver.onChange(false /* selfChange */)
+        initHapticSettingObserver(context)
     }
 
     /**
@@ -621,6 +601,43 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     companion object {
+
+        /**
+         * Whether the HAPTIC_FEEDBACK_ENABLED setting is true.
+         *
+         * We put it in the companion object because we need to register a settings observer and
+         * [MagnetizedObject] doesn't have an obvious lifecycle so we don't have a good time to
+         * remove that observer. Since this settings is shared among all instances we just let all
+         * instances read from this value.
+         */
+        private var systemHapticsEnabled = false
+        private var hapticSettingObserverInitialized = false
+
+        private fun initHapticSettingObserver(context: Context) {
+            if (hapticSettingObserverInitialized) {
+                return
+            }
+
+            val hapticSettingObserver =
+                    object : ContentObserver(Handler.getMain()) {
+                        override fun onChange(selfChange: Boolean) {
+                            systemHapticsEnabled =
+                                    Settings.System.getIntForUser(
+                                            context.contentResolver,
+                                            Settings.System.HAPTIC_FEEDBACK_ENABLED,
+                                            0,
+                                            UserHandle.USER_CURRENT) != 0
+                        }
+                    }
+
+            context.contentResolver.registerContentObserver(
+                    Settings.System.getUriFor(Settings.System.HAPTIC_FEEDBACK_ENABLED),
+                    true /* notifyForDescendants */, hapticSettingObserver)
+
+            // Trigger the observer once to initialize systemHapticsEnabled.
+            hapticSettingObserver.onChange(false /* selfChange */)
+            hapticSettingObserverInitialized = true
+        }
 
         /**
          * Magnetizes the given view. Magnetized views are attracted to one or more magnetic
