@@ -5629,11 +5629,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mLatencyTracker.onActionStart(ACTION_ROTATE_SCREEN);
         mExitAnimId = exitAnim;
         mEnterAnimId = enterAnim;
-        ScreenRotationAnimation screenRotationAnimation =
-                displayContent.getRotationAnimation();
-        if (screenRotationAnimation != null) {
-            screenRotationAnimation.kill();
-        }
 
         displayContent.updateDisplayInfo();
         final int originalRotation = overrideOriginalRotation != ROTATION_UNDEFINED
