@@ -791,7 +791,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             WindowInsetsAnimationControlListener listener,
             boolean fromIme, long durationMs, @Nullable Interpolator interpolator,
             @AnimationType int animationType) {
-        if (!checkDisplayFramesForControlling()) {
+        if ((mState.calculateUncontrollableInsetsFromFrame(mFrame) & types) != 0) {
             listener.onCancelled(null);
             return;
         }
@@ -799,13 +799,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         controlAnimationUnchecked(types, cancellationSignal, listener, mFrame, fromIme, durationMs,
                 interpolator, animationType, getLayoutInsetsDuringAnimationMode(types),
                 false /* useInsetsAnimationThread */);
-    }
-
-    private boolean checkDisplayFramesForControlling() {
-
-        // If the frame of our window doesn't span the entire display, the control API makes very
-        // little sense, as we don't deal with negative insets. So just cancel immediately.
-        return mState.getDisplayFrame().equals(mFrame);
     }
 
     private void controlAnimationUnchecked(@InsetsType int types,
@@ -1285,9 +1278,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     }
 
     private @InsetsType int calculateControllableTypes() {
-        if (!checkDisplayFramesForControlling()) {
-            return 0;
-        }
         @InsetsType int result = 0;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
@@ -1295,7 +1285,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
                 result |= toPublicType(consumer.mType);
             }
         }
-        return result;
+        return result & ~mState.calculateUncontrollableInsetsFromFrame(mFrame);
     }
 
     /**
