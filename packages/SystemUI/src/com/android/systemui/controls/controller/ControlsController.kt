@@ -190,11 +190,6 @@ interface ControlsController : UserAwareController {
     fun countFavoritesForComponent(componentName: ComponentName): Int
 
     /**
-     * TEMPORARY for testing
-     */
-    fun resetFavorites()
-
-    /**
      * Interface for structure to pass data to [ControlsFavoritingActivity].
      */
     interface LoadData {
