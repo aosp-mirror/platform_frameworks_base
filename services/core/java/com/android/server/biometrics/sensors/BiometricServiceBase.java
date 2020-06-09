@@ -116,25 +116,9 @@ public abstract class BiometricServiceBase extends SystemService
     private IBiometricService mBiometricService;
     private ClientMonitor mCurrentClient;
     private ClientMonitor mPendingClient;
-    private PerformanceStats mPerformanceStats;
+    private PerformanceTracker mPerformanceTracker;
     private int mSensorId;
     protected int mCurrentUserId = UserHandle.USER_NULL;
-    // Tracks if the current authentication makes use of CryptoObjects.
-    protected boolean mIsCrypto;
-    // Normal authentications are tracked by mPerformanceMap.
-    protected HashMap<Integer, PerformanceStats> mPerformanceMap = new HashMap<>();
-    // Transactions that make use of CryptoObjects are tracked by mCryptoPerformaceMap.
-    protected HashMap<Integer, PerformanceStats> mCryptoPerformanceMap = new HashMap<>();
-    protected int mHALDeathCount;
-
-    protected class PerformanceStats {
-        public int accept; // number of accepted biometrics
-        public int reject; // number of rejected biometrics
-        public int acquire; // total number of acquisitions. Should be >= accept+reject due to poor
-        // image acquisition in some cases (too fast, too slow, dirty sensor, etc.)
-        public int lockout; // total number of lockouts
-        public int permanentLockout; // total number of permanent lockouts
-    }
 
     /**
      * @return the log tag.
@@ -226,10 +210,13 @@ public abstract class BiometricServiceBase extends SystemService
         @Override
         public int handleFailedAttempt(int userId) {
             final int lockoutMode = getLockoutMode(userId);
+            PerformanceTracker performanceTracker = PerformanceTracker.getInstanceForSensorId(
+                    BiometricServiceBase.this.getSensorId());
+
             if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
-                mPerformanceStats.permanentLockout++;
+                performanceTracker.incrementPermanentLockoutForUser(userId);
             } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
-                mPerformanceStats.lockout++;
+                performanceTracker.incrementTimedLockoutForUser(userId);
             }
 
             // Failing multiple times will continue to push out the lockout time
@@ -399,6 +386,7 @@ public abstract class BiometricServiceBase extends SystemService
         mActivityTaskManager = ActivityTaskManager.getService();
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManager = UserManager.get(mContext);
+        mPerformanceTracker = PerformanceTracker.getInstanceForSensorId(getSensorId());
         mMetricsLogger = new MetricsLogger();
     }
 
@@ -411,7 +399,7 @@ public abstract class BiometricServiceBase extends SystemService
     public void serviceDied(long cookie) {
         Slog.e(getTag(), "HAL died");
         mMetricsLogger.count(getConstants().tagHalDied(), 1);
-        mHALDeathCount++;
+        mPerformanceTracker.incrementHALDeathCount();
         mCurrentUserId = UserHandle.USER_NULL;
 
         // All client lifecycle must be managed on the handler.
@@ -464,11 +452,12 @@ public abstract class BiometricServiceBase extends SystemService
         if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
             removeClient(client);
         }
-        if (mPerformanceStats != null
-                && getLockoutMode(client.getTargetUserId()) == AuthenticationClient.LOCKOUT_NONE
-                && client instanceof AuthenticationClient) {
-            // ignore enrollment acquisitions or acquisitions when we're locked out
-            mPerformanceStats.acquire++;
+
+        if (client instanceof AuthenticationClient) {
+            final int userId = client.getTargetUserId();
+            if (getLockoutMode(userId) == AuthenticationClient.LOCKOUT_NONE) {
+                mPerformanceTracker.incrementAcquireForUser(userId, client.isCryptoOperation());
+            }
         }
     }
 
@@ -477,13 +466,16 @@ public abstract class BiometricServiceBase extends SystemService
         ClientMonitor client = mCurrentClient;
         final boolean authenticated = identifier.getBiometricId() != 0;
 
-        if (client != null && client.onAuthenticated(identifier, authenticated, token)) {
-            removeClient(client);
-        }
-        if (authenticated) {
-            mPerformanceStats.accept++;
-        } else {
-            mPerformanceStats.reject++;
+        if (client != null) {
+            final int userId = client.getTargetUserId();
+            if (client.isCryptoOperation()) {
+                mPerformanceTracker.incrementCryptoAuthForUser(userId, authenticated);
+            } else {
+                mPerformanceTracker.incrementAuthForUser(userId, authenticated);
+            }
+            if (client.onAuthenticated(identifier, authenticated, token)) {
+                removeClient(client);
+            }
         }
     }
 
@@ -596,18 +588,6 @@ public abstract class BiometricServiceBase extends SystemService
 
         mHandler.post(() -> {
             mMetricsLogger.histogram(getConstants().tagAuthToken(), opId != 0L ? 1 : 0);
-
-            // Get performance stats object for this user.
-            HashMap<Integer, PerformanceStats> pmap
-                    = (opId == 0) ? mPerformanceMap : mCryptoPerformanceMap;
-            PerformanceStats stats = pmap.get(mCurrentUserId);
-            if (stats == null) {
-                stats = new PerformanceStats();
-                pmap.put(mCurrentUserId, stats);
-            }
-            mPerformanceStats = stats;
-            mIsCrypto = (opId != 0);
-
             startAuthentication(client, opPackageName);
         });
     }
