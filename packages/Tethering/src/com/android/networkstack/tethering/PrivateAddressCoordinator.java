@@ -15,6 +15,8 @@
  */
 package com.android.networkstack.tethering;
 
+import static java.util.Arrays.asList;
+
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.IpPrefix;
@@ -34,9 +36,10 @@ import com.android.internal.util.IndentingPrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  * This class coordinate IP addresses conflict problem.
@@ -60,8 +63,8 @@ public class PrivateAddressCoordinator {
     // Upstream monitor would be stopped when tethering is down. When tethering restart, downstream
     // address may be requested before coordinator get current upstream notification. To ensure
     // coordinator do not select conflict downstream prefix, mUpstreamPrefixMap would not be cleared
-    // when tethering is down. Instead coordinator would remove all depcreted upstreams from
-    // mUpstreamPrefixMap when tethering is starting. See #maybeRemoveDeprectedUpstreams().
+    // when tethering is down. Instead tethering would remove all deprecated upstreams from
+    // mUpstreamPrefixMap when tethering is starting. See #maybeRemoveDeprecatedUpstreams().
     private final ArrayMap<Network, List<IpPrefix>> mUpstreamPrefixMap;
     private final ArraySet<IpServer> mDownstreams;
     // IANA has reserved the following three blocks of the IP address space for private intranets:
@@ -124,15 +127,16 @@ public class PrivateAddressCoordinator {
         mUpstreamPrefixMap.remove(network);
     }
 
-    private void maybeRemoveDeprectedUpstreams() {
-        if (!mDownstreams.isEmpty() || mUpstreamPrefixMap.isEmpty()) return;
+    /**
+     * Maybe remove deprecated upstream records, this would be called once tethering started without
+     * any exiting tethered downstream.
+     */
+    public void maybeRemoveDeprecatedUpstreams() {
+        if (mUpstreamPrefixMap.isEmpty()) return;
 
-        final ArrayList<Network> toBeRemoved = new ArrayList<>();
-        List<Network> allNetworks = Arrays.asList(mConnectivityMgr.getAllNetworks());
-        for (int i = 0; i < mUpstreamPrefixMap.size(); i++) {
-            final Network network = mUpstreamPrefixMap.keyAt(i);
-            if (!allNetworks.contains(network)) toBeRemoved.add(network);
-        }
+        // Remove all upstreams that are no longer valid networks
+        final Set<Network> toBeRemoved = new HashSet<>(mUpstreamPrefixMap.keySet());
+        toBeRemoved.removeAll(asList(mConnectivityMgr.getAllNetworks()));
 
         mUpstreamPrefixMap.removeAll(toBeRemoved);
     }
@@ -143,8 +147,6 @@ public class PrivateAddressCoordinator {
      */
     @Nullable
     public LinkAddress requestDownstreamAddress(final IpServer ipServer) {
-        maybeRemoveDeprectedUpstreams();
-
         // Address would be 192.168.[subAddress]/24.
         final byte[] bytes = mTetheringPrefix.getRawAddress();
         final int subAddress = getRandomSubAddr();
@@ -237,7 +239,6 @@ public class PrivateAddressCoordinator {
     }
 
     void dump(final IndentingPrintWriter pw) {
-        pw.decreaseIndent();
         pw.println("mUpstreamPrefixMap:");
         pw.increaseIndent();
         for (int i = 0; i < mUpstreamPrefixMap.size(); i++) {
