@@ -56,4 +56,4 @@ FRAMEWORKS_DATA_BINDING_SUBDIRS := \
 # the root of the tree.
 #
 FRAMEWORKS_DATA_BINDING_JAVA_SRC_DIRS := \
-    $(addprefix frameworks/data-binding/,$(FRAMEWORKS_DATA_BINDING_SUBDIRS))
+    $(addprefix frameworks/data-binding/,$(FRAMEWORKS_DATA_BINDING_SUBDIRS)) ..
