@@ -281,17 +281,19 @@ public class MediaRouter2ManagerTest {
     }
 
     @Test
-    public void testGetRoutingControllers() throws Exception {
+    public void testGetRoutingSessions() throws Exception {
         CountDownLatch latch = new CountDownLatch(1);
 
         Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
+
         addRouterCallback(new RouteCallback() {});
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
             public void onTransferred(RoutingSessionInfo oldSessionInfo,
                     RoutingSessionInfo newSessionInfo) {
                 if (TextUtils.equals(mPackageName, newSessionInfo.getClientPackageName())
-                        && newSessionInfo.getSelectedRoutes().contains(ROUTE_ID1)) {
+                        && newSessionInfo.getSelectedRoutes().contains(routeToSelect.getId())) {
                     latch.countDown();
                 }
             }
@@ -299,11 +301,10 @@ public class MediaRouter2ManagerTest {
 
         assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
 
-        mManager.selectRoute(mPackageName, routes.get(ROUTE_ID1));
-        latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS);
+        mManager.selectRoute(mPackageName, routeToSelect);
+        assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
 
         List<RoutingSessionInfo> sessions = mManager.getRoutingSessions(mPackageName);
-
         assertEquals(2, sessions.size());
 
         RoutingSessionInfo sessionInfo = sessions.get(1);
@@ -342,6 +343,47 @@ public class MediaRouter2ManagerTest {
         mManager.transfer(mManager.getSystemRoutingSession(), unknownRoute);
         assertFalse(onSessionCreatedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
         assertTrue(onTransferFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+    }
+
+    @Test
+    public void testRouterRelease_managerGetRoutingSessions() throws Exception {
+        CountDownLatch transferLatch = new CountDownLatch(1);
+        CountDownLatch releaseLatch = new CountDownLatch(1);
+
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        MediaRoute2Info routeToSelect = routes.get(ROUTE_ID1);
+        assertNotNull(routeToSelect);
+
+        addRouterCallback(new RouteCallback() {});
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSessionInfo,
+                    RoutingSessionInfo newSessionInfo) {
+                if (TextUtils.equals(mPackageName, newSessionInfo.getClientPackageName())
+                        && newSessionInfo.getSelectedRoutes().contains(routeToSelect.getId())) {
+                    transferLatch.countDown();
+                }
+            }
+            @Override
+            public void onSessionReleased(RoutingSessionInfo session) {
+                releaseLatch.countDown();
+            }
+        });
+
+        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
+        assertEquals(1, mRouter2.getControllers().size());
+
+        mManager.transfer(mManager.getRoutingSessions(mPackageName).get(0), routeToSelect);
+        assertTrue(transferLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        assertEquals(2, mManager.getRoutingSessions(mPackageName).size());
+        assertEquals(2, mRouter2.getControllers().size());
+        mRouter2.getControllers().get(1).release();
+
+        assertTrue(releaseLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        assertEquals(1, mRouter2.getControllers().size());
+        assertEquals(1, mManager.getRoutingSessions(mPackageName).size());
     }
 
     /**
