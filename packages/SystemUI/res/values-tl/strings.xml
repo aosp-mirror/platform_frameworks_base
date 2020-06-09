@@ -719,8 +719,7 @@
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Makikita sa itaas ng seksyon ng pag-uusap, lumalabas bilang floating bubble, ipinapakita sa lock screen ang larawan sa profile"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Mga Setting"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Priyoridad"</string>
-    <!-- no translation found for no_shortcut (8257177117568230126) -->
-    <skip />
+    <string name="no_shortcut" msgid="8257177117568230126">"Hindi sinusuportahan ng <xliff:g id="APP_NAME">%1$s</xliff:g> ang mga feature ng pag-uusap"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Walang kamakailang bubble"</string>
     <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Lalabas dito ang mga kamakailang bubble at na-dismiss na bubble"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Hindi puwedeng baguhin ang mga notification na ito."</string>
@@ -1014,11 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Na-update na ang pag-navigate ng system. Para gumawa ng mga pagbabago, pumunta sa Mga Setting."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Pumunta sa Mga Setting para i-update ang pag-navigate sa system"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Naka-standby"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Ginawang priyoridad ang pag-uusap"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Ang mga priyoridad na pag-uusap ay:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Ipakita sa itaas ng seksyon ng pag-uusap"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ipakita ang larawan sa profile sa lock screen"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Ipakitang floating bubble sa ibabaw ng mga app"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ihinto ang Huwag Istorbohin"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Mga Setting"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Window ng Overlay sa Pag-magnify"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Window ng Pag-magnify"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Mga Kontrol sa Pag-magnify ng Window"</string>
@@ -1060,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Mag-swipe para tumingin ng higit pa"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Nilo-load ang rekomendasyon"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Isara ang session ng media na ito"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Ituloy"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Hindi aktibo, tingnan ang app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Nagka-error, sinusubukan ulit…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Inalis ang device"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Hindi ma-load ang status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Nagka-error, subukan ulit"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Isinasagawa"</string>

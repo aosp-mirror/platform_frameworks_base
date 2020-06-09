@@ -87,9 +87,7 @@ class ControlViewHolder(
             deviceType: Int
         ): KClass<out Behavior> {
             return when {
-                status == Control.STATUS_UNKNOWN -> StatusBehavior::class
-                status == Control.STATUS_ERROR -> StatusBehavior::class
-                status == Control.STATUS_NOT_FOUND -> StatusBehavior::class
+                status != Control.STATUS_OK -> StatusBehavior::class
                 deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
                 template is ToggleTemplate -> ToggleBehavior::class
                 template is StatelessTemplate -> TouchBehavior::class
@@ -123,7 +121,11 @@ class ControlViewHolder(
     private val onDialogCancel: () -> Unit = { lastChallengeDialog = null }
 
     val deviceType: Int
-        get() = cws.control?.let { it.getDeviceType() } ?: cws.ci.deviceType
+        get() = cws.control?.let { it.deviceType } ?: cws.ci.deviceType
+    val controlStatus: Int
+        get() = cws.control?.let { it.status } ?: Control.STATUS_UNKNOWN
+    val controlTemplate: ControlTemplate
+        get() = cws.control?.let { it.controlTemplate } ?: ControlTemplate.NO_TEMPLATE
 
     init {
         val ld = layout.getBackground() as LayerDrawable
@@ -140,14 +142,16 @@ class ControlViewHolder(
 
         cancelUpdate?.run()
 
-        val (controlStatus, template) = cws.control?.let {
-            title.setText(it.getTitle())
-            subtitle.setText(it.getSubtitle())
-            Pair(it.status, it.controlTemplate)
-        } ?: run {
+        // For the following statuses only, assume the title/subtitle could not be set properly
+        // by the app and instead use the last known information from favorites
+        if (controlStatus == Control.STATUS_UNKNOWN || controlStatus == Control.STATUS_NOT_FOUND) {
             title.setText(cws.ci.controlTitle)
             subtitle.setText(cws.ci.controlSubtitle)
-            Pair(Control.STATUS_UNKNOWN, ControlTemplate.NO_TEMPLATE)
+        } else {
+            cws.control?.let {
+                title.setText(it.title)
+                subtitle.setText(it.subtitle)
+            }
         }
 
         cws.control?.let {
@@ -161,7 +165,8 @@ class ControlViewHolder(
         }
 
         isLoading = false
-        behavior = bindBehavior(behavior, findBehaviorClass(controlStatus, template, deviceType))
+        behavior = bindBehavior(behavior,
+            findBehaviorClass(controlStatus, controlTemplate, deviceType))
         updateContentDescription()
     }
 
@@ -256,7 +261,13 @@ class ControlViewHolder(
     }
 
     internal fun applyRenderInfo(enabled: Boolean, offset: Int, animated: Boolean = true) {
-        val ri = RenderInfo.lookup(context, cws.componentName, deviceType, offset)
+        val deviceTypeOrError = if (controlStatus == Control.STATUS_OK ||
+                controlStatus == Control.STATUS_UNKNOWN) {
+            deviceType
+        } else {
+            RenderInfo.ERROR_ICON
+        }
+        val ri = RenderInfo.lookup(context, cws.componentName, deviceTypeOrError, offset)
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
         val newText = nextStatusText
         nextStatusText = ""
