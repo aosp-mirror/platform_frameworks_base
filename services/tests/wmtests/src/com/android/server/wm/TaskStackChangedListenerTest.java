@@ -52,6 +52,7 @@ import android.view.ViewGroup;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 
+import com.android.compatibility.common.util.SystemUtil;
 import com.android.internal.annotations.GuardedBy;
 
 import org.junit.After;
@@ -295,7 +296,7 @@ public class TaskStackChangedListenerTest {
         final Context context = instrumentation.getContext();
         Intent intent = new Intent(context, ActivityInActivityView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        activityView.startActivity(intent);
+        SystemUtil.runWithShellPermissionIdentity(() -> activityView.startActivity(intent));
         waitForCallback(singleTaskDisplayDrawnLatch);
     }
 
@@ -338,7 +339,7 @@ public class TaskStackChangedListenerTest {
         final Context context = instrumentation.getContext();
         Intent intent = new Intent(context, ActivityInActivityView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        activityView.startActivity(intent);
+        SystemUtil.runWithShellPermissionIdentity(() -> activityView.startActivity(intent));
         waitForCallback(singleTaskDisplayDrawnLatch);
         assertEquals(1, singleTaskDisplayEmptyLatch.getCount());
 
@@ -465,9 +466,9 @@ public class TaskStackChangedListenerTest {
         final ActivityMonitor monitor = new ActivityMonitor(activityClass.getName(), null, false);
         getInstrumentation().addMonitor(monitor);
         final Context context = getInstrumentation().getContext();
-        context.startActivity(
+        SystemUtil.runWithShellPermissionIdentity(() -> context.startActivity(
                 new Intent(context, activityClass).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-                options.toBundle());
+                options.toBundle()));
         final TestActivity activity = (TestActivity) monitor.waitForActivityWithTimeout(1000);
         if (activity == null) {
             throw new RuntimeException("Timed out waiting for Activity");
