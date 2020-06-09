@@ -173,6 +173,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void addMediaHostView() {
         mMediaHost.setExpansion(1.0f);
         mMediaHost.setShowsOnlyActiveMedia(false);
+        // Reveal player with some parallax (1.0f would also work)
+        mMediaHost.setGonePivot(0.0f, 0.8f);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
         ViewGroup hostView = mMediaHost.getHostView();
         addView(hostView);
