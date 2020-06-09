@@ -278,7 +278,7 @@ public class BubbleDataTest extends SysuiTestCase {
         assertBubbleRemoved(mBubbleA1, BubbleController.DISMISS_AGED);
         assertOverflowChangedTo(ImmutableList.of(mBubbleA1));
 
-        Bubble bubbleA1 = mBubbleData.getOrCreateBubble(mEntryA1);
+        Bubble bubbleA1 = mBubbleData.getOrCreateBubble(mEntryA1, null /* persistedBubble */);
         bubbleA1.markUpdatedAt(7000L);
         mBubbleData.notificationEntryUpdated(bubbleA1, false /* suppressFlyout*/,
                 true /* showInShade */);
@@ -890,7 +890,7 @@ public class BubbleDataTest extends SysuiTestCase {
     private void sendUpdatedEntryAtTime(NotificationEntry entry, long postTime) {
         setPostTime(entry, postTime);
         // BubbleController calls this:
-        Bubble b = mBubbleData.getOrCreateBubble(entry);
+        Bubble b = mBubbleData.getOrCreateBubble(entry, null /* persistedBubble */);
         // And then this
         mBubbleData.notificationEntryUpdated(b, false /* suppressFlyout*/,
                 true /* showInShade */);
