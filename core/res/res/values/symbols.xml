@@ -3827,7 +3827,6 @@
 
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
   <java-symbol type="bool" name="config_inflateSignalStrength" />
-  <java-symbol type="array" name="config_restrictedPreinstalledCarrierApps" />
 
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
