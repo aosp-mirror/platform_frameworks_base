@@ -297,4 +297,19 @@ public final class InlineFillUi {
          */
         void startIntentSender(@NonNull IntentSender intentSender, @NonNull Intent intent);
     }
+
+    /**
+     * Callback for inline suggestion Ui related events.
+     */
+    public interface InlineUiEventCallback {
+        /**
+         * Callback to notify inline ui is shown.
+         */
+        void notifyInlineUiShown(@NonNull AutofillId autofillId);
+
+        /**
+         * Callback to notify inline ui is hidden.
+         */
+        void notifyInlineUiHidden(@NonNull AutofillId autofillId);
+    }
 }
