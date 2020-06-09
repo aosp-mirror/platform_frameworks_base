@@ -25,7 +25,7 @@ java_defaults {
     ],
     static_libs: [
         "androidx.annotation_annotation",
-        "netd_aidl_interface-V3-java",
+        "netd_aidl_interface-java",
         "netlink-client",
         "networkstack-aidl-interfaces-java",
         "android.hardware.tetheroffload.config-V1.0-java",
