@@ -16,6 +16,7 @@
 
 package com.android.server.power;
 
+import android.annotation.DurationMillisLong;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Environment;
@@ -23,7 +24,7 @@ import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.provider.Settings;
+import android.provider.Settings.Global;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
@@ -34,6 +35,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Provides utils to dump/wipe pre-reboot information.
@@ -46,10 +49,12 @@ final class PreRebootLogger {
     private static final String[] SERVICES_TO_DUMP = {Context.ROLLBACK_SERVICE, "package"};
 
     private static final Object sLock = new Object();
+    private static final long MAX_DUMP_TIME = TimeUnit.SECONDS.toMillis(20);
 
     /**
      * Process pre-reboot information. Dump pre-reboot information to {@link #PREREBOOT_DIR} if
-     * enabled {@link Settings.Global#ADB_ENABLED}; wipe dumped information otherwise.
+     * enabled {@link Settings.Global#ADB_ENABLED} and having active staged session; wipe dumped
+     * information otherwise.
      */
     static void log(Context context) {
         log(context, getDumpDir());
@@ -57,28 +62,49 @@ final class PreRebootLogger {
 
     @VisibleForTesting
     static void log(Context context, @NonNull File dumpDir) {
-        if (Settings.Global.getInt(
-                context.getContentResolver(), Settings.Global.ADB_ENABLED, 0) == 1) {
-            Slog.d(TAG, "Dumping pre-reboot information...");
-            dump(dumpDir);
+        if (needDump(context)) {
+            dump(dumpDir, MAX_DUMP_TIME);
         } else {
-            Slog.d(TAG, "Wiping pre-reboot information...");
             wipe(dumpDir);
         }
     }
 
-    private static void dump(@NonNull File dumpDir) {
-        synchronized (sLock) {
-            for (String buffer : BUFFERS_TO_DUMP) {
-                dumpLogsLocked(dumpDir, buffer);
+    private static boolean needDump(Context context) {
+        return Global.getInt(context.getContentResolver(), Global.ADB_ENABLED, 0) == 1
+                && !context.getPackageManager().getPackageInstaller()
+                        .getActiveStagedSessions().isEmpty();
+    }
+
+    @VisibleForTesting
+    static void dump(@NonNull File dumpDir, @DurationMillisLong long maxWaitTime) {
+        Slog.d(TAG, "Dumping pre-reboot information...");
+        final AtomicBoolean done = new AtomicBoolean(false);
+        final Thread t = new Thread(() -> {
+            synchronized (sLock) {
+                for (String buffer : BUFFERS_TO_DUMP) {
+                    dumpLogsLocked(dumpDir, buffer);
+                }
+                for (String service : SERVICES_TO_DUMP) {
+                    dumpServiceLocked(dumpDir, service);
+                }
             }
-            for (String service : SERVICES_TO_DUMP) {
-                dumpServiceLocked(dumpDir, service);
-            }
+            done.set(true);
+        });
+        t.start();
+
+        try {
+            t.join(maxWaitTime);
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Failed to dump pre-reboot information due to interrupted", e);
+        }
+
+        if (!done.get()) {
+            Slog.w(TAG, "Failed to dump pre-reboot information due to timeout");
         }
     }
 
     private static void wipe(@NonNull File dumpDir) {
+        Slog.d(TAG, "Wiping pre-reboot information...");
         synchronized (sLock) {
             for (File file : dumpDir.listFiles()) {
                 file.delete();
@@ -109,7 +135,7 @@ final class PreRebootLogger {
                     {"logcat", "-d", "-b", buffer, "-f", dumpFile.getAbsolutePath()};
             Runtime.getRuntime().exec(cmdline).waitFor();
         } catch (IOException | InterruptedException e) {
-            Slog.d(TAG, "Dump system log buffer before reboot fail", e);
+            Slog.e(TAG, "Failed to dump system log buffer before reboot", e);
         }
     }
 
@@ -127,7 +153,7 @@ final class PreRebootLogger {
                             | ParcelFileDescriptor.MODE_WRITE_ONLY);
             binder.dump(fd.getFileDescriptor(), ArrayUtils.emptyArray(String.class));
         } catch (FileNotFoundException | RemoteException e) {
-            Slog.d(TAG, String.format("Dump %s service before reboot fail", serviceName), e);
+            Slog.e(TAG, String.format("Failed to dump %s service before reboot", serviceName), e);
         }
     }
 }
