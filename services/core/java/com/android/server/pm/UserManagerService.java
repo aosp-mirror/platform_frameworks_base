@@ -989,6 +989,15 @@ public class UserManagerService extends IUserManager.Stub {
 
         ensureCanModifyQuietMode(
                 callingPackage, Binder.getCallingUid(), userId, target != null, dontAskCredential);
+
+        if (onlyIfCredentialNotRequired && callingPackage.equals(
+                getPackageManagerInternal().getSystemUiServiceComponent().getPackageName())) {
+            // This is to prevent SysUI from accidentally allowing the profile to turned on
+            // without password when keyguard is still locked.
+            throw new SecurityException("SystemUI is not allowed to set "
+                    + "QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED");
+        }
+
         final long identity = Binder.clearCallingIdentity();
         try {
             if (enableQuietMode) {
@@ -996,7 +1005,17 @@ public class UserManagerService extends IUserManager.Stub {
                         userId, true /* enableQuietMode */, target, callingPackage);
                 return true;
             }
-            mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
+            if (mLockPatternUtils.isManagedProfileWithUnifiedChallenge(userId)) {
+                KeyguardManager km = mContext.getSystemService(KeyguardManager.class);
+                // Normally only attempt to auto-unlock unified challenge if keyguard is not showing
+                // (to stop turning profile on automatically via the QS tile), except when we
+                // are called with QUIET_MODE_DISABLE_ONLY_IF_CREDENTIAL_NOT_REQUIRED, in which
+                // case always attempt to auto-unlock.
+                if (!km.isDeviceLocked(mLocalService.getProfileParentId(userId))
+                        || onlyIfCredentialNotRequired) {
+                    mLockPatternUtils.tryUnlockWithCachedUnifiedChallenge(userId);
+                }
+            }
             final boolean needToShowConfirmCredential = !dontAskCredential
                     && mLockPatternUtils.isSecure(userId)
                     && !StorageManager.isUserKeyUnlocked(userId);
@@ -1029,6 +1048,8 @@ public class UserManagerService extends IUserManager.Stub {
      */
     private void ensureCanModifyQuietMode(String callingPackage, int callingUid,
             @UserIdInt int targetUserId, boolean startIntent, boolean dontAskCredential) {
+        verifyCallingPackage(callingPackage, callingUid);
+
         if (hasManageUsersPermission()) {
             return;
         }
@@ -1050,7 +1071,6 @@ public class UserManagerService extends IUserManager.Stub {
             return;
         }
 
-        verifyCallingPackage(callingPackage, callingUid);
         final ShortcutServiceInternal shortcutInternal =
                 LocalServices.getService(ShortcutServiceInternal.class);
         if (shortcutInternal != null) {
