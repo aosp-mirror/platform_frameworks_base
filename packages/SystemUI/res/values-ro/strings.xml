@@ -1007,7 +1007,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Mutați în dreapta sus"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Mutați în stânga jos"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Mutați în dreapta jos"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Închideți"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nu afișați conversația în balon"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Discutați pe chat folosind baloanele"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Conversațiile noi apar ca pictograme flotante sau baloane. Atingeți pentru a deschide balonul. Trageți pentru a-l muta."</string>
@@ -1071,14 +1072,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Reia"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactiv, verificați aplicația"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Eroare, se încearcă din nou…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nu s-a găsit"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Comanda este indisponibilă"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nu s-a putut accesa <xliff:g id="DEVICE">%1$s</xliff:g>. Accesați aplicația <xliff:g id="APPLICATION">%2$s</xliff:g> pentru a vă asigura de disponibilitatea comenzii și că setările aplicației nu s-au schimbat."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Deschideți aplicația"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Starea nu se poate încărca"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Eroare, încercați din nou"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"În curs"</string>

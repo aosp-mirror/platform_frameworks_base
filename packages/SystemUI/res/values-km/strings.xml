@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ផ្លាស់ទីទៅផ្នែកខាងលើខាងស្ដាំ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ផ្លាស់ទីទៅផ្នែកខាងក្រោមខាងឆ្វេង​"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ផ្លាស់ទីទៅផ្នែកខាងក្រោម​ខាងស្ដាំ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ច្រានចោល"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"កុំបង្ហាញ​ការសន្ទនា​ជាពពុះ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ជជែក​ដោយប្រើ​ពពុះ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ការសន្ទនាថ្មីៗ​បង្ហាញជា​​ពពុះ ឬរូបអណ្ដែត។ ចុច ដើម្បីបើក​ពពុះ។ អូស ដើម្បី​ផ្លាស់ទី​ពពុះនេះ។"</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"បន្ត"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"អសកម្ម ពិនិត្យមើល​កម្មវិធី"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"បញ្ហា កំពុងព្យាយាម​ម្ដងទៀត…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"រកមិន​ឃើញទេ"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"មិនអាច​គ្រប់គ្រង​បានទេ"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"មិនអាច​ចូលប្រើ <xliff:g id="DEVICE">%1$s</xliff:g> បានទេ​។ សូមពិនិត្យមើល​កម្មវិធី <xliff:g id="APPLICATION">%2$s</xliff:g> ដើម្បីប្រាកដថា​នៅតែអាច​គ្រប់គ្រងបាន ហើយថា​ការកំណត់​កម្មវិធីនេះ​មិនបានផ្លាស់ប្ដូរឡើយ​។"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"បើកកម្មវិធី"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"មិនអាច​ផ្ទុក​ស្ថានភាព​បានទេ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"មានបញ្ហា សូម​ព្យាយាម​ម្តងទៀត"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"កំពុងដំណើរការ"</string>

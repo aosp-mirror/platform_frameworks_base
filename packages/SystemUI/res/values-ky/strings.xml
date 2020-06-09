@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Жогорку оң жакка жылдырыңыз"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Төмөнкү сол жакка жылдыруу"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Төмөнкү оң жакка жылдырыңыз"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Жабуу"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Жазышуу калкып чыкма билдирмеде көрүнбөсүн"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Калкып чыкма билдирмелер аркылуу маектешүү"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Жаңы жазышуулар калкыма сүрөтчөлөр же калкып чыкма билдирмелер болуп көрүнөт. Калкып чыкма билдирмелерди ачуу үчүн таптап коюңуз. Жылдыруу үчүн сүйрөңүз."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Улантуу"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Жигерсиз. Колдонмону текшериңиз"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Ката, дагы аракет жасалууда…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Табылган жок"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Көзөмөл жеткиликтүү эмес"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> түзмөгүнө кирүү мүмкүнчүлүгү жок. <xliff:g id="APPLICATION">%2$s</xliff:g> колдонмосуна өтүп, көзөмөл жеткиликтүү экенин жана колдонмонун жөндөөлөрү өзгөрбөгөнүн текшериңиз."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Колдонмону ачуу"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Абалы жүктөлгөн жок"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Ката, кайталап көрүңүз"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Аткарылууда"</string>

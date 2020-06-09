@@ -273,7 +273,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ਏਅਰਪਲੇਨ ਮੋਡ ਬੰਦ ਹੈ।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ਏਅਰਪਲੇਨ ਮੋਡ ਚਾਲੂ ਹੋਇਆ"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ਸੰਪੂਰਨ ਖਾਮੋਸ਼ੀ"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ਪੂਰਾ ਸ਼ਾਂਤ"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"ਸਿਰਫ਼ ਅਲਾਰਮ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\'ਪਰੇਸ਼ਾਨ ਨਾ ਕਰੋ\' ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ਉੱਪਰ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ਖਾਰਜ ਕਰੋ"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ਗੱਲਬਾਤ \'ਤੇ ਬਬਲ ਨਾ ਲਾਓ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ਬਬਲ ਵਰਤਦੇ ਹੋਏ ਚੈਟ ਕਰੋ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ਨਵੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਫਲੋਟਿੰਗ ਪ੍ਰਤੀਕਾਂ ਜਾਂ ਬਬਲ ਦੇ ਰੂਪ ਵਿੱਚ ਦਿਸਦੀਆਂ ਹਨ। ਬਬਲ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ। ਇਸਨੂੰ ਲਿਜਾਣ ਲਈ ਘਸੀਟੋ।"</string>

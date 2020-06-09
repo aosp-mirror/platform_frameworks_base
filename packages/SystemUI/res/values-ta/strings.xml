@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"கீழே வலதுபுறமாக நகர்த்து"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"மூடுக"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"உரையாடலைக் குமிழாக்காதே"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"குமிழ்களைப் பயன்படுத்தி அரட்டையடியுங்கள்"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"புதிய உரையாடல்கள் மிதக்கும் ஐகான்களாகவோ குமிழ்களாகவோ தோன்றும். குமிழைத் திறக்க தட்டவும். நகர்த்த இழுக்கவும்."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"பிழை, மீண்டும் முயல்கிறது…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"கட்டுப்பாடு இல்லை"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தை அணுக இயலவில்லை. இப்போதும் கட்டுப்பாடு உள்ளது என்பதையும் ஆப்ஸ் அமைப்புகள் மாறவில்லை என்பதையும் உறுதிப்படுத்த <xliff:g id="APPLICATION">%2$s</xliff:g> ஆப்ஸைப் பார்க்கவும்."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ஆப்ஸைத் திற"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"செயல்பாட்டிலுள்ளது"</string>
