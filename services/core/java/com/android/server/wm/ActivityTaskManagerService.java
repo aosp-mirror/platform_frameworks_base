@@ -1685,6 +1685,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final NeededUriGrants resultGrants = collectGrants(resultData, r.resultTo);
 
         synchronized (mGlobalLock) {
+            // Sanity check in case activity was removed before entering global lock.
+            if (!r.isInHistory()) {
+                return true;
+            }
+
             // Keep track of the root activity of the task before we finish it
             final Task tr = r.getTask();
             final ActivityRecord rootR = tr.getRootActivity();
