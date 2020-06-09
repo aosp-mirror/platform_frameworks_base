@@ -399,11 +399,16 @@ public final class MediaRouter2 {
         Objects.requireNonNull(controller, "controller must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
-        // TODO(b/157873496): Check thread-safety, at least check "sRouterLock" for every variable
-        if (!mRoutes.containsKey(route.getId())) {
+        boolean routeFound;
+        synchronized (sRouterLock) {
+            // TODO: Check thread-safety
+            routeFound = mRoutes.containsKey(route.getId());
+        }
+        if (!routeFound) {
             notifyTransferFailure(route);
             return;
         }
+
         if (controller.getRoutingSessionInfo().getTransferableRoutes().contains(route.getId())) {
             controller.transferToRoute(route);
             return;
@@ -572,10 +577,6 @@ public final class MediaRouter2 {
     }
 
     void addRoutesOnHandler(List<MediaRoute2Info> routes) {
-        // TODO(b/157874065): When onRoutesAdded is first called,
-        //  1) clear mRoutes before adding the routes
-        //  2) Call onRouteSelected(system_route, reason_fallback) if previously selected route
-        //     does not exist anymore. => We may need 'boolean MediaRoute2Info#isSystemRoute()'.
         List<MediaRoute2Info> addedRoutes = new ArrayList<>();
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
