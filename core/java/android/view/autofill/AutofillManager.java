@@ -751,6 +751,8 @@ public final class AutofillManager {
                         }
                     } catch (RemoteException e) {
                         Log.e(TAG, "Could not figure out if there was an autofill session", e);
+                    } catch (SyncResultReceiver.TimeoutException e) {
+                        Log.e(TAG, "Fail to get session restore status: " + e);
                     }
                 }
             }
@@ -864,7 +866,9 @@ public final class AutofillManager {
             mService.getFillEventHistory(receiver);
             return receiver.getParcelableResult();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            Log.e(TAG, "Fail to get fill event history: " + e);
             return null;
         }
     }
@@ -1477,10 +1481,13 @@ public final class AutofillManager {
 
         final SyncResultReceiver receiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
         try {
-            mService.isServiceEnabled(mContext.getUserId(), mContext.getPackageName(), receiver);
+            mService.isServiceEnabled(mContext.getUserId(), mContext.getPackageName(),
+                    receiver);
             return receiver.getIntResult() == 1;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get enabled autofill services status.");
         }
     }
 
@@ -1498,6 +1505,8 @@ public final class AutofillManager {
             return receiver.getParcelableResult();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get autofill services component name.");
         }
     }
 
@@ -1522,8 +1531,9 @@ public final class AutofillManager {
             mService.getUserDataId(receiver);
             return receiver.getStringResult();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get user data id for field classification.");
         }
     }
 
@@ -1544,8 +1554,9 @@ public final class AutofillManager {
             mService.getUserData(receiver);
             return receiver.getParcelableResult();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get user data for field classification.");
         }
     }
 
@@ -1561,7 +1572,7 @@ public final class AutofillManager {
         try {
             mService.setUserData(userData);
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
+            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -1583,8 +1594,9 @@ public final class AutofillManager {
             mService.isFieldClassificationEnabled(receiver);
             return receiver.getIntResult() == 1;
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return false;
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get field classification enabled status.");
         }
     }
 
@@ -1606,8 +1618,9 @@ public final class AutofillManager {
             mService.getDefaultFieldClassificationAlgorithm(receiver);
             return receiver.getStringResult();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get default field classification algorithm.");
         }
     }
 
@@ -1627,8 +1640,9 @@ public final class AutofillManager {
             final String[] algorithms = receiver.getStringArrayResult();
             return algorithms != null ? Arrays.asList(algorithms) : Collections.emptyList();
         } catch (RemoteException e) {
-            e.rethrowFromSystemServer();
-            return null;
+            throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get available field classification algorithms.");
         }
     }
 
@@ -1651,6 +1665,8 @@ public final class AutofillManager {
             return receiver.getIntResult() == 1;
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            throw new RuntimeException("Fail to get autofill supported status.");
         }
     }
 
@@ -2040,13 +2056,16 @@ public final class AutofillManager {
         }
 
         final SyncResultReceiver resultReceiver = new SyncResultReceiver(SYNC_CALLS_TIMEOUT_MS);
-        final int resultCode;
+        int resultCode;
         try {
             mService.setAugmentedAutofillWhitelist(toList(packages), toList(activities),
                     resultReceiver);
             resultCode = resultReceiver.getIntResult();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
+        } catch (SyncResultReceiver.TimeoutException e) {
+            Log.e(TAG, "Fail to get the result of set AugmentedAutofill whitelist. " + e);
+            return;
         }
         switch (resultCode) {
             case RESULT_OK:
@@ -2283,7 +2302,7 @@ public final class AutofillManager {
                     // In theory, we could ignore this error since it's not a big deal, but
                     // in reality, we rather crash the app anyways, as the failure could be
                     // a consequence of something going wrong on the server side...
-                    e.rethrowFromSystemServer();
+                    throw e.rethrowFromSystemServer();
                 }
             }
 
@@ -2661,7 +2680,7 @@ public final class AutofillManager {
             try {
                 mService.onPendingSaveUi(operation, token);
             } catch (RemoteException e) {
-                e.rethrowFromSystemServer();
+                Log.e(TAG, "Error in onPendingSaveUi: ", e);
             }
         }
     }
