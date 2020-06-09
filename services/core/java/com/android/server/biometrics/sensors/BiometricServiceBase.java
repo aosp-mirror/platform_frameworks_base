@@ -198,7 +198,7 @@ public abstract class BiometricServiceBase extends SystemService
      * Wraps a portion of the interface from Service -> Daemon that is used by the ClientMonitor
      * subclasses.
      */
-    protected interface DaemonWrapper {
+    public interface DaemonWrapper {
         int ERROR_ESRCH = 3; // Likely HAL is dead. see errno.h.
         int authenticate(long operationId, int groupId, Surface surface)
                 throws RemoteException;

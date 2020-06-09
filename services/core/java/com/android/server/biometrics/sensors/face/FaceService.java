@@ -22,14 +22,9 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.app.ActivityManager;
 import android.app.AppOpsManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.UserInfo;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -39,7 +34,6 @@ import android.hardware.biometrics.face.V1_0.IBiometricsFaceClientCallback;
 import android.hardware.biometrics.face.V1_0.OptionalBool;
 import android.hardware.biometrics.face.V1_0.Status;
 import android.hardware.face.Face;
-import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
 import android.hardware.face.IFaceServiceReceiver;
 import android.os.Binder;
@@ -83,9 +77,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * A service to manage multiple clients that want to access the face HAL API.
@@ -103,234 +95,8 @@ public class FaceService extends BiometricServiceBase {
             "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
     private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
 
-    private static final String NOTIFICATION_TAG = "FaceService";
-    private static final int NOTIFICATION_ID = 1;
-
-    private static final String SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST =
-            "com.android.server.biometrics.face.skip_keyguard_acquire_ignore_list";
-
-    /**
-     * Events for bugreports.
-     */
-    public static final class AuthenticationEvent {
-        private long mStartTime;
-        private long mLatency;
-        // Only valid if mError is 0
-        private boolean mAuthenticated;
-        private int mError;
-        // Only valid if mError is ERROR_VENDOR
-        private int mVendorError;
-        private int mUser;
-
-        AuthenticationEvent(long startTime, long latency, boolean authenticated, int error,
-                int vendorError, int user) {
-            mStartTime = startTime;
-            mLatency = latency;
-            mAuthenticated = authenticated;
-            mError = error;
-            mVendorError = vendorError;
-            mUser = user;
-        }
-
-        public String toString(Context context) {
-            return "Start: " + mStartTime
-                    + "\tLatency: " + mLatency
-                    + "\tAuthenticated: " + mAuthenticated
-                    + "\tError: " + mError
-                    + "\tVendorCode: " + mVendorError
-                    + "\tUser: " + mUser
-                    + "\t" + FaceManager.getErrorString(context, mError, mVendorError);
-        }
-    }
-
-    /**
-     * Keep a short historical buffer of stats, with an aggregated usage time.
-     */
-    private class UsageStats {
-        static final int EVENT_LOG_SIZE = 100;
-
-        Context mContext;
-        List<AuthenticationEvent> mAuthenticationEvents;
-
-        int acceptCount;
-        int rejectCount;
-        Map<Integer, Integer> mErrorCount;
-
-        long acceptLatency;
-        long rejectLatency;
-        Map<Integer, Long> mErrorLatency;
-
-        UsageStats(Context context) {
-            mAuthenticationEvents = new ArrayList<>();
-            mErrorCount = new HashMap<>();
-            mErrorLatency = new HashMap<>();
-            mContext = context;
-        }
-
-        void addEvent(AuthenticationEvent event) {
-            if (mAuthenticationEvents.size() >= EVENT_LOG_SIZE) {
-                mAuthenticationEvents.remove(0);
-            }
-            mAuthenticationEvents.add(event);
-
-            if (event.mAuthenticated) {
-                acceptCount++;
-                acceptLatency += event.mLatency;
-            } else if (event.mError == 0) {
-                rejectCount++;
-                rejectLatency += event.mLatency;
-            } else {
-                mErrorCount.put(event.mError, mErrorCount.getOrDefault(event.mError, 0) + 1);
-                mErrorLatency.put(event.mError,
-                        mErrorLatency.getOrDefault(event.mError, 0l) + event.mLatency);
-            }
-        }
-
-        void print(PrintWriter pw) {
-            pw.println("Events since last reboot: " + mAuthenticationEvents.size());
-            for (int i = 0; i < mAuthenticationEvents.size(); i++) {
-                pw.println(mAuthenticationEvents.get(i).toString(mContext));
-            }
-
-            // Dump aggregated usage stats
-            // TODO: Remove or combine with json dump in a future release
-            pw.println("Accept\tCount: " + acceptCount + "\tLatency: " + acceptLatency
-                    + "\tAverage: " + (acceptCount > 0 ? acceptLatency / acceptCount : 0));
-            pw.println("Reject\tCount: " + rejectCount + "\tLatency: " + rejectLatency
-                    + "\tAverage: " + (rejectCount > 0 ? rejectLatency / rejectCount : 0));
-
-            for (Integer key : mErrorCount.keySet()) {
-                final int count = mErrorCount.get(key);
-                pw.println("Error" + key + "\tCount: " + count
-                        + "\tLatency: " + mErrorLatency.getOrDefault(key, 0l)
-                        + "\tAverage: " + (count > 0 ? mErrorLatency.getOrDefault(key, 0l) / count
-                        : 0)
-                        + "\t" + FaceManager.getErrorString(mContext, key, 0 /* vendorCode */));
-            }
-        }
-    }
-
-    private final class FaceAuthClient extends AuthenticationClient {
-        private int mLastAcquire;
-
-        public FaceAuthClient(Context context,
-                DaemonWrapper daemon, IBinder token,
-                ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
-                boolean restricted, String owner, int cookie, boolean requireConfirmation,
-                int statsClient, Surface surface) {
-            super(context, getConstants(), daemon, token, listener, targetUserId, groupId, opId,
-                    false /* shouldFrameworkHandleLockout */, restricted, owner, cookie,
-                    requireConfirmation, FaceService.this.getSensorId(), isStrongBiometric(),
-                    statsModality(), statsClient, mActivityTaskManager, mTaskStackListener,
-                    mPowerManager, mLockoutTracker, surface);
-        }
-
-        @Override
-        public boolean wasUserDetected() {
-            return mLastAcquire != FaceManager.FACE_ACQUIRED_NOT_DETECTED
-                    && mLastAcquire != FaceManager.FACE_ACQUIRED_SENSOR_DIRTY;
-        }
-
-        @Override
-        public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-                boolean authenticated, ArrayList<Byte> token) {
-            final boolean result = super.onAuthenticated(identifier, authenticated, token);
-
-            mUsageStats.addEvent(new AuthenticationEvent(
-                    getStartTimeMs(),
-                    System.currentTimeMillis() - getStartTimeMs() /* latency */,
-                    authenticated,
-                    0 /* error */,
-                    0 /* vendorError */,
-                    getTargetUserId()));
-
-            // For face, the authentication lifecycle ends either when
-            // 1) Authenticated == true
-            // 2) Error occurred
-            // 3) Authenticated == false
-            // Fingerprint currently does not end when the third condition is met which is a bug,
-            // but let's leave it as-is for now.
-            return result || !authenticated;
-        }
-
-        @Override
-        public boolean onError(int error, int vendorCode) {
-            mUsageStats.addEvent(new AuthenticationEvent(
-                    getStartTimeMs(),
-                    System.currentTimeMillis() - getStartTimeMs() /* latency */,
-                    false /* authenticated */,
-                    error,
-                    vendorCode,
-                    getTargetUserId()));
-
-            return super.onError(error, vendorCode);
-        }
-
-        @Override
-        public int[] getAcquireIgnorelist() {
-            if (isBiometricPrompt()) {
-                return mBiometricPromptIgnoreList;
-            } else {
-                // Keyguard
-                return mKeyguardIgnoreList;
-            }
-        }
-
-        @Override
-        public int[] getAcquireVendorIgnorelist() {
-            if (isBiometricPrompt()) {
-                return mBiometricPromptIgnoreListVendor;
-            } else {
-                // Keyguard
-                return mKeyguardIgnoreListVendor;
-            }
-        }
-
-        @Override
-        public boolean onAcquired(int acquireInfo, int vendorCode) {
-
-            mLastAcquire = acquireInfo;
-
-            if (acquireInfo == FaceManager.FACE_ACQUIRED_RECALIBRATE) {
-                final String name =
-                        getContext().getString(R.string.face_recalibrate_notification_name);
-                final String title =
-                        getContext().getString(R.string.face_recalibrate_notification_title);
-                final String content =
-                        getContext().getString(R.string.face_recalibrate_notification_content);
-
-                final Intent intent = new Intent("android.settings.FACE_SETTINGS");
-                intent.setPackage("com.android.settings");
-
-                final PendingIntent pendingIntent = PendingIntent.getActivityAsUser(getContext(),
-                        0 /* requestCode */, intent, 0 /* flags */, null /* options */,
-                        UserHandle.CURRENT);
-
-                final String channelName = "FaceEnrollNotificationChannel";
-
-                NotificationChannel channel = new NotificationChannel(channelName, name,
-                        NotificationManager.IMPORTANCE_HIGH);
-                Notification notification = new Notification.Builder(getContext(), channelName)
-                        .setSmallIcon(R.drawable.ic_lock)
-                        .setContentTitle(title)
-                        .setContentText(content)
-                        .setSubText(name)
-                        .setOnlyAlertOnce(true)
-                        .setLocalOnly(true)
-                        .setAutoCancel(true)
-                        .setCategory(Notification.CATEGORY_SYSTEM)
-                        .setContentIntent(pendingIntent)
-                        .setVisibility(Notification.VISIBILITY_SECRET)
-                        .build();
-
-                mNotificationManager.createNotificationChannel(channel);
-                mNotificationManager.notifyAsUser(NOTIFICATION_TAG, NOTIFICATION_ID, notification,
-                        UserHandle.CURRENT);
-            }
-
-            return super.onAcquired(acquireInfo, vendorCode);
-        }
-    }
+    static final String NOTIFICATION_TAG = "FaceService";
+    static final int NOTIFICATION_ID = 1;
 
     /**
      * Receives the incoming binder calls from FaceManager.
@@ -422,11 +188,13 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_UNKNOWN;
-            final AuthenticationClient client = new FaceAuthClient(getContext(),
-                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
-                    mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    0 /* cookie */, false /* requireConfirmation */, statsClient,
-                    null /* surface */);
+            final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
+                    getConstants(), mDaemonWrapper, token,
+                    new ClientMonitorCallbackConverter(receiver),
+                    mCurrentUserId, opId, restricted, opPackageName,
+                    0 /* cookie */, false /* requireConfirmation */, getSensorId(),
+                    isStrongBiometric(), statsClient,
+                    mTaskStackListener, mLockoutTracker, mUsageStats);
             authenticateInternal(client, opId, opPackageName);
         }
 
@@ -438,12 +206,13 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClient client = new FaceAuthClient(getContext(),
-                    mDaemonWrapper, token,
+            final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
+                    getConstants(), mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
-                    mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
-                    requireConfirmation, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    null /* surface */);
+                    mCurrentUserId, opId, restricted, opPackageName, cookie,
+                    requireConfirmation, getSensorId(), isStrongBiometric(),
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    mTaskStackListener, mLockoutTracker, mUsageStats);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -714,10 +483,6 @@ public class FaceService extends BiometricServiceBase {
 
     private NotificationManager mNotificationManager;
 
-    private int[] mBiometricPromptIgnoreList;
-    private int[] mBiometricPromptIgnoreListVendor;
-    private int[] mKeyguardIgnoreList;
-    private int[] mKeyguardIgnoreListVendor;
     private int[] mEnrollIgnoreList;
     private int[] mEnrollIgnoreListVendor;
 
@@ -933,23 +698,8 @@ public class FaceService extends BiometricServiceBase {
     public FaceService(Context context) {
         super(context);
         mLockoutTracker = new LockoutHalImpl();
-
-        final boolean ignoreKeyguardBlacklist = Settings.Secure.getInt(context.getContentResolver(),
-                SKIP_KEYGUARD_ACQUIRE_IGNORE_LIST, 0) != 0;
-
         mUsageStats = new UsageStats(context);
-
         mNotificationManager = getContext().getSystemService(NotificationManager.class);
-
-        mBiometricPromptIgnoreList = getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_biometricprompt_ignorelist);
-        mBiometricPromptIgnoreListVendor = getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_vendor_biometricprompt_ignorelist);
-        mKeyguardIgnoreList = ignoreKeyguardBlacklist ? new int[0] : getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_keyguard_ignorelist);
-        mKeyguardIgnoreListVendor =
-                ignoreKeyguardBlacklist ? new int[0] : getContext().getResources()
-                        .getIntArray(R.array.config_face_acquire_vendor_keyguard_ignorelist);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()

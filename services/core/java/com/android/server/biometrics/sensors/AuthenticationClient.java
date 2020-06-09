@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.Context;
@@ -37,11 +38,8 @@ import java.util.ArrayList;
  */
 public abstract class AuthenticationClient extends ClientMonitor {
 
-    public void resetFailedAttempts(int userId) {}
-
     private final boolean mIsStrongBiometric;
     private final long mOpId;
-    private final boolean mShouldFrameworkHandleLockout;
     private final boolean mRequireConfirmation;
     private final IActivityTaskManager mActivityTaskManager;
     private final TaskStackListener mTaskStackListener;
@@ -49,16 +47,12 @@ public abstract class AuthenticationClient extends ClientMonitor {
     private final LockoutTracker mLockoutTracker;
     private final Surface mSurface;
 
-    // We need to track this state since it's possible for applications to request for
-    // authentication while the device is already locked out. In that case, the client is created
-    // but not started yet. The user shouldn't receive the error haptics in this case.
-    private boolean mStarted;
     private long mStartTimeMs;
 
     /**
      * This method is called when authentication starts.
      */
-    private void onStart() {
+    protected void onStart() {
         try {
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
@@ -70,7 +64,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
      * This method is called when a biometric is authenticated or authentication is stopped
      * (cancelled by the user, or an error such as lockout has occurred).
      */
-    private void onStop() {
+    protected void onStop() {
         try {
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
@@ -78,26 +72,21 @@ public abstract class AuthenticationClient extends ClientMonitor {
         }
     }
 
-    public abstract boolean wasUserDetected();
-
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
-            boolean shouldFrameworkHandleLockout, boolean restricted, String owner, int cookie,
-            boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsModality,
-            int statsClient, IActivityTaskManager activityTaskManager,
-            TaskStackListener taskStackListener, PowerManager powerManager,
-            LockoutTracker lockoutTracker, Surface surface) {
+            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
+            boolean isStrongBiometric, int statsModality, int statsClient,
+            TaskStackListener taskStackListener, LockoutTracker lockoutTracker, Surface surface) {
         super(context, constants, daemon, token, listener, targetUserId, groupId,
                 restricted, owner, cookie, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOpId = opId;
-        mShouldFrameworkHandleLockout = shouldFrameworkHandleLockout;
         mRequireConfirmation = requireConfirmation;
-        mActivityTaskManager = activityTaskManager;
+        mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = taskStackListener;
-        mPowerManager = powerManager;
+        mPowerManager = context.getSystemService(PowerManager.class);
         mLockoutTracker = lockoutTracker;
         mSurface = surface;
     }
@@ -143,28 +132,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public boolean onError(int error, int vendorCode) {
-        if (!mShouldFrameworkHandleLockout) {
-            switch (error) {
-                case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
-                    if (!wasUserDetected() && !isBiometricPrompt()) {
-                        // No vibration if user was not detected on keyguard
-                        break;
-                    }
-                case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT:
-                case BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT:
-                    if (mStarted) {
-                        vibrateError();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-        return super.onError(error, vendorCode);
-    }
-
-    @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
@@ -191,9 +158,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     vibrateSuccess();
                 }
                 result = true;
-                if (mShouldFrameworkHandleLockout) {
-                    resetFailedAttempts(getTargetUserId());
-                }
                 onStop();
 
                 final byte[] byteToken = new byte[token.size()];
@@ -237,15 +201,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 // Allow system-defined limit of number of attempts before giving up
                 final @LockoutTracker.LockoutMode int lockoutMode =
                         handleFailedAttempt(getTargetUserId());
-                if (lockoutMode != LockoutTracker.LOCKOUT_NONE && mShouldFrameworkHandleLockout) {
-                    Slog.w(getLogTag(), "Forcing lockout (driver code should do this!), mode("
-                            + lockoutMode + ")");
-                    stop(false);
-                    final int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
-                            ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
-                            : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-                    onError(errorCode, 0 /* vendorCode */);
-                } else {
+                if (lockoutMode == LockoutTracker.LOCKOUT_NONE) {
                     // Don't send onAuthenticationFailed if we're in lockout, it causes a
                     // janky UI on Keyguard/BiometricPrompt since "authentication failed"
                     // will show briefly and be replaced by "device locked out" message.
@@ -267,7 +223,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
      */
     @Override
     public int start() {
-        mStarted = true;
         onStart();
         try {
             mStartTimeMs = System.currentTimeMillis();
@@ -292,8 +247,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
             Slog.w(getLogTag(), "stopAuthentication: already cancelled!");
             return 0;
         }
-
-        mStarted = false;
 
         onStop();
 

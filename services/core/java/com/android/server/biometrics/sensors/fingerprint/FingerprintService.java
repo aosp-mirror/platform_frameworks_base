@@ -94,37 +94,6 @@ public class FingerprintService extends BiometricServiceBase {
     private static final boolean DEBUG = true;
     private static final String FP_DATA_DIR = "fpdata";
 
-    private final class FingerprintAuthClient extends AuthenticationClient {
-        public FingerprintAuthClient(Context context,
-                DaemonWrapper daemon, IBinder token,
-                ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
-                boolean restricted, String owner, int cookie,
-                boolean requireConfirmation, Surface surface, int statsClient) {
-            super(context, getConstants(), daemon, token, listener, targetUserId, groupId, opId,
-                    true /* shouldFrameworkHandleLockout */, restricted, owner, cookie,
-                    requireConfirmation, FingerprintService.this.getSensorId(), isStrongBiometric(),
-                    statsModality(), statsClient, mActivityTaskManager, mTaskStackListener,
-                    mPowerManager, mLockoutTracker, surface);
-        }
-
-        @Override
-        public void resetFailedAttempts(int userId) {
-            mLockoutTracker.resetFailedAttemptsForUser(true /* clearAttemptCounter */, userId);
-        }
-
-        @Override
-        public boolean wasUserDetected() {
-            // TODO: Return a proper value for devices that use ERROR_TIMEOUT
-            return false;
-        }
-
-        @Override
-        public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
-            mLockoutTracker.addFailedAttemptForUser(userId);
-            return super.handleFailedAttempt(userId);
-        }
-    }
-
     /**
      * Receives the incoming binder calls from FingerprintManager.
      */
@@ -180,11 +149,12 @@ public class FingerprintService extends BiometricServiceBase {
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
 
-            final AuthenticationClient client = new FingerprintAuthClient(getContext(),
-                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
-                    mCurrentUserId, groupId, opId, restricted, opPackageName,
-                    0 /* cookie */, false /* requireConfirmation */,
-                    surface, statsClient);
+            final AuthenticationClient client = new FingerprintAuthenticationClient(getContext(),
+                    getConstants(), mDaemonWrapper, token,
+                    new ClientMonitorCallbackConverter(receiver),
+                    mCurrentUserId, groupId, opId, restricted, opPackageName, 0 /* cookie */,
+                    false /* requireConfirmation */, getSensorId(), isStrongBiometric(), surface,
+                    statsClient, mTaskStackListener, mLockoutTracker);
             authenticateInternal(client, opId, opPackageName);
         }
 
@@ -196,12 +166,13 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(MANAGE_BIOMETRIC);
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClient client = new FingerprintAuthClient(getContext(),
-                    mDaemonWrapper, token,
+            final AuthenticationClient client = new FingerprintAuthenticationClient(getContext(),
+                    getConstants(), mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
-                    false /* requireConfirmation */, surface,
-                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT);
+                    false /* requireConfirmation */, getSensorId(), isStrongBiometric(), surface,
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, mTaskStackListener,
+                    mLockoutTracker);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
