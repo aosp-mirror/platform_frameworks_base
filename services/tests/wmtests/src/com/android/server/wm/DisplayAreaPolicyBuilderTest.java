@@ -29,24 +29,16 @@ import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
 
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertFalse;
 
 import static java.util.stream.Collectors.toList;
 
 import android.content.res.Resources;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
-
-import androidx.test.filters.FlakyTest;
 
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Description;
@@ -96,7 +88,6 @@ public class DisplayAreaPolicyBuilderTest {
     }
 
     @Test
-    @FlakyTest(bugId = 149760939)
     public void testBuilder() {
         final Feature foo;
         final Feature bar;
@@ -114,23 +105,27 @@ public class DisplayAreaPolicyBuilderTest {
 
         policy.attachDisplayAreas();
 
-        assertThat(policy.getDisplayAreas(foo), is(not(empty())));
-        assertThat(policy.getDisplayAreas(bar), is(not(empty())));
+        assertThat(policy.getDisplayAreas(foo)).isNotEmpty();
+        assertThat(policy.getDisplayAreas(bar)).isNotEmpty();
 
-        assertThat(policy.findAreaForToken(tokenOfType(TYPE_STATUS_BAR)),
-                is(decendantOfOneOf(policy.getDisplayAreas(foo))));
-        assertThat(policy.findAreaForToken(tokenOfType(TYPE_STATUS_BAR)),
-                is(not(decendantOfOneOf(policy.getDisplayAreas(bar)))));
+        Matcher<WindowContainer> fooDescendantMatcher = descendantOfOneOf(
+                policy.getDisplayAreas(foo));
+        Matcher<WindowContainer> barDescendantMatcher = descendantOfOneOf(
+                policy.getDisplayAreas(bar));
 
-        assertThat(mDefaultTaskDisplayArea,
-                is(decendantOfOneOf(policy.getDisplayAreas(foo))));
-        assertThat(mDefaultTaskDisplayArea,
-                is(decendantOfOneOf(policy.getDisplayAreas(bar))));
+        // There is a DA of TYPE_STATUS_BAR below foo, but not below bar
+        assertThat(fooDescendantMatcher.matches(
+                policy.findAreaForToken(tokenOfType(TYPE_STATUS_BAR)))).isTrue();
+        assertThat(barDescendantMatcher.matches(
+                policy.findAreaForToken(tokenOfType(TYPE_STATUS_BAR)))).isFalse();
 
-        assertThat(mImeContainer,
-                is(decendantOfOneOf(policy.getDisplayAreas(foo))));
-        assertThat(mImeContainer,
-                is(decendantOfOneOf(policy.getDisplayAreas(bar))));
+        // The TDA is below both foo and bar.
+        assertThat(fooDescendantMatcher.matches(mDefaultTaskDisplayArea)).isTrue();
+        assertThat(barDescendantMatcher.matches(mDefaultTaskDisplayArea)).isTrue();
+
+        // The IME is below both foo and bar.
+        assertThat(fooDescendantMatcher.matches(mImeContainer)).isTrue();
+        assertThat(barDescendantMatcher.matches(mImeContainer)).isTrue();
 
         List<DisplayArea<?>> actualOrder = collectLeafAreas(mRoot);
         Map<DisplayArea<?>, Set<Integer>> zSets = calculateZSets(policy, mRoot, mImeContainer,
@@ -142,8 +137,9 @@ public class DisplayAreaPolicyBuilderTest {
         Map<DisplayArea<?>, Integer> expectedByMaxLayer = mapValues(zSets,
                 v -> v.stream().max(Integer::compareTo).get());
 
-        assertThat(expectedByMinLayer, is(equalTo(expectedByMaxLayer)));
-        assertThat(actualOrder, is(equalTo(expectedByMaxLayer)));
+        // Make sure the DAs' order is the same as their layer order.
+        assertMatchLayerOrder(actualOrder, expectedByMinLayer);
+        assertMatchLayerOrder(actualOrder, expectedByMaxLayer);
     }
 
     @Test
@@ -159,7 +155,7 @@ public class DisplayAreaPolicyBuilderTest {
             hasOneHandedFeature |= features.get(i).getId() == FEATURE_ONE_HANDED;
         }
 
-        assertTrue(hasOneHandedFeature);
+        assertThat(hasOneHandedFeature).isTrue();
     }
 
     @Test
@@ -183,10 +179,10 @@ public class DisplayAreaPolicyBuilderTest {
                 policy.getDisplayAreas(dimmable.getId());
         List<DisplayArea<? extends WindowContainer>> otherDAs =
                 policy.getDisplayAreas(other.getId());
-        assertEquals(1, dimmableDAs.size());
-        assertTrue(dimmableDAs.get(0) instanceof DisplayArea.Dimmable);
+        assertThat(dimmableDAs).hasSize(1);
+        assertThat(dimmableDAs.get(0)).isInstanceOf(DisplayArea.Dimmable.class);
         for (DisplayArea otherDA : otherDAs) {
-            assertFalse(otherDA instanceof DisplayArea.Dimmable);
+            assertThat(otherDA).isNotInstanceOf(DisplayArea.Dimmable.class);
         }
     }
 
@@ -231,7 +227,7 @@ public class DisplayAreaPolicyBuilderTest {
         zSets.computeIfAbsent(area, k -> new HashSet<>()).add(layer);
     }
 
-    private Matcher<WindowContainer> decendantOfOneOf(List<? extends WindowContainer> expected) {
+    private Matcher<WindowContainer> descendantOfOneOf(List<? extends WindowContainer> expected) {
         return new CustomTypeSafeMatcher<WindowContainer>("descendant of one of " + expected) {
             @Override
             protected boolean matchesSafely(WindowContainer actual) {
@@ -261,8 +257,18 @@ public class DisplayAreaPolicyBuilderTest {
 
     private WindowToken tokenOfType(int type) {
         WindowToken m = mock(WindowToken.class);
-        when(m.getWindowLayerFromType()).thenReturn(mPolicy.getWindowLayerFromTypeLw(type));
+        when(m.getWindowLayerFromType()).thenReturn(
+                mPolicy.getWindowLayerFromTypeLw(type, false /* canAddInternalSystemWindow */));
         return m;
+    }
+
+    private static void assertMatchLayerOrder(List<DisplayArea<?>> actualOrder,
+            Map<DisplayArea<?>, Integer> areaToLayerMap) {
+        for (int i = 0; i < actualOrder.size() - 1; i++) {
+            DisplayArea<?> curr = actualOrder.get(i);
+            DisplayArea<?> next = actualOrder.get(i + 1);
+            assertThat(areaToLayerMap.get(curr)).isLessThan(areaToLayerMap.get(next));
+        }
     }
 
     private static void traverseLeafAreas(DisplayArea<?> root, Consumer<DisplayArea<?>> consumer) {
