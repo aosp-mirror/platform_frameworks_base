@@ -29,6 +29,8 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PixelFormat;
+import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
 import android.view.Gravity;
@@ -62,6 +64,9 @@ public class AudioRecordingDisclosureBar implements
     // This title is used to test the microphone disclosure indicator in
     // CtsSystemUiHostTestCases:TvMicrophoneCaptureIndicatorTest
     private static final String LAYOUT_PARAMS_TITLE = "MicrophoneCaptureIndicator";
+
+    private static final String EXEMPT_PACKAGES_LIST = "sysui_mic_disclosure_exempt";
+    private static final String FORCED_PACKAGES_LIST = "sysui_mic_disclosure_forced";
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(prefix = {"STATE_"}, value = {
@@ -134,11 +139,18 @@ public class AudioRecordingDisclosureBar implements
         mExemptPackages = new ArraySet<>(
                 Arrays.asList(mContext.getResources().getStringArray(
                         R.array.audio_recording_disclosure_exempt_apps)));
+        mExemptPackages.addAll(Arrays.asList(getGlobalStringArray(EXEMPT_PACKAGES_LIST)));
+        mExemptPackages.removeAll(Arrays.asList(getGlobalStringArray(FORCED_PACKAGES_LIST)));
 
         mAudioActivityObservers = new AudioActivityObserver[]{
                 new RecordAudioAppOpObserver(mContext, this),
                 new MicrophoneForegroundServicesObserver(mContext, this),
         };
+    }
+
+    private String[] getGlobalStringArray(String setting) {
+        String result = Settings.Global.getString(mContext.getContentResolver(), setting);
+        return TextUtils.isEmpty(result) ? new String[0] : result.split(",");
     }
 
     @UiThread
