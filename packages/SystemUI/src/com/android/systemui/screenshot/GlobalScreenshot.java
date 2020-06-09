@@ -174,6 +174,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
     private static final long SCREENSHOT_FLASH_IN_DURATION_MS = 133;
     private static final long SCREENSHOT_FLASH_OUT_DURATION_MS = 217;
+    // delay before starting to fade in dismiss button
+    private static final long SCREENSHOT_TO_CORNER_DISMISS_DELAY_MS = 200;
     private static final long SCREENSHOT_TO_CORNER_X_DURATION_MS = 234;
     private static final long SCREENSHOT_TO_CORNER_Y_DURATION_MS = 500;
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
@@ -773,6 +775,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotAnimatedView.setScaleX(currentScale);
         mScreenshotAnimatedView.setScaleY(currentScale);
 
+        mDismissButton.setAlpha(0);
+        mDismissButton.setVisibility(View.VISIBLE);
+
         AnimatorSet dropInAnimation = new AnimatorSet();
         ValueAnimator flashInAnimator = ValueAnimator.ofFloat(0, 1);
         flashInAnimator.setDuration(SCREENSHOT_FLASH_IN_DURATION_MS);
@@ -794,6 +799,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         toCorner.setDuration(SCREENSHOT_TO_CORNER_Y_DURATION_MS);
         float xPositionPct =
                 SCREENSHOT_TO_CORNER_X_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
+        float dismissPct =
+                SCREENSHOT_TO_CORNER_DISMISS_DELAY_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         float scalePct =
                 SCREENSHOT_TO_CORNER_SCALE_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         toCorner.addUpdateListener(animation -> {
@@ -821,6 +828,19 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             float yCenter = MathUtils.lerp(
                     startPos.y, finalPos.y, mFastOutSlowIn.getInterpolation(t));
             mScreenshotAnimatedView.setY(yCenter - bounds.height() * currentScaleY / 2f);
+
+            if (t >= dismissPct) {
+                mDismissButton.setAlpha((t - dismissPct) / (1 - dismissPct));
+                float currentX = mScreenshotAnimatedView.getX();
+                float currentY = mScreenshotAnimatedView.getY();
+                mDismissButton.setY(currentY - mDismissButton.getHeight() / 2f);
+                if (mDirectionLTR) {
+                    mDismissButton.setX(currentX
+                            + bounds.width() * currentScaleX - mDismissButton.getWidth() / 2f);
+                } else {
+                    mDismissButton.setX(currentX - mDismissButton.getWidth() / 2f);
+                }
+            }
         });
 
         toCorner.addListener(new AnimatorListenerAdapter() {
@@ -845,13 +865,20 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                mDismissButton.setAlpha(1);
+                float dismissOffset = mDismissButton.getWidth() / 2f;
+                float finalDismissX = mDirectionLTR
+                        ? finalPos.x - dismissOffset + bounds.width() * cornerScale / 2f
+                        : finalPos.x - dismissOffset - bounds.width() * cornerScale / 2f;
+                mDismissButton.setX(finalDismissX);
+                mDismissButton.setY(
+                        finalPos.y - dismissOffset - bounds.height() * cornerScale / 2f);
                 mScreenshotAnimatedView.setScaleX(1);
                 mScreenshotAnimatedView.setScaleY(1);
                 mScreenshotAnimatedView.setX(finalPos.x - bounds.width() * cornerScale / 2f);
                 mScreenshotAnimatedView.setY(finalPos.y - bounds.height() * cornerScale / 2f);
                 mScreenshotAnimatedView.setVisibility(View.GONE);
                 mScreenshotPreview.setVisibility(View.VISIBLE);
-                mDismissButton.setVisibility(View.VISIBLE);
                 mScreenshotLayout.forceLayout();
             }
         });
