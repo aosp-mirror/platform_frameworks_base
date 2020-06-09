@@ -53,7 +53,6 @@ import android.transition.TransitionManager;
 import android.transition.TransitionSet;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.Slog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
@@ -508,10 +507,10 @@ public class NotificationConversationInfo extends LinearLayout implements
         mBgHandler.post(
                 new UpdateChannelRunnable(mINotificationManager, mPackageName,
                         mAppUid, mSelectedAction, mNotificationChannel));
-        mMainHandler.postDelayed(() -> {
-            mEntry.markForUserTriggeredMovement(true);
-            mVisualStabilityManager.temporarilyAllowReordering();
-        }, StackStateAnimator.ANIMATION_DURATION_STANDARD);
+        mEntry.markForUserTriggeredMovement(true);
+        mMainHandler.postDelayed(
+                mVisualStabilityManager::temporarilyAllowReordering,
+                StackStateAnimator.ANIMATION_DURATION_STANDARD);
     }
 
     private boolean shouldShowPriorityOnboarding() {
