@@ -3454,22 +3454,21 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
      * doesn't support IME/system decorations.
      *
      * @param target current IME target.
-     * @return {@link WindowState} that can host IME.
+     * @return {@link InsetsControlTarget} that can host IME.
      */
-    WindowState getImeHostOrFallback(WindowState target) {
+    InsetsControlTarget getImeHostOrFallback(WindowState target) {
         if (target != null && target.getDisplayContent().canShowIme()) {
             return target;
         }
         return getImeFallback();
     }
 
-    WindowState getImeFallback() {
-
+    InsetsControlTarget getImeFallback() {
         // host is in non-default display that doesn't support system decor, default to
-        // default display's StatusBar to control IME.
-        // TODO: (b/148234093)find a better host OR control IME animation/visibility directly
-        //  because it won't work when statusbar isn't available.
-        return mWmService.getDefaultDisplayContentLocked().getDisplayPolicy().getStatusBar();
+        // default display's StatusBar to control IME (when available), else let system control it.
+        WindowState statusBar = 
+                mWmService.getDefaultDisplayContentLocked().getDisplayPolicy().getStatusBar();
+        return statusBar != null ? statusBar : mRemoteInsetsControlTarget;
     }
 
     boolean canShowIme() {
