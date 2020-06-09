@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"اوپر دائیں جانب لے جائيں"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نیچے بائیں جانب لے جائیں"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نیچے دائیں جانب لے جائیں"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"برخاست کریں"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"بلبلہ گفتگو نہ کریں"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"بلبلے کے ذریعے چیٹ کریں"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگوئیں فلوٹنگ آئیکن یا بلبلے کے طور پر ظاہر ہوں گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
@@ -1013,17 +1014,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"سسٹم نیویگیشن اپ ڈیٹ کیا گیا۔ تبدیلیاں کرنے کے لیے، ترتیبات پر جائیں۔"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
-    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
-    <skip />
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"گفتگو کو ترجیح پر سیٹ کیا گیا"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ترجیحی گفتگوئیں یہ ہوگی:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو کے سیکشن میں سب سے اوپر دکھائیں"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ایپس کے سب سے اوپر فلوٹنگ بلبلہ کے طور پر ظاہر ہوں"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ڈسٹرب نہ کریں میں مداخلت کریں"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
-    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
-    <skip />
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ترتیبات"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"میگنیفیکیشن اوورلے ونڈو"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"میگنیفکیشن ونڈو"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"میگنیفکیشن ونڈو کنٹرولز"</string>

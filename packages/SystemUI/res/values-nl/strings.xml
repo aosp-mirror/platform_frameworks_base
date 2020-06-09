@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Naar rechtsboven verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Naar linksonder verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Naar rechtsonder verplaatsen"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Sluiten"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Gesprekken niet in bubbels weergeven"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatten met bubbels"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nieuwe gesprekken worden weergegeven als zwevende iconen of \'bubbels\'. Tik om een bubbel te openen. Sleep om de bubbel te verplaatsen."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Hervatten"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fout. Opnieuw proberen…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Niet gevonden"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Beheeroptie niet beschikbaar"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Kan geen toegang krijgen tot <xliff:g id="DEVICE">%1$s</xliff:g>. Check de <xliff:g id="APPLICATION">%2$s</xliff:g>-app om na te gaan of de beheeroptie nog steeds beschikbaar is en of de app-instellingen niet zijn gewijzigd."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"App openen"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Kan status niet laden"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fout, probeer het opnieuw"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Bezig"</string>

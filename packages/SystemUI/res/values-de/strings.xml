@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Nach rechts oben verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Nach unten links verschieben"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Nach unten rechts verschieben"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Schließen"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Unterhaltung nicht als Bubble anzeigen"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bubbles zum Chatten verwenden"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Neue Unterhaltungen erscheinen als unverankerte Symbole, \"Bubbles\" genannt. Wenn du die Bubble öffnen möchtest, tippe sie an. Wenn du sie verschieben möchtest, zieh an ihr."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Fortsetzen"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktiv – sieh in der App nach"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fehler. Neuer Versuch…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nicht gefunden"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Steuerelement nicht verfügbar"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Zugriff auf <xliff:g id="DEVICE">%1$s</xliff:g> nicht möglich. Prüfe, ob das Steuerelement in der App \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" noch verfügbar ist und die App-Einstellungen nicht geändert wurden."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"App öffnen"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Status kann nicht geladen werden"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fehler – versuch es noch mal"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Läuft"</string>

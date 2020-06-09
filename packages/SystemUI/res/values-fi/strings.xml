@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Siirrä oikeaan yläreunaan"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Siirrä vasempaan alareunaan"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Siirrä oikeaan alareunaan"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ohita"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Älä näytä kuplia keskusteluista"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chattaile kuplien avulla"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Uudet keskustelut näkyvät kelluvina kuvakkeina tai kuplina. Avaa kupla napauttamalla. Siirrä sitä vetämällä."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Jatka"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Epäaktiivinen, tarkista sovellus"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Virhe, yritetään uudelleen…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Ei löydy"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Ohjain ei ole käytettävissä"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Ei pääsyä: <xliff:g id="DEVICE">%1$s</xliff:g>. Avaa <xliff:g id="APPLICATION">%2$s</xliff:g> ja tarkista, että ohjain on edelleen käytettävissä ja että sovelluksen asetukset eivät ole muuttuneet."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Avaa sovellus"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Tilaa ei voi ladata"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Virhe, yritä uudelleen"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Käynnissä"</string>
