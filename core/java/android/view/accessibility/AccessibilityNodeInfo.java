@@ -635,7 +635,7 @@ public class AccessibilityNodeInfo implements Parcelable {
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH";
 
     /**
-     * Key used to request extra data for accessibility scanning tool's purposes.
+     * Key used to request extra data for the rendering information.
      * The key requests that a {@link AccessibilityNodeInfo.ExtraRenderingInfo} be added to this
      * info. This request is made with {@link #refreshWithExtraData(String, Bundle)} without
      * argument.
@@ -5847,12 +5847,15 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
-         * Gets the size object containing the height and the width of layout params if the node is
-         * a {@link ViewGroup} or a {@link TextView}, or null otherwise. Useful for accessibility
-         * scanning tool to understand whether the text is scalable and fits the view or not.
+         * Gets the size object containing the height and the width of
+         * {@link android.view.ViewGroup.LayoutParams}  if the node is a {@link ViewGroup} or
+         * a {@link TextView}, or null otherwise. Useful for some accessibility services to
+         * understand whether the text is scalable and fits the view or not.
          *
-         * @return a {@link Size} stores layout height and layout width of the view,
-         *         or null otherwise.
+         * @return a {@link Size} stores layout height and layout width of the view, or null
+         * otherwise. And the size value may be in pixels,
+         * {@link android.view.ViewGroup.LayoutParams#MATCH_PARENT},
+         * or {@link android.view.ViewGroup.LayoutParams#WRAP_CONTENT}
          */
         public @Nullable Size getLayoutSize() {
             return mLayoutSize;
@@ -5870,9 +5873,9 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
 
         /**
-         * Gets the text size if the node is a {@link TextView}, or -1 otherwise.  Useful for
-         * accessibility scanning tool to understand whether the text is scalable and fits the view
-         * or not.
+         * Gets the text size if the node is a {@link TextView}, or -1 otherwise. Useful for some
+         * accessibility services to understand whether the text is scalable and fits the view or
+         * not.
          *
          * @return the text size of a {@code TextView}, or -1 otherwise.
          */
@@ -5893,7 +5896,7 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Gets the text size unit if the node is a {@link TextView}, or -1 otherwise.
          * Text size returned from {@link #getTextSizeInPx} in raw pixels may scale by factors and
-         * convert from other units. Useful for accessibility scanning tool to understand whether
+         * convert from other units. Useful for some accessibility services to understand whether
          * the text is scalable and fits the view or not.
          *
          * @return the text size unit which type is {@link TypedValue#TYPE_DIMENSION} of a
