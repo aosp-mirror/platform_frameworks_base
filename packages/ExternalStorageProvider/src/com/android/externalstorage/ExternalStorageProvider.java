@@ -520,9 +520,11 @@ public class ExternalStorageProvider extends FileSystemProvider {
         final RootInfo root = resolvedDocId.first;
         File child = resolvedDocId.second;
 
+        final File rootFile = root.visiblePath != null ? root.visiblePath
+                : root.path;
         final File parent = TextUtils.isEmpty(parentDocId)
-                        ? root.path
-                        : getFileForDocId(parentDocId);
+                ? rootFile
+                : getFileForDocId(parentDocId);
 
         return new Path(parentDocId == null ? root.rootId : null, findDocumentPath(parent, child));
     }
