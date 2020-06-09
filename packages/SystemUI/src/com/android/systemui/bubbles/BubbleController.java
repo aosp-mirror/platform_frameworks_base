@@ -617,7 +617,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
-                    mSysUiState, mNotificationShadeWindowController, this::onAllBubblesAnimatedOut,
+                    mSysUiState, this::onAllBubblesAnimatedOut,
                     this::onImeVisibilityChanged);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {

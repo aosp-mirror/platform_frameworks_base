@@ -348,8 +348,6 @@ public class BubbleStackView extends FrameLayout
     @NonNull
     private final SurfaceSynchronizer mSurfaceSynchronizer;
 
-    private final NotificationShadeWindowController mNotificationShadeWindowController;
-
     /**
      * Callback to run when the IME visibility changes - BubbleController uses this to update the
      * Bubbles window focusability flags with the WindowManager.
@@ -682,7 +680,6 @@ public class BubbleStackView extends FrameLayout
             @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
-            NotificationShadeWindowController notificationShadeWindowController,
             Runnable allBubblesAnimatedOutAction,
             Consumer<Boolean> onImeVisibilityChanged) {
         super(context);
@@ -691,7 +688,6 @@ public class BubbleStackView extends FrameLayout
         mInflater = LayoutInflater.from(context);
 
         mSysUiState = sysUiState;
-        mNotificationShadeWindowController = notificationShadeWindowController;
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
@@ -1802,7 +1798,7 @@ public class BubbleStackView extends FrameLayout
     public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
         // If the notification shade is expanded, or the manage menu is open, we shouldn't let the
         // ActivityView steal any touch events from any location.
-        if (mNotificationShadeWindowController.getPanelExpanded() || mShowingManage) {
+        if (!mIsExpanded || mShowingManage) {
             touchableRegion.setEmpty();
         }
     }
