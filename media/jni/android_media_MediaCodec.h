@@ -173,6 +173,7 @@ private:
     enum {
         kWhatCallbackNotify,
         kWhatFrameRendered,
+        kWhatAsyncReleaseComplete,
     };
 
     jclass mClass;
@@ -185,6 +186,7 @@ private:
     bool mGraphicOutput{false};
     bool mHasCryptoOrDescrambler{false};
     std::once_flag mReleaseFlag;
+    std::once_flag mAsyncReleaseFlag;
 
     sp<AMessage> mCallbackNotification;
     sp<AMessage> mOnFrameRenderedNotification;
