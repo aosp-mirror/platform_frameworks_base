@@ -1583,7 +1583,7 @@ class MediaRouter2ServiceImpl {
         private void onSessionInfoChangedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionInfoChangedToManagers(managers, sessionInfo);
+            notifySessionUpdatedToManagers(managers, sessionInfo);
 
             // For system provider, notify all routers.
             if (provider == mSystemProvider) {
@@ -1608,7 +1608,7 @@ class MediaRouter2ServiceImpl {
         private void onSessionReleasedOnHandler(@NonNull MediaRoute2Provider provider,
                 @NonNull RoutingSessionInfo sessionInfo) {
             List<IMediaRouter2Manager> managers = getManagers();
-            notifySessionInfoChangedToManagers(managers, sessionInfo);
+            notifySessionReleasedToManagers(managers, sessionInfo);
 
             RouterRecord routerRecord = mSessionToRouterMap.get(sessionInfo.getId());
             if (routerRecord == null) {
@@ -1913,15 +1913,28 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifySessionInfoChangedToManagers(
+        private void notifySessionUpdatedToManagers(
                 @NonNull List<IMediaRouter2Manager> managers,
                 @NonNull RoutingSessionInfo sessionInfo) {
             for (IMediaRouter2Manager manager : managers) {
                 try {
                     manager.notifySessionUpdated(sessionInfo);
                 } catch (RemoteException ex) {
-                    Slog.w(TAG, "notifySessionInfosChangedToManagers: "
-                            + "failed to notify. Manager probably died.", ex);
+                    Slog.w(TAG, "notifySessionUpdatedToManagers: "
+                            + "Failed to notify. Manager probably died.", ex);
+                }
+            }
+        }
+
+        private void notifySessionReleasedToManagers(
+                @NonNull List<IMediaRouter2Manager> managers,
+                @NonNull RoutingSessionInfo sessionInfo) {
+            for (IMediaRouter2Manager manager : managers) {
+                try {
+                    manager.notifySessionReleased(sessionInfo);
+                } catch (RemoteException ex) {
+                    Slog.w(TAG, "notifySessionReleasedToManagers: "
+                            + "Failed to notify. Manager probably died.", ex);
                 }
             }
         }
