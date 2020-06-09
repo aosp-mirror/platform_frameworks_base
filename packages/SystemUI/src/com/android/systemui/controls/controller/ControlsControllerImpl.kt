@@ -524,13 +524,6 @@ class ControlsControllerImpl @Inject constructor (
         }
     }
 
-    override fun resetFavorites() {
-        executor.execute {
-            Favorites.clear()
-            persistenceWrapper.storeFavorites(Favorites.getAllStructures())
-        }
-    }
-
     override fun refreshStatus(componentName: ComponentName, control: Control) {
         if (!confirmAvailability()) {
             Log.d(TAG, "Controls not available")
