@@ -482,7 +482,8 @@ public class BlobStoreManagerService extends SystemService {
                             descriptionResId, leasee.description));
                 });
                 blobInfos.add(new BlobInfo(blobMetadata.getBlobId(),
-                        blobHandle.getExpiryTimeMillis(), blobHandle.getLabel(), leaseInfos));
+                        blobHandle.getExpiryTimeMillis(), blobHandle.getLabel(),
+                        blobMetadata.getSize(), leaseInfos));
             });
         }
         return blobInfos;
