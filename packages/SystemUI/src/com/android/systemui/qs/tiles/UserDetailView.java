@@ -16,8 +16,12 @@
 
 package com.android.systemui.qs.tiles;
 
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_DISABLED_ALPHA;
+import static com.android.systemui.statusbar.policy.UserSwitcherController.USER_SWITCH_ENABLED_ALPHA;
+
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
@@ -94,17 +98,20 @@ public class UserDetailView extends PseudoGridView {
             }
             String name = getName(mContext, item);
             if (item.picture == null) {
-                v.bind(name, getDrawable(mContext, item), item.resolveId());
+                v.bind(name, getDrawable(mContext, item).mutate(), item.resolveId());
             } else {
-                v.bind(name, item.picture, item.info.id);
+                Drawable drawable = new BitmapDrawable(v.getResources(), item.picture);
+                drawable.setColorFilter(
+                        item.isSwitchToEnabled ? null : getDisabledUserAvatarColorFilter());
+                v.bind(name, drawable, item.info.id);
             }
             v.setActivated(item.isCurrent);
+            v.setDisabledByAdmin(item.isDisabledByAdmin);
+            v.setEnabled(item.isSwitchToEnabled);
+            v.setAlpha(v.isEnabled() ? USER_SWITCH_ENABLED_ALPHA : USER_SWITCH_DISABLED_ALPHA);
+
             if (item.isCurrent) {
                 mCurrentUserView = v;
-            }
-            v.setDisabledByAdmin(item.isDisabledByAdmin);
-            if (!item.isSwitchToEnabled) {
-                v.setEnabled(false);
             }
             v.setTag(item);
             return v;
@@ -113,8 +120,14 @@ public class UserDetailView extends PseudoGridView {
         private static Drawable getDrawable(Context context,
                 UserSwitcherController.UserRecord item) {
             Drawable icon = getIconDrawable(context, item);
-            int iconColorRes = item.isCurrent ? R.color.qs_user_switcher_selected_avatar_icon_color
-                    : R.color.qs_user_switcher_avatar_icon_color;
+            int iconColorRes;
+            if (item.isCurrent) {
+                iconColorRes = R.color.qs_user_switcher_selected_avatar_icon_color;
+            } else if (!item.isSwitchToEnabled) {
+                iconColorRes = R.color.GM2_grey_600;
+            } else {
+                iconColorRes = R.color.qs_user_switcher_avatar_icon_color;
+            }
             icon.setTint(context.getResources().getColor(iconColorRes, context.getTheme()));
 
             int bgRes = item.isCurrent ? R.drawable.bg_avatar_selected : R.drawable.qs_bg_avatar;
