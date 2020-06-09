@@ -303,10 +303,10 @@ class Bubble implements BubbleViewProvider {
         mDotPath = info.dotPath;
 
         if (mExpandedView != null) {
-            mExpandedView.update(/* bubble */ this);
+            mExpandedView.update(this /* bubble */);
         }
         if (mIconView != null) {
-            mIconView.setRenderedBubble(/* bubble */ this);
+            mIconView.setRenderedBubble(this /* bubble */);
         }
     }
 
@@ -548,13 +548,13 @@ class Bubble implements BubbleViewProvider {
     }
 
     private boolean shouldSuppressNotification() {
-        if (mEntry == null) return false;
+        if (mEntry == null) return true;
         return mEntry.getBubbleMetadata() != null
                 && mEntry.getBubbleMetadata().isNotificationSuppressed();
     }
 
     boolean shouldAutoExpand() {
-        if (mEntry == null) return false;
+        if (mEntry == null) return mShouldAutoExpand;
         Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
         return (metadata != null && metadata.getAutoExpandBubble()) ||  mShouldAutoExpand;
     }

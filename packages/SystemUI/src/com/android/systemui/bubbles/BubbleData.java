@@ -115,7 +115,7 @@ public class BubbleData {
     /** Bubbles that aged out to overflow. */
     private final List<Bubble> mOverflowBubbles;
     /** Bubbles that are being loaded but haven't been added to the stack just yet. */
-    private final List<Bubble> mPendingBubbles;
+    private final HashMap<String, Bubble> mPendingBubbles;
     private Bubble mSelectedBubble;
     private boolean mShowingOverflow;
     private boolean mExpanded;
@@ -151,7 +151,7 @@ public class BubbleData {
         mContext = context;
         mBubbles = new ArrayList<>();
         mOverflowBubbles = new ArrayList<>();
-        mPendingBubbles = new ArrayList<>();
+        mPendingBubbles = new HashMap<>();
         mStateChange = new Update(mBubbles, mOverflowBubbles);
         mMaxBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_rendered);
         mMaxOverflowBubbles = mContext.getResources().getInteger(R.integer.bubbles_max_overflow);
@@ -203,62 +203,46 @@ public class BubbleData {
         dispatchPendingChanges();
     }
 
-    public void promoteBubbleFromOverflow(Bubble bubble, BubbleStackView stack,
-            BubbleIconFactory factory) {
-        if (DEBUG_BUBBLE_DATA) {
-            Log.d(TAG, "promoteBubbleFromOverflow: " + bubble);
-        }
-        mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
-        moveOverflowBubbleToPending(bubble);
-        // Preserve new order for next repack, which sorts by last updated time.
-        bubble.inflate(
-                b -> {
-                    b.setShouldAutoExpand(true);
-                    b.markUpdatedAt(mTimeSource.currentTimeMillis());
-                    notificationEntryUpdated(bubble, false /* suppressFlyout */,
-                            true /* showInShade */);
-                },
-                mContext, stack, factory, false /* skipInflation */);
-    }
-
     void setShowingOverflow(boolean showingOverflow) {
         mShowingOverflow = showingOverflow;
-    }
-
-    private void moveOverflowBubbleToPending(Bubble b) {
-        mOverflowBubbles.remove(b);
-        mPendingBubbles.add(b);
     }
 
     /**
      * Constructs a new bubble or returns an existing one. Does not add new bubbles to
      * bubble data, must go through {@link #notificationEntryUpdated(Bubble, boolean, boolean)}
      * for that.
+     *
+     * @param entry The notification entry to use, only null if it's a bubble being promoted from
+     *              the overflow that was persisted over reboot.
+     * @param persistedBubble The bubble to use, only non-null if it's a bubble being promoted from
+     *              the overflow that was persisted over reboot.
      */
-    Bubble getOrCreateBubble(NotificationEntry entry) {
-        String key = entry.getKey();
-        Bubble bubble = getBubbleInStackWithKey(entry.getKey());
-        if (bubble != null) {
-            bubble.setEntry(entry);
-        } else {
-            bubble = getOverflowBubbleWithKey(key);
-            if (bubble != null) {
-                moveOverflowBubbleToPending(bubble);
-                bubble.setEntry(entry);
-                return bubble;
+    Bubble getOrCreateBubble(NotificationEntry entry, Bubble persistedBubble) {
+        String key = entry != null ? entry.getKey() : persistedBubble.getKey();
+        Bubble bubbleToReturn = getBubbleInStackWithKey(key);
+
+        if (bubbleToReturn == null) {
+            bubbleToReturn = getOverflowBubbleWithKey(key);
+            if (bubbleToReturn != null) {
+                // Promoting from overflow
+                mOverflowBubbles.remove(bubbleToReturn);
+            } else if (mPendingBubbles.containsKey(key)) {
+                // Update while it was pending
+                bubbleToReturn = mPendingBubbles.get(key);
+            } else if (entry != null) {
+                // New bubble
+                bubbleToReturn = new Bubble(entry, mSuppressionListener);
+            } else {
+                // Persisted bubble being promoted
+                bubbleToReturn = persistedBubble;
             }
-            // Check for it in pending
-            for (int i = 0; i < mPendingBubbles.size(); i++) {
-                Bubble b = mPendingBubbles.get(i);
-                if (b.getKey().equals(entry.getKey())) {
-                    b.setEntry(entry);
-                    return b;
-                }
-            }
-            bubble = new Bubble(entry, mSuppressionListener);
-            mPendingBubbles.add(bubble);
         }
-        return bubble;
+
+        if (entry != null) {
+            bubbleToReturn.setEntry(entry);
+        }
+        mPendingBubbles.put(key, bubbleToReturn);
+        return bubbleToReturn;
     }
 
     /**
@@ -270,7 +254,7 @@ public class BubbleData {
         if (DEBUG_BUBBLE_DATA) {
             Log.d(TAG, "notificationEntryUpdated: " + bubble);
         }
-        mPendingBubbles.remove(bubble); // No longer pending once we're here
+        mPendingBubbles.remove(bubble.getKey()); // No longer pending once we're here
         Bubble prevBubble = getBubbleInStackWithKey(bubble.getKey());
         suppressFlyout |= bubble.getEntry() == null
                 || !bubble.getEntry().getRanking().visuallyInterruptive();
@@ -408,10 +392,8 @@ public class BubbleData {
             Log.d(TAG, "doRemove: " + key);
         }
         //  If it was pending remove it
-        for (int i = 0; i < mPendingBubbles.size(); i++) {
-            if (mPendingBubbles.get(i).getKey().equals(key)) {
-                mPendingBubbles.remove(mPendingBubbles.get(i));
-            }
+        if (mPendingBubbles.containsKey(key)) {
+            mPendingBubbles.remove(key);
         }
         int indexToRemove = indexForKey(key);
         if (indexToRemove == -1) {
