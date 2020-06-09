@@ -1318,15 +1318,15 @@ public class ZygoteProcess {
 
         Process.ProcessStartResult result;
         try {
-            // As app zygote is for generating isolated process, at the end it can't access
-            // apps data, so doesn't need to its data info.
+            // We will bind mount app data dirs so app zygote can't access /data/data, while
+            // we don't need to bind mount storage dirs as /storage won't be mounted.
             result = startViaZygote(processClass, niceName, uid, gid,
                     gids, runtimeFlags, 0 /* mountExternal */, 0 /* targetSdkVersion */, seInfo,
                     abi, instructionSet, null /* appDataDir */, null /* invokeWith */,
                     true /* startChildZygote */, null /* packageName */,
                     ZYGOTE_POLICY_FLAG_SYSTEM_PROCESS /* zygotePolicyFlags */, false /* isTopApp */,
                     null /* disabledCompatChanges */, null /* pkgDataInfoMap */,
-                    null /* whitelistedDataInfoMap */, false /* bindMountAppsData*/,
+                    null /* whitelistedDataInfoMap */, true /* bindMountAppsData*/,
                     /* bindMountAppStorageDirs */ false, extraArgs);
 
         } catch (ZygoteStartFailedEx ex) {

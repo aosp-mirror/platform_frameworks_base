@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Սահեցրեք մատը՝ ավելին իմանալու համար"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Փակել աշխատաշրջանը"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Վերսկսել"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ակտիվ չէ, ստուգեք հավելվածը"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Սխալ. նորից ենք փորձում…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Սարքը հեռացված է"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"Չի գտնվել"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Կառավարման տարրը հասանելի չէ"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> սարքն անհասանելի է։ Ստուգեք <xliff:g id="APPLICATION">%2$s</xliff:g> հավելվածը՝ համոզվելու, որ կառավարման տարրը դեռ հասանելի է և հավելվածի կարգավորումները չեն փոխվել։"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Բացել հավելվածը"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Չհաջողվեց բեռնել կարգավիճակը"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Սխալ առաջացավ։ Նորից փորձեք։"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Ընթացքի մեջ է"</string>

@@ -1381,4 +1381,26 @@ public class WifiEnterpriseConfig implements Parcelable {
     public String getWapiCertSuite() {
         return getFieldValue(WAPI_CERT_SUITE_KEY);
     }
+
+    /**
+     * Method determines whether the Enterprise configuration is insecure. An insecure
+     * configuration is one where EAP method requires a CA certification, i.e. PEAP, TLS, or
+     * TTLS, and any of the following conditions are met:
+     * - Both certificate and CA path are not configured.
+     * - Both alternative subject match and domain suffix match are not set.
+     *
+     * Note: this method does not exhaustively check security of the configuration - i.e. a return
+     * value of {@code false} is not a guarantee that the configuration is secure.
+     * @hide
+     */
+    public boolean isInsecure() {
+        if (mEapMethod != Eap.PEAP && mEapMethod != Eap.TLS && mEapMethod != Eap.TTLS) {
+            return false;
+        }
+        if (!mIsAppInstalledCaCert && TextUtils.isEmpty(getCaPath())) {
+            return true;
+        }
+        return TextUtils.isEmpty(getAltSubjectMatch()) && TextUtils.isEmpty(
+                getDomainSuffixMatch());
+    }
 }
