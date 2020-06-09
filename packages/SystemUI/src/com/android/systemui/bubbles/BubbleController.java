@@ -1156,6 +1156,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
         @Override
         public void applyUpdate(BubbleData.Update update) {
+            ensureStackViewCreated();
+
             // Lazy load overflow bubbles from disk
             loadOverflowBubblesFromDisk();
             // Update bubbles in overflow.

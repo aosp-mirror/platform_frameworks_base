@@ -1016,7 +1016,7 @@
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversación marcada como prioritaria"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Las conversaciones prioritarias:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Se muestran en la parte superior de la sección de conversaciones"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Muestran tu imagen de perfil en la pantalla de bloqueo"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Muestran la imagen de perfil en la pantalla de bloqueo"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecen como burbuja sobre las aplicaciones"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrumpen el modo No molestar"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entendido"</string>
@@ -1062,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Desliza el dedo para ver más"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Cargando recomendaciones"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Cerrar esta sesión multimedia"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Error; reintentando…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Dispositivo quitado"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"No se ha podido cargar el estado"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Se ha producido un error. Vuelve a intentarlo."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>

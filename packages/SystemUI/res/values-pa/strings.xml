@@ -1062,9 +1062,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ਹੋਰ ਦੇਖਣ ਲਈ ਸਵਾਈਪ ਕਰੋ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ਸਿਫ਼ਾਰਸ਼ਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"ਇਸ ਮੀਡੀਆ ਸੈਸ਼ਨ ਨੂੰ ਬੰਦ ਕਰੋ"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ਅਕਿਰਿਆਸ਼ੀਲ, ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ਗੜਬੜ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"ਡੀਵਾਈਸ ਹਟਾਇਆ ਗਿਆ"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"ਨਹੀਂ ਮਿਲਿਆ"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"ਕੰਟਰੋਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ <xliff:g id="APPLICATION">%2$s</xliff:g> ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿ ਕੰਟਰੋਲ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੈ ਅਤੇ ਐਪ ਸੈਟਿੰਗ ਬਦਲੀ ਨਹੀਂ ਹੈ।"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ਸਥਿਤੀ ਲੋਡ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ਗੜਬੜ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"ਜਾਰੀ ਹੈ"</string>

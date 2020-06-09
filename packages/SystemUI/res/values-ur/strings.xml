@@ -1065,9 +1065,13 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مزید دیکھنے کیلئے سوائپ کریں"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"تجاویز لوڈ ہو رہی ہیں"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"اس میڈیا سیشن کو بند کریں"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"دوبارہ شروع کریں"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غیر فعال، ایپ چیک کریں"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"خرابی، دوبارہ کوشش کی جا رہی ہے…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"آلہ ہٹا دیا گیا"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"نہیں ملا"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"کنٹرول دستیاب نہیں ہے"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> تک رسائی حاصل نہیں ہو سکی۔ اس بات کو یقینی بنانے کے لیے کہ کنٹرول ابھی بھی دستیاب ہے اور ایپ کی ترتیبات تبدیل نہیں ہوئی، تو <xliff:g id="APPLICATION">%2$s</xliff:g> ایپ چیک کریں۔"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ایپ کھولیں"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"صورتحال لوڈ نہیں ہو سکتی"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"خرابی، دوبارہ کوشش کریں"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"پیشرفت میں"</string>

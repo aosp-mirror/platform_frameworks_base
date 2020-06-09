@@ -1062,9 +1062,17 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Илүү ихийг харахын тулд шударна уу"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Зөвлөмжүүдийг ачаалж байна"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Медианы энэ харилцан үйлдлийг хаах"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Үргэлжлүүлэх"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Идэвхгүй байна, аппыг шалгана уу"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Алдаа, дахин оролдож байна…"</string>
-    <string name="controls_error_removed" msgid="6299213591234723805">"Төхөөрөмжийг хассан"</string>
+    <!-- no translation found for controls_error_removed (6675638069846014366) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
+    <skip />
+    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
+    <skip />
+    <!-- no translation found for controls_open_app (483650971094300141) -->
+    <skip />
     <string name="controls_error_generic" msgid="352500456918362905">"Статус ачаалах боломжгүй"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Алдаа гарав, дахин оролдоно уу"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Үргэлжилж байна"</string>
