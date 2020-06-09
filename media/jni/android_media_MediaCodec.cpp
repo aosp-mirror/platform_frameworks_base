@@ -233,10 +233,12 @@ void JMediaCodec::release() {
 }
 
 void JMediaCodec::releaseAsync() {
-    if (mCodec != NULL) {
-        mCodec->releaseAsync();
-    }
-    mInitStatus = NO_INIT;
+    std::call_once(mAsyncReleaseFlag, [this] {
+        if (mCodec != NULL) {
+            mCodec->releaseAsync(new AMessage(kWhatAsyncReleaseComplete, this));
+        }
+        mInitStatus = NO_INIT;
+    });
 }
 
 JMediaCodec::~JMediaCodec() {
@@ -1082,6 +1084,12 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
         case kWhatFrameRendered:
         {
             handleFrameRenderedNotification(msg);
+            break;
+        }
+        case kWhatAsyncReleaseComplete:
+        {
+            mCodec.clear();
+            mLooper->stop();
             break;
         }
         default:
