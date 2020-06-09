@@ -1007,8 +1007,11 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void updateProcessInfo(boolean updateServiceConnectionActivities, boolean activityChange,
-            boolean updateOomAdj) {
+            boolean updateOomAdj, boolean addPendingTopUid) {
         if (mListener == null) return;
+        if (addPendingTopUid) {
+            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
+        }
         // Posting on handler so WM lock isn't held when we call into AM.
         final Message m = PooledLambda.obtainMessage(WindowProcessListener::updateProcessInfo,
                 mListener, updateServiceConnectionActivities, activityChange, updateOomAdj);
@@ -1068,7 +1071,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
         // update ActivityManagerService.PendingStartActivityUids list.
         if (topProcessState == ActivityManager.PROCESS_STATE_TOP) {
-            mAtm.mAmInternal.updatePendingTopUid(mUid, true);
+            mAtm.mAmInternal.addPendingTopUid(mUid, mPid);
         }
         // Posting the message at the front of queue so WM lock isn't held when we call into AM,
         // and the process state of starting activity can be updated quicker which will give it a

@@ -521,7 +521,6 @@ public class AppOpsService extends IAppOpsService.Stub {
         public boolean hasForegroundWatchers;
 
         public long lastTimeShowDebugToast;
-        public long lastTimePendingTopUid;
 
         public UidState(int uid) {
             this.uid = uid;
@@ -545,7 +544,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     return MODE_ALLOWED;
                 } else if (mActivityManagerInternal != null
                         && mActivityManagerInternal.isPendingTopUid(uid)) {
-                    maybeLogPendingTopUid(op, mode);
                     return MODE_ALLOWED;
                 } else if (state <= UID_STATE_TOP) {
                     // process is in TOP.
@@ -611,7 +609,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     case OP_CAMERA:
                         if (mActivityManagerInternal != null
                                 && mActivityManagerInternal.isPendingTopUid(uid)) {
-                            maybeLogPendingTopUid(op, mode);
                             return MODE_ALLOWED;
                         } else if ((capability & PROCESS_CAPABILITY_FOREGROUND_CAMERA) != 0) {
                             return MODE_ALLOWED;
@@ -629,7 +626,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                     case OP_RECORD_AUDIO:
                         if (mActivityManagerInternal != null
                                 && mActivityManagerInternal.isPendingTopUid(uid)) {
-                            maybeLogPendingTopUid(op, mode);
                             return MODE_ALLOWED;
                         } else if ((capability & PROCESS_CAPABILITY_FOREGROUND_MICROPHONE) != 0) {
                             return MODE_ALLOWED;
@@ -709,25 +705,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             if (mode == DEBUG_FGS_ALLOW_WHILE_IN_USE && state != UID_STATE_FOREGROUND_SERVICE) {
                 return;
             }
-            final long now = System.currentTimeMillis();
+            final long now = SystemClock.elapsedRealtime();
             if (lastTimeShowDebugToast == 0 ||  now - lastTimeShowDebugToast > 600000) {
                 lastTimeShowDebugToast = now;
                 mHandler.sendMessage(PooledLambda.obtainMessage(
                         ActivityManagerInternal::showWhileInUseDebugToast,
                         mActivityManagerInternal, uid, op, mode));
-            }
-        }
-
-
-        void maybeLogPendingTopUid(int op, int mode) {
-            final long now = System.currentTimeMillis();
-            if (lastTimePendingTopUid == 0 ||  now - lastTimePendingTopUid > 300000) {
-                lastTimePendingTopUid = now;
-                Slog.wtf(TAG, "PendingStartActivityUids evalMode, isPendingTopUid true, uid:"
-                        + uid
-                        + " packageName:" + Settings.getPackageNameForUid(mContext, uid)
-                        + " op:" + op
-                        + " mode:" + mode);
             }
         }
     }
