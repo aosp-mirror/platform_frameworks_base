@@ -577,10 +577,6 @@ public class OverviewProxyService extends CurrentUserTracker implements
         // Listen for nav bar mode changes
         mNavBarMode = navModeController.addListener(this);
 
-        // Listen for device provisioned/user setup
-        updateEnabledState();
-        startTracking();
-
         // Listen for launcher package changes
         IntentFilter filter = new IntentFilter(Intent.ACTION_PACKAGE_ADDED);
         filter.addDataScheme("package");
@@ -601,6 +597,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
                         .commitUpdate(mContext.getDisplayId());
             }
         });
+
+        // Listen for user setup
+        startTracking();
+
+        // Connect to the service
+        updateEnabledState();
+        startConnectionToCurrentUser();
     }
 
     @Override
