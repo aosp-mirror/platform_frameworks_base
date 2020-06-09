@@ -59,6 +59,7 @@ import android.content.res.Configuration;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.inputmethodservice.InputMethodService;
 import android.net.Uri;
@@ -83,6 +84,7 @@ import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.WindowInsetsController.Appearance;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
@@ -217,11 +219,12 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
      * original handle hidden and we'll flip the visibilities once the
      * {@link #mTasksFrozenListener} fires
      */
-    private NavigationHandle mOrientationHandle;
+    private VerticalNavigationHandle mOrientationHandle;
     private WindowManager.LayoutParams mOrientationParams;
     private int mStartingQuickSwitchRotation;
     private int mCurrentRotation;
     private boolean mFixedRotationEnabled;
+    private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
 
     /** Only for default display */
     @Nullable
@@ -519,6 +522,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             getContext().getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             getBarTransitions().removeDarkIntensityListener(mOrientationHandleIntensityListener);
             mWindowManager.removeView(mOrientationHandle);
+            mOrientationHandle.getViewTreeObserver().removeOnGlobalLayoutListener(
+                    mOrientationHandleGlobalLayoutListener);
         }
     }
 
@@ -573,6 +578,20 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 PixelFormat.TRANSLUCENT);
         mWindowManager.addView(mOrientationHandle, mOrientationParams);
         mOrientationHandle.setVisibility(View.GONE);
+        mOrientationHandleGlobalLayoutListener =
+                () -> {
+                    if (mStartingQuickSwitchRotation == -1) {
+                        return;
+                    }
+
+                    RectF boundsOnScreen = mOrientationHandle.computeHomeHandleBounds();
+                    mOrientationHandle.mapRectFromViewToScreenCoords(boundsOnScreen, true);
+                    Rect boundsRounded = new Rect();
+                    boundsOnScreen.roundOut(boundsRounded);
+                    mNavigationBarView.setOrientedHandleSamplingRegion(boundsRounded);
+                };
+        mOrientationHandle.getViewTreeObserver().addOnGlobalLayoutListener(
+                mOrientationHandleGlobalLayoutListener);
     }
 
     private void orientSecondaryHomeHandle() {
@@ -621,6 +640,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         if (mNavigationBarView != null) {
             mNavigationBarView.setVisibility(View.VISIBLE);
+            mNavigationBarView.setOrientedHandleSamplingRegion(null);
         }
     }
 
