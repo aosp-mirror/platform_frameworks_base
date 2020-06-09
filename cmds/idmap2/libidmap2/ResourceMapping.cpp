@@ -61,10 +61,13 @@ Result<Unit> CheckOverlayable(const LoadedPackage& target_package,
                               const ResourceId& target_resource) {
   static constexpr const PolicyBitmask sDefaultPolicies =
       PolicyFlags::ODM_PARTITION | PolicyFlags::OEM_PARTITION | PolicyFlags::SYSTEM_PARTITION |
-      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE;
+      PolicyFlags::VENDOR_PARTITION | PolicyFlags::PRODUCT_PARTITION | PolicyFlags::SIGNATURE |
+      PolicyFlags::CONFIG_SIGNATURE;
 
   // If the resource does not have an overlayable definition, allow the resource to be overlaid if
-  // the overlay is preinstalled or signed with the same signature as the target.
+  // the overlay is preinstalled, signed with the same signature as the target or signed with the
+  // same signature as reference package defined in SystemConfig under 'overlay-config-signature'
+  // tag.
   if (!target_package.DefinesOverlayable()) {
     return (sDefaultPolicies & fulfilled_policies) != 0
                ? Result<Unit>({})

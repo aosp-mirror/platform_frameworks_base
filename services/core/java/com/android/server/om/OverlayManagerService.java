@@ -1053,8 +1053,7 @@ public final class OverlayManagerService extends SystemService {
         }
     }
 
-    private static final class PackageManagerHelperImpl implements PackageManagerHelper,
-            OverlayableInfoCallback {
+    private static final class PackageManagerHelperImpl implements PackageManagerHelper  {
 
         private final Context mContext;
         private final IPackageManager mPackageManager;
@@ -1125,6 +1124,14 @@ public final class OverlayManagerService extends SystemService {
                 cachePackageInfo(info.packageName, userId, info);
             }
             return overlays;
+        }
+
+        @Override
+        public String getConfigSignaturePackage() {
+            final String[] pkgs = mPackageManagerInternal.getKnownPackageNames(
+                    PackageManagerInternal.PACKAGE_OVERLAY_CONFIG_SIGNATURE,
+                    UserHandle.USER_SYSTEM);
+            return (pkgs.length == 0) ? null : pkgs[0];
         }
 
         @Nullable
