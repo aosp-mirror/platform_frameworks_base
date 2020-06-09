@@ -303,7 +303,7 @@ public class SoundTriggerModule {
                                     (SoundTrigger.RecognitionEvent) msg.obj);
                             break;
                         case EVENT_SERVICE_STATE_CHANGE:
-                            listener.onServiceStateChange(msg.arg1);
+                            listener.onServiceStateChange((int) msg.obj);
                             break;
                         case EVENT_SERVICE_DIED:
                             listener.onServiceDied();
