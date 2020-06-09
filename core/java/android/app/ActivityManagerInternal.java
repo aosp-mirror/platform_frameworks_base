@@ -429,11 +429,17 @@ public abstract class ActivityManagerInternal {
             int userId, int[] appIdWhitelist);
 
     /**
-     * Add or delete uid from the ActivityManagerService PendingStartActivityUids list.
+     * Add uid to the ActivityManagerService PendingStartActivityUids list.
      * @param uid uid
-     * @param pending add to the list if true, delete from list if false.
+     * @param pid pid of the ProcessRecord that is pending top.
      */
-    public abstract void updatePendingTopUid(int uid, boolean pending);
+    public abstract void addPendingTopUid(int uid, int pid);
+
+    /**
+     * Delete uid from the ActivityManagerService PendingStartActivityUids list.
+     * @param uid uid
+     */
+    public abstract void deletePendingTopUid(int uid);
 
     /**
      * Is the uid in ActivityManagerService PendingStartActivityUids list?
