@@ -122,6 +122,7 @@ import android.os.SystemProperties;
 import android.os.TelephonyServiceManager;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.os.UserManager;
 import android.permission.IPermissionManager;
 import android.provider.BlockedNumberContract;
 import android.provider.CalendarContract;
@@ -6816,7 +6817,11 @@ public final class ActivityThread extends ClientTransactionHandler {
             throw ex.rethrowFromSystemServer();
         }
         if (holder == null) {
-            Slog.e(TAG, "Failed to find provider info for " + auth);
+            if (UserManager.get(c).isUserUnlocked(userId)) {
+                Slog.e(TAG, "Failed to find provider info for " + auth);
+            } else {
+                Slog.w(TAG, "Failed to find provider info for " + auth + " (user not unlocked)");
+            }
             return null;
         }
 
