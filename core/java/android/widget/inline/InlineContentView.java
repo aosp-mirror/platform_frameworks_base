@@ -197,7 +197,9 @@ public class InlineContentView extends ViewGroup {
             mSurfacePackageUpdater.getSurfacePackage(
                     sp -> {
                         if (DEBUG) Log.v(TAG, "Received new SurfacePackage");
-                        mSurfaceView.setChildSurfacePackage(sp);
+                        if (getViewRootImpl() != null) {
+                            mSurfaceView.setChildSurfacePackage(sp);
+                        }
                     });
         }
     }
