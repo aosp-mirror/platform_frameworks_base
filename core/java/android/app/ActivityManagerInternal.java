@@ -398,13 +398,6 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean isUidCurrentlyInstrumented(int uid);
 
-    /**
-     * Show a debug toast, asking user to file a bugreport.
-     */
-    // TODO: remove this toast after feature development is done
-    public abstract void showWhileInUseDebugToast(int uid, int op, int mode);
-
-
     /** Is this a device owner app? */
     public abstract boolean isDeviceOwner(int uid);
 
