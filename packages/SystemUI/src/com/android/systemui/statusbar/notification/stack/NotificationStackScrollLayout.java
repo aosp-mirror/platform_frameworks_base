@@ -6538,7 +6538,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return row.canViewBeDismissed();
         }
         if (v instanceof PeopleHubView) {
-            return true;
+            return ((PeopleHubView) v).getCanSwipe();
         }
         return false;
     }
