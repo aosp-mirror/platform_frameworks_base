@@ -65,6 +65,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.networkstack.tethering.BpfCoordinator;
 import com.android.networkstack.tethering.PrivateAddressCoordinator;
 
 import java.io.IOException;
@@ -225,6 +226,8 @@ public class IpServer extends StateMachine {
 
     private final SharedLog mLog;
     private final INetd mNetd;
+    @NonNull
+    private final BpfCoordinator mBpfCoordinator;
     private final Callback mCallback;
     private final InterfaceController mInterfaceCtrl;
     private final PrivateAddressCoordinator mPrivateAddressCoordinator;
@@ -314,11 +317,13 @@ public class IpServer extends StateMachine {
     // object. It helps to reduce the arguments of the constructor.
     public IpServer(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
-            INetd netd, Callback callback, boolean usingLegacyDhcp, boolean usingBpfOffload,
+            INetd netd, @NonNull BpfCoordinator coordinator, Callback callback,
+            boolean usingLegacyDhcp, boolean usingBpfOffload,
             PrivateAddressCoordinator addressCoordinator, Dependencies deps) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNetd = netd;
+        mBpfCoordinator = coordinator;
         mCallback = callback;
         mInterfaceCtrl = new InterfaceController(ifaceName, mNetd, mLog);
         mIfaceName = ifaceName;
@@ -749,6 +754,14 @@ public class IpServer extends StateMachine {
             }
 
             upstreamIfindex = mDeps.getIfindex(upstreamIface);
+
+            // Add upstream index to name mapping for the tether stats usage in the coordinator.
+            // Although this mapping could be added by both class Tethering and IpServer, adding
+            // mapping from IpServer guarantees that the mapping is added before the adding
+            // forwarding rules. That is because there are different state machines in both
+            // classes. It is hard to guarantee the link property update order between multiple
+            // state machines.
+            mBpfCoordinator.addUpstreamNameToLookupTable(upstreamIfindex, upstreamIface);
         }
 
         // If v6only is null, we pass in null to setRaParams(), which handles
