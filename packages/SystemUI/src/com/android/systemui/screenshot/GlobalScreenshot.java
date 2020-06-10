@@ -114,7 +114,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
         public int errorMsgResId;
-        public boolean createDeleteAction;
 
         void clearImage() {
             image = null;
@@ -431,7 +430,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         data.image = mScreenBitmap;
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
-        data.createDeleteAction = false;
 
         if (mSaveInBgTask != null) {
             // just log success/failure for the pre-existing screenshot
@@ -726,11 +724,11 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         createScreenshotDropInAnimation(bitmapWidth, bitmapHeight, screenRect);
 
                 saveScreenshotInWorkerThread(finisher, new ActionsReadyListener() {
-                            @Override
-                            void onActionsReady(SavedImageData imageData) {
-                                showUiOnActionsReady(imageData);
-                            }
-                        });
+                    @Override
+                    void onActionsReady(SavedImageData imageData) {
+                        showUiOnActionsReady(imageData);
+                    }
+                });
 
                 // Play the shutter sound to notify that we've taken a screenshot
                 mCameraSound.play(MediaActionSound.SHUTTER_CLICK);
