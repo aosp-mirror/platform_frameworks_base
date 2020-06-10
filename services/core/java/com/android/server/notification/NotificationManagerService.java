@@ -2048,10 +2048,13 @@ public class NotificationManagerService extends SystemService {
         mStripRemoteViewsSizeBytes = getContext().getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
 
-        mMsgPkgsAllowedAsConvos = Set.of(
-                getContext().getResources().getStringArray(
-                        com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
+        mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
+                com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
         mStatsManager = statsManager;
+    }
+
+    protected String[] getStringArrayResource(int key) {
+        return getContext().getResources().getStringArray(key);
     }
 
     @Override
@@ -2741,10 +2744,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void maybeRegisterMessageSent(NotificationRecord r) {
-        Context appContext = r.getSbn().getPackageContext(getContext());
-        Notification.Builder nb =
-                Notification.Builder.recoverBuilder(appContext, r.getNotification());
-        if (nb.getStyle() instanceof Notification.MessagingStyle) {
+        if (r.isConversation()) {
             if (r.getShortcutInfo() != null) {
                 if (mPreferencesHelper.setValidMessageSent(
                         r.getSbn().getPackageName(), r.getUid())) {
