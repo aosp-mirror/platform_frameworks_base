@@ -104,9 +104,9 @@ import com.android.systemui.statusbar.notification.row.ActivatableNotificationVi
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
-import com.android.systemui.statusbar.notification.stack.MediaHeaderView;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.dagger.StatusBarComponent;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
@@ -2474,6 +2474,8 @@ public class NotificationPanelViewController extends PanelViewController {
                     } else {
                         mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_HINT,
                                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+                        mLockscreenGestureLogger
+                            .log(LockscreenUiEvent.LOCKSCREEN_LOCK_SHOW_HINT);
                         startUnlockHintAnimation();
                     }
                 }
@@ -3257,7 +3259,7 @@ public class NotificationPanelViewController extends PanelViewController {
             int velocityDp = Math.abs((int) (vel / displayDensity));
             if (start) {
                 mLockscreenGestureLogger.write(MetricsEvent.ACTION_LS_DIALER, lengthDp, velocityDp);
-
+                mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_DIALER);
                 mFalsingManager.onLeftAffordanceOn();
                 if (mFalsingManager.shouldEnforceBouncer()) {
                     mStatusBar.executeRunnableDismissingKeyguard(
@@ -3272,6 +3274,7 @@ public class NotificationPanelViewController extends PanelViewController {
                         mLastCameraLaunchSource)) {
                     mLockscreenGestureLogger.write(
                             MetricsEvent.ACTION_LS_CAMERA, lengthDp, velocityDp);
+                    mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_CAMERA);
                 }
                 mFalsingManager.onCameraOn();
                 if (mFalsingManager.shouldEnforceBouncer()) {
