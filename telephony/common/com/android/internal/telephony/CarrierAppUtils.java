@@ -21,7 +21,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.os.SystemConfigManager;
 import android.os.UserHandle;
 import android.permission.PermissionManager;
@@ -30,9 +29,7 @@ import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.telephony.util.ArrayUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -162,12 +159,9 @@ public final class CarrierAppUtils {
         try {
             for (ApplicationInfo ai : candidates) {
                 String packageName = ai.packageName;
-                String[] restrictedCarrierApps = Resources.getSystem().getStringArray(
-                        R.array.config_restrictedPreinstalledCarrierApps);
                 boolean hasPrivileges = telephonyManager != null
                         && telephonyManager.checkCarrierPrivilegesForPackageAnyPhone(packageName)
-                                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS
-                        && !ArrayUtils.contains(restrictedCarrierApps, packageName);
+                                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS;
 
                 // add hiddenUntilInstalled flag for carrier apps and associated apps
                 packageManager.setSystemAppState(
