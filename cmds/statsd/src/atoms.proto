@@ -6417,6 +6417,16 @@ message ContentCaptureServiceEvents {
         SET_WHITELIST = 3;
         SET_DISABLED = 4;
         ON_USER_DATA_REMOVED = 5;
+        ON_DATA_SHARE_REQUEST = 6;
+        ACCEPT_DATA_SHARE_REQUEST = 7;
+        REJECT_DATA_SHARE_REQUEST = 8;
+        DATA_SHARE_WRITE_FINISHED = 9;
+        DATA_SHARE_ERROR_IOEXCEPTION = 10;
+        DATA_SHARE_ERROR_EMPTY_DATA = 11;
+        DATA_SHARE_ERROR_CLIENT_PIPE_FAIL = 12;
+        DATA_SHARE_ERROR_SERVICE_PIPE_FAIL = 13;
+        DATA_SHARE_ERROR_CONCURRENT_REQUEST = 14;
+        DATA_SHARE_ERROR_TIMEOUT_INTERRUPTED = 15;
     }
     optional Event event = 1;
     // component/package of content capture service.
