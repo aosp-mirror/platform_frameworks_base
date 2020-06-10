@@ -77,13 +77,29 @@ final class AutofillInlineSessionController {
         if (mSession != null) {
             // Destroy the existing session.
             mSession.destroySessionLocked();
-            mInlineFillUi = null;
         }
+        mInlineFillUi = null;
         // TODO(b/151123764): consider reusing the same AutofillInlineSession object for the
         // same field.
         mSession = new AutofillInlineSuggestionsRequestSession(mInputMethodManagerInternal, mUserId,
                 mComponentName, mHandler, mLock, autofillId, requestConsumer, uiExtras);
         mSession.onCreateInlineSuggestionsRequestLocked();
+    }
+
+    /**
+     * Destroys the current session. May send an empty response to IME to clear the suggestions if
+     * the focus didn't change to a different field.
+     *
+     * @param autofillId the currently focused view from the autofill session
+     */
+    @GuardedBy("mLock")
+    void destroyLocked(@NonNull AutofillId autofillId) {
+        if (mSession != null) {
+            mSession.onInlineSuggestionsResponseLocked(InlineFillUi.emptyUi(autofillId));
+            mSession.destroySessionLocked();
+            mSession = null;
+        }
+        mInlineFillUi = null;
     }
 
     /**
