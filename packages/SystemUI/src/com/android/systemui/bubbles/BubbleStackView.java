@@ -1621,12 +1621,19 @@ public class BubbleStackView extends FrameLayout
                 final int inset = getResources().getDimensionPixelSize(
                         R.dimen.bubbles_manage_education_top_inset);
                 mManageEducationView.bringToFront();
-                mManageEducationView.setManageViewPosition(mTempRect.left,
-                        mTempRect.top - viewHeight + inset);
-                mManageEducationView.setPointerPosition(mTempRect.centerX() - mTempRect.left);
+                mManageEducationView.setManageViewPosition(0, mTempRect.top - viewHeight + inset);
                 mManageEducationView.animate()
                         .setDuration(ANIMATE_STACK_USER_EDUCATION_DURATION)
                         .setInterpolator(FAST_OUT_SLOW_IN).alpha(1);
+                mManageEducationView.findViewById(R.id.manage).setOnClickListener(view -> {
+                            mExpandedBubble.getExpandedView().findViewById(R.id.settings_button)
+                                    .performClick();
+                            maybeShowManageEducation(false);
+                        });
+                mManageEducationView.findViewById(R.id.got_it).setOnClickListener(view ->
+                        maybeShowManageEducation(false));
+                mManageEducationView.setOnClickListener(view ->
+                        maybeShowManageEducation(false));
             });
             Prefs.putBoolean(getContext(), HAS_SEEN_BUBBLES_MANAGE_EDUCATION, true);
         } else if (!show
@@ -1959,9 +1966,10 @@ public class BubbleStackView extends FrameLayout
      */
     @Override
     public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
-        // If the notification shade is expanded, or the manage menu is open, we shouldn't let the
+        // If the notification shade is expanded, or the manage menu is open, or we are showing
+        // manage bubbles user education, we shouldn't let the
         // ActivityView steal any touch events from any location.
-        if (!mIsExpanded || mShowingManage) {
+        if (!mIsExpanded || mShowingManage || mManageEducationView.getVisibility() == VISIBLE) {
             touchableRegion.setEmpty();
         }
     }
