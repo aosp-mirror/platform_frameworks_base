@@ -38,6 +38,8 @@
         <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:clipChildren="false"
+            android:clipToPadding="false"
             android:layout_gravity="top|center_horizontal"
         >
 
@@ -63,13 +65,17 @@
                 android:layout_height="@dimen/conversation_icon_size_badged"
                 android:layout_marginLeft="@dimen/conversation_badge_side_margin"
                 android:layout_marginTop="@dimen/conversation_badge_side_margin"
+                android:clipChildren="false"
+                android:clipToPadding="false"
             >
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_bg"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_gravity="center"
                     android:src="@drawable/conversation_badge_background"
                     android:forceHasOverlappingRendering="false"
+                    android:scaleType="center"
                 />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/icon"
@@ -81,11 +87,14 @@
                 />
                 <com.android.internal.widget.CachingIconView
                     android:id="@+id/conversation_icon_badge_ring"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
                     android:src="@drawable/conversation_badge_ring"
                     android:visibility="gone"
                     android:forceHasOverlappingRendering="false"
+                    android:clipToPadding="false"
+                    android:scaleType="center"
                 />
             </FrameLayout>
         </FrameLayout>
@@ -132,7 +141,7 @@
                         android:id="@+id/conversation_text"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"
                         android:textSize="16sp"
                         android:singleLine="true"
@@ -145,8 +154,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:text="@string/notification_header_divider_symbol"
                         android:layout_gravity="center"
                         android:paddingTop="1sp"
@@ -161,7 +170,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:paddingTop="1sp"
                         android:singleLine="true"
                     />
@@ -171,8 +181,8 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textAppearance="?attr/notificationHeaderTextAppearance"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
-                        android:layout_marginEnd="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
+                        android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:text="@string/notification_header_divider_symbol"
                         android:layout_gravity="center"
                         android:paddingTop="1sp"
@@ -186,7 +196,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:layout_marginStart="@dimen/notification_header_separating_margin"
+                        android:layout_marginStart="@dimen/notification_conversation_header_separating_margin"
                         android:paddingTop="1sp"
                         android:showRelative="true"
                         android:singleLine="true"

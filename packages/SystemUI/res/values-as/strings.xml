@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"শীৰ্ষৰ সোঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"বুটামটো বাওঁফালে নিয়ক"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"তলৰ সোঁফালে নিয়ক"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"অগ্ৰাহ্য কৰক"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"বাৰ্তালাপ বাবল নকৰিব"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bubbles ব্যৱহাৰ কৰি চাট কৰক"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"নতুন বাৰ্তালাপ উপঙি থকা চিহ্নসমূহ অথবা bubbles হিচাপে প্ৰদর্শিত হয়। Bubbles খুলিবলৈ টিপক। এইটো স্থানান্তৰ কৰিবলৈ টানি নিয়ক।"</string>
@@ -1067,7 +1068,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"আসোঁৱাহ, পুনৰ চেষ্টা কৰি আছে…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"বিচাৰি পোৱা নগ’ল"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"নিয়ন্ত্ৰণটো উপলব্ধ নহয়"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> এক্সেছ কৰিব পৰা নগ’ল। নিয়ন্ত্ৰণটো যে এতিয়াও উপলব্ধ আৰু এপ্‌টোৰ ছেটিংসমূহ সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APPLICATION">%2$s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> এক্সেছ কৰিব পৰা নগ’ল। নিয়ন্ত্ৰণটো এতিয়াও উপলব্ধ আৰু এপ্‌টোৰ ছেটিংসমূহ সলনি কৰা হোৱা নাই বুলি নিশ্চিত কৰিবলৈ <xliff:g id="APPLICATION">%2$s</xliff:g> এপ্‌টো পৰীক্ষা কৰক।"</string>
     <string name="controls_open_app" msgid="483650971094300141">"এপ্‌টো খোলক"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"স্থিতি ল’ড কৰিব নোৱাৰি"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"আসোঁৱাহ হৈছে, আকৌ চেষ্টা কৰক"</string>

@@ -274,7 +274,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Ұшақ режимі өшірілді."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Ұшақ режимі қосылды."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"үнсіз"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"тек дабылдар"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"оятқыштар ғана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Мазаламау."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"Мазаламау\" режимі өшірілді."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"Мазаламау\" режимі қосылды."</string>
@@ -344,7 +344,7 @@
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"Басқа опцияларды көру үшін белгішелерді түртіп ұстап тұрыңыз"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Мазаламау"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Маңыздылары ғана"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Тек дабылдар"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Оятқыштар ғана"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Толық тыныштық"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> құрылғылары)"</string>
@@ -462,7 +462,7 @@
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Толық тыныштық. Экранды оқу құралдары да өшеді."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Толық тыныштық"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"Маңыздылары ғана"</string>
-    <string name="interruption_level_alarms" msgid="2457850481335846959">"Тек дабылдар"</string>
+    <string name="interruption_level_alarms" msgid="2457850481335846959">"Оятқыштар ғана"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Толық\nтыныштық"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Тек\nбасымдық"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Тек\nдабылдар"</string>
@@ -721,7 +721,7 @@
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңыздылығы"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Жақындағы қалқыма хабарлар жоқ"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Жақында ашылған және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бұл хабарландыруларды өзгерту мүмкін емес."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Мұндай хабарландырулар бұл жерде конфигурацияланбайды."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Прокси-сервер арқылы жіберілген хабарландыру"</string>
@@ -1002,9 +1002,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Жоғары оң жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Төменгі сол жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Төменгі оң жаққа жылжыту"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Жабу"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Әңгіменің қалқыма хабары көрсетілмесін"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Сөйлесуге арналған қалқыма хабарлар"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Қалқыма хабарлар арқылы сөйлесу"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Жаңа әңгімелер қалқыма белгішелер немесе хабарлар түрінде көрсетіледі. Қалқыма хабарды ашу үшін түртіңіз. Жылжыту үшін сүйреңіз."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Қалқыма хабарларды реттеу"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Бұл қолданбадан қалқыма хабарларды өшіру үшін \"Басқару\" түймесін түртіңіз."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Жалғастыру"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Өшірулі. Қолданба тексеріңіз."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Қате, әрекет қайталануда…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Табылмады"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Басқару элементтері қолжетімді емес"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ашылмады. Басқару элементтерінің әлі қолжетімді екенін және қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасын қараңыз."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Қолданбаны ашу"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Күйді жүктеу мүмкін емес."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Қате шықты. Қайталап көріңіз."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Орындалуда"</string>

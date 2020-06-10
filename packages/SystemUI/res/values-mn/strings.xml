@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Баруун дээш зөөх"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Зүүн доош зөөх"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Баруун доош зөөх"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Үл хэрэгсэх"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Харилцан яриаг бүү бөмбөлөг болго"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Бөмбөлөг ашиглан чатлаарай"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Шинэ харилцан яриа нь хөвөгч дүрс тэмдэг эсвэл бөмбөлөг хэлбэрээр харагддаг. Бөмбөлгийг нээхийн тулд товшино уу. Түүнийг зөөхийн тулд чирнэ үү."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Үргэлжлүүлэх"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Идэвхгүй байна, аппыг шалгана уу"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Алдаа, дахин оролдож байна…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Олдсонгүй"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Хяналт боломжгүй байна"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>-д хандаж чадсангүй. Хяналт боломжтой хэвээр байгаа бөгөөд аппын тохиргоог өөрчлөөгүй эсэхийг нягтлахын тулд <xliff:g id="APPLICATION">%2$s</xliff:g> аппыг шалгана уу."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Аппыг нээх"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Статус ачаалах боломжгүй"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Алдаа гарав, дахин оролдоно уу"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Үргэлжилж байна"</string>

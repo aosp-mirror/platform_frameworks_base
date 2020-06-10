@@ -450,13 +450,28 @@ message Atom {
         TvCasSessionOpenStatus tv_cas_session_open_status =
             280 [(module) = "framework"];
         AssistantInvocationReported assistant_invocation_reported = 281 [(module) = "framework"];
+        DisplayWakeReported display_wake_reported = 282 [(module) = "framework"];
+        CarUserHalModifyUserRequestReported car_user_hal_modify_user_request_reported =
+            283 [(module) = "car"];
+        CarUserHalModifyUserResponseReported car_user_hal_modify_user_response_reported =
+            284 [(module) = "car"];
+        CarUserHalPostSwitchResponseReported car_user_hal_post_switch_response_reported =
+            285 [(module) = "car"];
+        CarUserHalInitialUserInfoRequestReported car_user_hal_initial_user_info_request_reported =
+            286 [(module) = "car"];
+        CarUserHalInitialUserInfoResponseReported car_user_hal_initial_user_info_response_reported =
+            287 [(module) = "car"];
+        CarUserHalUserAssociationRequestReported car_user_hal_user_association_request_reported =
+            288 [(module) = "car"];
+        CarUserHalSetUserAssociationResponseReported car_user_hal_set_user_association_response_reported =
+            289 [(module) = "car"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10084
+    // Next: 10081
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -547,7 +562,7 @@ message Atom {
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
-        DisplayWakeReason display_wake_reason = 10081 [(module) = "framework"];
+        //10081 free for use
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
@@ -8001,6 +8016,245 @@ message CarPowerStateChanged {
 }
 
 /**
+ * Logs when Car User Hal is requested to switch/create/remove user.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalModifyUserRequestReported {
+    // Request id for the request.
+    optional int32 request_id = 1;
+    // Request type.
+    enum RequestType {
+        UNKNOWN = 0;
+        // Car user manager requested user switch.
+        SWITCH_REQUEST_ANDROID = 1;
+        // OEM requested User switch.
+        SWITCH_REQUEST_OEM = 2;
+        // Hal switch requested after android switch using activity manager.
+        SWITCH_REQUEST_LEGACY = 3;
+        // Create User
+        CREATE_REQUEST = 4;
+        // Remove User
+        REMOVE_REQUEST = 5;
+    }
+    optional RequestType request_type = 2;
+    // Android User id of the current user which can only be 0, 10, 11 and so on.
+    // -1 if not available.
+    optional int32 user_id = 3;
+    // VHAL flags of the current user. (-1 if not available)
+    optional int32 user_flags = 4;
+    // Android User id of the target user for switch/create/remove. It can only
+    // be 0, 10, 11 and so on. -1 if not available.
+    optional int32 target_user_id = 5;
+    // VHAL flags of the target user for switch/create/remove. (-1 if not available)
+    optional int32 target_user_flags = 6;
+    // Request timeout Milliseconds (-1 if not available)
+    optional int32 timeout_millis = 7;
+}
+
+/**
+ * Logs when Car User Hal responds to switch/create user request.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalModifyUserResponseReported {
+    // Request id of the request associated with the response.
+    optional int32 request_id = 1;
+    // Car user hal callback status.
+    enum CallbackStatus {
+        UNKNOWN = 0;
+        // Hal response was invalid.
+        INVALID = 1;
+        // Hal response was ok.
+        OK = 2;
+        // Hal timeout during set call.
+        HAL_SET_TIMEOUT = 3;
+        // Hal response timeout.
+        HAL_RESPONSE_TIMEOUT = 4;
+        // Hal responded with wrong info.
+        WRONG_HAL_RESPONSE = 5;
+        // Hal is processing multiple requests simultaneously.
+        CONCURRENT_OPERATION = 6;
+    }
+    optional CallbackStatus callback_status = 2;
+
+    // Hal request status for user switch/create/remove.
+    enum HalRequestStatus {
+        UNSPECIFIED = 0;
+        // Hal request for user switch/create is successful.
+        SUCCESS = 1;
+        // Hal request for user switch/create failed.
+        FAILURE = 2;
+    }
+    optional HalRequestStatus request_status = 3;
+}
+
+/**
+ * Logs when post switch response is posted to Car User Hal.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalPostSwitchResponseReported {
+    // Request id.
+    optional int32 request_id = 1;
+
+    // Android user switch status.
+    enum UserSwitchStatus {
+        UNKNOWN = 0;
+        // Android user switch is successful.
+        SUCCESS = 1;
+        // Android user switch failed.
+        FAILURE = 2;
+    }
+    optional UserSwitchStatus switch_status = 2;
+}
+
+/**
+ * Logs when initial user information is requested from Car User Hal.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalInitialUserInfoRequestReported {
+    // Request id for the request.
+    optional int32 request_id = 1;
+
+    // Request type for initial user information.
+    enum InitialUserInfoRequestType {
+        UNKNOWN = 0;
+        // At the first time Android was booted (or after a factory reset).
+        FIRST_BOOT = 1;
+        // At the first time Android was booted after the system was updated.
+        FIRST_BOOT_AFTER_OTA = 2;
+        // When Android was booted "from scratch".
+        COLD_BOOT = 3;
+        // When Android was resumed after the system was suspended to memory.
+        RESUME = 4;
+    }
+    optional InitialUserInfoRequestType request_type = 2;
+    // Request timeout Milliseconds (-1 if not available)
+    optional int32 timeout_millis = 3;
+}
+
+/**
+ * Logs when Car User Hal responds to initial user information requests.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalInitialUserInfoResponseReported {
+    // Request id of the request associated with the response.
+    optional int32 request_id = 1;
+    // Car user hal callback status.
+    enum CallbackStatus {
+        UNKNOWN = 0;
+        // Hal response was invalid.
+        INVALID = 1;
+        // Hal response was ok.
+        OK = 2;
+        // Hal timeout during set call.
+        HAL_SET_TIMEOUT = 3;
+        // Hal response timeout.
+        HAL_RESPONSE_TIMEOUT = 4;
+        // Hal responded with wrong info.
+        WRONG_HAL_RESPONSE = 5;
+        // Hal is processing multiple requests simultaneously.
+        CONCURRENT_OPERATION = 6;
+    }
+    optional CallbackStatus callback_status = 2;
+    // Response for initial user information request.
+    enum InitialUserInfoResponseAction {
+        UNSPECIFIED = 0;
+        // Let the Android System decide what to do.
+        DEFAULT = 1;
+        // Switch to an existing Android user.
+        SWITCH = 2;
+        // Create a new Android user (and switch to it).
+        CREATE = 3;
+    }
+    optional InitialUserInfoResponseAction response_action = 3;
+    // Android User id of the target user which can only be 0, 10, 11 and so on.
+    // -1 if not available.
+    optional int32 target_user = 4;
+    // VHAL flags of the current user. (-1 if not available)
+    optional int32 target_user_flags = 5;
+    // User locales
+    optional string user_locales = 6;
+}
+
+/**
+ * Logs when set user association is requested from Car User Hal.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalUserAssociationRequestReported {
+    // Request id for the request.
+    optional int32 request_id = 1;
+    // Request type.
+    enum RequestType {
+        UNKNOWN = 0;
+        // For setting user association information.
+        SET = 1;
+        // For getting user association information.
+        GET = 2;
+    }
+    optional RequestType request_type = 2;
+    // Android User id of the current user which can only be 0, 10, 11 and so on.
+    // -1 if not available.
+    optional int32 current_user_id = 3;
+    // VHAL flags of the current user. (-1 if not available)
+    optional int32 current_user_flags = 4;
+    // Number of the set associations requested.
+    optional int32 number_associations = 5;
+    // Concatenated string for the types from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_types = 6;
+    // Concatenated string for the values from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_values = 7;
+}
+
+/**
+ * Logs when Car User Hal responds to set user association requests.
+ *
+ * Logged from:
+ *   packages/services/Car/service/src/com/android/car/hal/UserHalService.java
+ */
+message CarUserHalSetUserAssociationResponseReported {
+    // Request id of the request associated with the response.
+    optional int32 request_id = 1;
+    // Car user hal callback status.
+    enum CallbackStatus {
+        UNKNOWN = 0;
+        // Hal response was invalid.
+        INVALID = 1;
+        // Hal response was ok.
+        OK = 2;
+        // Hal timeout during set call.
+        HAL_SET_TIMEOUT = 3;
+        // Hal response timeout.
+        HAL_RESPONSE_TIMEOUT = 4;
+        // Hal responded with wrong info.
+        WRONG_HAL_RESPONSE = 5;
+        // Hal is processing multiple requests simultaneously.
+        CONCURRENT_OPERATION = 6;
+    }
+    optional CallbackStatus callback_status = 2;
+    // Number of the set associations in the response.
+    optional int32 number_associations = 3;
+    // Concatenated string for the types from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_types = 4;
+    // Concatenated string for the values from set associations request.
+    // This is a string converted from an array of integers.
+    optional string user_identification_association_values = 5;
+}
+
+/**
  * Logs whether GarageMode is entered.
  *
  * Logged from:
@@ -9817,15 +10071,20 @@ message AccessibilityServiceReported {
     optional android.stats.accessibility.ServiceStatus service_status = 2;
 }
 
-message DisplayWakeReason {
+/**
+ * Logs when display wake up.
+ *
+ * Logged from:
+ *   services/core/java/com/android/server/power/Notifier.java
+ */
+
+message DisplayWakeReported {
     // Wake_up_reason code
     // If LOWORD(wake_up_reason) = 0
     //     reference to HIWORD(wake_up_reason) PowerManager.WAKE_REASON_XXX
     //     else reference wake_up_reason to
-    //     frameworks/base/services/core/java/com/android/server/power/Notifier.java#DispWakeupReason
+    //     services/core/java/com/android/server/power/Notifier.java#onWakeUp
     optional int32 wake_up_reason = 1;
-    // Count of wake up by reason
-    optional int32 wake_times = 2;
 }
 
 /**

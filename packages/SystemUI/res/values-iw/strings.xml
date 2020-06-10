@@ -1012,7 +1012,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"העברה לפינה הימנית העליונה"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"העברה לפינה השמאלית התחתונה"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"העברה לפינה הימנית התחתונה"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"סגירה"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"אין להציג בועות לשיחה"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"לדבר בצ\'אט באמצעות בועות"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"שיחות חדשות מופיעות כסמלים צפים, או בועות. יש להקיש כדי לפתוח בועה. יש לגרור כדי להזיז אותה."</string>
@@ -1077,14 +1078,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"המשך"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"לא פעיל, יש לבדוק את האפליקציה"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"שגיאה, מתבצע ניסיון חוזר…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"לא נמצא"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"הפקד לא זמין"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"לא ניתן להתחבר אל <xliff:g id="DEVICE">%1$s</xliff:g>. יש לבדוק את האפליקציה <xliff:g id="APPLICATION">%2$s</xliff:g> כדי לוודא שהפקד עדיין זמין ושהגדרות האפליקציה לא השתנו."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"לפתיחת האפליקציה"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"לא ניתן לטעון את הסטטוס"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"שגיאה, יש לנסות שוב"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"בתהליך"</string>

@@ -1012,7 +1012,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Přesunout vpravo nahoru"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Přesunout vlevo dolů"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Přesunout vpravo dolů"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Zavřít"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nezobrazovat konverzaci v bublinách"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatujte pomocí bublin"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nové konverzace se zobrazují jako plovoucí ikony, neboli bubliny. Klepnutím bublinu otevřete. Přetažením ji posunete."</string>
@@ -1077,14 +1078,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Pokračovat"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivní, zkontrolujte aplikaci"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Chyba. Nový pokus…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nenalezeno"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Ovládání není k dispozici"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Zařízení <xliff:g id="DEVICE">%1$s</xliff:g> nelze použít. V aplikaci <xliff:g id="APPLICATION">%2$s</xliff:g> zkontrolujte, zda je ovládání stále k dispozici a zda se nezměnilo nastavení."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Otevřít aplikaci"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Stav nelze načíst"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Chyba, zkuste to znovu"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Probíhá"</string>

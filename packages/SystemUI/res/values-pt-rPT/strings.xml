@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Mover parte superior direita"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Mover p/ parte infer. esquerda"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Mover parte inferior direita"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ignorar"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Não apresentar a conversa em balões"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Converse no chat através de balões"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"As novas conversas aparecem como ícones flutuantes ou balões. Toque para abrir o balão. Arraste para o mover."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativa. Consulte a app."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Erro. A tentar novamente…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado."</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"O controlo está indisponível"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Não foi possível aceder a <xliff:g id="DEVICE">%1$s</xliff:g>. Verifique a app <xliff:g id="APPLICATION">%2$s</xliff:g> para se certificar de que o controlo ainda está disponível e que as definições da mesma não foram alteradas."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Abrir app"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Impossível carregar o estado."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Tente novamente."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Em curso"</string>

@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Ekraanisalvestuse töötlemine"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Kas alustada salvestamist?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Heli salvestamise ajal võib Androidi süsteem jäädvustada tundlikku teavet, mis on ekraanikuval nähtav või mida seadmes esitatakse. See hõlmab paroole, makseteavet, fotosid, sõnumeid ja heli."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Salvestamise ajal võib Androidi süsteem jäädvustada tundlikku teavet, mis on ekraanikuval nähtav või mida seadmes esitatakse. See hõlmab paroole, makseteavet, fotosid, sõnumeid ja heli."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Heli salvestamine"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Seadme heli"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Seadmest pärinev heli, nt muusika, kõned ja helinad"</string>
@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Teisalda üles paremale"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Teisalda alla vasakule"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Teisalda alla paremale"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Loobu"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ära kuva vestlust mullina"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Vestelge mullide abil"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Uued vestlused kuvatakse hõljuvate ikoonidena ehk mullidena. Puudutage mulli avamiseks. Lohistage mulli, et seda liigutada."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Jätka"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Passiivne, vaadake rakendust"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Viga, proovitakse uuesti …"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Ei leitud"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Juhtelement pole saadaval"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Seadmele <xliff:g id="DEVICE">%1$s</xliff:g> ei pääsenud juurde. Kontrollige rakendust <xliff:g id="APPLICATION">%2$s</xliff:g> ja veenduge, et juhtelement oleks endiselt saadaval ning rakenduse seaded poleks muutunud."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ava rakendus"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Olekut ei saa laadida"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Ilmnes viga, proovige uuesti"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Pooleli"</string>

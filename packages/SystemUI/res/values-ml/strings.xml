@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"മുകളിൽ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ചുവടെ ഇടതുഭാഗത്തേക്ക് നീക്കുക"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ചുവടെ വലതുഭാഗത്തേക്ക് നീക്കുക"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ഡിസ്‌മിസ് ചെയ്യുക"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"സംഭാഷണം ബബിൾ ചെയ്യരുത്"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ബബിളുകൾ ഉപയോഗിച്ച് ചാറ്റ് ചെയ്യുക"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളുകളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യു. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>

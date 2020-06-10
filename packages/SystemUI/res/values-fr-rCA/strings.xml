@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Déplacer dans coin sup. droit"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Déplacer dans coin inf. gauche"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Déplacer dans coin inf. droit"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Fermer"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ne pas afficher les conversations dans des bulles"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Clavarder en utilisant des bulles"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes (de bulles). Touchez une bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
@@ -1068,7 +1069,7 @@
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"La commande n\'est pas accessible"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"Impossible d\'accéder à <xliff:g id="DEVICE">%1$s</xliff:g>. Vérifiez l\'application <xliff:g id="APPLICATION">%2$s</xliff:g> pour vous assurer que la commande est toujours offerte et que les paramètres de l\'application n\'ont pas changé."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir l\'application"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Ouvrir"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Impossible de charger l\'état"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erreur. Veuillez réessayer."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En cours"</string>

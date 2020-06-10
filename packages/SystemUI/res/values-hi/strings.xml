@@ -1004,7 +1004,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"सबसे ऊपर दाईं ओर ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"बाईं ओर सबसे नीचे ले जाएं"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"सबसे नीचे दाईं ओर ले जाएं"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"खारिज करें"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"बातचीत को बबल न करें"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबल्स का इस्तेमाल करके चैट करें"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"नई बातचीत फ़्लोटिंग आइकॉन या बबल्स की तरह दिखेंगी. बबल को खोलने के लिए टैप करें. इसे एक जगह से दूसरी जगह ले जाने के लिए खींचें और छोड़ें."</string>
@@ -1067,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"फिर से शुरू करें"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"कोई गड़बड़ी हुई, फिर से कोशिश की जा रही है…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं मिला"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"कंट्रोल मौजूद नहीं है"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ऐक्सेस नहीं किया जा सका. <xliff:g id="APPLICATION">%2$s</xliff:g> ऐप्लिकेशन देखें, ताकि यह पक्का किया जा सके कि कंट्रोल अब भी मौजूद है और सेटिंग में कोई बदलाव नहीं हुआ है."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ऐप्लिकेशन खोलें"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"स्थिति लोड नहीं की जा सकती"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"गड़बड़ी हुई, फिर से कोशिश करें"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"जारी है"</string>

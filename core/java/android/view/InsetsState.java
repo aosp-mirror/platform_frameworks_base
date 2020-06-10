@@ -245,6 +245,44 @@ public class InsetsState implements Parcelable {
         return insets.toRect();
     }
 
+    /**
+     * Calculate which insets *cannot* be controlled, because the frame does not cover the
+     * respective side of the inset.
+     *
+     * If the frame of our window doesn't cover the entire inset, the control API makes very
+     * little sense, as we don't deal with negative insets.
+     */
+    @InsetsType
+    public int calculateUncontrollableInsetsFromFrame(Rect frame) {
+        int blocked = 0;
+        for (int type = FIRST_TYPE; type <= LAST_TYPE; type++) {
+            InsetsSource source = mSources.get(type);
+            if (source == null) {
+                continue;
+            }
+            if (!canControlSide(frame, getInsetSide(
+                    source.calculateInsets(frame, true /* ignoreVisibility */)))) {
+                blocked |= toPublicType(type);
+            }
+        }
+        return blocked;
+    }
+
+    private boolean canControlSide(Rect frame, int side) {
+        switch (side) {
+            case ISIDE_LEFT:
+            case ISIDE_RIGHT:
+                return frame.left == mDisplayFrame.left && frame.right == mDisplayFrame.right;
+            case ISIDE_TOP:
+            case ISIDE_BOTTOM:
+                return frame.top == mDisplayFrame.top && frame.bottom == mDisplayFrame.bottom;
+            case ISIDE_FLOATING:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     private void processSource(InsetsSource source, Rect relativeFrame, boolean ignoreVisibility,
             Insets[] typeInsetsMap, @Nullable @InternalInsetsSide SparseIntArray typeSideMap,
             @Nullable boolean[] typeVisibilityMap) {

@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Sağ üste taşı"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sol alta taşı"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sağ alta taşı"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Kapat"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Görüşmeyi baloncuk olarak görüntüleme"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Baloncukları kullanarak sohbet edin"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yeni görüşmeler kayan simgeler veya baloncuk olarak görünür. Açmak için baloncuğa dokunun. Baloncuğu taşımak için sürükleyin."</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Devam ettir"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamaya bakın"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hata, yeniden deneniyor…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Bulunamadı"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol kullanılamıyor"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazına erişilemedi Kontrolün hâlâ kullanılabilir olduğundan ve uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APPLICATION">%2$s</xliff:g> uygulamasını kontrol edin."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Uygulama aç"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Durum yüklenemiyor"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hata, yeniden deneyin"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Devam ediyor"</string>

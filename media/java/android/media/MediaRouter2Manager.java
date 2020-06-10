@@ -509,7 +509,7 @@ public final class MediaRouter2Manager {
         notifyRequestFailed(reason);
     }
 
-    void handleSessionsUpdated(RoutingSessionInfo sessionInfo) {
+    void handleSessionsUpdatedOnHandler(RoutingSessionInfo sessionInfo) {
         for (TransferRequest request : mTransferRequests) {
             String sessionId = request.mOldSessionInfo.getId();
             if (!TextUtils.equals(sessionId, sessionInfo.getId())) {
@@ -548,6 +548,12 @@ public final class MediaRouter2Manager {
     void notifySessionUpdated(RoutingSessionInfo sessionInfo) {
         for (CallbackRecord record : mCallbackRecords) {
             record.mExecutor.execute(() -> record.mCallback.onSessionUpdated(sessionInfo));
+        }
+    }
+
+    void notifySessionReleased(RoutingSessionInfo session) {
+        for (CallbackRecord record : mCallbackRecords) {
+            record.mExecutor.execute(() -> record.mCallback.onSessionReleased(session));
         }
     }
 
@@ -864,9 +870,16 @@ public final class MediaRouter2Manager {
 
         /**
          * Called when a session is changed.
-         * @param sessionInfo the updated session
+         * @param session the updated session
          */
-        public void onSessionUpdated(@NonNull RoutingSessionInfo sessionInfo) {}
+        public void onSessionUpdated(@NonNull RoutingSessionInfo session) {}
+
+        /**
+         * Called when a session is released.
+         * @param session the released session.
+         * @see #releaseSession(RoutingSessionInfo)
+         */
+        public void onSessionReleased(@NonNull RoutingSessionInfo session) {}
 
         /**
          * Called when media is transferred.
@@ -946,15 +959,21 @@ public final class MediaRouter2Manager {
 
     class Client extends IMediaRouter2Manager.Stub {
         @Override
-        public void notifySessionCreated(int requestId, RoutingSessionInfo sessionInfo) {
+        public void notifySessionCreated(int requestId, RoutingSessionInfo session) {
             mHandler.sendMessage(obtainMessage(MediaRouter2Manager::createSessionOnHandler,
-                    MediaRouter2Manager.this, requestId, sessionInfo));
+                    MediaRouter2Manager.this, requestId, session));
         }
 
         @Override
-        public void notifySessionUpdated(RoutingSessionInfo sessionInfo) {
-            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::handleSessionsUpdated,
-                    MediaRouter2Manager.this, sessionInfo));
+        public void notifySessionUpdated(RoutingSessionInfo session) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::handleSessionsUpdatedOnHandler,
+                    MediaRouter2Manager.this, session));
+        }
+
+        @Override
+        public void notifySessionReleased(RoutingSessionInfo session) {
+            mHandler.sendMessage(obtainMessage(MediaRouter2Manager::notifySessionReleased,
+                    MediaRouter2Manager.this, session));
         }
 
         @Override
