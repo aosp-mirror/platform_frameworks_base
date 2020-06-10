@@ -617,7 +617,8 @@ public class ResolverListAdapter extends BaseAdapter {
         }
     }
 
-    UserHandle getUserHandle() {
+    @VisibleForTesting
+    public UserHandle getUserHandle() {
         return mResolverListController.getUserHandle();
     }
 
