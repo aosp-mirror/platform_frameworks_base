@@ -178,6 +178,7 @@ import com.android.server.wm.WindowManagerInternal;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -1328,6 +1329,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    @Ignore
     public void testPostCancelPostNotifiesListeners() throws Exception {
         // WHEN a notification is posted
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
