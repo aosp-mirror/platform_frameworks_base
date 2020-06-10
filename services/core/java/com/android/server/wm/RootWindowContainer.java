@@ -3570,12 +3570,14 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    public void dump(PrintWriter pw, String prefix) {
+    @Override
+    public void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
         pw.print(prefix);
         pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedStack());
         for (int i = getChildCount() - 1; i >= 0; --i) {
             final DisplayContent display = getChildAt(i);
-            display.dump(pw, prefix, true /* dumpAll */);
+            display.dump(pw, prefix, dumpAll);
         }
         pw.println();
     }
