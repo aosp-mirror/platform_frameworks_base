@@ -29,7 +29,7 @@ using android::idmap2::Result;
 using android::idmap2::Unit;
 
 Result<Unit> Verify(const std::string& idmap_path, const std::string& target_path,
-                    const std::string& overlay_path, uint32_t fulfilled_policies,
+                    const std::string& overlay_path, PolicyBitmask fulfilled_policies,
                     bool enforce_overlayable) {
   SYSTRACE << "Verify " << idmap_path;
   std::ifstream fin(idmap_path);
