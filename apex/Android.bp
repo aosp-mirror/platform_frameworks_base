@@ -63,9 +63,9 @@ mainline_service_stubs_args =
     "--hide-annotation android.annotation.Hide " +
     "--hide InternalClasses " // com.android.* classes are okay in this interface
 
-// Defaults for mainline module provided java_sdk_library instances.
+// Defaults common to all mainline module java_sdk_library instances.
 java_defaults {
-    name: "framework-module-defaults",
+    name: "framework-module-common-defaults",
 
     // Additional annotations used for compiling both the implementation and the
     // stubs libraries.
@@ -89,14 +89,6 @@ java_defaults {
 
     // The API scope specific properties.
     public: {
-        enabled: true,
-        sdk_version: "module_current",
-    },
-    system: {
-        enabled: true,
-        sdk_version: "module_current",
-    },
-    module_lib: {
         enabled: true,
         sdk_version: "module_current",
     },
@@ -129,6 +121,32 @@ java_defaults {
     // Mainline modules should only rely on 'module_lib' APIs provided by other modules
     // and the non updatable parts of the platform.
     sdk_version: "module_current",
+}
+
+// Defaults for mainline module provided java_sdk_library instances.
+java_defaults {
+    name: "framework-module-defaults",
+    defaults: ["framework-module-common-defaults"],
+
+    system: {
+        enabled: true,
+        sdk_version: "module_current",
+    },
+    module_lib: {
+        enabled: true,
+        sdk_version: "module_current",
+    },
+}
+
+// Defaults for mainline module system server provided java_sdk_library instances.
+java_defaults {
+    name: "framework-system-server-module-defaults",
+    defaults: ["framework-module-common-defaults"],
+
+    system_server: {
+        enabled: true,
+        sdk_version: "module_current",
+    },
 }
 
 stubs_defaults {
