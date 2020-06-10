@@ -1290,8 +1290,10 @@ public class ConversationLayout extends FrameLayout
         if (expandable) {
             mExpandButtonContainer.setVisibility(VISIBLE);
             mExpandButtonInnerContainer.setOnClickListener(onClickListener);
+            mConversationIconContainer.setOnClickListener(onClickListener);
         } else {
             mExpandButtonContainer.setVisibility(GONE);
+            mConversationIconContainer.setOnClickListener(null);
         }
         updateContentEndPaddings();
     }
