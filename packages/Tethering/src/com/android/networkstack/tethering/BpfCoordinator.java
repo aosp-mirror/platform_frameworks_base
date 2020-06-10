@@ -23,6 +23,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStats.UID_TETHERING;
+import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 
 import android.app.usage.NetworkStatsManager;
 import android.net.INetd;
@@ -37,6 +38,7 @@ import android.net.util.TetheringUtils.ForwardedStats;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -50,6 +52,7 @@ import java.net.Inet6Address;
 /**
  *  This coordinator is responsible for providing BPF offload relevant functionality.
  *  - Get tethering stats.
+ *  - Set global alert.
  *
  * @hide
  */
@@ -75,6 +78,10 @@ public class BpfCoordinator {
     @Nullable
     private final BpfTetherStatsProvider mStatsProvider;
     private boolean mStarted = false;
+
+    // Tracking remaining alert quota. Unlike limit quota is subject to interface, the alert
+    // quota is interface independent and global for tether offload.
+    private long mRemainingAlertQuota = QUOTA_UNLIMITED;
 
     // Maps upstream interface index to offloaded traffic statistics.
     // Always contains the latest total bytes/packets, since each upstream was started, received
@@ -158,15 +165,15 @@ public class BpfCoordinator {
      * expects the interface name in NetworkStats object.
      * Note that this can be only called on handler thread.
      */
-    public void addUpstreamNameToLookupTable(int upstreamIfindex, String upstreamIface) {
-        if (upstreamIfindex == 0) return;
+    public void addUpstreamNameToLookupTable(int upstreamIfindex, @NonNull String upstreamIface) {
+        if (upstreamIfindex == 0 || TextUtils.isEmpty(upstreamIface)) return;
 
         // The same interface index to name mapping may be added by different IpServer objects or
         // re-added by reconnection on the same upstream interface. Ignore the duplicate one.
         final String iface = mInterfaceNames.get(upstreamIfindex);
         if (iface == null) {
             mInterfaceNames.put(upstreamIfindex, upstreamIface);
-        } else if (iface != upstreamIface) {
+        } else if (!TextUtils.equals(iface, upstreamIface)) {
             Log.wtf(TAG, "The upstream interface name " + upstreamIface
                     + " is different from the existing interface name "
                     + iface + " for index " + upstreamIfindex);
@@ -214,7 +221,7 @@ public class BpfCoordinator {
 
     /**
      * A BPF tethering stats provider to provide network statistics to the system.
-     * Note that this class's data may only be accessed on the handler thread.
+     * Note that this class' data may only be accessed on the handler thread.
      */
     @VisibleForTesting
     class BpfTetherStatsProvider extends NetworkStatsProvider {
@@ -233,7 +240,7 @@ public class BpfCoordinator {
 
         @Override
         public void onSetAlert(long quotaBytes) {
-            // no-op
+            mHandler.post(() -> updateAlertQuota(quotaBytes));
         }
 
         @Override
@@ -282,6 +289,19 @@ public class BpfCoordinator {
                 diff.txBytes, diff.txPackets, 0L /* operations */));
     }
 
+    private void updateAlertQuota(long newQuota) {
+        if (newQuota < QUOTA_UNLIMITED) {
+            throw new IllegalArgumentException("invalid quota value " + newQuota);
+        }
+        if (mRemainingAlertQuota == newQuota) return;
+
+        mRemainingAlertQuota = newQuota;
+        if (mRemainingAlertQuota == 0) {
+            mLog.i("onAlertReached");
+            if (mStatsProvider != null) mStatsProvider.notifyAlertReached();
+        }
+    }
+
     private void updateForwardedStatsFromNetd() {
         final TetherStatsParcel[] tetherStatsList;
         try {
@@ -293,11 +313,13 @@ public class BpfCoordinator {
             return;
         }
 
+        long usedAlertQuota = 0;
         for (TetherStatsParcel tetherStats : tetherStatsList) {
             final Integer ifIndex = tetherStats.ifIndex;
             final ForwardedStats curr = new ForwardedStats(tetherStats);
             final ForwardedStats base = mStats.get(ifIndex);
             final ForwardedStats diff = (base != null) ? curr.subtract(base) : curr;
+            usedAlertQuota += diff.rxBytes + diff.txBytes;
 
             // Update the local cache for counting tether stats delta.
             mStats.put(ifIndex, curr);
@@ -315,6 +337,13 @@ public class BpfCoordinator {
                 }
             }
         }
+
+        if (mRemainingAlertQuota > 0 && usedAlertQuota > 0) {
+            // Trim to zero if overshoot.
+            final long newQuota = Math.max(mRemainingAlertQuota - usedAlertQuota, 0);
+            updateAlertQuota(newQuota);
+        }
+
     }
 
     private void maybeSchedulePollingStats() {
