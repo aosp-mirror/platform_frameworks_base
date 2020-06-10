@@ -261,6 +261,21 @@ public final class MediaTranscodeManager {
                 }
 
                 @Override
+                public void onTranscodingStarted(int jobId) throws RemoteException {
+
+                }
+
+                @Override
+                public void onTranscodingPaused(int jobId) throws RemoteException {
+
+                }
+
+                @Override
+                public void onTranscodingResumed(int jobId) throws RemoteException {
+
+                }
+
+                @Override
                 public void onTranscodingFinished(int jobId, TranscodingResultParcel result)
                         throws RemoteException {
                     handleTranscodingFinished(jobId, result);
@@ -306,6 +321,7 @@ public final class MediaTranscodeManager {
         }
     }
 
+
     public static final class TranscodingRequest {
         /** Uri of the source media file. */
         private @NonNull Uri mSourceUri;
@@ -344,7 +360,7 @@ public final class MediaTranscodeManager {
         private @Nullable MediaFormat mImageFormat = null;
 
         @VisibleForTesting
-        private int mProcessingDelayMs = 0;
+        private TranscodingTestConfig mTestConfig = null;
 
         private TranscodingRequest(Builder b) {
             mSourceUri = b.mSourceUri;
@@ -354,7 +370,7 @@ public final class MediaTranscodeManager {
             mVideoTrackFormat = b.mVideoTrackFormat;
             mAudioTrackFormat = b.mAudioTrackFormat;
             mImageFormat = b.mImageFormat;
-            mProcessingDelayMs = b.mProcessingDelayMs;
+            mTestConfig = b.mTestConfig;
         }
 
         /** Return the type of the transcoding. */
@@ -397,10 +413,9 @@ public final class MediaTranscodeManager {
             parcel.transcodingType = mType;
             parcel.sourceFilePath = mSourceUri.getPath();
             parcel.destinationFilePath = mDestinationUri.getPath();
-            if (mProcessingDelayMs != 0) {
+            if (mTestConfig != null) {
                 parcel.isForTesting = true;
-                parcel.testConfig = new TranscodingTestConfig();
-                parcel.testConfig.processingDelayMs = mProcessingDelayMs;
+                parcel.testConfig = mTestConfig;
             }
             return parcel;
         }
@@ -417,7 +432,7 @@ public final class MediaTranscodeManager {
             private @Nullable MediaFormat mVideoTrackFormat;
             private @Nullable MediaFormat mAudioTrackFormat;
             private @Nullable MediaFormat mImageFormat;
-            private int mProcessingDelayMs = 0;
+            private TranscodingTestConfig mTestConfig;
 
             /**
              * Specifies the uri of source media file.
@@ -525,12 +540,12 @@ public final class MediaTranscodeManager {
 
             /**
              * Sets the delay in processing this request.
-             * @param processingDelayMs delay in milliseconds.
+             * @param config test config.
              * @return The same builder instance.
              */
             @VisibleForTesting
-            public Builder setProcessingDelayMs(int processingDelayMs) {
-                mProcessingDelayMs = processingDelayMs;
+            public Builder setTestConfig(TranscodingTestConfig config) {
+                mTestConfig = config;
                 return this;
             }
 
