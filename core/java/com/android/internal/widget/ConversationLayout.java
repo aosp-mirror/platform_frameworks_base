@@ -780,8 +780,8 @@ public class ConversationLayout extends FrameLayout
     }
 
     @RemotableViewMethod
-    public void setShortcutIcon(Icon conversationIcon) {
-        mConversationIcon = conversationIcon;
+    public void setShortcutIcon(Icon shortcutIcon) {
+        mShortcutIcon = shortcutIcon;
     }
 
     /**
