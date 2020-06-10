@@ -1,4 +1,4 @@
-// Copyright (C) 2019 The Android Open Source Project
+// Copyright (C) 2020 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,24 +13,21 @@
 // limitations under the License.
 
 java_test_host {
-    name: "OverlayRemountedTest",
-    srcs: ["src/**/*.java"],
+    name: "PackageManagerServiceHostTests",
+    srcs: ["src/**/*.kt"],
     libs: [
         "tradefed",
         "junit",
+        "truth-prebuilt",
     ],
     static_libs: [
         "frameworks-base-hostutils",
     ],
     test_suites: ["general-tests"],
     java_resources: [
-        ":com.android.overlaytest.overlaid",
-        ":com.android.overlaytest.overlay",
-        ":OverlayRemountedTest_SharedLibrary",
-        ":OverlayRemountedTest_SharedLibraryOverlay",
-        ":OverlayRemountedTest_Target",
-        ":OverlayRemountedTest_TargetUpgrade",
-        ":OverlayRemountedTest_Overlay",
-        ":OverlayRemountedTest_Overlay_SameCert",
-    ],
+        ":PackageManagerDummyAppVersion1",
+        ":PackageManagerDummyAppVersion2",
+        ":PackageManagerDummyAppVersion3",
+        ":PackageManagerDummyAppOriginalOverride",
+    ]
 }
