@@ -16,8 +16,8 @@
 
 package com.android.systemui.accessibility;
 
-
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 
 import android.app.Instrumentation;
@@ -27,6 +27,7 @@ import android.testing.AndroidTestingRunner;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SysuiTestCase;
 
 import org.junit.After;
@@ -43,6 +44,8 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
     @Mock
     Handler mHandler;
     @Mock
+    SfVsyncFrameCallbackProvider mSfVsyncFrameProvider;
+    @Mock
     MirrorWindowControl mMirrorWindowControl;
     @Mock
     WindowMagnifierCallback mWindowMagnifierCallback;
@@ -54,7 +57,7 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
         mWindowMagnificationController = new WindowMagnificationController(getContext(),
-                mHandler,
+                mHandler, mSfVsyncFrameProvider,
                 mMirrorWindowControl, mWindowMagnifierCallback);
         verify(mMirrorWindowControl).setWindowDelegate(
                 any(MirrorWindowControl.MirrorWindowDelegate.class));
@@ -65,7 +68,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.deleteWindowMagnification();
         });
-        mInstrumentation.waitForIdleSync();
     }
 
     @Test
@@ -74,7 +76,6 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
         });
-        mInstrumentation.waitForIdleSync();
         verify(mMirrorWindowControl).showControl();
     }
 
@@ -84,13 +85,22 @@ public class WindowMagnificationControllerTest extends SysuiTestCase {
             mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
                     Float.NaN);
         });
-        mInstrumentation.waitForIdleSync();
 
         mInstrumentation.runOnMainSync(() -> {
             mWindowMagnificationController.deleteWindowMagnification();
         });
-        mInstrumentation.waitForIdleSync();
 
         verify(mMirrorWindowControl).destroyControl();
+    }
+
+    @Test
+    public void moveMagnifier_schedulesFrame() {
+        mInstrumentation.runOnMainSync(() -> {
+            mWindowMagnificationController.enableWindowMagnification(Float.NaN, Float.NaN,
+                    Float.NaN);
+            mWindowMagnificationController.moveWindowMagnifier(100f, 100f);
+        });
+
+        verify(mSfVsyncFrameProvider, atLeastOnce()).postFrameCallback(any());
     }
 }

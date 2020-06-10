@@ -30,6 +30,7 @@ import android.view.accessibility.IWindowMagnificationConnection;
 import android.view.accessibility.IWindowMagnificationConnectionCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.SystemUI;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.CommandQueue;
@@ -94,7 +95,9 @@ public class WindowMagnification extends SystemUI implements WindowMagnifierCall
         //TODO: b/144080869 support multi-display.
         if (mWindowMagnificationController == null) {
             mWindowMagnificationController = new WindowMagnificationController(mContext,
-                    mHandler, null,
+                    mHandler,
+                    new SfVsyncFrameCallbackProvider(),
+                    null,
                     this);
         }
         mWindowMagnificationController.enableWindowMagnification(scale, centerX, centerY);
