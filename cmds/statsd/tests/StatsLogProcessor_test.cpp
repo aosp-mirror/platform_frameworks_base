@@ -1796,6 +1796,48 @@ TEST(StatsLogProcessorTest_mapIsolatedUidToHostUid, LogIsolatedUidAttributionCha
     EXPECT_EQ(field2, actualFieldValues->at(5).mValue.int_value);
 }
 
+TEST(StatsLogProcessorTest, TestDumpReportWithoutErasingDataDoesNotUpdateTimestamp) {
+    int hostUid = 20;
+    int isolatedUid = 30;
+    sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
+    ConfigKey key(3, 4);
+    StatsdConfig config = MakeConfig(false);
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(1, 1, config, key, nullptr, 0, mockUidMap);
+    vector<uint8_t> bytes;
+
+    int64_t dumpTime1Ns = 1 * NS_PER_SEC;
+    processor->onDumpReport(key, dumpTime1Ns, false /* include_current_bucket */,
+            true /* erase_data */, ADB_DUMP, FAST, &bytes);
+
+    ConfigMetricsReportList output;
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).current_report_elapsed_nanos(), dumpTime1Ns);
+
+    int64_t dumpTime2Ns = 5 * NS_PER_SEC;
+    processor->onDumpReport(key, dumpTime2Ns, false /* include_current_bucket */,
+            false /* erase_data */, ADB_DUMP, FAST, &bytes);
+
+    // Check that the dump report without clearing data is successful.
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).current_report_elapsed_nanos(), dumpTime2Ns);
+    EXPECT_EQ(output.reports(0).last_report_elapsed_nanos(), dumpTime1Ns);
+
+    int64_t dumpTime3Ns = 10 * NS_PER_SEC;
+    processor->onDumpReport(key, dumpTime3Ns, false /* include_current_bucket */,
+            true /* erase_data */, ADB_DUMP, FAST, &bytes);
+
+    // Check that the previous dump report that didn't clear data did not overwrite the first dump's
+    // timestamps.
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).current_report_elapsed_nanos(), dumpTime3Ns);
+    EXPECT_EQ(output.reports(0).last_report_elapsed_nanos(), dumpTime1Ns);
+
+}
+
 #else
 GTEST_LOG_(INFO) << "This test does nothing.\n";
 #endif
