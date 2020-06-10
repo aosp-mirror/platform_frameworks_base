@@ -1167,7 +1167,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (b.getEntry() != null) {
             // Updating the entry to be a bubble will trigger our normal update flow
             setIsBubble(b.getEntry(), isBubble, b.shouldAutoExpand());
-        } else {
+        } else if (isBubble) {
             // If we have no entry to update, it's a persisted bubble so
             // we need to add it to the stack ourselves
             Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);
