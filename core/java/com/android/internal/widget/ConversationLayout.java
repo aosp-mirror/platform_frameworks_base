@@ -761,9 +761,13 @@ public class ConversationLayout extends FrameLayout
                 // group
                 : mExpandedGroupMessagePadding;
 
+        int iconPadding = mIsOneToOne || mIsCollapsed
+                ? mConversationIconTopPadding
+                : mConversationIconTopPaddingExpandedGroup;
+
         mConversationIconContainer.setPaddingRelative(
                 mConversationIconContainer.getPaddingStart(),
-                mConversationIconTopPadding,
+                iconPadding,
                 mConversationIconContainer.getPaddingEnd(),
                 mConversationIconContainer.getPaddingBottom());
 
