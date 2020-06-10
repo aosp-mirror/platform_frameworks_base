@@ -15,7 +15,7 @@
 cc_defaults {
     name: "idmap2_defaults",
     tidy: true,
-    tidy_checks: [
+    tidy_checks_as_errors: [
         "modernize-*",
         "-modernize-avoid-c-arrays",
         "-modernize-use-trailing-return-type",
@@ -25,7 +25,6 @@ cc_defaults {
     ],
     tidy_flags: [
         "-system-headers",
-        "-warnings-as-errors=*,-bugprone*",
     ],
 }
 
