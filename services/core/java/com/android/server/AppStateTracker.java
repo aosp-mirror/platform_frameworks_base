@@ -1118,7 +1118,8 @@ public class AppStateTracker {
                 return false;
             }
             final int userId = UserHandle.getUserId(uid);
-            if (mExemptedPackages.contains(userId, packageName)) {
+            if (mAppStandbyInternal.isAppIdleEnabled() && !mAppStandbyInternal.isInParole()
+                    && mExemptedPackages.contains(userId, packageName)) {
                 return false;
             }
             return mForceAllAppsStandby;
