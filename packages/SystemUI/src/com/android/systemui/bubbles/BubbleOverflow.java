@@ -62,13 +62,12 @@ public class BubbleOverflow implements BubbleViewProvider {
 
     void setUpOverflow(ViewGroup parentViewGroup, BubbleStackView stackView) {
         updateDimensions();
-
         mExpandedView = (BubbleExpandedView) mInflater.inflate(
                 R.layout.bubble_expanded_view, parentViewGroup /* root */,
                 false /* attachToRoot */);
         mExpandedView.setOverflow(true);
         mExpandedView.setStackView(stackView);
-
+        mExpandedView.applyThemeAttrs();
         updateIcon(mContext, parentViewGroup);
     }
 
