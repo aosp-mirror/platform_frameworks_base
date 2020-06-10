@@ -19,6 +19,7 @@ package com.android.internal.app;
 import static android.content.Context.ACTIVITY_SERVICE;
 import static android.graphics.Paint.DITHER_FLAG;
 import static android.graphics.Paint.FILTER_BITMAP_FLAG;
+import static android.graphics.drawable.AdaptiveIconDrawable.getExtraInsetFraction;
 
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
@@ -54,6 +55,7 @@ import com.android.internal.R;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 
 /**
@@ -63,6 +65,7 @@ import java.nio.ByteBuffer;
  */
 @Deprecated
 public class SimpleIconFactory {
+
 
     private static final SynchronizedPool<SimpleIconFactory> sPool =
             new SynchronizedPool<>(Runtime.getRuntime().availableProcessors());
@@ -251,7 +254,7 @@ public class SimpleIconFactory {
         } else if (w > h && h > 0) {
             scale = (float) w / h;
         }
-        Bitmap bitmap = createIconBitmap(icon, scale);
+        Bitmap bitmap = createIconBitmapNoInsetOrMask(icon, scale);
         bitmap = maskBitmapToCircle(bitmap);
         icon = new BitmapDrawable(mContext.getResources(), bitmap);
 
@@ -281,15 +284,19 @@ public class SimpleIconFactory {
         final Bitmap output = Bitmap.createBitmap(bitmap.getWidth(),
                 bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         final Canvas canvas = new Canvas(output);
-        final Paint paint = new Paint();
-        paint.setAntiAlias(true);
+        final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG
+                | Paint.FILTER_BITMAP_FLAG);
+
+        // Apply an offset to enable shadow to be drawn
+        final int size = bitmap.getWidth();
+        int offset = Math.max((int) Math.ceil(BLUR_FACTOR * size), 1);
 
         // Draw mask
         paint.setColor(0xffffffff);
         canvas.drawARGB(0, 0, 0, 0);
         canvas.drawCircle(bitmap.getWidth() / 2f,
                 bitmap.getHeight() / 2f,
-                bitmap.getWidth() / 2f - 1 /* -1 to avoid circles with flat sides */,
+                bitmap.getWidth() / 2f - offset,
                 paint);
 
         // Draw masked bitmap
@@ -306,24 +313,61 @@ public class SimpleIconFactory {
     }
 
     private Bitmap createIconBitmap(Drawable icon, float scale) {
-        return createIconBitmap(icon, scale, mIconBitmapSize);
+        return createIconBitmap(icon, scale, mIconBitmapSize, true, false);
+    }
+
+    private Bitmap createIconBitmapNoInsetOrMask(Drawable icon, float scale) {
+        return createIconBitmap(icon, scale, mIconBitmapSize, false, true);
     }
 
     /**
      * @param icon drawable that should be flattened to a bitmap
      * @param scale the scale to apply before drawing {@param icon} on the canvas
+     * @param insetAdiForShadow when rendering AdaptiveIconDrawables inset to make room for a shadow
+     * @param ignoreAdiMask when rendering AdaptiveIconDrawables ignore the current system mask
      */
-    private Bitmap createIconBitmap(Drawable icon, float scale, int size) {
+    private Bitmap createIconBitmap(Drawable icon, float scale, int size, boolean insetAdiForShadow,
+            boolean ignoreAdiMask) {
         Bitmap bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
 
         mCanvas.setBitmap(bitmap);
         mOldBounds.set(icon.getBounds());
 
         if (icon instanceof AdaptiveIconDrawable) {
-            int offset = Math.max((int) Math.ceil(BLUR_FACTOR * size),
-                    Math.round(size * (1 - scale) / 2));
-            icon.setBounds(offset, offset, size - offset, size - offset);
-            icon.draw(mCanvas);
+            final AdaptiveIconDrawable adi = (AdaptiveIconDrawable) icon;
+
+            // By default assumes the output bitmap will have a shadow directly applied and makes
+            // room for it by insetting. If there are intermediate steps before applying the shadow
+            // insetting is disableable.
+            int offset = Math.round(size * (1 - scale) / 2);
+            if (insetAdiForShadow) {
+                offset = Math.max((int) Math.ceil(BLUR_FACTOR * size), offset);
+            }
+            Rect bounds = new Rect(offset, offset, size - offset, size - offset);
+
+            // AdaptiveIconDrawables are by default masked by the user's icon shape selection.
+            // If further masking is to be done, directly render to avoid the system masking.
+            if (ignoreAdiMask) {
+                final int cX = bounds.width() / 2;
+                final int cY = bounds.height() / 2;
+                final float portScale = 1f / (1 + 2 * getExtraInsetFraction());
+                final int insetWidth = (int) (bounds.width() / (portScale * 2));
+                final int insetHeight = (int) (bounds.height() / (portScale * 2));
+
+                Rect childRect = new Rect(cX - insetWidth, cY - insetHeight, cX + insetWidth,
+                        cY + insetHeight);
+                Optional.ofNullable(adi.getBackground()).ifPresent(drawable -> {
+                    drawable.setBounds(childRect);
+                    drawable.draw(mCanvas);
+                });
+                Optional.ofNullable(adi.getForeground()).ifPresent(drawable -> {
+                    drawable.setBounds(childRect);
+                    drawable.draw(mCanvas);
+                });
+            } else {
+                adi.setBounds(bounds);
+                adi.draw(mCanvas);
+            }
         } else {
             if (icon instanceof BitmapDrawable) {
                 BitmapDrawable bitmapDrawable = (BitmapDrawable) icon;
