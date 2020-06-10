@@ -59,20 +59,20 @@
                 android:textDirection="locale"
                 style="@style/TextAppearance.NotificationImportanceChannel"/>
             <TextView
-                android:id="@+id/pkg_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.NotificationImportanceChannelGroup"
-                android:ellipsize="end"
-                android:textDirection="locale"
-                android:maxLines="1"/>
-            <TextView
                 android:id="@+id/group_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textDirection="locale"
                 android:ellipsize="end"
                 style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
+            <TextView
+                android:id="@+id/pkg_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.NotificationImportanceApp"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                android:maxLines="1"/>
             <TextView
                 android:id="@+id/delegate_name"
                 android:layout_width="match_parent"
