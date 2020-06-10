@@ -70,12 +70,12 @@ PolicyBitmask ConvertAidlArgToPolicyBitmask(int32_t arg) {
 }
 
 Status GetCrc(const std::string& apk_path, uint32_t* out_crc) {
-  const auto overlay_zip = ZipFile::Open(apk_path);
-  if (!overlay_zip) {
+  const auto zip = ZipFile::Open(apk_path);
+  if (!zip) {
     return error(StringPrintf("failed to open apk %s", apk_path.c_str()));
   }
 
-  const auto crc = GetPackageCrc(*overlay_zip);
+  const auto crc = GetPackageCrc(*zip);
   if (!crc) {
     return error(crc.GetErrorMessage());
   }
@@ -121,6 +121,7 @@ Status Idmap2Service::verifyIdmap(const std::string& target_apk_path,
                                   bool* _aidl_return) {
   SYSTRACE << "Idmap2Service::verifyIdmap " << overlay_apk_path;
   assert(_aidl_return);
+
   const std::string idmap_path = Idmap::CanonicalIdmapPathFor(kIdmapCacheDir, overlay_apk_path);
   std::ifstream fin(idmap_path);
   const std::unique_ptr<const IdmapHeader> header = IdmapHeader::FromBinaryStream(fin);
@@ -156,13 +157,10 @@ Status Idmap2Service::verifyIdmap(const std::string& target_apk_path,
 
   auto up_to_date =
       header->IsUpToDate(target_apk_path.c_str(), overlay_apk_path.c_str(), target_crc, overlay_crc,
-                         fulfilled_policies, enforce_overlayable);
-  if (!up_to_date) {
-    *_aidl_return = false;
-    return error(up_to_date.GetErrorMessage());
-  }
+                         ConvertAidlArgToPolicyBitmask(fulfilled_policies), enforce_overlayable);
 
-  return ok();
+  *_aidl_return = static_cast<bool>(up_to_date);
+  return *_aidl_return ? ok() : error(up_to_date.GetErrorMessage());
 }
 
 Status Idmap2Service::createIdmap(const std::string& target_apk_path,

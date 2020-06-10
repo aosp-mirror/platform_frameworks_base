@@ -141,9 +141,9 @@ class IdmapHeader {
   // field *must* be incremented. Because of this, we know that if the idmap
   // header is up-to-date the entire file is up-to-date.
   Result<Unit> IsUpToDate(const char* target_path, const char* overlay_path,
-                          uint32_t fulfilled_policies, bool enforce_overlayable) const;
+                          PolicyBitmask fulfilled_policies, bool enforce_overlayable) const;
   Result<Unit> IsUpToDate(const char* target_path, const char* overlay_path, uint32_t target_crc,
-                          uint32_t overlay_crc, uint32_t fulfilled_policies,
+                          uint32_t overlay_crc, PolicyBitmask fulfilled_policies,
                           bool enforce_overlayable) const;
 
   void accept(Visitor* v) const;
