@@ -19,7 +19,7 @@ android_test {
         "java/**/*.kt",
     ],
     static_libs: [
-        "service-permission",
+        "service-permission.impl",
         "androidx.test.rules",
         "androidx.test.ext.junit",
         "androidx.test.ext.truth",
