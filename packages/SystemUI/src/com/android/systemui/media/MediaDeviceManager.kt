@@ -34,7 +34,6 @@ class MediaDeviceManager @Inject constructor(
     private val context: Context,
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
-    private val featureFlag: MediaFeatureFlag,
     @Main private val fgExecutor: Executor,
     private val mediaDataManager: MediaDataManager
 ) : MediaDataManager.Listener {
@@ -56,20 +55,19 @@ class MediaDeviceManager @Inject constructor(
     fun removeListener(listener: Listener) = listeners.remove(listener)
 
     override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-        if (featureFlag.enabled) {
-            if (oldKey != null && oldKey != key) {
-                val oldToken = entries.remove(oldKey)
-                oldToken?.stop()
+        if (oldKey != null && oldKey != key) {
+            val oldEntry = entries.remove(oldKey)
+            oldEntry?.stop()
+        }
+        var entry = entries[key]
+        if (entry == null || entry?.token != data.token) {
+            entry?.stop()
+            val controller = data.token?.let {
+                MediaController(context, it)
             }
-            var tok = entries[key]
-            if (tok == null && data.token != null) {
-                val controller = MediaController(context, data.token!!)
-                tok = Token(key, controller, localMediaManagerFactory.create(data.packageName))
-                entries[key] = tok
-                tok.start()
-            }
-        } else {
-            onMediaDataRemoved(key)
+            entry = Token(key, controller, localMediaManagerFactory.create(data.packageName))
+            entries[key] = entry
+            entry.start()
         }
     }
 
@@ -100,9 +98,11 @@ class MediaDeviceManager @Inject constructor(
 
     private inner class Token(
         val key: String,
-        val controller: MediaController,
+        val controller: MediaController?,
         val localMediaManager: LocalMediaManager
     ) : LocalMediaManager.DeviceCallback {
+        val token
+            get() = controller?.sessionToken
         private var started = false
         private var current: MediaDevice? = null
             set(value) {
@@ -132,10 +132,14 @@ class MediaDeviceManager @Inject constructor(
         }
         private fun updateCurrent() {
             val device = localMediaManager.getCurrentConnectedDevice()
-            val route = mr2manager.getRoutingSessionForMediaController(controller)
-            // If we get a null route, then don't trust the device. Just set to null to disable the
-            // output switcher chip.
-            current = if (route != null) device else null
+            controller?.let {
+                val route = mr2manager.getRoutingSessionForMediaController(it)
+                // If we get a null route, then don't trust the device. Just set to null to disable the
+                // output switcher chip.
+                current = if (route != null) device else null
+            } ?: run {
+                current = device
+            }
         }
     }
 }
