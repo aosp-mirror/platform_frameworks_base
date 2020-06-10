@@ -16,14 +16,19 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static android.content.Intent.ACTION_OVERLAY_CHANGED;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL_OVERLAY;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.om.IOverlayManager;
 import android.content.om.OverlayInfo;
 import android.content.pm.PackageManager;
 import android.content.res.ApkAssets;
+import android.os.PatternMatcher;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -79,6 +84,19 @@ public class NavigationModeController implements Dumpable {
                 }
             };
 
+    // The primary user SysUI process doesn't get AppInfo changes from overlay package changes for
+    // the secondary user (b/158613864), so we need to update the interaction mode here as well
+    // as a fallback if we don't receive the configuration change
+    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Log.d(TAG, "ACTION_OVERLAY_CHANGED");
+            }
+            updateCurrentInteractionMode(true /* notify */);
+        }
+    };
+
 
     @Inject
     public NavigationModeController(Context context,
@@ -91,6 +109,11 @@ public class NavigationModeController implements Dumpable {
                 ServiceManager.getService(Context.OVERLAY_SERVICE));
         mUiBgExecutor = uiBgExecutor;
         deviceProvisionedController.addCallback(mDeviceProvisionedCallback);
+
+        IntentFilter overlayFilter = new IntentFilter(ACTION_OVERLAY_CHANGED);
+        overlayFilter.addDataScheme("package");
+        overlayFilter.addDataSchemeSpecificPart("android", PatternMatcher.PATTERN_LITERAL);
+        mContext.registerReceiverAsUser(mReceiver, UserHandle.ALL, overlayFilter, null, null);
 
         configurationController.addCallback(new ConfigurationController.ConfigurationListener() {
             @Override
