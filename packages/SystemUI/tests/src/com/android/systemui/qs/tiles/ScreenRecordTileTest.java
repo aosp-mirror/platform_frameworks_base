@@ -29,6 +29,7 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
@@ -53,6 +54,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
     private ActivityStarter mActivityStarter;
     @Mock
     private QSTileHost mHost;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -68,7 +71,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mTile = new ScreenRecordTile(mHost, mController, mActivityStarter);
+        mTile = new ScreenRecordTile(mHost, mController, mActivityStarter, mUiEventLogger);
     }
 
     // Test that the tile is inactive and labeled correctly when the controller is neither starting

@@ -1551,7 +1551,7 @@
     <string name="activity_resolver_use_once" msgid="948462794469672658">"တစ်ခါတည်း"</string>
     <string name="activity_resolver_work_profiles_support" msgid="4071345609235361269">"%1$s က အလုပ်ပရိုဖိုင်ကို မပံ့ပိုးပါ။"</string>
     <string name="default_audio_route_name" product="tablet" msgid="367936735632195517">"တက်ဘလက်"</string>
-    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"တီဗွီ"</string>
+    <string name="default_audio_route_name" product="tv" msgid="4908971385068087367">"TV"</string>
     <string name="default_audio_route_name" product="default" msgid="9213546147739983977">"ဖုန်း"</string>
     <string name="default_audio_route_name_dock_speakers" msgid="1551166029093995289">"အထိုင်ရှိသော စပီကာများ"</string>
     <string name="default_audio_route_name_hdmi" msgid="5474470558160717850">"HDMI"</string>

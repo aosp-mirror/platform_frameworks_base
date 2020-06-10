@@ -951,7 +951,7 @@ public final class OomAdjuster {
                     mService.mServices.foregroundServiceProcStateChangedLocked(uidRec);
                 }
             }
-            mService.mInternal.updatePendingTopUid(uidRec.uid, false);
+            mService.mInternal.deletePendingTopUid(uidRec.uid);
         }
         if (mLocalPowerManager != null) {
             mLocalPowerManager.finishUidChanges();
@@ -1508,16 +1508,7 @@ public final class OomAdjuster {
                     capabilityFromFGS |=
                             (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION)
                                     != 0 ? PROCESS_CAPABILITY_FOREGROUND_LOCATION : 0;
-                } else {
-                    //The FGS has the location capability, but due to FGS BG start restriction it
-                    //lost the capability, use temp location capability to mark this case.
-                    //TODO: remove this block when development is done.
-                    capabilityFromFGS |=
-                            (fgsType & FOREGROUND_SERVICE_TYPE_LOCATION) != 0
-                                    ? ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_LOCATION
-                                    : 0;
-                }
-                if (s.mAllowWhileInUsePermissionInFgs) {
+
                     boolean enabled = false;
                     try {
                         enabled = mPlatformCompat.isChangeEnabled(
@@ -1527,23 +1518,13 @@ public final class OomAdjuster {
                     if (enabled) {
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
-                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                                        : ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA;
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA : 0;
                         capabilityFromFGS |=
                                 (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
-                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                                        : ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
+                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE : 0;
                     } else {
-                        // Remove fgsType check and assign PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                        // and MICROPHONE when finish debugging.
-                        capabilityFromFGS |=
-                                (fgsType & FOREGROUND_SERVICE_TYPE_CAMERA)
-                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_CAMERA
-                                        : ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_CAMERA_Q;
-                        capabilityFromFGS |=
-                                (fgsType & FOREGROUND_SERVICE_TYPE_MICROPHONE)
-                                        != 0 ? PROCESS_CAPABILITY_FOREGROUND_MICROPHONE
-                                        : ActivityManager.DEBUG_PROCESS_CAPABILITY_FOREGROUND_MICROPHONE_Q;
+                        capabilityFromFGS |= PROCESS_CAPABILITY_FOREGROUND_CAMERA
+                                | PROCESS_CAPABILITY_FOREGROUND_MICROPHONE;
                     }
                 }
             }

@@ -725,7 +725,7 @@
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Bu bildirishnomalarni tahrirlash imkonsiz."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Ushbu bildirishnomalar guruhi bu yerda sozlanmaydi"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Ishonchli bildirishnoma"</string>
-    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"<xliff:g id="APP_NAME">%1$s</xliff:g> ilovasining barcha bildirishnomalari"</string>
+    <string name="notification_channel_dialog_title" msgid="6856514143093200019">"Barcha <xliff:g id="APP_NAME">%1$s</xliff:g> bildirishnomalari"</string>
     <string name="see_more_title" msgid="7409317011708185729">"Yana"</string>
     <string name="appops_camera" msgid="5215967620896725715">"Bu ilova kameradan foydalanmoqda."</string>
     <string name="appops_microphone" msgid="8805468338613070149">"Bu ilova mikrofondan foydalanmoqda."</string>
@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Yuqori oʻngga surish"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Quyi chapga surish"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Quyi oʻngga surish"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Yopish"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Suhbatlar bulutchalar shaklida chiqmasin"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bulutchalar yordamida subhatlashish"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yangi xabarlar qalqib chiquvchi belgilar yoki bulutchalar kabi chiqadi. Xabarni ochish uchun bildirishnoma ustiga bosing. Xabarni qayta joylash uchun bildirishnomani suring."</string>

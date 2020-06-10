@@ -448,7 +448,7 @@
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"No te molestarán los sonidos ni las vibraciones, excepto las alarmas. Seguirás escuchando el contenido que quieras reproducir, como música, vídeos y juegos."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Personalizar"</string>
     <string name="zen_silence_introduction_voice" msgid="853573681302712348">"Esta opción bloqueará TODOS los sonidos y todas las vibraciones, por ejemplo, los vídeos, los juegos, las alarmas y la música. Seguirás pudiendo hacer llamadas."</string>
-    <string name="zen_silence_introduction" msgid="6117517737057344014">"Este modo permite bloquear TODOS los sonidos y todas las vibraciones (p. ej., los de alarmas, música, vídeos y juegos)."</string>
+    <string name="zen_silence_introduction" msgid="6117517737057344014">"Este modo bloquea TODOS los sonidos y todas las vibraciones, lo que incluye alarmas, música, vídeos y juegos."</string>
     <string name="keyguard_more_overflow_text" msgid="5819512373606638727">"+<xliff:g id="NUMBER_OF_NOTIFICATIONS">%d</xliff:g>"</string>
     <string name="speed_bump_explanation" msgid="7248696377626341060">"Notificaciones menos urgente abajo"</string>
     <string name="notification_tap_again" msgid="4477318164947497249">"Toca de nuevo para abrir"</string>
@@ -1002,10 +1002,11 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Mover arriba a la derecha"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Mover abajo a la izquierda."</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Mover abajo a la derecha"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Cerrar"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"No mostrar conversación en burbujas"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatear mediante burbujas"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como iconos flotantes o burbujas. Toca para abrir la burbuja. Arrastra para moverla."</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatea con burbujas"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Las conversaciones nuevas aparecen como iconos flotantes llamadas \"burbujas\". Toca para abrir la burbuja. Arrastra para moverla."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Controla las burbujas en cualquier momento"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Toca Gestionar para desactivar las burbujas de esta aplicación"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Entendido"</string>
@@ -1065,14 +1066,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Reanudar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactivo, comprobar aplicación"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Error; reintentando…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"No se ha encontrado"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"El control no está disponible"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"No se ha podido acceder a <xliff:g id="DEVICE">%1$s</xliff:g>. Comprueba que el control siga disponible en la aplicación <xliff:g id="APPLICATION">%2$s</xliff:g> y que no se haya modificado su configuración."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Abrir aplicación"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"No se ha podido cargar el estado"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Se ha producido un error. Vuelve a intentarlo."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"En curso"</string>

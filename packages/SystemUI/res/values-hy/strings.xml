@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Տեղափոխել վերև՝ աջ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Տեղափոխել ներքև՝ ձախ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Տեղափոխել ներքև՝ աջ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Փակել"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Զրույցը չցուցադրել ամպիկի տեսքով"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Զրուցել ամպիկների միջոցով"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Նոր խոսակցությունները կհայտնվեն լողացող պատկերակների կամ ամպիկների տեսքով։ Հպեք՝ ամպիկը բացելու համար։ Քաշեք՝ այն տեղափոխելու համար։"</string>
@@ -1062,7 +1063,7 @@
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Սահեցրեք մատը՝ ավելին իմանալու համար"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Բեռնման խորհուրդներ"</string>
     <string name="controls_media_close_session" msgid="9023534788828414585">"Փակել աշխատաշրջանը"</string>
-    <string name="controls_media_resume" msgid="1933520684481586053">"Վերսկսել"</string>
+    <string name="controls_media_resume" msgid="1933520684481586053">"Շարունակել"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ակտիվ չէ, ստուգեք հավելվածը"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Սխալ. նորից ենք փորձում…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Չի գտնվել"</string>

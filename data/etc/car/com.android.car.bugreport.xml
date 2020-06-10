@@ -14,15 +14,11 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License
   -->
-
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="oval">
-
-    <solid
-        android:color="#ffffff"/>
-
-    <size
-        android:width="20dp"
-        android:height="20dp"/>
-</shape>
-
+<permissions>
+    <privapp-permissions package="com.android.car.bugreport">
+        <permission name="android.permission.DUMP"/>
+        <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+        <permission name="android.permission.READ_LOGS"/>
+        <permission name="android.permission.MANAGE_USERS"/>
+    </privapp-permissions>
+  </permissions>

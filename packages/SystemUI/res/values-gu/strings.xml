@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ઉપર જમણે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"નીચે ડાબે ખસેડો"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"નીચે જમણે ખસેડો"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"છોડી દો"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"વાતચીતને બબલ કરશો નહીં"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"બબલનો ઉપયોગ કરીને ચેટ કરો"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"નવી વાતચીત ફ્લોટિંગ આઇકન અથવા બબલ જેવી દેખાશે. બબલને ખોલવા માટે ટૅપ કરો. તેને ખસેડવા માટે ખેંચો."</string>
@@ -1013,17 +1014,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"સિસ્ટમ નૅવિગેશન અપડેટ કર્યું. ફેરફારો કરવા માટે, સેટિંગ પર જાઓ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"સિસ્ટમ નૅવિગેશનને અપડેટ કરવા માટે સેટિંગ પર જાઓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"સ્ટૅન્ડબાય"</string>
-    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
-    <skip />
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"વાતચીતને પ્રાધાન્યતા ધરાવતી તરીકે સેટ કરી"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"પ્રાધાન્યતા ધરાવતી વાતચીતો:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"વાતચીત વિભાગની ટોચ પર બતાવો"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"લૉક સ્ક્રીન પર પ્રોફાઇલ ફોટો બતાવો"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ઍપની ટોચ પર તરતા બબલ તરીકે દેખાય છે"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ખલેલ પાડશો નહીં સેટિંગમાં હસ્તક્ષેપ કરી શકે છે"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"સમજાઈ ગયું"</string>
-    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
-    <skip />
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"સેટિંગ"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"વિસ્તૃતીકરણ ઓવરલે વિંડો"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"વિસ્તૃતીકરણ વિંડો"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"વિસ્તૃતીકરણ વિંડોના નિયંત્રણો"</string>

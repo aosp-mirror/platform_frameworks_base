@@ -21,6 +21,10 @@ import static com.android.internal.widget.MessagingGroup.IMAGE_DISPLAY_LOCATION_
 import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_IN;
 import static com.android.internal.widget.MessagingPropertyAnimator.ALPHA_OUT;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ValueAnimator;
 import android.annotation.AttrRes;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -36,6 +40,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
 import android.os.Parcelable;
@@ -80,7 +85,7 @@ public class ConversationLayout extends FrameLayout
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
     /**
-     *  Pattren for filter some ingonable characters.
+     *  Pattern for filter some ignorable characters.
      *  p{Z} for any kind of whitespace or invisible separator.
      *  p{C} for any kind of punctuation character.
      */
@@ -93,8 +98,12 @@ public class ConversationLayout extends FrameLayout
     public static final Interpolator LINEAR_OUT_SLOW_IN = new PathInterpolator(0f, 0f, 0.2f, 1f);
     public static final Interpolator FAST_OUT_LINEAR_IN = new PathInterpolator(0.4f, 0f, 1f, 1f);
     public static final Interpolator FAST_OUT_SLOW_IN = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
+    public static final Interpolator OVERSHOOT = new PathInterpolator(0.4f, 0f, 0.2f, 1.4f);
     public static final OnLayoutChangeListener MESSAGING_PROPERTY_ANIMATOR
             = new MessagingPropertyAnimator();
+    public static final int IMPORTANCE_ANIM_GROW_DURATION = 250;
+    public static final int IMPORTANCE_ANIM_SHRINK_DURATION = 200;
+    public static final int IMPORTANCE_ANIM_SHRINK_DELAY = 25;
     private List<MessagingMessage> mMessages = new ArrayList<>();
     private List<MessagingMessage> mHistoricMessages = new ArrayList<>();
     private MessagingLinearLayout mMessagingLinearLayout;
@@ -331,14 +340,74 @@ public class ConversationLayout extends FrameLayout
         mNameReplacement = nameReplacement;
     }
 
-    /**
-     * Sets this conversation as "important", adding some additional UI treatment.
-     */
+    /** Sets this conversation as "important", adding some additional UI treatment. */
     @RemotableViewMethod
     public void setIsImportantConversation(boolean isImportantConversation) {
+        setIsImportantConversation(isImportantConversation, false);
+    }
+
+    /** @hide **/
+    public void setIsImportantConversation(boolean isImportantConversation, boolean animate) {
         mImportantConversation = isImportantConversation;
-        mImportanceRingView.setVisibility(isImportantConversation
-                && mIcon.getVisibility() != GONE ? VISIBLE : GONE);
+        mImportanceRingView.setVisibility(isImportantConversation && mIcon.getVisibility() != GONE
+                ? VISIBLE : GONE);
+
+        if (animate && isImportantConversation) {
+            GradientDrawable ring = (GradientDrawable) mImportanceRingView.getDrawable();
+            ring.mutate();
+            GradientDrawable bg = (GradientDrawable) mConversationIconBadgeBg.getDrawable();
+            bg.mutate();
+            int ringColor = getResources()
+                    .getColor(R.color.conversation_important_highlight);
+            int standardThickness = getResources()
+                    .getDimensionPixelSize(R.dimen.importance_ring_stroke_width);
+            int largeThickness = getResources()
+                    .getDimensionPixelSize(R.dimen.importance_ring_anim_max_stroke_width);
+            int standardSize = getResources().getDimensionPixelSize(
+                    R.dimen.importance_ring_size);
+            int baseSize = standardSize - standardThickness * 2;
+            int bgSize = getResources()
+                    .getDimensionPixelSize(R.dimen.conversation_icon_size_badged);
+
+            ValueAnimator.AnimatorUpdateListener animatorUpdateListener = animation -> {
+                int strokeWidth = Math.round((float) animation.getAnimatedValue());
+                ring.setStroke(strokeWidth, ringColor);
+                int newSize = baseSize + strokeWidth * 2;
+                ring.setSize(newSize, newSize);
+                mImportanceRingView.invalidate();
+            };
+
+            ValueAnimator growAnimation = ValueAnimator.ofFloat(0, largeThickness);
+            growAnimation.setInterpolator(LINEAR_OUT_SLOW_IN);
+            growAnimation.setDuration(IMPORTANCE_ANIM_GROW_DURATION);
+            growAnimation.addUpdateListener(animatorUpdateListener);
+
+            ValueAnimator shrinkAnimation =
+                    ValueAnimator.ofFloat(largeThickness, standardThickness);
+            shrinkAnimation.setDuration(IMPORTANCE_ANIM_SHRINK_DURATION);
+            shrinkAnimation.setStartDelay(IMPORTANCE_ANIM_SHRINK_DELAY);
+            shrinkAnimation.setInterpolator(OVERSHOOT);
+            shrinkAnimation.addUpdateListener(animatorUpdateListener);
+            shrinkAnimation.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    // Shrink the badge bg so that it doesn't peek behind the animation
+                    bg.setSize(baseSize, baseSize);
+                    mConversationIconBadgeBg.invalidate();
+                }
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    // Reset bg back to normal size
+                    bg.setSize(bgSize, bgSize);
+                    mConversationIconBadgeBg.invalidate();
+                }
+            });
+
+            AnimatorSet anims = new AnimatorSet();
+            anims.playSequentially(growAnimation, shrinkAnimation);
+            anims.start();
+        }
     }
 
     public boolean isImportantConversation() {
@@ -1176,7 +1245,6 @@ public class ConversationLayout extends FrameLayout
     }
 
     private void updateContentEndPaddings() {
-
         // Let's make sure the conversation header can't run into the expand button when we're
         // collapsed and update the paddings of the content
         int headerPaddingEnd;

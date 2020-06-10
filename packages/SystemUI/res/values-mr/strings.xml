@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"वर उजवीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"तळाशी डावीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"तळाशी उजवीकडे हलवा"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"डिसमिस करा"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"संभाषणाला बबल करू नका"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबल वापरून चॅट करा"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"नवीन संभाषणे फ्लोटिंग आयकन किंवा बबल म्हणून दिसतात. बबल उघडण्यासाठी टॅप करा. हे हलवण्यासाठी ड्रॅग करा."</string>

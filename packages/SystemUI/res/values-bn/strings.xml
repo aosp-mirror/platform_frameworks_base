@@ -1002,7 +1002,8 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"উপরে ডানদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"নিচে ডান দিকে সরান"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"খারিজ করুন"</string>
+    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
+    <skip />
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"কথোপকথন বাবল হিসেবে দেখাবে না"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"বাবল ব্যবহার করে চ্যাট করুন"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
@@ -1013,17 +1014,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"সিস্টেম নেভিগেশন আপডেট হয়েছে। পরিবর্তন করার জন্য সেটিংসে যান।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"সিস্টেম নেভিগেশন আপডেট করতে সেটিংসে যান"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
-    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
-    <skip />
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"কথোপকথনকে \'গুরুত্বপূর্ণ\' হিসেবে সেট করা হয়েছে"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"গুরুত্বপূর্ণ কথোপকথন:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"কথোপকথনের বিভাগের উপরে দেখান"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"লক স্ক্রিনে প্রোফাইল ছবি দেখান"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"অ্যাপের উপরে একটি ভাসমান বুদবুদ হিসেবে দেখা যাবে"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"বিরক্ত করবে না মোডে ব্যাঘাত ঘটাতে পারে"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"বুঝেছি"</string>
-    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
-    <skip />
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"সেটিংস"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ওভারলে উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"উইন্ডো বড় করে দেখা"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"উইন্ডো কন্ট্রোল বড় করে দেখা"</string>

@@ -317,8 +317,24 @@ public final class InlineSuggestion implements Parcelable {
          */
         @MainThread
         private void handleOnSurfacePackage(SurfaceControlViewHost.SurfacePackage surfacePackage) {
+            if (surfacePackage == null) {
+                return;
+            }
+            if (mSurfacePackage != null || mSurfacePackageConsumer == null) {
+                // The surface package is not consumed, release it immediately.
+                surfacePackage.release();
+                try {
+                    mInlineContentProvider.onSurfacePackageReleased();
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Error calling onSurfacePackageReleased(): " + e);
+                }
+                return;
+            }
             mSurfacePackage = surfacePackage;
-            if (mSurfacePackage != null && mSurfacePackageConsumer != null) {
+            if (mSurfacePackage == null) {
+                return;
+            }
+            if (mSurfacePackageConsumer != null) {
                 mSurfacePackageConsumer.accept(mSurfacePackage);
                 mSurfacePackageConsumer = null;
             }
@@ -334,6 +350,10 @@ public final class InlineSuggestion implements Parcelable {
                 }
                 mSurfacePackage = null;
             }
+            // Clear the pending surface package consumer, if any. This can happen if the IME
+            // attaches the view to window and then quickly detaches it from the window, before
+            // the surface package requested upon attaching to window was returned.
+            mSurfacePackageConsumer = null;
         }
 
         @MainThread
