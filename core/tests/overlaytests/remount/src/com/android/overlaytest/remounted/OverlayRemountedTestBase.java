@@ -18,6 +18,7 @@ package com.android.overlaytest.remounted;
 
 import static org.junit.Assert.fail;
 
+import com.android.internal.util.test.SystemPreparer;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
