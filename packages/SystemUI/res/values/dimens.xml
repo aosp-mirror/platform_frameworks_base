@@ -1222,10 +1222,6 @@
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
     <dimen name="bubble_manage_button_height">48dp</dimen>
-    <!-- How far, horizontally, to animate the expanded view over when animating in/out. -->
-    <dimen name="bubble_expanded_animate_x_distance">100dp</dimen>
-    <!-- How far, vertically, to animate the expanded view over when animating in/out. -->
-    <dimen name="bubble_expanded_animate_y_distance">500dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->
