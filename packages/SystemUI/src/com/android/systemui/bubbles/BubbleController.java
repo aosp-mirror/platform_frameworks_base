@@ -1214,7 +1214,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                             }
                         }
                     } else {
-                        if (bubble.isBubble() && bubble.showInShade()) {
+                        if (bubble.isBubble()) {
                             setIsBubble(bubble, false /* isBubble */);
                         }
                         if (bubble.getEntry() != null && bubble.getEntry().getRow() != null) {
