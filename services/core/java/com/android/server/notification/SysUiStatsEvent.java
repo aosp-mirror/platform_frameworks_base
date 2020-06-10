@@ -58,6 +58,11 @@ public class SysUiStatsEvent {
             mBuilder.writeBoolean(value);
             return this;
         }
+
+        public Builder writeByteArray(byte[] value) {
+            mBuilder.writeByteArray(value);
+            return this;
+        }
     }
 
     static class BuilderFactory {
