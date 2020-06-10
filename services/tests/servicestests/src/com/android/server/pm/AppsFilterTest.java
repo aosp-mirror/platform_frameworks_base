@@ -23,6 +23,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +58,7 @@ import org.junit.runners.JUnit4;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.stubbing.Answer;
 
 import java.security.cert.CertificateException;
 import java.util.ArrayList;
@@ -69,16 +71,20 @@ import java.util.Set;
 @RunWith(JUnit4.class)
 public class AppsFilterTest {
 
-    private static final int DUMMY_CALLING_UID = 10345;
-    private static final int DUMMY_TARGET_UID = 10556;
-    private static final int DUMMY_ACTOR_UID = 10656;
-    private static final int DUMMY_OVERLAY_UID = 10756;
-    private static final int DUMMY_ACTOR_TWO_UID = 10856;
+    private static final int DUMMY_CALLING_APPID = 10345;
+    private static final int DUMMY_TARGET_APPID = 10556;
+    private static final int DUMMY_ACTOR_APPID = 10656;
+    private static final int DUMMY_OVERLAY_APPID = 10756;
+    private static final int SYSTEM_USER = 0;
+    private static final int[] SINGLE_USER_ARRAY = {SYSTEM_USER};
 
     @Mock
     AppsFilter.FeatureConfig mFeatureConfigMock;
+    @Mock
+    AppsFilter.StateProvider mStateProvider;
 
     private ArrayMap<String, PackageSetting> mExisting = new ArrayMap<>();
+    private Object mDummyLock = new Object();
 
     private static ParsingPackage pkg(String packageName) {
         return PackageImpl.forTesting(packageName)
@@ -170,15 +176,24 @@ public class AppsFilterTest {
         mExisting = new ArrayMap<>();
 
         MockitoAnnotations.initMocks(this);
+        doAnswer(invocation -> {
+            ((AppsFilter.StateProvider.CurrentStateCallback) invocation.getArgument(0))
+                    .currentState(mExisting, SINGLE_USER_ARRAY);
+            return null;
+        }).when(mStateProvider)
+                .runWithState(any(AppsFilter.StateProvider.CurrentStateCallback.class));
+
         when(mFeatureConfigMock.isGloballyEnabled()).thenReturn(true);
-        when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
-                .thenReturn(true);
+        when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class))).thenAnswer(
+                (Answer<Boolean>) invocation ->
+                        ((AndroidPackage)invocation.getArgument(SYSTEM_USER)).getTargetSdkVersion()
+                                >= Build.VERSION_CODES.R);
     }
 
     @Test
     public void testSystemReadyPropogates() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         appsFilter.onSystemReady();
         verify(mFeatureConfigMock).onSystemReady();
     }
@@ -186,22 +201,23 @@ public class AppsFilterTest {
     @Test
     public void testQueriesAction_FilterMatches() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package", new IntentFilter("TEST_ACTION")), DUMMY_TARGET_UID);
+                pkg("com.some.package", new IntentFilter("TEST_ACTION")), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_UID);
+                pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testQueriesProtectedAction_FilterDoesNotMatch() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         final Signature frameworkSignature = Mockito.mock(Signature.class);
         final PackageParser.SigningDetails frameworkSigningDetails =
                 new PackageParser.SigningDetails(new Signature[]{frameworkSignature}, 1);
@@ -211,164 +227,174 @@ public class AppsFilterTest {
                 b -> b.setSigningDetails(frameworkSigningDetails));
         appsFilter.onSystemReady();
 
-        final int activityUid = DUMMY_TARGET_UID;
+        final int activityUid = DUMMY_TARGET_APPID;
         PackageSetting targetActivity = simulateAddPackage(appsFilter,
                 pkg("com.target.activity", new IntentFilter("TEST_ACTION")), activityUid);
-        final int receiverUid = DUMMY_TARGET_UID + 1;
+        final int receiverUid = DUMMY_TARGET_APPID + 1;
         PackageSetting targetReceiver = simulateAddPackage(appsFilter,
                 pkgWithReceiver("com.target.receiver", new IntentFilter("TEST_ACTION")),
                 receiverUid);
-        final int callingUid = DUMMY_CALLING_UID;
+        final int callingUid = DUMMY_CALLING_APPID;
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkg("com.calling.action", new Intent("TEST_ACTION")), callingUid);
-        final int wildcardUid = DUMMY_CALLING_UID + 1;
+        final int wildcardUid = DUMMY_CALLING_APPID + 1;
         PackageSetting callingWildCard = simulateAddPackage(appsFilter,
                 pkg("com.calling.wildcard", new Intent("*")), wildcardUid);
 
-        assertFalse(appsFilter.shouldFilterApplication(callingUid, calling, targetActivity, 0));
-        assertTrue(appsFilter.shouldFilterApplication(callingUid, calling, targetReceiver, 0));
+        assertFalse(appsFilter.shouldFilterApplication(callingUid, calling, targetActivity,
+                SYSTEM_USER));
+        assertTrue(appsFilter.shouldFilterApplication(callingUid, calling, targetReceiver,
+                SYSTEM_USER));
 
         assertFalse(appsFilter.shouldFilterApplication(
-                wildcardUid, callingWildCard, targetActivity, 0));
+                wildcardUid, callingWildCard, targetActivity, SYSTEM_USER));
         assertTrue(appsFilter.shouldFilterApplication(
-                wildcardUid, callingWildCard, targetReceiver, 0));
+                wildcardUid, callingWildCard, targetReceiver, SYSTEM_USER));
     }
 
     @Test
     public void testQueriesProvider_FilterMatches() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
+                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkgQueriesProvider("com.some.other.package", "com.some.authority"),
-                DUMMY_CALLING_UID);
+                DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testQueriesDifferentProvider_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_UID);
+                pkgWithProvider("com.some.package", "com.some.authority"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkgQueriesProvider("com.some.other.package", "com.some.other.authority"),
-                DUMMY_CALLING_UID);
+                DUMMY_CALLING_APPID);
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testQueriesProviderWithSemiColon_FilterMatches() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
                 pkgWithProvider("com.some.package", "com.some.authority;com.some.other.authority"),
-                DUMMY_TARGET_UID);
+                DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
                 pkgQueriesProvider("com.some.other.package", "com.some.authority"),
-                DUMMY_CALLING_UID);
+                DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testQueriesAction_NoMatchingAction_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_UID);
+                pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_APPID);
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testQueriesAction_NoMatchingActionFilterLowSdk_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
-        PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package",
-                        new Intent("TEST_ACTION"))
-                        .setTargetSdkVersion(Build.VERSION_CODES.P),
-                DUMMY_CALLING_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
+        ParsingPackage callingPkg = pkg("com.some.other.package",
+                new Intent("TEST_ACTION"))
+                .setTargetSdkVersion(Build.VERSION_CODES.P);
+        PackageSetting calling = simulateAddPackage(appsFilter, callingPkg,
+                DUMMY_CALLING_APPID);
 
-        when(mFeatureConfigMock.packageIsEnabled(calling.pkg)).thenReturn(false);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testNoQueries_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_UID);
+                pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testForceQueryable_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_UID);
+                pkg("com.some.package").setForceQueryable(true), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_UID);
+                pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testForceQueryableByDevice_SystemCaller_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{"com.some.package"}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{"com.some.package"},
+                        false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID,
+                pkg("com.some.package"), DUMMY_TARGET_APPID,
                 setting -> setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_UID);
+                pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
 
     @Test
     public void testSystemSignedTarget_DoesntFilter() throws CertificateException {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         appsFilter.onSystemReady();
 
         final Signature frameworkSignature = Mockito.mock(Signature.class);
@@ -382,62 +408,67 @@ public class AppsFilterTest {
         simulateAddPackage(appsFilter, pkg("android"), 1000,
                 b -> b.setSigningDetails(frameworkSigningDetails));
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
-                DUMMY_TARGET_UID,
+                DUMMY_TARGET_APPID,
                 b -> b.setSigningDetails(frameworkSigningDetails)
                         .setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_UID,
+                pkg("com.some.other.package"), DUMMY_CALLING_APPID,
                 b -> b.setSigningDetails(otherSigningDetails));
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testForceQueryableByDevice_NonSystemCaller_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{"com.some.package"}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{"com.some.package"},
+                        false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_UID);
+                pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
 
     @Test
     public void testSystemQueryable_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{},
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{},
                         true /* system force queryable */, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID,
+                pkg("com.some.package"), DUMMY_TARGET_APPID,
                 setting -> setting.setPkgFlags(ApplicationInfo.FLAG_SYSTEM));
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package"), DUMMY_CALLING_UID);
+                pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testQueriesPackage_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package", "com.some.package"), DUMMY_CALLING_UID);
+                pkg("com.some.other.package", "com.some.package"), DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
@@ -445,63 +476,67 @@ public class AppsFilterTest {
         when(mFeatureConfigMock.packageIsEnabled(any(AndroidPackage.class)))
                 .thenReturn(false);
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(
-                appsFilter, pkg("com.some.package"), DUMMY_TARGET_UID);
+                appsFilter, pkg("com.some.package"), DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(
-                appsFilter, pkg("com.some.other.package"), DUMMY_CALLING_UID);
+                appsFilter, pkg("com.some.other.package"), DUMMY_CALLING_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testSystemUid_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
 
-        assertFalse(appsFilter.shouldFilterApplication(0, null, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(SYSTEM_USER, null, target, SYSTEM_USER));
         assertFalse(appsFilter.shouldFilterApplication(Process.FIRST_APPLICATION_UID - 1,
-                null, target, 0));
+                null, target, SYSTEM_USER));
     }
 
     @Test
     public void testNonSystemUid_NoCallingSetting_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter,
-                pkg("com.some.package"), DUMMY_TARGET_UID);
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, null, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, null, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testNoTargetPackage_filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = new PackageSettingBuilder()
+                .setAppId(DUMMY_TARGET_APPID)
                 .setName("com.some.package")
                 .setCodePath("/")
                 .setResourcePath("/")
                 .setPVersionCode(1L)
                 .build();
         PackageSetting calling = simulateAddPackage(appsFilter,
-                pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_UID);
+                pkg("com.some.other.package", new Intent("TEST_ACTION")), DUMMY_CALLING_APPID);
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
@@ -516,7 +551,11 @@ public class AppsFilterTest {
                 .setOverlayTargetName("overlayableName");
         ParsingPackage actor = pkg("com.some.package.actor");
 
-        final AppsFilter appsFilter = new AppsFilter(mFeatureConfigMock, new String[]{}, false,
+        final AppsFilter appsFilter = new AppsFilter(
+                mStateProvider,
+                mFeatureConfigMock,
+                new String[]{},
+                false,
                 new OverlayReferenceMapper.Provider() {
                     @Nullable
                     @Override
@@ -544,31 +583,34 @@ public class AppsFilterTest {
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
-        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_UID);
-        PackageSetting overlaySetting = simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_UID);
-        PackageSetting actorSetting = simulateAddPackage(appsFilter, actor, DUMMY_ACTOR_UID);
+        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_APPID);
+        PackageSetting overlaySetting =
+                simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_APPID);
+        PackageSetting actorSetting = simulateAddPackage(appsFilter, actor, DUMMY_ACTOR_APPID);
 
         // Actor can see both target and overlay
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_UID, actorSetting,
-                targetSetting, 0));
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_UID, actorSetting,
-                overlaySetting, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSetting,
+                targetSetting, SYSTEM_USER));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSetting,
+                overlaySetting, SYSTEM_USER));
 
         // But target/overlay can't see each other
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_TARGET_UID, targetSetting,
-                overlaySetting, 0));
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_UID, overlaySetting,
-                targetSetting, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_TARGET_APPID, targetSetting,
+                overlaySetting, SYSTEM_USER));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_APPID, overlaySetting,
+                targetSetting, SYSTEM_USER));
 
         // And can't see the actor
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_TARGET_UID, targetSetting,
-                actorSetting, 0));
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_UID, overlaySetting,
-                actorSetting, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_TARGET_APPID, targetSetting,
+                actorSetting, SYSTEM_USER));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_OVERLAY_APPID, overlaySetting,
+                actorSetting, SYSTEM_USER));
     }
 
     @Test
     public void testActsOnTargetOfOverlayThroughSharedUser() throws Exception {
+//        Debug.waitForDebugger();
+
         final String actorName = "overlay://test/actorName";
 
         ParsingPackage target = pkg("com.some.package.target")
@@ -580,7 +622,11 @@ public class AppsFilterTest {
         ParsingPackage actorOne = pkg("com.some.package.actor.one");
         ParsingPackage actorTwo = pkg("com.some.package.actor.two");
 
-        final AppsFilter appsFilter = new AppsFilter(mFeatureConfigMock, new String[]{}, false,
+        final AppsFilter appsFilter = new AppsFilter(
+                mStateProvider,
+                mFeatureConfigMock,
+                new String[]{},
+                false,
                 new OverlayReferenceMapper.Provider() {
                     @Nullable
                     @Override
@@ -609,108 +655,114 @@ public class AppsFilterTest {
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
-        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_UID);
-        PackageSetting overlaySetting = simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_UID);
-        PackageSetting actorOneSetting = simulateAddPackage(appsFilter, actorOne, DUMMY_ACTOR_UID);
-        PackageSetting actorTwoSetting = simulateAddPackage(appsFilter, actorTwo,
-                DUMMY_ACTOR_TWO_UID);
-
+        PackageSetting targetSetting = simulateAddPackage(appsFilter, target, DUMMY_TARGET_APPID);
         SharedUserSetting actorSharedSetting = new SharedUserSetting("actorSharedUser",
-                actorOneSetting.pkgFlags, actorOneSetting.pkgPrivateFlags);
-        actorSharedSetting.addPackage(actorOneSetting);
-        actorSharedSetting.addPackage(actorTwoSetting);
+                targetSetting.pkgFlags, targetSetting.pkgPrivateFlags);
+        PackageSetting overlaySetting =
+                simulateAddPackage(appsFilter, overlay, DUMMY_OVERLAY_APPID);
+        simulateAddPackage(appsFilter, actorOne, DUMMY_ACTOR_APPID,
+                null /*settingBuilder*/, actorSharedSetting);
+        simulateAddPackage(appsFilter, actorTwo, DUMMY_ACTOR_APPID,
+                null /*settingBuilder*/, actorSharedSetting);
+
 
         // actorTwo can see both target and overlay
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_TWO_UID, actorSharedSetting,
-                targetSetting, 0));
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_TWO_UID, actorSharedSetting,
-                overlaySetting, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSharedSetting,
+                targetSetting, SYSTEM_USER));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_ACTOR_APPID, actorSharedSetting,
+                overlaySetting, SYSTEM_USER));
     }
 
     @Test
     public void testInitiatingApp_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
-                DUMMY_TARGET_UID);
+                DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
-                DUMMY_CALLING_UID, withInstallSource(target.name, null, null, false));
+                DUMMY_CALLING_APPID, withInstallSource(target.name, null, null, false));
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testUninstalledInitiatingApp_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
-                DUMMY_TARGET_UID);
+                DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
-                DUMMY_CALLING_UID, withInstallSource(target.name, null, null, true));
+                DUMMY_CALLING_APPID, withInstallSource(target.name, null, null, true));
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testOriginatingApp_Filters() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
-                DUMMY_TARGET_UID);
+                DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
-                DUMMY_CALLING_UID, withInstallSource(null, target.name, null, false));
+                DUMMY_CALLING_APPID, withInstallSource(null, target.name, null, false));
 
-        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertTrue(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testInstallingApp_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
-                DUMMY_TARGET_UID);
+                DUMMY_TARGET_APPID);
         PackageSetting calling = simulateAddPackage(appsFilter, pkg("com.some.other.package"),
-                DUMMY_CALLING_UID, withInstallSource(null, null, target.name, false));
+                DUMMY_CALLING_APPID, withInstallSource(null, null, target.name, false));
 
-        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, calling, target, 0));
+        assertFalse(appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, calling, target,
+                SYSTEM_USER));
     }
 
     @Test
     public void testInstrumentation_DoesntFilter() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
 
         PackageSetting target = simulateAddPackage(appsFilter, pkg("com.some.package"),
-                DUMMY_TARGET_UID);
+                DUMMY_TARGET_APPID);
         PackageSetting instrumentation = simulateAddPackage(appsFilter,
                 pkgWithInstrumentation("com.some.other.package", "com.some.package"),
-                DUMMY_CALLING_UID);
+                DUMMY_CALLING_APPID);
 
         assertFalse(
-                appsFilter.shouldFilterApplication(DUMMY_CALLING_UID, instrumentation, target, 0));
+                appsFilter.shouldFilterApplication(DUMMY_CALLING_APPID, instrumentation, target,
+                        SYSTEM_USER));
         assertFalse(
-                appsFilter.shouldFilterApplication(DUMMY_TARGET_UID, target, instrumentation, 0));
+                appsFilter.shouldFilterApplication(DUMMY_TARGET_APPID, target, instrumentation,
+                        SYSTEM_USER));
     }
 
     @Test
     public void testWhoCanSee() throws Exception {
         final AppsFilter appsFilter =
-                new AppsFilter(mFeatureConfigMock, new String[]{}, false, null);
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
         simulateAddBasicAndroid(appsFilter);
         appsFilter.onSystemReady();
 
@@ -728,21 +780,25 @@ public class AppsFilterTest {
                 queriesProviderAppId);
 
         final int[] systemFilter =
-                appsFilter.getVisibilityWhitelist(system, new int[]{0}, mExisting).get(0);
+                appsFilter.getVisibilityWhitelist(system, SINGLE_USER_ARRAY, mExisting)
+                        .get(SYSTEM_USER);
         assertThat(toList(systemFilter), empty());
 
         final int[] seesNothingFilter =
-                appsFilter.getVisibilityWhitelist(seesNothing, new int[]{0}, mExisting).get(0);
+                appsFilter.getVisibilityWhitelist(seesNothing, SINGLE_USER_ARRAY, mExisting)
+                        .get(SYSTEM_USER);
         assertThat(toList(seesNothingFilter),
                 contains(seesNothingAppId));
 
         final int[] hasProviderFilter =
-                appsFilter.getVisibilityWhitelist(hasProvider, new int[]{0}, mExisting).get(0);
+                appsFilter.getVisibilityWhitelist(hasProvider, SINGLE_USER_ARRAY, mExisting)
+                        .get(SYSTEM_USER);
         assertThat(toList(hasProviderFilter),
                 contains(hasProviderAppId, queriesProviderAppId));
 
         int[] queriesProviderFilter =
-                appsFilter.getVisibilityWhitelist(queriesProvider, new int[]{0}, mExisting).get(0);
+                appsFilter.getVisibilityWhitelist(queriesProvider, SINGLE_USER_ARRAY, mExisting)
+                        .get(SYSTEM_USER);
         assertThat(toList(queriesProviderFilter),
                 contains(queriesProviderAppId));
 
@@ -751,7 +807,8 @@ public class AppsFilterTest {
 
         // ensure implicit access is included in the filter
         queriesProviderFilter =
-                appsFilter.getVisibilityWhitelist(queriesProvider, new int[]{0}, mExisting).get(0);
+                appsFilter.getVisibilityWhitelist(queriesProvider, SINGLE_USER_ARRAY, mExisting)
+                        .get(SYSTEM_USER);
         assertThat(toList(queriesProviderFilter),
                 contains(hasProviderAppId, queriesProviderAppId));
     }
@@ -779,11 +836,17 @@ public class AppsFilterTest {
 
     private PackageSetting simulateAddPackage(AppsFilter filter,
             ParsingPackage newPkgBuilder, int appId) {
-        return simulateAddPackage(filter, newPkgBuilder, appId, null);
+        return simulateAddPackage(filter, newPkgBuilder, appId, null /*settingBuilder*/);
     }
 
     private PackageSetting simulateAddPackage(AppsFilter filter,
             ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action) {
+        return simulateAddPackage(filter, newPkgBuilder, appId, action, null /*sharedUserSetting*/);
+    }
+
+    private PackageSetting simulateAddPackage(AppsFilter filter,
+                ParsingPackage newPkgBuilder, int appId, @Nullable WithSettingBuilder action,
+            @Nullable SharedUserSetting sharedUserSetting) {
         AndroidPackage newPkg = ((ParsedPackage) newPkgBuilder.hideAsParsed()).hideAsFinal();
 
         final PackageSettingBuilder settingBuilder = new PackageSettingBuilder()
@@ -795,8 +858,12 @@ public class AppsFilterTest {
                 .setPVersionCode(1L);
         final PackageSetting setting =
                 (action == null ? settingBuilder : action.withBuilder(settingBuilder)).build();
-        filter.addPackage(setting, mExisting);
         mExisting.put(newPkg.getPackageName(), setting);
+        if (sharedUserSetting != null) {
+            sharedUserSetting.addPackage(setting);
+            setting.sharedUser = sharedUserSetting;
+        }
+        filter.addPackage(setting);
         return setting;
     }
 
@@ -809,4 +876,3 @@ public class AppsFilterTest {
         return setting -> setting.setInstallSource(installSource);
     }
 }
-
