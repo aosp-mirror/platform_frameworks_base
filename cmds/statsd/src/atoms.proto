@@ -566,6 +566,7 @@ message Atom {
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
+        DNDModeProto dnd_mode_rule = 10084 [(module) = "framework"];
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -6093,6 +6094,76 @@ message PackageNotificationChannelPreferences {
     optional bool is_demoted_conversation = 9;
     // Indicates if the channel is a conversation that was marked as important by the user.
     optional bool is_important_conversation = 10;
+}
+
+/**
+ * Atom that represents an item in the list of Do Not Disturb rules, pulled from
+ * NotificationManagerService.java.
+ */
+message DNDModeProto {
+    enum Mode {
+        ROOT_CONFIG = -1;  // Used to distinguish the config (one per user) from the rules.
+        ZEN_MODE_OFF = 0;
+        ZEN_MODE_IMPORTANT_INTERRUPTIONS = 1;
+        ZEN_MODE_NO_INTERRUPTIONS = 2;
+        ZEN_MODE_ALARMS = 3;
+    }
+    optional int32 user = 1;  // Android user ID (0, 1, 10, ...)
+    optional bool enabled = 2;  // true for ROOT_CONFIG if a manualRule is enabled
+    optional bool channels_bypassing = 3; // only valid for ROOT_CONFIG
+    optional Mode zen_mode = 4;
+    // id is one of the system default rule IDs, or empty
+    // May also be "MANUAL_RULE" to indicate app-activation of the manual rule.
+    optional string id = 5;
+    optional int32 uid = 6 [(is_uid) = true]; // currently only SYSTEM_UID or 0 for other
+    optional DNDPolicyProto policy = 7;
+}
+
+/**
+ * Atom that represents a Do Not Disturb policy, an optional detail proto for DNDModeProto.
+ */
+message DNDPolicyProto {
+    enum State {
+        STATE_UNSET = 0;
+        STATE_ALLOW = 1;
+        STATE_DISALLOW = 2;
+    }
+    optional State calls = 1;
+    optional State repeat_callers = 2;
+    optional State messages = 3;
+    optional State conversations = 4;
+    optional State reminders = 5;
+    optional State events = 6;
+    optional State alarms = 7;
+    optional State media = 8;
+    optional State system = 9;
+    optional State fullscreen = 10;
+    optional State lights = 11;
+    optional State peek = 12;
+    optional State status_bar = 13;
+    optional State badge = 14;
+    optional State ambient = 15;
+    optional State notification_list = 16;
+
+    enum PeopleType {
+        PEOPLE_UNSET = 0;
+        PEOPLE_ANYONE = 1;
+        PEOPLE_CONTACTS = 2;
+        PEOPLE_STARRED = 3;
+        PEOPLE_NONE = 4;
+    }
+
+    optional PeopleType allow_calls_from = 17;
+    optional PeopleType allow_messages_from = 18;
+
+    enum ConversationType {
+        CONV_UNSET = 0;
+        CONV_ANYONE = 1;
+        CONV_IMPORTANT = 2;
+        CONV_NONE = 3;
+    }
+
+    optional ConversationType allow_conversations_from = 19;
 }
 
 /**
