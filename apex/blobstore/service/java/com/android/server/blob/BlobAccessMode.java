@@ -127,6 +127,14 @@ class BlobAccessMode {
         return false;
     }
 
+    int getAccessType() {
+        return mAccessType;
+    }
+
+    int getNumWhitelistedPackages() {
+        return mWhitelistedPackages.size();
+    }
+
     void dump(IndentingPrintWriter fout) {
         fout.println("accessType: " + DebugUtils.flagsToString(
                 BlobAccessMode.class, "ACCESS_TYPE_", mAccessType));
