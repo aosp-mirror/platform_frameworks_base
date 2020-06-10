@@ -93,7 +93,7 @@ final class AutofillInlineSuggestionsRequestSession {
     @Nullable
     private InlineFillUi mInlineFillUi;
     @GuardedBy("mLock")
-    private boolean mPreviousResponseIsNotEmpty;
+    private Boolean mPreviousResponseIsNotEmpty = null;
 
     @GuardedBy("mLock")
     private boolean mDestroyed = false;
@@ -213,7 +213,7 @@ final class AutofillInlineSuggestionsRequestSession {
             // if IME is visible, and response is not null, send the response
             InlineSuggestionsResponse response = mInlineFillUi.getInlineSuggestionsResponse();
             boolean isEmptyResponse = response.getInlineSuggestions().isEmpty();
-            if (isEmptyResponse && !mPreviousResponseIsNotEmpty) {
+            if (isEmptyResponse && Boolean.FALSE.equals(mPreviousResponseIsNotEmpty)) {
                 // No-op if both the previous response and current response are empty.
                 return;
             }
