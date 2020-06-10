@@ -193,7 +193,7 @@ message Atom {
         BiometricAcquired biometric_acquired = 87 [(module) = "framework"];
         BiometricAuthenticated biometric_authenticated = 88 [(module) = "framework"];
         BiometricErrorOccurred biometric_error_occurred = 89 [(module) = "framework"];
-        UiEventReported ui_event_reported = 90 [(module) = "framework"];
+        UiEventReported ui_event_reported = 90 [(module) = "framework", (module) = "sysui"];
         BatteryHealthSnapshot battery_health_snapshot = 91;
         SlowIo slow_io = 92;
         BatteryCausedShutdown battery_caused_shutdown = 93;
@@ -419,7 +419,7 @@ message Atom {
         DisplayJankReported display_jank_reported = 257;
         AppStandbyBucketChanged app_standby_bucket_changed = 258 [(module) = "framework"];
         SharesheetStarted sharesheet_started = 259 [(module) = "framework"];
-        RankingSelected ranking_selected = 260 [(module) = "framework"];
+        RankingSelected ranking_selected = 260 [(module) = "framework", (module) = "sysui"];
         TvSettingsUIInteracted tvsettings_ui_interacted = 261 [(module) = "tv_settings"];
         LauncherStaticLayout launcher_snapshot = 262 [(module) = "sysui"];
         PackageInstallerV2Reported package_installer_v2_reported = 263 [(module) = "framework"];
