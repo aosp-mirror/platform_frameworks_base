@@ -96,6 +96,8 @@ import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.accessibility.dialog.AccessibilityButtonChooserActivity;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.LatencyTracker;
 import com.android.internal.view.AppearanceRegion;
@@ -225,6 +227,25 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private int mCurrentRotation;
     private boolean mFixedRotationEnabled;
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
+    private UiEventLogger mUiEventLogger;
+
+    @com.android.internal.annotations.VisibleForTesting
+    public enum NavBarActionEvent implements UiEventLogger.UiEventEnum {
+
+        @UiEvent(doc = "Assistant invoked via home button long press.")
+        NAVBAR_ASSIST_LONGPRESS(550);
+
+        private final int mId;
+
+        NavBarActionEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
 
     /** Only for default display */
     @Nullable
@@ -367,7 +388,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             ShadeController shadeController,
             NotificationRemoteInputManager notificationRemoteInputManager,
             SystemActions systemActions,
-            @Main Handler mainHandler) {
+            @Main Handler mainHandler,
+            UiEventLogger uiEventLogger) {
         mAccessibilityManagerWrapper = accessibilityManagerWrapper;
         mDeviceProvisionedController = deviceProvisionedController;
         mStatusBarStateController = statusBarStateController;
@@ -387,6 +409,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mRecentsOptional = recentsOptional;
         mSystemActions = systemActions;
         mHandler = mainHandler;
+        mUiEventLogger = uiEventLogger;
     }
 
     // ----- Fragment Lifecycle Callbacks -----
@@ -1008,6 +1031,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             return false;
         }
         mMetricsLogger.action(MetricsEvent.ACTION_ASSIST_LONG_PRESS);
+        mUiEventLogger.log(NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS);
         Bundle args  = new Bundle();
         args.putInt(
                 AssistManager.INVOCATION_TYPE_KEY, AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS);

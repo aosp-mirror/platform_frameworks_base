@@ -23,12 +23,12 @@ import static android.view.KeyEvent.KEYCODE_APP_SWITCH;
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.KeyEvent.KEYCODE_HOME;
 
-import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarActionsEvent.NAVBAR_BACK_BUTTON_LONGPRESS;
-import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarActionsEvent.NAVBAR_BACK_BUTTON_TAP;
-import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarActionsEvent.NAVBAR_HOME_BUTTON_LONGPRESS;
-import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarActionsEvent.NAVBAR_HOME_BUTTON_TAP;
-import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarActionsEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS;
-import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarActionsEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
+import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS;
+import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
+import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarButtonEvent.NAVBAR_HOME_BUTTON_LONGPRESS;
+import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarButtonEvent.NAVBAR_HOME_BUTTON_TAP;
+import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS;
+import static com.android.systemui.statusbar.policy.KeyButtonView.NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -140,11 +140,11 @@ public class KeyButtonViewTest extends SysuiTestCase {
     }
 
     private void checkmetrics(int code, int action, int flag,
-            KeyButtonView.NavBarActionsEvent expected) {
+            KeyButtonView.NavBarButtonEvent expected) {
         mKeyButtonView.setCode(code);
         mKeyButtonView.sendEvent(action, flag);
         if (expected == null) {
-            verify(mUiEventLogger, never()).log(any(KeyButtonView.NavBarActionsEvent.class));
+            verify(mUiEventLogger, never()).log(any(KeyButtonView.NavBarButtonEvent.class));
         } else {
             verify(mUiEventLogger, times(1)).log(expected);
         }
