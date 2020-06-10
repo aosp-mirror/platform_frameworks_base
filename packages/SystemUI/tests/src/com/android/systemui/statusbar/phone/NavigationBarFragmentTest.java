@@ -21,6 +21,8 @@ import static android.inputmethodservice.InputMethodService.IME_VISIBLE;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 
+import static com.android.systemui.statusbar.phone.NavigationBarFragment.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +62,7 @@ import android.view.accessibility.AccessibilityManager.AccessibilityServicesStat
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.SysuiTestableContext;
@@ -105,6 +109,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     private Recents mRecents;
     @Mock
     private SystemActions mSystemActions;
+    @Mock
+    private UiEventLogger mUiEventLogger;
 
     private AccessibilityManagerWrapper mAccessibilityWrapper =
             new AccessibilityManagerWrapper(mContext) {
@@ -187,6 +193,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
         mFragments.dispatchResume();
         processAllMessages();
         navigationBarFragment.onHomeLongClick(navigationBarFragment.getView());
+
+        verify(mUiEventLogger, times(1)).log(NAVBAR_ASSIST_LONGPRESS);
     }
 
     @Test
@@ -242,6 +250,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
     protected Fragment instantiate(Context context, String className, Bundle arguments) {
         DeviceProvisionedController deviceProvisionedController =
                 mock(DeviceProvisionedController.class);
+        when(deviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         assertNotNull(mAccessibilityWrapper);
         return new NavigationBarFragment(
                 context.getDisplayId() == DEFAULT_DISPLAY ? mAccessibilityWrapper
@@ -261,7 +270,8 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                 mock(ShadeController.class),
                 mock(NotificationRemoteInputManager.class),
                 mock(SystemActions.class),
-                mHandler);
+                mHandler,
+                mUiEventLogger);
     }
 
     private class HostCallbacksForExternalDisplay extends
@@ -319,6 +329,7 @@ public class NavigationBarFragmentTest extends SysuiBaseFragmentTest {
                     mock(LightBarTransitionsController.class));
             when(view.getRotationButtonController()).thenReturn(
                     mock(RotationButtonController.class));
+            when(view.isRecentsButtonVisible()).thenReturn(true);
             return view;
         }
     }
