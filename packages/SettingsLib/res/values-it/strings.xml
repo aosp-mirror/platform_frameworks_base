@@ -64,10 +64,10 @@
     <string name="wifi_passpoint_expired" msgid="6540867261754427561">"Scaduta"</string>
     <string name="preference_summary_default_combination" msgid="2644094566845577901">"<xliff:g id="STATE">%1$s</xliff:g>/<xliff:g id="DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="bluetooth_disconnected" msgid="7739366554710388701">"Disconnesso"</string>
-    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione..."</string>
-    <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione..."</string>
+    <string name="bluetooth_disconnecting" msgid="7638892134401574338">"Disconnessione…"</string>
+    <string name="bluetooth_connecting" msgid="5871702668260192755">"Connessione…"</string>
     <string name="bluetooth_connected" msgid="8065345572198502293">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso"</string>
-    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento..."</string>
+    <string name="bluetooth_pairing" msgid="4269046942588193600">"Accoppiamento…"</string>
     <string name="bluetooth_connected_no_headset" msgid="2224101138659967604">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (telefono escluso)"</string>
     <string name="bluetooth_connected_no_a2dp" msgid="8566874395813947092">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (contenuti multimediali esclusi)"</string>
     <string name="bluetooth_connected_no_map" msgid="3381860077002724689">"<xliff:g id="ACTIVE_DEVICE">%1$s</xliff:g> connesso (nessun accesso ai messaggi)"</string>
@@ -406,11 +406,11 @@
     <string name="select_webview_provider_dialog_title" msgid="2444261109877277714">"Imposta l\'implementazione di WebView"</string>
     <string name="select_webview_provider_toast_text" msgid="8512254949169359848">"La selezione non è più valida. Riprova."</string>
     <string name="convert_to_file_encryption" msgid="2828976934129751818">"Converti in crittografia basata su file"</string>
-    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converti..."</string>
+    <string name="convert_to_file_encryption_enabled" msgid="840757431284311754">"Converti…"</string>
     <string name="convert_to_file_encryption_done" msgid="8965831011811180627">"Crittografia su base file già eseguita"</string>
     <string name="title_convert_fbe" msgid="5780013350366495149">"Conversione in crittografia basata su file"</string>
-    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converti la partizione di dati in crittografia basata su file.\n Attenzione. Questa operazione eliminerà tutti i tuoi dati.\n Questa funzione è in versione alpha, pertanto potrebbe non funzionare correttamente.\n Premi \"Cancella e converti...\" per continuare."</string>
-    <string name="button_convert_fbe" msgid="1159861795137727671">"Cancella e converti..."</string>
+    <string name="convert_to_fbe_warning" msgid="34294381569282109">"Converti la partizione di dati in crittografia basata su file.\n Attenzione. Questa operazione eliminerà tutti i tuoi dati.\n Questa funzione è in versione alpha, pertanto potrebbe non funzionare correttamente.\n Premi \"Cancella e converti…\" per continuare."</string>
+    <string name="button_convert_fbe" msgid="1159861795137727671">"Cancella e converti…"</string>
     <string name="picture_color_mode" msgid="1013807330552931903">"Modalità colori immagini"</string>
     <string name="picture_color_mode_desc" msgid="151780973768136200">"Use sRGB"</string>
     <string name="daltonizer_mode_disabled" msgid="403424372812399228">"Disattivato"</string>
