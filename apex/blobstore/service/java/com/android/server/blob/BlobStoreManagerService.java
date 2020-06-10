@@ -478,7 +478,9 @@ public class BlobStoreManagerService extends SystemService {
                             ? Resources.ID_NULL
                             : getDescriptionResourceId(resourcesGetter.apply(leasee.packageName),
                                     leasee.descriptionResEntryName, leasee.packageName);
-                    leaseInfos.add(new LeaseInfo(leasee.packageName, leasee.expiryTimeMillis,
+                    final long expiryTimeMs = leasee.expiryTimeMillis == 0
+                            ? blobHandle.getExpiryTimeMillis() : leasee.expiryTimeMillis;
+                    leaseInfos.add(new LeaseInfo(leasee.packageName, expiryTimeMs,
                             descriptionResId, leasee.description));
                 });
                 blobInfos.add(new BlobInfo(blobMetadata.getBlobId(),
