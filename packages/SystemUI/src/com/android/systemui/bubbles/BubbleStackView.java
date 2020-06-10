@@ -1975,9 +1975,12 @@ public class BubbleStackView extends FrameLayout
     @Override
     public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
         // If the notification shade is expanded, or the manage menu is open, or we are showing
-        // manage bubbles user education, we shouldn't let the
-        // ActivityView steal any touch events from any location.
-        if (!mIsExpanded || mShowingManage || mManageEducationView.getVisibility() == VISIBLE) {
+        // manage bubbles user education, we shouldn't let the ActivityView steal any touch events
+        // from any location.
+        if (!mIsExpanded
+                || mShowingManage
+                || (mManageEducationView != null
+                    && mManageEducationView.getVisibility() == VISIBLE)) {
             touchableRegion.setEmpty();
         }
     }
