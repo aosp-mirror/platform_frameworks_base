@@ -41,6 +41,7 @@ import android.service.textclassifier.TextClassifierService;
 import android.service.textclassifier.TextClassifierService.ConnectionState;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.LruCache;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.textclassifier.ConversationAction;
@@ -68,12 +69,10 @@ import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Queue;
 
 /**
  * A manager for TextClassifier services.
@@ -308,13 +307,15 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         Objects.requireNonNull(classificationContext);
         Objects.requireNonNull(classificationContext.getSystemTextClassifierMetadata());
 
+        synchronized (mLock) {
+            mSessionCache.put(sessionId, classificationContext);
+        }
         handleRequest(
                 classificationContext.getSystemTextClassifierMetadata(),
                 /* verifyCallingPackage= */ true,
                 /* attemptToBind= */ false,
                 service -> {
                     service.onCreateTextClassificationSession(classificationContext, sessionId);
-                    mSessionCache.put(sessionId, classificationContext);
                 },
                 "onCreateTextClassificationSession",
                 NO_OP_CALLBACK);
@@ -588,12 +589,14 @@ public final class TextClassificationManagerService extends ITextClassifierServi
      * are cleaned up automatically when the client process is dead.
      */
     static final class SessionCache {
+        private static final int MAX_CACHE_SIZE = 100;
+
         @NonNull
         private final Object mLock;
         @NonNull
         @GuardedBy("mLock")
-        private final Map<TextClassificationSessionId, StrippedTextClassificationContext> mCache =
-                new ArrayMap<>();
+        private final LruCache<TextClassificationSessionId, StrippedTextClassificationContext>
+                mCache = new LruCache<>(MAX_CACHE_SIZE);
         @NonNull
         @GuardedBy("mLock")
         private final Map<TextClassificationSessionId, DeathRecipient> mDeathRecipients =
@@ -775,6 +778,8 @@ public final class TextClassificationManagerService extends ITextClassifierServi
     }
 
     private final class ServiceState {
+        private static final int MAX_PENDING_REQUESTS = 20;
+
         @UserIdInt
         final int mUserId;
         @NonNull
@@ -786,7 +791,15 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         final int mBindServiceFlags;
         @NonNull
         @GuardedBy("mLock")
-        final Queue<PendingRequest> mPendingRequests = new ArrayDeque<>();
+        final FixedSizeQueue<PendingRequest> mPendingRequests =
+                new FixedSizeQueue<>(MAX_PENDING_REQUESTS,
+                        request -> {
+                            Slog.w(LOG_TAG,
+                                    String.format("Pending request[%s] is dropped", request.mName));
+                            if (request.mOnServiceFailure != null) {
+                                request.mOnServiceFailure.run();
+                            }
+                        });
         @Nullable
         @GuardedBy("mLock")
         ITextClassifierService mService;
@@ -910,7 +923,7 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 pw.printPair("bindServiceFlags", mBindServiceFlags);
                 pw.printPair("boundServiceUid", mBoundServiceUid);
                 pw.printPair("binding", mBinding);
-                pw.printPair("numberRequests", mPendingRequests.size());
+                pw.printPair("numOfPendingRequests", mPendingRequests.size());
             }
         }
 
