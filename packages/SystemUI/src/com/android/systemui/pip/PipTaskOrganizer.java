@@ -143,10 +143,8 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             case MSG_RESIZE_ANIMATE: {
                 Rect currentBounds = (Rect) args.arg2;
                 Rect toBounds = (Rect) args.arg3;
-                Rect sourceHintRect = (Rect) args.arg4;
                 int duration = args.argi2;
-                animateResizePip(currentBounds, toBounds, sourceHintRect,
-                        args.argi1 /* direction */, duration);
+                animateResizePip(currentBounds, toBounds, args.argi1 /* direction */, duration);
                 if (updateBoundsCallback != null) {
                     updateBoundsCallback.accept(toBounds);
                 }
@@ -296,8 +294,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 public void onTransactionReady(int id, SurfaceControl.Transaction t) {
                     t.apply();
                     scheduleAnimateResizePip(mLastReportedBounds, destinationBounds,
-                            null /* sourceHintRect */, direction, animationDurationMs,
-                            null /* updateBoundsCallback */);
+                            direction, animationDurationMs, null /* updateBoundsCallback */);
                     mInPip = false;
                 }
             });
@@ -360,8 +357,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         final Rect currentBounds = mTaskInfo.configuration.windowConfiguration.getBounds();
 
         if (mOneShotAnimationType == ANIM_TYPE_BOUNDS) {
-            final Rect sourceHintRect = getValidSourceHintRect(info, currentBounds);
-            scheduleAnimateResizePip(currentBounds, destinationBounds, sourceHintRect,
+            scheduleAnimateResizePip(currentBounds, destinationBounds,
                     TRANSITION_DIRECTION_TO_PIP, mEnterExitAnimationDuration,
                     null /* updateBoundsCallback */);
         } else if (mOneShotAnimationType == ANIM_TYPE_ALPHA) {
@@ -370,21 +366,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         } else {
             throw new RuntimeException("Unrecognized animation type: " + mOneShotAnimationType);
         }
-    }
-
-    /**
-     * Returns the source hint rect if it is valid (if provided and is contained by the current
-     * task bounds).
-     */
-    private Rect getValidSourceHintRect(ActivityManager.RunningTaskInfo info, Rect sourceBounds) {
-        final Rect sourceHintRect = info.pictureInPictureParams != null
-                && info.pictureInPictureParams.hasSourceBoundsHint()
-                ? info.pictureInPictureParams.getSourceRectHint()
-                : null;
-        if (sourceHintRect != null && sourceBounds.contains(sourceHintRect)) {
-            return sourceHintRect;
-        }
-        return null;
     }
 
     private void enterPipWithAlphaAnimation(Rect destinationBounds, long durationMs) {
@@ -571,13 +552,13 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             Log.d(TAG, "skip scheduleAnimateResizePip, entering pip deferred");
             return;
         }
-        scheduleAnimateResizePip(mLastReportedBounds, toBounds, null /* sourceHintRect */,
+        scheduleAnimateResizePip(mLastReportedBounds, toBounds,
                 TRANSITION_DIRECTION_NONE, duration, updateBoundsCallback);
     }
 
     private void scheduleAnimateResizePip(Rect currentBounds, Rect destinationBounds,
-            Rect sourceHintRect, @PipAnimationController.TransitionDirection int direction,
-            int durationMs, Consumer<Rect> updateBoundsCallback) {
+            @PipAnimationController.TransitionDirection int direction, int durationMs,
+            Consumer<Rect> updateBoundsCallback) {
         if (!mInPip) {
             // can be initiated in other component, ignore if we are no longer in PIP
             return;
@@ -587,7 +568,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         args.arg1 = updateBoundsCallback;
         args.arg2 = currentBounds;
         args.arg3 = destinationBounds;
-        args.arg4 = sourceHintRect;
         args.argi1 = direction;
         args.argi2 = durationMs;
         mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESIZE_ANIMATE, args));
@@ -687,8 +667,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         }
         final Rect destinationBounds = new Rect(originalBounds);
         destinationBounds.offset(xOffset, yOffset);
-        animateResizePip(originalBounds, destinationBounds, null /* sourceHintRect */,
-                TRANSITION_DIRECTION_SAME, durationMs);
+        animateResizePip(originalBounds, destinationBounds, TRANSITION_DIRECTION_SAME, durationMs);
     }
 
     private void resizePip(Rect destinationBounds) {
@@ -766,7 +745,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         WindowOrganizer.applyTransaction(wct);
     }
 
-    private void animateResizePip(Rect currentBounds, Rect destinationBounds, Rect sourceHintRect,
+    private void animateResizePip(Rect currentBounds, Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction, int durationMs) {
         if (Looper.myLooper() != mUpdateHandler.getLooper()) {
             throw new RuntimeException("Callers should call scheduleAnimateResizePip() instead of "
@@ -778,7 +757,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             return;
         }
         mPipAnimationController
-                .getAnimator(mLeash, currentBounds, destinationBounds, sourceHintRect)
+                .getAnimator(mLeash, currentBounds, destinationBounds)
                 .setTransitionDirection(direction)
                 .setPipAnimationCallback(mPipAnimationCallback)
                 .setDuration(durationMs)

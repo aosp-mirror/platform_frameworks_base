@@ -20,6 +20,7 @@ import android.app.INotificationManager;
 import android.content.Context;
 import android.view.WindowManager;
 
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.bubbles.BubbleData;
 import com.android.systemui.bubbles.BubbleDataRepository;
@@ -70,6 +71,7 @@ public interface BubbleModule {
             BubbleDataRepository bubbleDataRepository,
             SysUiState sysUiState,
             INotificationManager notifManager,
+            IStatusBarService statusBarService,
             WindowManager windowManager) {
         return new BubbleController(
                 context,
@@ -91,6 +93,7 @@ public interface BubbleModule {
                 bubbleDataRepository,
                 sysUiState,
                 notifManager,
+                statusBarService,
                 windowManager);
     }
 }

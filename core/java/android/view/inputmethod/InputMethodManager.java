@@ -616,12 +616,19 @@ public final class InputMethodManager {
                 // For some reason we didn't do a startInput + windowFocusGain, so
                 // we'll just do a window focus gain and call it a day.
                 try {
-                    if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
+                    View servedView = controller.getServedView();
+                    boolean nextFocusIsServedView = servedView != null && servedView == focusedView;
+                    if (DEBUG) {
+                        Log.v(TAG, "Reporting focus gain, without startInput"
+                                + ", nextFocusIsServedView=" + nextFocusIsServedView);
+                    }
                     mService.startInputOrWindowGainedFocus(
                             StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                             focusedView.getWindowToken(), startInputFlags, softInputMode,
                             windowFlags,
-                            null, null, 0 /* missingMethodFlags */,
+                            nextFocusIsServedView ? mCurrentTextBoxAttribute : null,
+                            nextFocusIsServedView ? mServedInputConnectionWrapper : null,
+                            0 /* missingMethodFlags */,
                             mCurRootView.mContext.getApplicationInfo().targetSdkVersion);
                 } catch (RemoteException e) {
                     throw e.rethrowFromSystemServer();
@@ -646,8 +653,7 @@ public final class InputMethodManager {
         public void setCurrentRootView(ViewRootImpl rootView) {
             synchronized (mH) {
                 if (mCurRootView != null) {
-                    // Reset the last served view and restart window focus state of the root view.
-                    mCurRootView.getImeFocusController().setServedView(null);
+                    // Restart the input when the next window focus state of the root view changed.
                     mRestartOnNextWindowFocus = true;
                 }
                 mCurRootView = rootView;
@@ -676,6 +682,18 @@ public final class InputMethodManager {
                 mRestartOnNextWindowFocus = false;
             }
             return result;
+        }
+
+        /**
+         * For {@link ImeFocusController} to check if the currently served view is accepting full
+         * text edits.
+         */
+        @Override
+        public boolean isAcceptingText() {
+            synchronized (mH) {
+                return mServedInputConnectionWrapper != null
+                        && mServedInputConnectionWrapper.getInputConnection() != null;
+            }
         }
     }
 

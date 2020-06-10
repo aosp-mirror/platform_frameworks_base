@@ -148,8 +148,7 @@ public class PartialConversationInfo extends LinearLayout implements
     }
 
     private void bindHeader() {
-        bindConversationDetails();
-
+        bindPackage();
         // Delegate
         bindDelegate();
     }
@@ -180,51 +179,6 @@ public class PartialConversationInfo extends LinearLayout implements
         });
     }
 
-    private void bindConversationDetails() {
-        final TextView channelName = findViewById(R.id.parent_channel_name);
-        channelName.setText(mNotificationChannel.getName());
-
-        bindGroup();
-        bindName();
-        bindPackage();
-        bindIcon();
-    }
-
-    private void bindName() {
-        TextView name = findViewById(R.id.name);
-        Bundle extras = mSbn.getNotification().extras;
-        CharSequence nameString = extras.getCharSequence(Notification.EXTRA_CONVERSATION_TITLE, "");
-        if (TextUtils.isEmpty(nameString)) {
-            nameString = extras.getCharSequence(Notification.EXTRA_TITLE, "");
-        }
-        name.setText(nameString);
-    }
-
-    private void bindIcon() {
-        ImageView image = findViewById(R.id.conversation_icon);
-        if (mSbn.getNotification().extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION, false)) {
-            // TODO: maybe use a generic group icon, or a composite of recent senders
-            image.setImageDrawable(mPkgIcon);
-        } else {
-            final List<Notification.MessagingStyle.Message> messages =
-                    Notification.MessagingStyle.Message.getMessagesFromBundleArray(
-                            (Parcelable[]) mSbn.getNotification().extras.get(
-                                    Notification.EXTRA_MESSAGES));
-
-            final Notification.MessagingStyle.Message latestMessage =
-                    Notification.MessagingStyle.findLatestIncomingMessage(messages);
-            Icon personIcon = null;
-            if (latestMessage != null && latestMessage.getSenderPerson() != null) {
-                personIcon = latestMessage.getSenderPerson().getIcon();
-            }
-            if (personIcon != null) {
-                image.setImageIcon(latestMessage.getSenderPerson().getIcon());
-            } else {
-                image.setImageDrawable(mPkgIcon);
-            }
-        }
-    }
-
     private void bindPackage() {
         ApplicationInfo info;
         try {
@@ -241,6 +195,10 @@ public class PartialConversationInfo extends LinearLayout implements
         } catch (PackageManager.NameNotFoundException e) {
             mPkgIcon = mPm.getDefaultActivityIcon();
         }
+        TextView name = findViewById(R.id.name);
+        name.setText(mAppName);
+        ImageView image = findViewById(R.id.icon);
+        image.setImageDrawable(mPkgIcon);
     }
 
     private void bindDelegate() {

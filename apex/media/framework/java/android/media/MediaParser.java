@@ -203,6 +203,15 @@ public final class MediaParser {
         /** Returned by {@link #getDurationMicros()} when the duration is unknown. */
         public static final int UNKNOWN_DURATION = Integer.MIN_VALUE;
 
+        /**
+         * For each {@link #getSeekPoints} call, returns a single {@link SeekPoint} whose {@link
+         * SeekPoint#timeMicros} matches the requested timestamp, and whose {@link
+         * SeekPoint#position} is 0.
+         *
+         * @hide
+         */
+        public static final SeekMap DUMMY = new SeekMap(new DummyExoPlayerSeekMap());
+
         private final com.google.android.exoplayer2.extractor.SeekMap mExoPlayerSeekMap;
 
         private SeekMap(com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
@@ -795,6 +804,18 @@ public final class MediaParser {
      */
     public static final String PARAMETER_EAGERLY_EXPOSE_TRACKTYPE =
             "android.media.mediaparser.eagerlyExposeTrackType";
+    /**
+     * Sets whether a dummy {@link SeekMap} should be exposed before starting extraction. {@code
+     * boolean} expected. Default value is {@code false}.
+     *
+     * <p>For each {@link SeekMap#getSeekPoints} call, the dummy {@link SeekMap} returns a single
+     * {@link SeekPoint} whose {@link SeekPoint#timeMicros} matches the requested timestamp, and
+     * whose {@link SeekPoint#position} is 0.
+     *
+     * @hide
+     */
+    public static final String PARAMETER_EXPOSE_DUMMY_SEEKMAP =
+            "android.media.mediaparser.exposeDummySeekMap";
 
     // Private constants.
 
@@ -958,6 +979,7 @@ public final class MediaParser {
     private boolean mIncludeSupplementalData;
     private boolean mIgnoreTimestampOffset;
     private boolean mEagerlyExposeTrackType;
+    private boolean mExposeDummySeekMap;
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
@@ -1016,6 +1038,9 @@ public final class MediaParser {
         }
         if (PARAMETER_EAGERLY_EXPOSE_TRACKTYPE.equals(parameterName)) {
             mEagerlyExposeTrackType = (boolean) value;
+        }
+        if (PARAMETER_EXPOSE_DUMMY_SEEKMAP.equals(parameterName)) {
+            mExposeDummySeekMap = (boolean) value;
         }
         mParserParameters.put(parameterName, value);
         return this;
@@ -1078,11 +1103,10 @@ public final class MediaParser {
         }
         mExoDataReader.mInputReader = seekableInputReader;
 
-        // TODO: Apply parameters when creating extractor instances.
         if (mExtractor == null) {
+            mPendingExtractorInit = true;
             if (!mParserName.equals(PARSER_NAME_UNKNOWN)) {
                 mExtractor = createExtractor(mParserName);
-                mExtractor.init(new ExtractorOutputAdapter());
             } else {
                 for (String parserName : mParserNamesPool) {
                     Extractor extractor = createExtractor(parserName);
@@ -1107,9 +1131,18 @@ public final class MediaParser {
         }
 
         if (mPendingExtractorInit) {
+            if (mExposeDummySeekMap) {
+                // We propagate the dummy seek map before initializing the extractor, in case the
+                // extractor initialization outputs a seek map.
+                mOutputConsumer.onSeekMapFound(SeekMap.DUMMY);
+            }
             mExtractor.init(new ExtractorOutputAdapter());
             mPendingExtractorInit = false;
+            // We return after initialization to allow clients use any output information before
+            // starting actual extraction.
+            return true;
         }
+
         if (isPendingSeek()) {
             mExtractor.seek(mPendingSeekPosition, mPendingSeekTimeMicros);
             removePendingSeek();
@@ -1683,6 +1716,28 @@ public final class MediaParser {
         }
     }
 
+    private static final class DummyExoPlayerSeekMap
+            implements com.google.android.exoplayer2.extractor.SeekMap {
+
+        @Override
+        public boolean isSeekable() {
+            return true;
+        }
+
+        @Override
+        public long getDurationUs() {
+            return C.TIME_UNSET;
+        }
+
+        @Override
+        public SeekPoints getSeekPoints(long timeUs) {
+            com.google.android.exoplayer2.extractor.SeekPoint seekPoint =
+                    new com.google.android.exoplayer2.extractor.SeekPoint(
+                            timeUs, /* position= */ 0);
+            return new SeekPoints(seekPoint, seekPoint);
+        }
+    }
+
     /** Creates extractor instances. */
     private interface ExtractorFactory {
 
@@ -1923,6 +1978,7 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_INCLUDE_SUPPLEMENTAL_DATA, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_IGNORE_TIMESTAMP_OFFSET, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_EAGERLY_EXPOSE_TRACKTYPE, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_EXPOSE_DUMMY_SEEKMAP, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }
