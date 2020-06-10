@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:paddingTop="8dp"
+        android:paddingTop="11dp"
         android:clipToPadding="true">
         <ImageView
             android:id="@+id/conversation_icon"
