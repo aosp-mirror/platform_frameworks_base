@@ -12362,7 +12362,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ksms.addScannedPackageLPw(pkg);
 
             mComponentResolver.addAllComponents(pkg, chatty);
-            mAppsFilter.addPackage(pkgSetting, mSettings.mPackages);
+            mAppsFilter.addPackage(pkgSetting);
 
             // Don't allow ephemeral applications to define new permissions groups.
             if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
@@ -12536,8 +12536,6 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
-        mAppsFilter.removePackage(getPackageSetting(pkg.getPackageName()),
-                mInjector.getUserManagerInternal().getUserIds(), mSettings.mPackages);
         mPermissionManager.removeAllPermissions(pkg, chatty);
 
         final int instrumentationSize = ArrayUtils.size(pkg.getInstrumentations());
@@ -14253,7 +14251,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Okay!
             targetPackageSetting.setInstallerPackageName(installerPackageName);
             mSettings.addInstallerPackageNames(targetPackageSetting.installSource);
-            mAppsFilter.addPackage(targetPackageSetting, mSettings.mPackages);
+            mAppsFilter.addPackage(targetPackageSetting);
             scheduleWriteSettingsLocked();
         }
     }
@@ -18703,6 +18701,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL, true);
                     clearDefaultBrowserIfNeeded(packageName);
                     mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
+                    mAppsFilter.removePackage(getPackageSetting(packageName));
                     removedAppId = mSettings.removePackageLPw(packageName);
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
@@ -23460,6 +23459,7 @@ public class PackageManagerService extends IPackageManager.Stub
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
             primeDomainVerificationsLPw(userId);
+            mAppsFilter.onUsersChanged();
         }
     }
 

@@ -19,16 +19,13 @@ package com.android.systemui.controls.ui
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
-import android.app.AlertDialog
 import android.content.ComponentName
 import android.content.Context
-import android.content.DialogInterface
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
-import android.os.Process
 import android.service.controls.Control
 import android.util.Log
 import android.util.TypedValue
@@ -36,7 +33,6 @@ import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.widget.AdapterView
@@ -272,8 +268,7 @@ class ControlsUiControllerImpl @Inject constructor (
     private fun createMenu() {
         val items = arrayOf(
             context.resources.getString(R.string.controls_menu_add),
-            context.resources.getString(R.string.controls_menu_edit),
-            "Reset"
+            context.resources.getString(R.string.controls_menu_edit)
         )
         var adapter = ArrayAdapter<String>(context, R.layout.controls_more_item, items)
 
@@ -298,10 +293,6 @@ class ControlsUiControllerImpl @Inject constructor (
                                 0 -> startFavoritingActivity(view.context, selectedStructure)
                                 // 1: Edit controls
                                 1 -> startEditingActivity(view.context, selectedStructure)
-                                // 2: TEMPORARY for reset controls
-                                2 -> showResetConfirmation()
-                                else -> Log.w(ControlsUiController.TAG,
-                                    "Unsupported index ($pos) on 'more' menu selection")
                             }
                             dismiss()
                         }
@@ -310,39 +301,6 @@ class ControlsUiControllerImpl @Inject constructor (
                 }
             }
         })
-    }
-
-    private fun showResetConfirmation() {
-        val builder = AlertDialog.Builder(
-            context,
-            android.R.style.Theme_DeviceDefault_Dialog_Alert
-        ).apply {
-            setMessage("For testing purposes: Would you like to " +
-                "reset your favorited device controls?")
-            setPositiveButton(
-                android.R.string.ok,
-                DialogInterface.OnClickListener { dialog, _ ->
-                    val userHandle = Process.myUserHandle()
-                    val userContext = context.createContextAsUser(userHandle, 0)
-                    val prefs = userContext.getSharedPreferences(
-                        "controls_prefs", Context.MODE_PRIVATE)
-                    prefs.edit().remove("SeedingCompleted").apply()
-                    controlsController.get().resetFavorites()
-                    dialog.dismiss()
-                    context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
-            })
-            setNegativeButton(
-                android.R.string.cancel,
-                DialogInterface.OnClickListener {
-                    dialog, _ -> dialog.cancel()
-                }
-            )
-        }
-        builder.create().apply {
-            getWindow().apply {
-                setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-            }
-        }.show()
     }
 
     private fun createDropDown(items: List<SelectionItem>) {

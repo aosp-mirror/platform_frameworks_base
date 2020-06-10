@@ -296,14 +296,6 @@ public class PipBoundsHandler {
      */
     public boolean onDisplayRotationChanged(Rect outBounds, Rect oldBounds, Rect outInsetBounds,
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) {
-        // Calculate the snap fraction of the current stack along the old movement bounds
-        final Rect postChangeStackBounds = new Rect(oldBounds);
-        final float snapFraction = getSnapFraction(postChangeStackBounds);
-
-        // Update the display layout, note that we have to do this on every rotation even if we
-        // aren't in PIP since we need to update the display layout to get the right resources
-        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
-
         // Bail early if the event is not sent to current {@link #mDisplayInfo}
         if ((displayId != mDisplayInfo.displayId) || (fromRotation == toRotation)) {
             return false;
@@ -319,6 +311,13 @@ public class PipBoundsHandler {
             Log.e(TAG, "Failed to get StackInfo for pinned stack", e);
             return false;
         }
+
+        // Calculate the snap fraction of the current stack along the old movement bounds
+        final Rect postChangeStackBounds = new Rect(oldBounds);
+        final float snapFraction = getSnapFraction(postChangeStackBounds);
+
+        // Update the display layout
+        mDisplayLayout.rotateTo(mContext.getResources(), toRotation);
 
         // Populate the new {@link #mDisplayInfo}.
         // The {@link DisplayInfo} queried from DisplayManager would be the one before rotation,

@@ -23,6 +23,7 @@ import static android.net.NetworkStats.SET_DEFAULT;
 import static android.net.NetworkStats.TAG_NONE;
 import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStats.UID_TETHERING;
+import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 
 import static com.android.networkstack.tethering.BpfCoordinator
         .DEFAULT_PERFORM_POLL_INTERVAL_MS;
@@ -140,7 +141,7 @@ public class BpfCoordinatorTest {
         setupFunctioningNetdInterface();
 
         final BpfCoordinator coordinator = makeBpfCoordinator();
-        coordinator.start();
+        coordinator.startPolling();
 
         final String wlanIface = "wlan0";
         final Integer wlanIfIndex = 100;
@@ -196,12 +197,50 @@ public class BpfCoordinatorTest {
         // [3] Stop coordinator.
         // Shutdown the coordinator and clear the invocation history, especially the
         // tetherOffloadGetStats() calls.
-        coordinator.stop();
+        coordinator.stopPolling();
         clearInvocations(mNetd);
 
         // Verify the polling update thread stopped.
         mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
         waitForIdle();
         verify(mNetd, never()).tetherOffloadGetStats();
+    }
+
+    @Test
+    public void testOnSetAlert() throws Exception {
+        setupFunctioningNetdInterface();
+
+        final BpfCoordinator coordinator = makeBpfCoordinator();
+        coordinator.startPolling();
+
+        final String mobileIface = "rmnet_data0";
+        final Integer mobileIfIndex = 100;
+        coordinator.addUpstreamNameToLookupTable(mobileIfIndex, mobileIface);
+
+        // Verify that set quota to 0 will immediately triggers a callback.
+        mTetherStatsProvider.onSetAlert(0);
+        waitForIdle();
+        mTetherStatsProviderCb.expectNotifyAlertReached();
+
+        // Verify that notifyAlertReached never fired if quota is not yet reached.
+        when(mNetd.tetherOffloadGetStats()).thenReturn(
+                new TetherStatsParcel[] {buildTestTetherStatsParcel(mobileIfIndex, 0, 0, 0, 0)});
+        mTetherStatsProvider.onSetAlert(100);
+        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        waitForIdle();
+        mTetherStatsProviderCb.assertNoCallback();
+
+        // Verify that notifyAlertReached fired when quota is reached.
+        when(mNetd.tetherOffloadGetStats()).thenReturn(
+                new TetherStatsParcel[] {buildTestTetherStatsParcel(mobileIfIndex, 50, 0, 50, 0)});
+        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        waitForIdle();
+        mTetherStatsProviderCb.expectNotifyAlertReached();
+
+        // Verify that set quota with UNLIMITED won't trigger any callback.
+        mTetherStatsProvider.onSetAlert(QUOTA_UNLIMITED);
+        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        waitForIdle();
+        mTetherStatsProviderCb.assertNoCallback();
     }
 }

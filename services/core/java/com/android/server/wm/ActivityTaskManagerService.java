@@ -4858,6 +4858,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
 
+                if (isInPictureInPictureMode(activity)) {
+                    throw new IllegalStateException("Activity is already in PIP mode");
+                }
+
                 final boolean canEnterPictureInPicture = activity.checkEnterPictureInPictureState(
                         "requestPictureInPictureMode", /* beforeStopping */ false);
                 if (!canEnterPictureInPicture) {

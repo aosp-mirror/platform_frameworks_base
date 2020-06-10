@@ -1698,6 +1698,7 @@ public class Tethering {
                     return;
                 }
 
+                mPrivateAddressCoordinator.maybeRemoveDeprecatedUpstreams();
                 mUpstreamNetworkMonitor.startObserveAllNetworks();
 
                 // TODO: De-duplicate with updateUpstreamWanted() below.
@@ -1709,7 +1710,7 @@ public class Tethering {
                 }
 
                 // TODO: Check the upstream interface if it is managed by BPF offload.
-                mBpfCoordinator.start();
+                mBpfCoordinator.startPolling();
             }
 
             @Override
@@ -1722,7 +1723,7 @@ public class Tethering {
                     mTetherUpstream = null;
                     reportUpstreamChanged(null);
                 }
-                mBpfCoordinator.stop();
+                mBpfCoordinator.stopPolling();
             }
 
             private boolean updateUpstreamWanted() {

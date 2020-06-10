@@ -33,6 +33,7 @@ import android.platform.helpers.IAppHelper;
 import android.util.Rational;
 import android.view.Surface;
 
+import androidx.annotation.Nullable;
 import androidx.test.uiautomator.By;
 import androidx.test.uiautomator.UiDevice;
 import androidx.test.uiautomator.UiObject2;
@@ -74,11 +75,77 @@ class CommonTransitions {
         }
     }
 
+    /**
+     * Build a test tag for the test
+     * @param testName Name of the transition(s) being tested
+     * @param app App being launcher
+     * @param rotation Initial screen rotation
+     *
+     * @return test tag with pattern <NAME>__<APP>__<ROTATION>
+     */
+    private static String buildTestTag(String testName, IAppHelper app, int rotation) {
+        return buildTestTag(
+                testName, app, /* app2 */ null, rotation, rotation, /* description */ "");
+    }
+
+    /**
+     * Build a test tag for the test
+     * @param testName Name of the transition(s) being tested
+     * @param app App being launcher
+     * @param beginRotation Initial screen rotation
+     * @param endRotation End screen rotation (if any, otherwise use same as initial)
+     *
+     * @return test tag with pattern <NAME>__<APP>__<BEGIN_ROTATION>-<END_ROTATION>
+     */
+    private static String buildTestTag(String testName, IAppHelper app, int beginRotation,
+            int endRotation) {
+        return buildTestTag(
+                testName, app, /* app2 */ null, beginRotation, endRotation, /* description */ "");
+    }
+
+    /**
+     * Build a test tag for the test
+     * @param testName Name of the transition(s) being tested
+     * @param app App being launcher
+     * @param app2 Second app being launched (if any)
+     * @param beginRotation Initial screen rotation
+     * @param endRotation End screen rotation (if any, otherwise use same as initial)
+     * @param extraInfo Additional information to append to the tag
+     *
+     * @return test tag with pattern <NAME>__<APP(S)>__<ROTATION(S)>[__<EXTRA>]
+     */
+    private static String buildTestTag(String testName, IAppHelper app, @Nullable IAppHelper app2,
+            int beginRotation, int endRotation, String extraInfo) {
+        StringBuilder testTag = new StringBuilder();
+        testTag.append(testName)
+                .append("__")
+                .append(app.getLauncherName());
+
+        if (app2 != null) {
+            testTag.append("-")
+                    .append(app2.getLauncherName());
+        }
+
+        testTag.append("__")
+                .append(rotationToString(beginRotation));
+
+        if (endRotation != beginRotation) {
+            testTag.append("-")
+                    .append(rotationToString(endRotation));
+        }
+
+        if (!extraInfo.isEmpty()) {
+            testTag.append("__")
+                    .append(extraInfo);
+        }
+
+        return testTag.toString();
+    }
+
     static TransitionBuilder openAppWarm(IAppHelper testApp, UiDevice
             device, int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("OpenAppWarm_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("openAppWarm", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBeforeAll(() -> setRotation(device, beginRotation))
@@ -93,9 +160,9 @@ class CommonTransitions {
     }
 
     static TransitionBuilder closeAppWithBackKey(IAppHelper testApp, UiDevice
-            device) {
+            device, int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("closeAppWithBackKey_" + testApp.getLauncherName())
+                .withTag(buildTestTag("closeAppWithBackKey", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(testApp::open)
@@ -108,9 +175,9 @@ class CommonTransitions {
     }
 
     static TransitionBuilder closeAppWithHomeKey(IAppHelper testApp, UiDevice
-            device) {
+            device, int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("closeAppWithHomeKey_" + testApp.getLauncherName())
+                .withTag(buildTestTag("closeAppWithHomeKey", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(testApp::open)
@@ -125,8 +192,7 @@ class CommonTransitions {
     static TransitionBuilder openAppCold(IAppHelper testApp,
             UiDevice device, int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("OpenAppCold_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("openAppCold", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
@@ -142,9 +208,7 @@ class CommonTransitions {
     static TransitionBuilder changeAppRotation(IAppHelper testApp, UiDevice
             device, int beginRotation, int endRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("changeAppRotation_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation) + "_" +
-                        rotationToString(endRotation))
+                .withTag(buildTestTag("changeAppRotation", testApp, beginRotation, endRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBeforeAll(testApp::open)
@@ -156,8 +220,7 @@ class CommonTransitions {
     }
 
     static TransitionBuilder changeAppRotation(Intent intent, String intentId, Context context,
-            UiDevice
-                    device, int beginRotation, int endRotation) {
+            UiDevice device, int beginRotation, int endRotation) {
         final String testTag = "changeAppRotation_" + intentId + "_" +
                 rotationToString(beginRotation) + "_" + rotationToString(endRotation);
         return TransitionRunner.newBuilder()
@@ -179,10 +242,8 @@ class CommonTransitions {
 
     static TransitionBuilder appToSplitScreen(IAppHelper testApp, UiDevice device,
             int beginRotation) {
-        final String testTag = "appToSplitScreen_" + testApp.getLauncherName() + "_"
-                + rotationToString(beginRotation);
         return TransitionRunner.newBuilder()
-                .withTag(testTag)
+                .withTag(buildTestTag("appToSplitScreen", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBeforeAll(() -> setRotation(device, beginRotation))
@@ -195,11 +256,13 @@ class CommonTransitions {
                 .repeat(ITERATIONS);
     }
 
-    static TransitionBuilder splitScreenToLauncher(IAppHelper testApp, UiDevice device) {
+    static TransitionBuilder splitScreenToLauncher(IAppHelper testApp, UiDevice device,
+            int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("splitScreenToLauncher_" + testApp.getLauncherName())
+                .withTag(buildTestTag("splitScreenToLauncher", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
+                .runBeforeAll(() -> setRotation(device, beginRotation))
                 .runBefore(testApp::open)
                 .runBefore(device::waitForIdle)
                 .runBefore(() -> launchSplitScreen(device))
@@ -211,8 +274,7 @@ class CommonTransitions {
     static TransitionBuilder editTextSetFocus(ImeAppHelper testApp, UiDevice device,
             int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("editTextSetFocus_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("editTextSetFocus", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
@@ -226,11 +288,10 @@ class CommonTransitions {
     static TransitionBuilder resizeSplitScreen(Instrumentation instr, IAppHelper testAppTop,
             ImeAppHelper testAppBottom, UiDevice device, int beginRotation, Rational startRatio,
             Rational stopRatio) {
-        String testTag = "resizeSplitScreen_" + testAppTop.getLauncherName() + "_"
-                + testAppBottom.getLauncherName() + "_"
-                + startRatio.toString().replace("/", ":") + "_to_"
-                + stopRatio.toString().replace("/", ":") + "_"
-                + rotationToString(beginRotation);
+        String description = startRatio.toString().replace("/", "-") + "_to_"
+                + stopRatio.toString().replace("/", "-");
+        String testTag = buildTestTag("resizeSplitScreen", testAppTop, testAppBottom,
+                beginRotation, beginRotation, description);
         return TransitionRunner.newBuilder()
                 .withTag(testTag)
                 .recordAllRuns()
@@ -261,8 +322,7 @@ class CommonTransitions {
     static TransitionBuilder editTextLoseFocusToHome(ImeAppHelper testApp, UiDevice device,
             int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("editTextLoseFocusToHome_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("editTextLoseFocusToHome", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
@@ -278,8 +338,7 @@ class CommonTransitions {
     static TransitionBuilder editTextLoseFocusToApp(ImeAppHelper testApp, UiDevice device,
             int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("editTextLoseFocusToApp_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("editTextLoseFocusToApp", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
@@ -295,8 +354,7 @@ class CommonTransitions {
     static TransitionBuilder enterPipMode(PipAppHelper testApp, UiDevice device,
             int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("enterPipMode_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("enterPipMode", testApp, beginRotation))
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
                 .runBefore(() -> setRotation(device, beginRotation))
@@ -310,8 +368,7 @@ class CommonTransitions {
     static TransitionBuilder exitPipModeToHome(PipAppHelper testApp, UiDevice device,
             int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("exitPipModeToHome_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("exitPipModeToHome", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .runBefore(device::pressHome)
@@ -327,8 +384,7 @@ class CommonTransitions {
     static TransitionBuilder exitPipModeToApp(PipAppHelper testApp, UiDevice device,
             int beginRotation) {
         return TransitionRunner.newBuilder()
-                .withTag("exitPipModeToApp_" + testApp.getLauncherName()
-                        + rotationToString(beginRotation))
+                .withTag(buildTestTag("exitPipModeToApp", testApp, beginRotation))
                 .recordAllRuns()
                 .runBeforeAll(AutomationUtils::wakeUpAndGoToHomeScreen)
                 .run(device::pressHome)

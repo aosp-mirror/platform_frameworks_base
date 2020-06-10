@@ -36,6 +36,8 @@ import android.provider.Settings;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 
@@ -63,22 +65,28 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
     private static final String ACTION_START = "com.android.systemui.screenrecord.START";
     private static final String ACTION_STOP = "com.android.systemui.screenrecord.STOP";
+    private static final String ACTION_STOP_NOTIF =
+            "com.android.systemui.screenrecord.STOP_FROM_NOTIF";
     private static final String ACTION_SHARE = "com.android.systemui.screenrecord.SHARE";
     private static final String ACTION_DELETE = "com.android.systemui.screenrecord.DELETE";
 
     private final RecordingController mController;
-    private Notification.Builder mRecordingNotificationBuilder;
 
     private ScreenRecordingAudioSource mAudioSource;
     private boolean mShowTaps;
     private boolean mOriginalShowTaps;
     private ScreenMediaRecorder mRecorder;
     private final Executor mLongExecutor;
+    private final UiEventLogger mUiEventLogger;
+    private final NotificationManager mNotificationManager;
 
     @Inject
-    public RecordingService(RecordingController controller, @LongRunning Executor executor) {
+    public RecordingService(RecordingController controller, @LongRunning Executor executor,
+            UiEventLogger uiEventLogger, NotificationManager notificationManager) {
         mController = controller;
         mLongExecutor = executor;
+        mUiEventLogger = uiEventLogger;
+        mNotificationManager = notificationManager;
     }
 
     /**
@@ -110,9 +118,6 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         String action = intent.getAction();
         Log.d(TAG, "onStartCommand " + action);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
         switch (action) {
             case ACTION_START:
                 mAudioSource = ScreenRecordingAudioSource
@@ -135,10 +140,16 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 startRecording();
                 break;
 
+            case ACTION_STOP_NOTIF:
             case ACTION_STOP:
+                // only difference for actions is the log event
+                if (ACTION_STOP_NOTIF.equals(action)) {
+                    mUiEventLogger.log(Events.ScreenRecordEvent.SCREEN_RECORD_END_NOTIFICATION);
+                } else {
+                    mUiEventLogger.log(Events.ScreenRecordEvent.SCREEN_RECORD_END_QS_TILE);
+                }
                 stopRecording();
-                notificationManager.cancel(NOTIFICATION_RECORDING_ID);
-                saveRecording(notificationManager);
+                mNotificationManager.cancel(NOTIFICATION_RECORDING_ID);
                 stopSelf();
                 break;
 
@@ -154,7 +165,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
                 // Remove notification
-                notificationManager.cancel(NOTIFICATION_VIEW_ID);
+                mNotificationManager.cancel(NOTIFICATION_VIEW_ID);
 
                 startActivity(Intent.createChooser(shareIntent, shareLabel)
                         .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
@@ -173,7 +184,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                         Toast.LENGTH_LONG).show();
 
                 // Remove notification
-                notificationManager.cancel(NOTIFICATION_VIEW_ID);
+                mNotificationManager.cancel(NOTIFICATION_VIEW_ID);
                 Log.d(TAG, "Deleted recording " + uri);
                 break;
         }
@@ -190,14 +201,20 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         super.onCreate();
     }
 
+    @VisibleForTesting
+    protected ScreenMediaRecorder getRecorder() {
+        return mRecorder;
+    }
+
     /**
      * Begin the recording session
      */
     private void startRecording() {
         try {
-            mRecorder.start();
+            getRecorder().start();
             mController.updateState(true);
             createRecordingNotification();
+            mUiEventLogger.log(Events.ScreenRecordEvent.SCREEN_RECORD_START);
         } catch (IOException | RemoteException e) {
             Toast.makeText(this,
                     R.string.screenrecord_start_error, Toast.LENGTH_LONG)
@@ -206,7 +223,8 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
         }
     }
 
-    private void createRecordingNotification() {
+    @VisibleForTesting
+    protected void createRecordingNotification() {
         Resources res = getResources();
         NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
@@ -214,9 +232,7 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 NotificationManager.IMPORTANCE_DEFAULT);
         channel.setDescription(getString(R.string.screenrecord_channel_description));
         channel.enableVibration(true);
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.createNotificationChannel(channel);
+        mNotificationManager.createNotificationChannel(channel);
 
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME,
@@ -226,7 +242,9 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 ? res.getString(R.string.screenrecord_ongoing_screen_only)
                 : res.getString(R.string.screenrecord_ongoing_screen_and_audio);
 
-        mRecordingNotificationBuilder = new Notification.Builder(this, CHANNEL_ID)
+
+        Intent stopIntent = getNotificationIntent(this);
+        Notification.Builder builder = new Notification.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)
                 .setContentTitle(notificationTitle)
                 .setContentText(getResources().getString(R.string.screenrecord_stop_text))
@@ -235,17 +253,28 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
                 .setColor(getResources().getColor(R.color.GM2_red_700))
                 .setOngoing(true)
                 .setContentIntent(
-                        PendingIntent.getService(
-                                this, REQUEST_CODE, getStopIntent(this),
+                        PendingIntent.getService(this, REQUEST_CODE, stopIntent,
                                 PendingIntent.FLAG_UPDATE_CURRENT))
                 .addExtras(extras);
-        notificationManager.notify(NOTIFICATION_RECORDING_ID,
-                mRecordingNotificationBuilder.build());
-        Notification notification = mRecordingNotificationBuilder.build();
-        startForeground(NOTIFICATION_RECORDING_ID, notification);
+        startForeground(NOTIFICATION_RECORDING_ID, builder.build());
     }
 
-    private Notification createSaveNotification(ScreenMediaRecorder.SavedRecording recording) {
+    @VisibleForTesting
+    protected Notification createProcessingNotification() {
+        Resources res = getApplicationContext().getResources();
+        String notificationTitle = mAudioSource == ScreenRecordingAudioSource.NONE
+                ? res.getString(R.string.screenrecord_ongoing_screen_only)
+                : res.getString(R.string.screenrecord_ongoing_screen_and_audio);
+        Notification.Builder builder = new Notification.Builder(getApplicationContext(), CHANNEL_ID)
+                .setContentTitle(notificationTitle)
+                .setContentText(
+                        getResources().getString(R.string.screenrecord_background_processing_label))
+                .setSmallIcon(R.drawable.ic_screenrecord);
+        return builder.build();
+    }
+
+    @VisibleForTesting
+    protected Notification createSaveNotification(ScreenMediaRecorder.SavedRecording recording) {
         Uri uri = recording.getUri();
         Intent viewIntent = new Intent(Intent.ACTION_VIEW)
                 .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -301,44 +330,39 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
 
     private void stopRecording() {
         setTapsVisible(mOriginalShowTaps);
-        mRecorder.end();
+        if (getRecorder() != null) {
+            getRecorder().end();
+            saveRecording();
+        } else {
+            Log.e(TAG, "stopRecording called, but recorder was null");
+        }
         mController.updateState(false);
     }
 
-    private void saveRecording(NotificationManager notificationManager) {
-        Resources res = getApplicationContext().getResources();
-        String notificationTitle = mAudioSource == ScreenRecordingAudioSource.NONE
-                ? res.getString(R.string.screenrecord_ongoing_screen_only)
-                : res.getString(R.string.screenrecord_ongoing_screen_and_audio);
-        Notification.Builder builder = new Notification.Builder(getApplicationContext(), CHANNEL_ID)
-                .setContentTitle(notificationTitle)
-                .setContentText(
-                        getResources().getString(R.string.screenrecord_background_processing_label))
-                .setSmallIcon(R.drawable.ic_screenrecord);
-        notificationManager.notify(NOTIFICATION_PROCESSING_ID, builder.build());
+    private void saveRecording() {
+        mNotificationManager.notify(NOTIFICATION_PROCESSING_ID, createProcessingNotification());
 
         mLongExecutor.execute(() -> {
             try {
                 Log.d(TAG, "saving recording");
-                Notification notification = createSaveNotification(mRecorder.save());
+                Notification notification = createSaveNotification(getRecorder().save());
                 if (!mController.isRecording()) {
                     Log.d(TAG, "showing saved notification");
-                    notificationManager.notify(NOTIFICATION_VIEW_ID, notification);
+                    mNotificationManager.notify(NOTIFICATION_VIEW_ID, notification);
                 }
             } catch (IOException e) {
                 Log.e(TAG, "Error saving screen recording: " + e.getMessage());
                 Toast.makeText(this, R.string.screenrecord_delete_error, Toast.LENGTH_LONG)
                         .show();
             } finally {
-                notificationManager.cancel(NOTIFICATION_PROCESSING_ID);
+                mNotificationManager.cancel(NOTIFICATION_PROCESSING_ID);
             }
         });
     }
 
     private void setTapsVisible(boolean turnOn) {
         int value = turnOn ? 1 : 0;
-        Settings.System.putInt(getApplicationContext().getContentResolver(),
-                Settings.System.SHOW_TOUCHES, value);
+        Settings.System.putInt(getContentResolver(), Settings.System.SHOW_TOUCHES, value);
     }
 
     /**
@@ -348,6 +372,15 @@ public class RecordingService extends Service implements MediaRecorder.OnInfoLis
      */
     public static Intent getStopIntent(Context context) {
         return new Intent(context, RecordingService.class).setAction(ACTION_STOP);
+    }
+
+    /**
+     * Get the recording notification content intent
+     * @param context
+     * @return
+     */
+    protected static Intent getNotificationIntent(Context context) {
+        return new Intent(context, RecordingService.class).setAction(ACTION_STOP_NOTIF);
     }
 
     private static Intent getShareIntent(Context context, String path) {
