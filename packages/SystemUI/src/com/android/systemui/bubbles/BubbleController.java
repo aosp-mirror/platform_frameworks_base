@@ -419,6 +419,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mCallbacks.add(callback);
     }
 
+    /**
+     * Dispatches a back press into the expanded Bubble's ActivityView if its IME is visible,
+     * causing it to hide.
+     */
+    public void hideImeFromExpandedBubble() {
+        if (mStackView != null) {
+            mStackView.hideImeFromExpandedBubble();
+        }
+    }
+
     private void setupNEM() {
         mNotificationEntryManager.addNotificationEntryListener(
                 new NotificationEntryListener() {
