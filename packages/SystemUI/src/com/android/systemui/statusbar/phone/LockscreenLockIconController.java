@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.KeyguardIndicationController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator.WakeUpListener;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -424,6 +425,7 @@ public class LockscreenLockIconController {
     private boolean handleLongClick(View view) {
         mLockscreenGestureLogger.write(MetricsProto.MetricsEvent.ACTION_LS_LOCK,
                 0 /* lengthDp - N/A */, 0 /* velocityDp - N/A */);
+        mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_LOCK_TAP);
         mKeyguardIndicationController.showTransientIndication(
                 R.string.keyguard_indication_trust_disabled);
         mKeyguardUpdateMonitor.onLockIconPressed();
