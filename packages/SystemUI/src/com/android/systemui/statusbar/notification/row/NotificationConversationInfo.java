@@ -44,6 +44,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
@@ -540,7 +541,9 @@ public class NotificationConversationInfo extends LinearLayout implements
                 .setView(onboardingView)
                 .setIgnoresDnd(ignoreDnd)
                 .setShowsAsBubble(showAsBubble)
-                .setIcon(((ImageView) findViewById(R.id.conversation_icon)).getDrawable())
+                .setIcon(mIconFactory.getBaseIconDrawable(mShortcutInfo))
+                .setBadge(mIconFactory.getAppBadge(
+                        mPackageName, UserHandle.getUserId(mSbn.getUid())))
                 .setOnSettingsClick(mOnConversationSettingsClickListener)
                 .build();
 
