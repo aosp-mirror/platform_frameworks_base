@@ -156,6 +156,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private final ShadeController mShadeController;
     private final FloatingContentCoordinator mFloatingContentCoordinator;
     private final BubbleDataRepository mDataRepository;
+    private BubbleLogger mLogger = new BubbleLoggerImpl();
 
     private BubbleData mBubbleData;
     private ScrimView mBubbleScrim;
@@ -317,6 +318,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             BubbleDataRepository dataRepository,
             SysUiState sysUiState,
             INotificationManager notificationManager,
+            @Nullable IStatusBarService statusBarService,
             WindowManager windowManager) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
@@ -387,8 +389,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mSurfaceSynchronizer = synchronizer;
 
         mWindowManager = windowManager;
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
+        mBarService = statusBarService == null
+                ? IStatusBarService.Stub.asInterface(
+                        ServiceManager.getService(Context.STATUS_BAR_SERVICE))
+                : statusBarService;
 
         mBubbleScrim = new ScrimView(mContext);
 
@@ -617,7 +621,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
-                    mSysUiState, mNotificationShadeWindowController, this::onAllBubblesAnimatedOut,
+                    mSysUiState, this::onAllBubblesAnimatedOut,
                     this::onImeVisibilityChanged);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {
@@ -894,9 +898,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     void promoteBubbleFromOverflow(Bubble bubble) {
+        mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
         bubble.setInflateSynchronously(mInflateSynchronously);
-        setIsBubble(bubble, /* isBubble */ true);
-        mBubbleData.promoteBubbleFromOverflow(bubble, mStackView, mBubbleIconFactory);
+        bubble.setShouldAutoExpand(true);
+        bubble.markUpdatedAt(System.currentTimeMillis());
+        setIsBubble(bubble, true /* isBubble */);
     }
 
     /**
@@ -910,20 +916,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
         if (bubble != null) {
             mBubbleData.setSelectedBubble(bubble);
+            mBubbleData.setExpanded(true);
         } else {
             bubble = mBubbleData.getOverflowBubbleWithKey(key);
             if (bubble != null) {
-                bubble.setShouldAutoExpand(true);
                 promoteBubbleFromOverflow(bubble);
             } else if (entry.canBubble()) {
                 // It can bubble but it's not -- it got aged out of the overflow before it
                 // was dismissed or opened, make it a bubble again.
-                setIsBubble(entry, true);
-                updateBubble(entry, true /* suppressFlyout */, false /* showInShade */);
+                setIsBubble(entry, true /* isBubble */, true /* autoExpand */);
             }
         }
-
-        mBubbleData.setExpanded(true);
     }
 
     /**
@@ -967,13 +970,17 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     void updateBubble(NotificationEntry notif, boolean suppressFlyout, boolean showInShade) {
-        // Lazy init stack view when a bubble is created
-        ensureStackViewCreated();
         // If this is an interruptive notif, mark that it's interrupted
         if (notif.getImportance() >= NotificationManager.IMPORTANCE_HIGH) {
             notif.setInterruption();
         }
-        Bubble bubble = mBubbleData.getOrCreateBubble(notif);
+        Bubble bubble = mBubbleData.getOrCreateBubble(notif, null /* persistedBubble */);
+        inflateAndAdd(bubble, suppressFlyout, showInShade);
+    }
+
+    void inflateAndAdd(Bubble bubble, boolean suppressFlyout, boolean showInShade) {
+        // Lazy init stack view when a bubble is created
+        ensureStackViewCreated();
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.inflate(
                 b -> {
@@ -1119,7 +1126,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
     }
 
-    private void setIsBubble(@NonNull final NotificationEntry entry, final boolean isBubble) {
+    private void setIsBubble(@NonNull final NotificationEntry entry, final boolean isBubble,
+            final boolean autoExpand) {
         Objects.requireNonNull(entry);
         if (isBubble) {
             entry.getSbn().getNotification().flags |= FLAG_BUBBLE;
@@ -1127,7 +1135,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             entry.getSbn().getNotification().flags &= ~FLAG_BUBBLE;
         }
         try {
-            mBarService.onNotificationBubbleChanged(entry.getKey(), isBubble, 0);
+            int flags = 0;
+            if (autoExpand) {
+                flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+                flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
+            }
+            mBarService.onNotificationBubbleChanged(entry.getKey(), isBubble, flags);
         } catch (RemoteException e) {
             // Bad things have happened
         }
@@ -1141,13 +1154,15 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             b.disable(FLAG_BUBBLE);
         }
         if (b.getEntry() != null) {
-            setIsBubble(b.getEntry(), isBubble);
+            // Updating the entry to be a bubble will trigger our normal update flow
+            setIsBubble(b.getEntry(), isBubble, b.shouldAutoExpand());
         } else {
-            try {
-                mBarService.onNotificationBubbleChanged(b.getKey(), isBubble, 0);
-            } catch (RemoteException e) {
-                // Bad things have happened
-            }
+            // If we have no entry to update, it's a persisted bubble so
+            // we need to add it to the stack ourselves
+            Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);
+            inflateAndAdd(bubble, bubble.shouldAutoExpand() /* suppressFlyout */,
+                    !bubble.shouldAutoExpand() /* showInShade */);
+
         }
     }
 
@@ -1199,7 +1214,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                             }
                         }
                     } else {
-                        if (bubble.isBubble() && bubble.showInShade()) {
+                        if (bubble.isBubble()) {
                             setIsBubble(bubble, false /* isBubble */);
                         }
                         if (bubble.getEntry() != null && bubble.getEntry().getRow() != null) {

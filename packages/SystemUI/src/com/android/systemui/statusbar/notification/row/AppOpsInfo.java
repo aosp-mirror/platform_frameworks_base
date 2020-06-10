@@ -188,7 +188,9 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
-        mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
+        if (mMetricsLogger != null) {
+            mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
+        }
         return false;
     }
 

@@ -79,7 +79,6 @@ import androidx.dynamicanimation.animation.SpringForce;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
@@ -292,20 +291,6 @@ public class BubbleStackView extends FrameLayout
     private ViewTreeObserver.OnDrawListener mSystemGestureExcludeUpdater =
             this::updateSystemGestureExcludeRects;
 
-    private ViewClippingUtil.ClippingParameters mClippingParameters =
-            new ViewClippingUtil.ClippingParameters() {
-
-                @Override
-                public boolean shouldFinish(View view) {
-                    return false;
-                }
-
-                @Override
-                public boolean isClippingEnablingAllowed(View view) {
-                    return !mIsExpanded;
-                }
-            };
-
     /** Float property that 'drags' the flyout. */
     private final FloatPropertyCompat mFlyoutCollapseProperty =
             new FloatPropertyCompat("FlyoutCollapseSpring") {
@@ -347,8 +332,6 @@ public class BubbleStackView extends FrameLayout
 
     @NonNull
     private final SurfaceSynchronizer mSurfaceSynchronizer;
-
-    private final NotificationShadeWindowController mNotificationShadeWindowController;
 
     /**
      * Callback to run when the IME visibility changes - BubbleController uses this to update the
@@ -682,7 +665,6 @@ public class BubbleStackView extends FrameLayout
             @Nullable SurfaceSynchronizer synchronizer,
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
-            NotificationShadeWindowController notificationShadeWindowController,
             Runnable allBubblesAnimatedOutAction,
             Consumer<Boolean> onImeVisibilityChanged) {
         super(context);
@@ -691,7 +673,6 @@ public class BubbleStackView extends FrameLayout
         mInflater = LayoutInflater.from(context);
 
         mSysUiState = sysUiState;
-        mNotificationShadeWindowController = notificationShadeWindowController;
 
         Resources res = getResources();
         mMaxBubbles = res.getInteger(R.integer.bubbles_max_rendered);
@@ -1399,7 +1380,6 @@ public class BubbleStackView extends FrameLayout
 
         mBubbleContainer.addView(bubble.getIconView(), 0,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        ViewClippingUtil.setClippingDeactivated(bubble.getIconView(), true, mClippingParameters);
         animateInFlyoutForBubble(bubble);
         requestUpdate();
         logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__POSTED);
@@ -1802,7 +1782,7 @@ public class BubbleStackView extends FrameLayout
     public void subtractObscuredTouchableRegion(Region touchableRegion, View view) {
         // If the notification shade is expanded, or the manage menu is open, we shouldn't let the
         // ActivityView steal any touch events from any location.
-        if (mNotificationShadeWindowController.getPanelExpanded() || mShowingManage) {
+        if (!mIsExpanded || mShowingManage) {
             touchableRegion.setEmpty();
         }
     }

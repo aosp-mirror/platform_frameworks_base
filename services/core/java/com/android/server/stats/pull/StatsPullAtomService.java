@@ -3519,7 +3519,7 @@ public class StatsPullAtomService extends SystemService {
         CompletableFuture<HistoricalOps> ops = new CompletableFuture<>();
         HistoricalOpsRequest histOpsRequest =
                 new HistoricalOpsRequest.Builder(
-                        Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli(),
+                        Math.max(Instant.now().minus(1, ChronoUnit.DAYS).toEpochMilli(), 0),
                         Long.MAX_VALUE).setFlags(
                         OP_FLAGS_PULLED).build();
         appOps.getHistoricalOps(histOpsRequest, AsyncTask.THREAD_POOL_EXECUTOR, ops::complete);

@@ -92,6 +92,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -1906,7 +1907,8 @@ public class NotificationManagerService extends SystemService {
         mMetricsLogger = new MetricsLogger();
         mRankingHandler = rankingHandler;
         mConditionProviders = conditionProviders;
-        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
+        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders,
+                new SysUiStatsEvent.BuilderFactory());
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
             public void onConfigChanged() {
@@ -2189,6 +2191,12 @@ public class NotificationManagerService extends SystemService {
                 ConcurrentUtils.DIRECT_EXECUTOR,
                 mPullAtomCallback
         );
+        mStatsManager.setPullAtomCallback(
+                DND_MODE_RULE,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mPullAtomCallback
+        );
     }
 
     private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
@@ -2198,6 +2206,7 @@ public class NotificationManagerService extends SystemService {
                 case PACKAGE_NOTIFICATION_PREFERENCES:
                 case PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES:
                 case PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES:
+                case DND_MODE_RULE:
                     return pullNotificationStates(atomTag, data);
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
@@ -2215,6 +2224,9 @@ public class NotificationManagerService extends SystemService {
                 break;
             case PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES:
                 mPreferencesHelper.pullPackageChannelGroupPreferencesStats(data);
+                break;
+            case DND_MODE_RULE:
+                mZenModeHelper.pullRules(data);
                 break;
         }
         return StatsManager.PULL_SUCCESS;
@@ -4015,7 +4027,7 @@ public class NotificationManagerService extends SystemService {
         private void cancelNotificationFromListenerLocked(ManagedServiceInfo info,
                 int callingUid, int callingPid, String pkg, String tag, int id, int userId) {
             cancelNotification(callingUid, callingPid, pkg, tag, id, 0,
-                    FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE | FLAG_BUBBLE,
+                    FLAG_ONGOING_EVENT | FLAG_FOREGROUND_SERVICE,
                     true,
                     userId, REASON_LISTENER_CANCEL, info);
         }
@@ -6246,6 +6258,13 @@ public class NotificationManagerService extends SystemService {
                     // require the caller to also find the notification.
                     if (mReason == REASON_CLICK) {
                         mUsageStats.registerClickedByUser(r);
+                    }
+
+                    if (mReason == REASON_LISTENER_CANCEL
+                        && (r.getNotification().flags & FLAG_BUBBLE) != 0) {
+                        mNotificationDelegate.onBubbleNotificationSuppressionChanged(
+                            r.getKey(), /* suppressed */ true);
+                        return;
                     }
 
                     if ((r.getNotification().flags & mMustHaveFlags) != mMustHaveFlags) {

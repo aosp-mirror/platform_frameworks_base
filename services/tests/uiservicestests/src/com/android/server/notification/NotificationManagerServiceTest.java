@@ -5455,25 +5455,49 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testCancelNotificationsFromListener_ignoresBubbles() throws Exception {
-        final NotificationRecord nrNormal = generateNotificationRecord(mTestNotificationChannel);
-        final NotificationRecord nrBubble = generateNotificationRecord(mTestNotificationChannel);
-        nrBubble.getSbn().getNotification().flags |= FLAG_BUBBLE;
+    public void testCancelNotificationsFromListener_cancelsNonBubble() throws Exception {
+        // Add non-bubble notif
+        final NotificationRecord nr = generateNotificationRecord(mTestNotificationChannel);
+        mService.addNotification(nr);
 
-        mService.addNotification(nrNormal);
-        mService.addNotification(nrBubble);
-
-        String[] keys = {nrNormal.getSbn().getKey(), nrBubble.getSbn().getKey()};
+        // Cancel via listener
+        String[] keys = {nr.getSbn().getKey()};
         mService.getBinderService().cancelNotificationsFromListener(null, keys);
         waitForIdle();
 
+        // Notif not active anymore
+        StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
+        assertEquals(0, notifs.length);
+        assertEquals(0, mService.getNotificationRecordCount());
+        // Cancel event is logged
+        assertEquals(1, mNotificationRecordLogger.numCalls());
+        assertEquals(NotificationRecordLogger.NotificationCancelledEvent
+            .NOTIFICATION_CANCEL_LISTENER_CANCEL, mNotificationRecordLogger.event(0));
+    }
+
+    @Test
+    public void testCancelNotificationsFromListener_suppressesBubble() throws Exception {
+        // Add bubble notif
+        setUpPrefsForBubbles(PKG, mUid,
+            true /* global */,
+            BUBBLE_PREFERENCE_ALL /* app */,
+            true /* channel */);
+        NotificationRecord nr = generateMessageBubbleNotifRecord(mTestNotificationChannel, "tag");
+
+        mBinderService.enqueueNotificationWithTag(PKG, PKG, nr.getSbn().getTag(),
+            nr.getSbn().getId(), nr.getSbn().getNotification(), nr.getSbn().getUserId());
+        waitForIdle();
+
+        // Cancel via listener
+        String[] keys = {nr.getSbn().getKey()};
+        mService.getBinderService().cancelNotificationsFromListener(null, keys);
+        waitForIdle();
+
+        // Bubble notif active and suppressed
         StatusBarNotification[] notifs = mBinderService.getActiveNotifications(PKG);
         assertEquals(1, notifs.length);
         assertEquals(1, mService.getNotificationRecordCount());
-
-        assertEquals(1, mNotificationRecordLogger.numCalls());
-        assertEquals(NotificationRecordLogger.NotificationCancelledEvent
-                .NOTIFICATION_CANCEL_LISTENER_CANCEL, mNotificationRecordLogger.event(0));
+        assertTrue(notifs[0].getNotification().getBubbleMetadata().isNotificationSuppressed());
     }
 
     @Test
