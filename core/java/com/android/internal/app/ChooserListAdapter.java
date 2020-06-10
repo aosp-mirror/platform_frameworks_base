@@ -181,6 +181,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                     ri.icon = 0;
                 }
                 mCallerTargets.add(new DisplayResolveInfo(ii, ri, ii, makePresentationGetter(ri)));
+                if (mCallerTargets.size() == MAX_SUGGESTED_APP_TARGETS) break;
             }
         }
     }
@@ -320,7 +321,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
 
     public int getCallerTargetCount() {
-        return Math.min(mCallerTargets.size(), MAX_SUGGESTED_APP_TARGETS);
+        return mCallerTargets.size();
     }
 
     /**
@@ -346,8 +347,9 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     int getAlphaTargetCount() {
-        int standardCount = mSortedList.size();
-        return standardCount > mChooserListCommunicator.getMaxRankedTargets() ? standardCount : 0;
+        int groupedCount = mSortedList.size();
+        int ungroupedCount = mCallerTargets.size() + mDisplayList.size();
+        return ungroupedCount > mChooserListCommunicator.getMaxRankedTargets() ? groupedCount : 0;
     }
 
     /**
