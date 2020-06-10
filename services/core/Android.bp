@@ -99,7 +99,7 @@ java_library_static {
         "android.net.ipsec.ike.stubs.module_lib",
         "app-compat-annotations",
         "framework-tethering.stubs.module_lib",
-        "service-permission-stubs",
+        "service-permission.stubs.system_server",
     ],
 
     required: [
