@@ -106,6 +106,7 @@ public class CaptivePortalLoginActivity extends Activity {
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDomStorageEnabled(true);
+        webSettings.setAllowFileAccess(false);
         mWebViewClient = new MyWebViewClient();
         mWebView.setWebViewClient(mWebViewClient);
         mWebView.setWebChromeClient(new MyWebChromeClient());

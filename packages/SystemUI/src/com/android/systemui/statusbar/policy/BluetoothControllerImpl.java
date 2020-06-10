@@ -277,7 +277,7 @@ public class BluetoothControllerImpl implements BluetoothController, BluetoothCa
         boolean otherProfileConnected = false;
 
         for (CachedBluetoothDevice device : getDevices()) {
-            for (LocalBluetoothProfile profile : device.getProfiles()) {
+            for (LocalBluetoothProfile profile : device.getProfileListCopy()) {
                 int profileId = profile.getProfileId();
                 boolean isConnected = device.isConnectedProfile(profile);
                 if (profileId == BluetoothProfile.HEADSET

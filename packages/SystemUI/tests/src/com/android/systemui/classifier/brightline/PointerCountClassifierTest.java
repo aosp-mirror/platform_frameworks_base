@@ -16,6 +16,8 @@
 
 package com.android.systemui.classifier.brightline;
 
+import static com.android.systemui.classifier.Classifier.QUICK_SETTINGS;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -73,5 +75,22 @@ public class PointerCountClassifierTest extends ClassifierTest {
         mClassifier.onTouchEvent(motionEvent);
         motionEvent.recycle();
         assertThat(mClassifier.isFalseTouch(), is(true));
+    }
+
+    @Test
+    public void testPass_multiPointerDragDown() {
+        MotionEvent.PointerProperties[] pointerProperties =
+                MotionEvent.PointerProperties.createArray(2);
+        pointerProperties[0].id = 0;
+        pointerProperties[1].id = 1;
+        MotionEvent.PointerCoords[] pointerCoords = MotionEvent.PointerCoords.createArray(2);
+        MotionEvent motionEvent = MotionEvent.obtain(
+                1, 1, MotionEvent.ACTION_DOWN, 2, pointerProperties, pointerCoords, 0, 0, 0, 0, 0,
+                0,
+                0, 0);
+        mClassifier.onTouchEvent(motionEvent);
+        motionEvent.recycle();
+        getDataProvider().setInteractionType(QUICK_SETTINGS);
+        assertThat(mClassifier.isFalseTouch(), is(false));
     }
 }

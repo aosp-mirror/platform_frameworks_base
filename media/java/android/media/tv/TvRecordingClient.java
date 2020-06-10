@@ -146,6 +146,8 @@ public class TvRecordingClient {
         mPendingAppPrivateCommands.clear();
         if (mSession != null) {
             mSession.release();
+            mIsTuned = false;
+            mIsRecordingStarted = false;
             mSession = null;
         }
     }

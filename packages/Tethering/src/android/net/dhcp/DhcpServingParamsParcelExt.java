@@ -169,7 +169,19 @@ public class DhcpServingParamsParcelExt extends DhcpServingParamsParcel {
      * <p>If not set, the default value is null.
      */
     public DhcpServingParamsParcelExt setSingleClientAddr(@Nullable Inet4Address clientAddr) {
-        this.clientAddr = clientAddr == null ? 0 : inet4AddressToIntHTH(clientAddr);
+        this.singleClientAddr = clientAddr == null ? 0 : inet4AddressToIntHTH(clientAddr);
+        return this;
+    }
+
+    /**
+     * Set whether the DHCP server should request a new prefix from IpServer when receiving
+     * DHCPDECLINE message in certain particular link (e.g. there is only one downstream USB
+     * tethering client). If it's false, process DHCPDECLINE message as RFC2131#4.3.3 suggests.
+     *
+     * <p>If not set, the default value is false.
+     */
+    public DhcpServingParamsParcelExt setChangePrefixOnDecline(boolean changePrefixOnDecline) {
+        this.changePrefixOnDecline = changePrefixOnDecline;
         return this;
     }
 

@@ -185,6 +185,26 @@ public final class NetworkAgentConfig implements Parcelable {
         return legacyTypeName;
     }
 
+    /**
+     * The legacy extra info of the agent. The extra info should only be :
+     * <ul>
+     *   <li>For cellular agents, the APN name.</li>
+     *   <li>For ethernet agents, the interface name.</li>
+     * </ul>
+     * @hide
+     */
+    @NonNull
+    private String mLegacyExtraInfo = "";
+
+    /**
+     * The legacy extra info of the agent.
+     * @hide
+     */
+    @NonNull
+    public String getLegacyExtraInfo() {
+        return mLegacyExtraInfo;
+    }
+
     /** @hide */
     public NetworkAgentConfig() {
     }
@@ -201,6 +221,7 @@ public final class NetworkAgentConfig implements Parcelable {
             skip464xlat = nac.skip464xlat;
             legacyType = nac.legacyType;
             legacyTypeName = nac.legacyTypeName;
+            mLegacyExtraInfo = nac.mLegacyExtraInfo;
         }
     }
 
@@ -309,6 +330,18 @@ public final class NetworkAgentConfig implements Parcelable {
         }
 
         /**
+         * Sets the legacy extra info of the agent.
+         * @param legacyExtraInfo the legacy extra info.
+         * @return this builder, to facilitate chaining.
+         * @hide
+         */
+        @NonNull
+        public Builder setLegacyExtraInfo(@NonNull String legacyExtraInfo) {
+            mConfig.mLegacyExtraInfo = legacyExtraInfo;
+            return this;
+        }
+
+        /**
          * Returns the constructed {@link NetworkAgentConfig} object.
          */
         @NonNull
@@ -330,14 +363,15 @@ public final class NetworkAgentConfig implements Parcelable {
                 && skip464xlat == that.skip464xlat
                 && legacyType == that.legacyType
                 && Objects.equals(subscriberId, that.subscriberId)
-                && Objects.equals(legacyTypeName, that.legacyTypeName);
+                && Objects.equals(legacyTypeName, that.legacyTypeName)
+                && Objects.equals(mLegacyExtraInfo, that.mLegacyExtraInfo);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(allowBypass, explicitlySelected, acceptUnvalidated,
                 acceptPartialConnectivity, provisioningNotificationDisabled, subscriberId,
-                skip464xlat, legacyType, legacyTypeName);
+                skip464xlat, legacyType, legacyTypeName, mLegacyExtraInfo);
     }
 
     @Override
@@ -353,6 +387,7 @@ public final class NetworkAgentConfig implements Parcelable {
                 + ", legacyType = " + legacyType
                 + ", hasShownBroken = " + hasShownBroken
                 + ", legacyTypeName = '" + legacyTypeName + '\''
+                + ", legacyExtraInfo = '" + mLegacyExtraInfo + '\''
                 + "}";
     }
 
@@ -372,6 +407,7 @@ public final class NetworkAgentConfig implements Parcelable {
         out.writeInt(skip464xlat ? 1 : 0);
         out.writeInt(legacyType);
         out.writeString(legacyTypeName);
+        out.writeString(mLegacyExtraInfo);
     }
 
     public static final @NonNull Creator<NetworkAgentConfig> CREATOR =
@@ -388,6 +424,7 @@ public final class NetworkAgentConfig implements Parcelable {
             networkAgentConfig.skip464xlat = in.readInt() != 0;
             networkAgentConfig.legacyType = in.readInt();
             networkAgentConfig.legacyTypeName = in.readString();
+            networkAgentConfig.mLegacyExtraInfo = in.readString();
             return networkAgentConfig;
         }
 

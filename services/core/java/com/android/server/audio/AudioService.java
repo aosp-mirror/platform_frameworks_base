@@ -1049,6 +1049,27 @@ public class AudioService extends IAudioService.Stub
             }
         }
 
+        // Restore capture policies
+        synchronized (mPlaybackMonitor) {
+            HashMap<Integer, Integer> allowedCapturePolicies =
+                    mPlaybackMonitor.getAllAllowedCapturePolicies();
+            for (HashMap.Entry<Integer, Integer> entry : allowedCapturePolicies.entrySet()) {
+                int result = AudioSystem.setAllowedCapturePolicy(
+                        entry.getKey(),
+                        AudioAttributes.capturePolicyToFlags(entry.getValue(), 0x0));
+                if (result != AudioSystem.AUDIO_STATUS_OK) {
+                    Log.e(TAG, "Failed to restore capture policy, uid: "
+                            + entry.getKey() + ", capture policy: " + entry.getValue()
+                            + ", result: " + result);
+                    // When restoring capture policy failed, set the capture policy as
+                    // ALLOW_CAPTURE_BY_ALL, which will result in removing the cached
+                    // capture policy in PlaybackActivityMonitor.
+                    mPlaybackMonitor.setAllowedCapturePolicy(
+                            entry.getKey(), AudioAttributes.ALLOW_CAPTURE_BY_ALL);
+                }
+            }
+        }
+
         onIndicateSystemReady();
         // indicate the end of reconfiguration phase to audio HAL
         AudioSystem.setParameters("restarting=false");
@@ -1230,10 +1251,10 @@ public class AudioService extends IAudioService.Stub
     private void updateDefaultVolumes() {
         for (int stream = 0; stream < mStreamStates.length; stream++) {
             if (stream != mStreamVolumeAlias[stream]) {
-                AudioSystem.DEFAULT_STREAM_VOLUME[stream] = rescaleIndex(
-                        AudioSystem.DEFAULT_STREAM_VOLUME[mStreamVolumeAlias[stream]],
+                AudioSystem.DEFAULT_STREAM_VOLUME[stream] = (rescaleIndex(
+                        AudioSystem.DEFAULT_STREAM_VOLUME[mStreamVolumeAlias[stream]] * 10,
                         mStreamVolumeAlias[stream],
-                        stream);
+                        stream) + 5) / 10;
             }
         }
     }
@@ -2818,10 +2839,6 @@ public class AudioService extends IAudioService.Stub
                 setSystemAudioMute(mute);
                 AudioSystem.setMasterMute(mute);
                 sendMasterMuteUpdate(mute, flags);
-
-                Intent intent = new Intent(AudioManager.MASTER_MUTE_CHANGED_ACTION);
-                intent.putExtra(AudioManager.EXTRA_MASTER_VOLUME_MUTED, mute);
-                sendBroadcastToAll(intent);
             }
         }
     }
@@ -4481,7 +4498,9 @@ public class AudioService extends IAudioService.Stub
             } catch (IllegalArgumentException e) {
                 // Volume Groups without attributes are not controllable through set/get volume
                 // using attributes. Do not append them.
-                Log.d(TAG, "volume group " + avg.name() + " for internal policy needs");
+                if (DEBUG_VOL) {
+                    Log.v(TAG, "volume group " + avg.name() + " for internal policy needs");
+                }
                 continue;
             }
             sVolumeGroupStates.append(avg.getId(), new VolumeGroupState(avg));
@@ -4502,7 +4521,9 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void readVolumeGroupsSettings() {
-        Log.v(TAG, "readVolumeGroupsSettings");
+        if (DEBUG_VOL) {
+            Log.v(TAG, "readVolumeGroupsSettings.");
+        }
         for (int i = 0; i < sVolumeGroupStates.size(); i++) {
             final VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
             vgs.readSettings();
@@ -4512,7 +4533,9 @@ public class AudioService extends IAudioService.Stub
 
     // Called upon crash of AudioServer
     private void restoreVolumeGroups() {
-        Log.v(TAG, "restoreVolumeGroups");
+        if (DEBUG_VOL) {
+            Log.v(TAG, "restoreVolumeGroups");
+        }
         for (int i = 0; i < sVolumeGroupStates.size(); i++) {
             final VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
             vgs.applyAllVolumes();
@@ -4548,7 +4571,9 @@ public class AudioService extends IAudioService.Stub
 
         private VolumeGroupState(AudioVolumeGroup avg) {
             mAudioVolumeGroup = avg;
-            Log.v(TAG, "VolumeGroupState for " + avg.toString());
+            if (DEBUG_VOL) {
+                Log.v(TAG, "VolumeGroupState for " + avg.toString());
+            }
             for (final AudioAttributes aa : avg.getAudioAttributes()) {
                 if (!aa.equals(AudioProductStrategy.sDefaultAttributes)) {
                     mAudioAttributes = aa;
@@ -4643,11 +4668,19 @@ public class AudioService extends IAudioService.Stub
             return mIndexMin;
         }
 
+        private boolean isValidLegacyStreamType() {
+            return (mLegacyStreamType != AudioSystem.STREAM_DEFAULT)
+                    && (mLegacyStreamType < mStreamStates.length);
+        }
+
         public void applyAllVolumes() {
             synchronized (VolumeGroupState.class) {
-                if (mLegacyStreamType != AudioSystem.STREAM_DEFAULT) {
-                    // No-op to avoid regression with stream based volume management
-                    return;
+                int deviceForStream = AudioSystem.DEVICE_NONE;
+                int volumeIndexForStream = 0;
+                if (isValidLegacyStreamType()) {
+                    // Prevent to apply settings twice when group is associated to public stream
+                    deviceForStream = getDeviceForStream(mLegacyStreamType);
+                    volumeIndexForStream = getStreamVolume(mLegacyStreamType);
                 }
                 // apply device specific volumes first
                 int index;
@@ -4655,16 +4688,30 @@ public class AudioService extends IAudioService.Stub
                     final int device = mIndexMap.keyAt(i);
                     if (device != AudioSystem.DEVICE_OUT_DEFAULT) {
                         index = mIndexMap.valueAt(i);
-                        Log.v(TAG, "applyAllVolumes: restore index " + index + " for group "
-                                + mAudioVolumeGroup.name() + " and device "
-                                + AudioSystem.getOutputDeviceName(device));
+                        if (device == deviceForStream && volumeIndexForStream == index) {
+                            continue;
+                        }
+                        if (DEBUG_VOL) {
+                            Log.v(TAG, "applyAllVolumes: restore index " + index + " for group "
+                                    + mAudioVolumeGroup.name() + " and device "
+                                    + AudioSystem.getOutputDeviceName(device));
+                        }
                         setVolumeIndexInt(index, device, 0 /*flags*/);
                     }
                 }
                 // apply default volume last: by convention , default device volume will be used
                 index = getIndex(AudioSystem.DEVICE_OUT_DEFAULT);
-                Log.v(TAG, "applyAllVolumes: restore default device index " + index + " for group "
-                        + mAudioVolumeGroup.name());
+                if (DEBUG_VOL) {
+                    Log.v(TAG, "applyAllVolumes: restore default device index " + index
+                            + " for group " + mAudioVolumeGroup.name());
+                }
+                if (isValidLegacyStreamType()) {
+                    int defaultStreamIndex = (mStreamStates[mLegacyStreamType]
+                            .getIndex(AudioSystem.DEVICE_OUT_DEFAULT) + 5) / 10;
+                    if (defaultStreamIndex == index) {
+                        return;
+                    }
+                }
                 setVolumeIndexInt(index, AudioSystem.DEVICE_OUT_DEFAULT, 0 /*flags*/);
             }
         }
@@ -4673,9 +4720,12 @@ public class AudioService extends IAudioService.Stub
             if (mUseFixedVolume) {
                 return;
             }
-            Log.v(TAG, "persistVolumeGroup: storing index " + getIndex(device) + " for group "
-                    + mAudioVolumeGroup.name() + " and device "
-                    + AudioSystem.getOutputDeviceName(device));
+            if (DEBUG_VOL) {
+                Log.v(TAG, "persistVolumeGroup: storing index " + getIndex(device) + " for group "
+                        + mAudioVolumeGroup.name()
+                        + ", device " + AudioSystem.getOutputDeviceName(device)
+                        + " and User=" + ActivityManager.getCurrentUser());
+            }
             boolean success = Settings.System.putIntForUser(mContentResolver,
                     getSettingNameForDevice(device),
                     getIndex(device),
@@ -4705,12 +4755,18 @@ public class AudioService extends IAudioService.Stub
                     index = Settings.System.getIntForUser(
                             mContentResolver, name, defaultIndex, UserHandle.USER_CURRENT);
                     if (index == -1) {
-                        Log.e(TAG, "readSettings: No index stored for group "
-                                + mAudioVolumeGroup.name() + ", device " + name);
+                        if (DEBUG_VOL) {
+                            Log.e(TAG, "readSettings: No index stored for group "
+                                    + mAudioVolumeGroup.name() + ", device " + name
+                                    + ", User=" + ActivityManager.getCurrentUser());
+                        }
                         continue;
                     }
-                    Log.v(TAG, "readSettings: found stored index " + getValidIndex(index)
-                             + " for group " + mAudioVolumeGroup.name() + ", device: " + name);
+                    if (DEBUG_VOL) {
+                        Log.v(TAG, "readSettings: found stored index " + getValidIndex(index)
+                                 + " for group " + mAudioVolumeGroup.name() + ", device: " + name
+                                 + ", User=" + ActivityManager.getCurrentUser());
+                    }
                     mIndexMap.put(device, getValidIndex(index));
                 }
             }
@@ -7312,6 +7368,43 @@ public class AudioService extends IAudioService.Stub
 
     public void releasePlayer(int piid) {
         mPlaybackMonitor.releasePlayer(piid, Binder.getCallingUid());
+    }
+
+    /**
+     * Specifies whether the audio played by this app may or may not be captured by other apps or
+     * the system.
+     *
+     * @param capturePolicy one of
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_ALL},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_SYSTEM},
+     *     {@link AudioAttributes#ALLOW_CAPTURE_BY_NONE}.
+     * @return AudioSystem.AUDIO_STATUS_OK if set allowed capture policy succeed.
+     * @throws IllegalArgumentException if the argument is not a valid value.
+     */
+    public int setAllowedCapturePolicy(int capturePolicy) {
+        int callingUid = Binder.getCallingUid();
+        int flags = AudioAttributes.capturePolicyToFlags(capturePolicy, 0x0);
+        final long identity = Binder.clearCallingIdentity();
+        synchronized (mPlaybackMonitor) {
+            int result = AudioSystem.setAllowedCapturePolicy(callingUid, flags);
+            if (result == AudioSystem.AUDIO_STATUS_OK) {
+                mPlaybackMonitor.setAllowedCapturePolicy(callingUid, capturePolicy);
+            }
+            Binder.restoreCallingIdentity(identity);
+            return result;
+        }
+    }
+
+    /**
+     * Return the capture policy.
+     * @return the cached capture policy for the calling uid.
+     */
+    public int getAllowedCapturePolicy() {
+        int callingUid = Binder.getCallingUid();
+        final long identity = Binder.clearCallingIdentity();
+        int capturePolicy = mPlaybackMonitor.getAllowedCapturePolicy(callingUid);
+        Binder.restoreCallingIdentity(identity);
+        return capturePolicy;
     }
 
     //======================

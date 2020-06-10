@@ -998,7 +998,7 @@ public final class RenderNode {
      * Sets the rotation value for the display list around the Z axis.
      *
      * @param rotation The rotation value of the display list, in degrees
-     * @see View#setRotationZ(float)
+     * @see View#setRotation(float)
      * @see #getRotationZ()
      * @return True if the value changed, false if the new value was the same as the previous value.
      */

@@ -2763,6 +2763,11 @@ class ActivityStarter {
         return mRequest.intent;
     }
 
+    @VisibleForTesting
+    int getCallingUid() {
+        return mRequest.callingUid;
+    }
+
     ActivityStarter setReason(String reason) {
         mRequest.reason = reason;
         return this;

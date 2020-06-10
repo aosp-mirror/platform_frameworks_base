@@ -403,6 +403,8 @@ public final class CellIdentityLte extends CellIdentity {
         mBandwidth = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
         mCsgInfo = in.readParcelable(null);
+
+        updateGlobalCellId();
         if (DBG) log(toString());
     }
 

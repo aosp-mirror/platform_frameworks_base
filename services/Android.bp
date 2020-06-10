@@ -72,7 +72,7 @@ java_library {
 
     libs: [
         "android.hidl.manager-V1.0-java",
-        "framework-tethering-stubs-module_libs_api",
+        "framework-tethering.stubs.module_lib",
     ],
 
     // Uncomment to enable output of certain warnings (deprecated, unchecked)
@@ -106,7 +106,6 @@ droidstubs {
     name: "services-stubs.sources",
     srcs: [":services-sources"],
     installable: false,
-    api_tag_name: "SYSTEM_SERVER",
     args: " --show-annotation android.annotation.SystemApi\\(client=android.annotation.SystemApi.Client.SYSTEM_SERVER\\)" +
         " --hide-annotation android.annotation.Hide" +
         " --hide InternalClasses" + // com.android.* classes are okay in this interface
@@ -123,15 +122,20 @@ droidstubs {
             removed_api_file: "api/removed.txt",
         },
         last_released: {
-            api_file: ":last-released-system-server-api",
+            api_file: ":android.api.system-server.latest",
             removed_api_file: "api/removed.txt",
             baseline_file: ":system-server-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-system-server-api",
+            new_since: ":android.api.system-server.latest",
             baseline_file: "api/lint-baseline.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system-server/api",
+        dest: "android.txt",
     },
 }
 

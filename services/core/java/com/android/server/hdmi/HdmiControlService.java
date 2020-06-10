@@ -19,7 +19,6 @@ package com.android.server.hdmi;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 
-import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
 import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
@@ -710,9 +709,6 @@ public class HdmiControlService extends SystemService {
         // A container for [Device type, Local device info].
         ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
         for (int type : mLocalDevices) {
-            if (type == HdmiDeviceInfo.DEVICE_PLAYBACK) {
-                continue;
-            }
             HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
             if (localDevice == null) {
                 localDevice = HdmiCecLocalDevice.create(this, type);
@@ -1110,9 +1106,6 @@ public class HdmiControlService extends SystemService {
             }
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : mLocalDevices) {
-                if (type == HdmiDeviceInfo.DEVICE_PLAYBACK) {
-                    continue;
-                }
                 HdmiCecLocalDevice localDevice = mCecController.getLocalDevice(type);
                 if (localDevice == null) {
                     localDevice = HdmiCecLocalDevice.create(this, type);
@@ -2526,8 +2519,7 @@ public class HdmiControlService extends SystemService {
     }
 
     boolean isSwitchDevice() {
-        return SystemProperties.getBoolean(
-            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+        return HdmiProperties.is_switch().orElse(false);
     }
 
     boolean isTvDeviceEnabled() {

@@ -803,7 +803,7 @@ public class BackupManager {
      * has a work profile that was restored from another work profile with serial number
      * {@code ancestralSerialNumber}.
      *
-     * @see UserManager#getSerialNumberForUser(UserHandle)
+     * @see android.os.UserManager#getSerialNumberForUser(UserHandle)
      */
     @Nullable
     public UserHandle getUserForAncestralSerialNumber(long ancestralSerialNumber) {

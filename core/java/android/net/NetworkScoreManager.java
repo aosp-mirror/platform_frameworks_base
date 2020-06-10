@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
@@ -468,11 +469,13 @@ public class NetworkScoreManager {
          *
          * @param networks List of {@link ScoredNetwork} containing updated scores.
          */
+        @SuppressLint("CallbackMethodName")
         void updateScores(@NonNull List<ScoredNetwork> networks);
 
         /**
          * Invokes when all the previously provided scores are no longer valid.
          */
+        @SuppressLint("CallbackMethodName")
         void clearScores();
     }
 

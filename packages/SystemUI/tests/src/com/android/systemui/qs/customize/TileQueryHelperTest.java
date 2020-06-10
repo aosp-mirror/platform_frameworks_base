@@ -27,6 +27,7 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,12 +80,14 @@ public class TileQueryHelperTest extends SysuiTestCase {
     private static final Set<String> FACTORY_TILES = new ArraySet<>();
     private static final String TEST_PKG = "test_pkg";
     private static final String TEST_CLS = "test_cls";
+    private static final String CUSTOM_TILE = "custom(" + TEST_PKG + "/" + TEST_CLS + ")";
 
     static {
         FACTORY_TILES.addAll(Arrays.asList(
                 new String[]{"wifi", "bt", "cell", "dnd", "inversion", "airplane", "work",
                         "rotation", "flashlight", "location", "cast", "hotspot", "user", "battery",
                         "saver", "night", "nfc"}));
+        FACTORY_TILES.add(CUSTOM_TILE);
     }
 
     @Mock
@@ -225,6 +228,18 @@ public class TileQueryHelperTest extends SysuiTestCase {
             specs.add(t.spec);
         }
         assertFalse(specs.contains("other"));
+    }
+
+    @Test
+    public void testCustomTileNotCreated() {
+        Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.QS_TILES,
+                CUSTOM_TILE);
+        mTileQueryHelper.queryTiles(mQSTileHost);
+
+        mBGLooper.processAllMessages();
+        waitForIdleSync(Dependency.get(Dependency.MAIN_HANDLER));
+      
+        verify(mQSTileHost, never()).createTile(CUSTOM_TILE);
     }
 
     @Test

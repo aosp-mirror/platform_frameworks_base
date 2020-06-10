@@ -3519,7 +3519,6 @@ public abstract class Context {
      * @see android.telephony.CarrierConfigManager
      * @see #EUICC_SERVICE
      * @see android.telephony.euicc.EuiccManager
-     * @see #MMS_SERVICE
      * @see android.telephony.MmsManager
      * @see #INPUT_METHOD_SERVICE
      * @see android.view.inputmethod.InputMethodManager

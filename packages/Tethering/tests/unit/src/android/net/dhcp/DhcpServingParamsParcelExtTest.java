@@ -110,7 +110,7 @@ public class DhcpServingParamsParcelExtTest {
     @Test
     public void testSetClientAddr() {
         mParcel.setSingleClientAddr(TEST_CLIENT_ADDRESS);
-        assertEquals(TEST_CLIENT_ADDRESS_PARCELED, mParcel.clientAddr);
+        assertEquals(TEST_CLIENT_ADDRESS_PARCELED, mParcel.singleClientAddr);
     }
 
     private static Inet4Address inet4Addr(String addr) {

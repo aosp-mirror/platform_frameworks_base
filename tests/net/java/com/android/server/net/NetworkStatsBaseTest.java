@@ -41,6 +41,7 @@ abstract class NetworkStatsBaseTest {
     static final String TEST_IFACE = "test0";
     static final String TEST_IFACE2 = "test1";
     static final String TUN_IFACE = "test_nss_tun0";
+    static final String TUN_IFACE2 = "test_nss_tun1";
 
     static final int UID_RED = 1001;
     static final int UID_BLUE = 1002;
@@ -107,10 +108,14 @@ abstract class NetworkStatsBaseTest {
         assertEquals("unexpected operations", operations, entry.operations);
     }
 
-    VpnInfo createVpnInfo(String[] underlyingIfaces) {
+    static VpnInfo createVpnInfo(String[] underlyingIfaces) {
+        return createVpnInfo(TUN_IFACE, underlyingIfaces);
+    }
+
+    static VpnInfo createVpnInfo(String vpnIface, String[] underlyingIfaces) {
         VpnInfo info = new VpnInfo();
         info.ownerUid = UID_VPN;
-        info.vpnIface = TUN_IFACE;
+        info.vpnIface = vpnIface;
         info.underlyingIfaces = underlyingIfaces;
         return info;
     }

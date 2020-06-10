@@ -23,7 +23,7 @@ import android.telephony.BarringInfo;
 import android.telephony.CallQuality;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
-import android.telephony.DisplayInfo;
+import android.telephony.TelephonyDisplayInfo;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
@@ -89,7 +89,7 @@ interface ITelephonyRegistry {
     void notifyOpportunisticSubscriptionInfoChanged();
     void notifyCarrierNetworkChange(in boolean active);
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
-    void notifyDisplayInfoChanged(int slotIndex, int subId, in DisplayInfo displayInfo);
+    void notifyDisplayInfoChanged(int slotIndex, int subId, in TelephonyDisplayInfo telephonyDisplayInfo);
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
     void notifyActiveDataSubIdChanged(int activeDataSubId);
     void notifyRadioPowerStateChanged(in int phoneId, in int subId, in int state);

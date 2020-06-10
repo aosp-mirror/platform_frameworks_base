@@ -16,6 +16,7 @@
 
 package com.android.networkstack.tethering;
 
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.net.INetd;
@@ -40,11 +41,35 @@ import java.util.ArrayList;
  */
 public abstract class TetheringDependencies {
     /**
+     * Get a reference to the BpfCoordinator to be used by tethering.
+     */
+    public @NonNull BpfCoordinator getBpfCoordinator(
+            @NonNull Handler handler, @NonNull INetd netd, @NonNull SharedLog log,
+            @NonNull BpfCoordinator.Dependencies deps) {
+        final NetworkStatsManager statsManager =
+                (NetworkStatsManager) getContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+        return new BpfCoordinator(handler, netd, statsManager, log, deps);
+    }
+
+    /**
      * Get a reference to the offload hardware interface to be used by tethering.
      */
     public OffloadHardwareInterface getOffloadHardwareInterface(Handler h, SharedLog log) {
         return new OffloadHardwareInterface(h, log);
     }
+
+    /**
+     * Get a reference to the offload controller to be used by tethering.
+     */
+    @NonNull
+    public OffloadController getOffloadController(@NonNull Handler h,
+            @NonNull SharedLog log, @NonNull OffloadController.Dependencies deps) {
+        final NetworkStatsManager statsManager =
+                (NetworkStatsManager) getContext().getSystemService(Context.NETWORK_STATS_SERVICE);
+        return new OffloadController(h, getOffloadHardwareInterface(h, log),
+                getContext().getContentResolver(), statsManager, log, deps);
+    }
+
 
     /**
      * Get a reference to the UpstreamNetworkMonitor to be used by tethering.
@@ -82,9 +107,9 @@ public abstract class TetheringDependencies {
     /**
      * Get a reference to the EntitlementManager to be used by tethering.
      */
-    public EntitlementManager getEntitlementManager(Context ctx, StateMachine target,
-            SharedLog log, int what) {
-        return new EntitlementManager(ctx, target, log, what);
+    public EntitlementManager getEntitlementManager(Context ctx, Handler h, SharedLog log,
+            Runnable callback) {
+        return new EntitlementManager(ctx, h, log, callback);
     }
 
     /**

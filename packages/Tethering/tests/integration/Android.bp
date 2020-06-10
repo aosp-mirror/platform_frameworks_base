@@ -63,12 +63,12 @@ android_test {
 // NetworkStackTests.
 android_test {
     name: "TetheringCoverageTests",
-    certificate: "platform",
     platform_apis: true,
     test_suites: ["device-tests", "mts"],
     test_config: "AndroidTest_Coverage.xml",
     defaults: ["libnetworkstackutilsjni_deps"],
     static_libs: [
+        "NetworkStaticLibTestsLib",
         "NetworkStackTestsLib",
         "TetheringTestsLib",
         "TetheringIntegrationTestsLib",

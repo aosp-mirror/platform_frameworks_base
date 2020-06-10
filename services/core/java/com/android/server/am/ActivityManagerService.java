@@ -360,7 +360,6 @@ import com.android.server.contentcapture.ContentCaptureManagerInternal;
 import com.android.server.firewall.IntentFirewall;
 import com.android.server.job.JobSchedulerInternal;
 import com.android.server.pm.Installer;
-import com.android.server.pm.Installer.InstallerException;
 import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
@@ -455,6 +454,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     public static final int STOCK_PM_FLAGS = PackageManager.GET_SHARED_LIBRARY_FILES;
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
+
+    static final String SYSTEM_USER_HOME_NEEDED = "ro.system_user_home_needed";
 
     public static final String ANR_TRACE_DIR = "/data/anr";
 
@@ -3595,7 +3596,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void crashApplication(int uid, int initialPid, String packageName, int userId,
-            String message) {
+            String message, boolean force) {
         if (checkCallingPermission(android.Manifest.permission.FORCE_STOP_PACKAGES)
                 != PackageManager.PERMISSION_GRANTED) {
             String msg = "Permission Denial: crashApplication() from pid="
@@ -3607,7 +3608,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         synchronized(this) {
-            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId, message);
+            mAppErrors.scheduleAppCrashLocked(uid, initialPid, packageName, userId,
+                    message, force);
         }
     }
 
@@ -4786,7 +4788,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @GuardedBy("this")
-    private final boolean attachApplicationLocked(IApplicationThread thread,
+    private boolean attachApplicationLocked(@NonNull IApplicationThread thread,
             int pid, int callingUid, long startSeq) {
 
         // Find the application record that is being attached...  either via
@@ -5209,6 +5211,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public final void attachApplication(IApplicationThread thread, long startSeq) {
+        if (thread == null) {
+            throw new SecurityException("Invalid application interface");
+        }
         synchronized (this) {
             int callingPid = Binder.getCallingPid();
             final int callingUid = Binder.getCallingUid();
@@ -5235,26 +5240,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
             mCallFinishBooting = false;
-        }
-
-        ArraySet<String> completedIsas = new ArraySet<String>();
-        for (String abi : Build.SUPPORTED_ABIS) {
-            ZYGOTE_PROCESS.establishZygoteConnectionForAbi(abi);
-            final String instructionSet = VMRuntime.getInstructionSet(abi);
-            if (!completedIsas.contains(instructionSet)) {
-                try {
-                    mInstaller.markBootComplete(VMRuntime.getInstructionSet(abi));
-                } catch (InstallerException e) {
-                    if (!VMRuntime.didPruneDalvikCache()) {
-                        // This is technically not the right filter, as different zygotes may
-                        // have made different pruning decisions. But the log is best effort,
-                        // anyways.
-                        Slog.w(TAG, "Unable to mark boot complete for abi: " + abi + " (" +
-                                e.getMessage() +")");
-                    }
-                }
-                completedIsas.add(instructionSet);
-            }
         }
 
         // Let the ART runtime in zygote and system_server know that the boot completed.
@@ -8321,6 +8306,21 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
+    private boolean isActiveInstrumentation(int uid) {
+        synchronized (ActivityManagerService.this) {
+            for (int i = mActiveInstrumentation.size() - 1; i >= 0; i--) {
+                final ActiveInstrumentation instrumentation = mActiveInstrumentation.get(i);
+                for (int j = instrumentation.mRunningProcesses.size() - 1; j >= 0; j--) {
+                    final ProcessRecord process = instrumentation.mRunningProcesses.get(j);
+                    if (process.uid == uid) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     @Override
     public int getUidProcessState(int uid, String callingPackage) {
         if (!hasUsageStatsPermission(callingPackage)) {
@@ -9111,7 +9111,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // to handle home activity in this case.
             if (UserManager.isSplitSystemUser() &&
                     Settings.Secure.getInt(mContext.getContentResolver(),
-                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0) {
+                         Settings.Secure.USER_SETUP_COMPLETE, 0) != 0
+                    || SystemProperties.getBoolean(SYSTEM_USER_HOME_NEEDED, false)) {
                 ComponentName cName = new ComponentName(mContext, SystemUserHomeActivity.class);
                 try {
                     AppGlobals.getPackageManager().setComponentEnabledSetting(cName,
@@ -12850,7 +12851,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         pw.print(" unmapped + ");
                         pw.print(stringifyKBSize(ionPool));
                         pw.println(" pools)");
-                kernelUsed += ionUnmapped;
+                // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
+                // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
+                kernelUsed += ionHeap;
             }
             final long lostRAM = memInfo.getTotalSizeKb() - (totalPss - totalSwapPss)
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
@@ -13587,7 +13590,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             memInfoBuilder.append("       ION: ");
             memInfoBuilder.append(stringifyKBSize(ionHeap + ionPool));
             memInfoBuilder.append("\n");
-            kernelUsed += ionUnmapped;
+            // Note: mapped ION memory is not accounted in PSS due to VM_PFNMAP flag being
+            // set on ION VMAs, therefore consider the entire ION heap as used kernel memory
+            kernelUsed += ionHeap;
         }
         memInfoBuilder.append("  Used RAM: ");
         memInfoBuilder.append(stringifyKBSize(
@@ -18617,6 +18622,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void unregisterProcessObserver(IProcessObserver processObserver) {
             ActivityManagerService.this.unregisterProcessObserver(processObserver);
+        }
+
+        @Override
+        public boolean isActiveInstrumentation(int uid) {
+            return ActivityManagerService.this.isActiveInstrumentation(uid);
         }
     }
 

@@ -76,6 +76,7 @@ final class ConnectionServiceAdapterServant {
     private static final int MSG_CONNECTION_SERVICE_FOCUS_RELEASED = 35;
     private static final int MSG_SET_CONFERENCE_STATE = 36;
     private static final int MSG_HANDLE_CREATE_CONFERENCE_COMPLETE = 37;
+    private static final int MSG_SET_CALL_DIRECTION = 38;
 
     private final IConnectionServiceAdapter mDelegate;
 
@@ -353,7 +354,7 @@ final class ConnectionServiceAdapterServant {
                 case MSG_CONNECTION_SERVICE_FOCUS_RELEASED:
                     mDelegate.onConnectionServiceFocusReleased(null /*Session.Info*/);
                     break;
-                case MSG_SET_CONFERENCE_STATE:
+                case MSG_SET_CONFERENCE_STATE: {
                     SomeArgs args = (SomeArgs) msg.obj;
                     try {
                         mDelegate.setConferenceState((String) args.arg1, (Boolean) args.arg2,
@@ -361,6 +362,17 @@ final class ConnectionServiceAdapterServant {
                     } finally {
                         args.recycle();
                     }
+                    break;
+                }
+                case MSG_SET_CALL_DIRECTION: {
+                    SomeArgs args = (SomeArgs) msg.obj;
+                    try {
+                        mDelegate.setCallDirection((String) args.arg1, args.argi1,
+                                (Session.Info) args.arg2);
+                    } finally {
+                        args.recycle();
+                    }
+                }
             }
         }
     };
@@ -669,6 +681,16 @@ final class ConnectionServiceAdapterServant {
             args.arg2 = isConference;
             args.arg3 = sessionInfo;
             mHandler.obtainMessage(MSG_SET_CONFERENCE_STATE, args).sendToTarget();
+        }
+
+        @Override
+        public void setCallDirection(String callId, int direction,
+                Session.Info sessionInfo) {
+            SomeArgs args = SomeArgs.obtain();
+            args.arg1 = callId;
+            args.argi1 = direction;
+            args.arg2 = sessionInfo;
+            mHandler.obtainMessage(MSG_SET_CALL_DIRECTION, args).sendToTarget();
         }
     };
 

@@ -48,13 +48,13 @@ stubs_defaults {
         ":opt-telephony-srcs",
         ":opt-net-voip-srcs",
         ":art-module-public-api-stubs-source",
-        ":conscrypt.module.public.api.stubs.source",
         ":android_icu4j_public_api_files",
+        "**/package.html",
     ],
     libs: ["framework-internal-utils"],
     installable: false,
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: [
         "metalava-manual",
     ],
@@ -65,7 +65,10 @@ stubs_defaults {
 stubs_defaults {
     name: "metalava-full-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
-    srcs: [":framework-updatable-sources"],
+    srcs: [
+        ":conscrypt.module.public.api{.public.stubs.source}",
+        ":framework-updatable-sources",
+    ],
     sdk_version: "core_platform",
 }
 
@@ -73,7 +76,18 @@ stubs_defaults {
     name: "metalava-non-updatable-api-stubs-default",
     defaults: ["metalava-base-api-stubs-default"],
     sdk_version: "core_platform",
-    libs: ["framework-all"],
+    // There are a few classes from modules used as type arguments that
+    // need to be resolved by metalava. For now, we can use a previously
+    // finalized stub library to resolve them. If a new class gets added,
+    // this may be need to be revisited to use a manually maintained stub
+    // library with empty classes in order to resolve those references.
+    libs: ["sdk_system_29_android"],
+    aidl: {
+        local_include_dirs: [
+            "media/apex/java",
+            "wifi/aidl-export",
+        ],
+    },
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -86,9 +100,6 @@ stubs_defaults {
 droidstubs {
     name: "api-stubs-docs",
     defaults: ["metalava-full-api-stubs-default"],
-    api_filename: "public_api.txt",
-    private_api_filename: "private.txt",
-    removed_api_filename: "removed.txt",
     removed_dex_api_filename: "removed-dex.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
@@ -100,17 +111,35 @@ droidstubs {
             removed_api_file: "api/removed.txt",
         },
         last_released: {
-            api_file: ":last-released-public-api",
+            api_file: ":android.api.public.latest",
             removed_api_file: "api/removed.txt",
             baseline_file: ":public-api-incompatibilities-with-last-released",
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-public-api",
+            new_since: ":android.api.public.latest",
             baseline_file: "api/lint-baseline.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/public/api",
+        dest: "android.txt",
+    },
     jdiff_enabled: true,
+}
+
+droidstubs {
+    name: "api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/current.txt",
+            removed_api_file: "non-updatable-api/removed.txt",
+        },
+    },
 }
 
 priv_apps = " " +
@@ -126,10 +155,6 @@ module_libs = " " +
 droidstubs {
     name: "system-api-stubs-docs",
     defaults: ["metalava-full-api-stubs-default"],
-    api_tag_name: "SYSTEM",
-    api_filename: "system-api.txt",
-    private_api_filename: "system-private.txt",
-    removed_api_filename: "system-removed.txt",
     removed_dex_api_filename: "system-removed-dex.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
@@ -141,25 +166,40 @@ droidstubs {
             removed_api_file: "api/system-removed.txt",
         },
         last_released: {
-            api_file: ":last-released-system-api",
+            api_file: ":android.api.system.latest",
             removed_api_file: "api/system-removed.txt",
             baseline_file: ":system-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-system-api",
+            new_since: ":android.api.system.latest",
             baseline_file: "api/system-lint-baseline.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/system/api",
+        dest: "android.txt",
     },
     jdiff_enabled: true,
 }
 
 droidstubs {
+    name: "system-api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + priv_apps,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/system-current.txt",
+            removed_api_file: "non-updatable-api/system-removed.txt",
+        },
+    },
+}
+
+droidstubs {
     name: "test-api-stubs-docs",
     defaults: ["metalava-full-api-stubs-default"],
-    api_tag_name: "TEST",
-    api_filename: "test-api.txt",
-    removed_api_filename: "test-removed.txt",
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
@@ -173,6 +213,11 @@ droidstubs {
             enabled: true,
             baseline_file: "api/test-lint-baseline.txt",
         },
+    },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/test/api",
+        dest: "android.txt",
     },
 }
 
@@ -190,7 +235,6 @@ droidstubs {
 droidstubs {
     name: "module-lib-api",
     defaults: ["metalava-full-api-stubs-default"],
-    api_tag_name: "MODULE_LIB",
     arg_files: ["core/res/AndroidManifest.xml"],
     args: metalava_framework_docs_args + module_libs,
 
@@ -203,18 +247,35 @@ droidstubs {
             removed_api_file: "api/module-lib-removed.txt",
         },
         last_released: {
-            api_file: ":last-released-module-lib-api",
+            api_file: ":android.api.module-lib.latest",
             removed_api_file: "api/module-lib-removed.txt",
             baseline_file: ":module-lib-api-incompatibilities-with-last-released"
         },
         api_lint: {
             enabled: true,
-            new_since: ":last-released-module-lib-api",
+            new_since: ":android.api.module-lib.latest",
             baseline_file: "api/module-lib-lint-baseline.txt",
         },
     },
+    dist: {
+        targets: ["sdk", "win_sdk"],
+        dir: "apistubs/android/module-lib/api",
+        dest: "android.txt",
+    },
 }
 
+droidstubs {
+    name: "module-lib-api-stubs-docs-non-updatable",
+    defaults: ["metalava-non-updatable-api-stubs-default"],
+    arg_files: ["core/res/AndroidManifest.xml"],
+    args: metalava_framework_docs_args + module_libs,
+    check_api: {
+        current: {
+            api_file: "non-updatable-api/module-lib-current.txt",
+            removed_api_file: "non-updatable-api/module-lib-removed.txt",
+        },
+    },
+}
 
 // The following droidstub module generates source files for the API stub library for
 // modules. Note that it not only includes its own APIs but also other APIs that have
@@ -274,7 +335,21 @@ java_library_static {
     name: "android_module_lib_stubs_current",
     srcs: [ ":module-lib-api-stubs-docs" ],
     defaults: ["android_defaults_stubs_current"],
-    libs: ["android_system_stubs_current"],
+    libs: ["sdk_system_29_android"],
+}
+
+java_library_static {
+    name: "android_non_updatable_stubs_current",
+    srcs: [":api-stubs-docs-non-updatable"],
+    defaults: ["android_defaults_stubs_current"],
+    libs: ["sdk_system_29_android"],
+}
+
+java_library_static {
+    name: "android_system_non_updatable_stubs_current",
+    srcs: [":system-api-stubs-docs-non-updatable"],
+    defaults: ["android_defaults_stubs_current"],
+    libs: ["sdk_system_29_android"],
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -305,7 +380,7 @@ droidstubs {
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
-    previous_api: ":last-released-public-api",
+    previous_api: ":android.api.public.latest",
     merge_annotations_dirs: [
         "metalava-manual",
     ],

@@ -485,6 +485,11 @@ final class RemoteConnectionService {
                 Session.Info sessionInfo) {
             // Do nothing
         }
+
+        @Override
+        public void setCallDirection(String callId, int direction, Session.Info sessionInfo) {
+            // Do nothing
+        }
     };
 
     private final ConnectionServiceAdapterServant mServant =

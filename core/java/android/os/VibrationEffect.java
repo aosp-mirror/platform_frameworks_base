@@ -55,21 +55,16 @@ public abstract class VibrationEffect implements Parcelable {
 
     /**
      * A click effect. Use this effect as a baseline, as it's the most common type of click effect.
-     *
-     * @see #get(int)
      */
     public static final int EFFECT_CLICK = Effect.CLICK;
 
     /**
      * A double click effect.
-     *
-     * @see #get(int)
      */
     public static final int EFFECT_DOUBLE_CLICK = Effect.DOUBLE_CLICK;
 
     /**
      * A tick effect. This effect is less strong compared to {@link #EFFECT_CLICK}.
-     * @see #get(int)
      */
     public static final int EFFECT_TICK = Effect.TICK;
 
@@ -93,7 +88,6 @@ public abstract class VibrationEffect implements Parcelable {
 
     /**
      * A heavy click effect. This effect is stronger than {@link #EFFECT_CLICK}.
-     * @see #get(int)
      */
     public static final int EFFECT_HEAVY_CLICK = Effect.HEAVY_CLICK;
 

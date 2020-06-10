@@ -26,8 +26,10 @@ java_library {
 
     installable: true,
 
-    // Make sure that the implementaion only relies on SDK or system APIs.
+    // TODO: build against stable API surface. Use core_platform for now to avoid
+    // link-check failure with exoplayer building against "current".
     sdk_version: "core_platform",
+    min_sdk_version: "29",
     libs: [
         // The order matters. android_system_* library should come later.
         "framework_media_annotation",
@@ -94,4 +96,5 @@ java_library {
     name: "framework_media_annotation",
     srcs: [":framework-media-annotation-srcs"],
     installable: false,
+    sdk_version: "core_current",
 }

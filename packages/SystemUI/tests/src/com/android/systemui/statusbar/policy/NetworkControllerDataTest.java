@@ -235,7 +235,7 @@ public class NetworkControllerDataTest extends NetworkControllerBaseTest {
                 .build();
         when(mServiceState.getNetworkRegistrationInfo(DOMAIN_PS, TRANSPORT_TYPE_WWAN))
                 .thenReturn(fakeRegInfo);
-        when(mDisplayInfo.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_HSPA);
+        when(mTelephonyDisplayInfo.getNetworkType()).thenReturn(TelephonyManager.NETWORK_TYPE_HSPA);
         updateServiceState();
         verifyDataIndicators(TelephonyIcons.ICON_H);
     }

@@ -1,0 +1,173 @@
+// Baseline format: 1.0
+GenericException: android.test.ActivityInstrumentationTestCase#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ActivityInstrumentationTestCase#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ActivityInstrumentationTestCase2#runTest():
+    Methods must not throw generic exceptions (`java.lang.Throwable`)
+GenericException: android.test.ActivityInstrumentationTestCase2#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ActivityInstrumentationTestCase2#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ActivityUnitTestCase#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ActivityUnitTestCase#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ApplicationTestCase#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ApplicationTestCase#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ProviderTestCase#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ProviderTestCase#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ProviderTestCase2#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ProviderTestCase2#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ServiceTestCase#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.ServiceTestCase#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.SingleLaunchActivityTestCase#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.SingleLaunchActivityTestCase#tearDown():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+GenericException: android.test.SyncBaseInstrumentation#setUp():
+    Methods must not throw generic exceptions (`java.lang.Exception`)
+
+
+IntentBuilderName: android.test.IsolatedContext#registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter):
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `registerReceiver`
+
+
+MissingNullability: android.test.ComparisonFailure#getMessage():
+    Missing nullability on method `getMessage` return
+MissingNullability: android.test.InstrumentationTestRunner#onCreate(android.os.Bundle) parameter #0:
+    Missing nullability on parameter `arguments` in method `onCreate`
+MissingNullability: android.test.IsolatedContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #0:
+    Missing nullability on parameter `service` in method `bindIsolatedService`
+MissingNullability: android.test.IsolatedContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #2:
+    Missing nullability on parameter `instanceName` in method `bindIsolatedService`
+MissingNullability: android.test.IsolatedContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #3:
+    Missing nullability on parameter `executor` in method `bindIsolatedService`
+MissingNullability: android.test.IsolatedContext#bindIsolatedService(android.content.Intent, int, String, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #4:
+    Missing nullability on parameter `conn` in method `bindIsolatedService`
+MissingNullability: android.test.IsolatedContext#bindService(android.content.Intent, android.content.ServiceConnection, int) parameter #0:
+    Missing nullability on parameter `service` in method `bindService`
+MissingNullability: android.test.IsolatedContext#bindService(android.content.Intent, android.content.ServiceConnection, int) parameter #1:
+    Missing nullability on parameter `conn` in method `bindService`
+MissingNullability: android.test.IsolatedContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #0:
+    Missing nullability on parameter `service` in method `bindService`
+MissingNullability: android.test.IsolatedContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #2:
+    Missing nullability on parameter `executor` in method `bindService`
+MissingNullability: android.test.IsolatedContext#bindService(android.content.Intent, int, java.util.concurrent.Executor, android.content.ServiceConnection) parameter #3:
+    Missing nullability on parameter `conn` in method `bindService`
+MissingNullability: android.test.IsolatedContext#checkUriPermission(android.net.Uri, String, String, int, int, int) parameter #0:
+    Missing nullability on parameter `uri` in method `checkUriPermission`
+MissingNullability: android.test.IsolatedContext#checkUriPermission(android.net.Uri, String, String, int, int, int) parameter #1:
+    Missing nullability on parameter `readPermission` in method `checkUriPermission`
+MissingNullability: android.test.IsolatedContext#checkUriPermission(android.net.Uri, String, String, int, int, int) parameter #2:
+    Missing nullability on parameter `writePermission` in method `checkUriPermission`
+MissingNullability: android.test.IsolatedContext#checkUriPermission(android.net.Uri, int, int, int) parameter #0:
+    Missing nullability on parameter `uri` in method `checkUriPermission`
+MissingNullability: android.test.IsolatedContext#getContentResolver():
+    Missing nullability on method `getContentResolver` return
+MissingNullability: android.test.IsolatedContext#getFilesDir():
+    Missing nullability on method `getFilesDir` return
+MissingNullability: android.test.IsolatedContext#getSystemService(String):
+    Missing nullability on method `getSystemService` return
+MissingNullability: android.test.IsolatedContext#getSystemService(String) parameter #0:
+    Missing nullability on parameter `name` in method `getSystemService`
+MissingNullability: android.test.IsolatedContext#registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter):
+    Missing nullability on method `registerReceiver` return
+MissingNullability: android.test.IsolatedContext#registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter) parameter #0:
+    Missing nullability on parameter `receiver` in method `registerReceiver`
+MissingNullability: android.test.IsolatedContext#registerReceiver(android.content.BroadcastReceiver, android.content.IntentFilter) parameter #1:
+    Missing nullability on parameter `filter` in method `registerReceiver`
+MissingNullability: android.test.IsolatedContext#sendBroadcast(android.content.Intent) parameter #0:
+    Missing nullability on parameter `intent` in method `sendBroadcast`
+MissingNullability: android.test.IsolatedContext#sendOrderedBroadcast(android.content.Intent, String) parameter #0:
+    Missing nullability on parameter `intent` in method `sendOrderedBroadcast`
+MissingNullability: android.test.IsolatedContext#sendOrderedBroadcast(android.content.Intent, String) parameter #1:
+    Missing nullability on parameter `receiverPermission` in method `sendOrderedBroadcast`
+MissingNullability: android.test.IsolatedContext#unregisterReceiver(android.content.BroadcastReceiver) parameter #0:
+    Missing nullability on parameter `receiver` in method `unregisterReceiver`
+MissingNullability: android.test.RenamingDelegatingContext#databaseList():
+    Missing nullability on method `databaseList` return
+MissingNullability: android.test.RenamingDelegatingContext#deleteDatabase(String) parameter #0:
+    Missing nullability on parameter `name` in method `deleteDatabase`
+MissingNullability: android.test.RenamingDelegatingContext#deleteFile(String) parameter #0:
+    Missing nullability on parameter `name` in method `deleteFile`
+MissingNullability: android.test.RenamingDelegatingContext#fileList():
+    Missing nullability on method `fileList` return
+MissingNullability: android.test.RenamingDelegatingContext#getCacheDir():
+    Missing nullability on method `getCacheDir` return
+MissingNullability: android.test.RenamingDelegatingContext#getDatabasePath(String):
+    Missing nullability on method `getDatabasePath` return
+MissingNullability: android.test.RenamingDelegatingContext#getDatabasePath(String) parameter #0:
+    Missing nullability on parameter `name` in method `getDatabasePath`
+MissingNullability: android.test.RenamingDelegatingContext#getFileStreamPath(String):
+    Missing nullability on method `getFileStreamPath` return
+MissingNullability: android.test.RenamingDelegatingContext#getFileStreamPath(String) parameter #0:
+    Missing nullability on parameter `name` in method `getFileStreamPath`
+MissingNullability: android.test.RenamingDelegatingContext#openFileInput(String):
+    Missing nullability on method `openFileInput` return
+MissingNullability: android.test.RenamingDelegatingContext#openFileInput(String) parameter #0:
+    Missing nullability on parameter `name` in method `openFileInput`
+MissingNullability: android.test.RenamingDelegatingContext#openFileOutput(String, int):
+    Missing nullability on method `openFileOutput` return
+MissingNullability: android.test.RenamingDelegatingContext#openFileOutput(String, int) parameter #0:
+    Missing nullability on parameter `name` in method `openFileOutput`
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory):
+    Missing nullability on method `openOrCreateDatabase` return
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory) parameter #0:
+    Missing nullability on parameter `name` in method `openOrCreateDatabase`
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory) parameter #2:
+    Missing nullability on parameter `factory` in method `openOrCreateDatabase`
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler):
+    Missing nullability on method `openOrCreateDatabase` return
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler) parameter #0:
+    Missing nullability on parameter `name` in method `openOrCreateDatabase`
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler) parameter #2:
+    Missing nullability on parameter `factory` in method `openOrCreateDatabase`
+MissingNullability: android.test.RenamingDelegatingContext#openOrCreateDatabase(String, int, android.database.sqlite.SQLiteDatabase.CursorFactory, android.database.DatabaseErrorHandler) parameter #3:
+    Missing nullability on parameter `errorHandler` in method `openOrCreateDatabase`
+
+
+ProtectedMember: android.test.ActivityInstrumentationTestCase#setUp():
+    Protected methods not allowed; must be public: method android.test.ActivityInstrumentationTestCase.setUp()}
+ProtectedMember: android.test.ActivityInstrumentationTestCase#tearDown():
+    Protected methods not allowed; must be public: method android.test.ActivityInstrumentationTestCase.tearDown()}
+ProtectedMember: android.test.ActivityInstrumentationTestCase2#runTest():
+    Protected methods not allowed; must be public: method android.test.ActivityInstrumentationTestCase2.runTest()}
+ProtectedMember: android.test.ActivityInstrumentationTestCase2#setUp():
+    Protected methods not allowed; must be public: method android.test.ActivityInstrumentationTestCase2.setUp()}
+ProtectedMember: android.test.ActivityInstrumentationTestCase2#tearDown():
+    Protected methods not allowed; must be public: method android.test.ActivityInstrumentationTestCase2.tearDown()}
+ProtectedMember: android.test.ActivityUnitTestCase#setUp():
+    Protected methods not allowed; must be public: method android.test.ActivityUnitTestCase.setUp()}
+ProtectedMember: android.test.ActivityUnitTestCase#tearDown():
+    Protected methods not allowed; must be public: method android.test.ActivityUnitTestCase.tearDown()}
+ProtectedMember: android.test.ApplicationTestCase#setUp():
+    Protected methods not allowed; must be public: method android.test.ApplicationTestCase.setUp()}
+ProtectedMember: android.test.ApplicationTestCase#tearDown():
+    Protected methods not allowed; must be public: method android.test.ApplicationTestCase.tearDown()}
+ProtectedMember: android.test.ProviderTestCase#setUp():
+    Protected methods not allowed; must be public: method android.test.ProviderTestCase.setUp()}
+ProtectedMember: android.test.ProviderTestCase#tearDown():
+    Protected methods not allowed; must be public: method android.test.ProviderTestCase.tearDown()}
+ProtectedMember: android.test.ProviderTestCase2#setUp():
+    Protected methods not allowed; must be public: method android.test.ProviderTestCase2.setUp()}
+ProtectedMember: android.test.ProviderTestCase2#tearDown():
+    Protected methods not allowed; must be public: method android.test.ProviderTestCase2.tearDown()}
+ProtectedMember: android.test.ServiceTestCase#setUp():
+    Protected methods not allowed; must be public: method android.test.ServiceTestCase.setUp()}
+ProtectedMember: android.test.ServiceTestCase#tearDown():
+    Protected methods not allowed; must be public: method android.test.ServiceTestCase.tearDown()}
+ProtectedMember: android.test.SingleLaunchActivityTestCase#setUp():
+    Protected methods not allowed; must be public: method android.test.SingleLaunchActivityTestCase.setUp()}
+ProtectedMember: android.test.SingleLaunchActivityTestCase#tearDown():
+    Protected methods not allowed; must be public: method android.test.SingleLaunchActivityTestCase.tearDown()}
+ProtectedMember: android.test.SyncBaseInstrumentation#setUp():
+    Protected methods not allowed; must be public: method android.test.SyncBaseInstrumentation.setUp()}

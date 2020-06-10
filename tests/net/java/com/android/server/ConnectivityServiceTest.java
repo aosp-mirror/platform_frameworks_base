@@ -75,6 +75,7 @@ import static android.net.NetworkPolicyManager.RULE_NONE;
 import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
 import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
+import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 
 import static com.android.server.ConnectivityServiceTestUtilsKt.transportToLegacyType;
@@ -144,6 +145,7 @@ import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.ConnectivityManager.PacketKeepaliveCallback;
 import android.net.ConnectivityManager.TooManyRequestsException;
 import android.net.ConnectivityThread;
+import android.net.DataStallReportParcelable;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.IDnsResolver;
 import android.net.IIpConnectivityMetrics;
@@ -170,6 +172,7 @@ import android.net.NetworkSpecifier;
 import android.net.NetworkStack;
 import android.net.NetworkStackClient;
 import android.net.NetworkState;
+import android.net.NetworkTestResultParcelable;
 import android.net.NetworkUtils;
 import android.net.ProxyInfo;
 import android.net.ResolverParamsParcel;
@@ -196,7 +199,6 @@ import android.os.Looper;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -580,14 +582,6 @@ public class ConnectivityServiceTest {
     }
 
     private class TestNetworkAgentWrapper extends NetworkAgentWrapper {
-        private static final int VALIDATION_RESULT_BASE = NETWORK_VALIDATION_PROBE_DNS
-                | NETWORK_VALIDATION_PROBE_HTTP
-                | NETWORK_VALIDATION_PROBE_HTTPS;
-        private static final int VALIDATION_RESULT_VALID = VALIDATION_RESULT_BASE
-                | NETWORK_VALIDATION_RESULT_VALID;
-        private static final int VALIDATION_RESULT_PARTIAL = VALIDATION_RESULT_BASE
-                | NETWORK_VALIDATION_PROBE_FALLBACK
-                | NETWORK_VALIDATION_RESULT_PARTIAL;
         private static final int VALIDATION_RESULT_INVALID = 0;
 
         private static final long DATA_STALL_TIMESTAMP = 10L;
@@ -595,12 +589,10 @@ public class ConnectivityServiceTest {
 
         private INetworkMonitor mNetworkMonitor;
         private INetworkMonitorCallbacks mNmCallbacks;
-        private int mNmValidationResult = VALIDATION_RESULT_BASE;
+        private int mNmValidationResult = VALIDATION_RESULT_INVALID;
         private int mProbesCompleted;
         private int mProbesSucceeded;
         private String mNmValidationRedirectUrl = null;
-        private PersistableBundle mValidationExtras = PersistableBundle.EMPTY;
-        private PersistableBundle mDataStallExtras = PersistableBundle.EMPTY;
         private boolean mNmProvNotificationRequested = false;
 
         private final ConditionVariable mNetworkStatusReceived = new ConditionVariable();
@@ -668,8 +660,13 @@ public class ConnectivityServiceTest {
             }
 
             mNmCallbacks.notifyProbeStatusChanged(mProbesCompleted, mProbesSucceeded);
-            mNmCallbacks.notifyNetworkTestedWithExtras(
-                    mNmValidationResult, mNmValidationRedirectUrl, TIMESTAMP, mValidationExtras);
+            final NetworkTestResultParcelable p = new NetworkTestResultParcelable();
+            p.result = mNmValidationResult;
+            p.probesAttempted = mProbesCompleted;
+            p.probesSucceeded = mProbesSucceeded;
+            p.redirectUrl = mNmValidationRedirectUrl;
+            p.timestampMillis = TIMESTAMP;
+            mNmCallbacks.notifyNetworkTestedWithExtras(p);
 
             if (mNmValidationRedirectUrl != null) {
                 mNmCallbacks.showProvisioningNotification(
@@ -751,9 +748,9 @@ public class ConnectivityServiceTest {
         }
 
         void setNetworkValid(boolean isStrictMode) {
-            mNmValidationResult = VALIDATION_RESULT_VALID;
+            mNmValidationResult = NETWORK_VALIDATION_RESULT_VALID;
             mNmValidationRedirectUrl = null;
-            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTP;
+            int probesSucceeded = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS;
             if (isStrictMode) {
                 probesSucceeded |= NETWORK_VALIDATION_PROBE_PRIVDNS;
             }
@@ -765,8 +762,9 @@ public class ConnectivityServiceTest {
         void setNetworkInvalid(boolean isStrictMode) {
             mNmValidationResult = VALIDATION_RESULT_INVALID;
             mNmValidationRedirectUrl = null;
-            int probesCompleted = VALIDATION_RESULT_BASE;
-            int probesSucceeded = VALIDATION_RESULT_INVALID;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                    | NETWORK_VALIDATION_PROBE_HTTP;
+            int probesSucceeded = 0;
             // If the isStrictMode is true, it means the network is invalid when NetworkMonitor
             // tried to validate the private DNS but failed.
             if (isStrictMode) {
@@ -782,7 +780,7 @@ public class ConnectivityServiceTest {
             mNmValidationRedirectUrl = redirectUrl;
             // Suppose the portal is found when NetworkMonitor probes NETWORK_VALIDATION_PROBE_HTTP
             // in the beginning, so the NETWORK_VALIDATION_PROBE_HTTPS hasn't probed yet.
-            int probesCompleted = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTP;
             int probesSucceeded = VALIDATION_RESULT_INVALID;
             if (isStrictMode) {
                 probesCompleted |= NETWORK_VALIDATION_PROBE_PRIVDNS;
@@ -791,18 +789,20 @@ public class ConnectivityServiceTest {
         }
 
         void setNetworkPartial() {
-            mNmValidationResult = VALIDATION_RESULT_PARTIAL;
+            mNmValidationResult = NETWORK_VALIDATION_RESULT_PARTIAL;
             mNmValidationRedirectUrl = null;
-            int probesCompleted = VALIDATION_RESULT_BASE;
-            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                    | NETWORK_VALIDATION_PROBE_FALLBACK;
+            int probesSucceeded = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_FALLBACK;
             setProbesStatus(probesCompleted, probesSucceeded);
         }
 
         void setNetworkPartialValid(boolean isStrictMode) {
             setNetworkPartial();
-            mNmValidationResult |= VALIDATION_RESULT_VALID;
-            int probesCompleted = VALIDATION_RESULT_BASE;
-            int probesSucceeded = VALIDATION_RESULT_BASE & ~NETWORK_VALIDATION_PROBE_HTTPS;
+            mNmValidationResult |= NETWORK_VALIDATION_RESULT_VALID;
+            int probesCompleted = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTPS
+                    | NETWORK_VALIDATION_PROBE_HTTP;
+            int probesSucceeded = NETWORK_VALIDATION_PROBE_DNS | NETWORK_VALIDATION_PROBE_HTTP;
             // Suppose the partial network cannot pass the private DNS validation as well, so only
             // add NETWORK_VALIDATION_PROBE_DNS in probesCompleted but not probesSucceeded.
             if (isStrictMode) {
@@ -838,8 +838,10 @@ public class ConnectivityServiceTest {
         }
 
         void notifyDataStallSuspected() throws Exception {
-            mNmCallbacks.notifyDataStallSuspected(
-                    DATA_STALL_TIMESTAMP, DATA_STALL_DETECTION_METHOD, mDataStallExtras);
+            final DataStallReportParcelable p = new DataStallReportParcelable();
+            p.detectionMethod = DATA_STALL_DETECTION_METHOD;
+            p.timestampMillis = DATA_STALL_TIMESTAMP;
+            mNmCallbacks.notifyDataStallSuspected(p);
         }
     }
 
@@ -3049,6 +3051,13 @@ public class ConnectivityServiceTest {
         assertNoCallbacks(cEmpty1, cEmpty2, cEmpty3, cEmpty4, cFoo, cBar);
     }
 
+    /**
+     * @return the context's attribution tag
+     */
+    private String getAttributionTag() {
+        return null;
+    }
+
     @Test
     public void testInvalidNetworkSpecifier() {
         assertThrows(IllegalArgumentException.class, () -> {
@@ -3061,7 +3070,8 @@ public class ConnectivityServiceTest {
             networkCapabilities.addTransportType(TRANSPORT_WIFI)
                     .setNetworkSpecifier(new MatchAllNetworkSpecifier());
             mService.requestNetwork(networkCapabilities, null, 0, null,
-                    ConnectivityManager.TYPE_WIFI, mContext.getPackageName());
+                    ConnectivityManager.TYPE_WIFI, mContext.getPackageName(),
+                    getAttributionTag());
         });
 
         class NonParcelableSpecifier extends NetworkSpecifier {
@@ -5385,8 +5395,6 @@ public class ConnectivityServiceTest {
 
         // Even though the VPN is unvalidated, it becomes the default network for our app.
         callback.expectAvailableCallbacksUnvalidated(vpnNetworkAgent);
-        // TODO: this looks like a spurious callback.
-        callback.expectCallback(CallbackEntry.NETWORK_CAPS_UPDATED, vpnNetworkAgent);
         callback.assertNoCallback();
 
         assertTrue(vpnNetworkAgent.getScore() > mEthernetNetworkAgent.getScore());
@@ -5413,6 +5421,47 @@ public class ConnectivityServiceTest {
         vpnNetworkAgent.disconnect();
         callback.expectCallback(CallbackEntry.LOST, vpnNetworkAgent);
         callback.expectAvailableCallbacksValidated(mEthernetNetworkAgent);
+    }
+
+    @Test
+    public void testVpnStartsWithUnderlyingCaps() throws Exception {
+        final int uid = Process.myUid();
+
+        final TestNetworkCallback vpnNetworkCallback = new TestNetworkCallback();
+        final NetworkRequest vpnNetworkRequest = new NetworkRequest.Builder()
+                .removeCapability(NET_CAPABILITY_NOT_VPN)
+                .addTransportType(TRANSPORT_VPN)
+                .build();
+        mCm.registerNetworkCallback(vpnNetworkRequest, vpnNetworkCallback);
+        vpnNetworkCallback.assertNoCallback();
+
+        // Connect cell. It will become the default network, and in the absence of setting
+        // underlying networks explicitly it will become the sole underlying network for the vpn.
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        mCellNetworkAgent.connect(true);
+
+        final TestNetworkAgentWrapper vpnNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_VPN);
+        final ArraySet<UidRange> ranges = new ArraySet<>();
+        ranges.add(new UidRange(uid, uid));
+        mMockVpn.setNetworkAgent(vpnNetworkAgent);
+        mMockVpn.connect();
+        mMockVpn.setUids(ranges);
+        vpnNetworkAgent.connect(true /* validated */, false /* hasInternet */,
+                false /* isStrictMode */);
+
+        vpnNetworkCallback.expectAvailableCallbacks(vpnNetworkAgent.getNetwork(),
+                false /* suspended */, false /* validated */, false /* blocked */, TIMEOUT_MS);
+        vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent.getNetwork(), TIMEOUT_MS,
+                nc -> nc.hasCapability(NET_CAPABILITY_VALIDATED));
+
+        final NetworkCapabilities nc = mCm.getNetworkCapabilities(vpnNetworkAgent.getNetwork());
+        assertTrue(nc.hasTransport(TRANSPORT_VPN));
+        assertTrue(nc.hasTransport(TRANSPORT_CELLULAR));
+        assertFalse(nc.hasTransport(TRANSPORT_WIFI));
+        assertTrue(nc.hasCapability(NET_CAPABILITY_VALIDATED));
+        assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_METERED));
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
     }
 
     @Test
@@ -5445,9 +5494,12 @@ public class ConnectivityServiceTest {
         assertFalse(nc.hasTransport(TRANSPORT_WIFI));
         // For safety reasons a VPN without underlying networks is considered metered.
         assertFalse(nc.hasCapability(NET_CAPABILITY_NOT_METERED));
+        // A VPN without underlying networks is not suspended.
+        assertTrue(nc.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         // Connect cell and use it as an underlying network.
         mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_CELLULAR);
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mCellNetworkAgent.connect(true);
 
         mService.setUnderlyingNetworksForVpn(
@@ -5456,10 +5508,12 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
-                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         mWiFiNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI);
         mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_METERED);
+        mWiFiNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
         mWiFiNetworkAgent.connect(true);
 
         mService.setUnderlyingNetworksForVpn(
@@ -5468,7 +5522,8 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
-                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         // Don't disconnect, but note the VPN is not using wifi any more.
         mService.setUnderlyingNetworksForVpn(
@@ -5477,16 +5532,36 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
-                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
-        // Use Wifi but not cell. Note the VPN is now unmetered.
+        // Remove NOT_SUSPENDED from the only network and observe VPN is now suspended.
+        mCellNetworkAgent.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
+                (caps) -> caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && !caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        vpnNetworkCallback.expectCallback(CallbackEntry.SUSPENDED, vpnNetworkAgent);
+
+        // Add NOT_SUSPENDED again and observe VPN is no longer suspended.
+        mCellNetworkAgent.addCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
+                (caps) -> caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_CELLULAR) && !caps.hasTransport(TRANSPORT_WIFI)
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        vpnNetworkCallback.expectCallback(CallbackEntry.RESUMED, vpnNetworkAgent);
+
+        // Use Wifi but not cell. Note the VPN is now unmetered and not suspended.
         mService.setUnderlyingNetworksForVpn(
                 new Network[] { mWiFiNetworkAgent.getNetwork() });
 
         vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && !caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
-                && caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+                && caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
 
         // Use both again.
         mService.setUnderlyingNetworksForVpn(
@@ -5495,7 +5570,37 @@ public class ConnectivityServiceTest {
         vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
                 (caps) -> caps.hasTransport(TRANSPORT_VPN)
                 && caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
-                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED));
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+
+        // Cell is suspended again. As WiFi is not, this should not cause a callback.
+        mCellNetworkAgent.removeCapability(NET_CAPABILITY_NOT_SUSPENDED);
+        vpnNetworkCallback.assertNoCallback();
+
+        // Stop using WiFi. The VPN is suspended again.
+        mService.setUnderlyingNetworksForVpn(
+                new Network[] { mCellNetworkAgent.getNetwork() });
+        vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
+                (caps) -> caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_CELLULAR)
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && !caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        // While the SUSPENDED callback should in theory be sent here, it is not. This is
+        // a bug in ConnectivityService, but as the SUSPENDED and RESUMED callbacks have never
+        // been public and are deprecated and slated for removal, there is no sense in spending
+        // resources fixing this bug now.
+
+        // Use both again.
+        mService.setUnderlyingNetworksForVpn(
+                new Network[] { mCellNetworkAgent.getNetwork(), mWiFiNetworkAgent.getNetwork() });
+
+        vpnNetworkCallback.expectCapabilitiesThat(vpnNetworkAgent,
+                (caps) -> caps.hasTransport(TRANSPORT_VPN)
+                && caps.hasTransport(TRANSPORT_CELLULAR) && caps.hasTransport(TRANSPORT_WIFI)
+                && !caps.hasCapability(NET_CAPABILITY_NOT_METERED)
+                && caps.hasCapability(NET_CAPABILITY_NOT_SUSPENDED));
+        // As above, the RESUMED callback not being sent here is a bug, but not a bug that's
+        // worth anybody's time to fix.
 
         // Disconnect cell. Receive update without even removing the dead network from the
         // underlying networks – it's dead anyway. Not metered any more.
@@ -6179,6 +6284,178 @@ public class ConnectivityServiceTest {
         mCm.unregisterNetworkCallback(networkCallback);
     }
 
+    private void expectNat64PrefixChange(TestableNetworkCallback callback,
+            TestNetworkAgentWrapper agent, IpPrefix prefix) {
+        callback.expectLinkPropertiesThat(agent, x -> Objects.equals(x.getNat64Prefix(), prefix));
+    }
+
+    @Test
+    public void testNat64PrefixMultipleSources() throws Exception {
+        final String iface = "wlan0";
+        final String pref64FromRaStr = "64:ff9b::";
+        final String pref64FromDnsStr = "2001:db8:64::";
+        final IpPrefix pref64FromRa = new IpPrefix(InetAddress.getByName(pref64FromRaStr), 96);
+        final IpPrefix pref64FromDns = new IpPrefix(InetAddress.getByName(pref64FromDnsStr), 96);
+        final IpPrefix newPref64FromRa = new IpPrefix("2001:db8:64:64:64:64::/96");
+
+        final NetworkRequest request = new NetworkRequest.Builder()
+                .addCapability(NET_CAPABILITY_INTERNET)
+                .build();
+        final TestNetworkCallback callback = new TestNetworkCallback();
+        mCm.registerNetworkCallback(request, callback);
+
+        final LinkProperties baseLp = new LinkProperties();
+        baseLp.setInterfaceName(iface);
+        baseLp.addLinkAddress(new LinkAddress("2001:db8:1::1/64"));
+        baseLp.addDnsServer(InetAddress.getByName("2001:4860:4860::6464"));
+
+        reset(mMockNetd, mMockDnsResolver);
+        InOrder inOrder = inOrder(mMockNetd, mMockDnsResolver);
+
+        // If a network already has a NAT64 prefix on connect, clatd is started immediately and
+        // prefix discovery is never started.
+        LinkProperties lp = new LinkProperties(baseLp);
+        lp.setNat64Prefix(pref64FromRa);
+        mCellNetworkAgent = new TestNetworkAgentWrapper(TRANSPORT_WIFI, lp);
+        mCellNetworkAgent.connect(false);
+        final Network network = mCellNetworkAgent.getNetwork();
+        int netId = network.getNetId();
+        callback.expectAvailableCallbacksUnvalidated(mCellNetworkAgent);
+        inOrder.verify(mMockNetd).clatdStart(iface, pref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, pref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+        callback.assertNoCallback();
+        assertEquals(pref64FromRa, mCm.getLinkProperties(network).getNat64Prefix());
+
+        // If the RA prefix is withdrawn, clatd is stopped and prefix discovery is started.
+        lp.setNat64Prefix(null);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, null);
+        inOrder.verify(mMockNetd).clatdStop(iface);
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, "");
+        inOrder.verify(mMockDnsResolver).startPrefix64Discovery(netId);
+
+        // If the RA prefix appears while DNS discovery is in progress, discovery is stopped and
+        // clatd is started with the prefix from the RA.
+        lp.setNat64Prefix(pref64FromRa);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, pref64FromRa);
+        inOrder.verify(mMockNetd).clatdStart(iface, pref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, pref64FromRa.toString());
+
+        // Withdraw the RA prefix so we can test the case where an RA prefix appears after DNS
+        // discovery has succeeded.
+        lp.setNat64Prefix(null);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, null);
+        inOrder.verify(mMockNetd).clatdStop(iface);
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, "");
+        inOrder.verify(mMockDnsResolver).startPrefix64Discovery(netId);
+
+        mService.mNetdEventCallback.onNat64PrefixEvent(netId, true /* added */,
+                pref64FromDnsStr, 96);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, pref64FromDns);
+        inOrder.verify(mMockNetd).clatdStart(iface, pref64FromDns.toString());
+
+        // If an RA advertises the same prefix that was discovered by DNS, nothing happens: prefix
+        // discovery is not stopped, and there are no callbacks.
+        lp.setNat64Prefix(pref64FromDns);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        callback.assertNoCallback();
+        inOrder.verify(mMockNetd, never()).clatdStop(iface);
+        inOrder.verify(mMockNetd, never()).clatdStart(eq(iface), anyString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).setPrefix64(eq(netId), anyString());
+
+        // If the RA is later withdrawn, nothing happens again.
+        lp.setNat64Prefix(null);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        callback.assertNoCallback();
+        inOrder.verify(mMockNetd, never()).clatdStop(iface);
+        inOrder.verify(mMockNetd, never()).clatdStart(eq(iface), anyString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).setPrefix64(eq(netId), anyString());
+
+        // If the RA prefix changes, clatd is restarted and prefix discovery is stopped.
+        lp.setNat64Prefix(pref64FromRa);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, pref64FromRa);
+        inOrder.verify(mMockNetd).clatdStop(iface);
+        inOrder.verify(mMockDnsResolver).stopPrefix64Discovery(netId);
+
+        // Stopping prefix discovery results in a prefix removed notification.
+        mService.mNetdEventCallback.onNat64PrefixEvent(netId, false /* added */,
+                pref64FromDnsStr, 96);
+
+        inOrder.verify(mMockNetd).clatdStart(iface, pref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, pref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+
+        // If the RA prefix changes, clatd is restarted and prefix discovery is not started.
+        lp.setNat64Prefix(newPref64FromRa);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, newPref64FromRa);
+        inOrder.verify(mMockNetd).clatdStop(iface);
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, "");
+        inOrder.verify(mMockNetd).clatdStart(iface, newPref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, newPref64FromRa.toString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+
+        // If the RA prefix changes to the same value, nothing happens.
+        lp.setNat64Prefix(newPref64FromRa);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        callback.assertNoCallback();
+        assertEquals(newPref64FromRa, mCm.getLinkProperties(network).getNat64Prefix());
+        inOrder.verify(mMockNetd, never()).clatdStop(iface);
+        inOrder.verify(mMockNetd, never()).clatdStart(eq(iface), anyString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).setPrefix64(eq(netId), anyString());
+
+        // The transition between no prefix and DNS prefix is tested in testStackedLinkProperties.
+
+        // If the same prefix is learned first by DNS and then by RA, and clat is later stopped,
+        // (e.g., because the network disconnects) setPrefix64(netid, "") is never called.
+        lp.setNat64Prefix(null);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, null);
+        inOrder.verify(mMockNetd).clatdStop(iface);
+        inOrder.verify(mMockDnsResolver).setPrefix64(netId, "");
+        inOrder.verify(mMockDnsResolver).startPrefix64Discovery(netId);
+        mService.mNetdEventCallback.onNat64PrefixEvent(netId, true /* added */,
+                pref64FromDnsStr, 96);
+        expectNat64PrefixChange(callback, mCellNetworkAgent, pref64FromDns);
+        inOrder.verify(mMockNetd).clatdStart(iface, pref64FromDns.toString());
+        inOrder.verify(mMockDnsResolver, never()).setPrefix64(eq(netId), any());
+
+        lp.setNat64Prefix(pref64FromDns);
+        mCellNetworkAgent.sendLinkProperties(lp);
+        callback.assertNoCallback();
+        inOrder.verify(mMockNetd, never()).clatdStop(iface);
+        inOrder.verify(mMockNetd, never()).clatdStart(eq(iface), anyString());
+        inOrder.verify(mMockDnsResolver, never()).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).startPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).setPrefix64(eq(netId), anyString());
+
+        // When tearing down a network, clat state is only updated after CALLBACK_LOST is fired, but
+        // before CONNECTIVITY_ACTION is sent. Wait for CONNECTIVITY_ACTION before verifying that
+        // clat has been stopped, or the test will be flaky.
+        ConditionVariable cv = registerConnectivityBroadcast(1);
+        mCellNetworkAgent.disconnect();
+        callback.expectCallback(CallbackEntry.LOST, mCellNetworkAgent);
+        waitFor(cv);
+
+        inOrder.verify(mMockNetd).clatdStop(iface);
+        inOrder.verify(mMockDnsResolver).stopPrefix64Discovery(netId);
+        inOrder.verify(mMockDnsResolver, never()).setPrefix64(eq(netId), anyString());
+
+        mCm.unregisterNetworkCallback(callback);
+    }
+
     @Test
     public void testDataActivityTracking() throws Exception {
         final TestNetworkCallback networkCallback = new TestNetworkCallback();
@@ -6839,7 +7116,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         mServiceContext.setPermission(
                 android.Manifest.permission.NETWORK_STACK, PERMISSION_GRANTED);
@@ -6855,7 +7132,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
@@ -6871,7 +7148,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         mServiceContext.setPermission(android.Manifest.permission.NETWORK_STACK, PERMISSION_DENIED);
 
@@ -6888,7 +7165,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithoutUid =
                 new NetworkAgentInfo(
                         null, null, network, null, null, new NetworkCapabilities(), 0,
-                        mServiceContext, null, null, mService, null, null, null, 0);
+                        mServiceContext, null, null, mService, null, null, null, 0, INVALID_UID);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -6922,7 +7199,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, nc, 0, mServiceContext, null, null,
-                        mService, null, null, null, 0);
+                        mService, null, null, null, 0, INVALID_UID);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);
@@ -6944,7 +7221,7 @@ public class ConnectivityServiceTest {
         final NetworkAgentInfo naiWithUid =
                 new NetworkAgentInfo(
                         null, null, null, null, null, nc, 0, mServiceContext, null, null,
-                        mService, null, null, null, 0);
+                        mService, null, null, null, 0, INVALID_UID);
 
         setupLocationPermissions(Build.VERSION_CODES.Q, true, AppOpsManager.OPSTR_FINE_LOCATION,
                 Manifest.permission.ACCESS_FINE_LOCATION);

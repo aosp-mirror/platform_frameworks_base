@@ -39,12 +39,12 @@ class MatchAllNetworkSpecifierTest {
     }
 
     @Test(expected = IllegalStateException::class)
-    fun testSatisfiedBy() {
+    fun testCanBeSatisfiedBy() {
         val specifier = MatchAllNetworkSpecifier()
         val discoverySession = Mockito.mock(DiscoverySession::class.java)
         val peerHandle = Mockito.mock(PeerHandle::class.java)
         val wifiAwareNetworkSpecifier = WifiAwareNetworkSpecifier.Builder(discoverySession,
                 peerHandle).build()
-        specifier.satisfiedBy(wifiAwareNetworkSpecifier)
+        specifier.canBeSatisfiedBy(wifiAwareNetworkSpecifier)
     }
 }
