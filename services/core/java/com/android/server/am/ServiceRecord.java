@@ -141,10 +141,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     // allow while-in-use permissions in foreground service or not.
     // while-in-use permissions in FGS started from background might be restricted.
     boolean mAllowWhileInUsePermissionInFgs;
-    // information string what/why service is denied while-in-use permissions when
-    // foreground service is started from background.
-    // TODO: remove this field after feature development is done
-    String mInfoDenyWhileInUsePermissionInFgs;
+
     // the most recent package that start/bind this service.
     String mRecentCallingPackage;
 

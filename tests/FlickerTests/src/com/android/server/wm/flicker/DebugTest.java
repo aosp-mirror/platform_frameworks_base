@@ -79,7 +79,8 @@ public class DebugTest {
      */
     @Test
     public void closeAppWithBackKey() {
-        CommonTransitions.closeAppWithBackKey(testApp, uiDevice).recordAllRuns().build().run();
+        CommonTransitions.closeAppWithBackKey(testApp, uiDevice, Surface.ROTATION_0)
+                .recordAllRuns().build().run();
     }
 
     /**
@@ -87,7 +88,8 @@ public class DebugTest {
      */
     @Test
     public void closeAppWithHomeKey() {
-        CommonTransitions.closeAppWithHomeKey(testApp, uiDevice).recordAllRuns().build().run();
+        CommonTransitions.closeAppWithHomeKey(testApp, uiDevice, Surface.ROTATION_0)
+                .recordAllRuns().build().run();
     }
 
     /**
@@ -105,9 +107,8 @@ public class DebugTest {
      */
     @Test
     public void splitScreenToLauncher() {
-        CommonTransitions.splitScreenToLauncher(testApp,
-                uiDevice).includeJankyRuns().recordAllRuns()
-                .build().run();
+        CommonTransitions.splitScreenToLauncher(testApp, uiDevice, Surface.ROTATION_0)
+                .includeJankyRuns().recordAllRuns().build().run();
     }
 
     /**

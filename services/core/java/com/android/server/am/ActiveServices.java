@@ -4918,52 +4918,6 @@ public final class ActiveServices {
         if (isDeviceOwner) {
             return true;
         }
-
-        r.mInfoDenyWhileInUsePermissionInFgs =
-                "Background FGS start while-in-use permission restriction [callingPackage: "
-                + callingPackage
-                + "; callingUid: " + callingUid
-                + "; intent: " + intent
-                + "]";
         return false;
-    }
-
-    // TODO: remove this toast after feature development is done
-    void showWhileInUseDebugToastLocked(int uid, int op, int mode) {
-        final UidRecord uidRec = mAm.mProcessList.getUidRecordLocked(uid);
-        if (uidRec == null) {
-            return;
-        }
-
-        for (int i = uidRec.procRecords.size() - 1; i >= 0; i--) {
-            ProcessRecord pr = uidRec.procRecords.valueAt(i);
-            if (pr.uid != uid) {
-                continue;
-            }
-            for (int j = pr.numberOfRunningServices() - 1; j >= 0; j--) {
-                ServiceRecord r = pr.getRunningServiceAt(j);
-                if (!r.isForeground) {
-                    continue;
-                }
-                if (mode == DEBUG_FGS_ALLOW_WHILE_IN_USE) {
-                    if (!r.mAllowWhileInUsePermissionInFgs
-                            && r.mInfoDenyWhileInUsePermissionInFgs != null) {
-                        final String msg = r.mInfoDenyWhileInUsePermissionInFgs
-                                + " affected while-in-use permission:"
-                                + AppOpsManager.opToPublicName(op);
-                        Slog.wtf(TAG, msg);
-                    }
-                } else if (mode == DEBUG_FGS_ENFORCE_TYPE) {
-                    final String msg =
-                            "FGS Missing foregroundServiceType in manifest file [callingPackage: "
-                            + r.mRecentCallingPackage
-                            + "; intent:" + r.intent.getIntent()
-                            + "] affected while-in-use permission:"
-                            + AppOpsManager.opToPublicName(op)
-                            + "; targetSdkVersion:" + r.appInfo.targetSdkVersion;
-                    Slog.wtf(TAG, msg);
-                }
-            }
-        }
     }
 }

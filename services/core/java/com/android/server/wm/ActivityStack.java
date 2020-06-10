@@ -1682,7 +1682,8 @@ class ActivityStack extends Task {
             // happens to be sitting towards the end.
             if (next.attachedToProcess()) {
                 next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* activityChange */, false /* updateOomAdj */);
+                        true /* activityChange */, false /* updateOomAdj */,
+                        false /* addPendingTopUid */);
             } else if (!next.isProcessRunning()) {
                 // Since the start-process is asynchronous, if we already know the process of next
                 // activity isn't running, we can start the process earlier to save the time to wait
@@ -1839,7 +1840,8 @@ class ActivityStack extends Task {
             next.setState(RESUMED, "resumeTopActivityInnerLocked");
 
             next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                    true /* activityChange */, true /* updateOomAdj */);
+                    true /* activityChange */, true /* updateOomAdj */,
+                    true /* addPendingTopUid */);
 
             // Have the window manager re-evaluate the orientation of
             // the screen based on the new activity order.

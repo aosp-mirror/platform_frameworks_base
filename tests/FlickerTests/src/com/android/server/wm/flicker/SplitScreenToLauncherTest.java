@@ -21,6 +21,8 @@ import static com.android.server.wm.flicker.WindowUtils.getDisplayBounds;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.exitSplitScreen;
 import static com.android.server.wm.flicker.helpers.AutomationUtils.isInSplitScreen;
 
+import android.view.Surface;
+
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.LargeTest;
@@ -52,7 +54,7 @@ public class SplitScreenToLauncherTest extends FlickerTestBase {
 
     @Override
     TransitionRunner getTransitionToRun() {
-        return splitScreenToLauncher(mTestApp, mUiDevice)
+        return splitScreenToLauncher(mTestApp, mUiDevice, Surface.ROTATION_0)
                 .includeJankyRuns().build();
     }
 

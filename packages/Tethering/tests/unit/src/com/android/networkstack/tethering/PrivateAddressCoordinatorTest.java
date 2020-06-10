@@ -127,10 +127,15 @@ public final class PrivateAddressCoordinatorTest {
         mPrivateAddressCoordinator.releaseDownstream(mHotspotIpServer);
     }
 
+    private int getBluetoothSubAddress() {
+        final byte[] rawAddress = mBluetoothPrefix.getRawAddress();
+        int bluetoothSubNet = rawAddress[2] & 0xff;
+        return (bluetoothSubNet << 8) + 0x5;
+    }
+
     @Test
     public void testReserveBluetoothPrefix() throws Exception {
-        final int fakeSubAddr = 0x2c05;
-        when(mPrivateAddressCoordinator.getRandomSubAddr()).thenReturn(fakeSubAddr);
+        when(mPrivateAddressCoordinator.getRandomSubAddr()).thenReturn(getBluetoothSubAddress());
         LinkAddress address = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(address);
@@ -146,7 +151,7 @@ public final class PrivateAddressCoordinatorTest {
         LinkAddress address = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(address);
-        assertEquals("Wrong wifi perfix: ", predefinedPrefix, hotspotPrefix);
+        assertEquals("Wrong wifi prefix: ", predefinedPrefix, hotspotPrefix);
         when(mHotspotIpServer.getAddress()).thenReturn(address);
 
         address = mPrivateAddressCoordinator.requestDownstreamAddress(
@@ -159,7 +164,7 @@ public final class PrivateAddressCoordinatorTest {
         address = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mUsbIpServer);
         final IpPrefix allowUseFreePrefix = PrefixUtils.asIpPrefix(address);
-        assertEquals("Fail to reselect available perfix: ", predefinedPrefix, allowUseFreePrefix);
+        assertEquals("Fail to reselect available prefix: ", predefinedPrefix, allowUseFreePrefix);
     }
 
     private LinkProperties buildUpstreamLinkProperties(boolean withIPv4, boolean withIPv6,
@@ -202,7 +207,7 @@ public final class PrivateAddressCoordinatorTest {
         final LinkAddress hotspotAddr = mPrivateAddressCoordinator.requestDownstreamAddress(
                 mHotspotIpServer);
         final IpPrefix hotspotPrefix = PrefixUtils.asIpPrefix(hotspotAddr);
-        assertEquals("Wrong wifi perfix: ", predefinedPrefix, hotspotPrefix);
+        assertEquals("Wrong wifi prefix: ", predefinedPrefix, hotspotPrefix);
         when(mHotspotIpServer.getAddress()).thenReturn(hotspotAddr);
         // 2. Update v6 only mobile network, hotspot prefix should not be removed.
         List<String> testConflicts;

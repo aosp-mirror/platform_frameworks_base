@@ -29,7 +29,12 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.DrawableWrapper;
+import android.os.RemoteException;
+import android.util.DisplayMetrics;
 import android.util.PathParser;
+import android.view.Display;
+import android.view.IWindowManager;
+import android.view.WindowManagerGlobal;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.VisibleForTesting;
@@ -56,6 +61,7 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
     private int mStrokeWidth;
     private Bitmap mBitmap;
     private int mType;
+    private float mDensity;
 
     public AdaptiveOutlineDrawable(Resources resources, Bitmap bitmap) {
         super(new AdaptiveIconShapeDrawable(resources));
@@ -77,6 +83,7 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
         mPath = new Path(PathParser.createPathFromPathData(
                 resources.getString(com.android.internal.R.string.config_icon_mask)));
         mStrokeWidth = resources.getDimensionPixelSize(R.dimen.adaptive_outline_stroke);
+        mDensity = resources.getDisplayMetrics().density;
         mOutlinePaint = new Paint();
         mOutlinePaint.setColor(getColor(resources, type));
         mOutlinePaint.setStyle(Paint.Style.STROKE);
@@ -130,13 +137,27 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
         if (mType == TYPE_DEFAULT) {
             canvas.drawPath(mPath, mOutlinePaint);
         } else {
-            canvas.drawCircle(2 * mInsetPx, 2 * mInsetPx, 2 * mInsetPx - mStrokeWidth,
+            final float defaultDensity = getDefaultDisplayDensity(Display.DEFAULT_DISPLAY)
+                    / (float) DisplayMetrics.DENSITY_DEFAULT;
+            final int insetPx =
+                    Math.round(mInsetPx / (float) (Math.floor(
+                            (mDensity / defaultDensity) * 100) / 100.0));
+            canvas.drawCircle(2 * insetPx, 2 * insetPx, 2 * insetPx - mStrokeWidth,
                     mOutlinePaint);
         }
         canvas.restoreToCount(count);
 
         // Draw the foreground icon
         canvas.drawBitmap(mBitmap, bounds.left + mInsetPx, bounds.top + mInsetPx, null);
+    }
+
+    private static int getDefaultDisplayDensity(int displayId) {
+        try {
+            final IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+            return wm.getInitialDisplayDensity(displayId);
+        } catch (RemoteException exc) {
+            return -1;
+        }
     }
 
     @Override
