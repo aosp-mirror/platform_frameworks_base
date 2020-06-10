@@ -206,7 +206,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final GeofenceManager mGeofenceManager;
 
-    @Nullable private GnssManagerService mGnssManagerService = null;
+    @Nullable private volatile GnssManagerService mGnssManagerService = null;
 
     private final PassiveLocationProviderManager mPassiveManager;
 
@@ -359,6 +359,10 @@ public class LocationManagerService extends ILocationManager.Stub {
             // prepare providers
             initializeProvidersLocked();
         }
+
+        // initialize gnss last because it has no awareness of boot phases and blindly assumes that
+        // all other location providers are loaded at initialization
+        initializeGnss();
     }
 
     private void onAppOpChanged(String packageName) {
@@ -580,16 +584,19 @@ public class LocationManagerService extends ILocationManager.Stub {
             }
             manager.setMockProvider(new MockProvider(properties));
         }
+    }
 
-        // initialize gnss last because it has no awareness of boot phases and blindly assumes that
-        // all other location providers are loaded at initialization
+    private void initializeGnss() {
+        // Do not hold mLock when calling GnssManagerService#isGnssSupported() which calls into HAL.
         if (GnssManagerService.isGnssSupported()) {
             mGnssManagerService = new GnssManagerService(mContext, mUserInfoHelper, mSettingsHelper,
                     mAppOpsHelper, mAppForegroundHelper, mLocationUsageLogger);
             mGnssManagerService.onSystemReady();
 
             LocationProviderManager gnssManager = new LocationProviderManager(GPS_PROVIDER);
-            mProviderManagers.add(gnssManager);
+            synchronized (mLock) {
+                mProviderManagers.add(gnssManager);
+            }
             gnssManager.setRealProvider(mGnssManagerService.getGnssLocationProvider());
 
             // bind to geofence proxy
