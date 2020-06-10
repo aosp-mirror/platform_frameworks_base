@@ -1690,6 +1690,14 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
+    void hideImeFromExpandedBubble() {
+        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+            // Hide the currently expanded bubble's IME if it's visible before switching to a new
+            // bubble.
+            mExpandedBubble.getExpandedView().hideImeIfVisible();
+        }
+    }
+
     private void beforeExpandedViewAnimation() {
         mIsExpansionAnimating = true;
         hideFlyoutImmediate();
@@ -2405,11 +2413,7 @@ public class BubbleStackView extends FrameLayout
             Log.d(TAG, "updateExpandedBubble()");
         }
 
-        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-            // Hide the currently expanded bubble's IME if it's visible before switching to a new
-            // bubble.
-            mExpandedBubble.getExpandedView().hideImeIfVisible();
-        }
+        hideImeFromExpandedBubble();
 
         mExpandedViewContainer.removeAllViews();
         if (mIsExpanded && mExpandedBubble != null
