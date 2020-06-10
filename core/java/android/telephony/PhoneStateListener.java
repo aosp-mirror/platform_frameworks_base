@@ -379,8 +379,6 @@ public class PhoneStateListener {
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
-     *
-     * @see #onEmergencyNumberListChanged
      */
     public static final int LISTEN_EMERGENCY_NUMBER_LIST                   = 0x01000000;
 
@@ -459,7 +457,7 @@ public class PhoneStateListener {
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @see #onRegistrationFailed()
+     * @see #onRegistrationFailed
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int LISTEN_REGISTRATION_FAILURE = 0x40000000;
@@ -470,7 +468,7 @@ public class PhoneStateListener {
      * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @see #onBarringInfoChanged()
+     * @see #onBarringInfoChanged
      */
     @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int LISTEN_BARRING_INFO = 0x80000000;
@@ -764,7 +762,8 @@ public class PhoneStateListener {
      *
      */
     @RequiresPermission((android.Manifest.permission.READ_PRECISE_PHONE_STATE))
-    public void onCallDisconnectCauseChanged(int disconnectCause, int preciseDisconnectCause) {
+    public void onCallDisconnectCauseChanged(@Annotation.DisconnectCauses int disconnectCause,
+            int preciseDisconnectCause) {
         // default implementation empty
     }
 
@@ -893,16 +892,16 @@ public class PhoneStateListener {
 
     /**
      * Callback invoked when the display info has changed on the registered subscription.
-     * <p> The {@link DisplayInfo} contains status information shown to the user based on
+     * <p> The {@link TelephonyDisplayInfo} contains status information shown to the user based on
      * carrier policy.
      *
      * Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
-     * @param displayInfo The display information.
+     * @param telephonyDisplayInfo The display information.
      */
     @RequiresPermission((android.Manifest.permission.READ_PHONE_STATE))
-    public void onDisplayInfoChanged(@NonNull DisplayInfo displayInfo) {
+    public void onDisplayInfoChanged(@NonNull TelephonyDisplayInfo telephonyDisplayInfo) {
         // default implementation empty
     }
 
@@ -1285,13 +1284,13 @@ public class PhoneStateListener {
                             () -> psl.onUserMobileDataStateChanged(enabled)));
         }
 
-        public void onDisplayInfoChanged(DisplayInfo displayInfo) {
+        public void onDisplayInfoChanged(TelephonyDisplayInfo telephonyDisplayInfo) {
             PhoneStateListener psl = mPhoneStateListenerWeakRef.get();
             if (psl == null) return;
 
             Binder.withCleanCallingIdentity(
                     () -> mExecutor.execute(
-                            () -> psl.onDisplayInfoChanged(displayInfo)));
+                            () -> psl.onDisplayInfoChanged(telephonyDisplayInfo)));
         }
 
         public void onOemHookRawEvent(byte[] rawData) {

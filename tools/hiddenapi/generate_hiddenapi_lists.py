@@ -18,10 +18,10 @@ Generate API lists for non-SDK API enforcement.
 """
 import argparse
 from collections import defaultdict
-import os
-import sys
-import re
 import functools
+import os
+import re
+import sys
 
 # Names of flags recognized by the `hiddenapi` tool.
 FLAG_WHITELIST = "whitelist"
@@ -30,6 +30,7 @@ FLAG_BLACKLIST = "blacklist"
 FLAG_GREYLIST_MAX_O = "greylist-max-o"
 FLAG_GREYLIST_MAX_P = "greylist-max-p"
 FLAG_GREYLIST_MAX_Q = "greylist-max-q"
+FLAG_GREYLIST_MAX_R = "greylist-max-r"
 FLAG_CORE_PLATFORM_API = "core-platform-api"
 FLAG_PUBLIC_API = "public-api"
 FLAG_SYSTEM_API = "system-api"
@@ -43,13 +44,14 @@ FLAGS_API_LIST = [
     FLAG_GREYLIST_MAX_O,
     FLAG_GREYLIST_MAX_P,
     FLAG_GREYLIST_MAX_Q,
+    FLAG_GREYLIST_MAX_R,
 ]
 ALL_FLAGS = FLAGS_API_LIST + [
     FLAG_CORE_PLATFORM_API,
     FLAG_PUBLIC_API,
     FLAG_SYSTEM_API,
     FLAG_TEST_API,
-    ]
+]
 
 FLAGS_API_LIST_SET = set(FLAGS_API_LIST)
 ALL_FLAGS_SET = set(ALL_FLAGS)

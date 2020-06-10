@@ -279,6 +279,7 @@ public final class CellIdentityCdma extends CellIdentity {
         mLongitude = in.readInt();
         mLatitude = in.readInt();
 
+        updateGlobalCellId();
         if (DBG) log(toString());
     }
 

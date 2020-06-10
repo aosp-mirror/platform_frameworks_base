@@ -22,16 +22,21 @@ import android.os.Parcelable
 data class HttpResponse(
     val requestUrl: String,
     val responseCode: Int,
-    val contentLength: Long,
-    val redirectUrl: String?
+    val content: String = "",
+    val redirectUrl: String? = null
 ) : Parcelable {
-    constructor(p: Parcel): this(p.readString(), p.readInt(), p.readLong(), p.readString())
+    constructor(p: Parcel): this(p.readString(), p.readInt(), p.readString(), p.readString())
+    constructor(requestUrl: String, contentBody: String): this(
+            requestUrl,
+            responseCode = 200,
+            content = contentBody,
+            redirectUrl = null)
 
     override fun writeToParcel(dest: Parcel, flags: Int) {
         with(dest) {
             writeString(requestUrl)
             writeInt(responseCode)
-            writeLong(contentLength)
+            writeString(content)
             writeString(redirectUrl)
         }
     }

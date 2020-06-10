@@ -35,22 +35,96 @@ filegroup {
 }
 
 // These are subset of framework-core-sources that are needed by the
-// android.test.mock library. Ideally, the library should use public APIs only,
-// but unfortunately its API signature has some references to these private APIs.
+// android.test.mock library. The implementation of android.test.mock references
+// private members of various components to allow mocking of classes that cannot
+// be mocked without access to those internal implementation details.
 filegroup {
     name: "framework-core-sources-for-test-mock",
     srcs: [
+        "core/java/android/accounts/AccountManagerCallback.java",
+        "core/java/android/accounts/AccountManagerFuture.java",
+        "core/java/android/accounts/AccountManager.java",
+        "core/java/android/accounts/AccountsException.java",
+        "core/java/android/accounts/AuthenticatorException.java",
+        "core/java/android/accounts/OperationCanceledException.java",
+        "core/java/android/annotation/AnimatorRes.java",
+        "core/java/android/annotation/AnimRes.java",
+        "core/java/android/annotation/AnyRes.java",
+        "core/java/android/annotation/ArrayRes.java",
+        "core/java/android/annotation/AttrRes.java",
+        "core/java/android/annotation/BoolRes.java",
+        "core/java/android/annotation/BroadcastBehavior.java",
+        "core/java/android/annotation/CallbackExecutor.java",
+        "core/java/android/annotation/CallSuper.java",
+        "core/java/android/annotation/CheckResult.java",
+        "core/java/android/annotation/ColorInt.java",
+        "core/java/android/annotation/ColorRes.java",
+        "core/java/android/annotation/DimenRes.java",
+        "core/java/android/annotation/DrawableRes.java",
+        "core/java/android/annotation/FontRes.java",
+        "core/java/android/annotation/FractionRes.java",
+        "core/java/android/annotation/IntDef.java",
+        "core/java/android/annotation/IntegerRes.java",
+        "core/java/android/annotation/IntRange.java",
+        "core/java/android/annotation/LayoutRes.java",
+        "core/java/android/annotation/NonNull.java",
+        "core/java/android/annotation/Nullable.java",
+        "core/java/android/annotation/PluralsRes.java",
+        "core/java/android/annotation/RawRes.java",
+        "core/java/android/annotation/RequiresPermission.java",
+        "core/java/android/annotation/SdkConstant.java",
+        "core/java/android/annotation/Size.java",
+        "core/java/android/annotation/StringDef.java",
+        "core/java/android/annotation/StringRes.java",
+        "core/java/android/annotation/StyleableRes.java",
+        "core/java/android/annotation/StyleRes.java",
+        "core/java/android/annotation/SuppressLint.java",
+        "core/java/android/annotation/SystemApi.java",
+        "core/java/android/annotation/SystemService.java",
+        "core/java/android/annotation/TestApi.java",
+        "core/java/android/annotation/UserIdInt.java",
+        "core/java/android/annotation/XmlRes.java",
+        "core/java/android/app/Application.java",
         "core/java/android/app/IApplicationThread.aidl",
         "core/java/android/app/IServiceConnection.aidl",
+        "core/java/android/app/PackageDeleteObserver.java",
+        "core/java/android/content/ComponentCallbacks2.java",
+        "core/java/android/content/ComponentCallbacks.java",
+        "core/java/android/content/ContentInterface.java",
+        "core/java/android/content/ContentProvider.java",
+        "core/java/android/content/ContentProviderNative.java",
+        "core/java/android/content/ContentResolver.java",
+        "core/java/android/content/Context.java",
+        "core/java/android/content/ContextWrapper.java",
+        "core/java/android/content/DialogInterface.java",
         "core/java/android/content/IContentProvider.java",
-        "core/java/android/content/pm/IPackageDataObserver.aidl",
+        "core/java/android/content/Intent.java",
+        "core/java/android/content/IntentSender.java",
+        "core/java/android/content/OperationApplicationException.java",
+        "core/java/android/content/pm/ActivityInfo.java",
+        "core/java/android/content/pm/ApplicationInfo.java",
         "core/java/android/content/pm/InstantAppInfo.java",
+        "core/java/android/content/pm/IPackageDataObserver.aidl",
         "core/java/android/content/pm/KeySet.java",
         "core/java/android/content/pm/PackageManager.java",
         "core/java/android/content/pm/VerifierDeviceIdentity.java",
         "core/java/android/content/res/Resources.java",
+        "core/java/android/database/CrossProcessCursor.java",
+        "core/java/android/database/CrossProcessCursorWrapper.java",
+        "core/java/android/database/Cursor.java",
+        "core/java/android/database/CursorWrapper.java",
+        "core/java/android/os/Binder.java",
+        "core/java/android/os/Bundle.java",
+        "core/java/android/os/IBinder.java",
+        "core/java/android/os/IInterface.java",
+        "core/java/android/os/Parcelable.java",
+        "core/java/android/os/ParcelFileDescriptor.java",
+        "core/java/android/os/RemoteException.java",
         "core/java/android/os/storage/VolumeInfo.java",
+        "core/java/android/util/AndroidException.java",
         "core/java/android/view/DisplayAdjustments.java",
+        "core/java/android/view/ViewDebug.java",
+        "core/java/com/android/internal/annotations/VisibleForTesting.java",
     ],
     path: "core/java",
     visibility: ["//frameworks/base/test-mock"],
@@ -298,7 +372,7 @@ java_library {
     name: "framework-updatable-stubs-module_libs_api",
     static_libs: [
         "framework-sdkextensions-stubs-module_libs_api",
-        "framework-tethering-stubs-module_libs_api",
+        "framework-tethering.stubs.module_lib",
         "updatable_media_stubs",
     ],
     sdk_version: "module_current",
@@ -608,12 +682,12 @@ filegroup {
 java_library {
     name: "framework-annotations-lib",
     srcs: [ ":framework-annotations" ],
-    sdk_version: "current",
+    sdk_version: "core_current",
 }
 
 filegroup {
     name: "framework-ike-shared-srcs",
-    visibility: ["//frameworks/opt/net/ike"],
+    visibility: ["//packages/modules/IPsec"],
     srcs: [
         "core/java/android/annotation/StringDef.java",
         "core/java/android/net/annotations/PolicyDirection.java",
@@ -647,15 +721,32 @@ filegroup {
     ],
 }
 
+// utility classes statically linked into framework-wifi and dynamically linked
+// into wifi-service
+java_library {
+    name: "framework-wifi-util-lib",
+    sdk_version: "module_current",
+    srcs: [
+        "core/java/android/net/shared/Inet4AddressUtils.java",
+        "core/java/com/android/internal/util/Preconditions.java",
+    ],
+    libs: [
+        "framework-annotations-lib",
+        "unsupportedappusage",
+    ],
+    visibility: [
+        "//frameworks/base/wifi",
+        "//frameworks/base/services/net",
+    ],
+}
+
 filegroup {
     name: "framework-services-net-module-wifi-shared-srcs",
     srcs: [
         "core/java/android/net/DhcpResults.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
         "core/java/android/net/shared/InetAddressUtils.java",
         "core/java/android/net/util/IpUtils.java",
         "core/java/android/util/LocalLog.java",
-        "core/java/com/android/internal/util/Preconditions.java",
     ],
 }
 
@@ -667,7 +758,6 @@ filegroup {
         "core/java/com/android/internal/util/IndentingPrintWriter.java",
         "core/java/com/android/internal/util/IState.java",
         "core/java/com/android/internal/util/MessageUtils.java",
-        "core/java/com/android/internal/util/Preconditions.java",
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
@@ -723,7 +813,7 @@ java_library {
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
     ],
-    sdk_version: "current",
+    sdk_version: "9",
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
@@ -746,6 +836,7 @@ java_library {
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
     ],
+    sdk_version: "core_current",
     // Protos have lots of MissingOverride and similar.
     errorprone: {
         javacflags: ["-XepDisableAllChecks"],
@@ -855,6 +946,7 @@ filegroup {
 
 aidl_interface {
     name: "libincremental_aidl",
+    unstable: true,
     srcs: [
         ":incremental_aidl",
     ],
@@ -1040,6 +1132,7 @@ metalava_framework_docs_args = "--manifest $(location core/res/AndroidManifest.x
     "--hide MissingPermission --hide BroadcastBehavior " +
     "--hide HiddenSuperclass --hide DeprecationMismatch --hide UnavailableSymbol " +
     "--hide SdkConstant --hide HiddenTypeParameter --hide Todo --hide Typo " +
+    "--error NoSettingsProvider " +
     "--force-convert-to-warning-nullability-annotations +*:-android.*:+android.icu.*:-dalvik.* " +
     "--api-lint-ignore-prefix android.icu. " +
     "--api-lint-ignore-prefix java. " +

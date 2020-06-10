@@ -342,6 +342,8 @@ AndroidRuntime::~AndroidRuntime()
 }
 
 void AndroidRuntime::setArgv0(const char* argv0, bool setProcName) {
+    // Set the kernel's task name, for as much of the name as we can fit.
+    // The kernel's TASK_COMM_LEN minus one for the terminating NUL == 15.
     if (setProcName) {
         int len = strlen(argv0);
         if (len < 15) {
@@ -350,8 +352,14 @@ void AndroidRuntime::setArgv0(const char* argv0, bool setProcName) {
             pthread_setname_np(pthread_self(), argv0 + len - 15);
         }
     }
+
+    // Directly change the memory pointed to by argv[0].
     memset(mArgBlockStart, 0, mArgBlockLength);
     strlcpy(mArgBlockStart, argv0, mArgBlockLength);
+
+    // Let bionic know that we just did that, because __progname points
+    // into argv[0] (https://issuetracker.google.com/152893281).
+    setprogname(mArgBlockStart);
 }
 
 status_t AndroidRuntime::callMain(const String8& className, jclass clazz,
@@ -685,6 +693,7 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     char dex2oatImageFlagsBuf[PROPERTY_VALUE_MAX];
     char extraOptsBuf[PROPERTY_VALUE_MAX];
     char voldDecryptBuf[PROPERTY_VALUE_MAX];
+    char perfettoHprofOptBuf[sizeof("-XX:PerfettoHprof=") + PROPERTY_VALUE_MAX];
     enum {
       kEMDefault,
       kEMIntPortable,
@@ -798,6 +807,16 @@ int AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, bool zygote, bool p
     //addOption("-verbose:jni");
     addOption("-verbose:gc");
     //addOption("-verbose:class");
+
+    // On Android, we always want to allow loading the PerfettoHprof plugin.
+    // Even with this option set, we will still only actually load the plugin
+    // if we are on a userdebug build or the app is debuggable or profileable.
+    // This is enforced in art/runtime/runtime.cc.
+    //
+    // We want to be able to disable this, because this does not work on host,
+    // and we do not want to enable it in tests.
+    parseRuntimeOption("dalvik.vm.perfetto_hprof", perfettoHprofOptBuf, "-XX:PerfettoHprof=",
+                       "true");
 
     if (primary_zygote) {
         addOption("-Xprimaryzygote");

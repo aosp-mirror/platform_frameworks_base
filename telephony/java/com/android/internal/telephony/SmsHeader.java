@@ -23,6 +23,8 @@ import com.android.internal.util.HexDump;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Objects;
 
 /**
  * SMS user data header, as specified in TS 23.040 9.2.3.24.
@@ -71,6 +73,25 @@ public class SmsHeader {
     public static final int PORT_WAP_PUSH = 2948;
     public static final int PORT_WAP_WSP  = 9200;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SmsHeader smsHeader = (SmsHeader) o;
+        return languageTable == smsHeader.languageTable
+                && languageShiftTable == smsHeader.languageShiftTable
+                && Objects.equals(portAddrs, smsHeader.portAddrs)
+                && Objects.equals(concatRef, smsHeader.concatRef)
+                && Objects.equals(specialSmsMsgList, smsHeader.specialSmsMsgList)
+                && Objects.equals(miscEltList, smsHeader.miscEltList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(portAddrs, concatRef, specialSmsMsgList, miscEltList, languageTable,
+                languageShiftTable);
+    }
+
     public static class PortAddrs {
         @UnsupportedAppUsage
         public PortAddrs() {
@@ -81,6 +102,21 @@ public class SmsHeader {
         @UnsupportedAppUsage
         public int origPort;
         public boolean areEightBits;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            PortAddrs portAddrs = (PortAddrs) o;
+            return destPort == portAddrs.destPort
+                    && origPort == portAddrs.origPort
+                    && areEightBits == portAddrs.areEightBits;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(destPort, origPort, areEightBits);
+        }
     }
 
     public static class ConcatRef {
@@ -95,11 +131,41 @@ public class SmsHeader {
         @UnsupportedAppUsage
         public int msgCount;
         public boolean isEightBits;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ConcatRef concatRef = (ConcatRef) o;
+            return refNumber == concatRef.refNumber
+                    && seqNumber == concatRef.seqNumber
+                    && msgCount == concatRef.msgCount
+                    && isEightBits == concatRef.isEightBits;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(refNumber, seqNumber, msgCount, isEightBits);
+        }
     }
 
     public static class SpecialSmsMsg {
         public int msgIndType;
         public int msgCount;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SpecialSmsMsg that = (SpecialSmsMsg) o;
+            return msgIndType == that.msgIndType
+                    && msgCount == that.msgCount;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(msgIndType, msgCount);
+        }
     }
 
     /**
@@ -109,6 +175,22 @@ public class SmsHeader {
     public static class MiscElt {
         public int id;
         public byte[] data;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MiscElt miscElt = (MiscElt) o;
+            return id == miscElt.id
+                    && Arrays.equals(data, miscElt.data);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = Objects.hash(id);
+            result = 31 * result + Arrays.hashCode(data);
+            return result;
+        }
     }
 
     @UnsupportedAppUsage

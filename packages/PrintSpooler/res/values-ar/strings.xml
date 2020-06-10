@@ -53,7 +53,7 @@
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"تم إظهار مربع البحث"</string>
     <string name="print_search_box_hidden_utterance" msgid="5727755169343113351">"تم إخفاء مربع البحث"</string>
     <string name="print_add_printer" msgid="1088656468360653455">"إضافة طابعة"</string>
-    <string name="print_select_printer" msgid="7388760939873368698">"اختيار الطابعة"</string>
+    <string name="print_select_printer" msgid="7388760939873368698">"حدد الطابعة"</string>
     <string name="print_forget_printer" msgid="5035287497291910766">"تجاهل الطابعة"</string>
     <plurals name="print_search_result_count_utterance" formatted="false" msgid="6997663738361080868">
       <item quantity="zero">لم يتم العثور على أي طابعة (<xliff:g id="COUNT_1">%1$s</xliff:g>)</item>
@@ -75,7 +75,7 @@
     <string name="cannot_add_printer" msgid="7840348733668023106">"تعذرت إضافة طابعات"</string>
     <string name="select_to_add_printers" msgid="3800709038689830974">"اختر لإضافة طابعة"</string>
     <string name="enable_print_service" msgid="3482815747043533842">"حدد للتمكين"</string>
-    <string name="enabled_services_title" msgid="7036986099096582296">"الخدمات المفعّلة"</string>
+    <string name="enabled_services_title" msgid="7036986099096582296">"الخدمات الممكنة"</string>
     <string name="recommended_services_title" msgid="3799434882937956924">"الخدمات الموصى بها"</string>
     <string name="disabled_services_title" msgid="7313253167968363211">"الخدمات غير المفعّلة"</string>
     <string name="all_services_title" msgid="5578662754874906455">"جميع الخدمات"</string>

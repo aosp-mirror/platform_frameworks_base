@@ -16,6 +16,8 @@
 
 package android.widget;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.InterpolatorRes;
 import android.annotation.NonNull;
@@ -245,6 +247,8 @@ public class ProgressBar extends View {
     private final ArrayList<RefreshData> mRefreshData = new ArrayList<RefreshData>();
 
     private AccessibilityEventSender mAccessibilityEventSender;
+
+    private ObjectAnimator mLastProgressAnimator;
 
     /**
      * Create a new progress bar with range 0...100 and initial progress of 0.
@@ -1544,8 +1548,19 @@ public class ProgressBar extends View {
             animator.setAutoCancel(true);
             animator.setDuration(PROGRESS_ANIM_DURATION);
             animator.setInterpolator(PROGRESS_ANIM_INTERPOLATOR);
+            animator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mLastProgressAnimator = null;
+                }
+            });
             animator.start();
+            mLastProgressAnimator = animator;
         } else {
+            if (isPrimary && mLastProgressAnimator != null) {
+                mLastProgressAnimator.cancel();
+                mLastProgressAnimator = null;
+            }
             setVisualProgress(id, scale);
         }
 

@@ -1,0 +1,38 @@
+// Copyright (C) 2011 The Android Open Source Project
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+prebuilt_font {
+    name: "DroidSansMono.ttf",
+    src: "DroidSansMono.ttf",
+    required: [
+        // Roboto-Regular.ttf provides DroidSans.ttf as a symlink to itself
+        "Roboto-Regular.ttf",
+        // Roboto-Bold.ttf provides DroidSans-Bold.ttf as a symlink to itself
+        "Roboto-Bold.ttf",
+    ],
+}
+
+prebuilt_font {
+    name: "AndroidClock.ttf",
+    src: "AndroidClock.ttf",
+}
+
+/////////////////////////////////
+// Copies the font configuration file into system/etc for the product as fonts.xml.
+// Additional fonts should be installed to /product/fonts/ alongside a corresponding
+// fonts_customiztion.xml in /product/etc/
+prebuilt_etc {
+    name: "fonts.xml",
+    src: "fonts.xml",
+}

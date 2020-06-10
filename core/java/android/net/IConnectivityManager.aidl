@@ -18,6 +18,7 @@ package android.net;
 
 import android.app.PendingIntent;
 import android.net.ConnectionInfo;
+import android.net.ConnectivityDiagnosticsManager;
 import android.net.IConnectivityDiagnosticsCallback;
 import android.net.LinkProperties;
 import android.net.Network;
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.Messenger;
 import android.os.ParcelFileDescriptor;
+import android.os.PersistableBundle;
 import android.os.ResultReceiver;
 
 import com.android.internal.net.LegacyVpnInfo;
@@ -77,7 +79,8 @@ interface IConnectivityManager
     NetworkQuotaInfo getActiveNetworkQuotaInfo();
     boolean isActiveNetworkMetered();
 
-    boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress);
+    boolean requestRouteToHostAddress(int networkType, in byte[] hostAddress,
+            String callingPackageName, String callingAttributionTag);
 
     @UnsupportedAppUsage(maxTargetSdk = 29,
             publicAlternatives = "Use {@code TetheringManager#getLastTetherError} as alternative")
@@ -168,10 +171,10 @@ interface IConnectivityManager
 
     NetworkRequest requestNetwork(in NetworkCapabilities networkCapabilities,
             in Messenger messenger, int timeoutSec, in IBinder binder, int legacy,
-            String callingPackageName);
+            String callingPackageName, String callingAttributionTag);
 
     NetworkRequest pendingRequestForNetwork(in NetworkCapabilities networkCapabilities,
-            in PendingIntent operation, String callingPackageName);
+            in PendingIntent operation, String callingPackageName, String callingAttributionTag);
 
     void releasePendingNetworkRequest(in PendingIntent operation);
 
@@ -227,4 +230,7 @@ interface IConnectivityManager
     void unregisterConnectivityDiagnosticsCallback(in IConnectivityDiagnosticsCallback callback);
 
     IBinder startOrGetTestNetworkService();
+
+    void simulateDataStall(int detectionMethod, long timestampMillis, in Network network,
+                in PersistableBundle extras);
 }

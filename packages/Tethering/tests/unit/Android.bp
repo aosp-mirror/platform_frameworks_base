@@ -14,6 +14,26 @@
 // limitations under the License.
 //
 
+// Tests in this folder are included both in unit tests and CTS.
+java_library {
+    name: "TetheringCommonTests",
+    srcs: [
+        "common/**/*.java",
+        "common/**/*.kt"
+    ],
+    static_libs: [
+        "androidx.test.rules",
+        "net-tests-utils",
+    ],
+    // TODO(b/147200698) change sdk_version to module-current and remove framework-minus-apex
+    sdk_version: "core_platform",
+    libs: [
+        "framework-minus-apex",
+        "framework-tethering.impl",
+    ],
+    visibility: ["//cts/tests/tests/tethering"],
+}
+
 java_defaults {
     name: "TetheringTestsDefaults",
     srcs: [
@@ -22,6 +42,7 @@ java_defaults {
     ],
     static_libs: [
         "TetheringApiCurrentLib",
+        "TetheringCommonTests",
         "androidx.test.rules",
         "frameworks-base-testutils",
         "mockito-target-extended-minus-junit4",
@@ -38,7 +59,7 @@ java_defaults {
         "ext",
         "framework-minus-apex",
         "framework-res",
-        "framework-tethering",
+        "framework-tethering.impl",
     ],
     jni_libs: [
         // For mockito extended
@@ -61,7 +82,7 @@ android_library {
 
 android_test {
     name: "TetheringTests",
-    certificate: "platform",
+    platform_apis: true,
     test_suites: [
         "device-tests",
         "mts",

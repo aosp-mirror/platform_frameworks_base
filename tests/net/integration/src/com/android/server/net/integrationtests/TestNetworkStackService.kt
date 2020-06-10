@@ -33,9 +33,11 @@ import com.android.server.net.integrationtests.NetworkStackInstrumentationServic
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
+import java.io.ByteArrayInputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLConnection
+import java.nio.charset.StandardCharsets
 
 private const val TEST_NETID = 42
 
@@ -52,7 +54,7 @@ class TestNetworkStackService : Service() {
         doReturn(mock(IBinder::class.java)).`when`(it).getSystemService(Context.NETD_SERVICE)
     }
 
-    private class TestPermissionChecker : NetworkStackConnector.PermissionChecker() {
+    private class TestPermissionChecker : NetworkStackService.PermissionChecker() {
         override fun enforceNetworkStackCallingPermission() = Unit
     }
 
@@ -62,8 +64,8 @@ class TestNetworkStackService : Service() {
         override fun sendNetworkConditionsBroadcast(context: Context, broadcast: Intent) = Unit
     }
 
-    private inner class TestNetworkStackConnector(context: Context) :
-            NetworkStackConnector(context, TestPermissionChecker()) {
+    private inner class TestNetworkStackConnector(context: Context) : NetworkStackConnector(
+            context, TestPermissionChecker(), NetworkStackService.Dependencies()) {
 
         private val network = Network(TEST_NETID)
         private val privateDnsBypassNetwork = TestNetwork(TEST_NETID)
@@ -71,11 +73,13 @@ class TestNetworkStackService : Service() {
         private inner class TestNetwork(netId: Int) : Network(netId) {
             override fun openConnection(url: URL): URLConnection {
                 val response = InstrumentationConnector.processRequest(url)
+                val responseBytes = response.content.toByteArray(StandardCharsets.UTF_8)
 
                 val connection = mock(HttpURLConnection::class.java)
                 doReturn(response.responseCode).`when`(connection).responseCode
-                doReturn(response.contentLength).`when`(connection).contentLengthLong
+                doReturn(responseBytes.size.toLong()).`when`(connection).contentLengthLong
                 doReturn(response.redirectUrl).`when`(connection).getHeaderField("location")
+                doReturn(ByteArrayInputStream(responseBytes)).`when`(connection).inputStream
                 return connection
             }
         }

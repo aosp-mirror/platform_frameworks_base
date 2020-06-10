@@ -1,0 +1,15 @@
+// Baseline format: 1.0
+IntentBuilderName: android.test.mock.MockContext#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
+    Methods creating an Intent should be named `create<Foo>Intent()`, was `registerReceiverForAllUsers`
+
+
+MissingNullability: android.test.mock.MockContext#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler):
+    Missing nullability on method `registerReceiverForAllUsers` return
+MissingNullability: android.test.mock.MockContext#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler) parameter #0:
+    Missing nullability on parameter `receiver` in method `registerReceiverForAllUsers`
+MissingNullability: android.test.mock.MockContext#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler) parameter #1:
+    Missing nullability on parameter `filter` in method `registerReceiverForAllUsers`
+MissingNullability: android.test.mock.MockContext#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler) parameter #2:
+    Missing nullability on parameter `broadcastPermission` in method `registerReceiverForAllUsers`
+MissingNullability: android.test.mock.MockContext#registerReceiverForAllUsers(android.content.BroadcastReceiver, android.content.IntentFilter, String, android.os.Handler) parameter #3:
+    Missing nullability on parameter `scheduler` in method `registerReceiverForAllUsers`

@@ -74,6 +74,7 @@ public abstract class Conference extends Conferenceable {
         public void onConnectionEvent(Conference c, String event, Bundle extras) {}
         public void onCallerDisplayNameChanged(
                 Conference c, String callerDisplayName, int presentation) {}
+        public void onCallDirectionChanged(Conference c, int callDirection) {}
         public void onRingbackRequested(Conference c, boolean ringback) {}
     }
 
@@ -103,7 +104,9 @@ public abstract class Conference extends Conferenceable {
     private int mAddressPresentation;
     private String mCallerDisplayName;
     private int mCallerDisplayNamePresentation;
+    private int mCallDirection;
     private boolean mRingbackRequested = false;
+    private boolean mIsMultiparty = true;
 
     private final Connection.Listener mConnectionDeathListener = new Connection.Listener() {
         @Override
@@ -996,8 +999,8 @@ public abstract class Conference extends Conferenceable {
     public void onExtrasChanged(Bundle extras) {}
 
     /**
-     * Set whether Telecom should treat this {@link Conference} as a conference call or if it
-     * should treat it as a single-party call.
+     * Set whether Telecom should treat this {@link Conference} as a multiparty conference call or
+     * if it should treat it as a single-party call.
      * This method is used as part of a workaround regarding IMS conference calls and user
      * expectation.  In IMS, once a conference is formed, the UE is connected to an IMS conference
      * server.  If all participants of the conference drop out of the conference except for one, the
@@ -1018,9 +1021,43 @@ public abstract class Conference extends Conferenceable {
     @TestApi
     @RequiresPermission(MODIFY_PHONE_STATE)
     public void setConferenceState(boolean isConference) {
+        mIsMultiparty = isConference;
         for (Listener l : mListeners) {
             l.onConferenceStateChanged(this, isConference);
         }
+    }
+
+    /**
+     * Sets the call direction of this {@link Conference}. By default, all {@link Conference}s have
+     * a direction of {@link android.telecom.Call.Details.CallDirection#DIRECTION_UNKNOWN}. The
+     * direction of a {@link Conference} is only applicable to the case where
+     * {@link #setConferenceState(boolean)} has been set to {@code false}, otherwise the direction
+     * will be ignored.
+     * @param callDirection The direction of the conference.
+     * @hide
+     */
+    @RequiresPermission(MODIFY_PHONE_STATE)
+    public final void setCallDirection(@Call.Details.CallDirection int callDirection) {
+        Log.d(this, "setDirection %d", callDirection);
+        mCallDirection = callDirection;
+        for (Listener l : mListeners) {
+            l.onCallDirectionChanged(this, callDirection);
+        }
+    }
+
+    /**
+     * Determines if the {@link Conference} is considered "multiparty" or not.  By default all
+     * conferences are considered multiparty.  A multiparty conference is one where there are
+     * multiple conference participants (other than the host) in the conference.
+     * This is tied to {@link #setConferenceState(boolean)}, which is used for some use cases to
+     * have a conference appear as if it is a standalone call, in which case the conference will
+     * no longer be multiparty.
+     * @return {@code true} if conference is treated as a conference (i.e. it is multiparty),
+     * {@code false} if it should emulate a standalone call (i.e. not multiparty).
+     * @hide
+     */
+    public boolean isMultiparty() {
+        return mIsMultiparty;
     }
 
     /**
@@ -1071,16 +1108,16 @@ public abstract class Conference extends Conferenceable {
      * This is applicable in two cases:
      * <ol>
      *     <li>When {@link #setConferenceState(boolean)} is used to mark a conference as
-     *     temporarily "not a conference"; we need to present the correct address in the in-call
-     *     UI.</li>
+     *     temporarily "not a conference"; we need to present the correct address presentation in
+     *     the in-call UI.</li>
      *     <li>When the conference is not hosted on the current device, we need to know the address
-     *     information for the purpose of showing the original address to the user, as well as for
-     *     logging to the call log.</li>
+     *     presentation information for the purpose of showing the original address to the user, as
+     *     well as for logging to the call log.</li>
      * </ol>
-     * @return The address of the conference, or {@code null} if not applicable.
+     * @return The address presentation of the conference.
      * @hide
      */
-    public final int getAddressPresentation() {
+    public final @TelecomManager.Presentation int getAddressPresentation() {
         return mAddressPresentation;
     }
 
@@ -1099,6 +1136,15 @@ public abstract class Conference extends Conferenceable {
      */
     public final int getCallerDisplayNamePresentation() {
         return mCallerDisplayNamePresentation;
+    }
+
+    /**
+     * @return The call direction of this conference. Only applicable when
+     * {@link #setConferenceState(boolean)} is set to false.
+     * @hide
+     */
+    public final @Call.Details.CallDirection int getCallDirection() {
+        return mCallDirection;
     }
 
     /**

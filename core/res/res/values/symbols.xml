@@ -312,6 +312,7 @@
   <java-symbol type="bool" name="config_mobile_data_capable" />
   <java-symbol type="bool" name="config_suspendWhenScreenOffDueToProximity" />
   <java-symbol type="bool" name="config_swipeDisambiguation" />
+  <java-symbol type="bool" name="config_systemUserPackagesBlacklistSupported" />
   <java-symbol type="bool" name="config_syncstorageengine_masterSyncAutomatically" />
   <java-symbol type="bool" name="config_ui_enableFadingMarquee" />
   <java-symbol type="bool" name="config_enableHapticTextHandle" />
@@ -745,7 +746,6 @@
   <java-symbol type="string" name="config_ethernet_iface_regex" />
   <java-symbol type="array" name="config_ethernet_interfaces" />
   <java-symbol type="array" name="config_wakeonlan_supported_interfaces" />
-  <java-symbol type="string" name="cellbroadcast_default_package" />
   <java-symbol type="string" name="config_forceVoiceInteractionServicePackage" />
   <java-symbol type="string" name="config_mms_user_agent" />
   <java-symbol type="string" name="config_mms_user_agent_profile_url" />
@@ -1546,6 +1546,7 @@
   <java-symbol type="layout" name="select_dialog" />
   <java-symbol type="layout" name="simple_dropdown_hint" />
   <java-symbol type="layout" name="status_bar_latest_event_content" />
+  <java-symbol type="layout" name="system_user_home" />
   <java-symbol type="layout" name="text_edit_action_popup_text" />
   <java-symbol type="layout" name="text_drag_thumbnail" />
   <java-symbol type="layout" name="typing_filter" />
@@ -3168,7 +3169,7 @@
   <java-symbol type="string" name="global_action_emergency" />
   <java-symbol type="string" name="config_emergency_call_number" />
   <java-symbol type="string" name="config_emergency_dialer_package" />
-  <java-symbol type="array" name="config_emergency_mcc_codes" />
+  <java-symbol type="array" name="config_emergency_iso_country_codes" />
 
   <java-symbol type="string" name="config_dozeDoubleTapSensorType" />
   <java-symbol type="string" name="config_dozeTapSensorType" />
@@ -3702,6 +3703,8 @@
 
   <java-symbol type="bool" name="config_maskMainBuiltInDisplayCutout" />
 
+  <java-symbol type="string" name="config_customCountryDetector" />
+
   <!-- For Foldables -->
   <java-symbol type="bool" name="config_lidControlsDisplayFold" />
   <java-symbol type="string" name="config_foldedArea" />
@@ -3826,6 +3829,7 @@
   <java-symbol type="drawable" name="iconfactory_adaptive_icon_drawable_wrapper"/>
   <java-symbol type="dimen" name="notification_min_height" />
   <java-symbol type="dimen" name="resolver_icon_size"/>
+  <java-symbol type="dimen" name="resolver_grid_icon_size"/>
   <java-symbol type="dimen" name="resolver_badge_size"/>
   <java-symbol type="dimen" name="resolver_button_bar_spacing"/>
   <java-symbol type="dimen" name="resolver_icon_margin"/>
@@ -3871,4 +3875,13 @@
 
   <java-symbol type="bool" name="config_automotiveHideNavBarForKeyboard" />
   <java-symbol type="bool" name="reset_geo_fencing_check_after_boot_or_apm" />
+  <java-symbol type="bool" name="config_enableAutoSuspend" />
+
+  <!-- For Pdn throttle feature -->
+  <java-symbol type="bool" name="config_pdp_reject_enable_retry" />
+  <java-symbol type="integer" name="config_pdp_reject_retry_delay_ms" />
+  <java-symbol type="string" name="config_pdp_reject_dialog_title" />
+  <java-symbol type="string" name="config_pdp_reject_user_authentication_failed" />
+  <java-symbol type="string" name="config_pdp_reject_service_not_subscribed" />
+  <java-symbol type="string" name="config_pdp_reject_multi_conn_to_same_pdn_not_allowed" />
 </resources>

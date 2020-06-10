@@ -4742,7 +4742,7 @@
              May be a string value, which is a comma-separated language tag list, such as "ja-JP,zh-CN".
              When not specified or an empty string is given, it will fallback to the default one.
              {@see android.os.LocaleList#forLanguageTags(String)}
-             {@see android.text.TextView#setTextLocales(android.os.LocaleList)} -->
+             {@see android.widget.TextView#setTextLocales(android.os.LocaleList)} -->
         <attr name="textLocale" format="string" />
         <!-- Text color for links. -->
         <attr name="textColorLink" />

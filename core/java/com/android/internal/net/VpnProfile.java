@@ -136,13 +136,19 @@ public final class VpnProfile implements Cloneable, Parcelable {
     public boolean isMetered = false;                            // 21
     public int maxMtu = PlatformVpnProfile.MAX_MTU_DEFAULT;      // 22
     public boolean areAuthParamsInline = false;                  // 23
+    public final boolean isRestrictedToTestNetworks;             // 24
 
     // Helper fields.
     @UnsupportedAppUsage
     public transient boolean saveLogin = false;
 
     public VpnProfile(String key) {
+        this(key, false);
+    }
+
+    public VpnProfile(String key, boolean isRestrictedToTestNetworks) {
         this.key = key;
+        this.isRestrictedToTestNetworks = isRestrictedToTestNetworks;
     }
 
     @UnsupportedAppUsage
@@ -171,6 +177,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         isMetered = in.readBoolean();
         maxMtu = in.readInt();
         areAuthParamsInline = in.readBoolean();
+        isRestrictedToTestNetworks = in.readBoolean();
     }
 
     /**
@@ -220,6 +227,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         out.writeBoolean(isMetered);
         out.writeInt(maxMtu);
         out.writeBoolean(areAuthParamsInline);
+        out.writeBoolean(isRestrictedToTestNetworks);
     }
 
     /**
@@ -237,12 +245,21 @@ public final class VpnProfile implements Cloneable, Parcelable {
             String[] values = new String(value, StandardCharsets.UTF_8).split(VALUE_DELIMITER, -1);
             // Acceptable numbers of values are:
             // 14-19: Standard profile, with option for serverCert, proxy
-            // 24: Standard profile with serverCert, proxy and platform-VPN parameters.
-            if ((values.length < 14 || values.length > 19) && values.length != 24) {
+            // 24: Standard profile with serverCert, proxy and platform-VPN parameters
+            // 25: Standard profile with platform-VPN parameters and isRestrictedToTestNetworks
+            if ((values.length < 14 || values.length > 19)
+                    && values.length != 24 && values.length != 25) {
                 return null;
             }
 
-            VpnProfile profile = new VpnProfile(key);
+            final boolean isRestrictedToTestNetworks;
+            if (values.length >= 25) {
+                isRestrictedToTestNetworks = Boolean.parseBoolean(values[24]);
+            } else {
+                isRestrictedToTestNetworks = false;
+            }
+
+            VpnProfile profile = new VpnProfile(key, isRestrictedToTestNetworks);
             profile.name = values[0];
             profile.type = Integer.parseInt(values[1]);
             if (profile.type < 0 || profile.type > TYPE_MAX) {
@@ -282,6 +299,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 profile.maxMtu = Integer.parseInt(values[22]);
                 profile.areAuthParamsInline = Boolean.parseBoolean(values[23]);
             }
+
+            // isRestrictedToTestNetworks (values[24]) assigned as part of the constructor
 
             profile.saveLogin = !profile.username.isEmpty() || !profile.password.isEmpty();
             return profile;
@@ -330,6 +349,7 @@ public final class VpnProfile implements Cloneable, Parcelable {
         builder.append(VALUE_DELIMITER).append(isMetered);
         builder.append(VALUE_DELIMITER).append(maxMtu);
         builder.append(VALUE_DELIMITER).append(areAuthParamsInline);
+        builder.append(VALUE_DELIMITER).append(isRestrictedToTestNetworks);
 
         return builder.toString().getBytes(StandardCharsets.UTF_8);
     }
@@ -421,7 +441,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
         return Objects.hash(
             key, type, server, username, password, dnsServers, searchDomains, routes, mppe,
             l2tpSecret, ipsecIdentifier, ipsecSecret, ipsecUserCert, ipsecCaCert, ipsecServerCert,
-            proxy, mAllowedAlgorithms, isBypassable, isMetered, maxMtu, areAuthParamsInline);
+            proxy, mAllowedAlgorithms, isBypassable, isMetered, maxMtu, areAuthParamsInline,
+            isRestrictedToTestNetworks);
     }
 
     /** Checks VPN profiles for interior equality. */
@@ -453,7 +474,8 @@ public final class VpnProfile implements Cloneable, Parcelable {
                 && isBypassable == other.isBypassable
                 && isMetered == other.isMetered
                 && maxMtu == other.maxMtu
-                && areAuthParamsInline == other.areAuthParamsInline;
+                && areAuthParamsInline == other.areAuthParamsInline
+                && isRestrictedToTestNetworks == other.isRestrictedToTestNetworks;
     }
 
     @NonNull

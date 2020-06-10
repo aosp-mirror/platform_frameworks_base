@@ -76,7 +76,7 @@ import java.util.concurrent.TimeoutException;
 public class EthernetTetheringTest {
 
     private static final String TAG = EthernetTetheringTest.class.getSimpleName();
-    private static final int TIMEOUT_MS = 1000;
+    private static final int TIMEOUT_MS = 5000;
     private static final int PACKET_READ_TIMEOUT_MS = 100;
     private static final int DHCP_DISCOVER_ATTEMPTS = 10;
     private static final byte[] DHCP_REQUESTED_PARAMS = new byte[] {
@@ -338,7 +338,8 @@ public class EthernetTetheringTest {
 
     private MyTetheringEventCallback enableEthernetTethering(String iface) throws Exception {
         return enableEthernetTethering(iface,
-                new TetheringRequest.Builder(TETHERING_ETHERNET).build());
+                new TetheringRequest.Builder(TETHERING_ETHERNET)
+                .setShouldShowEntitlementUi(false).build());
     }
 
     private int getMTU(TestNetworkInterface iface) throws SocketException {
@@ -508,7 +509,8 @@ public class EthernetTetheringTest {
         LinkAddress localAddr = local == null ? null : new LinkAddress(local);
         LinkAddress clientAddr = client == null ? null : new LinkAddress(client);
         return new TetheringRequest.Builder(TETHERING_ETHERNET)
-                .setStaticIpv4Addresses(localAddr, clientAddr).build();
+                .setStaticIpv4Addresses(localAddr, clientAddr)
+                .setShouldShowEntitlementUi(false).build();
     }
 
     private void assertInvalidStaticIpv4Request(String iface, String local, String client)

@@ -321,6 +321,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
         mUarfcn = in.readInt();
         mAdditionalPlmns = (ArraySet<String>) in.readArraySet(null);
         mCsgInfo = in.readParcelable(null);
+
+        updateGlobalCellId();
         if (DBG) log(toString());
     }
 

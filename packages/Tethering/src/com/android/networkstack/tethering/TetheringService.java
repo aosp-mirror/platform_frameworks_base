@@ -16,7 +16,11 @@
 
 package com.android.networkstack.tethering;
 
+import static android.Manifest.permission.ACCESS_NETWORK_STATE;
+import static android.Manifest.permission.NETWORK_STACK;
+import static android.Manifest.permission.TETHER_PRIVILEGED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.net.NetworkStack.PERMISSION_MAINLINE_NETWORK_STACK;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION;
 import static android.net.TetheringManager.TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION;
 import static android.net.TetheringManager.TETHER_ERROR_NO_ERROR;
@@ -38,15 +42,12 @@ import android.net.TetheringRequestParcel;
 import android.net.dhcp.DhcpServerCallbacks;
 import android.net.dhcp.DhcpServingParamsParcel;
 import android.net.ip.IpServer;
-import android.net.util.SharedLog;
 import android.os.Binder;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
-import android.os.SystemProperties;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.util.Log;
 
@@ -66,21 +67,14 @@ import java.io.PrintWriter;
 public class TetheringService extends Service {
     private static final String TAG = TetheringService.class.getSimpleName();
 
-    private final SharedLog mLog = new SharedLog(TAG);
     private TetheringConnector mConnector;
-    private Context mContext;
-    private TetheringDependencies mDeps;
-    private Tethering mTethering;
-    private UserManager mUserManager;
 
     @Override
     public void onCreate() {
-        mLog.mark("onCreate");
-        mDeps = getTetheringDependencies();
-        mContext = mDeps.getContext();
-        mUserManager = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
-        mTethering = makeTethering(mDeps);
-        mTethering.startStateMachineUpdaters();
+        final TetheringDependencies deps = makeTetheringDependencies();
+        // The Tethering object needs a fully functional context to start, so this can't be done
+        // in the constructor.
+        mConnector = new TetheringConnector(makeTethering(deps), TetheringService.this);
     }
 
     /**
@@ -92,21 +86,10 @@ public class TetheringService extends Service {
         return new Tethering(deps);
     }
 
-    /**
-     * Create a binder connector for the system server to communicate with the tethering.
-     */
-    private synchronized IBinder makeConnector() {
-        if (mConnector == null) {
-            mConnector = new TetheringConnector(mTethering, TetheringService.this);
-        }
-        return mConnector;
-    }
-
     @NonNull
     @Override
     public IBinder onBind(Intent intent) {
-        mLog.mark("onBind");
-        return makeConnector();
+        return mConnector;
     }
 
     private static class TetheringConnector extends ITetheringConnector.Stub {
@@ -119,8 +102,9 @@ public class TetheringService extends Service {
         }
 
         @Override
-        public void tether(String iface, String callerPkg, IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+        public void tether(String iface, String callerPkg, String callingAttributionTag,
+                IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, listener)) return;
 
             try {
                 listener.onResult(mTethering.tether(iface));
@@ -128,8 +112,9 @@ public class TetheringService extends Service {
         }
 
         @Override
-        public void untether(String iface, String callerPkg, IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+        public void untether(String iface, String callerPkg, String callingAttributionTag,
+                IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, listener)) return;
 
             try {
                 listener.onResult(mTethering.untether(iface));
@@ -137,8 +122,9 @@ public class TetheringService extends Service {
         }
 
         @Override
-        public void setUsbTethering(boolean enable, String callerPkg, IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+        public void setUsbTethering(boolean enable, String callerPkg, String callingAttributionTag,
+                IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, listener)) return;
 
             try {
                 listener.onResult(mTethering.setUsbTethering(enable));
@@ -147,15 +133,21 @@ public class TetheringService extends Service {
 
         @Override
         public void startTethering(TetheringRequestParcel request, String callerPkg,
-                IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+                String callingAttributionTag, IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg,
+                    callingAttributionTag,
+                    request.exemptFromEntitlementCheck /* onlyAllowPrivileged */,
+                    listener)) {
+                return;
+            }
 
             mTethering.startTethering(request, listener);
         }
 
         @Override
-        public void stopTethering(int type, String callerPkg, IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+        public void stopTethering(int type, String callerPkg, String callingAttributionTag,
+                IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, listener)) return;
 
             try {
                 mTethering.stopTethering(type);
@@ -165,8 +157,8 @@ public class TetheringService extends Service {
 
         @Override
         public void requestLatestTetheringEntitlementResult(int type, ResultReceiver receiver,
-                boolean showEntitlementUi, String callerPkg) {
-            if (checkAndNotifyCommonError(callerPkg, receiver)) return;
+                boolean showEntitlementUi, String callerPkg, String callingAttributionTag) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, receiver)) return;
 
             mTethering.requestLatestTetheringEntitlementResult(type, receiver, showEntitlementUi);
         }
@@ -175,7 +167,7 @@ public class TetheringService extends Service {
         public void registerTetheringEventCallback(ITetheringEventCallback callback,
                 String callerPkg) {
             try {
-                if (!mService.hasTetherAccessPermission()) {
+                if (!hasTetherAccessPermission()) {
                     callback.onCallbackStopped(TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION);
                     return;
                 }
@@ -187,7 +179,7 @@ public class TetheringService extends Service {
         public void unregisterTetheringEventCallback(ITetheringEventCallback callback,
                 String callerPkg) {
             try {
-                if (!mService.hasTetherAccessPermission()) {
+                if (!hasTetherAccessPermission()) {
                     callback.onCallbackStopped(TETHER_ERROR_NO_ACCESS_TETHERING_PERMISSION);
                     return;
                 }
@@ -196,8 +188,9 @@ public class TetheringService extends Service {
         }
 
         @Override
-        public void stopAllTethering(String callerPkg, IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+        public void stopAllTethering(String callerPkg, String callingAttributionTag,
+                IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, listener)) return;
 
             try {
                 mTethering.untetherAll();
@@ -206,8 +199,9 @@ public class TetheringService extends Service {
         }
 
         @Override
-        public void isTetheringSupported(String callerPkg, IIntResultListener listener) {
-            if (checkAndNotifyCommonError(callerPkg, listener)) return;
+        public void isTetheringSupported(String callerPkg, String callingAttributionTag,
+                IIntResultListener listener) {
+            if (checkAndNotifyCommonError(callerPkg, callingAttributionTag, listener)) return;
 
             try {
                 listener.onResult(TETHER_ERROR_NO_ERROR);
@@ -220,13 +214,22 @@ public class TetheringService extends Service {
             mTethering.dump(fd, writer, args);
         }
 
-        private boolean checkAndNotifyCommonError(String callerPkg, IIntResultListener listener) {
+        private boolean checkAndNotifyCommonError(final String callerPkg,
+                final String callingAttributionTag, final IIntResultListener listener) {
+            return checkAndNotifyCommonError(callerPkg, callingAttributionTag,
+                    false /* onlyAllowPrivileged */, listener);
+        }
+
+        private boolean checkAndNotifyCommonError(final String callerPkg,
+                final String callingAttributionTag, final boolean onlyAllowPrivileged,
+                final IIntResultListener listener) {
             try {
-                if (!mService.hasTetherChangePermission(callerPkg)) {
+                if (!hasTetherChangePermission(callerPkg, callingAttributionTag,
+                        onlyAllowPrivileged)) {
                     listener.onResult(TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION);
                     return true;
                 }
-                if (!mService.isTetheringSupported()) {
+                if (!mTethering.isTetheringSupported()) {
                     listener.onResult(TETHER_ERROR_UNSUPPORTED);
                     return true;
                 }
@@ -237,12 +240,14 @@ public class TetheringService extends Service {
             return false;
         }
 
-        private boolean checkAndNotifyCommonError(String callerPkg, ResultReceiver receiver) {
-            if (!mService.hasTetherChangePermission(callerPkg)) {
+        private boolean checkAndNotifyCommonError(final String callerPkg,
+                final String callingAttributionTag, final ResultReceiver receiver) {
+            if (!hasTetherChangePermission(callerPkg, callingAttributionTag,
+                    false /* onlyAllowPrivileged */)) {
                 receiver.send(TETHER_ERROR_NO_CHANGE_TETHERING_PERMISSION, null);
                 return true;
             }
-            if (!mService.isTetheringSupported()) {
+            if (!mTethering.isTetheringSupported()) {
                 receiver.send(TETHER_ERROR_UNSUPPORTED, null);
                 return true;
             }
@@ -250,142 +255,135 @@ public class TetheringService extends Service {
             return false;
         }
 
-    }
-
-    // if ro.tether.denied = true we default to no tethering
-    // gservices could set the secure setting to 1 though to enable it on a build where it
-    // had previously been turned off.
-    private boolean isTetheringSupported() {
-        final int defaultVal =
-                SystemProperties.get("ro.tether.denied").equals("true") ? 0 : 1;
-        final boolean tetherSupported = Settings.Global.getInt(mContext.getContentResolver(),
-                Settings.Global.TETHER_SUPPORTED, defaultVal) != 0;
-        final boolean tetherEnabledInSettings = tetherSupported
-                && !mUserManager.hasUserRestriction(UserManager.DISALLOW_CONFIG_TETHERING);
-
-        return tetherEnabledInSettings && mTethering.hasTetherableConfiguration();
-    }
-
-    private boolean hasTetherChangePermission(String callerPkg) {
-        if (checkCallingOrSelfPermission(
-                android.Manifest.permission.TETHER_PRIVILEGED) == PERMISSION_GRANTED) {
-            return true;
+        private boolean hasNetworkStackPermission() {
+            return checkCallingOrSelfPermission(NETWORK_STACK)
+                    || checkCallingOrSelfPermission(PERMISSION_MAINLINE_NETWORK_STACK);
         }
 
-        if (mTethering.isTetherProvisioningRequired()) return false;
-
-
-        int uid = Binder.getCallingUid();
-        // If callerPkg's uid is not same as Binder.getCallingUid(),
-        // checkAndNoteWriteSettingsOperation will return false and the operation will be denied.
-        if (Settings.checkAndNoteWriteSettingsOperation(mContext, uid, callerPkg,
-                false /* throwException */)) {
-            return true;
+        private boolean hasTetherPrivilegedPermission() {
+            return checkCallingOrSelfPermission(TETHER_PRIVILEGED);
         }
 
-        return false;
+        private boolean checkCallingOrSelfPermission(final String permission) {
+            return mService.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED;
+        }
+
+        private boolean hasTetherChangePermission(final String callerPkg,
+                final String callingAttributionTag, final boolean onlyAllowPrivileged) {
+            if (onlyAllowPrivileged && !hasNetworkStackPermission()) return false;
+
+            if (hasTetherPrivilegedPermission()) return true;
+
+            if (mTethering.isTetherProvisioningRequired()) return false;
+
+            int uid = Binder.getCallingUid();
+
+            // If callerPkg's uid is not same as Binder.getCallingUid(),
+            // checkAndNoteWriteSettingsOperation will return false and the operation will be
+            // denied.
+            return mService.checkAndNoteWriteSettingsOperation(mService, uid, callerPkg,
+                    callingAttributionTag, false /* throwException */);
+        }
+
+        private boolean hasTetherAccessPermission() {
+            if (hasTetherPrivilegedPermission()) return true;
+
+            return mService.checkCallingOrSelfPermission(
+                    ACCESS_NETWORK_STATE) == PERMISSION_GRANTED;
+        }
     }
 
-    private boolean hasTetherAccessPermission() {
-        if (checkCallingOrSelfPermission(
-                android.Manifest.permission.TETHER_PRIVILEGED) == PERMISSION_GRANTED) {
-            return true;
-        }
-
-        if (checkCallingOrSelfPermission(
-                android.Manifest.permission.ACCESS_NETWORK_STATE) == PERMISSION_GRANTED) {
-            return true;
-        }
-
-        return false;
+    /**
+     * Check if the package is a allowed to write settings. This also accounts that such an access
+     * happened.
+     *
+     * @return {@code true} iff the package is allowed to write settings.
+     */
+    @VisibleForTesting
+    boolean checkAndNoteWriteSettingsOperation(@NonNull Context context, int uid,
+            @NonNull String callingPackage, @Nullable String callingAttributionTag,
+            boolean throwException) {
+        return Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPackage,
+                throwException);
     }
-
 
     /**
      * An injection method for testing.
      */
     @VisibleForTesting
-    public TetheringDependencies getTetheringDependencies() {
-        if (mDeps == null) {
-            mDeps = new TetheringDependencies() {
-                @Override
-                public NetworkRequest getDefaultNetworkRequest() {
-                    // TODO: b/147280869, add a proper system API to replace this.
-                    final NetworkRequest trackDefaultRequest = new NetworkRequest.Builder()
-                            .clearCapabilities()
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-                            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-                            .build();
-                    return trackDefaultRequest;
-                }
+    public TetheringDependencies makeTetheringDependencies() {
+        return new TetheringDependencies() {
+            @Override
+            public NetworkRequest getDefaultNetworkRequest() {
+                // TODO: b/147280869, add a proper system API to replace this.
+                final NetworkRequest trackDefaultRequest = new NetworkRequest.Builder()
+                        .clearCapabilities()
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_RESTRICTED)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_TRUSTED)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
+                        .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+                        .build();
+                return trackDefaultRequest;
+            }
 
-                @Override
-                public Looper getTetheringLooper() {
-                    final HandlerThread tetherThread = new HandlerThread("android.tethering");
-                    tetherThread.start();
-                    return tetherThread.getLooper();
-                }
+            @Override
+            public Looper getTetheringLooper() {
+                final HandlerThread tetherThread = new HandlerThread("android.tethering");
+                tetherThread.start();
+                return tetherThread.getLooper();
+            }
 
-                @Override
-                public boolean isTetheringSupported() {
-                    return TetheringService.this.isTetheringSupported();
-                }
+            @Override
+            public Context getContext() {
+                return TetheringService.this;
+            }
 
-                @Override
-                public Context getContext() {
-                    return TetheringService.this;
-                }
+            @Override
+            public IpServer.Dependencies getIpServerDependencies() {
+                return new IpServer.Dependencies() {
+                    @Override
+                    public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
+                            DhcpServerCallbacks cb) {
+                        try {
+                            final INetworkStackConnector service = getNetworkStackConnector();
+                            if (service == null) return;
 
-                @Override
-                public IpServer.Dependencies getIpServerDependencies() {
-                    return new IpServer.Dependencies() {
-                        @Override
-                        public void makeDhcpServer(String ifName, DhcpServingParamsParcel params,
-                                DhcpServerCallbacks cb) {
+                            service.makeDhcpServer(ifName, params, cb);
+                        } catch (RemoteException e) {
+                            Log.e(TAG, "Fail to make dhcp server");
                             try {
-                                final INetworkStackConnector service = getNetworkStackConnector();
-                                if (service == null) return;
-
-                                service.makeDhcpServer(ifName, params, cb);
-                            } catch (RemoteException e) {
-                                Log.e(TAG, "Fail to make dhcp server");
-                                try {
-                                    cb.onDhcpServerCreated(STATUS_UNKNOWN_ERROR, null);
-                                } catch (RemoteException re) { }
-                            }
+                                cb.onDhcpServerCreated(STATUS_UNKNOWN_ERROR, null);
+                            } catch (RemoteException re) { }
                         }
-                    };
-                }
-
-                // TODO: replace this by NetworkStackClient#getRemoteConnector after refactoring
-                // networkStackClient.
-                static final int NETWORKSTACK_TIMEOUT_MS = 60_000;
-                private INetworkStackConnector getNetworkStackConnector() {
-                    IBinder connector;
-                    try {
-                        final long before = System.currentTimeMillis();
-                        while ((connector = NetworkStack.getService()) == null) {
-                            if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
-                                Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");
-                                return null;
-                            }
-                            Thread.sleep(200);
-                        }
-                    } catch (InterruptedException e) {
-                        Log.wtf(TAG, "Interrupted, fail to get INetworkStackConnector");
-                        return null;
                     }
-                    return INetworkStackConnector.Stub.asInterface(connector);
-                }
+                };
+            }
 
-                @Override
-                public BluetoothAdapter getBluetoothAdapter() {
-                    return BluetoothAdapter.getDefaultAdapter();
+            // TODO: replace this by NetworkStackClient#getRemoteConnector after refactoring
+            // networkStackClient.
+            static final int NETWORKSTACK_TIMEOUT_MS = 60_000;
+            private INetworkStackConnector getNetworkStackConnector() {
+                IBinder connector;
+                try {
+                    final long before = System.currentTimeMillis();
+                    while ((connector = NetworkStack.getService()) == null) {
+                        if (System.currentTimeMillis() - before > NETWORKSTACK_TIMEOUT_MS) {
+                            Log.wtf(TAG, "Timeout, fail to get INetworkStackConnector");
+                            return null;
+                        }
+                        Thread.sleep(200);
+                    }
+                } catch (InterruptedException e) {
+                    Log.wtf(TAG, "Interrupted, fail to get INetworkStackConnector");
+                    return null;
                 }
-            };
-        }
-        return mDeps;
+                return INetworkStackConnector.Stub.asInterface(connector);
+            }
+
+            @Override
+            public BluetoothAdapter getBluetoothAdapter() {
+                return BluetoothAdapter.getDefaultAdapter();
+            }
+        };
     }
 }
