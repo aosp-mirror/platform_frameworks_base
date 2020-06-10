@@ -11053,7 +11053,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             pkgSetting = result.pkgSetting;
             if (originalPkgSetting != null) {
-                mSettings.addRenamedPackageLPw(parsedPackage.getPackageName(),
+                mSettings.addRenamedPackageLPw(parsedPackage.getRealPackage(),
                         originalPkgSetting.name);
                 mTransferredPackages.add(originalPkgSetting.name);
             }
@@ -11162,7 +11162,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private @Nullable PackageSetting getOriginalPackageLocked(@NonNull AndroidPackage pkg,
             @Nullable String renamedPkgName) {
-        if (!isPackageRenamed(pkg, renamedPkgName)) {
+        if (isPackageRenamed(pkg, renamedPkgName)) {
             return null;
         }
         for (int i = ArrayUtils.size(pkg.getOriginalPackages()) - 1; i >= 0; --i) {
