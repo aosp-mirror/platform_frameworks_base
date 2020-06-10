@@ -21,6 +21,7 @@ import static androidx.test.espresso.action.ViewActions.click;
 import static androidx.test.espresso.action.ViewActions.swipeUp;
 import static androidx.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static androidx.test.espresso.assertion.ViewAssertions.matches;
+import static androidx.test.espresso.matcher.ViewMatchers.hasSibling;
 import static androidx.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static androidx.test.espresso.matcher.ViewMatchers.withId;
 import static androidx.test.espresso.matcher.ViewMatchers.withText;
@@ -299,9 +300,8 @@ public class ChooserActivityTest {
     public void fourOptionsStackedIntoOneTarget() throws InterruptedException {
         Intent sendIntent = createSendTextIntent();
 
-        // create 12 unique app targets to ensure the app ranking row can be filled, otherwise
-        // targets will not stack
-        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(12);
+        // create just enough targets to ensure the a-z list should be shown
+        List<ResolvedComponentInfo> resolvedComponentInfos = createResolvedComponentsForTest(1);
 
         // next create 4 targets in a single app that should be stacked into a single target
         String packageName = "xxx.yyy";
@@ -328,8 +328,8 @@ public class ChooserActivityTest {
                 .launchActivity(Intent.createChooser(sendIntent, null));
         waitForIdle();
 
-        // expect 12 unique targets + 1 group + 4 ranked app targets
-        assertThat(activity.getAdapter().getCount(), is(17));
+        // expect 1 unique targets + 1 group + 4 ranked app targets
+        assertThat(activity.getAdapter().getCount(), is(6));
 
         ResolveInfo[] chosen = new ResolveInfo[1];
         sOverrides.onSafelyStartCallback = targetInfo -> {
@@ -337,7 +337,7 @@ public class ChooserActivityTest {
             return true;
         };
 
-        onView(withText(appName)).perform(click());
+        onView(allOf(withText(appName), hasSibling(withText("")))).perform(click());
         waitForIdle();
 
         // clicking will launch a dialog to choose the activity within the app
