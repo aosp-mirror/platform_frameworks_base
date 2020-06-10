@@ -62,9 +62,10 @@ public final class FillCallback {
 
         List<Dataset> inlineSuggestions = response.getInlineSuggestions();
         Bundle clientState = response.getClientState();
+        // We need to report result regardless of whether inline suggestions are returned or not.
+        mProxy.reportResult(inlineSuggestions, clientState);
         if (inlineSuggestions != null && !inlineSuggestions.isEmpty()) {
             mProxy.logEvent(AutofillProxy.REPORT_EVENT_INLINE_RESPONSE);
-            mProxy.reportResult(inlineSuggestions, clientState);
             return;
         }
 
