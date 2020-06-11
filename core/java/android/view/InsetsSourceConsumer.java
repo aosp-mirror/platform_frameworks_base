@@ -18,8 +18,8 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
-import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsController.DEBUG;
+import static android.view.InsetsState.getDefaultVisibility;
 import static android.view.InsetsState.toPublicType;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
@@ -221,9 +221,10 @@ public class InsetsSourceConsumer {
         final boolean hasControl = mSourceControl != null;
 
         // We still need to let the legacy app know the visibility change even if we don't have the
-        // control.
+        // control. If we don't have the source, we don't change the requested visibility for making
+        // the callback behavior compatible.
         mController.updateCompatSysUiVisibility(
-                mType, hasControl ? mRequestedVisible : isVisible, hasControl);
+                mType, (hasControl || source == null) ? mRequestedVisible : isVisible, hasControl);
 
         // If we don't have control, we are not able to change the visibility.
         if (!hasControl) {
