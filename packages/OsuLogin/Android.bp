@@ -1,5 +1,6 @@
 android_app {
     name: "OsuLogin",
+    defaults: ["wifi-module-sdk-version-defaults"],
     static_libs: ["androidx.legacy_legacy-support-v4"],
     resource_dirs: ["res"],
     srcs: ["src/**/*.java"],
