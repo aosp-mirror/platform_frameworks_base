@@ -62,7 +62,7 @@ Acquire the dispatcher by using `@Inject` to obtain a `BroadcastDispatcher`. The
  * @param executor An executor to dispatch [BroadcastReceiver.onReceive]. Pass null to use an
  *                 executor in the main thread (default).
  * @param user A user handle to determine which broadcast should be dispatched to this receiver.
- *             By default, it is the current user.
+ *             By default, it is the user of the context (system user in SystemUI).
  * @throws IllegalArgumentException if the filter has other constraints that are not actions or
  *                                  categories or the filter has no actions.
  */

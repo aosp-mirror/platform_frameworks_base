@@ -25,6 +25,7 @@ import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.os.ServiceManager;
 import android.util.DisplayMetrics;
 import android.view.Choreographer;
@@ -39,9 +40,12 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Prefs;
+import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.doze.AlwaysOnDisplayPolicy;
+import com.android.systemui.dump.DumpManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -176,6 +180,21 @@ public class DependencyProvider {
     @Provides
     public ActivityManagerWrapper provideActivityManagerWrapper() {
         return ActivityManagerWrapper.getInstance();
+    }
+
+    /** Provides and initializes the {#link BroadcastDispatcher} for SystemUI */
+    @Singleton
+    @Provides
+    public BroadcastDispatcher providesBroadcastDispatcher(
+            Context context,
+            @Background Looper backgroundLooper,
+            DumpManager dumpManager,
+            BroadcastDispatcherLogger logger
+    ) {
+        BroadcastDispatcher bD =
+                new BroadcastDispatcher(context, backgroundLooper, dumpManager, logger);
+        bD.initialize();
+        return bD;
     }
 
     @Singleton
