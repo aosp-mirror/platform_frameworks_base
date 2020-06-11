@@ -302,11 +302,14 @@ public class MediaControlPanel {
             button.setContentDescription(mediaAction.getContentDescription());
             Runnable action = mediaAction.getAction();
 
-            button.setOnClickListener(v -> {
-                if (action != null) {
+            if (action == null) {
+                button.setEnabled(false);
+            } else {
+                button.setEnabled(true);
+                button.setOnClickListener(v -> {
                     action.run();
-                }
-            });
+                });
+            }
             boolean visibleInCompat = actionsWhenCollapsed.contains(i);
             setVisibleAndAlpha(collapsedSet, actionId, visibleInCompat);
             setVisibleAndAlpha(expandedSet, actionId, true /*visible */);
