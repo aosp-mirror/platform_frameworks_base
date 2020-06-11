@@ -16,6 +16,7 @@
 
 package com.android.systemui.pip;
 
+import android.animation.AnimationHandler;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.IntDef;
@@ -26,6 +27,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.Interpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -78,6 +80,13 @@ public class PipAnimationController {
     private final PipSurfaceTransactionHelper mSurfaceTransactionHelper;
 
     private PipTransitionAnimator mCurrentAnimator;
+
+    private ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
+            ThreadLocal.withInitial(() -> {
+                AnimationHandler handler = new AnimationHandler();
+                handler.setProvider(new SfVsyncFrameCallbackProvider());
+                return handler;
+            });
 
     @Inject
     PipAnimationController(Context context, PipSurfaceTransactionHelper helper) {
@@ -135,6 +144,7 @@ public class PipAnimationController {
         animator.setSurfaceTransactionHelper(mSurfaceTransactionHelper);
         animator.setInterpolator(mFastOutSlowInInterpolator);
         animator.setFloatValues(FRACTION_START, FRACTION_END);
+        animator.setAnimationHandler(mSfAnimationHandlerThreadLocal.get());
         return animator;
     }
 
