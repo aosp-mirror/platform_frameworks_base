@@ -417,7 +417,8 @@ public class BubbleData {
         if (mBubbles.size() == 1) {
             // Going to become empty, handle specially.
             setExpandedInternal(false);
-            setSelectedBubbleInternal(null);
+            // Don't use setSelectedBubbleInternal because we don't want to trigger an applyUpdate
+            mSelectedBubble = null;
         }
         if (indexToRemove < mBubbles.size() - 1) {
             // Removing anything but the last bubble means positions will change.
