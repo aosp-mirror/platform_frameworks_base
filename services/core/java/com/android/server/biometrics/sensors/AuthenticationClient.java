@@ -24,9 +24,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.security.KeyStore;
 import android.util.Slog;
 import android.view.Surface;
@@ -36,7 +34,7 @@ import java.util.ArrayList;
 /**
  * A class to keep track of the authentication state for a given client.
  */
-public abstract class AuthenticationClient extends ClientMonitor {
+public abstract class AuthenticationClient extends AcquisitionClient {
 
     private static final String TAG = "Biometrics/AuthenticationClient";
 
@@ -45,7 +43,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
     private final boolean mRequireConfirmation;
     private final IActivityTaskManager mActivityTaskManager;
     private final TaskStackListener mTaskStackListener;
-    private final PowerManager mPowerManager;
     private final LockoutTracker mLockoutTracker;
     private final Surface mSurface;
 
@@ -74,11 +71,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
         }
     }
 
-    public AuthenticationClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
-            boolean isStrongBiometric, int statsModality, int statsClient,
+    public AuthenticationClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
+            IBinder token, ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
+            long opId, boolean restricted, String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, int statsModality, int statsClient,
             TaskStackListener taskStackListener, LockoutTracker lockoutTracker, Surface surface) {
         super(context, daemon, token, listener, targetUserId, groupId,
                 restricted, owner, cookie, sensorId, statsModality,
@@ -88,7 +84,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
         mRequireConfirmation = requireConfirmation;
         mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = taskStackListener;
-        mPowerManager = context.getSystemService(PowerManager.class);
         mLockoutTracker = lockoutTracker;
         mSurface = surface;
     }
@@ -113,12 +108,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public void notifyUserActivity() {
-        long now = SystemClock.uptimeMillis();
-        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-    }
-
-    @Override
     public void binderDied() {
         final boolean clearListener = !isBiometricPrompt();
         binderDiedInternal(clearListener);
@@ -133,7 +122,6 @@ public abstract class AuthenticationClient extends ClientMonitor {
         return mOpId != 0;
     }
 
-    @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         super.logOnAuthenticated(getContext(), authenticated, mRequireConfirmation,
@@ -265,25 +253,5 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
         mAlreadyCancelled = true;
         return 0; // success
-    }
-
-    @Override
-    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
-        if (DEBUG) Slog.w(TAG, "onEnrollResult() called for authenticate!");
-        return true; // Invalid for Authenticate
-    }
-
-    @Override
-    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (DEBUG) Slog.w(TAG, "onRemoved() called for authenticate!");
-        return true; // Invalid for Authenticate
-    }
-
-    @Override
-    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
-        if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for authenticate!");
-        return true; // Invalid for Authenticate
     }
 }

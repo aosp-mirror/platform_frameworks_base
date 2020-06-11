@@ -35,7 +35,8 @@ import java.util.List;
  * 2) The HAL and Framework are not in sync, and
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
-public class InternalCleanupClient extends ClientMonitor {
+public class InternalCleanupClient extends ClientMonitor implements EnumerateConsumer,
+        RemovalConsumer {
 
     private static final String TAG = "Biometrics/InternalCleanupClient";
 
@@ -56,12 +57,10 @@ public class InternalCleanupClient extends ClientMonitor {
     private final BiometricUtils mBiometricUtils;
     private ClientMonitor mCurrentTask;
 
-    InternalCleanupClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon,
-            ClientMonitorCallbackConverter listener,
-            int userId, int groupId, boolean restricted, String owner, int sensorId,
-            int statsModality, List<? extends BiometricAuthenticator.Identifier> enrolledList,
-            BiometricUtils utils) {
+    InternalCleanupClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
+            ClientMonitorCallbackConverter listener, int userId, int groupId, boolean restricted,
+            String owner, int sensorId, int statsModality,
+            List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils) {
         super(context, daemon, null /* token */, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
@@ -104,7 +103,7 @@ public class InternalCleanupClient extends ClientMonitor {
                     + mCurrentTask.getClass().getSimpleName());
             return false;
         }
-        return mCurrentTask.onRemoved(identifier, remaining);
+        return ((RemovalClient) mCurrentTask).onRemoved(identifier, remaining);
     }
 
     @Override
@@ -116,7 +115,7 @@ public class InternalCleanupClient extends ClientMonitor {
             return false;
         }
 
-        mCurrentTask.onEnumerationResult(identifier, remaining);
+        ((EnumerateConsumer) mCurrentTask).onEnumerationResult(identifier, remaining);
 
         if (remaining != 0) {
             return false;
@@ -140,21 +139,5 @@ public class InternalCleanupClient extends ClientMonitor {
             startCleanupUnknownHalTemplates();
             return false;
         }
-    }
-
-    @Override
-    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
-        return false;
-    }
-
-    @Override
-    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated, ArrayList<Byte> token) {
-        return false;
-    }
-
-    @Override
-    public void notifyUserActivity() {
-
     }
 }

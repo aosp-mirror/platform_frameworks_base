@@ -41,14 +41,13 @@ public class InternalEnumerateClient extends EnumerateClient {
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    InternalEnumerateClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int groupId, int userId,
+    InternalEnumerateClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
+            IBinder token, ClientMonitorCallbackConverter listener, int groupId, int userId,
             boolean restricted, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList,
             BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, daemon, token, listener, groupId, userId,
-                restricted, owner, sensorId, statsModality);
+        super(context, daemon, token, listener, groupId, userId, restricted, owner, sensorId,
+                statsModality);
         mEnrolledList = enrolledList;
         mUtils = utils;
     }

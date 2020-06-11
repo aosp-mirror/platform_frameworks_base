@@ -21,9 +21,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
-import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.util.Slog;
 import android.view.Surface;
 
@@ -33,7 +31,7 @@ import java.util.Arrays;
 /**
  * A class to keep track of the enrollment state for a given client.
  */
-public class EnrollClient extends ClientMonitor {
+public class EnrollClient extends AcquisitionClient {
 
     private static final String TAG = "Biometrics/EnrollClient";
 
@@ -41,18 +39,16 @@ public class EnrollClient extends ClientMonitor {
     private final BiometricUtils mBiometricUtils;
     private final int[] mDisabledFeatures;
     private final int mTimeoutSec;
-    private final PowerManager mPowerManager;
     private final Surface mSurface;
     private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
 
-    public EnrollClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId,
-            byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
-            final int[] disabledFeatures, int timeoutSec, int statsModality,
-            PowerManager powerManager, Surface surface, int sensorId, boolean shouldVibrate) {
+    public EnrollClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
+            ClientMonitorCallbackConverter listener, int userId, int groupId, byte[] cryptoToken,
+            boolean restricted, String owner, BiometricUtils utils, final int[] disabledFeatures,
+            int timeoutSec, int statsModality, Surface surface, int sensorId,
+            boolean shouldVibrate) {
         super(context, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
@@ -60,12 +56,10 @@ public class EnrollClient extends ClientMonitor {
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mTimeoutSec = timeoutSec;
-        mPowerManager = powerManager;
         mSurface = surface;
         mShouldVibrate = shouldVibrate;
     }
 
-    @Override
     public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
         if (remaining == 0) {
@@ -78,17 +72,10 @@ public class EnrollClient extends ClientMonitor {
         return sendEnrollResult(identifier, remaining);
     }
 
-    @Override
-    public void notifyUserActivity() {
-        long now = SystemClock.uptimeMillis();
-        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
-    }
-
     /*
      * @return true if we're done.
      */
-    private boolean sendEnrollResult(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
+    private boolean sendEnrollResult(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (mShouldVibrate) {
             vibrateSuccess();
         }
@@ -147,37 +134,14 @@ public class EnrollClient extends ClientMonitor {
         return 0;
     }
 
-    @Override
-    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (DEBUG) Slog.w(TAG, "onRemoved() called for enroll!");
-        return true; // Invalid for EnrollClient
-    }
-
-    @Override
-    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
-        if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for enroll!");
-        return true; // Invalid for EnrollClient
-    }
-
-    @Override
-    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated, ArrayList<Byte> token) {
-        if (DEBUG) Slog.w(TAG, "onAuthenticated() called for enroll!");
-        return true; // Invalid for EnrollClient
-    }
-
     /**
      * Called when we get notification from the biometric's HAL that an error has occurred with the
-     * current operation. Common to authenticate, enroll, enumerate and remove.
-     * @param error
-     * @return true if client should be removed
+     * current operation.
      */
     @Override
-    public boolean onError(int error, int vendorCode) {
+    public void onError(int error, int vendorCode) {
         logOnEnrolled(getTargetUserId(), System.currentTimeMillis() - mEnrollmentStartTimeMs,
                 false /* enrollSuccessful */);
-        return super.onError(error, vendorCode);
+        super.onError(error, vendorCode);
     }
-
 }

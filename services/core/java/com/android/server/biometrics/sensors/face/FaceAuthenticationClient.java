@@ -60,9 +60,8 @@ class FaceAuthenticationClient extends AuthenticationClient {
     // but not started yet. The user shouldn't receive the error haptics in this case.
     private boolean mStarted;
 
-    FaceAuthenticationClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int targetUserId, long opId,
+    FaceAuthenticationClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
+            IBinder token, ClientMonitorCallbackConverter listener, int targetUserId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, TaskStackListener taskStackListener,
             LockoutTracker lockoutTracker, UsageStats usageStats) {
@@ -124,7 +123,7 @@ class FaceAuthenticationClient extends AuthenticationClient {
     }
 
     @Override
-    public boolean onError(int error, int vendorCode) {
+    public void onError(int error, int vendorCode) {
         mUsageStats.addEvent(new UsageStats.AuthenticationEvent(
                 getStartTimeMs(),
                 System.currentTimeMillis() - getStartTimeMs() /* latency */,
@@ -149,7 +148,7 @@ class FaceAuthenticationClient extends AuthenticationClient {
                 break;
         }
 
-        return super.onError(error, vendorCode);
+        super.onError(error, vendorCode);
     }
 
     private int[] getAcquireIgnorelist() {

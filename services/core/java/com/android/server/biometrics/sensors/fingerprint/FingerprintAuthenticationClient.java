@@ -43,11 +43,10 @@ class FingerprintAuthenticationClient extends AuthenticationClient {
 
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
 
-    FingerprintAuthenticationClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
-            boolean isStrongBiometric, Surface surface, int statsClient,
+    FingerprintAuthenticationClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
+            IBinder token, ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
+            long opId, boolean restricted, String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, Surface surface, int statsClient,
             TaskStackListener taskStackListener, LockoutFrameworkImpl lockoutTracker) {
         super(context, daemon, token, listener, targetUserId, groupId, opId,
                 restricted, owner, cookie, requireConfirmation, sensorId, isStrongBiometric,

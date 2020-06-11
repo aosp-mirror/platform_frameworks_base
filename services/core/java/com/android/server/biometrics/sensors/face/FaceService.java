@@ -147,7 +147,7 @@ public class FaceService extends BiometricServiceBase {
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, 0 /* groupId */, cryptoToken, restricted, opPackageName,
                     getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
-                    mPowerManager, surface, getSensorId(), false /* shouldVibrate */);
+                    surface, getSensorId());
 
             enrollInternal(client, mCurrentUserId);
         }

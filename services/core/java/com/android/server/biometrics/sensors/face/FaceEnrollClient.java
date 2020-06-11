@@ -37,17 +37,13 @@ public class FaceEnrollClient extends EnrollClient {
     private final int[] mEnrollIgnoreList;
     private final int[] mEnrollIgnoreListVendor;
 
-    FaceEnrollClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon,
-            IBinder token,
-            ClientMonitorCallbackConverter listener, int userId,
-            int groupId, byte[] cryptoToken, boolean restricted, String owner,
-            BiometricUtils utils, int[] disabledFeatures,
-            int timeoutSec, int statsModality, PowerManager powerManager,
-            Surface surface, int sensorId, boolean shouldVibrate) {
+    FaceEnrollClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
+            ClientMonitorCallbackConverter listener, int userId, int groupId, byte[] cryptoToken,
+            boolean restricted, String owner, BiometricUtils utils, int[] disabledFeatures,
+            int timeoutSec, int statsModality, Surface surface, int sensorId) {
         super(context, daemon, token, listener, userId, groupId, cryptoToken, restricted,
-                owner, utils, disabledFeatures, timeoutSec, statsModality, powerManager, surface,
-                sensorId, shouldVibrate);
+                owner, utils, disabledFeatures, timeoutSec, statsModality, surface,
+                sensorId, false /* shouldVibrate */);
         mEnrollIgnoreList = getContext().getResources()
                 .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
         mEnrollIgnoreListVendor = getContext().getResources()

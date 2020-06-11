@@ -84,7 +84,7 @@ public abstract class BiometricServiceBase extends SystemService
     private final Context mContext;
     private final String mKeyguardPackage;
     protected final IActivityTaskManager mActivityTaskManager;
-    public final PowerManager mPowerManager;
+    private final PowerManager mPowerManager;
     private final UserManager mUserManager;
     protected final BiometricTaskStackListener mTaskStackListener =
             new BiometricTaskStackListener();
@@ -406,8 +406,15 @@ public abstract class BiometricServiceBase extends SystemService
      */
 
     protected void handleAcquired(int acquiredInfo, int vendorCode) {
-        ClientMonitor client = mCurrentClient;
-        if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
+        final ClientMonitor client = mCurrentClient;
+        if (!(client instanceof AcquisitionClient)) {
+            final String clientName = client != null ? client.getClass().getSimpleName() : "null";
+            Slog.e(getTag(), "handleAcquired for non-acquire consumer: " + clientName);
+            return;
+        }
+
+        final AcquisitionClient acquisitionClient = (AcquisitionClient) client;
+        if (acquisitionClient.onAcquired(acquiredInfo, vendorCode)) {
             removeClient(client);
         }
 
@@ -421,27 +428,40 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected void handleAuthenticated(BiometricAuthenticator.Identifier identifier,
             ArrayList<Byte> token) {
-        ClientMonitor client = mCurrentClient;
+        final ClientMonitor client = mCurrentClient;
+        if (!(client instanceof AuthenticationClient)) {
+            final String clientName = client != null ? client.getClass().getSimpleName() : "null";
+            Slog.e(getTag(), "handleAuthenticated for non-authentication client: " + clientName);
+            return;
+        }
+
+        final AuthenticationClient authenticationClient = (AuthenticationClient) client;
         final boolean authenticated = identifier.getBiometricId() != 0;
 
-        if (client != null) {
-            final int userId = client.getTargetUserId();
-            if (client.isCryptoOperation()) {
-                mPerformanceTracker.incrementCryptoAuthForUser(userId, authenticated);
-            } else {
-                mPerformanceTracker.incrementAuthForUser(userId, authenticated);
-            }
-            if (client.onAuthenticated(identifier, authenticated, token)) {
-                removeClient(client);
-            }
+        final int userId = authenticationClient.getTargetUserId();
+        if (authenticationClient.isCryptoOperation()) {
+            mPerformanceTracker.incrementCryptoAuthForUser(userId, authenticated);
+        } else {
+            mPerformanceTracker.incrementAuthForUser(userId, authenticated);
+        }
+        if (authenticationClient.onAuthenticated(identifier, authenticated, token)) {
+            removeClient(authenticationClient);
         }
     }
 
     protected void handleEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
-        ClientMonitor client = mCurrentClient;
-        if (client != null && client.onEnrollResult(identifier, remaining)) {
-            removeClient(client);
+        final ClientMonitor client = mCurrentClient;
+        if (!(client instanceof EnrollClient)) {
+            final String clientName = client != null ? client.getClass().getSimpleName() : "null";
+            Slog.e(getTag(), "handleEnrollResult for non-enroll client: " + clientName);
+            return;
+        }
+
+        final EnrollClient enrollClient = (EnrollClient) client;
+
+        if (enrollClient.onEnrollResult(identifier, remaining)) {
+            removeClient(enrollClient);
             // When enrollment finishes, update this group's authenticator id, as the HAL has
             // already generated a new authenticator id when the new biometric is enrolled.
             if (identifier instanceof Fingerprint) {
@@ -456,7 +476,8 @@ public abstract class BiometricServiceBase extends SystemService
         if (DEBUG) Slog.v(getTag(), "handleError(client="
                 + (client != null ? client.getOwnerString() : "null") + ", error = " + error + ")");
 
-        if (client != null && client.onError(error, vendorCode)) {
+        if (client != null) {
+            client.onError(error, vendorCode);
             removeClient(client);
         }
 
@@ -477,8 +498,15 @@ public abstract class BiometricServiceBase extends SystemService
                 + ", dev=" + identifier.getDeviceId()
                 + ", rem=" + remaining);
 
-        ClientMonitor client = mCurrentClient;
-        if (client != null && client.onRemoved(identifier, remaining)) {
+        final ClientMonitor client = mCurrentClient;
+        if (!(client instanceof RemovalConsumer)) {
+            final String clientName = client != null ? client.getClass().getSimpleName() : "null";
+            Slog.e(getTag(), "handleRemoved for non-removal consumer: " + clientName);
+            return;
+        }
+
+        final RemovalConsumer removalConsumer = (RemovalConsumer) client;
+        if (removalConsumer.onRemoved(identifier, remaining)) {
             removeClient(client);
             // When the last biometric of a group is removed, update the authenticator id
             int userId = mCurrentUserId;
@@ -492,8 +520,16 @@ public abstract class BiometricServiceBase extends SystemService
     }
 
     protected void handleEnumerate(BiometricAuthenticator.Identifier identifier, int remaining) {
-        ClientMonitor client = mCurrentClient;
-        if (client != null && client.onEnumerationResult(identifier, remaining)) {
+        final ClientMonitor client = mCurrentClient;
+        if (!(client instanceof EnumerateConsumer)) {
+            final String clientName = client != null ? client.getClass().getSimpleName() : "null";
+            Slog.e(getTag(), "handleEnumerate for non-enumerate consumer: "
+                    + clientName);
+            return;
+        }
+
+        final EnumerateConsumer enumerateConsumer = (EnumerateConsumer) client;
+        if (enumerateConsumer.onEnumerationResult(identifier, remaining)) {
             removeClient(client);
         }
     }
@@ -624,9 +660,7 @@ public abstract class BiometricServiceBase extends SystemService
             int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
                     ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT
                     : BiometricConstants.BIOMETRIC_ERROR_LOCKOUT_PERMANENT;
-            if (!client.onError(errorCode, 0 /* vendorCode */)) {
-                Slog.w(getTag(), "Cannot send permanent lockout message to client");
-            }
+            client.onError(errorCode, 0 /* vendorCode */);
             return;
         }
         startClient(client, true /* initiatedByClient */);

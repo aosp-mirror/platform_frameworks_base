@@ -24,32 +24,25 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import java.util.ArrayList;
-
 /**
  * A class to keep track of the remove state for a given client.
  */
-public class RemovalClient extends ClientMonitor {
+public class RemovalClient extends ClientMonitor implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
     private final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
+    public RemovalClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int biometricId, int groupId, int userId,
             boolean restricted, String owner, BiometricUtils utils, int sensorId,
             int statsModality) {
-        super(context, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
+        super(context, daemon, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
+                sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
-    }
-
-    @Override
-    public void notifyUserActivity() {
     }
 
     @Override
@@ -113,25 +106,5 @@ public class RemovalClient extends ClientMonitor {
                     identifier.getBiometricId());
         }
         return sendRemoved(identifier, remaining);
-    }
-
-    @Override
-    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int rem) {
-        if (DEBUG) Slog.w(TAG, "onEnrollResult() called for remove!");
-        return true; // Invalid for Remove
-    }
-
-    @Override
-    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated, ArrayList<Byte> token) {
-        if (DEBUG) Slog.w(TAG, "onAuthenticated() called for remove!");
-        return true; // Invalid for Remove.
-    }
-
-    @Override
-    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
-            int remaining) {
-        if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for remove!");
-        return true; // Invalid for Remove.
     }
 }
