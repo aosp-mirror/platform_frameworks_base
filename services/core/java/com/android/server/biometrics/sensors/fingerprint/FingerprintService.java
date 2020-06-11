@@ -63,7 +63,6 @@ import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -124,7 +123,7 @@ public class FingerprintService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final int groupId = userId; // default group for fingerprint enrollment
-            final EnrollClient client = new EnrollClient(getContext(), getConstants(),
+            final EnrollClient client = new EnrollClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, groupId, cryptoToken, restricted, opPackageName,
                     getBiometricUtils(), new int[0] /* disabledFeatures */, ENROLL_TIMEOUT_SEC,
@@ -150,7 +149,7 @@ public class FingerprintService extends BiometricServiceBase {
                     : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
 
             final AuthenticationClient client = new FingerprintAuthenticationClient(getContext(),
-                    getConstants(), mDaemonWrapper, token,
+                    mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, 0 /* cookie */,
                     false /* requireConfirmation */, getSensorId(), isStrongBiometric(), surface,
@@ -167,7 +166,7 @@ public class FingerprintService extends BiometricServiceBase {
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClient client = new FingerprintAuthenticationClient(getContext(),
-                    getConstants(), mDaemonWrapper, token,
+                    mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
                     false /* requireConfirmation */, getSensorId(), isStrongBiometric(), surface,
@@ -215,7 +214,7 @@ public class FingerprintService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final RemovalClient client = new RemovalClient(getContext(), getConstants(),
+            final RemovalClient client = new RemovalClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     fingerId, groupId, userId, restricted, token.toString(), getBiometricUtils(),
                     getSensorId(), statsModality());
@@ -356,7 +355,6 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     private final LockoutFrameworkImpl mLockoutTracker;
-    private final FingerprintConstants mFingerprintConstants = new FingerprintConstants();
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
 
@@ -530,11 +528,6 @@ public class FingerprintService extends BiometricServiceBase {
     @Override
     protected BiometricUtils getBiometricUtils() {
         return FingerprintUtils.getInstance();
-    }
-
-    @Override
-    protected Constants getConstants() {
-        return mFingerprintConstants;
     }
 
     @Override

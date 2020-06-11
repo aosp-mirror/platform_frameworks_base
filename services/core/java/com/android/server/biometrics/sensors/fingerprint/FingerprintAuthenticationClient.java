@@ -28,7 +28,6 @@ import android.view.Surface;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.util.ArrayList;
@@ -39,15 +38,18 @@ import java.util.ArrayList;
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
 class FingerprintAuthenticationClient extends AuthenticationClient {
+
+    private static final String TAG = "Biometrics/FingerprintAuthClient";
+
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
 
-    FingerprintAuthenticationClient(Context context, Constants constants,
+    FingerprintAuthenticationClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, Surface surface, int statsClient,
             TaskStackListener taskStackListener, LockoutFrameworkImpl lockoutTracker) {
-        super(context, constants, daemon, token, listener, targetUserId, groupId, opId,
+        super(context, daemon, token, listener, targetUserId, groupId, opId,
                 restricted, owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutTracker, surface);
@@ -66,7 +68,7 @@ class FingerprintAuthenticationClient extends AuthenticationClient {
             final @LockoutTracker.LockoutMode int lockoutMode =
                     mLockoutFrameworkImpl.getLockoutModeForUser(getTargetUserId());
             if (lockoutMode != LockoutTracker.LOCKOUT_NONE) {
-                Slog.w(getLogTag(), "Fingerprint locked out, lockoutMode(" + lockoutMode + ")");
+                Slog.w(TAG, "Fingerprint locked out, lockoutMode(" + lockoutMode + ")");
                 stop(false /* initiatedByClient */);
                 final int errorCode = lockoutMode == LockoutTracker.LOCKOUT_TIMED
                         ? BiometricConstants.BIOMETRIC_ERROR_LOCKOUT

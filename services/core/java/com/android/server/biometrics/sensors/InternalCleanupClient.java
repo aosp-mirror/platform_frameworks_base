@@ -36,6 +36,9 @@ import java.util.List;
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
 public class InternalCleanupClient extends ClientMonitor {
+
+    private static final String TAG = "Biometrics/InternalCleanupClient";
+
     /**
      * Container for enumerated templates. Used to keep track when cleaning up unknown
      * templates.
@@ -53,18 +56,18 @@ public class InternalCleanupClient extends ClientMonitor {
     private final BiometricUtils mBiometricUtils;
     private ClientMonitor mCurrentTask;
 
-    public InternalCleanupClient(Context context, Constants constants,
+    InternalCleanupClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon,
             ClientMonitorCallbackConverter listener,
             int userId, int groupId, boolean restricted, String owner, int sensorId,
             int statsModality, List<? extends BiometricAuthenticator.Identifier> enrolledList,
             BiometricUtils utils) {
-        super(context, constants, daemon, null /* token */, listener, userId, groupId, restricted,
+        super(context, daemon, null /* token */, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
 
         mBiometricUtils = utils;
-        mCurrentTask = new InternalEnumerateClient(context, constants, daemon, getToken(),
+        mCurrentTask = new InternalEnumerateClient(context, daemon, getToken(),
                 listener, userId, groupId, restricted, owner, enrolledList, utils, sensorId,
                 statsModality);
     }
@@ -73,7 +76,7 @@ public class InternalCleanupClient extends ClientMonitor {
         UserTemplate template = mUnknownHALTemplates.get(0);
         mUnknownHALTemplates.remove(template);
         mCurrentTask = new RemovalClient(getContext(),
-                mConstants, getDaemonWrapper(), getToken(), null /* listener */,
+                getDaemonWrapper(), getToken(), null /* listener */,
                 template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
                 getIsRestricted(), getContext().getPackageName(), mBiometricUtils,
                 getSensorId(), mStatsModality);
@@ -97,7 +100,7 @@ public class InternalCleanupClient extends ClientMonitor {
     @Override
     public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
         if (!(mCurrentTask instanceof RemovalClient)) {
-            Slog.e(getLogTag(), "onRemoved received during client: "
+            Slog.e(TAG, "onRemoved received during client: "
                     + mCurrentTask.getClass().getSimpleName());
             return false;
         }
@@ -108,7 +111,7 @@ public class InternalCleanupClient extends ClientMonitor {
     public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
         if (!(mCurrentTask instanceof InternalEnumerateClient)) {
-            Slog.e(getLogTag(), "onEnumerationResult received during client: "
+            Slog.e(TAG, "onEnumerationResult received during client: "
                     + mCurrentTask.getClass().getSimpleName());
             return false;
         }
@@ -123,7 +126,7 @@ public class InternalCleanupClient extends ClientMonitor {
                 ((InternalEnumerateClient) mCurrentTask).getUnknownHALTemplates();
 
         if (!unknownHALTemplates.isEmpty()) {
-            Slog.w(getLogTag(), "Adding " + unknownHALTemplates.size()
+            Slog.w(TAG, "Adding " + unknownHALTemplates.size()
                     + " templates for deletion");
         }
         for (int i = 0; i < unknownHALTemplates.size(); i++) {

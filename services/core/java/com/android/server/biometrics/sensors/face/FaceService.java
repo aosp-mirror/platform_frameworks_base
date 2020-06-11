@@ -50,7 +50,6 @@ import android.provider.Settings;
 import android.util.Slog;
 import android.view.Surface;
 
-import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
@@ -60,7 +59,6 @@ import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
@@ -145,7 +143,7 @@ public class FaceService extends BiometricServiceBase {
             });
 
             final boolean restricted = isRestricted();
-            final EnrollClient client = new FaceEnrollClient(getContext(), getConstants(),
+            final EnrollClient client = new FaceEnrollClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, 0 /* groupId */, cryptoToken, restricted, opPackageName,
                     getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
@@ -178,7 +176,7 @@ public class FaceService extends BiometricServiceBase {
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_UNKNOWN;
             final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
-                    getConstants(), mDaemonWrapper, token,
+                    mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, opId, restricted, opPackageName,
                     0 /* cookie */, false /* requireConfirmation */, getSensorId(),
@@ -196,7 +194,7 @@ public class FaceService extends BiometricServiceBase {
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = true; // BiometricPrompt is always restricted
             final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
-                    getConstants(), mDaemonWrapper, token,
+                    mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, opId, restricted, opPackageName, cookie,
                     requireConfirmation, getSensorId(), isStrongBiometric(),
@@ -245,7 +243,7 @@ public class FaceService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final RemovalClient client = new RemovalClient(getContext(), getConstants(),
+            final RemovalClient client = new RemovalClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver), faceId,
                     0 /* groupId */, userId, restricted, token.toString(), getBiometricUtils(),
                     getSensorId(), statsModality());
@@ -463,7 +461,6 @@ public class FaceService extends BiometricServiceBase {
     }
 
     private final LockoutHalImpl mLockoutTracker;
-    private final FaceConstants mFaceConstants = new FaceConstants();
 
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
@@ -720,11 +717,6 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected BiometricUtils getBiometricUtils() {
         return FaceUtils.getInstance();
-    }
-
-    @Override
-    protected Constants getConstants() {
-        return mFaceConstants;
     }
 
     @Override

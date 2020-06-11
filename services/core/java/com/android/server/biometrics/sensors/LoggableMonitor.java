@@ -31,7 +31,7 @@ import com.android.server.biometrics.Utils;
  */
 public abstract class LoggableMonitor {
 
-    public static final String TAG = "BiometricStats";
+    public static final String TAG = "Biometrics/LoggableMonitor";
     public static final boolean DEBUG = false;
 
     final int mStatsModality;

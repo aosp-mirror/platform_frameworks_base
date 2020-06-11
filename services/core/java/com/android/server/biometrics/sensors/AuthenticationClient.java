@@ -38,6 +38,8 @@ import java.util.ArrayList;
  */
 public abstract class AuthenticationClient extends ClientMonitor {
 
+    private static final String TAG = "Biometrics/AuthenticationClient";
+
     private final boolean mIsStrongBiometric;
     private final long mOpId;
     private final boolean mRequireConfirmation;
@@ -56,7 +58,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
         try {
             mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "Could not register task stack listener", e);
+            Slog.e(TAG, "Could not register task stack listener", e);
         }
     }
 
@@ -68,17 +70,17 @@ public abstract class AuthenticationClient extends ClientMonitor {
         try {
             mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "Could not unregister task stack listener", e);
+            Slog.e(TAG, "Could not unregister task stack listener", e);
         }
     }
 
-    public AuthenticationClient(Context context, Constants constants,
+    public AuthenticationClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsModality, int statsClient,
             TaskStackListener taskStackListener, LockoutTracker lockoutTracker, Surface surface) {
-        super(context, constants, daemon, token, listener, targetUserId, groupId,
+        super(context, daemon, token, listener, targetUserId, groupId,
                 restricted, owner, cookie, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
@@ -139,11 +141,10 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
         final ClientMonitorCallbackConverter listener = getListener();
 
-        mMetricsLogger.action(mConstants.actionBiometricAuth(), authenticated);
         boolean result = false;
 
         try {
-            if (DEBUG) Slog.v(getLogTag(), "onAuthenticated(" + authenticated + ")"
+            if (DEBUG) Slog.v(TAG, "onAuthenticated(" + authenticated + ")"
                     + ", ID:" + identifier.getBiometricId()
                     + ", Owner: " + getOwnerString()
                     + ", isBP: " + isBiometricPrompt()
@@ -172,7 +173,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     if (mIsStrongBiometric) {
                         KeyStore.getInstance().addAuthToken(byteToken);
                     } else {
-                        Slog.d(getLogTag(), "Skipping addAuthToken");
+                        Slog.d(TAG, "Skipping addAuthToken");
                     }
 
                     try {
@@ -186,11 +187,11 @@ public abstract class AuthenticationClient extends ClientMonitor {
                                     byteToken, getTargetUserId(), mIsStrongBiometric);
                         }
                     } catch (RemoteException e) {
-                        Slog.e(getLogTag(), "Remote exception", e);
+                        Slog.e(TAG, "Remote exception", e);
                     }
                 } else {
                     // Client not listening
-                    Slog.w(getLogTag(), "Client not listening");
+                    Slog.w(TAG, "Client not listening");
                     result = true;
                 }
             } else {
@@ -212,7 +213,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 result = lockoutMode != LockoutTracker.LOCKOUT_NONE; // in a lockout mode
             }
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "Remote exception", e);
+            Slog.e(TAG, "Remote exception", e);
             result = true;
         }
         return result;
@@ -228,14 +229,13 @@ public abstract class AuthenticationClient extends ClientMonitor {
             mStartTimeMs = System.currentTimeMillis();
             final int result = getDaemonWrapper().authenticate(mOpId, getGroupId(), mSurface);
             if (result != 0) {
-                Slog.w(getLogTag(), "startAuthentication failed, result=" + result);
-                mMetricsLogger.histogram(mConstants.tagAuthStartError(), result);
+                Slog.w(TAG, "startAuthentication failed, result=" + result);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
-            if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() + " is authenticating...");
+            if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is authenticating...");
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "startAuthentication failed", e);
+            Slog.e(TAG, "startAuthentication failed", e);
             return ERROR_ESRCH;
         }
         return 0; // success
@@ -244,7 +244,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     @Override
     public int stop(boolean initiatedByClient) {
         if (mAlreadyCancelled) {
-            Slog.w(getLogTag(), "stopAuthentication: already cancelled!");
+            Slog.w(TAG, "stopAuthentication: already cancelled!");
             return 0;
         }
 
@@ -253,13 +253,13 @@ public abstract class AuthenticationClient extends ClientMonitor {
         try {
             final int result = getDaemonWrapper().cancel();
             if (result != 0) {
-                Slog.w(getLogTag(), "stopAuthentication failed, result=" + result);
+                Slog.w(TAG, "stopAuthentication failed, result=" + result);
                 return result;
             }
-            if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() +
+            if (DEBUG) Slog.w(TAG, "client " + getOwnerString() +
                     " is no longer authenticating");
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "stopAuthentication failed", e);
+            Slog.e(TAG, "stopAuthentication failed", e);
             return ERROR_ESRCH;
         }
 
@@ -270,20 +270,20 @@ public abstract class AuthenticationClient extends ClientMonitor {
     @Override
     public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onEnrollResult() called for authenticate!");
+        if (DEBUG) Slog.w(TAG, "onEnrollResult() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 
     @Override
     public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onRemoved() called for authenticate!");
+        if (DEBUG) Slog.w(TAG, "onRemoved() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 
     @Override
     public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onEnumerationResult() called for authenticate!");
+        if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for authenticate!");
         return true; // Invalid for Authenticate
     }
 }

@@ -30,15 +30,18 @@ import java.util.ArrayList;
  * A class to keep track of the remove state for a given client.
  */
 public class RemovalClient extends ClientMonitor {
+
+    private static final String TAG = "Biometrics/RemovalClient";
+
     private final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(Context context, Constants constants,
+    public RemovalClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int biometricId, int groupId, int userId,
             boolean restricted, String owner, BiometricUtils utils, int sensorId,
             int statsModality) {
-        super(context, constants, daemon, token, listener, userId, groupId, restricted,
+        super(context, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
@@ -55,14 +58,13 @@ public class RemovalClient extends ClientMonitor {
         try {
             final int result = getDaemonWrapper().remove(getGroupId(), mBiometricId);
             if (result != 0) {
-                Slog.w(getLogTag(), "startRemove with id = " + mBiometricId + " failed, result=" +
+                Slog.w(TAG, "startRemove with id = " + mBiometricId + " failed, result=" +
                         result);
-                mMetricsLogger.histogram(mConstants.tagRemoveStartError(), result);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "startRemove failed", e);
+            Slog.e(TAG, "startRemove failed", e);
         }
         return 0;
     }
@@ -70,19 +72,19 @@ public class RemovalClient extends ClientMonitor {
     @Override
     public int stop(boolean initiatedByClient) {
         if (mAlreadyCancelled) {
-            Slog.w(getLogTag(), "stopRemove: already cancelled!");
+            Slog.w(TAG, "stopRemove: already cancelled!");
             return 0;
         }
 
         try {
             final int result = getDaemonWrapper().cancel();
             if (result != 0) {
-                Slog.w(getLogTag(), "stopRemoval failed, result=" + result);
+                Slog.w(TAG, "stopRemoval failed, result=" + result);
                 return result;
             }
-            if (DEBUG) Slog.w(getLogTag(), "client " + getOwnerString() + " is no longer removing");
+            if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is no longer removing");
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "stopRemoval failed", e);
+            Slog.e(TAG, "stopRemoval failed", e);
             return ERROR_ESRCH;
         }
         mAlreadyCancelled = true;
@@ -99,7 +101,7 @@ public class RemovalClient extends ClientMonitor {
                 getListener().onRemoved(identifier, remaining);
             }
         } catch (RemoteException e) {
-            Slog.w(getLogTag(), "Failed to notify Removed:", e);
+            Slog.w(TAG, "Failed to notify Removed:", e);
         }
         return remaining == 0;
     }
@@ -115,21 +117,21 @@ public class RemovalClient extends ClientMonitor {
 
     @Override
     public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int rem) {
-        if (DEBUG) Slog.w(getLogTag(), "onEnrollResult() called for remove!");
+        if (DEBUG) Slog.w(TAG, "onEnrollResult() called for remove!");
         return true; // Invalid for Remove
     }
 
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
-        if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for remove!");
+        if (DEBUG) Slog.w(TAG, "onAuthenticated() called for remove!");
         return true; // Invalid for Remove.
     }
 
     @Override
     public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onEnumerationResult() called for remove!");
+        if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for remove!");
         return true; // Invalid for Remove.
     }
 }

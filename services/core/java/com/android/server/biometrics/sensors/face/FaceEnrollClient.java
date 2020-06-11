@@ -27,7 +27,6 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
 
 /**
@@ -39,7 +38,6 @@ public class FaceEnrollClient extends EnrollClient {
     private final int[] mEnrollIgnoreListVendor;
 
     FaceEnrollClient(Context context,
-            Constants constants,
             BiometricServiceBase.DaemonWrapper daemon,
             IBinder token,
             ClientMonitorCallbackConverter listener, int userId,
@@ -47,7 +45,7 @@ public class FaceEnrollClient extends EnrollClient {
             BiometricUtils utils, int[] disabledFeatures,
             int timeoutSec, int statsModality, PowerManager powerManager,
             Surface surface, int sensorId, boolean shouldVibrate) {
-        super(context, constants, daemon, token, listener, userId, groupId, cryptoToken, restricted,
+        super(context, daemon, token, listener, userId, groupId, cryptoToken, restricted,
                 owner, utils, disabledFeatures, timeoutSec, statsModality, powerManager, surface,
                 sensorId, shouldVibrate);
         mEnrollIgnoreList = getContext().getResources()

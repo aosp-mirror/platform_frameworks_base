@@ -25,7 +25,6 @@ import android.hardware.iris.IIrisService;
 
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
-import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 
@@ -87,11 +86,6 @@ public class IrisService extends BiometricServiceBase {
 
     @Override
     protected BiometricUtils getBiometricUtils() {
-        return null;
-    }
-
-    @Override
-    protected Constants getConstants() {
         return null;
     }
 
