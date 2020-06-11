@@ -1100,16 +1100,17 @@ public class BubbleStackView extends FrameLayout
             mBubbleOverflow = new BubbleOverflow(getContext());
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
-            mBubbleContainer.removeView(mBubbleOverflow.getBtn());
+            mBubbleContainer.removeView(mBubbleOverflow.getIconView());
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
             overflowBtnIndex = mBubbleContainer.getChildCount();
         }
-        mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
+        mBubbleContainer.addView(mBubbleOverflow.getIconView(), overflowBtnIndex,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mBubbleOverflow.getBtn().setOnClickListener(v -> {
+        mBubbleOverflow.getIconView().setOnClickListener(v -> {
             setSelectedBubble(mBubbleOverflow);
             showManageMenu(false);
         });
+        updateOverflowVisibility();
     }
     /**
      * Handle theme changes.
