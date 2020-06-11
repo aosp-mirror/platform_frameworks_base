@@ -423,6 +423,7 @@ public class DozeTriggers implements DozeMachine.Part {
 
     @Override
     public void onScreenState(int state) {
+        mDozeSensors.onScreenState(state);
         if (state == Display.STATE_DOZE || state == Display.STATE_DOZE_SUSPEND
                 || state == Display.STATE_OFF) {
             mDozeSensors.setProxListening(mWantProx);
