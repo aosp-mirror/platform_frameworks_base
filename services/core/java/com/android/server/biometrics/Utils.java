@@ -310,4 +310,13 @@ public class Utils {
     static int removeBiometricBits(@Authenticators.Types int authenticators) {
         return authenticators & ~Authenticators.BIOMETRIC_MIN_STRENGTH;
     }
+
+    public static boolean listContains(int[] haystack, int needle) {
+        for (int i = 0; i < haystack.length; i++) {
+            if (haystack[i] == needle) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

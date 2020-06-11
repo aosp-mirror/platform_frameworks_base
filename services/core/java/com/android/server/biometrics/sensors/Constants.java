@@ -31,6 +31,4 @@ public interface Constants {
     /** Integers for MetricsLogger.action() */
     int actionBiometricAuth();
     int actionBiometricEnroll();
-
-    int acquireVendorCode();
 }

@@ -146,32 +146,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     public abstract boolean onEnumerationResult(
             BiometricAuthenticator.Identifier identifier, int remaining);
 
-    public int[] getAcquireIgnorelist() {
-        return new int[0];
-    }
-    public int[] getAcquireVendorIgnorelist() {
-        return new int[0];
-    }
-
-    private boolean blacklistContains(int acquiredInfo, int vendorCode) {
-        if (acquiredInfo == mConstants.acquireVendorCode()) {
-            for (int i = 0; i < getAcquireVendorIgnorelist().length; i++) {
-                if (getAcquireVendorIgnorelist()[i] == vendorCode) {
-                    if (DEBUG) Slog.v(getLogTag(), "Ignoring vendor message: " + vendorCode);
-                    return true;
-                }
-            }
-        } else {
-            for (int i = 0; i < getAcquireIgnorelist().length; i++) {
-                if (getAcquireIgnorelist()[i] == acquiredInfo) {
-                    if (DEBUG) Slog.v(getLogTag(), "Ignoring message: " + acquiredInfo);
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     public boolean isAlreadyDone() {
         return mAlreadyDone;
     }
@@ -183,10 +157,17 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @return true if client should be removed
      */
     public boolean onAcquired(int acquiredInfo, int vendorCode) {
+        // Default is to always send acquire messages to clients.
+        return onAcquiredInternal(acquiredInfo, vendorCode, true /* shouldSend */);
+    }
+
+    protected final boolean onAcquiredInternal(int acquiredInfo, int vendorCode,
+            boolean shouldSend) {
         super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
-        if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode);
+        if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode
+                + ", shouldSend: " + shouldSend);
         try {
-            if (mListener != null && !blacklistContains(acquiredInfo, vendorCode)) {
+            if (mListener != null && shouldSend) {
                 mListener.onAcquired(mSensorId, acquiredInfo, vendorCode);
             }
             return false; // acquisition continues...

@@ -32,6 +32,7 @@ import android.os.IBinder;
 import android.os.UserHandle;
 
 import com.android.internal.R;
+import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -152,14 +153,20 @@ class FaceAuthenticationClient extends AuthenticationClient {
         return super.onError(error, vendorCode);
     }
 
-    @Override
-    public int[] getAcquireIgnorelist() {
+    private int[] getAcquireIgnorelist() {
         return isBiometricPrompt() ? mBiometricPromptIgnoreList : mKeyguardIgnoreList;
     }
 
-    @Override
-    public int[] getAcquireVendorIgnorelist() {
+    private int[] getAcquireVendorIgnorelist() {
         return isBiometricPrompt() ? mBiometricPromptIgnoreListVendor : mKeyguardIgnoreListVendor;
+    }
+
+    private boolean shouldSend(int acquireInfo, int vendorCode) {
+        if (acquireInfo == FaceManager.FACE_ACQUIRED_VENDOR) {
+            return !Utils.listContains(getAcquireVendorIgnorelist(), vendorCode);
+        } else {
+            return !Utils.listContains(getAcquireIgnorelist(), acquireInfo);
+        }
     }
 
     @Override
@@ -205,6 +212,7 @@ class FaceAuthenticationClient extends AuthenticationClient {
                     UserHandle.CURRENT);
         }
 
-        return super.onAcquired(acquireInfo, vendorCode);
+        final boolean shouldSend = shouldSend(acquireInfo, vendorCode);
+        return onAcquiredInternal(acquireInfo, vendorCode, shouldSend);
     }
 }

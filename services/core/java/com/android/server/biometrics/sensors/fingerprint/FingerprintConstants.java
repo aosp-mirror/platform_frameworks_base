@@ -67,9 +67,4 @@ public class FingerprintConstants implements Constants {
     public int actionBiometricEnroll() {
         return MetricsProto.MetricsEvent.ACTION_FINGERPRINT_ENROLL;
     }
-
-    @Override
-    public int acquireVendorCode() {
-        return FingerprintManager.FINGERPRINT_ACQUIRED_VENDOR;
-    }
 }
