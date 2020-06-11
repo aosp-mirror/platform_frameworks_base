@@ -2407,14 +2407,15 @@ public class MediaSessionService extends SystemService implements Monitor {
             MediaButtonReceiverHolder mediaButtonReceiverHolder = null;
 
             if (mCustomMediaKeyDispatcher != null) {
-                MediaSession.Token token = mCustomMediaKeyDispatcher.getCustomMediaSession(
+                MediaSession.Token token = mCustomMediaKeyDispatcher.getMediaSession(
                         keyEvent, uid, asSystemService);
                 if (token != null) {
                     session = getMediaSessionRecordLocked(token);
                 }
 
                 if (session == null) {
-                    PendingIntent pi = mCustomMediaKeyDispatcher.getCustomMediaButtonReceiver();
+                    PendingIntent pi = mCustomMediaKeyDispatcher.getMediaButtonReceiver(keyEvent,
+                            uid, asSystemService);
                     if (pi != null) {
                         mediaButtonReceiverHolder = MediaButtonReceiverHolder.create(mContext,
                                 mCurrentFullUserRecord.mFullUserId, pi);
