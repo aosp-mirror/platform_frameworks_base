@@ -30,6 +30,7 @@ import android.media.MediaTranscodeManager.TranscodingRequest;
 import android.media.TranscodingJobParcel;
 import android.media.TranscodingRequestParcel;
 import android.media.TranscodingResultParcel;
+import android.media.TranscodingTestConfig;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.test.ActivityInstrumentationTestCase2;
@@ -144,7 +145,7 @@ public class MediaTranscodeManagerWithMockServiceTest
                                 new ProcessingJobRunnable(callback, outjob,
                                         mPendingTranscodingJobs),
                                 inRequest.testConfig == null ? 0
-                                        : inRequest.testConfig.processingDelayMs,
+                                        : inRequest.testConfig.processingTotalTimeMs,
                                 TimeUnit.MILLISECONDS);
                         mPendingTranscodingJobs.put(outjob.jobId, transcodingFuture);
                     } catch (RejectedExecutionException e) {
@@ -353,6 +354,10 @@ public class MediaTranscodeManagerWithMockServiceTest
         Log.d(TAG, "Starting: testMediaTranscodeManager");
 
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
+        TranscodingTestConfig testConfig = new TranscodingTestConfig();
+        testConfig.passThroughMode = true;
+        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
+
         TranscodingRequest request =
                 new TranscodingRequest.Builder()
                         .setSourceUri(mSourceHEVCVideoUri)
@@ -360,7 +365,7 @@ public class MediaTranscodeManagerWithMockServiceTest
                         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
                         .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
                         .setVideoTrackFormat(createMediaFormat())
-                        .setProcessingDelayMs(300 /* delayMs */)
+                        .setTestConfig(testConfig)
                         .build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
 

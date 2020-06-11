@@ -2534,7 +2534,7 @@ class UserController implements Handler.Callback {
                 showUserSwitchDialog(fromToUserPair);
                 break;
             case CLEAR_USER_JOURNEY_SESSION_MSG:
-                clearSessionId(msg.arg1);
+                logAndClearSessionId(msg.arg1);
                 break;
         }
         return false;
@@ -2645,6 +2645,21 @@ class UserController implements Handler.Callback {
         synchronized (mUserIdToUserJourneyMap) {
             mHandler.removeMessages(CLEAR_USER_JOURNEY_SESSION_MSG);
             mUserIdToUserJourneyMap.delete(userId);
+        }
+    }
+
+    /**
+     * Log a final event of the {@link UserJourneySession} and clear it.
+     */
+    private void logAndClearSessionId(@UserIdInt int userId) {
+        synchronized (mUserIdToUserJourneyMap) {
+            final UserJourneySession userJourneySession = mUserIdToUserJourneyMap.get(userId);
+            if (userJourneySession != null) {
+                FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED,
+                        userJourneySession.mSessionId, userId, USER_LIFECYCLE_EVENT_UNKNOWN,
+                        USER_LIFECYCLE_EVENT_STATE_NONE);
+            }
+            clearSessionId(userId);
         }
     }
 

@@ -19,10 +19,14 @@ package com.android.internal.os;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Binder;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.Process;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.text.format.DateFormat;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
@@ -93,15 +97,47 @@ public class BinderCallsStats implements BinderInternal.Observer {
     private CachedDeviceState.Readonly mDeviceState;
     private CachedDeviceState.TimeInStateStopwatch mBatteryStopwatch;
 
+    private static final int CALL_STATS_OBSERVER_DEBOUNCE_MILLIS = 5000;
+    private BinderInternal.CallStatsObserver mCallStatsObserver;
+    private ArraySet<Integer> mSendUidsToObserver = new ArraySet<>(32);
+    private final Handler mCallStatsObserverHandler;
+    private Runnable mCallStatsObserverRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mCallStatsObserver == null) {
+                return;
+            }
+
+            noteCallsStatsDelayed();
+
+            synchronized (mLock) {
+                int size = mSendUidsToObserver.size();
+                for (int i = 0; i < size; i++) {
+                    UidEntry uidEntry = mUidEntries.get(mSendUidsToObserver.valueAt(i));
+                    if (uidEntry != null) {
+                        mCallStatsObserver.noteCallStats(uidEntry.workSourceUid,
+                                uidEntry.getCallStatsList());
+                    }
+                }
+                mSendUidsToObserver.clear();
+            }
+        }
+    };
+
     /** Injector for {@link BinderCallsStats}. */
     public static class Injector {
         public Random getRandomGenerator() {
             return new Random();
         }
+
+        public Handler getHandler() {
+            return new Handler(Looper.getMainLooper());
+        }
     }
 
     public BinderCallsStats(Injector injector) {
         this.mRandom = injector.getRandomGenerator();
+        this.mCallStatsObserverHandler = injector.getHandler();
     }
 
     public void setDeviceState(@NonNull CachedDeviceState.Readonly deviceState) {
@@ -110,6 +146,24 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
         mDeviceState = deviceState;
         mBatteryStopwatch = deviceState.createTimeOnBatteryStopwatch();
+    }
+
+    /**
+     * Registers an observer for call stats, which is invoked periodically with accumulated
+     * binder call stats.
+     */
+    public void setCallStatsObserver(
+            BinderInternal.CallStatsObserver callStatsObserver) {
+        mCallStatsObserver = callStatsObserver;
+        noteCallsStatsDelayed();
+    }
+
+    private void noteCallsStatsDelayed() {
+        mCallStatsObserverHandler.removeCallbacks(mCallStatsObserverRunnable);
+        if (mCallStatsObserver != null) {
+            mCallStatsObserverHandler.postDelayed(mCallStatsObserverRunnable,
+                    CALL_STATS_OBSERVER_DEBOUNCE_MILLIS);
+        }
     }
 
     @Override
@@ -217,6 +271,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     callStat.callCount++;
                 }
             }
+            if (mCallStatsObserver != null && !UserHandle.isCore(workSourceUid)) {
+                mSendUidsToObserver.add(workSourceUid);
+            }
         }
     }
 
@@ -251,7 +308,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     @Nullable
-    private Method getDefaultTransactionNameMethod(Class<? extends Binder> binder) {
+    private static Method getDefaultTransactionNameMethod(Class<? extends Binder> binder) {
         try {
             return binder.getMethod("getDefaultTransactionName", int.class);
         } catch (NoSuchMethodException e) {
@@ -261,16 +318,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     @Nullable
-    private String resolveTransactionCode(Method getDefaultTransactionName, int transactionCode) {
-        if (getDefaultTransactionName == null) {
-            return null;
+    private static String resolveTransactionCode(Method getDefaultTransactionName,
+            int transactionCode) {
+        String resolvedCode = null;
+        if (getDefaultTransactionName != null) {
+            try {
+                resolvedCode = (String) getDefaultTransactionName.invoke(null, transactionCode);
+            } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-        try {
-            return (String) getDefaultTransactionName.invoke(null, transactionCode);
-        } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-            throw new RuntimeException(e);
-        }
+        return resolvedCode == null ? String.valueOf(transactionCode) : resolvedCode;
     }
 
     /**
@@ -326,11 +384,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     || previous.transactionCode != exported.transactionCode;
             final String methodName;
             if (isClassDifferent || isCodeDifferent) {
-                String resolvedCode = resolveTransactionCode(
+                methodName = resolveTransactionCode(
                         getDefaultTransactionName, exported.transactionCode);
-                methodName = resolvedCode == null
-                        ? String.valueOf(exported.transactionCode)
-                        : resolvedCode;
             } else {
                 methodName = previousMethodName;
             }
@@ -627,6 +682,20 @@ public class BinderCallsStats implements BinderInternal.Observer {
             this.binderClass = binderClass;
             this.transactionCode = transactionCode;
             this.screenInteractive = screenInteractive;
+        }
+
+        @Override
+        public String toString() {
+            return "CallStat{"
+                    + "callingUid=" + callingUid
+                    + ", transaction=" + binderClass.getSimpleName()
+                    + '.' + resolveTransactionCode(
+                    getDefaultTransactionNameMethod(binderClass), transactionCode)
+                    + ", callCount=" + callCount
+                    + ", recordedCallCount=" + recordedCallCount
+                    + ", cpuTimeMicros=" + cpuTimeMicros
+                    + ", latencyMicros=" + latencyMicros
+                    + '}';
         }
     }
 

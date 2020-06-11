@@ -3511,20 +3511,17 @@ class Task extends WindowContainer<WindowContainer> {
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
         super.dump(pw, prefix, dumpAll);
+        pw.println(prefix + "bounds=" + getBounds().toShortString());
         final String doublePrefix = prefix + "  ";
-
-        pw.println(prefix + "taskId=" + mTaskId);
-        pw.println(doublePrefix + "mBounds=" + getBounds().toShortString());
-        pw.println(doublePrefix + "appTokens=" + mChildren);
-
-        final String triplePrefix = doublePrefix + "  ";
-        final String quadruplePrefix = triplePrefix + "  ";
-
-        int[] index = { 0 };
-        forAllActivities((r) -> {
-            pw.println(triplePrefix + "Activity #" + index[0]++ + " " + r);
-            r.dump(pw, quadruplePrefix, dumpAll);
-        });
+        for (int i = mChildren.size() - 1; i >= 0; i--) {
+            final WindowContainer<?> child = mChildren.get(i);
+            pw.println(prefix + "* " + child);
+            // Only dump non-activity because full activity info is already printed by
+            // RootWindowContainer#dumpActivities.
+            if (child.asActivityRecord() == null) {
+                child.dump(pw, doublePrefix, dumpAll);
+            }
+        }
     }
 
     /**

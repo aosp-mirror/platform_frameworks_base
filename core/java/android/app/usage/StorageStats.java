@@ -46,12 +46,6 @@ public final class StorageStats implements Parcelable {
         return codeBytes;
     }
 
-    /** @removed */
-    @Deprecated
-    public long getCodeBytes() {
-        return getAppBytes();
-    }
-
     /**
      * Return the size of all data. This includes files stored under
      * {@link Context#getDataDir()}, {@link Context#getCacheDir()},

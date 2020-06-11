@@ -1072,7 +1072,7 @@ public class CameraDeviceImpl extends CameraDevice
      * @param lastFrameNumber last frame number returned from binder.
      * @param repeatingRequestTypes the repeating requests' types.
      */
-    private void checkEarlyTriggerSequenceCompleteLocked(
+    private void checkEarlyTriggerSequenceComplete(
             final int requestId, final long lastFrameNumber,
             final int[] repeatingRequestTypes) {
         // lastFrameNumber being equal to NO_FRAMES_CAPTURED means that the request
@@ -1212,7 +1212,7 @@ public class CameraDeviceImpl extends CameraDevice
 
             if (repeating) {
                 if (mRepeatingRequestId != REQUEST_ID_NONE) {
-                    checkEarlyTriggerSequenceCompleteLocked(mRepeatingRequestId,
+                    checkEarlyTriggerSequenceComplete(mRepeatingRequestId,
                             requestInfo.getLastFrameNumber(),
                             mRepeatingRequestTypes);
                 }
@@ -1269,7 +1269,7 @@ public class CameraDeviceImpl extends CameraDevice
                     return;
                 }
 
-                checkEarlyTriggerSequenceCompleteLocked(requestId, lastFrameNumber, requestTypes);
+                checkEarlyTriggerSequenceComplete(requestId, lastFrameNumber, requestTypes);
             }
         }
     }
@@ -1302,7 +1302,7 @@ public class CameraDeviceImpl extends CameraDevice
 
             long lastFrameNumber = mRemoteDevice.flush();
             if (mRepeatingRequestId != REQUEST_ID_NONE) {
-                checkEarlyTriggerSequenceCompleteLocked(mRepeatingRequestId, lastFrameNumber,
+                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber,
                         mRepeatingRequestTypes);
                 mRepeatingRequestId = REQUEST_ID_NONE;
                 mRepeatingRequestTypes = null;
@@ -1442,135 +1442,78 @@ public class CameraDeviceImpl extends CameraDevice
         long completedFrameNumber = mFrameNumberTracker.getCompletedFrameNumber();
         long completedReprocessFrameNumber = mFrameNumberTracker.getCompletedReprocessFrameNumber();
         long completedZslStillFrameNumber = mFrameNumberTracker.getCompletedZslStillFrameNumber();
-
+        boolean isReprocess = false;
         Iterator<RequestLastFrameNumbersHolder> iter = mRequestLastFrameNumbersList.iterator();
         while (iter.hasNext()) {
             final RequestLastFrameNumbersHolder requestLastFrameNumbers = iter.next();
+            boolean sequenceCompleted = false;
             final int requestId = requestLastFrameNumbers.getRequestId();
             final CaptureCallbackHolder holder;
-            if (mRemoteDevice == null) {
-                Log.w(TAG, "Camera closed while checking sequences");
-                return;
-            }
-            if (!requestLastFrameNumbers.isSequenceCompleted()) {
-                long lastRegularFrameNumber =
-                        requestLastFrameNumbers.getLastRegularFrameNumber();
-                long lastReprocessFrameNumber =
-                        requestLastFrameNumbers.getLastReprocessFrameNumber();
-                long lastZslStillFrameNumber =
-                        requestLastFrameNumbers.getLastZslStillFrameNumber();
-                if (lastRegularFrameNumber <= completedFrameNumber
-                        && lastReprocessFrameNumber <= completedReprocessFrameNumber
-                        && lastZslStillFrameNumber <= completedZslStillFrameNumber) {
-                    Log.v(TAG, String.format(
-                            "Mark requestId %d as completed, because lastRegularFrame %d "
-                            + "is <= %d, lastReprocessFrame %d is <= %d, "
-                            + "lastZslStillFrame %d is <= %d", requestId,
-                            lastRegularFrameNumber, completedFrameNumber,
-                            lastReprocessFrameNumber, completedReprocessFrameNumber,
-                            lastZslStillFrameNumber, completedZslStillFrameNumber));
-                    requestLastFrameNumbers.markSequenceCompleted();
+            synchronized(mInterfaceLock) {
+                if (mRemoteDevice == null) {
+                    Log.w(TAG, "Camera closed while checking sequences");
+                    return;
                 }
 
-                // Call onCaptureSequenceCompleted
                 int index = mCaptureCallbackMap.indexOfKey(requestId);
                 holder = (index >= 0) ?
                         mCaptureCallbackMap.valueAt(index) : null;
-                if (holder != null && requestLastFrameNumbers.isSequenceCompleted()) {
-                    Runnable resultDispatch = new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!CameraDeviceImpl.this.isClosed()){
-                                if (DEBUG) {
-                                    Log.d(TAG, String.format(
-                                            "fire sequence complete for request %d",
-                                            requestId));
-                                }
-
-                                holder.getCallback().onCaptureSequenceCompleted(
-                                    CameraDeviceImpl.this,
-                                    requestId,
-                                    requestLastFrameNumbers.getLastFrameNumber());
-                            }
+                if (holder != null) {
+                    long lastRegularFrameNumber =
+                            requestLastFrameNumbers.getLastRegularFrameNumber();
+                    long lastReprocessFrameNumber =
+                            requestLastFrameNumbers.getLastReprocessFrameNumber();
+                    long lastZslStillFrameNumber =
+                            requestLastFrameNumbers.getLastZslStillFrameNumber();
+                    // check if it's okay to remove request from mCaptureCallbackMap
+                    if (lastRegularFrameNumber <= completedFrameNumber
+                            && lastReprocessFrameNumber <= completedReprocessFrameNumber
+                            && lastZslStillFrameNumber <= completedZslStillFrameNumber) {
+                        sequenceCompleted = true;
+                        mCaptureCallbackMap.removeAt(index);
+                        if (DEBUG) {
+                            Log.v(TAG, String.format(
+                                    "Remove holder for requestId %d, because lastRegularFrame %d "
+                                    + "is <= %d, lastReprocessFrame %d is <= %d, "
+                                    + "lastZslStillFrame %d is <= %d", requestId,
+                                    lastRegularFrameNumber, completedFrameNumber,
+                                    lastReprocessFrameNumber, completedReprocessFrameNumber,
+                                    lastZslStillFrameNumber, completedZslStillFrameNumber));
                         }
-                    };
-                    final long ident = Binder.clearCallingIdentity();
-                    try {
-                        holder.getExecutor().execute(resultDispatch);
-                    } finally {
-                        Binder.restoreCallingIdentity(ident);
                     }
                 }
             }
 
-            if (requestLastFrameNumbers.isSequenceCompleted() &&
-                    requestLastFrameNumbers.isInflightCompleted()) {
-                int index = mCaptureCallbackMap.indexOfKey(requestId);
-                if (index >= 0) {
-                    mCaptureCallbackMap.removeAt(index);
-                }
-                if (DEBUG) {
-                    Log.v(TAG, String.format(
-                            "Remove holder for requestId %d", requestId));
-                }
+            // If no callback is registered for this requestId or sequence completed, remove it
+            // from the frame number->request pair because it's not needed anymore.
+            if (holder == null || sequenceCompleted) {
                 iter.remove();
             }
-        }
-    }
 
-    private void removeCompletedCallbackHolderLocked(long lastCompletedRegularFrameNumber,
-            long lastCompletedReprocessFrameNumber, long lastCompletedZslStillFrameNumber) {
-        if (DEBUG) {
-            Log.v(TAG, String.format("remove completed callback holders for "
-                    + "lastCompletedRegularFrameNumber %d, "
-                    + "lastCompletedReprocessFrameNumber %d, "
-                    + "lastCompletedZslStillFrameNumber %d",
-                    lastCompletedRegularFrameNumber,
-                    lastCompletedReprocessFrameNumber,
-                    lastCompletedZslStillFrameNumber));
-        }
+            // Call onCaptureSequenceCompleted
+            if (sequenceCompleted) {
+                Runnable resultDispatch = new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!CameraDeviceImpl.this.isClosed()){
+                            if (DEBUG) {
+                                Log.d(TAG, String.format(
+                                        "fire sequence complete for request %d",
+                                        requestId));
+                            }
 
-        Iterator<RequestLastFrameNumbersHolder> iter = mRequestLastFrameNumbersList.iterator();
-        while (iter.hasNext()) {
-            final RequestLastFrameNumbersHolder requestLastFrameNumbers = iter.next();
-            final int requestId = requestLastFrameNumbers.getRequestId();
-            final CaptureCallbackHolder holder;
-            if (mRemoteDevice == null) {
-                Log.w(TAG, "Camera closed while removing completed callback holders");
-                return;
-            }
-
-            long lastRegularFrameNumber =
-                    requestLastFrameNumbers.getLastRegularFrameNumber();
-            long lastReprocessFrameNumber =
-                    requestLastFrameNumbers.getLastReprocessFrameNumber();
-            long lastZslStillFrameNumber =
-                    requestLastFrameNumbers.getLastZslStillFrameNumber();
-
-            if (lastRegularFrameNumber <= lastCompletedRegularFrameNumber
-                        && lastReprocessFrameNumber <= lastCompletedReprocessFrameNumber
-                        && lastZslStillFrameNumber <= lastCompletedZslStillFrameNumber) {
-
-                if (requestLastFrameNumbers.isSequenceCompleted()) {
-                    int index = mCaptureCallbackMap.indexOfKey(requestId);
-                    if (index >= 0) {
-                        mCaptureCallbackMap.removeAt(index);
+                            holder.getCallback().onCaptureSequenceCompleted(
+                                CameraDeviceImpl.this,
+                                requestId,
+                                requestLastFrameNumbers.getLastFrameNumber());
+                        }
                     }
-                    if (DEBUG) {
-                        Log.v(TAG, String.format(
-                                "Remove holder for requestId %d, because lastRegularFrame %d "
-                                + "is <= %d, lastReprocessFrame %d is <= %d, "
-                                + "lastZslStillFrame %d is <= %d", requestId,
-                                lastRegularFrameNumber, lastCompletedRegularFrameNumber,
-                                lastReprocessFrameNumber, lastCompletedReprocessFrameNumber,
-                                lastZslStillFrameNumber, lastCompletedZslStillFrameNumber));
-                    }
-                    iter.remove();
-                } else {
-                    if (DEBUG) {
-                        Log.v(TAG, "Sequence not yet completed for request id " + requestId);
-                    }
-                    requestLastFrameNumbers.markInflightCompleted();
+                };
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    holder.getExecutor().execute(resultDispatch);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
                 }
             }
         }
@@ -1759,12 +1702,6 @@ public class CameraDeviceImpl extends CameraDevice
                 return;
             }
 
-            // Remove all capture callbacks now that device has gone to IDLE state.
-            removeCompletedCallbackHolderLocked(
-                    Long.MAX_VALUE, /*lastCompletedRegularFrameNumber*/
-                    Long.MAX_VALUE, /*lastCompletedReprocessFrameNumber*/
-                    Long.MAX_VALUE /*lastCompletedZslStillFrameNumber*/);
-
             if (!CameraDeviceImpl.this.mIdle) {
                 final long ident = Binder.clearCallingIdentity();
                 try {
@@ -1810,7 +1747,7 @@ public class CameraDeviceImpl extends CameraDevice
                     return;
                 }
 
-                checkEarlyTriggerSequenceCompleteLocked(mRepeatingRequestId, lastFrameNumber,
+                checkEarlyTriggerSequenceComplete(mRepeatingRequestId, lastFrameNumber,
                         mRepeatingRequestTypes);
                 // Check if there is already a new repeating request
                 if (mRepeatingRequestId == repeatingRequestId) {
@@ -1829,18 +1766,9 @@ public class CameraDeviceImpl extends CameraDevice
         public void onCaptureStarted(final CaptureResultExtras resultExtras, final long timestamp) {
             int requestId = resultExtras.getRequestId();
             final long frameNumber = resultExtras.getFrameNumber();
-            final long lastCompletedRegularFrameNumber =
-                    resultExtras.getLastCompletedRegularFrameNumber();
-            final long lastCompletedReprocessFrameNumber =
-                    resultExtras.getLastCompletedReprocessFrameNumber();
-            final long lastCompletedZslFrameNumber =
-                    resultExtras.getLastCompletedZslFrameNumber();
 
             if (DEBUG) {
-                Log.d(TAG, "Capture started for id " + requestId + " frame number " + frameNumber
-                        + ": completedRegularFrameNumber " + lastCompletedRegularFrameNumber
-                        + ", completedReprocessFrameNUmber " + lastCompletedReprocessFrameNumber
-                        + ", completedZslFrameNumber " + lastCompletedZslFrameNumber);
+                Log.d(TAG, "Capture started for id " + requestId + " frame number " + frameNumber);
             }
             final CaptureCallbackHolder holder;
 
@@ -1855,12 +1783,6 @@ public class CameraDeviceImpl extends CameraDevice
                             timestamp);
                     return;
                 }
-
-                // Check if it's okay to remove completed callbacks from mCaptureCallbackMap.
-                // A callback is completed if the corresponding inflight request has been removed
-                // from the inflight queue in cameraservice.
-                removeCompletedCallbackHolderLocked(lastCompletedRegularFrameNumber,
-                        lastCompletedReprocessFrameNumber, lastCompletedZslFrameNumber);
 
                 // Get the callback for this frame ID, if there is one
                 holder = CameraDeviceImpl.this.mCaptureCallbackMap.get(requestId);

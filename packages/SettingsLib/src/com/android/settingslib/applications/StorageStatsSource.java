@@ -120,7 +120,7 @@ public class StorageStatsSource {
         }
 
         public long getCodeBytes() {
-            return mStats.getCodeBytes();
+            return mStats.getAppBytes();
         }
 
         public long getDataBytes() {

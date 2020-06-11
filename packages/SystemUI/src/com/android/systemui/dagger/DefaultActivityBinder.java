@@ -24,6 +24,8 @@ import com.android.systemui.keyguard.WorkLockActivity;
 import com.android.systemui.screenrecord.ScreenRecordDialog;
 import com.android.systemui.settings.BrightnessDialog;
 import com.android.systemui.tuner.TunerActivity;
+import com.android.systemui.usb.UsbDebuggingActivity;
+import com.android.systemui.usb.UsbDebuggingSecondaryUserActivity;
 
 import dagger.Binds;
 import dagger.Module;
@@ -70,4 +72,17 @@ public abstract class DefaultActivityBinder {
     @IntoMap
     @ClassKey(BubbleOverflowActivity.class)
     public abstract Activity bindBubbleOverflowActivity(BubbleOverflowActivity activity);
+
+    /** Inject into UsbDebuggingActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbDebuggingActivity.class)
+    public abstract Activity bindUsbDebuggingActivity(UsbDebuggingActivity activity);
+
+    /** Inject into UsbDebuggingSecondaryUserActivity. */
+    @Binds
+    @IntoMap
+    @ClassKey(UsbDebuggingSecondaryUserActivity.class)
+    public abstract Activity bindUsbDebuggingSecondaryUserActivity(
+            UsbDebuggingSecondaryUserActivity activity);
 }

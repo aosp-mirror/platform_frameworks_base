@@ -32,6 +32,7 @@ import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.FloatPropertyCompat
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.util.animation.PhysicsAnimator
+import kotlin.math.abs
 import kotlin.math.hypot
 
 /**
@@ -231,11 +232,11 @@ abstract class MagnetizedObject<T : Any>(
     var flingUnstuckFromTargetMinVelocity = 1000f
 
     /**
-     * Sets the maximum velocity above which the object will not stick to the target. Even if the
+     * Sets the maximum X velocity above which the object will not stick to the target. Even if the
      * object is dragged through the magnetic field, it will not stick to the target until the
-     * velocity is below this value.
+     * horizontal velocity is below this value.
      */
-    var stickToTargetMaxVelocity = 2000f
+    var stickToTargetMaxXVelocity = 2000f
 
     /**
      * Enable or disable haptic vibration effects when the object interacts with the magnetic field.
@@ -363,7 +364,7 @@ abstract class MagnetizedObject<T : Any>(
             // If the object is moving too quickly within the magnetic field, do not stick it. This
             // only applies to objects newly stuck to a target. If the object is moved into a new
             // target, it wasn't moving at all (since it was stuck to the previous one).
-            if (objectNewlyStuckToTarget && hypot(velX, velY) > stickToTargetMaxVelocity) {
+            if (objectNewlyStuckToTarget && abs(velX) > stickToTargetMaxXVelocity) {
                 return false
             }
 
