@@ -74,6 +74,7 @@ public class RotationButtonController {
     private Consumer<Integer> mRotWatcherListener;
     private boolean mListenersRegistered = false;
     private boolean mIsNavigationBarShowing;
+    private boolean mSkipOverrideUserLockPrefsOnce;
 
     private final Runnable mRemoveRotationProposal =
             () -> setRotateSuggestionButtonState(false /* visible */);
@@ -349,7 +350,20 @@ public class RotationButtonController {
         mUiEventLogger.log(RotationButtonEvent.ROTATION_SUGGESTION_SHOWN);
     }
 
+    /**
+     * Makes {@link #shouldOverrideUserLockPrefs} always return {@code false} once. It is used to
+     * avoid losing original user rotation when display rotation is changed by entering the fixed
+     * orientation overview.
+     */
+    void setSkipOverrideUserLockPrefsOnce() {
+        mSkipOverrideUserLockPrefsOnce = true;
+    }
+
     private boolean shouldOverrideUserLockPrefs(final int rotation) {
+        if (mSkipOverrideUserLockPrefsOnce) {
+            mSkipOverrideUserLockPrefsOnce = false;
+            return false;
+        }
         // Only override user prefs when returning to the natural rotation (normally portrait).
         // Don't let apps that force landscape or 180 alter user lock.
         return rotation == NATURAL_ROTATION;

@@ -118,6 +118,7 @@ public class OverviewProxyRecentsImpl implements RecentsImplementation {
                 try {
                     if (mOverviewProxyService.getProxy() != null) {
                         mOverviewProxyService.getProxy().onOverviewToggle();
+                        mOverviewProxyService.notifyToggleRecentApps();
                     }
                 } catch (RemoteException e) {
                     Log.e(TAG, "Cannot send toggle recents through proxy service.", e);

@@ -871,6 +871,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    void notifyToggleRecentApps() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onToggleRecentApps();
+        }
+    }
+
     private void updateEnabledState() {
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_SYSTEM_ONLY,
@@ -901,6 +907,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
+        /** Notify the recents app (overview) is started by 3-button navigation. */
+        default void onToggleRecentApps() {}
         /** Notify changes in the nav bar button alpha */
         default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}
