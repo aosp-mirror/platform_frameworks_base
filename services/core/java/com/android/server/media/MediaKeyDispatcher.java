@@ -78,7 +78,7 @@ public abstract class MediaKeyDispatcher {
      * Implement this to customize the logic for which MediaSession should consume which key event.
      *
      * Note: This session will have greater priority over the {@link PendingIntent} returned from
-     * {@link #getCustomMediaButtonReceiver()}.
+     * {@link #getMediaButtonReceiver(KeyEvent, int, boolean)}.
      *
      * @param keyEvent a non-null KeyEvent whose key code is one of the supported media buttons.
      * @param uid the uid value retrieved by calling {@link Binder#getCallingUid()} from
@@ -88,7 +88,7 @@ public abstract class MediaKeyDispatcher {
      * @return a {@link MediaSession.Token} instance that should consume the given key event.
      */
     @Nullable
-    MediaSession.Token getCustomMediaSession(@NonNull KeyEvent keyEvent, int uid,
+    MediaSession.Token getMediaSession(@NonNull KeyEvent keyEvent, int uid,
             boolean asSystemService) {
         return null;
     }
@@ -98,12 +98,13 @@ public abstract class MediaKeyDispatcher {
      * dispatched key event.
      *
      * Note: This pending intent will have lower priority over the {@link MediaSession.Token}
-     * returned from {@link #getCustomMediaButtonReceiver()}.
+     * returned from {@link #getMediaSession(KeyEvent, int, boolean)}.
      *
      * @return a {@link PendingIntent} instance that should receive the dispatched key event.
      */
     @Nullable
-    PendingIntent getCustomMediaButtonReceiver() {
+    PendingIntent getMediaButtonReceiver(@NonNull KeyEvent keyEvent, int uid,
+            boolean asSystemService) {
         return null;
     }
 
