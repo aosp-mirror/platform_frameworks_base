@@ -18,6 +18,7 @@ package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
 import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
@@ -96,7 +97,6 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
         broadcastDispatcher = TestBroadcastDispatcher(
                 mockContext,
-                Handler(testableLooper.looper),
                 testableLooper.looper,
                 mock(DumpManager::class.java),
                 logger,
@@ -177,7 +177,12 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     @Test
     fun testRegisterCurrentAsActualUser() {
-        setUserMock(mockContext, user1)
+        val intent = Intent(Intent.ACTION_USER_SWITCHED).apply {
+            putExtra(Intent.EXTRA_USER_HANDLE, user1.identifier)
+        }
+        broadcastDispatcher.onReceive(mockContext, intent)
+        testableLooper.processAllMessages()
+
         broadcastDispatcher.registerReceiverWithHandler(broadcastReceiver, intentFilter,
                 mockHandler, UserHandle.CURRENT)
 
@@ -240,12 +245,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
 
     private class TestBroadcastDispatcher(
         context: Context,
-        mainHandler: Handler,
         bgLooper: Looper,
         dumpManager: DumpManager,
         logger: BroadcastDispatcherLogger,
         var mockUBRMap: Map<Int, UserBroadcastDispatcher>
-    ) : BroadcastDispatcher(context, mainHandler, bgLooper, dumpManager, logger) {
+    ) : BroadcastDispatcher(context, bgLooper, dumpManager, logger) {
         override fun createUBRForUser(userId: Int): UserBroadcastDispatcher {
             return mockUBRMap.getOrDefault(userId, mock(UserBroadcastDispatcher::class.java))
         }
