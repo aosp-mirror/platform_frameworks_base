@@ -168,7 +168,7 @@ public class SettingsHelper {
      * Remove a listener for changes to the location enabled setting.
      */
     public void removeOnLocationEnabledChangedListener(UserSettingChangedListener listener) {
-        mLocationMode.addListener(listener);
+        mLocationMode.removeListener(listener);
     }
 
     /**
