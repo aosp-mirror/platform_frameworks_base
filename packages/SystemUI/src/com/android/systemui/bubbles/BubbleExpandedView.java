@@ -42,6 +42,7 @@ import android.app.PendingIntent;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -274,8 +275,6 @@ public class BubbleExpandedView extends LinearLayout {
 
         mPointerDrawable = new ShapeDrawable(TriangleShape.create(
                 mPointerWidth, mPointerHeight, true /* pointUp */));
-        mPointerDrawable.setTint(Color.WHITE);
-        mPointerView.setBackground(mPointerDrawable);
         mPointerView.setVisibility(INVISIBLE);
 
         mSettingsIconHeight = getContext().getResources().getDimensionPixelSize(
@@ -426,6 +425,18 @@ public class BubbleExpandedView extends LinearLayout {
                 mContext.getResources())) {
             mActivityView.setCornerRadius(mCornerRadius);
         }
+
+        final int mode =
+                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        switch (mode) {
+            case Configuration.UI_MODE_NIGHT_NO:
+                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_pointer_light));
+                break;
+            case Configuration.UI_MODE_NIGHT_YES:
+                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_pointer_dark));
+                break;
+        }
+        mPointerView.setBackground(mPointerDrawable);
     }
 
     /**
