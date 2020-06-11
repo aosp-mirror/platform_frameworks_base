@@ -1432,15 +1432,6 @@ class Task extends WindowContainer<WindowContainer> {
             mAtmService.getTaskChangeNotificationController().notifyTaskStackChanged();
         }
 
-        final boolean isRootTask = isRootTask();
-        if (isRootTask) {
-            final DisplayContent display = getDisplayContent();
-            if (display.isSingleTaskInstance()) {
-                mAtmService.notifySingleTaskDisplayEmpty(display.mDisplayId);
-            }
-            display.mDisplayContent.setLayoutNeeded();
-        }
-
         if (hasChild()) {
             updateEffectiveIntent();
 
@@ -1461,7 +1452,7 @@ class Task extends WindowContainer<WindowContainer> {
         } else if (!mReuseTask && !mCreatedByOrganizer) {
             // Remove entire task if it doesn't have any activity left and it isn't marked for reuse
             // or created by task organizer.
-            if (!isRootTask) {
+            if (!isRootTask()) {
                 getStack().removeChild(this, reason);
             }
             EventLogTags.writeWmTaskRemoved(mTaskId,
@@ -2808,6 +2799,10 @@ class Task extends WindowContainer<WindowContainer> {
     void removeImmediately() {
         if (DEBUG_STACK) Slog.i(TAG, "removeTask: removing taskId=" + mTaskId);
         EventLogTags.writeWmTaskRemoved(mTaskId, "removeTask");
+
+        if (mDisplayContent != null && mDisplayContent.isSingleTaskInstance()) {
+            mAtmService.notifySingleTaskDisplayEmpty(mDisplayContent.mDisplayId);
+        }
 
         // If applicable let the TaskOrganizer know the Task is vanishing.
         setTaskOrganizer(null);
