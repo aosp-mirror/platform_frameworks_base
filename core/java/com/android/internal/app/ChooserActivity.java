@@ -3100,7 +3100,7 @@ public class ChooserActivity extends ResolverActivity implements
                 setVerticalScrollEnabled(false);
             }
         } else if (state == ViewPager.SCROLL_STATE_IDLE) {
-            if (mScrollStatus == SCROLL_STATUS_SCROLLING_VERTICAL) {
+            if (mScrollStatus == SCROLL_STATUS_SCROLLING_HORIZONTAL) {
                 mScrollStatus = SCROLL_STATUS_IDLE;
                 setVerticalScrollEnabled(true);
             }
