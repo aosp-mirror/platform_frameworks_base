@@ -120,7 +120,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
         public int errorMsgResId;
-        public boolean createDeleteAction;
 
         void clearImage() {
             image = null;
@@ -437,7 +436,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         data.image = mScreenBitmap;
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
-        data.createDeleteAction = false;
 
         if (mSaveInBgTask != null) {
             // just log success/failure for the pre-existing screenshot
