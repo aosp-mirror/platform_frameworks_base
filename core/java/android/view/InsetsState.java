@@ -555,7 +555,7 @@ public class InsetsState implements Parcelable {
 
     @Override
     public boolean equals(Object o) {
-        return equals(o, false);
+        return equals(o, false, false);
     }
 
     /**
@@ -564,10 +564,13 @@ public class InsetsState implements Parcelable {
      * excluded.
      * @param excludingCaptionInsets {@code true} if we want to compare two InsetsState objects but
      *                                           ignore the caption insets source value.
+     * @param excludeInvisibleImeFrames If {@link #ITYPE_IME} frames should be ignored when IME is
+     *                                  not visible.
      * @return {@code true} if the two InsetsState objects are equal, {@code false} otherwise.
      */
     @VisibleForTesting
-    public boolean equals(Object o, boolean excludingCaptionInsets) {
+    public boolean equals(Object o, boolean excludingCaptionInsets,
+            boolean excludeInvisibleImeFrames) {
         if (this == o) { return true; }
         if (o == null || getClass() != o.getClass()) { return false; }
 
@@ -598,7 +601,7 @@ public class InsetsState implements Parcelable {
             if (otherSource == null) {
                 return false;
             }
-            if (!otherSource.equals(source)) {
+            if (!otherSource.equals(source, excludeInvisibleImeFrames)) {
                 return false;
             }
         }
