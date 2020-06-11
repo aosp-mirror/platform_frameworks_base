@@ -452,12 +452,6 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
-    public void requiresAuthentication_whenEncryptedKeyguard_andBypass() {
-        testStrongAuthExceptOnBouncer(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
-    }
-
-    @Test
     public void requiresAuthentication_whenTimeoutKeyguard_andBypass() {
         testStrongAuthExceptOnBouncer(
                 KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
@@ -513,10 +507,20 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
 
     @Test
     public void testIgnoresAuth_whenLockdown() {
+        testIgnoresAuth(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+    }
+
+    @Test
+    public void testIgnoresAuth_whenEncrypted() {
+        testIgnoresAuth(
+                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT);
+    }
+
+    private void testIgnoresAuth(int strongAuth) {
         mKeyguardUpdateMonitor.dispatchStartedWakingUp();
         mTestableLooper.processAllMessages();
-        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(
-                KeyguardUpdateMonitor.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        when(mStrongAuthTracker.getStrongAuthForUser(anyInt())).thenReturn(strongAuth);
 
         mKeyguardUpdateMonitor.onKeyguardVisibilityChanged(true);
         verify(mFaceManager, never()).authenticate(any(), any(), anyInt(), any(), any(), anyInt());
