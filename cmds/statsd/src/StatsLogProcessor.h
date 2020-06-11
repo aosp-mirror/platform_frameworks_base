@@ -284,6 +284,7 @@ private:
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitByteSize);
     FRIEND_TEST(StatsLogProcessorTest, TestRateLimitBroadcast);
     FRIEND_TEST(StatsLogProcessorTest, TestDropWhenByteSizeTooLarge);
+    FRIEND_TEST(StatsLogProcessorTest, InvalidConfigRemoved);
     FRIEND_TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBoot);
     FRIEND_TEST(StatsLogProcessorTest, TestActivationOnBootMultipleActivations);
