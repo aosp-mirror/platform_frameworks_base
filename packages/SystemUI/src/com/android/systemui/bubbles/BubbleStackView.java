@@ -1517,6 +1517,12 @@ public class BubbleStackView extends FrameLayout
                 if (previouslySelected != null) {
                     previouslySelected.setContentVisibility(false);
                 }
+                if (previouslySelected != null && previouslySelected.getExpandedView() != null) {
+                    // Hide the currently expanded bubble's IME if it's visible before switching
+                    // to a new bubble.
+                    previouslySelected.getExpandedView().hideImeIfVisible();
+                }
+
                 updateExpandedBubble();
                 requestUpdate();
 
@@ -2429,8 +2435,6 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedBubble()");
         }
-
-        hideImeFromExpandedBubble();
 
         mExpandedViewContainer.removeAllViews();
         if (mIsExpanded && mExpandedBubble != null
