@@ -254,7 +254,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
     @Override
     protected void tearDown() throws Exception {
-        flushTasks();
+        flushTasks(dpms);
         getMockTransferMetadataManager().deleteMetadataFile();
         super.tearDown();
     }
@@ -4961,7 +4961,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // CertificateMonitor.updateInstalledCertificates is called on the background thread,
         // let it finish with system uid, otherwise it will throw and crash.
-        flushTasks();
+        flushTasks(dpms);
 
         mContext.binder.restoreCallingIdentity(ident);
     }
@@ -5459,7 +5459,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         getServices().injectBroadcast(mServiceContext, new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED)
                 .putExtra(Intent.EXTRA_USER_HANDLE, callerUser.getIdentifier()),
                 callerUser.getIdentifier());
-        flushTasks();
+        flushTasks(dpms);
 
         final List<String> ownerInstalledCaCerts = new ArrayList<>();
 
@@ -5486,7 +5486,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         getServices().injectBroadcast(mServiceContext, new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED)
                 .putExtra(Intent.EXTRA_USER_HANDLE, callerUser.getIdentifier()),
                 callerUser.getIdentifier());
-        flushTasks();
+        flushTasks(dpms);
 
         // Verify that the CA cert is no longer reported as installed by the Device Owner / Profile
         // Owner.
@@ -5530,7 +5530,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         getServices().injectBroadcast(mServiceContext, new Intent(KeyChain.ACTION_TRUST_STORE_CHANGED)
                 .putExtra(Intent.EXTRA_USER_HANDLE, callerUser.getIdentifier()),
                 callerUser.getIdentifier());
-        flushTasks();
+        flushTasks(dpms);
 
         // Removing the Profile Owner should clear the information on which CA certs were installed
         runAsCaller(admin1Context, dpms, dpm -> dpm.clearProfileOwner(admin1));
@@ -6311,7 +6311,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         clearInvocations(getServices().alarmManager);
 
         setUserUnlocked(CALLER_USER_HANDLE, false);
-        sendBroadcastWithUser(Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
 
         // Verify the alarm was scheduled for time when the warning should be shown.
         verify(getServices().alarmManager, times(1))
@@ -6325,7 +6325,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Pretend the alarm went off.
         dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_WARNING_TIME + 10);
-        sendBroadcastWithUser(ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
 
         // Verify the alarm was scheduled for the actual deadline this time.
         verify(getServices().alarmManager, times(1)).set(anyInt(), eq(PROFILE_OFF_DEADLINE), any());
@@ -6340,7 +6340,7 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         // Pretend the alarm went off.
         dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_DEADLINE + 10);
-        sendBroadcastWithUser(ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
 
         // Verify the alarm was not set.
         verifyZeroInteractions(getServices().alarmManager);
@@ -6364,10 +6364,10 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setUserUnlocked(CALLER_USER_HANDLE, false);
-        sendBroadcastWithUser(Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
         clearInvocations(getServices().alarmManager);
         setUserUnlocked(CALLER_USER_HANDLE, true);
-        sendBroadcastWithUser(Intent.ACTION_USER_UNLOCKED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_UNLOCKED, CALLER_USER_HANDLE);
 
         // Verify that the alarm got discharged.
         verify(getServices().alarmManager, times(1)).cancel((PendingIntent) null);
@@ -6384,16 +6384,16 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setUserUnlocked(CALLER_USER_HANDLE, false);
-        sendBroadcastWithUser(Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
 
         // Pretend the alarm went off.
         dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_WARNING_TIME + 10);
-        sendBroadcastWithUser(ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
 
         clearInvocations(getServices().alarmManager);
         clearInvocations(getServices().notificationManager);
         setUserUnlocked(CALLER_USER_HANDLE, true);
-        sendBroadcastWithUser(Intent.ACTION_USER_UNLOCKED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_UNLOCKED, CALLER_USER_HANDLE);
 
         // Verify that the alarm got discharged.
         verify(getServices().alarmManager, times(1)).cancel((PendingIntent) null);
@@ -6413,24 +6413,24 @@ public class DevicePolicyManagerTest extends DpmTestBase {
 
         mContext.binder.callingUid = DpmMockContext.SYSTEM_UID;
         setUserUnlocked(CALLER_USER_HANDLE, false);
-        sendBroadcastWithUser(Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_STOPPED, CALLER_USER_HANDLE);
 
         // Pretend the alarm went off after the deadline.
         dpms.mMockInjector.setSystemCurrentTimeMillis(PROFILE_OFF_DEADLINE + 10);
-        sendBroadcastWithUser(ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, ACTION_PROFILE_OFF_DEADLINE, CALLER_USER_HANDLE);
 
         clearInvocations(getServices().alarmManager);
         clearInvocations(getServices().notificationManager);
         clearInvocations(getServices().ipackageManager);
 
         // Pretend the user clicked on the "apps suspended" notification to turn the profile on.
-        sendBroadcastWithUser(ACTION_TURN_PROFILE_ON_NOTIFICATION, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, ACTION_TURN_PROFILE_ON_NOTIFICATION, CALLER_USER_HANDLE);
         // Verify that the profile is turned on.
         verify(getServices().userManager, times(1))
                 .requestQuietModeEnabled(eq(false), eq(UserHandle.of(CALLER_USER_HANDLE)));
 
         setUserUnlocked(CALLER_USER_HANDLE, true);
-        sendBroadcastWithUser(Intent.ACTION_USER_UNLOCKED, CALLER_USER_HANDLE);
+        sendBroadcastWithUser(dpms, Intent.ACTION_USER_UNLOCKED, CALLER_USER_HANDLE);
 
         // Verify that the notification is removed (at this point DPC should show it).
         verify(getServices().notificationManager, times(1))
@@ -6454,13 +6454,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
                 .isEqualTo(DevicePolicyManager.PERSONAL_APPS_SUSPENDED_PROFILE_TIMEOUT);
     }
 
-    private void sendBroadcastWithUser(String action, int userHandle) throws Exception {
-        final Intent intent = new Intent(action);
-        intent.putExtra(Intent.EXTRA_USER_HANDLE, userHandle);
-        getServices().injectBroadcast(mServiceContext, intent, userHandle);
-        flushTasks();
-    }
-
     private void setUserUnlocked(int userHandle, boolean unlocked) {
         when(getServices().userManager.isUserUnlocked(eq(userHandle))).thenReturn(unlocked);
     }
@@ -6470,10 +6463,6 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         configureProfileOwnerOfOrgOwnedDevice(admin1, CALLER_USER_HANDLE);
 
         when(getServices().userManager.isUserUnlocked()).thenReturn(true);
-
-        // Pretend our admin handles CHECK_POLICY_COMPLIANCE intent.
-        final Intent intent = new Intent(ACTION_CHECK_POLICY_COMPLIANCE);
-        intent.setPackage(admin1.getPackageName());
 
         doReturn(Collections.singletonList(new ResolveInfo()))
                 .when(getServices().packageManager).queryIntentActivitiesAsUser(
@@ -6674,12 +6663,4 @@ public class DevicePolicyManagerTest extends DpmTestBase {
         return new StringParceledListSlice(Arrays.asList(s));
     }
 
-    private void flushTasks() throws Exception {
-        dpms.mHandler.runWithScissors(() -> {}, 0 /*now*/);
-        dpms.mBackgroundHandler.runWithScissors(() -> {}, 0 /*now*/);
-
-        // We can't let exceptions happen on the background thread. Throw them here if they happen
-        // so they still cause the test to fail despite being suppressed.
-        getServices().rethrowBackgroundBroadcastExceptions();
-    }
 }
