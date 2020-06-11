@@ -299,6 +299,20 @@ public class TaskStackChangedListenerTest {
         waitForCallback(singleTaskDisplayDrawnLatch);
     }
 
+    public static class ActivityLaunchesNewActivityInActivityView extends TestActivity {
+        private boolean mActivityBLaunched = false;
+
+        @Override
+        protected void onPostResume() {
+            super.onPostResume();
+            if (mActivityBLaunched) {
+                return;
+            }
+            mActivityBLaunched = true;
+            startActivity(new Intent(this, ActivityB.class));
+        }
+    }
+
     @Test
     public void testSingleTaskDisplayEmpty() throws Exception {
         final Instrumentation instrumentation = getInstrumentation();
@@ -335,13 +349,20 @@ public class TaskStackChangedListenerTest {
         });
         waitForCallback(activityViewReadyLatch);
 
+        // 1. start ActivityLaunchesNewActivityInActivityView in an ActivityView
+        // 2. ActivityLaunchesNewActivityInActivityView launches ActivityB
+        // 3. ActivityB finishes self.
+        // 4. Verify ITaskStackListener#onSingleTaskDisplayEmpty is not called yet.
         final Context context = instrumentation.getContext();
-        Intent intent = new Intent(context, ActivityInActivityView.class);
+        Intent intent = new Intent(context, ActivityLaunchesNewActivityInActivityView.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         activityView.startActivity(intent);
         waitForCallback(singleTaskDisplayDrawnLatch);
+        UiDevice.getInstance(getInstrumentation()).waitForIdle();
         assertEquals(1, singleTaskDisplayEmptyLatch.getCount());
 
+        // 5. Release the container, and ActivityLaunchesNewActivityInActivityView finishes.
+        // 6. Verify ITaskStackListener#onSingleTaskDisplayEmpty is called.
         activityView.release();
         waitForCallback(activityViewDestroyedLatch);
         waitForCallback(singleTaskDisplayEmptyLatch);
