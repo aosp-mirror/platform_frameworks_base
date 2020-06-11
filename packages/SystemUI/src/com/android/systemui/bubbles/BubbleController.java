@@ -419,6 +419,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mCallbacks.add(callback);
     }
 
+    /**
+     * Dispatches a back press into the expanded Bubble's ActivityView if its IME is visible,
+     * causing it to hide.
+     */
+    public void hideImeFromExpandedBubble() {
+        if (mStackView != null) {
+            mStackView.hideImeFromExpandedBubble();
+        }
+    }
+
     private void setupNEM() {
         mNotificationEntryManager.addNotificationEntryListener(
                 new NotificationEntryListener() {
@@ -1156,7 +1166,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (b.getEntry() != null) {
             // Updating the entry to be a bubble will trigger our normal update flow
             setIsBubble(b.getEntry(), isBubble, b.shouldAutoExpand());
-        } else {
+        } else if (isBubble) {
             // If we have no entry to update, it's a persisted bubble so
             // we need to add it to the stack ourselves
             Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);
@@ -1214,7 +1224,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                             }
                         }
                     } else {
-                        if (bubble.isBubble() && bubble.showInShade()) {
+                        if (bubble.isBubble()) {
                             setIsBubble(bubble, false /* isBubble */);
                         }
                         if (bubble.getEntry() != null && bubble.getEntry().getRow() != null) {

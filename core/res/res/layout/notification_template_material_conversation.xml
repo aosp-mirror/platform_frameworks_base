@@ -148,7 +148,6 @@
                         android:layout_weight="1"
                         />
 
-
                     <TextView
                         android:id="@+id/app_name_divider"
                         android:layout_width="wrap_content"
@@ -174,6 +173,7 @@
                         android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:paddingTop="1sp"
                         android:singleLine="true"
+                        android:visibility="gone"
                     />
 
                     <TextView
@@ -192,7 +192,7 @@
 
                     <DateTimeView
                         android:id="@+id/time"
-                        android:textAppearance="@style/TextAppearance.Material.Notification.Time"
+                        android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Time"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"

@@ -24,8 +24,10 @@ import android.app.Notification.Action;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.NetworkCapabilities;
@@ -253,6 +255,14 @@ public class TetheringNotificationUpdater {
     }
 
     @VisibleForTesting
+    static String getSettingsPackageName(@NonNull final PackageManager pm) {
+        final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+        final ComponentName settingsComponent = settingsIntent.resolveActivity(pm);
+        return settingsComponent != null
+                ? settingsComponent.getPackageName() : "com.android.settings";
+    }
+
+    @VisibleForTesting
     void notifyTetheringDisabledByRestriction() {
         final Resources res = getResourcesForSubId(mContext, mActiveDataSubId);
         final String title = res.getString(R.string.disable_tether_notification_title);
@@ -262,8 +272,9 @@ public class TetheringNotificationUpdater {
         final PendingIntent pi = PendingIntent.getActivity(
                 mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
                 0 /* requestCode */,
-                new Intent(Settings.ACTION_TETHER_SETTINGS),
-                Intent.FLAG_ACTIVITY_NEW_TASK,
+                new Intent(Settings.ACTION_TETHER_SETTINGS)
+                        .setPackage(getSettingsPackageName(mContext.getPackageManager())),
+                Intent.FLAG_ACTIVITY_NEW_TASK | PendingIntent.FLAG_IMMUTABLE,
                 null /* options */);
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
@@ -284,7 +295,7 @@ public class TetheringNotificationUpdater {
                 mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
                 0 /* requestCode */,
                 intent,
-                0 /* flags */);
+                PendingIntent.FLAG_IMMUTABLE);
         final Action action = new Action.Builder(NO_ICON_ID, disableButton, pi).build();
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,
@@ -305,8 +316,9 @@ public class TetheringNotificationUpdater {
         final PendingIntent pi = PendingIntent.getActivity(
                 mContext.createContextAsUser(UserHandle.CURRENT, 0 /* flags */),
                 0 /* requestCode */,
-                new Intent(Settings.ACTION_TETHER_SETTINGS),
-                Intent.FLAG_ACTIVITY_NEW_TASK,
+                new Intent(Settings.ACTION_TETHER_SETTINGS)
+                        .setPackage(getSettingsPackageName(mContext.getPackageManager())),
+                Intent.FLAG_ACTIVITY_NEW_TASK | PendingIntent.FLAG_IMMUTABLE,
                 null /* options */);
 
         showNotification(R.drawable.stat_sys_tether_general, title, message,

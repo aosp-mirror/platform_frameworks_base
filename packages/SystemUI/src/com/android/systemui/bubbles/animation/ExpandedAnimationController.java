@@ -56,7 +56,7 @@ public class ExpandedAnimationController
     private static final int ANIMATE_TRANSLATION_FACTOR = 4;
 
     /** Duration of the expand/collapse target path animation. */
-    private static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
+    public static final int EXPAND_COLLAPSE_TARGET_ANIM_DURATION = 175;
 
     /** Stiffness for the expand/collapse path-following animation. */
     private static final int EXPAND_COLLAPSE_ANIM_STIFFNESS = 1000;

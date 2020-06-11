@@ -92,6 +92,7 @@ import static android.service.notification.NotificationListenerService.TRIM_FULL
 import static android.service.notification.NotificationListenerService.TRIM_LIGHT;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 
+import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES;
 import static com.android.internal.util.FrameworkStatsLog.PACKAGE_NOTIFICATION_PREFERENCES;
@@ -1906,7 +1907,8 @@ public class NotificationManagerService extends SystemService {
         mMetricsLogger = new MetricsLogger();
         mRankingHandler = rankingHandler;
         mConditionProviders = conditionProviders;
-        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders);
+        mZenModeHelper = new ZenModeHelper(getContext(), mHandler.getLooper(), mConditionProviders,
+                new SysUiStatsEvent.BuilderFactory());
         mZenModeHelper.addCallback(new ZenModeHelper.Callback() {
             @Override
             public void onConfigChanged() {
@@ -2046,10 +2048,13 @@ public class NotificationManagerService extends SystemService {
         mStripRemoteViewsSizeBytes = getContext().getResources().getInteger(
                 com.android.internal.R.integer.config_notificationStripRemoteViewSizeBytes);
 
-        mMsgPkgsAllowedAsConvos = Set.of(
-                getContext().getResources().getStringArray(
-                        com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
+        mMsgPkgsAllowedAsConvos = Set.of(getStringArrayResource(
+                com.android.internal.R.array.config_notificationMsgPkgsAllowedAsConvos));
         mStatsManager = statsManager;
+    }
+
+    protected String[] getStringArrayResource(int key) {
+        return getContext().getResources().getStringArray(key);
     }
 
     @Override
@@ -2189,6 +2194,12 @@ public class NotificationManagerService extends SystemService {
                 ConcurrentUtils.DIRECT_EXECUTOR,
                 mPullAtomCallback
         );
+        mStatsManager.setPullAtomCallback(
+                DND_MODE_RULE,
+                null, // use default PullAtomMetadata values
+                BackgroundThread.getExecutor(),
+                mPullAtomCallback
+        );
     }
 
     private class StatsPullAtomCallbackImpl implements StatsManager.StatsPullAtomCallback {
@@ -2198,6 +2209,7 @@ public class NotificationManagerService extends SystemService {
                 case PACKAGE_NOTIFICATION_PREFERENCES:
                 case PACKAGE_NOTIFICATION_CHANNEL_PREFERENCES:
                 case PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES:
+                case DND_MODE_RULE:
                     return pullNotificationStates(atomTag, data);
                 default:
                     throw new UnsupportedOperationException("Unknown tagId=" + atomTag);
@@ -2215,6 +2227,9 @@ public class NotificationManagerService extends SystemService {
                 break;
             case PACKAGE_NOTIFICATION_CHANNEL_GROUP_PREFERENCES:
                 mPreferencesHelper.pullPackageChannelGroupPreferencesStats(data);
+                break;
+            case DND_MODE_RULE:
+                mZenModeHelper.pullRules(data);
                 break;
         }
         return StatsManager.PULL_SUCCESS;
@@ -2729,10 +2744,7 @@ public class NotificationManagerService extends SystemService {
     }
 
     protected void maybeRegisterMessageSent(NotificationRecord r) {
-        Context appContext = r.getSbn().getPackageContext(getContext());
-        Notification.Builder nb =
-                Notification.Builder.recoverBuilder(appContext, r.getNotification());
-        if (nb.getStyle() instanceof Notification.MessagingStyle) {
+        if (r.isConversation()) {
             if (r.getShortcutInfo() != null) {
                 if (mPreferencesHelper.setValidMessageSent(
                         r.getSbn().getPackageName(), r.getUid())) {

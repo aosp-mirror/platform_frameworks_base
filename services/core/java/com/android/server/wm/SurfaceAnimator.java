@@ -428,16 +428,11 @@ class SurfaceAnimator {
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        if (mAnimationStartDelayed) {
-            pw.print(" mAnimationStartDelayed="); pw.println(mAnimationStartDelayed);
-        } else {
-            pw.println();
-        }
-        pw.print(prefix); pw.println("Animation:");
+        pw.print(" mAnimationType=" + mAnimationType);
+        pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
+        pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
             mAnimation.dump(pw, prefix + "  ");
-        } else {
-            pw.print(prefix); pw.println("null");
         }
     }
 

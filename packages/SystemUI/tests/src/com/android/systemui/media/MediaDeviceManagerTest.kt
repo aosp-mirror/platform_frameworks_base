@@ -51,6 +51,7 @@ import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "TEST_KEY"
+private const val KEY_OLD = "TEST_KEY_OLD"
 private const val PACKAGE = "PKG"
 private const val SESSION_KEY = "SESSION_KEY"
 private const val SESSION_ARTIST = "SESSION_ARTIST"
@@ -69,7 +70,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var lmmFactory: LocalMediaManagerFactory
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
-    @Mock private lateinit var featureFlag: MediaFeatureFlag
     private lateinit var fakeExecutor: FakeExecutor
     @Mock private lateinit var listener: MediaDeviceManager.Listener
     @Mock private lateinit var device: MediaDevice
@@ -85,8 +85,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(context, lmmFactory, mr2, featureFlag, fakeExecutor,
-            mediaDataManager)
+        manager = MediaDeviceManager(context, lmmFactory, mr2, fakeExecutor, mediaDataManager)
         manager.addListener(listener)
 
         // Configure mocks.
@@ -95,7 +94,6 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         whenever(lmmFactory.create(PACKAGE)).thenReturn(lmm)
         whenever(lmm.getCurrentConnectedDevice()).thenReturn(device)
         whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(route)
-        whenever(featureFlag.enabled).thenReturn(true)
 
         // Create a media sesssion and notification for testing.
         metadataBuilder = MediaMetadata.Builder().apply {
@@ -132,23 +130,74 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun addNotification() {
+    fun loadMediaData() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         verify(lmmFactory).create(PACKAGE)
     }
 
     @Test
-    fun featureDisabled() {
-        whenever(featureFlag.enabled).thenReturn(false)
-        manager.onMediaDataLoaded(KEY, null, mediaData)
-        verify(lmmFactory, never()).create(PACKAGE)
-    }
-
-    @Test
-    fun addAndRemoveNotification() {
+    fun loadAndRemoveMediaData() {
         manager.onMediaDataLoaded(KEY, null, mediaData)
         manager.onMediaDataRemoved(KEY)
         verify(lmm).unregisterCallback(any())
+    }
+
+    @Test
+    fun loadMediaDataWithNullToken() {
+        manager.onMediaDataLoaded(KEY, null, mediaData.copy(token = null))
+        fakeExecutor.runAllReady()
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+    }
+
+    @Test
+    fun loadWithNewKey() {
+        // GIVEN that media data has been loaded with an old key
+        manager.onMediaDataLoaded(KEY_OLD, null, mediaData)
+        reset(listener)
+        // WHEN data is loaded with a new key
+        manager.onMediaDataLoaded(KEY, KEY_OLD, mediaData)
+        // THEN the listener for the old key should removed.
+        verify(lmm).unregisterCallback(any())
+        // AND a new device event emitted
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isTrue()
+        assertThat(data.name).isEqualTo(DEVICE_NAME)
+    }
+
+    @Test
+    fun newKeySameAsOldKey() {
+        // GIVEN that media data has been loaded
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        reset(listener)
+        // WHEN the new key is the same as the old key
+        manager.onMediaDataLoaded(KEY, KEY, mediaData)
+        // THEN no event should be emitted
+        verify(listener, never()).onMediaDeviceChanged(eq(KEY), any())
+    }
+
+    @Test
+    fun unknownOldKey() {
+        manager.onMediaDataLoaded(KEY, "unknown", mediaData)
+        verify(listener).onMediaDeviceChanged(eq(KEY), any())
+    }
+
+    @Test
+    fun updateToSessionTokenWithNullRoute() {
+        // GIVEN that media data has been loaded with a null token
+        manager.onMediaDataLoaded(KEY, null, mediaData.copy(token = null))
+        // WHEN media data is loaded with a different token
+        // AND that token results in a null route
+        reset(listener)
+        whenever(mr2.getRoutingSessionForMediaController(any())).thenReturn(null)
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        // THEN the device should be disabled
+        fakeExecutor.runAllReady()
+        val data = captureDeviceData(KEY)
+        assertThat(data.enabled).isFalse()
+        assertThat(data.name).isNull()
+        assertThat(data.icon).isNull()
     }
 
     @Test
@@ -161,6 +210,15 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
         assertThat(data.enabled).isTrue()
         assertThat(data.name).isEqualTo(DEVICE_NAME)
         assertThat(data.icon).isEqualTo(icon)
+    }
+
+    @Test
+    fun removeListener() {
+        // WHEN a listener is removed
+        manager.removeListener(listener)
+        // THEN it doesn't receive device events
+        manager.onMediaDataLoaded(KEY, null, mediaData)
+        verify(listener, never()).onMediaDeviceChanged(eq(KEY), any())
     }
 
     @Test

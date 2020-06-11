@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:clipChildren="false"
-        android:paddingTop="8dp"
+        android:paddingTop="11dp"
         android:clipToPadding="true">
         <ImageView
             android:id="@+id/conversation_icon"
@@ -85,20 +85,20 @@
                     style="@style/TextAppearance.NotificationImportanceChannel"/>
             </LinearLayout>
             <TextView
-                android:id="@+id/pkg_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                style="@style/TextAppearance.NotificationImportanceChannelGroup"
-                android:ellipsize="end"
-                android:textDirection="locale"
-                android:maxLines="1"/>
-            <TextView
                 android:id="@+id/group_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:textDirection="locale"
                 style="@style/TextAppearance.NotificationImportanceChannelGroup"/>
+            <TextView
+                android:id="@+id/pkg_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.NotificationImportanceApp"
+                android:ellipsize="end"
+                android:textDirection="locale"
+                android:maxLines="1"/>
             <TextView
                 android:id="@+id/delegate_name"
                 android:layout_width="match_parent"

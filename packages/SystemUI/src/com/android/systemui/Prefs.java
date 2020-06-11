@@ -124,7 +124,7 @@ public final class Prefs {
         String HAS_SEEN_BUBBLES_MANAGE_EDUCATION = "HasSeenBubblesManageOnboarding";
         String CONTROLS_STRUCTURE_SWIPE_TOOLTIP_COUNT = "ControlsStructureSwipeTooltipCount";
         /** Tracks whether the user has seen the onboarding screen for priority conversations */
-        String HAS_SEEN_PRIORITY_ONBOARDING = "HaveShownPriorityOnboarding";
+        String HAS_SEEN_PRIORITY_ONBOARDING = "HasUserSeenPriorityOnboarding";
     }
 
     public static boolean getBoolean(Context context, @Key String key, boolean defaultValue) {

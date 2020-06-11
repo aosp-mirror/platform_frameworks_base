@@ -17,12 +17,13 @@
 #ifndef IDMAP2_IDMAP2_COMMAND_UTILS_H_
 #define IDMAP2_IDMAP2_COMMAND_UTILS_H_
 
+#include "idmap2/PolicyUtils.h"
 #include "idmap2/Result.h"
 
 android::idmap2::Result<android::idmap2::Unit> Verify(const std::string& idmap_path,
                                                       const std::string& target_path,
                                                       const std::string& overlay_path,
-                                                      uint32_t fulfilled_policies,
+                                                      PolicyBitmask fulfilled_policies,
                                                       bool enforce_overlayable);
 
 #endif  // IDMAP2_IDMAP2_COMMAND_UTILS_H_

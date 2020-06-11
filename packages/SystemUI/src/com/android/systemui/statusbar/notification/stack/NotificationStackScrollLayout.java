@@ -146,6 +146,7 @@ import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
+import com.android.systemui.statusbar.phone.LockscreenGestureLogger.LockscreenUiEvent;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
@@ -6538,7 +6539,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return row.canViewBeDismissed();
         }
         if (v instanceof PeopleHubView) {
-            return true;
+            return ((PeopleHubView) v).getCanSwipe();
         }
         return false;
     }
@@ -6633,6 +6634,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         MetricsEvent.ACTION_LS_SHADE,
                         (int) (dragLengthY / mDisplayMetrics.density),
                         0 /* velocityDp - N/A */);
+                mLockscreenGestureLogger.log(LockscreenUiEvent.LOCKSCREEN_PULL_SHADE_OPEN);
 
                 if (!mAmbientState.isDozing() || startingChild != null) {
                     // We have notifications, go to locked shade.
