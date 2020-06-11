@@ -63,8 +63,9 @@ public class InputConsumerController {
      */
     private final class InputEventReceiver extends BatchedInputEventReceiver {
 
-        public InputEventReceiver(InputChannel inputChannel, Looper looper) {
-            super(inputChannel, looper, Choreographer.getInstance());
+        InputEventReceiver(InputChannel inputChannel, Looper looper,
+                Choreographer choreographer) {
+            super(inputChannel, looper, choreographer);
         }
 
         @Override
@@ -143,6 +144,14 @@ public class InputConsumerController {
      * Registers the input consumer.
      */
     public void registerInputConsumer() {
+        registerInputConsumer(false);
+    }
+
+    /**
+     * Registers the input consumer.
+     * @param withSfVsync the flag set using sf vsync signal or no
+     */
+    public void registerInputConsumer(boolean withSfVsync) {
         if (mInputEventReceiver == null) {
             final InputChannel inputChannel = new InputChannel();
             try {
@@ -152,7 +161,8 @@ public class InputConsumerController {
             } catch (RemoteException e) {
                 Log.e(TAG, "Failed to create input consumer", e);
             }
-            mInputEventReceiver = new InputEventReceiver(inputChannel, Looper.myLooper());
+            mInputEventReceiver = new InputEventReceiver(inputChannel, Looper.myLooper(),
+                    withSfVsync ? Choreographer.getSfInstance() : Choreographer.getInstance());
             if (mRegistrationListener != null) {
                 mRegistrationListener.onRegistrationChanged(true /* isRegistered */);
             }
