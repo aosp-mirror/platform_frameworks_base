@@ -557,5 +557,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"غير مفعّل"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"مفعّل"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"يجب إعادة تشغيل جهازك ليتم تطبيق هذا التغيير. يمكنك إعادة التشغيل الآن أو إلغاء التغيير."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"سمّاعة رأس سلكية"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"سمّاعة سلكية"</string>
 </resources>

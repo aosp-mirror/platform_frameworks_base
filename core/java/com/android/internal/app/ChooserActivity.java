@@ -3592,10 +3592,9 @@ public class ChooserActivity extends ResolverActivity implements
          * Only expand direct share area if there is a minimum number of targets.
          */
         private boolean canExpandDirectShare() {
-            int orientation = getResources().getConfiguration().orientation;
-            return mChooserListAdapter.getNumServiceTargetsForExpand() > getMaxTargetsPerRow()
-                    && orientation == Configuration.ORIENTATION_PORTRAIT
-                    && !isInMultiWindowMode();
+            // Do not enable until we have confirmed more apps are using sharing shortcuts
+            // Check git history for enablement logic
+            return false;
         }
 
         public ChooserListAdapter getListAdapter() {
