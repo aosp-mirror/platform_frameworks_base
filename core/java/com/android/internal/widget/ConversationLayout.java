@@ -72,6 +72,7 @@ import com.android.internal.util.ContrastColorUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -795,7 +796,8 @@ public class ConversationLayout extends FrameLayout
      */
     @RemotableViewMethod
     public void setConversationTitle(CharSequence conversationTitle) {
-        mConversationTitle = conversationTitle;
+        // Remove formatting from the title.
+        mConversationTitle = conversationTitle != null ? conversationTitle.toString() : null;
     }
 
     public CharSequence getConversationTitle() {
@@ -1052,6 +1054,9 @@ public class ConversationLayout extends FrameLayout
                 groups.add(currentGroup);
                 if (sender == null) {
                     sender = mUser;
+                } else {
+                    // Remove all formatting from the sender name
+                    sender = sender.toBuilder().setName(Objects.toString(sender.getName())).build();
                 }
                 senders.add(sender);
                 currentSenderKey = key;
