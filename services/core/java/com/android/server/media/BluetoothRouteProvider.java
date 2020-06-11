@@ -48,6 +48,7 @@ import java.util.Objects;
 
 class BluetoothRouteProvider {
     private static final String TAG = "BTRouteProvider";
+    private static final String HEARING_AID_ROUTE_ID_PREFIX = "HEARING_AID_";
     private static BluetoothRouteProvider sInstance;
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */
@@ -179,9 +180,16 @@ class BluetoothRouteProvider {
 
     @NonNull
     List<MediaRoute2Info> getAllBluetoothRoutes() {
-        ArrayList<MediaRoute2Info> routes = new ArrayList<>();
+        List<MediaRoute2Info> routes = new ArrayList<>();
+        List<String> routeIds = new ArrayList<>();
+
         for (BluetoothRouteInfo btRoute : mBluetoothRoutes.values()) {
+            // A pair of hearing aid devices or the same hardware address
+            if (routeIds.contains(btRoute.route.getId())) {
+                continue;
+            }
             routes.add(btRoute.route);
+            routeIds.add(btRoute.route.getId());
         }
         return routes;
     }
@@ -222,8 +230,8 @@ class BluetoothRouteProvider {
     private BluetoothRouteInfo createBluetoothRoute(BluetoothDevice device) {
         BluetoothRouteInfo newBtRoute = new BluetoothRouteInfo();
         newBtRoute.btDevice = device;
-        // Current volume will be set when connected.
-        // TODO: Is there any BT device which has fixed volume?
+
+        String routeId = device.getAddress();
         String deviceName = device.getName();
         if (TextUtils.isEmpty(deviceName)) {
             deviceName = mContext.getResources().getText(R.string.unknownName).toString();
@@ -236,10 +244,13 @@ class BluetoothRouteProvider {
         if (mHearingAidProfile != null
                 && mHearingAidProfile.getConnectedDevices().contains(device)) {
             newBtRoute.connectedProfiles.put(BluetoothProfile.HEARING_AID, true);
+            // Intentionally assign the same ID for a pair of devices to publish only one of them.
+            routeId = HEARING_AID_ROUTE_ID_PREFIX + mHearingAidProfile.getHiSyncId(device);
             type = MediaRoute2Info.TYPE_HEARING_AID;
         }
 
-        newBtRoute.route = new MediaRoute2Info.Builder(device.getAddress(), deviceName)
+        // Current volume will be set when connected.
+        newBtRoute.route = new MediaRoute2Info.Builder(routeId, deviceName)
                 .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
