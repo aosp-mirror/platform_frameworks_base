@@ -165,7 +165,8 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * The operating band of the AP.
-     * One of the band types from {@link @BandType}.
+     * One or combination of the following band type:
+     * {@link #BAND_2GHZ}, {@link #BAND_5GHZ}, {@link #BAND_6GHZ}.
      */
     private final @BandType int mBand;
 
@@ -181,7 +182,11 @@ public final class SoftApConfiguration implements Parcelable {
 
     /**
      * The operating security type of the AP.
-     * One of the security types from {@link @SecurityType}
+     * One of the following security types:
+     * {@link #SECURITY_TYPE_OPEN},
+     * {@link #SECURITY_TYPE_WPA2_PSK},
+     * {@link #SECURITY_TYPE_WPA3_SAE_TRANSITION},
+     * {@link #SECURITY_TYPE_WPA3_SAE}
      */
     private final @SecurityType int mSecurityType;
 
@@ -393,8 +398,12 @@ public final class SoftApConfiguration implements Parcelable {
     }
 
     /**
-     * Returns {@link BandType} set to be the band for the AP.
-     * {@link Builder#setBand(@BandType int)}.
+     * Returns band type set to be the band for the AP.
+     *
+     * One or combination of the following band type:
+     * {@link #BAND_2GHZ}, {@link #BAND_5GHZ}, {@link #BAND_6GHZ}.
+     *
+     * {@link Builder#setBand(int)}.
      *
      * @hide
      */
@@ -679,15 +688,19 @@ public final class SoftApConfiguration implements Parcelable {
         /**
          * Specifies that this AP should use specific security type with the given ASCII passphrase.
          *
-         * @param securityType one of the security types from {@link @SecurityType}.
-         * @param passphrase The passphrase to use for sepcific {@link @SecurityType} configuration
-         * or null with {@link @SecurityType#SECURITY_TYPE_OPEN}.
+         * @param securityType One of the following security types:
+         * {@link #SECURITY_TYPE_OPEN},
+         * {@link #SECURITY_TYPE_WPA2_PSK},
+         * {@link #SECURITY_TYPE_WPA3_SAE_TRANSITION},
+         * {@link #SECURITY_TYPE_WPA3_SAE}.
+         * @param passphrase The passphrase to use for sepcific {@code securityType} configuration
+         * or null with {@link #SECURITY_TYPE_OPEN}.
          *
          * @return Builder for chaining.
          * @throws IllegalArgumentException when the passphrase length is invalid and
-         *         {@code securityType} is not {@link @SecurityType#SECURITY_TYPE_OPEN}
+         *         {@code securityType} is not {@link #SECURITY_TYPE_OPEN}
          *         or non-null passphrase and {@code securityType} is
-         *         {@link @SecurityType#SECURITY_TYPE_OPEN}.
+         *         {@link #SECURITY_TYPE_OPEN}.
          */
         @NonNull
         public Builder setPassphrase(@Nullable String passphrase, @SecurityType int securityType) {
@@ -735,9 +748,10 @@ public final class SoftApConfiguration implements Parcelable {
         /**
          * Specifies the band for the AP.
          * <p>
-         * <li>If not set, defaults to BAND_2GHZ {@link @BandType}.</li>
+         * <li>If not set, defaults to {@link #BAND_2GHZ}.</li>
          *
-         * @param band One or combination of the band types from {@link @BandType}.
+         * @param band One or combination of the following band type:
+         * {@link #BAND_2GHZ}, {@link #BAND_5GHZ}, {@link #BAND_6GHZ}.
          * @return Builder for chaining.
          */
         @NonNull
@@ -758,7 +772,7 @@ public final class SoftApConfiguration implements Parcelable {
          * <p>
          * The default for the channel is a the special value 0 to have the framework
          * auto-select a valid channel from the band configured with
-         * {@link #setBand(@BandType int)}.
+         * {@link #setBand(int)}.
          *
          * The channel auto selection will offload to driver when
          * {@link SoftApCapability#areFeaturesSupported(
