@@ -83,34 +83,36 @@ public class ServiceWatcher implements ServiceConnection {
     public static final class ServiceInfo implements Comparable<ServiceInfo> {
 
         public static final ServiceInfo NONE = new ServiceInfo(Integer.MIN_VALUE, null,
-                UserHandle.USER_NULL);
+                UserHandle.USER_NULL, false);
 
         public final int version;
         @Nullable public final ComponentName component;
         @UserIdInt public final int userId;
+        public final boolean serviceIsMultiuser;
 
         ServiceInfo(ResolveInfo resolveInfo, int currentUserId) {
             Preconditions.checkArgument(resolveInfo.serviceInfo.getComponentName() != null);
 
             Bundle metadata = resolveInfo.serviceInfo.metaData;
-            boolean isMultiuser;
             if (metadata != null) {
                 version = metadata.getInt(EXTRA_SERVICE_VERSION, Integer.MIN_VALUE);
-                isMultiuser = metadata.getBoolean(EXTRA_SERVICE_IS_MULTIUSER, false);
+                serviceIsMultiuser = metadata.getBoolean(EXTRA_SERVICE_IS_MULTIUSER, false);
             } else {
                 version = Integer.MIN_VALUE;
-                isMultiuser = false;
+                serviceIsMultiuser = false;
             }
 
             component = resolveInfo.serviceInfo.getComponentName();
-            userId = isMultiuser ? UserHandle.USER_SYSTEM : currentUserId;
+            userId = serviceIsMultiuser ? UserHandle.USER_SYSTEM : currentUserId;
         }
 
-        private ServiceInfo(int version, @Nullable ComponentName component, int userId) {
+        private ServiceInfo(int version, @Nullable ComponentName component, int userId,
+                boolean serviceIsMultiuser) {
             Preconditions.checkArgument(component != null || version == Integer.MIN_VALUE);
             this.version = version;
             this.component = component;
             this.userId = userId;
+            this.serviceIsMultiuser = serviceIsMultiuser;
         }
 
         public @Nullable String getPackageName() {
