@@ -1034,13 +1034,13 @@ public class StackAnimationController extends
                 mMagnetizedStack.getFlingToTargetMinVelocity() /* default */);
         final float maxVelocity = Settings.Secure.getFloat(contentResolver,
                 "bubble_dismiss_stick_max_velocity",
-                mMagnetizedStack.getStickToTargetMaxVelocity() /* default */);
+                mMagnetizedStack.getStickToTargetMaxXVelocity() /* default */);
         final float targetWidth = Settings.Secure.getFloat(contentResolver,
                 "bubble_dismiss_target_width_percent",
                 mMagnetizedStack.getFlingToTargetWidthPercent() /* default */);
 
         mMagnetizedStack.setFlingToTargetMinVelocity(minVelocity);
-        mMagnetizedStack.setStickToTargetMaxVelocity(maxVelocity);
+        mMagnetizedStack.setStickToTargetMaxXVelocity(maxVelocity);
         mMagnetizedStack.setFlingToTargetWidthPercent(targetWidth);
 
         return mMagnetizedStack;

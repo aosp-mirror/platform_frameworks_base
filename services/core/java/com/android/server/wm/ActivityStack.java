@@ -3232,22 +3232,22 @@ class ActivityStack extends Task {
 
     @Override
     void dump(PrintWriter pw, String prefix, boolean dumpAll) {
-        pw.println(prefix + "mStackId=" + getRootTaskId());
-        pw.println(prefix + "mDeferRemoval=" + mDeferRemoval);
-        pw.println(prefix + "mBounds=" + getRawBounds().toShortString());
-        for (int taskNdx = mChildren.size() - 1; taskNdx >= 0; taskNdx--) {
-            mChildren.get(taskNdx).dump(pw, prefix + "  ", dumpAll);
+        if (mDeferRemoval) {
+            pw.println(prefix + "mDeferRemoval=true");
         }
+        super.dump(pw, prefix, dumpAll);
         if (!mExitingActivities.isEmpty()) {
             pw.println();
-            pw.println("  Exiting application tokens:");
+            pw.println(prefix + "Exiting application tokens:");
+            final String doublePrefix = prefix + "  ";
             for (int i = mExitingActivities.size() - 1; i >= 0; i--) {
                 WindowToken token = mExitingActivities.get(i);
-                pw.print("  Exiting App #"); pw.print(i);
+                pw.print(doublePrefix + "Exiting App #" + i);
                 pw.print(' '); pw.print(token);
                 pw.println(':');
-                token.dump(pw, "    ", dumpAll);
+                token.dump(pw, doublePrefix, dumpAll);
             }
+            pw.println();
         }
         mAnimatingActivityRegistry.dump(pw, "AnimatingApps:", prefix);
     }

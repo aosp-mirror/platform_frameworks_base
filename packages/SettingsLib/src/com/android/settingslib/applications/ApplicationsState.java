@@ -532,7 +532,7 @@ public class ApplicationsState {
                                         mStats.getCacheQuotaBytes(
                                                 entry.info.storageUuid.toString(), entry.info.uid);
                                 final PackageStats legacy = new PackageStats(packageName, userId);
-                                legacy.codeSize = stats.getCodeBytes();
+                                legacy.codeSize = stats.getAppBytes();
                                 legacy.dataSize = stats.getDataBytes();
                                 legacy.cacheSize = Math.min(stats.getCacheBytes(), cacheQuota);
                                 try {
@@ -1300,7 +1300,7 @@ public class ApplicationsState {
                                                 final PackageStats legacy = new PackageStats(
                                                         mCurComputingSizePkg,
                                                         mCurComputingSizeUserId);
-                                                legacy.codeSize = stats.getCodeBytes();
+                                                legacy.codeSize = stats.getAppBytes();
                                                 legacy.dataSize = stats.getDataBytes();
                                                 legacy.cacheSize = stats.getCacheBytes();
                                                 try {

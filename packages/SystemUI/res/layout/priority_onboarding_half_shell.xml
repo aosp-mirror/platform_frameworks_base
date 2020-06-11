@@ -38,11 +38,61 @@
         android:background="@drawable/rounded_bg_full"
         >
 
+    <FrameLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clipChildren="false"
+        android:clipToPadding="false"
+        android:padding="12dp"
+        android:layout_gravity="center_horizontal"
+    >
+
+        <!-- Big icon: 52x52, 12dp padding left + top, 16dp padding right -->
         <ImageView
             android:id="@+id/conversation_icon"
-            android:layout_width="@dimen/notification_guts_conversation_icon_size"
-            android:layout_height="@dimen/notification_guts_conversation_icon_size"
-            android:layout_gravity="center_horizontal" />
+            android:layout_width="@*android:dimen/conversation_avatar_size"
+            android:layout_height="@*android:dimen/conversation_avatar_size"
+            android:scaleType="centerCrop"
+            android:importantForAccessibility="no"
+        />
+
+        <FrameLayout
+            android:id="@+id/conversation_icon_badge"
+            android:layout_width="@*android:dimen/conversation_icon_size_badged"
+            android:layout_height="@*android:dimen/conversation_icon_size_badged"
+            android:layout_marginLeft="@*android:dimen/conversation_badge_side_margin"
+            android:layout_marginTop="@*android:dimen/conversation_badge_side_margin"
+            android:clipChildren="false"
+            android:clipToPadding="false"
+        >
+            <ImageView
+                android:id="@+id/conversation_icon_badge_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:src="@*android:drawable/conversation_badge_background"
+                android:forceHasOverlappingRendering="false"
+            />
+            <ImageView
+                android:id="@+id/icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_margin="4dp"
+                android:layout_gravity="center"
+                android:forceHasOverlappingRendering="false"
+            />
+            <ImageView
+                android:id="@+id/conversation_icon_badge_ring"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@*android:drawable/conversation_badge_ring"
+                android:forceHasOverlappingRendering="false"
+                android:clipToPadding="false"
+                android:scaleType="center"
+            />
+        </FrameLayout>
+    </FrameLayout>
 
         <TextView
             android:id="@+id/title"

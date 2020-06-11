@@ -219,7 +219,7 @@ public final class BlobHandle implements Parcelable {
     public void dump(IndentingPrintWriter fout, boolean dumpFull) {
         if (dumpFull) {
             fout.println("algo: " + algorithm);
-            fout.println("digest: " + (dumpFull ? encodeDigest() : safeDigest()));
+            fout.println("digest: " + (dumpFull ? encodeDigest(digest) : safeDigest(digest)));
             fout.println("label: " + label);
             fout.println("expiryMs: " + expiryTimeMillis);
             fout.println("tag: " + tag);
@@ -243,19 +243,20 @@ public final class BlobHandle implements Parcelable {
     public String toString() {
         return "BlobHandle {"
                 + "algo:" + algorithm + ","
-                + "digest:" + safeDigest() + ","
+                + "digest:" + safeDigest(digest) + ","
                 + "label:" + label + ","
                 + "expiryMs:" + expiryTimeMillis + ","
                 + "tag:" + tag
                 + "}";
     }
 
-    private String safeDigest() {
-        final String digestStr = encodeDigest();
+    /** @hide */
+    public static String safeDigest(@NonNull byte[] digest) {
+        final String digestStr = encodeDigest(digest);
         return digestStr.substring(0, 2) + ".." + digestStr.substring(digestStr.length() - 2);
     }
 
-    private String encodeDigest() {
+    private static String encodeDigest(@NonNull byte[] digest) {
         return Base64.encodeToString(digest, Base64.NO_WRAP);
     }
 
