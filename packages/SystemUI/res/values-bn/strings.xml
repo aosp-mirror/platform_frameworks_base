@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"সবকিছু সাফ করুন"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"পরিচালনা করুন"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ইতিহাস"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ইনকামিং"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"নতুন"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"আওয়াজ করবে না"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"বিজ্ঞপ্তি"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"কথোপকথন"</string>
@@ -1002,8 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"উপরে ডানদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"নিচে বাঁদিকে সরান"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"নিচে ডান দিকে সরান"</string>
-    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"বাবল খারিজ করুন"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"কথোপকথন বাবল হিসেবে দেখাবে না"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"বাবল ব্যবহার করে চ্যাট করুন"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
@@ -1068,7 +1067,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"সমস্যা, আবার চেষ্টা করা হচ্ছে…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"খুঁজে পাওয়া যায়নি"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"কন্ট্রোল উপলভ্য নেই"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ডিভাইস অ্যাক্সেস করা যায়নি। <xliff:g id="APPLICATION">%2$s</xliff:g> অ্যাপ চেক করে দেখুন যাতে এটি নিশ্চিত করে নিতে পারেন যে কন্ট্রোল এখনও উপলভ্য আছে এবং অ্যাপ সেটিংসে কোনও পরিবর্তন করা হয়নি।"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ডিভাইস অ্যাক্সেস করা যায়নি। কন্ট্রোল এখনও উপলভ্য আছে কিনা ও অ্যাপ সেটিংসে কোনও পরিবর্তন করা হয়েছে কিনা তা ভাল করে দেখে নিতে <xliff:g id="APPLICATION">%2$s</xliff:g> অ্যাপ চেক করুন।"</string>
     <string name="controls_open_app" msgid="483650971094300141">"অ্যাপ খুলুন"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"স্ট্যাটাস লোড করা যাচ্ছে না"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"সমস্যা হয়েছে, আবার চেষ্টা করুন"</string>
