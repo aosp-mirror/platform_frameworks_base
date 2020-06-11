@@ -3577,7 +3577,16 @@ public class StatsPullAtomService extends SystemService {
     private void processHistoricalOp(AppOpsManager.HistoricalOp op,
             List<AppOpEntry> opsList, int uid, int samplingRatio, String packageName,
             @Nullable String attributionTag) {
-        AppOpEntry entry = new AppOpEntry(packageName, attributionTag, op, uid);
+        int firstChar = 0;
+        if (attributionTag != null && attributionTag.startsWith(packageName)) {
+            firstChar = packageName.length();
+            if (firstChar < attributionTag.length() && attributionTag.charAt(firstChar) == '.') {
+                firstChar++;
+            }
+        }
+        AppOpEntry entry = new AppOpEntry(packageName,
+                attributionTag == null ? null : attributionTag.substring(firstChar), op,
+                uid);
         if (entry.mHash < samplingRatio) {
             opsList.add(entry);
         }
