@@ -41,6 +41,8 @@ import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.statusbar.phone.NotificationPanelViewController;
 import com.android.systemui.statusbar.phone.NotificationShadeWindowViewController;
 
+import java.util.concurrent.Executor;
+
 /**
  * A class that allows activities to be launched in a seamless way where the notification
  * transforms nicely into the starting window.
@@ -59,6 +61,7 @@ public class ActivityLaunchAnimator {
     private final float mWindowCornerRadius;
     private final NotificationShadeWindowViewController mNotificationShadeWindowViewController;
     private final NotificationShadeDepthController mDepthController;
+    private final Executor mMainExecutor;
     private Callback mCallback;
     private final Runnable mTimeoutRunnable = () -> {
         setAnimationPending(false);
@@ -73,12 +76,14 @@ public class ActivityLaunchAnimator {
             Callback callback,
             NotificationPanelViewController notificationPanel,
             NotificationShadeDepthController depthController,
-            NotificationListContainer container) {
+            NotificationListContainer container,
+            Executor mainExecutor) {
         mNotificationPanel = notificationPanel;
         mNotificationContainer = container;
         mDepthController = depthController;
         mNotificationShadeWindowViewController = notificationShadeWindowViewController;
         mCallback = callback;
+        mMainExecutor = mainExecutor;
         mWindowCornerRadius = ScreenDecorationsUtils
                 .getWindowCornerRadius(mNotificationShadeWindowViewController.getView()
                         .getResources());
@@ -155,7 +160,7 @@ public class ActivityLaunchAnimator {
                 RemoteAnimationTarget[] remoteAnimationWallpaperTargets,
                 IRemoteAnimationFinishedCallback iRemoteAnimationFinishedCallback)
                     throws RemoteException {
-            mSourceNotification.post(() -> {
+            mMainExecutor.execute(() -> {
                 RemoteAnimationTarget primary = getPrimaryRemoteAnimationTarget(
                         remoteAnimationTargets);
                 if (primary == null) {
@@ -191,8 +196,9 @@ public class ActivityLaunchAnimator {
                     }
                 }
                 int targetWidth = primary.sourceContainerBounds.width();
-                int notificationHeight = mSourceNotification.getActualHeight()
-                        - mSourceNotification.getClipBottomAmount();
+                // If the notification panel is collapsed, the clip may be larger than the height.
+                int notificationHeight = Math.max(mSourceNotification.getActualHeight()
+                        - mSourceNotification.getClipBottomAmount(), 0);
                 int notificationWidth = mSourceNotification.getWidth();
                 anim.setDuration(ANIMATION_DURATION);
                 anim.setInterpolator(Interpolators.LINEAR);
@@ -292,7 +298,7 @@ public class ActivityLaunchAnimator {
 
         @Override
         public void onAnimationCancelled() throws RemoteException {
-            mSourceNotification.post(() -> {
+            mMainExecutor.execute(() -> {
                 setAnimationPending(false);
                 mCallback.onLaunchAnimationCancelled();
             });
