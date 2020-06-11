@@ -1222,10 +1222,6 @@
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
     <dimen name="bubble_manage_button_height">48dp</dimen>
-    <!-- How far, horizontally, to animate the expanded view over when animating in/out. -->
-    <dimen name="bubble_expanded_animate_x_distance">100dp</dimen>
-    <!-- How far, vertically, to animate the expanded view over when animating in/out. -->
-    <dimen name="bubble_expanded_animate_y_distance">500dp</dimen>
     <!-- Max width of the message bubble-->
     <dimen name="bubble_message_max_width">144dp</dimen>
     <!-- Min width of the message bubble -->
@@ -1252,7 +1248,7 @@
     <!-- Bubbles user education views -->
     <dimen name="bubbles_manage_education_width">160dp</dimen>
     <!-- The inset from the top bound of the manage button to place the user education. -->
-    <dimen name="bubbles_manage_education_top_inset">10dp</dimen>
+    <dimen name="bubbles_manage_education_top_inset">65dp</dimen>
     <!-- Size of padding for the user education cling, this should at minimum be larger than
         individual_bubble_size + some padding. -->
     <dimen name="bubble_stack_user_education_side_inset">72dp</dimen>

@@ -644,6 +644,12 @@ class PhysicsAnimator<T> private constructor (target: T) {
                 it.onInternalAnimationEnd(
                         property, canceled, value, velocity, anim is FlingAnimation)
             }
+            if (springAnimations[property] == anim) {
+                springAnimations.remove(property)
+            }
+            if (flingAnimations[property] == anim) {
+                flingAnimations.remove(property)
+            }
         }
         return anim
     }

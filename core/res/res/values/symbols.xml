@@ -3827,7 +3827,6 @@
 
   <java-symbol type="string" name="config_defaultSupervisionProfileOwnerComponent" />
   <java-symbol type="bool" name="config_inflateSignalStrength" />
-  <java-symbol type="array" name="config_restrictedPreinstalledCarrierApps" />
 
   <java-symbol type="drawable" name="android_logotype" />
   <java-symbol type="layout" name="platlogo_layout" />
@@ -3956,6 +3955,13 @@
   <java-symbol type="id" name="conversation_unread_count" />
   <java-symbol type="string" name="unread_convo_overflow" />
   <java-symbol type="style" name="TextAppearance.DeviceDefault.Notification.Conversation.AppName" />
+  <java-symbol type="drawable" name="conversation_badge_background" />
+  <java-symbol type="drawable" name="conversation_badge_ring" />
+  <java-symbol type="color" name="conversation_important_highlight" />
+  <java-symbol type="dimen" name="importance_ring_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_anim_max_stroke_width" />
+  <java-symbol type="dimen" name="importance_ring_size" />
+  <java-symbol type="dimen" name="conversation_icon_size_badged" />
 
   <!-- Intent resolver and share sheet -->
   <java-symbol type="string" name="resolver_personal_tab" />

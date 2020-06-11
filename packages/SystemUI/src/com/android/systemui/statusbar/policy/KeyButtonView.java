@@ -87,7 +87,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
     private boolean mHasOvalBg = false;
 
     @VisibleForTesting
-    public enum NavBarActionsEvent implements UiEventLogger.UiEventEnum {
+    public enum NavBarButtonEvent implements UiEventLogger.UiEventEnum {
 
         @UiEvent(doc = "The home button was pressed in the navigation bar.")
         NAVBAR_HOME_BUTTON_TAP(533),
@@ -111,7 +111,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
         private final int mId;
 
-        NavBarActionsEvent(int id) {
+        NavBarButtonEvent(int id) {
             mId = id;
         }
 
@@ -368,7 +368,7 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
 
     private void logSomePresses(int action, int flags) {
         boolean longPressSet = (flags & KeyEvent.FLAG_LONG_PRESS) != 0;
-        NavBarActionsEvent uiEvent = NavBarActionsEvent.NONE;
+        NavBarButtonEvent uiEvent = NavBarButtonEvent.NONE;
         if (action == MotionEvent.ACTION_UP && mLongClicked) {
             return;  // don't log the up after a long press
         }
@@ -382,21 +382,21 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
         switch(mCode) {
             case KeyEvent.KEYCODE_BACK:
                 uiEvent = longPressSet
-                        ? NavBarActionsEvent.NAVBAR_BACK_BUTTON_LONGPRESS
-                        : NavBarActionsEvent.NAVBAR_BACK_BUTTON_TAP;
+                        ? NavBarButtonEvent.NAVBAR_BACK_BUTTON_LONGPRESS
+                        : NavBarButtonEvent.NAVBAR_BACK_BUTTON_TAP;
                 break;
             case KeyEvent.KEYCODE_HOME:
                 uiEvent = longPressSet
-                        ? NavBarActionsEvent.NAVBAR_HOME_BUTTON_LONGPRESS
-                        : NavBarActionsEvent.NAVBAR_HOME_BUTTON_TAP;
+                        ? NavBarButtonEvent.NAVBAR_HOME_BUTTON_LONGPRESS
+                        : NavBarButtonEvent.NAVBAR_HOME_BUTTON_TAP;
                 break;
             case KeyEvent.KEYCODE_APP_SWITCH:
                 uiEvent = longPressSet
-                        ? NavBarActionsEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS
-                        : NavBarActionsEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
+                        ? NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_LONGPRESS
+                        : NavBarButtonEvent.NAVBAR_OVERVIEW_BUTTON_TAP;
                 break;
         }
-        if (uiEvent != NavBarActionsEvent.NONE) {
+        if (uiEvent != NavBarButtonEvent.NONE) {
             mUiEventLogger.log(uiEvent);
         }
     }
