@@ -133,6 +133,7 @@ public final class UsageEvents implements Parcelable {
         /**
          * An event type denoting that a component was in the foreground when the stats
          * rolled-over. This is effectively treated as a {@link #ACTIVITY_PAUSED}.
+         * This event has a non-null packageName, and a null className.
          * {@hide}
          */
         public static final int END_OF_DAY = 3;
