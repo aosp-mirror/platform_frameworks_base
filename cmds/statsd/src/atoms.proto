@@ -9490,7 +9490,7 @@ message GnssStats {
     optional int64 time_to_first_fix_reports = 3;
 
     // Total pulled reported time to first fix (in milli-seconds) since boot
-    optional int64 time_to_first_fix_milli_s = 4;
+    optional int64 time_to_first_fix_millis = 4;
 
     // Number of position accuracy reports since boot
     optional int64 position_accuracy_reports = 5;
