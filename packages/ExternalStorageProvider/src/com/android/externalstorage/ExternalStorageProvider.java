@@ -95,7 +95,8 @@ public class ExternalStorageProvider extends FileSystemProvider {
         public String docId;
         public File visiblePath;
         public File path;
-        public boolean reportAvailableBytes = true;
+        // TODO (b/157033915): Make getFreeBytes() faster
+        public boolean reportAvailableBytes = false;
     }
 
     private static final String ROOT_ID_PRIMARY_EMULATED =
