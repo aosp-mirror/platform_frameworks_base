@@ -2583,9 +2583,15 @@ public class LocationManager {
         }
 
         public void cancel() {
+            remove();
+        }
+
+        private Consumer<Location> remove() {
+            Consumer<Location> consumer;
             ICancellationSignal cancellationSignal;
             synchronized (this) {
                 mExecutor = null;
+                consumer = mConsumer;
                 mConsumer = null;
 
                 if (mAlarmManager != null) {
@@ -2605,6 +2611,8 @@ public class LocationManager {
                     // ignore
                 }
             }
+
+            return consumer;
         }
 
         public void fail() {
@@ -2663,16 +2671,10 @@ public class LocationManager {
         }
 
         private void acceptResult(Location location) {
-            Consumer<Location> consumer;
-            synchronized (this) {
-                if (mConsumer == null) {
-                    return;
-                }
-                consumer = mConsumer;
-                cancel();
+            Consumer<Location> consumer = remove();
+            if (consumer != null) {
+                consumer.accept(location);
             }
-
-            consumer.accept(location);
         }
     }
 
