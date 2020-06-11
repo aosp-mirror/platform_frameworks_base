@@ -324,6 +324,41 @@ TEST(StatsLogProcessorTest, TestPullUidProviderSetOnConfigUpdate) {
     EXPECT_EQ(pullerManager->mPullUidProviders.find(key), pullerManager->mPullUidProviders.end());
 }
 
+TEST(StatsLogProcessorTest, InvalidConfigRemoved) {
+    // Setup simple config key corresponding to empty config.
+    StatsdStats::getInstance().reset();
+    sp<UidMap> m = new UidMap();
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    m->updateMap(1, {1, 2}, {1, 2}, {String16("v1"), String16("v2")},
+                 {String16("p1"), String16("p2")}, {String16(""), String16("")});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    StatsLogProcessor p(m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+                        [](const ConfigKey& key) { return true; },
+                        [](const int&, const vector<int64_t>&) {return true;});
+    ConfigKey key(3, 4);
+    StatsdConfig config = MakeConfig(true);
+    p.OnConfigUpdated(0, key, config);
+    EXPECT_EQ(1, p.mMetricsManagers.size());
+    EXPECT_NE(p.mMetricsManagers.find(key), p.mMetricsManagers.end());
+    // Cannot assert the size of mConfigStats since it is static and does not get cleared on reset.
+    EXPECT_NE(StatsdStats::getInstance().mConfigStats.end(),
+              StatsdStats::getInstance().mConfigStats.find(key));
+    EXPECT_EQ(0, StatsdStats::getInstance().mIceBox.size());
+
+    StatsdConfig invalidConfig = MakeConfig(true);
+    invalidConfig.clear_allowed_log_source();
+    p.OnConfigUpdated(0, key, invalidConfig);
+    EXPECT_EQ(0, p.mMetricsManagers.size());
+    // The current configs should not contain the invalid config.
+    EXPECT_EQ(StatsdStats::getInstance().mConfigStats.end(),
+              StatsdStats::getInstance().mConfigStats.find(key));
+    // Both "config" and "invalidConfig" should be in the icebox.
+    EXPECT_EQ(2, StatsdStats::getInstance().mIceBox.size());
+
+}
+
+
 TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     int uid = 1111;
 
