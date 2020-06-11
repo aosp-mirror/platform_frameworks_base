@@ -23,6 +23,7 @@ import android.os.SystemClock
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import android.view.ViewConfiguration
 import android.widget.SeekBar
 import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
@@ -31,10 +32,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.util.concurrency.RepeatableExecutor
-import java.util.concurrent.Executor
 import javax.inject.Inject
 
 private const val POSITION_UPDATE_INTERVAL_MILLIS = 100L
+private const val MIN_FLING_VELOCITY_SCALE_FACTOR = 10
 
 private fun PlaybackState.isInMotion(): Boolean {
     return this.state == PlaybackState.STATE_PLAYING ||
@@ -105,6 +106,9 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
     }
     private var cancel: Runnable? = null
 
+    /** Indicates if the seek interaction is considered a false guesture. */
+    private var isFalseSeek = false
+
     /** Listening state (QS open or closed) is used to control polling of progress. */
     var listening = true
         set(value) = bgExecutor.execute {
@@ -114,16 +118,61 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
             }
         }
 
+    /** Set to true when the user is touching the seek bar to change the position. */
+    private var scrubbing = false
+        set(value) {
+            if (field != value) {
+                field = value
+                checkIfPollingNeeded()
+            }
+        }
+
+    /**
+     * Event indicating that the user has started interacting with the seek bar.
+     */
+    @AnyThread
+    fun onSeekStarting() = bgExecutor.execute {
+        scrubbing = true
+        isFalseSeek = false
+    }
+
+    /**
+     * Event indicating that the user has moved the seek bar but hasn't yet finished the gesture.
+     * @param position Current location in the track.
+     */
+    @AnyThread
+    fun onSeekProgress(position: Long) = bgExecutor.execute {
+        if (scrubbing) {
+            _data = _data.copy(elapsedTime = position.toInt())
+        }
+    }
+
+    /**
+     * Event indicating that the seek interaction is a false gesture and it should be ignored.
+     */
+    @AnyThread
+    fun onSeekFalse() = bgExecutor.execute {
+        if (scrubbing) {
+            isFalseSeek = true
+        }
+    }
+
     /**
      * Handle request to change the current position in the media track.
      * @param position Place to seek to in the track.
      */
-    @WorkerThread
-    fun onSeek(position: Long) {
-        controller?.transportControls?.seekTo(position)
-        // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
-        // position.
-        playbackState = null
+    @AnyThread
+    fun onSeek(position: Long) = bgExecutor.execute {
+        if (isFalseSeek) {
+            scrubbing = false
+            checkPlaybackPosition()
+        } else {
+            controller?.transportControls?.seekTo(position)
+            // Invalidate the cached playbackState to avoid the thumb jumping back to the previous
+            // position.
+            playbackState = null
+            scrubbing = false
+        }
     }
 
     /**
@@ -181,7 +230,7 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
 
     @WorkerThread
     private fun checkIfPollingNeeded() {
-        val needed = listening && playbackState?.isInMotion() ?: false
+        val needed = listening && !scrubbing && playbackState?.isInMotion() ?: false
         if (needed) {
             if (cancel == null) {
                 cancel = bgExecutor.executeRepeatedly(this::checkPlaybackPosition, 0L,
@@ -196,33 +245,30 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
     /** Gets a listener to attach to the seek bar to handle seeking. */
     val seekBarListener: SeekBar.OnSeekBarChangeListener
         get() {
-            return SeekBarChangeListener(this, bgExecutor)
+            return SeekBarChangeListener(this)
         }
 
     /** Attach touch handlers to the seek bar view. */
     fun attachTouchHandlers(bar: SeekBar) {
         bar.setOnSeekBarChangeListener(seekBarListener)
-        bar.setOnTouchListener(SeekBarTouchListener(bar))
+        bar.setOnTouchListener(SeekBarTouchListener(this, bar))
     }
 
     private class SeekBarChangeListener(
-        val viewModel: SeekBarViewModel,
-        val bgExecutor: Executor
+        val viewModel: SeekBarViewModel
     ) : SeekBar.OnSeekBarChangeListener {
         override fun onProgressChanged(bar: SeekBar, progress: Int, fromUser: Boolean) {
             if (fromUser) {
-                bgExecutor.execute {
-                    viewModel.onSeek(progress.toLong())
-                }
+                viewModel.onSeekProgress(progress.toLong())
             }
         }
+
         override fun onStartTrackingTouch(bar: SeekBar) {
+            viewModel.onSeekStarting()
         }
+
         override fun onStopTrackingTouch(bar: SeekBar) {
-            val pos = bar.progress.toLong()
-            bgExecutor.execute {
-                viewModel.onSeek(pos)
-            }
+            viewModel.onSeek(bar.progress.toLong())
         }
     }
 
@@ -233,14 +279,18 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
      * they intend to scroll the carousel.
      */
     private class SeekBarTouchListener(
+        private val viewModel: SeekBarViewModel,
         private val bar: SeekBar
     ) : View.OnTouchListener, GestureDetector.OnGestureListener {
 
         // Gesture detector helps decide which touch events to intercept.
         private val detector = GestureDetectorCompat(bar.context, this)
-        // Defines a tap target around the thumb at the beginning of a gesture.
-        private var onDownTargetBoxMinX: Int = -1
-        private var onDownTargetBoxMaxX: Int = -1
+        // Velocity threshold used to decide when a fling is considered a false gesture.
+        private val flingVelocity: Int = ViewConfiguration.get(bar.context).run {
+            getScaledMinimumFlingVelocity() * MIN_FLING_VELOCITY_SCALE_FACTOR
+        }
+        // Indicates if the gesture should go to the seek bar or if it should be intercepted.
+        private var shouldGoToSeekBar = false
 
         /**
          * Decide which touch events to intercept before they reach the seek bar.
@@ -261,7 +311,7 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
             if (view != bar) {
                 return false
             }
-            val shouldGoToSeekBar = detector.onTouchEvent(event)
+            detector.onTouchEvent(event)
             return !shouldGoToSeekBar
         }
 
@@ -295,16 +345,16 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
             // Set the min, max boundaries of the thumb box.
             // I'm cheating by using the height of the seek bar as the width of the box.
             val halfHeight: Int = bar.height / 2
-            onDownTargetBoxMinX = (Math.round(thumbX) - halfHeight).toInt()
-            onDownTargetBoxMaxX = (Math.round(thumbX) + halfHeight).toInt()
+            val targetBoxMinX = (Math.round(thumbX) - halfHeight).toInt()
+            val targetBoxMaxX = (Math.round(thumbX) + halfHeight).toInt()
             // If the x position of the down event is within the box, then request that the parent
             // not intercept the event.
             val x = Math.round(event.x)
-            val accept = x >= onDownTargetBoxMinX && x <= onDownTargetBoxMaxX
-            if (accept) {
+            shouldGoToSeekBar = x >= targetBoxMinX && x <= targetBoxMaxX
+            if (shouldGoToSeekBar) {
                 bar.parent?.requestDisallowInterceptTouchEvent(true)
             }
-            return accept
+            return shouldGoToSeekBar
         }
 
         /**
@@ -312,7 +362,10 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
          *
          * This enables the user to single tap anywhere on the seek bar to seek to that position.
          */
-        override fun onSingleTapUp(event: MotionEvent) = true
+        override fun onSingleTapUp(event: MotionEvent): Boolean {
+            shouldGoToSeekBar = true
+            return true
+        }
 
         /**
          * Handle scroll events when the down event is on the thumb.
@@ -325,17 +378,13 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
             distanceX: Float,
             distanceY: Float
         ): Boolean {
-            val x = Math.round(eventStart.x)
-            return x >= onDownTargetBoxMinX && x <= onDownTargetBoxMaxX
+            return shouldGoToSeekBar
         }
 
         /**
          * Handle fling events when the down event is on the thumb.
          *
-         * TODO: Ignore entire gesture when it includes a fling.
-         * If a user is flinging, then they are probably trying to page the carousel. It would be
-         * better to ignore the entire gesture when it includes a fling. This could be achieved by
-         * reseting the seek bar position to where it was when the gesture started.
+         * Gestures that include a fling are considered a false gesture on the seek bar.
          */
         override fun onFling(
             eventStart: MotionEvent,
@@ -343,8 +392,10 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
             velocityX: Float,
             velocityY: Float
         ): Boolean {
-            val x = Math.round(eventStart.x)
-            return x >= onDownTargetBoxMinX && x <= onDownTargetBoxMaxX
+            if (Math.abs(velocityX) > flingVelocity || Math.abs(velocityY) > flingVelocity) {
+                viewModel.onSeekFalse()
+            }
+            return shouldGoToSeekBar
         }
 
         override fun onShowPress(event: MotionEvent) {}
