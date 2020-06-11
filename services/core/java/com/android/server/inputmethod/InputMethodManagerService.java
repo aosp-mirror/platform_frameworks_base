@@ -2352,6 +2352,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mImeTargetWindowMap.put(startInputToken, mCurFocusedWindow);
         mStartInputHistory.addEntry(info);
 
+        // Seems that PackageManagerInternal#grantImplicitAccess() doesn't handle cross-user
+        // implicit visibility (e.g. IME[user=10] -> App[user=0]) thus we do this only for the
+        // same-user scenarios.
+        // That said ignoring cross-user scenario will never affect IMEs that do not have
+        // INTERACT_ACROSS_USERS(_FULL) permissions, which is actually almost always the case.
+        if (mSettings.getCurrentUserId() == UserHandle.getUserId(mCurClient.uid)) {
+            mPackageManagerInternal.grantImplicitAccess(mSettings.getCurrentUserId(),
+                    null /* intent */, UserHandle.getAppId(mCurMethodUid), mCurClient.uid, true);
+        }
+
         final SessionState session = mCurClient.curSession;
         executeOrSendMessage(session.method, mCaller.obtainMessageIIOOOO(
                 MSG_START_INPUT, mCurInputContextMissingMethods, initial ? 0 : 1 /* restarting */,
