@@ -16,15 +16,19 @@
 
 package com.android.server.wm;
 
+import static android.os.Process.INVALID_UID;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
 import static android.view.WindowManager.LayoutParams.TYPE_NAVIGATION_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_PRESENTATION;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
+import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
 import static android.view.WindowManagerPolicyConstants.APPLICATION_LAYER;
 import static android.window.DisplayAreaOrganizer.FEATURE_DEFAULT_TASK_CONTAINER;
 import static android.window.DisplayAreaOrganizer.FEATURE_ONE_HANDED;
+import static android.window.DisplayAreaOrganizer.FEATURE_ROOT;
+import static android.window.DisplayAreaOrganizer.FEATURE_VENDOR_FIRST;
 
 import static com.android.server.wm.DisplayArea.Type.ABOVE_TASKS;
 import static com.android.server.wm.DisplayAreaPolicyBuilder.Feature;
@@ -33,12 +37,17 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertThrows;
 
 import static java.util.stream.Collectors.toList;
 
 import android.content.res.Resources;
+import android.os.Bundle;
+import android.os.IBinder;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
+
+import com.google.android.collect.Lists;
 
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Description;
@@ -74,6 +83,10 @@ public class DisplayAreaPolicyBuilderTest {
     private DisplayContent mDisplayContent;
     private TaskDisplayArea mDefaultTaskDisplayArea;
     private List<TaskDisplayArea> mTaskDisplayAreaList;
+    private RootDisplayArea mGroupRoot1;
+    private RootDisplayArea mGroupRoot2;
+    private TaskDisplayArea mTda1;
+    private TaskDisplayArea mTda2;
 
     @Before
     public void setup() {
@@ -85,6 +98,10 @@ public class DisplayAreaPolicyBuilderTest {
                 FEATURE_DEFAULT_TASK_CONTAINER);
         mTaskDisplayAreaList = new ArrayList<>();
         mTaskDisplayAreaList.add(mDefaultTaskDisplayArea);
+        mGroupRoot1 = new SurfacelessDisplayAreaRoot(mWms, "group1", FEATURE_VENDOR_FIRST + 1);
+        mGroupRoot2 = new SurfacelessDisplayAreaRoot(mWms, "group2", FEATURE_VENDOR_FIRST + 2);
+        mTda1 = new TaskDisplayArea(mDisplayContent, mWms, "tda1", FEATURE_VENDOR_FIRST + 3);
+        mTda2 = new TaskDisplayArea(mDisplayContent, mWms, "tda2", FEATURE_VENDOR_FIRST + 4);
     }
 
     @Test
@@ -191,6 +208,271 @@ public class DisplayAreaPolicyBuilderTest {
         }
     }
 
+    @Test
+    public void testBuilder_singleRoot_validateSettings() {
+        final DisplayAreaPolicyBuilder builder = new DisplayAreaPolicyBuilder();
+
+        // Root must be set.
+        assertThrows(IllegalStateException.class, () -> builder.build(mWms));
+
+        // IME must be set.
+        builder.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                .setTaskDisplayAreas(mTaskDisplayAreaList));
+
+        assertThrows(IllegalStateException.class, () -> builder.build(mWms));
+
+        // Default TaskDisplayArea must be set.
+        builder.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                .setImeContainer(mImeContainer)
+                .setTaskDisplayAreas(Lists.newArrayList(
+                        new TaskDisplayArea(mDisplayContent, mWms, "testTda",
+                                FEATURE_VENDOR_FIRST + 1))));
+
+        assertThrows(IllegalStateException.class, () -> builder.build(mWms));
+
+        // No exception
+        builder.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                .setImeContainer(mImeContainer)
+                .setTaskDisplayAreas(mTaskDisplayAreaList));
+
+        builder.build(mWms);
+    }
+
+    @Test
+    public void testBuilder_displayAreaGroup_validateSettings() {
+        final DisplayAreaPolicyBuilder builder1 = new DisplayAreaPolicyBuilder();
+
+        // IME must be set to one of the roots.
+        builder1.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot));
+        builder1.addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                mGroupRoot1)
+                .setTaskDisplayAreas(mTaskDisplayAreaList));
+
+        assertThrows(IllegalStateException.class, () -> builder1.build(mWms));
+
+        // Default TaskDisplayArea must be set.
+        final DisplayAreaPolicyBuilder builder2 = new DisplayAreaPolicyBuilder();
+        builder2.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot));
+        builder2.addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                mGroupRoot1)
+                .setImeContainer(mImeContainer)
+                .setTaskDisplayAreas(Lists.newArrayList(
+                        new TaskDisplayArea(mDisplayContent, mWms, "testTda",
+                                FEATURE_VENDOR_FIRST + 1))));
+
+        assertThrows(IllegalStateException.class, () -> builder2.build(mWms));
+
+        // Each DisplayAreaGroup must have at least one TaskDisplayArea.
+        final DisplayAreaPolicyBuilder builder3 = new DisplayAreaPolicyBuilder();
+        builder3.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot));
+        builder3.addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                mGroupRoot1)
+                .setImeContainer(mImeContainer)
+                .setTaskDisplayAreas(mTaskDisplayAreaList));
+        builder3.addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                mGroupRoot2));
+
+        assertThrows(IllegalStateException.class, () -> builder3.build(mWms));
+
+        // No exception
+        final DisplayAreaPolicyBuilder builder4 = new DisplayAreaPolicyBuilder();
+        builder4.setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot));
+        builder4.addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                mGroupRoot1)
+                .setImeContainer(mImeContainer)
+                .setTaskDisplayAreas(mTaskDisplayAreaList));
+        builder4.addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                mGroupRoot2)
+                .setTaskDisplayAreas(Lists.newArrayList(
+                        new TaskDisplayArea(mDisplayContent, mWms, "testTda",
+                                FEATURE_VENDOR_FIRST + 1))));
+
+        builder4.build(mWms);
+    }
+
+    @Test
+    public void testBuilder_displayAreaGroup_attachDisplayAreas() {
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList))
+                .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1)))
+                .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2)))
+                .build(mWms);
+
+        assertThat(mDefaultTaskDisplayArea.isDescendantOf(mRoot)).isTrue();
+        assertThat(mGroupRoot1.isDescendantOf(mRoot)).isTrue();
+        assertThat(mGroupRoot2.isDescendantOf(mRoot)).isTrue();
+        assertThat(mImeContainer.isDescendantOf(mGroupRoot1)).isTrue();
+        assertThat(mTda1.isDescendantOf(mGroupRoot1)).isTrue();
+        assertThat(mTda2.isDescendantOf(mGroupRoot2)).isTrue();
+        assertThat(isSibling(mDefaultTaskDisplayArea, mGroupRoot1)).isTrue();
+        assertThat(isSibling(mDefaultTaskDisplayArea, mGroupRoot2)).isTrue();
+    }
+
+    @Test
+    public void testBuilder_displayAreaGroup_createFeatureOnGroup() {
+        final Feature feature1 = new Feature.Builder(mWms.mPolicy, "feature1",
+                FEATURE_VENDOR_FIRST + 5)
+                .all()
+                .except(TYPE_STATUS_BAR)
+                .build();
+        final Feature feature2 = new Feature.Builder(mWms.mPolicy, "feature2",
+                FEATURE_VENDOR_FIRST + 6)
+                .upTo(TYPE_STATUS_BAR)
+                .and(TYPE_NAVIGATION_BAR)
+                .build();
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList))
+                .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1))
+                        .addFeature(feature1))
+                .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2))
+                        .addFeature(feature2))
+                .build(mWms);
+
+        List<DisplayArea<? extends WindowContainer>> feature1DAs =
+                policy.getDisplayAreas(feature1.getId());
+        List<DisplayArea<? extends WindowContainer>> feature2DAs =
+                policy.getDisplayAreas(feature2.getId());
+        for (DisplayArea<? extends WindowContainer> da : feature1DAs) {
+            assertThat(da.isDescendantOf(mGroupRoot1)).isTrue();
+        }
+        for (DisplayArea<? extends WindowContainer> da : feature2DAs) {
+            assertThat(da.isDescendantOf(mGroupRoot2)).isTrue();
+        }
+    }
+
+    @Test
+    public void testBuilder_addWindow_selectContainerForWindowFunc_defaultFunc() {
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList))
+                .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1)))
+                .addDisplayAreaGroupHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2)))
+                .build(mWms);
+
+        final WindowToken token = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, null /* options */);
+        policy.addWindow(token);
+
+        // By default, window are always added to the root.
+        assertThat(token.isDescendantOf(mRoot)).isTrue();
+        assertThat(token.isDescendantOf(mGroupRoot1)).isFalse();
+        assertThat(token.isDescendantOf(mGroupRoot2)).isFalse();
+    }
+
+    @Test
+    public void testBuilder_addWindow_selectContainerForWindowFunc_selectBasedOnType() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList))
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .setSelectRootForWindowFunc((token, options) -> {
+                    if (token.windowType == TYPE_STATUS_BAR) {
+                        return mGroupRoot1;
+                    }
+                    return mGroupRoot2;
+                })
+                .build(mWms);
+
+        final WindowToken token1 = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, null /* options */);
+        final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_WALLPAPER, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, null /* options */);
+        policy.addWindow(token1);
+        policy.addWindow(token2);
+
+        assertThat(token1.isDescendantOf(mGroupRoot1)).isTrue();
+        assertThat(token2.isDescendantOf(mGroupRoot2)).isTrue();
+    }
+
+    @Test
+    public void testBuilder_addWindow_selectContainerForWindowFunc_selectBasedOnOptions() {
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy0 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(mRoot)
+                        .setTaskDisplayAreas(mTaskDisplayAreaList);
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy1 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot1)
+                        .setImeContainer(mImeContainer)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda1));
+        final DisplayAreaPolicyBuilder.HierarchyBuilder hierarchy2 =
+                new DisplayAreaPolicyBuilder.HierarchyBuilder(
+                        mGroupRoot2)
+                        .setTaskDisplayAreas(Lists.newArrayList(mTda2));
+        final DisplayAreaPolicyBuilder.Result policy = new DisplayAreaPolicyBuilder()
+                .setRootHierarchy(hierarchy0)
+                .addDisplayAreaGroupHierarchy(hierarchy1)
+                .addDisplayAreaGroupHierarchy(hierarchy2)
+                .setSelectRootForWindowFunc((token, options) -> {
+                    if (options == null) {
+                        return mRoot;
+                    }
+                    if (options.getInt("HIERARCHY_ROOT_ID") == mGroupRoot1.mFeatureId) {
+                        return mGroupRoot1;
+                    }
+                    if (options.getInt("HIERARCHY_ROOT_ID") == mGroupRoot2.mFeatureId) {
+                        return mGroupRoot2;
+                    }
+                    return mRoot;
+                })
+                .build(mWms);
+
+        final Bundle options1 = new Bundle();
+        options1.putInt("HIERARCHY_ROOT_ID", mGroupRoot1.mFeatureId);
+        final Bundle options2 = new Bundle();
+        options2.putInt("HIERARCHY_ROOT_ID", mGroupRoot2.mFeatureId);
+        final WindowToken token0 = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, null /* options */);
+        final WindowToken token1 = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, options1);
+        final WindowToken token2 = new WindowToken(mWms, mock(IBinder.class),
+                TYPE_STATUS_BAR, true /* persistOnEmpty */, mDisplayContent,
+                true /* ownerCanManageAppTokens */, INVALID_UID, false /* roundedCornerOverlay */,
+                false /* fromClientToken */, options2);
+
+        policy.addWindow(token0);
+        policy.addWindow(token1);
+        policy.addWindow(token2);
+
+        assertThat(token0.isDescendantOf(mRoot)).isTrue();
+        assertThat(token1.isDescendantOf(mGroupRoot1)).isTrue();
+        assertThat(token2.isDescendantOf(mGroupRoot2)).isTrue();
+    }
+
     private static Resources resourcesWithProvider(String provider) {
         Resources mock = mock(Resources.class);
         when(mock.getString(
@@ -260,6 +542,10 @@ public class DisplayAreaPolicyBuilderTest {
         };
     }
 
+    private boolean isSibling(WindowContainer da1, WindowContainer da2) {
+        return da1.getParent() != null && da1.getParent() == da2.getParent();
+    }
+
     private WindowToken tokenOfType(int type) {
         WindowToken m = mock(WindowToken.class);
         when(m.getWindowLayerFromType()).thenReturn(
@@ -293,7 +579,11 @@ public class DisplayAreaPolicyBuilderTest {
     static class SurfacelessDisplayAreaRoot extends RootDisplayArea {
 
         SurfacelessDisplayAreaRoot(WindowManagerService wms) {
-            super(wms);
+            this(wms, "SurfacelessDisplayAreaRoot", FEATURE_ROOT);
+        }
+
+        SurfacelessDisplayAreaRoot(WindowManagerService wms, String name, int featureId) {
+            super(wms, name, featureId);
         }
 
         @Override

@@ -40,10 +40,12 @@ import static com.android.server.wm.WindowTokenProto.WAITING_TO_SHOW;
 import static com.android.server.wm.WindowTokenProto.WINDOW_CONTAINER;
 
 import android.annotation.CallSuper;
+import android.annotation.Nullable;
 import android.app.IWindowToken;
 import android.app.servertransaction.FixedRotationAdjustmentsItem;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.os.Bundle;
 import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -77,6 +79,13 @@ class WindowToken extends WindowContainer<WindowState> {
 
     // The type of window this token is for, as per WindowManager.LayoutParams.
     final int windowType;
+
+    /**
+     * Options that will be used to determine which {@link RootDisplayArea} this window should be
+     * attached to.
+     */
+    @Nullable
+    final Bundle mOptions;
 
     /** {@code true} if this holds the rounded corner overlay */
     final boolean mRoundedCornerOverlay;
@@ -233,9 +242,17 @@ class WindowToken extends WindowContainer<WindowState> {
     WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
             DisplayContent dc, boolean ownerCanManageAppTokens, int ownerUid,
             boolean roundedCornerOverlay, boolean fromClientToken) {
+        this(service, _token, type, persistOnEmpty, dc, ownerCanManageAppTokens, ownerUid,
+                roundedCornerOverlay, fromClientToken, null /* options */);
+    }
+
+    WindowToken(WindowManagerService service, IBinder _token, int type, boolean persistOnEmpty,
+            DisplayContent dc, boolean ownerCanManageAppTokens, int ownerUid,
+            boolean roundedCornerOverlay, boolean fromClientToken, @Nullable Bundle options) {
         super(service);
         token = _token;
         windowType = type;
+        mOptions = options;
         mPersistOnEmpty = persistOnEmpty;
         mOwnerCanManageAppTokens = ownerCanManageAppTokens;
         mOwnerUid = ownerUid;
