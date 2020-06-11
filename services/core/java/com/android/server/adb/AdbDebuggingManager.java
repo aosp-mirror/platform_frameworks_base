@@ -337,6 +337,7 @@ public class AdbDebuggingManager {
 
     class PortListenerImpl implements AdbConnectionPortListener {
         public void onPortReceived(int port) {
+            if (DEBUG) Slog.d(TAG, "Received tls port=" + port);
             Message msg = mHandler.obtainMessage(port > 0
                      ? AdbDebuggingHandler.MSG_SERVER_CONNECTED
                      : AdbDebuggingHandler.MSG_SERVER_DISCONNECTED);
@@ -392,6 +393,7 @@ public class AdbDebuggingManager {
 
                 mOutputStream = mSocket.getOutputStream();
                 mInputStream = mSocket.getInputStream();
+                mHandler.sendEmptyMessage(AdbDebuggingHandler.MSG_ADBD_SOCKET_CONNECTED);
             } catch (IOException ioe) {
                 Slog.e(TAG, "Caught an exception opening the socket: " + ioe);
                 closeSocketLocked();
@@ -504,6 +506,7 @@ public class AdbDebuggingManager {
             } catch (IOException ex) {
                 Slog.e(TAG, "Failed closing socket: " + ex);
             }
+            mHandler.sendEmptyMessage(AdbDebuggingHandler.MSG_ADBD_SOCKET_DISCONNECTED);
         }
 
         /** Call to stop listening on the socket and exit the thread. */
@@ -729,6 +732,10 @@ public class AdbDebuggingManager {
         static final int MSG_SERVER_CONNECTED = 24;
         // Notifies us the TLS server is disconnected
         static final int MSG_SERVER_DISCONNECTED = 25;
+        // Notification when adbd socket successfully connects.
+        static final int MSG_ADBD_SOCKET_CONNECTED = 26;
+        // Notification when adbd socket is disconnected.
+        static final int MSG_ADBD_SOCKET_DISCONNECTED = 27;
 
         // === Messages we can send to adbd ===========
         static final String MSG_DISCONNECT_DEVICE = "DD";
@@ -1167,6 +1174,28 @@ public class AdbDebuggingManager {
                     if (mConnectionPortPoller != null) {
                         mConnectionPortPoller.cancelAndWait();
                         mConnectionPortPoller = null;
+                    }
+                    break;
+                }
+                case MSG_ADBD_SOCKET_CONNECTED: {
+                    if (DEBUG) Slog.d(TAG, "adbd socket connected");
+                    if (mAdbWifiEnabled) {
+                        // In scenarios where adbd is restarted, the tls port may change.
+                        mConnectionPortPoller =
+                                new AdbDebuggingManager.AdbConnectionPortPoller(mPortListener);
+                        mConnectionPortPoller.start();
+                    }
+                    break;
+                }
+                case MSG_ADBD_SOCKET_DISCONNECTED: {
+                    if (DEBUG) Slog.d(TAG, "adbd socket disconnected");
+                    if (mConnectionPortPoller != null) {
+                        mConnectionPortPoller.cancelAndWait();
+                        mConnectionPortPoller = null;
+                    }
+                    if (mAdbWifiEnabled) {
+                        // In scenarios where adbd is restarted, the tls port may change.
+                        onAdbdWifiServerDisconnected(-1);
                     }
                     break;
                 }
