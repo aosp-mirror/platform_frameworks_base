@@ -28,12 +28,12 @@ import android.text.TextUtils
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Dumpable
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.lang.IllegalStateException
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -67,7 +67,8 @@ open class BroadcastDispatcher @Inject constructor (
     private val context: Context,
     @Main private val mainHandler: Handler,
     @Background private val bgLooper: Looper,
-    dumpManager: DumpManager
+    dumpManager: DumpManager,
+    private val logger: BroadcastDispatcherLogger
 ) : Dumpable {
 
     // Only modify in BG thread
@@ -156,7 +157,7 @@ open class BroadcastDispatcher @Inject constructor (
     /**
      * Unregister receiver for a particular user.
      *
-     * @param receiver The receiver to unregister. It will be unregistered for all users.
+     * @param receiver The receiver to unregister.
      * @param user The user associated to the registered [receiver]. It can be [UserHandle.ALL].
      */
     open fun unregisterReceiverForUser(receiver: BroadcastReceiver, user: UserHandle) {
@@ -166,7 +167,7 @@ open class BroadcastDispatcher @Inject constructor (
 
     @VisibleForTesting
     protected open fun createUBRForUser(userId: Int) =
-            UserBroadcastDispatcher(context, userId, bgLooper)
+            UserBroadcastDispatcher(context, userId, bgLooper, logger)
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("Broadcast dispatcher:")

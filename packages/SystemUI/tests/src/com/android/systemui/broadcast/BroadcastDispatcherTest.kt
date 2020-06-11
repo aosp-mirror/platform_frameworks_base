@@ -27,6 +27,7 @@ import android.test.suitebuilder.annotation.SmallTest
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
@@ -76,6 +77,8 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     private lateinit var intentFilterOther: IntentFilter
     @Mock
     private lateinit var mockHandler: Handler
+    @Mock
+    private lateinit var logger: BroadcastDispatcherLogger
 
     private lateinit var executor: Executor
 
@@ -96,6 +99,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
                 Handler(testableLooper.looper),
                 testableLooper.looper,
                 mock(DumpManager::class.java),
+                logger,
                 mapOf(0 to mockUBRUser0, 1 to mockUBRUser1))
 
         // These should be valid filters
@@ -239,8 +243,9 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         mainHandler: Handler,
         bgLooper: Looper,
         dumpManager: DumpManager,
+        logger: BroadcastDispatcherLogger,
         var mockUBRMap: Map<Int, UserBroadcastDispatcher>
-    ) : BroadcastDispatcher(context, mainHandler, bgLooper, dumpManager) {
+    ) : BroadcastDispatcher(context, mainHandler, bgLooper, dumpManager, logger) {
         override fun createUBRForUser(userId: Int): UserBroadcastDispatcher {
             return mockUBRMap.getOrDefault(userId, mock(UserBroadcastDispatcher::class.java))
         }
