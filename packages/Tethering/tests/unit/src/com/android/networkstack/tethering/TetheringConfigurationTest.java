@@ -61,6 +61,8 @@ public class TetheringConfigurationTest {
     private final SharedLog mLog = new SharedLog("TetheringConfigurationTest");
 
     private static final String[] PROVISIONING_APP_NAME = {"some", "app"};
+    private static final String PROVISIONING_NO_UI_APP_NAME = "no_ui_app";
+    private static final String PROVISIONING_APP_RESPONSE = "app_response";
     @Mock private Context mContext;
     @Mock private TelephonyManager mTelephonyManager;
     @Mock private Resources mResources;
@@ -388,6 +390,8 @@ public class TetheringConfigurationTest {
                 new MockTetheringConfiguration(mMockContext, mLog, anyValidSubId);
         assertEquals(mockCfg.provisioningApp[0], PROVISIONING_APP_NAME[0]);
         assertEquals(mockCfg.provisioningApp[1], PROVISIONING_APP_NAME[1]);
+        assertEquals(mockCfg.provisioningAppNoUi, PROVISIONING_NO_UI_APP_NAME);
+        assertEquals(mockCfg.provisioningResponse, PROVISIONING_APP_RESPONSE);
     }
 
     private void setUpResourceForSubId() {
@@ -403,6 +407,10 @@ public class TetheringConfigurationTest {
                 new int[0]);
         when(mResourcesForSubId.getStringArray(
                 R.array.config_mobile_hotspot_provision_app)).thenReturn(PROVISIONING_APP_NAME);
+        when(mResourcesForSubId.getString(R.string.config_mobile_hotspot_provision_app_no_ui))
+                .thenReturn(PROVISIONING_NO_UI_APP_NAME);
+        when(mResourcesForSubId.getString(
+                R.string.config_mobile_hotspot_provision_response)).thenReturn(
+                PROVISIONING_APP_RESPONSE);
     }
-
 }
