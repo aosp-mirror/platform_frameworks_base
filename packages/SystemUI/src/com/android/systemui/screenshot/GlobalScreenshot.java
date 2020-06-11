@@ -89,7 +89,6 @@ import android.widget.Toast;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -491,8 +490,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             saveScreenshotAndToast(finisher);
             return;
         }
-
-        mContext.sendBroadcast(new Intent(mContext, ScreenshotTakenReceiver.class));
 
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
@@ -1176,22 +1173,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
             ScreenshotSmartActions.notifyScreenshotAction(
                     context, intent.getStringExtra(EXTRA_ID), actionType, true);
-        }
-    }
-
-    /**
-     * Called when a screenshot has been taken and animation / screenshot UI is about to begin.
-     */
-    public static class ScreenshotTakenReceiver extends BroadcastReceiver {
-        private final Lazy<BubbleController> mBubbleController;
-
-        public ScreenshotTakenReceiver(Lazy<BubbleController> bubbleController) {
-            mBubbleController = bubbleController;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mBubbleController.get().hideImeFromExpandedBubble();
         }
     }
 }
