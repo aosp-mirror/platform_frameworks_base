@@ -537,7 +537,7 @@ public class BubbleDataTest extends SysuiTestCase {
         // Verify the selection was cleared.
         verifyUpdateReceived();
         assertThat(mBubbleData.isExpanded()).isFalse();
-        assertSelectionCleared();
+        assertThat(mBubbleData.getSelectedBubble()).isNull();
     }
 
     // EXPANDED / ADD / UPDATE
