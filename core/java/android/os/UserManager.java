@@ -4095,14 +4095,14 @@ public class UserManager {
     }
 
     /**
-     * Returns true if the user switcher should be shown.
-     * I.e., returns whether the user switcher is enabled and there is something actionable to show.
+     * Returns true if the user switcher is enabled (regardless of whether there is anything
+     * interesting for it to show).
      *
-     * @return true if user switcher should be shown.
+     * @return true if user switcher is enabled
      * @hide
      */
     public boolean isUserSwitcherEnabled() {
-        return isUserSwitcherEnabled(false);
+        return isUserSwitcherEnabled(true);
     }
 
     /**
