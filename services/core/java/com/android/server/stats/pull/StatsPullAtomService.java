@@ -209,14 +209,6 @@ public class StatsPullAtomService extends SystemService {
     // Random seed stable for StatsPullAtomService life cycle - can be used for stable sampling
     private static final int RANDOM_SEED = new Random().nextInt();
 
-    /**
-     * Lowest available uid for apps.
-     *
-     * <p>Used to quickly discard memory snapshots of the zygote forks from native process
-     * measurements.
-     */
-    private static final int MIN_APP_UID = 10_000;
-
     private static final int DIMENSION_KEY_SIZE_HARD_LIMIT = 800;
     private static final int DIMENSION_KEY_SIZE_SOFT_LIMIT = 500;
     private static final long APP_OPS_SAMPLING_INITIALIZATION_DELAY_MILLIS = 45000;
@@ -1819,10 +1811,6 @@ public class StatsPullAtomService extends SystemService {
         return StatsManager.PULL_SUCCESS;
     }
 
-    private static boolean isAppUid(int uid) {
-        return uid >= MIN_APP_UID;
-    }
-
     private void registerProcessMemoryHighWaterMark() {
         int tagId = FrameworkStatsLog.PROCESS_MEMORY_HIGH_WATER_MARK;
         mStatsManager.setPullAtomCallback(
@@ -1859,7 +1847,7 @@ public class StatsPullAtomService extends SystemService {
         int size = processCmdlines.size();
         for (int i = 0; i < size; ++i) {
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(processCmdlines.keyAt(i));
-            if (snapshot == null || isAppUid(snapshot.uid)) {
+            if (snapshot == null) {
                 continue;
             }
             StatsEvent e = StatsEvent.newBuilder()
@@ -1920,7 +1908,7 @@ public class StatsPullAtomService extends SystemService {
         for (int i = 0; i < size; ++i) {
             int pid = processCmdlines.keyAt(i);
             final MemorySnapshot snapshot = readMemorySnapshotFromProcfs(pid);
-            if (snapshot == null || isAppUid(snapshot.uid)) {
+            if (snapshot == null) {
                 continue;
             }
             StatsEvent e = StatsEvent.newBuilder()
