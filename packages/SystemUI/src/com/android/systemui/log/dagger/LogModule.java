@@ -97,6 +97,18 @@ public class LogModule {
         return buffer;
     }
 
+    /** Provides a logging buffer for {@link com.android.systemui.broadcast.BroadcastDispatcher} */
+    @Provides
+    @Singleton
+    @BroadcastDispatcherLog
+    public static LogBuffer provideBroadcastDispatcherLogBuffer(
+            LogcatEchoTracker bufferFilter,
+            DumpManager dumpManager) {
+        LogBuffer buffer = new LogBuffer("BroadcastDispatcherLog", 500, 10, bufferFilter);
+        buffer.attach(dumpManager);
+        return buffer;
+    }
+
     /** Allows logging buffers to be tweaked via adb on debug builds but not on prod builds. */
     @Provides
     @Singleton

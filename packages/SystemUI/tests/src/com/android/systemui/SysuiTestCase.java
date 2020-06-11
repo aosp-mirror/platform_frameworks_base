@@ -35,6 +35,7 @@ import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.broadcast.FakeBroadcastDispatcher;
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger;
 import com.android.systemui.classifier.FalsingManagerFake;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -73,7 +74,7 @@ public abstract class SysuiTestCase {
         SystemUIFactory.createFromConfig(mContext);
         mDependency = new TestableDependency(mContext);
         mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Handler.class),
-                mock(Looper.class), mock(DumpManager.class));
+                mock(Looper.class), mock(DumpManager.class), mock(BroadcastDispatcherLogger.class));
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
