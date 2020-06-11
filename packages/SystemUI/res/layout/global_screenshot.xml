@@ -48,4 +48,18 @@
         android:visibility="gone"
         android:pointerIcon="crosshair"/>
     <include layout="@layout/global_screenshot_static"/>
+    <FrameLayout
+        android:id="@+id/global_screenshot_dismiss_button"
+        android:layout_width="@dimen/screenshot_dismiss_button_tappable_size"
+        android:layout_height="@dimen/screenshot_dismiss_button_tappable_size"
+        android:elevation="7dp"
+        android:visibility="gone"
+        android:contentDescription="@string/screenshot_dismiss_ui_description">
+        <ImageView
+            android:id="@+id/global_screenshot_dismiss_image"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="@dimen/screenshot_dismiss_button_margin"
+            android:src="@drawable/screenshot_cancel"/>
+    </FrameLayout>
 </FrameLayout>
