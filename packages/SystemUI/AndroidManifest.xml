@@ -406,10 +406,6 @@
         <receiver android:name=".screenshot.GlobalScreenshot$SmartActionsReceiver"
                   android:exported="false"/>
 
-        <!-- Callback for performing sysui cleanup after screenshot has been taken. -->
-        <receiver android:name=".screenshot.GlobalScreenshot$ScreenshotTakenReceiver"
-                  android:exported="false"/>
-
         <!-- started from UsbDeviceSettingsManager -->
         <activity android:name=".usb.UsbConfirmActivity"
             android:exported="true"
