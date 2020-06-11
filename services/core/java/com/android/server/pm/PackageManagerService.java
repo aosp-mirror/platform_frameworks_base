@@ -11067,7 +11067,7 @@ public class PackageManagerService extends IPackageManager.Stub
         } else {
             pkgSetting = result.pkgSetting;
             if (originalPkgSetting != null) {
-                mSettings.addRenamedPackageLPw(parsedPackage.getPackageName(),
+                mSettings.addRenamedPackageLPw(parsedPackage.getRealPackage(),
                         originalPkgSetting.name);
                 mTransferredPackages.add(originalPkgSetting.name);
             }
@@ -11176,7 +11176,7 @@ public class PackageManagerService extends IPackageManager.Stub
     @GuardedBy("mLock")
     private @Nullable PackageSetting getOriginalPackageLocked(@NonNull AndroidPackage pkg,
             @Nullable String renamedPkgName) {
-        if (!isPackageRenamed(pkg, renamedPkgName)) {
+        if (isPackageRenamed(pkg, renamedPkgName)) {
             return null;
         }
         for (int i = ArrayUtils.size(pkg.getOriginalPackages()) - 1; i >= 0; --i) {
@@ -12362,7 +12362,7 @@ public class PackageManagerService extends IPackageManager.Stub
             ksms.addScannedPackageLPw(pkg);
 
             mComponentResolver.addAllComponents(pkg, chatty);
-            mAppsFilter.addPackage(pkgSetting);
+            mAppsFilter.addPackage(pkgSetting, mSettings.mPackages);
 
             // Don't allow ephemeral applications to define new permissions groups.
             if ((scanFlags & SCAN_AS_INSTANT_APP) != 0) {
@@ -12536,6 +12536,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     void cleanPackageDataStructuresLILPw(AndroidPackage pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
+        mAppsFilter.removePackage(getPackageSetting(pkg.getPackageName()),
+                mInjector.getUserManagerInternal().getUserIds(), mSettings.mPackages);
         mPermissionManager.removeAllPermissions(pkg, chatty);
 
         final int instrumentationSize = ArrayUtils.size(pkg.getInstrumentations());
@@ -13516,6 +13518,17 @@ public class PackageManagerService extends IPackageManager.Stub
         removeSuspensionsBySuspendingPackage(allPackages, suspendingPackage::equals, userId);
     }
 
+    boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
+        synchronized (mLock) {
+            for (final PackageSetting ps : mSettings.mPackages.values()) {
+                if (ps.isSuspendedBy(suspendingPackage, userId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Removes any suspensions on given packages that were added by packages that pass the given
      * predicate.
@@ -14251,7 +14264,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // Okay!
             targetPackageSetting.setInstallerPackageName(installerPackageName);
             mSettings.addInstallerPackageNames(targetPackageSetting.installSource);
-            mAppsFilter.addPackage(targetPackageSetting);
+            mAppsFilter.addPackage(targetPackageSetting, mSettings.mPackages);
             scheduleWriteSettingsLocked();
         }
     }
@@ -18704,7 +18717,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     clearIntentFilterVerificationsLPw(deletedPs.name, UserHandle.USER_ALL, true);
                     clearDefaultBrowserIfNeeded(packageName);
                     mSettings.mKeySetManagerService.removeAppKeySetDataLPw(packageName);
-                    mAppsFilter.removePackage(getPackageSetting(packageName));
                     removedAppId = mSettings.removePackageLPw(packageName);
                     if (outInfo != null) {
                         outInfo.removedAppId = removedAppId;
@@ -23462,7 +23474,6 @@ public class PackageManagerService extends IPackageManager.Stub
             scheduleWritePackageRestrictionsLocked(userId);
             scheduleWritePackageListLocked(userId);
             primeDomainVerificationsLPw(userId);
-            mAppsFilter.onUsersChanged();
         }
     }
 
@@ -23912,7 +23923,6 @@ public class PackageManagerService extends IPackageManager.Stub
             return PackageManagerService.this.getInstalledApplicationsListInternal(flags, userId,
                     callingUid);
         }
-
 
         @Override
         public boolean isPlatformSigned(String packageName) {
@@ -25017,6 +25027,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.clearBlockUninstallLPw(userId);
                 mSettings.writePackageRestrictionsLPr(userId);
             }
+        }
+
+        @Override
+        public void unsuspendForSuspendingPackage(final String packageName, int affectedUser) {
+            PackageManagerService.this.unsuspendForSuspendingPackage(packageName, affectedUser);
+        }
+
+        @Override
+        public boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
+            return PackageManagerService.this.isSuspendingAnyPackages(suspendingPackage, userId);
         }
     }
 

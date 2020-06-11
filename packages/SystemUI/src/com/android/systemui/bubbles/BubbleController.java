@@ -55,7 +55,6 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -180,6 +179,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     // Callback that updates BubbleOverflowActivity on data change.
     @Nullable private Runnable mOverflowCallback = null;
 
+    // Only load overflow data from disk once
+    private boolean mOverflowDataLoaded = false;
+
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
     private WindowManager mWindowManager;
@@ -192,9 +194,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     private WindowManager.LayoutParams mWmLayoutParams;
     /** Whether or not the BubbleStackView has been added to the WindowManager. */
     private boolean mAddedToWindowManager = false;
-
-    // Used for determining view rect for touch interaction
-    private Rect mTempRect = new Rect();
 
     // Listens to user switch so bubbles can be saved and restored.
     private final NotificationLockscreenUserManager mNotifUserManager;
@@ -417,6 +416,16 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      */
     public void addNotifCallback(NotifCallback callback) {
         mCallbacks.add(callback);
+    }
+
+    /**
+     * Dispatches a back press into the expanded Bubble's ActivityView if its IME is visible,
+     * causing it to hide.
+     */
+    public void hideImeFromExpandedBubble() {
+        if (mStackView != null) {
+            mStackView.hideImeFromExpandedBubble();
+        }
     }
 
     private void setupNEM() {
@@ -952,13 +961,14 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * Fills the overflow bubbles by loading them from disk.
      */
     void loadOverflowBubblesFromDisk() {
-        if (!mBubbleData.getOverflowBubbles().isEmpty()) {
+        if (!mBubbleData.getOverflowBubbles().isEmpty() || mOverflowDataLoaded) {
             // we don't need to load overflow bubbles from disk if it is already in memory
             return;
         }
+        mOverflowDataLoaded = true;
         mDataRepository.loadBubbles((bubbles) -> {
             bubbles.forEach(bubble -> {
-                if (mBubbleData.getBubbles().contains(bubble)) {
+                if (mBubbleData.hasAnyBubbleWithKey(bubble.getKey())) {
                     // if the bubble is already active, there's no need to push it to overflow
                     return;
                 }
@@ -1156,7 +1166,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (b.getEntry() != null) {
             // Updating the entry to be a bubble will trigger our normal update flow
             setIsBubble(b.getEntry(), isBubble, b.shouldAutoExpand());
-        } else {
+        } else if (isBubble) {
             // If we have no entry to update, it's a persisted bubble so
             // we need to add it to the stack ourselves
             Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);

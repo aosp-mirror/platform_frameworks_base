@@ -553,5 +553,5 @@
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Disabled"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Enabled"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Your device must be rebooted for this change to apply. Reboot now or cancel."</string>
-    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphone"</string>
+    <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Wired headphones"</string>
 </resources>

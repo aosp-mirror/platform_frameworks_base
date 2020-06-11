@@ -16,41 +16,57 @@
 
 package com.android.systemui.statusbar.notification.row
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
 import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.graphics.drawable.GradientDrawable
 import android.text.SpannableStringBuilder
 import android.text.style.BulletSpan
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.Window
 import android.view.WindowInsets.Type.statusBars
 import android.view.WindowManager
+import android.view.animation.Interpolator
+import android.view.animation.PathInterpolator
 import android.widget.ImageView
 import android.widget.TextView
+import com.android.systemui.Interpolators.LINEAR_OUT_SLOW_IN
 import com.android.systemui.Prefs
 import com.android.systemui.R
 import com.android.systemui.statusbar.notification.row.NotificationConversationInfo.OnConversationSettingsClickListener
 import javax.inject.Inject
 
+
 /**
  * Controller to handle presenting the priority conversations onboarding dialog
  */
 class PriorityOnboardingDialogController @Inject constructor(
-    val view: View,
-    val context: Context,
-    val ignoresDnd: Boolean,
-    val showsAsBubble: Boolean,
-    val icon : Drawable,
-    val onConversationSettingsClickListener : OnConversationSettingsClickListener
+        val view: View,
+        val context: Context,
+        private val ignoresDnd: Boolean,
+        private val showsAsBubble: Boolean,
+        val icon : Drawable,
+        private val onConversationSettingsClickListener : OnConversationSettingsClickListener,
+        val badge : Drawable
 ) {
 
     private lateinit var dialog: Dialog
+    private val OVERSHOOT: Interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1.4f)
+    private val IMPORTANCE_ANIM_DELAY = 150L
+    private val IMPORTANCE_ANIM_GROW_DURATION = 250L
+    private val IMPORTANCE_ANIM_SHRINK_DURATION = 200L
+    private val IMPORTANCE_ANIM_SHRINK_DELAY = 25L
 
     fun init() {
         initDialog()
@@ -81,6 +97,7 @@ class PriorityOnboardingDialogController @Inject constructor(
         private lateinit var icon: Drawable
         private lateinit var onConversationSettingsClickListener
                 : OnConversationSettingsClickListener
+        private lateinit var badge : Drawable
 
         fun setView(v: View): Builder {
             view = v
@@ -106,6 +123,10 @@ class PriorityOnboardingDialogController @Inject constructor(
             icon = draw
             return this
         }
+        fun setBadge(badge : Drawable) : Builder {
+            this.badge = badge
+            return this
+        }
 
         fun setOnSettingsClick(onClick : OnConversationSettingsClickListener) : Builder {
             onConversationSettingsClickListener = onClick
@@ -115,7 +136,7 @@ class PriorityOnboardingDialogController @Inject constructor(
         fun build(): PriorityOnboardingDialogController {
             val controller = PriorityOnboardingDialogController(
                     view, context, ignoresDnd, showAsBubble, icon,
-                    onConversationSettingsClickListener)
+                    onConversationSettingsClickListener, badge)
             return controller
         }
     }
@@ -143,6 +164,65 @@ class PriorityOnboardingDialogController @Inject constructor(
             }
 
             findViewById<ImageView>(R.id.conversation_icon)?.setImageDrawable(icon)
+            findViewById<ImageView>(R.id.icon)?.setImageDrawable(badge)
+            val mImportanceRingView = findViewById<ImageView>(R.id.conversation_icon_badge_ring)
+            val conversationIconBadgeBg = findViewById<ImageView>(R.id.conversation_icon_badge_bg)
+
+            val ring: GradientDrawable = mImportanceRingView.drawable as GradientDrawable
+            ring.mutate()
+            val bg = conversationIconBadgeBg.drawable as GradientDrawable
+            bg.mutate()
+            val ringColor = context.getResources()
+                    .getColor(com.android.internal.R.color.conversation_important_highlight)
+            val standardThickness = context.resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.importance_ring_stroke_width)
+            val largeThickness = context.resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.importance_ring_anim_max_stroke_width)
+            val standardSize = context.resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.importance_ring_size)
+            val baseSize = standardSize - standardThickness * 2
+            val largeSize = baseSize + largeThickness * 2
+            val bgSize = context.resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.conversation_icon_size_badged)
+
+            val animatorUpdateListener: ValueAnimator.AnimatorUpdateListener
+                    = ValueAnimator.AnimatorUpdateListener { animation ->
+                val strokeWidth = animation.animatedValue as Int
+                ring.setStroke(strokeWidth, ringColor)
+                val newSize = baseSize + strokeWidth * 2
+                ring.setSize(newSize, newSize)
+                mImportanceRingView.invalidate()
+            }
+
+            val growAnimation: ValueAnimator = ValueAnimator.ofInt(0, largeThickness)
+            growAnimation.interpolator = LINEAR_OUT_SLOW_IN
+            growAnimation.duration = IMPORTANCE_ANIM_GROW_DURATION
+            growAnimation.addUpdateListener(animatorUpdateListener)
+
+            val shrinkAnimation: ValueAnimator
+                    = ValueAnimator.ofInt(largeThickness, standardThickness)
+            shrinkAnimation.duration = IMPORTANCE_ANIM_SHRINK_DURATION
+            shrinkAnimation.startDelay = IMPORTANCE_ANIM_SHRINK_DELAY
+            shrinkAnimation.interpolator = OVERSHOOT
+            shrinkAnimation.addUpdateListener(animatorUpdateListener)
+            shrinkAnimation.addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator?) {
+                    // Shrink the badge bg so that it doesn't peek behind the animation
+                    bg.setSize(baseSize, baseSize);
+                    conversationIconBadgeBg.invalidate();
+                }
+
+                override fun onAnimationEnd(animation: Animator?) {
+                    // Reset bg back to normal size
+                    bg.setSize(bgSize, bgSize);
+                    conversationIconBadgeBg.invalidate();
+
+                }
+            })
+
+            val anims = AnimatorSet()
+            anims.startDelay = IMPORTANCE_ANIM_DELAY
+            anims.playSequentially(growAnimation, shrinkAnimation)
 
             val gapWidth = dialog.context.getResources().getDimensionPixelSize(
                     R.dimen.conversation_onboarding_bullet_gap_width)
@@ -180,6 +260,7 @@ class PriorityOnboardingDialogController @Inject constructor(
                     height = WRAP_CONTENT
                 }
             }
+            anims.start()
         }
     }
 

@@ -33,7 +33,6 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MacAddress;
 import android.net.RouteInfo;
-import android.net.TetherOffloadRuleParcel;
 import android.net.TetheredClient;
 import android.net.TetheringManager;
 import android.net.TetheringRequestParcel;
@@ -65,6 +64,8 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.MessageUtils;
 import com.android.internal.util.State;
 import com.android.internal.util.StateMachine;
+import com.android.networkstack.tethering.BpfCoordinator;
+import com.android.networkstack.tethering.BpfCoordinator.Ipv6ForwardingRule;
 import com.android.networkstack.tethering.PrivateAddressCoordinator;
 
 import java.io.IOException;
@@ -76,7 +77,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -225,6 +225,8 @@ public class IpServer extends StateMachine {
 
     private final SharedLog mLog;
     private final INetd mNetd;
+    @NonNull
+    private final BpfCoordinator mBpfCoordinator;
     private final Callback mCallback;
     private final InterfaceController mInterfaceCtrl;
     private final PrivateAddressCoordinator mPrivateAddressCoordinator;
@@ -269,43 +271,6 @@ public class IpServer extends StateMachine {
         }
     }
 
-    static class Ipv6ForwardingRule {
-        public final int upstreamIfindex;
-        public final int downstreamIfindex;
-        public final Inet6Address address;
-        public final MacAddress srcMac;
-        public final MacAddress dstMac;
-
-        Ipv6ForwardingRule(int upstreamIfindex, int downstreamIfIndex, Inet6Address address,
-                MacAddress srcMac, MacAddress dstMac) {
-            this.upstreamIfindex = upstreamIfindex;
-            this.downstreamIfindex = downstreamIfIndex;
-            this.address = address;
-            this.srcMac = srcMac;
-            this.dstMac = dstMac;
-        }
-
-        public Ipv6ForwardingRule onNewUpstream(int newUpstreamIfindex) {
-            return new Ipv6ForwardingRule(newUpstreamIfindex, downstreamIfindex, address, srcMac,
-                    dstMac);
-        }
-
-        // Don't manipulate TetherOffloadRuleParcel directly because implementing onNewUpstream()
-        // would be error-prone due to generated stable AIDL classes not having a copy constructor.
-        public TetherOffloadRuleParcel toTetherOffloadRuleParcel() {
-            final TetherOffloadRuleParcel parcel = new TetherOffloadRuleParcel();
-            parcel.inputInterfaceIndex = upstreamIfindex;
-            parcel.outputInterfaceIndex = downstreamIfindex;
-            parcel.destination = address.getAddress();
-            parcel.prefixLength = 128;
-            parcel.srcL2Address = srcMac.toByteArray();
-            parcel.dstL2Address = dstMac.toByteArray();
-            return parcel;
-        }
-    }
-    private final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> mIpv6ForwardingRules =
-            new LinkedHashMap<>();
-
     private final IpNeighborMonitor mIpNeighborMonitor;
 
     private LinkAddress mIpv4Address;
@@ -314,11 +279,13 @@ public class IpServer extends StateMachine {
     // object. It helps to reduce the arguments of the constructor.
     public IpServer(
             String ifaceName, Looper looper, int interfaceType, SharedLog log,
-            INetd netd, Callback callback, boolean usingLegacyDhcp, boolean usingBpfOffload,
+            INetd netd, @NonNull BpfCoordinator coordinator, Callback callback,
+            boolean usingLegacyDhcp, boolean usingBpfOffload,
             PrivateAddressCoordinator addressCoordinator, Dependencies deps) {
         super(ifaceName, looper);
         mLog = log.forSubComponent(ifaceName);
         mNetd = netd;
+        mBpfCoordinator = coordinator;
         mCallback = callback;
         mInterfaceCtrl = new InterfaceController(ifaceName, mNetd, mLog);
         mIfaceName = ifaceName;
@@ -749,6 +716,14 @@ public class IpServer extends StateMachine {
             }
 
             upstreamIfindex = mDeps.getIfindex(upstreamIface);
+
+            // Add upstream index to name mapping for the tether stats usage in the coordinator.
+            // Although this mapping could be added by both class Tethering and IpServer, adding
+            // mapping from IpServer guarantees that the mapping is added before the adding
+            // forwarding rules. That is because there are different state machines in both
+            // classes. It is hard to guarantee the link property update order between multiple
+            // state machines.
+            mBpfCoordinator.addUpstreamNameToLookupTable(upstreamIfindex, upstreamIface);
         }
 
         // If v6only is null, we pass in null to setRaParams(), which handles
@@ -864,43 +839,29 @@ public class IpServer extends StateMachine {
         // TODO: Perhaps remove this protection check.
         if (!mUsingBpfOffload) return;
 
-        try {
-            mNetd.tetherOffloadRuleAdd(rule.toTetherOffloadRuleParcel());
-            mIpv6ForwardingRules.put(rule.address, rule);
-        } catch (RemoteException | ServiceSpecificException e) {
-            mLog.e("Could not add IPv6 downstream rule: ", e);
-        }
+        mBpfCoordinator.tetherOffloadRuleAdd(this, rule);
     }
 
-    private void removeIpv6ForwardingRule(Ipv6ForwardingRule rule, boolean removeFromMap) {
-        // Theoretically, we don't need this check because IP neighbor monitor doesn't start if BPF
-        // offload is disabled. Add this check just in case.
+    private void removeIpv6ForwardingRule(Ipv6ForwardingRule rule) {
         // TODO: Perhaps remove this protection check.
+        // See the related comment in #addIpv6ForwardingRule.
         if (!mUsingBpfOffload) return;
 
-        try {
-            mNetd.tetherOffloadRuleRemove(rule.toTetherOffloadRuleParcel());
-            if (removeFromMap) {
-                mIpv6ForwardingRules.remove(rule.address);
-            }
-        } catch (RemoteException | ServiceSpecificException e) {
-            mLog.e("Could not remove IPv6 downstream rule: ", e);
-        }
+        mBpfCoordinator.tetherOffloadRuleRemove(this, rule);
     }
 
     private void clearIpv6ForwardingRules() {
-        for (Ipv6ForwardingRule rule : mIpv6ForwardingRules.values()) {
-            removeIpv6ForwardingRule(rule, false /*removeFromMap*/);
-        }
-        mIpv6ForwardingRules.clear();
+        if (!mUsingBpfOffload) return;
+
+        mBpfCoordinator.tetherOffloadRuleClear(this);
     }
 
-    // Convenience method to replace a rule with the same rule on a new upstream interface.
-    // Allows replacing the rules in one iteration pass without ConcurrentModificationExceptions.
-    // Relies on the fact that rules are in a map indexed by IP address.
-    private void updateIpv6ForwardingRule(Ipv6ForwardingRule rule, int newIfindex) {
-        addIpv6ForwardingRule(rule.onNewUpstream(newIfindex));
-        removeIpv6ForwardingRule(rule, false /*removeFromMap*/);
+    private void updateIpv6ForwardingRule(int newIfindex) {
+        // TODO: Perhaps remove this protection check.
+        // See the related comment in #addIpv6ForwardingRule.
+        if (!mUsingBpfOffload) return;
+
+        mBpfCoordinator.tetherOffloadRuleUpdate(this, newIfindex);
     }
 
     // Handles all updates to IPv6 forwarding rules. These can currently change only if the upstream
@@ -916,9 +877,7 @@ public class IpServer extends StateMachine {
         // If the upstream interface has changed, remove all rules and re-add them with the new
         // upstream interface.
         if (prevUpstreamIfindex != upstreamIfindex) {
-            for (Ipv6ForwardingRule rule : mIpv6ForwardingRules.values()) {
-                updateIpv6ForwardingRule(rule, upstreamIfindex);
-            }
+            updateIpv6ForwardingRule(upstreamIfindex);
         }
 
         // If we're here to process a NeighborEvent, do so now.
@@ -938,7 +897,7 @@ public class IpServer extends StateMachine {
         if (e.isValid()) {
             addIpv6ForwardingRule(rule);
         } else {
-            removeIpv6ForwardingRule(rule, true /*removeFromMap*/);
+            removeIpv6ForwardingRule(rule);
         }
     }
 

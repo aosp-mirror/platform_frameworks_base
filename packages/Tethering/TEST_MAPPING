@@ -1,7 +1,12 @@
 {
-  "postsubmit": [
+  "presubmit": [
     {
       "name": "TetheringTests"
+    }
+  ],
+  "postsubmit": [
+    {
+      "name": "TetheringIntegrationTests"
     }
   ]
 }

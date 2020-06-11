@@ -115,8 +115,7 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
   uint8_t enforce_overlayable;
   if (!Read32(stream, &idmap_header->magic_) || !Read32(stream, &idmap_header->version_) ||
       !Read32(stream, &idmap_header->target_crc_) || !Read32(stream, &idmap_header->overlay_crc_) ||
-      !Read32(stream, &idmap_header->fulfilled_policies_) ||
-      !Read8(stream, &enforce_overlayable) ||
+      !Read32(stream, &idmap_header->fulfilled_policies_) || !Read8(stream, &enforce_overlayable) ||
       !ReadString256(stream, idmap_header->target_path_) ||
       !ReadString256(stream, idmap_header->overlay_path_)) {
     return nullptr;
@@ -134,7 +133,8 @@ std::unique_ptr<const IdmapHeader> IdmapHeader::FromBinaryStream(std::istream& s
 }
 
 Result<Unit> IdmapHeader::IsUpToDate(const char* target_path, const char* overlay_path,
-                                     uint32_t fulfilled_policies, bool enforce_overlayable) const {
+                                     PolicyBitmask fulfilled_policies,
+                                     bool enforce_overlayable) const {
   const std::unique_ptr<const ZipFile> target_zip = ZipFile::Open(target_path);
   if (!target_zip) {
     return Error("failed to open target %s", target_path);
@@ -161,7 +161,8 @@ Result<Unit> IdmapHeader::IsUpToDate(const char* target_path, const char* overla
 
 Result<Unit> IdmapHeader::IsUpToDate(const char* target_path, const char* overlay_path,
                                      uint32_t target_crc, uint32_t overlay_crc,
-                                     uint32_t fulfilled_policies, bool enforce_overlayable) const {
+                                     PolicyBitmask fulfilled_policies,
+                                     bool enforce_overlayable) const {
   if (magic_ != kIdmapMagic) {
     return Error("bad magic: actual 0x%08x, expected 0x%08x", magic_, kIdmapMagic);
   }
@@ -187,8 +188,7 @@ Result<Unit> IdmapHeader::IsUpToDate(const char* target_path, const char* overla
 
   if (enforce_overlayable != enforce_overlayable_) {
     return Error("bad enforce overlayable: idmap version %s, file system version %s",
-                 enforce_overlayable ? "true" : "false",
-                 enforce_overlayable_ ? "true" : "false");
+                 enforce_overlayable ? "true" : "false", enforce_overlayable_ ? "true" : "false");
   }
 
   if (strcmp(target_path, target_path_) != 0) {
