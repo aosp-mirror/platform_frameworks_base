@@ -48,7 +48,6 @@ public class TakeScreenshotService extends Service {
     private static final String TAG = "TakeScreenshotService";
 
     private final GlobalScreenshot mScreenshot;
-    private final GlobalScreenshotLegacy mScreenshotLegacy;
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
 
@@ -81,9 +80,6 @@ public class TakeScreenshotService extends Service {
                 return;
             }
 
-            // TODO: clean up once notifications flow is fully deprecated
-            boolean useCornerFlow = true;
-
             ScreenshotHelper.ScreenshotRequest screenshotRequest =
                     (ScreenshotHelper.ScreenshotRequest) msg.obj;
 
@@ -91,22 +87,10 @@ public class TakeScreenshotService extends Service {
 
             switch (msg.what) {
                 case WindowManager.TAKE_SCREENSHOT_FULLSCREEN:
-                    if (useCornerFlow) {
-                        mScreenshot.takeScreenshot(uriConsumer, onComplete);
-                    } else {
-                        mScreenshotLegacy.takeScreenshot(
-                                uriConsumer, screenshotRequest.getHasStatusBar(),
-                                screenshotRequest.getHasNavBar());
-                    }
+                    mScreenshot.takeScreenshot(uriConsumer, onComplete);
                     break;
                 case WindowManager.TAKE_SCREENSHOT_SELECTED_REGION:
-                    if (useCornerFlow) {
-                        mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
-                    } else {
-                        mScreenshotLegacy.takeScreenshotPartial(
-                                uriConsumer, screenshotRequest.getHasStatusBar(),
-                                screenshotRequest.getHasNavBar());
-                    }
+                    mScreenshot.takeScreenshotPartial(uriConsumer, onComplete);
                     break;
                 case WindowManager.TAKE_SCREENSHOT_PROVIDED_IMAGE:
                     Bitmap screenshot = BitmapUtil.bundleToHardwareBitmap(
@@ -116,13 +100,8 @@ public class TakeScreenshotService extends Service {
                     int taskId = screenshotRequest.getTaskId();
                     int userId = screenshotRequest.getUserId();
                     ComponentName topComponent = screenshotRequest.getTopComponent();
-                    if (useCornerFlow) {
-                        mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
-                                taskId, userId, topComponent, uriConsumer, onComplete);
-                    } else {
-                        mScreenshotLegacy.handleImageAsScreenshot(screenshot, screenBounds, insets,
-                                taskId, userId, topComponent, uriConsumer);
-                    }
+                    mScreenshot.handleImageAsScreenshot(screenshot, screenBounds, insets,
+                            taskId, userId, topComponent, uriConsumer, onComplete);
                     break;
                 default:
                     Log.d(TAG, "Invalid screenshot option: " + msg.what);
@@ -131,11 +110,9 @@ public class TakeScreenshotService extends Service {
     };
 
     @Inject
-    public TakeScreenshotService(GlobalScreenshot globalScreenshot,
-            GlobalScreenshotLegacy globalScreenshotLegacy, UserManager userManager,
+    public TakeScreenshotService(GlobalScreenshot globalScreenshot, UserManager userManager,
             UiEventLogger uiEventLogger) {
         mScreenshot = globalScreenshot;
-        mScreenshotLegacy = globalScreenshotLegacy;
         mUserManager = userManager;
         mUiEventLogger = uiEventLogger;
     }
@@ -148,8 +125,6 @@ public class TakeScreenshotService extends Service {
     @Override
     public boolean onUnbind(Intent intent) {
         if (mScreenshot != null) mScreenshot.stopScreenshot();
-        // TODO remove once notifications flow is fully deprecated
-        if (mScreenshotLegacy != null) mScreenshotLegacy.stopScreenshot();
         return true;
     }
 }

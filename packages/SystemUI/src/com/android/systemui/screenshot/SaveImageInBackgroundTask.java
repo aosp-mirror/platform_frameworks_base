@@ -88,7 +88,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
     private final ScreenshotNotificationSmartActionsProvider mSmartActionsProvider;
     private final String mScreenshotId;
     private final boolean mSmartActionsEnabled;
-    private final boolean mCreateDeleteAction;
     private final Random mRandom = new Random();
 
     SaveImageInBackgroundTask(Context context, GlobalScreenshot.SaveImageInBackgroundData data) {
@@ -101,8 +100,6 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         String imageDate = new SimpleDateFormat("yyyyMMdd-HHmmss").format(new Date(mImageTime));
         mImageFileName = String.format(SCREENSHOT_FILE_NAME_TEMPLATE, imageDate);
         mScreenshotId = String.format(SCREENSHOT_ID_TEMPLATE, UUID.randomUUID());
-
-        mCreateDeleteAction = data.createDeleteAction;
 
         // Initialize screenshot notification smart actions provider.
         mSmartActionsEnabled = DeviceConfig.getBoolean(DeviceConfig.NAMESPACE_SYSTEMUI,
