@@ -31,7 +31,8 @@ java_library_static {
     ],
     visibility: [
         "//cts/hostsidetests/statsd/apps:__subpackages__",
-    ]
+        "//vendor:__subpackages__",
+    ],
 }
 
 filegroup {
