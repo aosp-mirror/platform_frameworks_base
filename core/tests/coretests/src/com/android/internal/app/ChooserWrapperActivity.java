@@ -222,6 +222,11 @@ public class ChooserWrapperActivity extends ChooserActivity {
         super.queryTargetServices(adapter);
     }
 
+    @Override
+    protected boolean isQuietModeEnabled(UserHandle userHandle) {
+        return sOverrides.isQuietModeEnabled;
+    }
+
     /**
      * We cannot directly mock the activity created since instrumentation creates it.
      * <p>
