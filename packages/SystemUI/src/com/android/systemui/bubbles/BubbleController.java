@@ -914,7 +914,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         mLogger.log(bubble, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_BACK_TO_STACK);
         bubble.setInflateSynchronously(mInflateSynchronously);
         bubble.setShouldAutoExpand(true);
-        bubble.markUpdatedAt(System.currentTimeMillis());
+        bubble.markAsAccessedAt(System.currentTimeMillis());
         setIsBubble(bubble, true /* isBubble */);
     }
 
