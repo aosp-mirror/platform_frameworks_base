@@ -16,9 +16,14 @@
 
 package com.android.systemui.car.window;
 
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,19 +33,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewStub;
+import android.view.WindowInsetsController;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.car.CarSystemUiTest;
-import com.android.systemui.car.navigationbar.CarNavigationBarController;
 import com.android.systemui.tests.R;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.Arrays;
@@ -58,8 +62,6 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
     private ViewGroup mBaseLayout;
 
     @Mock
-    private CarNavigationBarController mCarNavigationBarController;
-    @Mock
     private SystemUIOverlayWindowController mSystemUIOverlayWindowController;
     @Mock
     private OverlayViewMediator mOverlayViewMediator;
@@ -71,18 +73,22 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
     private OverlayPanelViewController mOverlayPanelViewController;
     @Mock
     private Runnable mRunnable;
+    @Mock
+    private WindowInsetsController mWindowInsetsController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(/* testClass= */ this);
 
-        mBaseLayout = (ViewGroup) LayoutInflater.from(mContext).inflate(
-                R.layout.overlay_view_global_state_controller_test, /* root= */ null);
+        mBaseLayout = spy((ViewGroup) LayoutInflater.from(mContext).inflate(
+                R.layout.overlay_view_global_state_controller_test, /* root= */ null));
+
+        when(mBaseLayout.getWindowInsetsController()).thenReturn(mWindowInsetsController);
 
         when(mSystemUIOverlayWindowController.getBaseLayout()).thenReturn(mBaseLayout);
 
         mOverlayViewGlobalStateController = new OverlayViewGlobalStateController(
-                mCarNavigationBarController, mSystemUIOverlayWindowController);
+                mSystemUIOverlayWindowController);
 
         verify(mSystemUIOverlayWindowController).attach();
     }
@@ -108,7 +114,7 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).hideBars();
+        verify(mWindowInsetsController).hide(navigationBars());
     }
 
     @Test
@@ -118,7 +124,37 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).showBars();
+        verify(mWindowInsetsController).show(navigationBars());
+    }
+
+    @Test
+    public void showView_nothingAlreadyShown_shouldShowStatusBarFalse_statusBarsHidden() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.shouldShowStatusBar()).thenReturn(false);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).hide(statusBars());
+    }
+
+    @Test
+    public void showView_nothingAlreadyShown_shouldShowStatusBarTrue_statusBarsShown() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.shouldShowStatusBar()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).show(statusBars());
+    }
+
+    @Test
+    public void showView_nothingAlreadyShown_fitsNavBarInsets_insetsAdjusted() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(navigationBars());
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(navigationBars());
     }
 
     @Test
@@ -168,10 +204,11 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
         setOverlayViewControllerAsShowing(mOverlayViewController1);
         setupOverlayViewController2();
         when(mOverlayViewController2.shouldShowNavigationBar()).thenReturn(false);
+        reset(mWindowInsetsController);
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController2, mRunnable);
 
-        verify(mCarNavigationBarController).hideBars();
+        verify(mWindowInsetsController).hide(navigationBars());
     }
 
     @Test
@@ -183,7 +220,46 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController2, mRunnable);
 
-        verify(mCarNavigationBarController).showBars();
+        verify(mWindowInsetsController).show(navigationBars());
+    }
+
+    @Test
+    public void showView_newHighestZOrder_shouldShowStatusBarFalse_statusBarsHidden() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        when(mOverlayViewController2.shouldShowStatusBar()).thenReturn(false);
+        reset(mWindowInsetsController);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController2, mRunnable);
+
+        verify(mWindowInsetsController).hide(statusBars());
+    }
+
+    @Test
+    public void showView_newHighestZOrder_shouldShowStatusBarTrue_statusBarsShown() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        when(mOverlayViewController2.shouldShowStatusBar()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController2, mRunnable);
+
+        verify(mWindowInsetsController).show(statusBars());
+    }
+
+    @Test
+    public void showView_newHighestZOrder_fitsNavBarInsets_insetsAdjusted() {
+        setupOverlayViewController1();
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(statusBars());
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        when(mOverlayViewController2.getInsetTypesToFit()).thenReturn(navigationBars());
+        reset(mWindowInsetsController);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController2, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(navigationBars());
     }
 
     @Test
@@ -216,10 +292,11 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
         setOverlayViewControllerAsShowing(mOverlayViewController2);
         when(mOverlayViewController1.shouldShowNavigationBar()).thenReturn(true);
         when(mOverlayViewController2.shouldShowNavigationBar()).thenReturn(false);
+        reset(mWindowInsetsController);
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).hideBars();
+        verify(mWindowInsetsController).hide(navigationBars());
     }
 
     @Test
@@ -231,7 +308,44 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).showBars();
+        verify(mWindowInsetsController).show(navigationBars());
+    }
+
+    @Test
+    public void showView_oldHighestZOrder_shouldShowStatusBarFalse_statusBarsHidden() {
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.shouldShowStatusBar()).thenReturn(true);
+        when(mOverlayViewController2.shouldShowStatusBar()).thenReturn(false);
+        reset(mWindowInsetsController);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).hide(statusBars());
+    }
+
+    @Test
+    public void showView_oldHighestZOrder_shouldShowStatusBarTrue_statusBarsShown() {
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.shouldShowStatusBar()).thenReturn(false);
+        when(mOverlayViewController2.shouldShowStatusBar()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).show(statusBars());
+    }
+
+    @Test
+    public void showView_oldHighestZOrder_fitsNavBarInsets_insetsAdjusted() {
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(statusBars());
+        when(mOverlayViewController2.getInsetTypesToFit()).thenReturn(navigationBars());
+
+        mOverlayViewGlobalStateController.showView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(navigationBars());
     }
 
     @Test
@@ -402,10 +516,11 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
         setupOverlayViewController2();
         setOverlayViewControllerAsShowing(mOverlayViewController2);
         when(mOverlayViewController1.shouldShowNavigationBar()).thenReturn(false);
+        reset(mWindowInsetsController);
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController2, mRunnable);
 
-        verify(mCarNavigationBarController).hideBars();
+        verify(mWindowInsetsController).hide(navigationBars());
     }
 
     @Test
@@ -418,7 +533,48 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController2, mRunnable);
 
-        verify(mCarNavigationBarController).showBars();
+        verify(mWindowInsetsController).show(navigationBars());
+    }
+
+    @Test
+    public void hideView_newHighestZOrder_shouldShowStatusBarFalse_statusBarHidden() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.shouldShowStatusBar()).thenReturn(false);
+        reset(mWindowInsetsController);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController2, mRunnable);
+
+        verify(mWindowInsetsController).hide(statusBars());
+    }
+
+    @Test
+    public void hideView_newHighestZOrder_shouldShowStatusBarTrue_statusBarShown() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.shouldShowStatusBar()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController2, mRunnable);
+
+        verify(mWindowInsetsController).show(statusBars());
+    }
+
+    @Test
+    public void hideView_newHighestZOrder_fitsNavBarInsets_insetsAdjusted() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(navigationBars());
+        when(mOverlayViewController2.getInsetTypesToFit()).thenReturn(statusBars());
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController2, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(navigationBars());
     }
 
     @Test
@@ -441,10 +597,11 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
         setupOverlayViewController2();
         setOverlayViewControllerAsShowing(mOverlayViewController2);
         when(mOverlayViewController2.shouldShowNavigationBar()).thenReturn(false);
+        reset(mWindowInsetsController);
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).hideBars();
+        verify(mWindowInsetsController).hide(navigationBars());
     }
 
     @Test
@@ -457,7 +614,48 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).showBars();
+        verify(mWindowInsetsController).show(navigationBars());
+    }
+
+    @Test
+    public void hideView_oldHighestZOrder_shouldShowStatusBarFalse_statusBarHidden() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController2.shouldShowStatusBar()).thenReturn(false);
+        reset(mWindowInsetsController);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).hide(statusBars());
+    }
+
+    @Test
+    public void hideView_oldHighestZOrder_shouldShowStatusBarTrue_statusBarShown() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController2.shouldShowStatusBar()).thenReturn(true);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).show(statusBars());
+    }
+
+    @Test
+    public void hideView_oldHighestZOrder_fitsNavBarInsets_insetsAdjusted() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+        setupOverlayViewController2();
+        setOverlayViewControllerAsShowing(mOverlayViewController2);
+        when(mOverlayViewController1.getInsetTypesToFit()).thenReturn(statusBars());
+        when(mOverlayViewController2.getInsetTypesToFit()).thenReturn(navigationBars());
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(navigationBars());
     }
 
     @Test
@@ -479,7 +677,27 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
         mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
 
-        verify(mCarNavigationBarController).showBars();
+        verify(mWindowInsetsController).show(navigationBars());
+    }
+
+    @Test
+    public void hideView_viewControllerOnlyShown_statusBarShown() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
+
+        verify(mWindowInsetsController).show(statusBars());
+    }
+
+    @Test
+    public void hideView_viewControllerOnlyShown_insetsAdjustedToDefault() {
+        setupOverlayViewController1();
+        setOverlayViewControllerAsShowing(mOverlayViewController1);
+
+        mOverlayViewGlobalStateController.hideView(mOverlayViewController1, mRunnable);
+
+        verify(mSystemUIOverlayWindowController).setFitInsetsTypes(statusBars());
     }
 
     @Test
@@ -615,7 +833,7 @@ public class OverlayViewGlobalStateControllerTest extends SysuiTestCase {
 
     private void setOverlayViewControllerAsShowing(OverlayViewController overlayViewController) {
         mOverlayViewGlobalStateController.showView(overlayViewController, /* show= */ null);
-        Mockito.reset(mCarNavigationBarController, mSystemUIOverlayWindowController);
+        reset(mSystemUIOverlayWindowController);
         when(mSystemUIOverlayWindowController.getBaseLayout()).thenReturn(mBaseLayout);
     }
 }

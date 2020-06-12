@@ -16,12 +16,16 @@
 
 package com.android.systemui.car.window;
 
+import static android.view.WindowInsets.Type.navigationBars;
+import static android.view.WindowInsets.Type.statusBars;
+import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
+
 import android.annotation.Nullable;
 import android.util.Log;
+import android.view.WindowInsets.Type.InsetsType;
+import android.view.WindowInsetsController;
 
 import androidx.annotation.VisibleForTesting;
-
-import com.android.systemui.car.navigationbar.CarNavigationBarController;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,10 +52,7 @@ public class OverlayViewGlobalStateController {
     private static final String TAG = OverlayViewGlobalStateController.class.getSimpleName();
     private static final int UNKNOWN_Z_ORDER = -1;
     private final SystemUIOverlayWindowController mSystemUIOverlayWindowController;
-    private final CarNavigationBarController mCarNavigationBarController;
-
-    private boolean mIsOccluded;
-
+    private final WindowInsetsController mWindowInsetsController;
     @VisibleForTesting
     Map<OverlayViewController, Integer> mZOrderMap;
     @VisibleForTesting
@@ -60,14 +61,15 @@ public class OverlayViewGlobalStateController {
     Set<OverlayViewController> mViewsHiddenForOcclusion;
     @VisibleForTesting
     OverlayViewController mHighestZOrder;
+    private boolean mIsOccluded;
 
     @Inject
     public OverlayViewGlobalStateController(
-            CarNavigationBarController carNavigationBarController,
             SystemUIOverlayWindowController systemUIOverlayWindowController) {
         mSystemUIOverlayWindowController = systemUIOverlayWindowController;
         mSystemUIOverlayWindowController.attach();
-        mCarNavigationBarController = carNavigationBarController;
+        mWindowInsetsController =
+                mSystemUIOverlayWindowController.getBaseLayout().getWindowInsetsController();
         mZOrderMap = new HashMap<>();
         mZOrderVisibleSortedMap = new TreeMap<>();
         mViewsHiddenForOcclusion = new HashSet<>();
@@ -115,7 +117,9 @@ public class OverlayViewGlobalStateController {
         }
 
         updateInternalsWhenShowingView(viewController);
+        refreshInsetTypesToFit();
         refreshNavigationBarVisibility();
+        refreshStatusBarVisibility();
 
         Log.d(TAG, "Content shown: " + viewController.getClass().getName());
         debugLog();
@@ -185,7 +189,9 @@ public class OverlayViewGlobalStateController {
 
         mZOrderVisibleSortedMap.remove(mZOrderMap.get(viewController));
         refreshHighestZOrderWhenHidingView(viewController);
+        refreshInsetTypesToFit();
         refreshNavigationBarVisibility();
+        refreshStatusBarVisibility();
 
         if (mZOrderVisibleSortedMap.isEmpty()) {
             setWindowVisible(false);
@@ -208,10 +214,28 @@ public class OverlayViewGlobalStateController {
     }
 
     private void refreshNavigationBarVisibility() {
+        mWindowInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
         if (mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowNavigationBar()) {
-            mCarNavigationBarController.showBars();
+            mWindowInsetsController.show(navigationBars());
         } else {
-            mCarNavigationBarController.hideBars();
+            mWindowInsetsController.hide(navigationBars());
+        }
+    }
+
+    private void refreshStatusBarVisibility() {
+        mWindowInsetsController.setSystemBarsBehavior(BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+        if (mZOrderVisibleSortedMap.isEmpty() || mHighestZOrder.shouldShowStatusBar()) {
+            mWindowInsetsController.show(statusBars());
+        } else {
+            mWindowInsetsController.hide(statusBars());
+        }
+    }
+
+    private void refreshInsetTypesToFit() {
+        if (mZOrderVisibleSortedMap.isEmpty()) {
+            setFitInsetsTypes(statusBars());
+        } else {
+            setFitInsetsTypes(mHighestZOrder.getInsetTypesToFit());
         }
     }
 
@@ -222,6 +246,10 @@ public class OverlayViewGlobalStateController {
 
     private void setWindowVisible(boolean visible) {
         mSystemUIOverlayWindowController.setWindowVisible(visible);
+    }
+
+    private void setFitInsetsTypes(@InsetsType int types) {
+        mSystemUIOverlayWindowController.setFitInsetsTypes(types);
     }
 
     /**
