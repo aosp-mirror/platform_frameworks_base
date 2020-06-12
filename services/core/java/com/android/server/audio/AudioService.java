@@ -5322,6 +5322,15 @@ public class AudioService extends IAudioService.Stub
         }
 
         private void setVolumeIndexInt(int index, int device, int flags) {
+            // Reflect mute state of corresponding stream by forcing index to 0 if muted
+            // Only set audio policy BT SCO stream volume to 0 when the stream is actually muted.
+            // This allows RX path muting by the audio HAL only when explicitly muted but not when
+            // index is just set to 0 to repect BT requirements
+            if (mStreamStates[mPublicStreamType].isFullyMuted()) {
+                index = 0;
+            } else if (mPublicStreamType == AudioSystem.STREAM_BLUETOOTH_SCO && index == 0) {
+                index = 1;
+            }
             // Set the volume index
             AudioSystem.setVolumeIndexForAttributes(mAudioAttributes, index, device);
         }
