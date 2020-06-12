@@ -18,8 +18,11 @@ package com.android.systemui.media
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -30,11 +33,13 @@ import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.net.Uri
+import android.os.UserHandle
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.R
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationMediaManager
@@ -87,12 +92,22 @@ class MediaDataManager @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
     private val mediaResumeListener: MediaResumeListener,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExecutor: Executor
+    @Main private val foregroundExecutor: Executor,
+    private val broadcastDispatcher: BroadcastDispatcher
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     private val useMediaResumption: Boolean = Utils.useMediaResumption(context)
+
+    private val userChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (Intent.ACTION_USER_SWITCHED == intent.action) {
+                // Remove all controls, regardless of state
+                clearData()
+            }
+        }
+    }
 
     init {
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
@@ -111,6 +126,9 @@ class MediaDataManager @Inject constructor(
             }
             addListener(mediaResumeListener)
         }
+
+        val userFilter = IntentFilter(Intent.ACTION_USER_SWITCHED)
+        broadcastDispatcher.registerReceiver(userChangeReceiver, userFilter, null, UserHandle.ALL)
     }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
@@ -129,6 +147,17 @@ class MediaDataManager @Inject constructor(
         } else {
             onNotificationRemoved(key)
         }
+    }
+
+    private fun clearData() {
+        // Called on user change. Remove all current MediaData objects and inform listeners
+        val listenersCopy = listeners.toSet()
+        mediaEntries.forEach {
+            listenersCopy.forEach { listener ->
+                listener.onMediaDataRemoved(it.key)
+            }
+        }
+        mediaEntries.clear()
     }
 
     private fun addResumptionControls(
