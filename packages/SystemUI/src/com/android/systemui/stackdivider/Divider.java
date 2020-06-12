@@ -253,7 +253,9 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             mSplitLayout.mSecondary = new Rect(mRotateSplitLayout.mSecondary);
             mRotateSplitLayout = null;
         }
-        update(newConfig);
+        if (isSplitActive()) {
+            update(newConfig);
+        }
     }
 
     Handler getHandler() {
@@ -326,11 +328,6 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void onTaskVanished() {
         mHandler.post(this::removeDivider);
-    }
-
-    void onTasksReady() {
-        mHandler.post(() -> update(mDisplayController.getDisplayContext(
-                mContext.getDisplayId()).getResources().getConfiguration()));
     }
 
     private void updateVisibility(final boolean visible) {
@@ -524,7 +521,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void ensureMinimizedSplit() {
         setHomeMinimized(true /* minimized */, mSplits.mSecondary.isResizable());
-        if (!isDividerVisible()) {
+        if (mView != null && !isDividerVisible()) {
             // Wasn't in split-mode yet, so enter now.
             if (DEBUG) {
                 Slog.d(TAG, " entering split mode with minimized=true");
@@ -535,7 +532,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
 
     void ensureNormalSplit() {
         setHomeMinimized(false /* minimized */, mHomeStackResizable);
-        if (!isDividerVisible()) {
+        if (mView != null && !isDividerVisible()) {
             // Wasn't in split-mode, so enter now.
             if (DEBUG) {
                 Slog.d(TAG, " enter split mode unminimized ");
