@@ -453,7 +453,8 @@ public class MbmsDownloadSession implements AutoCloseable {
      * callback may include any of the errors that are not specific to the streaming use-case.
      *
      * May throw an {@link IllegalStateException} when the middleware has not yet been bound,
-     * or an {@link IllegalArgumentException} if the byte array is too large.
+     * or an {@link IllegalArgumentException} if the byte array is too large, or an
+     * {@link UnsupportedOperationException} if the middleware has not implemented this method.
      *
      * @param contents The contents of the service announcement descriptor received from the
      *                     group call server. If the size of this array is greater than the value of
