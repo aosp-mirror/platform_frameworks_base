@@ -15788,9 +15788,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         if (receivers != null && broadcastWhitelist != null) {
             for (int i = receivers.size() - 1; i >= 0; i--) {
-                final int uid = receivers.get(i).activityInfo.applicationInfo.uid;
-                if (uid >= Process.FIRST_APPLICATION_UID
-                        && Arrays.binarySearch(broadcastWhitelist, UserHandle.getAppId(uid)) < 0) {
+                final int receiverAppId = UserHandle.getAppId(
+                        receivers.get(i).activityInfo.applicationInfo.uid);
+                if (receiverAppId >= Process.FIRST_APPLICATION_UID
+                        && Arrays.binarySearch(broadcastWhitelist, receiverAppId) < 0) {
                     receivers.remove(i);
                 }
             }
@@ -16436,9 +16437,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             // if a uid whitelist was provided, remove anything in the application space that wasn't
             // in it.
             for (int i = registeredReceivers.size() - 1; i >= 0; i--) {
-                final int uid = registeredReceivers.get(i).owningUid;
-                if (uid >= Process.FIRST_APPLICATION_UID
-                        && Arrays.binarySearch(broadcastWhitelist, UserHandle.getAppId(uid)) < 0) {
+                final int owningAppId = UserHandle.getAppId(registeredReceivers.get(i).owningUid);
+                if (owningAppId >= Process.FIRST_APPLICATION_UID
+                        && Arrays.binarySearch(broadcastWhitelist, owningAppId) < 0) {
                     registeredReceivers.remove(i);
                 }
             }
