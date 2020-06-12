@@ -23,6 +23,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 import static org.hamcrest.core.AnyOf.anyOf;
 import static org.hamcrest.core.Is.is;
 
+import android.app.ActivityManager;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
@@ -121,6 +122,12 @@ public class RecentsAnimationPerfTest extends WindowManagerPerfTestBase {
     @AfterClass
     public static void tearDownClass() {
         sSetUpClassException = null;
+        try {
+            // Recents activity may stop app switches. Restore the state to avoid affecting
+            // the next test.
+            ActivityManager.resumeAppSwitches();
+        } catch (RemoteException ignored) {
+        }
         sUiAutomation.dropShellPermissionIdentity();
     }
 
