@@ -628,6 +628,12 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             resetSecondaryHandle();
         } else {
             int deltaRotation = deltaRotation(mCurrentRotation, mStartingQuickSwitchRotation);
+            if (mStartingQuickSwitchRotation == -1 || deltaRotation == -1) {
+                // Curious if starting quickswitch can change between the if check and our delta
+                Log.d(TAG, "secondary nav delta rotation: " + deltaRotation
+                        + " current: " + mCurrentRotation
+                        + " starting: " + mStartingQuickSwitchRotation);
+            }
             int height = 0;
             int width = 0;
             Rect dispSize = mWindowManager.getCurrentWindowMetrics().getBounds();
@@ -691,6 +697,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             dumpBarTransitions(pw, "mNavigationBarView", mNavigationBarView.getBarTransitions());
         }
 
+        pw.print("  mStartingQuickSwitchRotation=" + mStartingQuickSwitchRotation);
+        pw.print("  mCurrentRotation=" + mCurrentRotation);
         pw.print("  mNavigationBarView=");
         if (mNavigationBarView == null) {
             pw.println("null");
