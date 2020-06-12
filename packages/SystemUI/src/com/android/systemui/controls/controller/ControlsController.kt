@@ -21,7 +21,7 @@ import android.service.controls.Control
 import android.service.controls.ControlsProviderService
 import android.service.controls.actions.ControlAction
 import com.android.systemui.controls.ControlStatus
-import com.android.systemui.controls.UserAwareController
+import com.android.systemui.util.UserAwareController
 import com.android.systemui.controls.management.ControlsFavoritingActivity
 import com.android.systemui.controls.ui.ControlsUiController
 import java.util.function.Consumer
