@@ -19,7 +19,6 @@ import android.content.res.Resources;
 import android.hardware.display.ColorDisplayManager;
 import android.hardware.display.NightDisplayListener;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -35,7 +34,6 @@ import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.DataSaverController.Listener;
 import com.android.systemui.statusbar.policy.HotspotController;
 import com.android.systemui.statusbar.policy.HotspotController.Callback;
-import com.android.systemui.util.UserAwareController;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -45,7 +43,7 @@ import javax.inject.Inject;
 /**
  * Manages which tiles should be automatically added to QS.
  */
-public class AutoTileManager implements UserAwareController {
+public class AutoTileManager {
     private static final String TAG = "AutoTileManager";
 
     public static final String HOTSPOT = "hotspot";
@@ -54,9 +52,7 @@ public class AutoTileManager implements UserAwareController {
     public static final String WORK = "work";
     public static final String NIGHT = "night";
     public static final String CAST = "cast";
-    static final String SETTING_SEPARATOR = ":";
-
-    private UserHandle mCurrentUser;
+    public static final String SETTING_SEPARATOR = ":";
 
     private final Context mContext;
     private final QSTileHost mHost;
@@ -70,56 +66,43 @@ public class AutoTileManager implements UserAwareController {
     private final ArrayList<AutoAddSetting> mAutoAddSettingList = new ArrayList<>();
 
     @Inject
-    public AutoTileManager(Context context, AutoAddTracker.Builder autoAddTrackerBuilder,
-            QSTileHost host,
+    public AutoTileManager(Context context, AutoAddTracker autoAddTracker, QSTileHost host,
             @Background Handler handler,
             HotspotController hotspotController,
             DataSaverController dataSaverController,
             ManagedProfileController managedProfileController,
             NightDisplayListener nightDisplayListener,
             CastController castController) {
+        mAutoTracker = autoAddTracker;
         mContext = context;
         mHost = host;
-        mCurrentUser = mHost.getUserContext().getUser();
-        mAutoTracker = autoAddTrackerBuilder.setUserId(mCurrentUser.getIdentifier()).build();
         mHandler = handler;
         mHotspotController = hotspotController;
         mDataSaverController = dataSaverController;
         mManagedProfileController = managedProfileController;
         mNightDisplayListener = nightDisplayListener;
         mCastController = castController;
-
-        populateSettingsList();
-        startControllersAndSettingsListeners();
-    }
-
-    protected void startControllersAndSettingsListeners() {
         if (!mAutoTracker.isAdded(HOTSPOT)) {
-            mHotspotController.addCallback(mHotspotCallback);
+            hotspotController.addCallback(mHotspotCallback);
         }
         if (!mAutoTracker.isAdded(SAVER)) {
-            mDataSaverController.addCallback(mDataSaverListener);
+            dataSaverController.addCallback(mDataSaverListener);
         }
         if (!mAutoTracker.isAdded(WORK)) {
-            mManagedProfileController.addCallback(mProfileCallback);
+            managedProfileController.addCallback(mProfileCallback);
         }
         if (!mAutoTracker.isAdded(NIGHT)
                 && ColorDisplayManager.isNightDisplayAvailable(mContext)) {
-            mNightDisplayListener.setCallback(mNightDisplayCallback);
+            nightDisplayListener.setCallback(mNightDisplayCallback);
         }
         if (!mAutoTracker.isAdded(CAST)) {
-            mCastController.addCallback(mCastCallback);
+            castController.addCallback(mCastCallback);
         }
-
-        int settingsN = mAutoAddSettingList.size();
-        for (int i = 0; i < settingsN; i++) {
-            if (!mAutoTracker.isAdded(mAutoAddSettingList.get(i).mSpec)) {
-                mAutoAddSettingList.get(i).setListening(true);
-            }
-        }
+        populateSettingsList();
     }
 
-    protected void stopListening() {
+    public void destroy() {
+        mAutoTracker.destroy();
         mHotspotController.removeCallback(mHotspotCallback);
         mDataSaverController.removeCallback(mDataSaverListener);
         mManagedProfileController.removeCallback(mProfileCallback);
@@ -131,11 +114,6 @@ public class AutoTileManager implements UserAwareController {
         for (int i = 0; i < settingsN; i++) {
             mAutoAddSettingList.get(i).setListening(false);
         }
-    }
-
-    public void destroy() {
-        stopListening();
-        mAutoTracker.destroy();
     }
 
     /**
@@ -159,37 +137,15 @@ public class AutoTileManager implements UserAwareController {
             if (split.length == 2) {
                 String setting = split[0];
                 String spec = split[1];
-                // Populate all the settings. As they may not have been added in other users
-                AutoAddSetting s = new AutoAddSetting(mContext, mHandler, setting, spec);
-                mAutoAddSettingList.add(s);
+                if (!mAutoTracker.isAdded(spec)) {
+                    AutoAddSetting s = new AutoAddSetting(mContext, mHandler, setting, spec);
+                    mAutoAddSettingList.add(s);
+                    s.setListening(true);
+                }
             } else {
                 Log.w(TAG, "Malformed item in array: " + tile);
             }
         }
-    }
-
-    @Override
-    public void changeUser(UserHandle newUser) {
-        if (!Thread.currentThread().equals(mHandler.getLooper().getThread())) {
-            mHandler.post(() -> changeUser(newUser));
-            return;
-        }
-        if (newUser.getIdentifier() == mCurrentUser.getIdentifier()) {
-            return;
-        }
-        stopListening();
-        mCurrentUser = newUser;
-        int settingsN = mAutoAddSettingList.size();
-        for (int i = 0; i < settingsN; i++) {
-            mAutoAddSettingList.get(i).setUserId(newUser.getIdentifier());
-        }
-        mAutoTracker.changeUser(newUser);
-        startControllersAndSettingsListeners();
-    }
-
-    @Override
-    public int getCurrentUserId() {
-        return mCurrentUser.getIdentifier();
     }
 
     public void unmarkTileAsAutoAdded(String tabSpec) {
