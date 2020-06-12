@@ -276,6 +276,15 @@ public class InsetsStateTest {
     }
 
     @Test
+    public void testEquals_excludeInvisibleIme() {
+        mState.getSource(ITYPE_IME).setFrame(new Rect(0, 0, 100, 100));
+        mState.getSource(ITYPE_IME).setVisible(false);
+        mState2.getSource(ITYPE_IME).setFrame(new Rect(0, 0, 100, 200));
+        mState2.getSource(ITYPE_IME).setVisible(false);
+        assertTrue(mState2.equals(mState, true, true /* excludeInvisibleIme */));
+    }
+
+    @Test
     public void testParcelUnparcel() {
         mState.getSource(ITYPE_IME).setFrame(new Rect(0, 0, 100, 100));
         mState.getSource(ITYPE_IME).setVisibleFrame(new Rect(0, 0, 50, 10));

@@ -988,4 +988,14 @@ public abstract class PackageManagerInternal {
      * Unblocks uninstall for all packages for the user.
      */
     public abstract void clearBlockUninstallForUser(@UserIdInt int userId);
+
+    /**
+     * Unsuspends all packages suspended by the given package for the user.
+     */
+    public abstract void unsuspendForSuspendingPackage(String suspendingPackage, int userId);
+
+    /**
+     * Returns {@code true} if the package is suspending any packages for the user.
+     */
+    public abstract boolean isSuspendingAnyPackages(String suspendingPackage, int userId);
 }

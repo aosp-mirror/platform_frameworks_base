@@ -178,6 +178,7 @@ class InsetsStateController {
             if (imeSource != null && imeSource.isVisible()) {
                 imeSource = new InsetsSource(imeSource);
                 imeSource.setVisible(false);
+                imeSource.setFrame(0, 0, 0, 0);
                 state = new InsetsState(state);
                 state.addSource(imeSource);
             }

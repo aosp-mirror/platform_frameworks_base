@@ -13515,6 +13515,17 @@ public class PackageManagerService extends IPackageManager.Stub
         removeSuspensionsBySuspendingPackage(allPackages, suspendingPackage::equals, userId);
     }
 
+    boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
+        synchronized (mLock) {
+            for (final PackageSetting ps : mSettings.mPackages.values()) {
+                if (ps.isSuspendedBy(suspendingPackage, userId)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Removes any suspensions on given packages that were added by packages that pass the given
      * predicate.
@@ -23882,7 +23893,6 @@ public class PackageManagerService extends IPackageManager.Stub
                     callingUid);
         }
 
-
         @Override
         public boolean isPlatformSigned(String packageName) {
             PackageSetting packageSetting = mSettings.mPackages.get(packageName);
@@ -24986,6 +24996,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 mSettings.clearBlockUninstallLPw(userId);
                 mSettings.writePackageRestrictionsLPr(userId);
             }
+        }
+
+        @Override
+        public void unsuspendForSuspendingPackage(final String packageName, int affectedUser) {
+            PackageManagerService.this.unsuspendForSuspendingPackage(packageName, affectedUser);
+        }
+
+        @Override
+        public boolean isSuspendingAnyPackages(String suspendingPackage, int userId) {
+            return PackageManagerService.this.isSuspendingAnyPackages(suspendingPackage, userId);
         }
     }
 

@@ -89,7 +89,6 @@ import android.widget.Toast;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
-import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -121,7 +120,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         public Consumer<Uri> finisher;
         public GlobalScreenshot.ActionsReadyListener mActionsReadyListener;
         public int errorMsgResId;
-        public boolean createDeleteAction;
 
         void clearImage() {
             image = null;
@@ -175,6 +173,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
     private static final long SCREENSHOT_FLASH_IN_DURATION_MS = 133;
     private static final long SCREENSHOT_FLASH_OUT_DURATION_MS = 217;
+    // delay before starting to fade in dismiss button
+    private static final long SCREENSHOT_TO_CORNER_DISMISS_DELAY_MS = 200;
     private static final long SCREENSHOT_TO_CORNER_X_DURATION_MS = 234;
     private static final long SCREENSHOT_TO_CORNER_Y_DURATION_MS = 500;
     private static final long SCREENSHOT_TO_CORNER_SCALE_DURATION_MS = 234;
@@ -272,7 +272,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                         | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
                         | WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
                         | WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED,
+                        | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
+                        | WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM,
                 PixelFormat.TRANSLUCENT);
         mWindowLayoutParams.setTitle("ScreenshotAnimation");
         mWindowLayoutParams.layoutInDisplayCutoutMode = LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
@@ -438,7 +439,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         data.image = mScreenBitmap;
         data.finisher = finisher;
         data.mActionsReadyListener = actionsReadyListener;
-        data.createDeleteAction = false;
 
         if (mSaveInBgTask != null) {
             // just log success/failure for the pre-existing screenshot
@@ -491,8 +491,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             saveScreenshotAndToast(finisher);
             return;
         }
-
-        mContext.sendBroadcast(new Intent(mContext, ScreenshotTakenReceiver.class));
 
         // Optimizations
         mScreenBitmap.setHasAlpha(false);
@@ -776,6 +774,9 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mScreenshotAnimatedView.setScaleX(currentScale);
         mScreenshotAnimatedView.setScaleY(currentScale);
 
+        mDismissButton.setAlpha(0);
+        mDismissButton.setVisibility(View.VISIBLE);
+
         AnimatorSet dropInAnimation = new AnimatorSet();
         ValueAnimator flashInAnimator = ValueAnimator.ofFloat(0, 1);
         flashInAnimator.setDuration(SCREENSHOT_FLASH_IN_DURATION_MS);
@@ -797,6 +798,8 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         toCorner.setDuration(SCREENSHOT_TO_CORNER_Y_DURATION_MS);
         float xPositionPct =
                 SCREENSHOT_TO_CORNER_X_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
+        float dismissPct =
+                SCREENSHOT_TO_CORNER_DISMISS_DELAY_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         float scalePct =
                 SCREENSHOT_TO_CORNER_SCALE_DURATION_MS / (float) SCREENSHOT_TO_CORNER_Y_DURATION_MS;
         toCorner.addUpdateListener(animation -> {
@@ -824,6 +827,19 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             float yCenter = MathUtils.lerp(
                     startPos.y, finalPos.y, mFastOutSlowIn.getInterpolation(t));
             mScreenshotAnimatedView.setY(yCenter - bounds.height() * currentScaleY / 2f);
+
+            if (t >= dismissPct) {
+                mDismissButton.setAlpha((t - dismissPct) / (1 - dismissPct));
+                float currentX = mScreenshotAnimatedView.getX();
+                float currentY = mScreenshotAnimatedView.getY();
+                mDismissButton.setY(currentY - mDismissButton.getHeight() / 2f);
+                if (mDirectionLTR) {
+                    mDismissButton.setX(currentX
+                            + bounds.width() * currentScaleX - mDismissButton.getWidth() / 2f);
+                } else {
+                    mDismissButton.setX(currentX - mDismissButton.getWidth() / 2f);
+                }
+            }
         });
 
         toCorner.addListener(new AnimatorListenerAdapter() {
@@ -848,13 +864,20 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
+                mDismissButton.setAlpha(1);
+                float dismissOffset = mDismissButton.getWidth() / 2f;
+                float finalDismissX = mDirectionLTR
+                        ? finalPos.x - dismissOffset + bounds.width() * cornerScale / 2f
+                        : finalPos.x - dismissOffset - bounds.width() * cornerScale / 2f;
+                mDismissButton.setX(finalDismissX);
+                mDismissButton.setY(
+                        finalPos.y - dismissOffset - bounds.height() * cornerScale / 2f);
                 mScreenshotAnimatedView.setScaleX(1);
                 mScreenshotAnimatedView.setScaleY(1);
                 mScreenshotAnimatedView.setX(finalPos.x - bounds.width() * cornerScale / 2f);
                 mScreenshotAnimatedView.setY(finalPos.y - bounds.height() * cornerScale / 2f);
                 mScreenshotAnimatedView.setVisibility(View.GONE);
                 mScreenshotPreview.setVisibility(View.VISIBLE);
-                mDismissButton.setVisibility(View.VISIBLE);
                 mScreenshotLayout.forceLayout();
             }
         });
@@ -1176,22 +1199,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
             ScreenshotSmartActions.notifyScreenshotAction(
                     context, intent.getStringExtra(EXTRA_ID), actionType, true);
-        }
-    }
-
-    /**
-     * Called when a screenshot has been taken and animation / screenshot UI is about to begin.
-     */
-    public static class ScreenshotTakenReceiver extends BroadcastReceiver {
-        private final Lazy<BubbleController> mBubbleController;
-
-        public ScreenshotTakenReceiver(Lazy<BubbleController> bubbleController) {
-            mBubbleController = bubbleController;
-        }
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            mBubbleController.get().hideImeFromExpandedBubble();
         }
     }
 }

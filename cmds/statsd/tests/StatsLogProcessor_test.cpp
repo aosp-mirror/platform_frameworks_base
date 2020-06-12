@@ -324,6 +324,41 @@ TEST(StatsLogProcessorTest, TestPullUidProviderSetOnConfigUpdate) {
     EXPECT_EQ(pullerManager->mPullUidProviders.find(key), pullerManager->mPullUidProviders.end());
 }
 
+TEST(StatsLogProcessorTest, InvalidConfigRemoved) {
+    // Setup simple config key corresponding to empty config.
+    StatsdStats::getInstance().reset();
+    sp<UidMap> m = new UidMap();
+    sp<StatsPullerManager> pullerManager = new StatsPullerManager();
+    m->updateMap(1, {1, 2}, {1, 2}, {String16("v1"), String16("v2")},
+                 {String16("p1"), String16("p2")}, {String16(""), String16("")});
+    sp<AlarmMonitor> anomalyAlarmMonitor;
+    sp<AlarmMonitor> subscriberAlarmMonitor;
+    StatsLogProcessor p(m, pullerManager, anomalyAlarmMonitor, subscriberAlarmMonitor, 0,
+                        [](const ConfigKey& key) { return true; },
+                        [](const int&, const vector<int64_t>&) {return true;});
+    ConfigKey key(3, 4);
+    StatsdConfig config = MakeConfig(true);
+    p.OnConfigUpdated(0, key, config);
+    EXPECT_EQ(1, p.mMetricsManagers.size());
+    EXPECT_NE(p.mMetricsManagers.find(key), p.mMetricsManagers.end());
+    // Cannot assert the size of mConfigStats since it is static and does not get cleared on reset.
+    EXPECT_NE(StatsdStats::getInstance().mConfigStats.end(),
+              StatsdStats::getInstance().mConfigStats.find(key));
+    EXPECT_EQ(0, StatsdStats::getInstance().mIceBox.size());
+
+    StatsdConfig invalidConfig = MakeConfig(true);
+    invalidConfig.clear_allowed_log_source();
+    p.OnConfigUpdated(0, key, invalidConfig);
+    EXPECT_EQ(0, p.mMetricsManagers.size());
+    // The current configs should not contain the invalid config.
+    EXPECT_EQ(StatsdStats::getInstance().mConfigStats.end(),
+              StatsdStats::getInstance().mConfigStats.find(key));
+    // Both "config" and "invalidConfig" should be in the icebox.
+    EXPECT_EQ(2, StatsdStats::getInstance().mIceBox.size());
+
+}
+
+
 TEST(StatsLogProcessorTest, TestActiveConfigMetricDiskWriteRead) {
     int uid = 1111;
 
@@ -1794,6 +1829,48 @@ TEST(StatsLogProcessorTest_mapIsolatedUidToHostUid, LogIsolatedUidAttributionCha
     EXPECT_EQ("tag2", actualFieldValues->at(3).mValue.str_value);
     EXPECT_EQ(field1, actualFieldValues->at(4).mValue.int_value);
     EXPECT_EQ(field2, actualFieldValues->at(5).mValue.int_value);
+}
+
+TEST(StatsLogProcessorTest, TestDumpReportWithoutErasingDataDoesNotUpdateTimestamp) {
+    int hostUid = 20;
+    int isolatedUid = 30;
+    sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
+    ConfigKey key(3, 4);
+    StatsdConfig config = MakeConfig(false);
+    sp<StatsLogProcessor> processor =
+            CreateStatsLogProcessor(1, 1, config, key, nullptr, 0, mockUidMap);
+    vector<uint8_t> bytes;
+
+    int64_t dumpTime1Ns = 1 * NS_PER_SEC;
+    processor->onDumpReport(key, dumpTime1Ns, false /* include_current_bucket */,
+            true /* erase_data */, ADB_DUMP, FAST, &bytes);
+
+    ConfigMetricsReportList output;
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).current_report_elapsed_nanos(), dumpTime1Ns);
+
+    int64_t dumpTime2Ns = 5 * NS_PER_SEC;
+    processor->onDumpReport(key, dumpTime2Ns, false /* include_current_bucket */,
+            false /* erase_data */, ADB_DUMP, FAST, &bytes);
+
+    // Check that the dump report without clearing data is successful.
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).current_report_elapsed_nanos(), dumpTime2Ns);
+    EXPECT_EQ(output.reports(0).last_report_elapsed_nanos(), dumpTime1Ns);
+
+    int64_t dumpTime3Ns = 10 * NS_PER_SEC;
+    processor->onDumpReport(key, dumpTime3Ns, false /* include_current_bucket */,
+            true /* erase_data */, ADB_DUMP, FAST, &bytes);
+
+    // Check that the previous dump report that didn't clear data did not overwrite the first dump's
+    // timestamps.
+    output.ParseFromArray(bytes.data(), bytes.size());
+    EXPECT_EQ(output.reports_size(), 1);
+    EXPECT_EQ(output.reports(0).current_report_elapsed_nanos(), dumpTime3Ns);
+    EXPECT_EQ(output.reports(0).last_report_elapsed_nanos(), dumpTime1Ns);
+
 }
 
 #else

@@ -350,7 +350,10 @@ public class BubbleExpandedView extends LinearLayout {
             // ActivityView's vertical bounds. These events are part of a back gesture, and so they
             // should not collapse the stack (which all other touches on areas around the AV would
             // do).
-            if (motionEvent.getRawY() >= avBounds.top && motionEvent.getRawY() <= avBounds.bottom) {
+            if (motionEvent.getRawY() >= avBounds.top
+                            && motionEvent.getRawY() <= avBounds.bottom
+                            && (motionEvent.getRawX() < avBounds.left
+                                || motionEvent.getRawX() > avBounds.right)) {
                 return true;
             }
 

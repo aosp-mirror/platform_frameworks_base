@@ -71,6 +71,9 @@ public abstract class MediaKeyDispatcher {
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_STOP, 0);
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_NEXT, 0);
         mOverriddenKeyEvents.put(KeyEvent.KEYCODE_MEDIA_PREVIOUS, 0);
+        mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_DOWN, 0);
+        mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_UP, 0);
+        mOverriddenKeyEvents.put(KeyEvent.KEYCODE_VOLUME_MUTE, 0);
     }
 
     // TODO: Move this method into SessionPolicyProvider.java for better readability.
@@ -78,7 +81,7 @@ public abstract class MediaKeyDispatcher {
      * Implement this to customize the logic for which MediaSession should consume which key event.
      *
      * Note: This session will have greater priority over the {@link PendingIntent} returned from
-     * {@link #getCustomMediaButtonReceiver()}.
+     * {@link #getMediaButtonReceiver(KeyEvent, int, boolean)}.
      *
      * @param keyEvent a non-null KeyEvent whose key code is one of the supported media buttons.
      * @param uid the uid value retrieved by calling {@link Binder#getCallingUid()} from
@@ -88,7 +91,7 @@ public abstract class MediaKeyDispatcher {
      * @return a {@link MediaSession.Token} instance that should consume the given key event.
      */
     @Nullable
-    MediaSession.Token getCustomMediaSession(@NonNull KeyEvent keyEvent, int uid,
+    MediaSession.Token getMediaSession(@NonNull KeyEvent keyEvent, int uid,
             boolean asSystemService) {
         return null;
     }
@@ -98,12 +101,13 @@ public abstract class MediaKeyDispatcher {
      * dispatched key event.
      *
      * Note: This pending intent will have lower priority over the {@link MediaSession.Token}
-     * returned from {@link #getCustomMediaButtonReceiver()}.
+     * returned from {@link #getMediaSession(KeyEvent, int, boolean)}.
      *
      * @return a {@link PendingIntent} instance that should receive the dispatched key event.
      */
     @Nullable
-    PendingIntent getCustomMediaButtonReceiver() {
+    PendingIntent getMediaButtonReceiver(@NonNull KeyEvent keyEvent, int uid,
+            boolean asSystemService) {
         return null;
     }
 
@@ -120,6 +124,9 @@ public abstract class MediaKeyDispatcher {
      * <li> {@link KeyEvent#KEYCODE_MEDIA_STOP}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_NEXT}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_UP}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_DOWN}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_MUTE}
      * </ul>
      * @see {@link KeyEvent#isMediaSessionKey(int)}
      */
@@ -158,6 +165,9 @@ public abstract class MediaKeyDispatcher {
      * <li> {@link KeyEvent#KEYCODE_MEDIA_STOP}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_NEXT}
      * <li> {@link KeyEvent#KEYCODE_MEDIA_PREVIOUS}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_DOWN}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_UP}
+     * <li> {@link KeyEvent#KEYCODE_VOLUME_MUTE}
      * </ul>
      * @see {@link KeyEvent#isMediaSessionKey(int)}
      * @param keyCode

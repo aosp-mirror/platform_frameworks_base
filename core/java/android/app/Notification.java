@@ -7495,6 +7495,7 @@ public class Notification implements Parcelable
             mHistoricMessages = Message.getMessagesFromBundleArray(histMessages);
             mIsGroupConversation = extras.getBoolean(EXTRA_IS_GROUP_CONVERSATION);
             mUnreadMessageCount = extras.getInt(EXTRA_CONVERSATION_UNREAD_MESSAGE_COUNT);
+            mShortcutIcon = extras.getParcelable(EXTRA_CONVERSATION_ICON);
         }
 
         /**

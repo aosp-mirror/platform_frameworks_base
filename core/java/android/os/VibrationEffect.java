@@ -224,15 +224,16 @@ public abstract class VibrationEffect implements Parcelable {
      *
      * Waveform vibrations are a potentially repeating series of timing and amplitude pairs. For
      * each pair, the value in the amplitude array determines the strength of the vibration and the
-     * value in the timing array determines how long it vibrates for. An amplitude of 0 implies no
-     * vibration (i.e. off), and any pairs with a timing value of 0 will be ignored.
+     * value in the timing array determines how long it vibrates for, in milliseconds. Amplitude
+     * values must be between 0 and 255, and an amplitude of 0 implies no vibration (i.e. off). Any
+     * pairs with a timing value of 0 will be ignored.
      * </p><p>
      * To cause the pattern to repeat, pass the index into the timings array at which to start the
      * repetition, or -1 to disable repeating.
      * </p>
      *
-     * @param timings The timing values of the timing / amplitude pairs. Timing values of 0
-     *                will cause the pair to be ignored.
+     * @param timings The timing values, in milliseconds, of the timing / amplitude pairs. Timing
+     *                values of 0 will cause the pair to be ignored.
      * @param amplitudes The amplitude values of the timing / amplitude pairs. Amplitude values
      *                   must be between 0 and 255, or equal to {@link #DEFAULT_AMPLITUDE}. An
      *                   amplitude value of 0 implies the motor is off.
