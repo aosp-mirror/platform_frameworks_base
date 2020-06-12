@@ -904,6 +904,10 @@ public final class BroadcastQueue {
         } else if (r.intent.getData() != null) {
             b.append(r.intent.getData());
         }
+        if (DEBUG_BROADCAST) {
+            Slog.v(TAG, "Broadcast temp whitelist uid=" + uid + " duration=" + duration
+                    + " : " + b.toString());
+        }
         mService.tempWhitelistUidLocked(uid, duration, b.toString());
     }
 
