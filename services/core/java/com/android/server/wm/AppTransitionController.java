@@ -49,7 +49,7 @@ import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_W
 import static com.android.server.wm.AppTransition.isKeyguardGoingAwayTransit;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS;
 import static com.android.server.wm.ProtoLogGroup.WM_DEBUG_APP_TRANSITIONS_ANIM;
-import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.PARENTS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_LIGHT_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
@@ -74,7 +74,6 @@ import com.android.server.protolog.common.ProtoLog;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.function.Predicate;
-
 
 /**
  * Checks for app transition readiness, resolves animation attributes and performs visibility
@@ -375,18 +374,14 @@ public class AppTransitionController {
             // triggers WC#onAnimationFinished only on the promoted target. So we need to take care
             // of triggering AR#onAnimationFinished on each ActivityRecord which is a part of the
             // app transition.
-            final ArrayList<ActivityRecord> transitioningDecendants = new ArrayList<>();
+            final ArrayList<ActivityRecord> transitioningDescendants = new ArrayList<>();
             for (int j = 0; j < apps.size(); ++j) {
                 final ActivityRecord app = apps.valueAt(j);
                 if (app.isDescendantOf(wc)) {
-                    transitioningDecendants.add(app);
+                    transitioningDescendants.add(app);
                 }
             }
-            wc.applyAnimation(animLp, transit, visible, voiceInteraction, (type, anim) -> {
-                for (int j = 0; j < transitioningDecendants.size(); ++j) {
-                    transitioningDecendants.get(j).onAnimationFinished(type, anim);
-                }
-            });
+            wc.applyAnimation(animLp, transit, visible, voiceInteraction, transitioningDescendants);
         }
     }
 
@@ -540,7 +535,14 @@ public class AppTransitionController {
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now opening app %s", app);
 
             app.commitVisibility(true /* visible */, false /* performLayout */);
-            if (!app.isAnimating(PARENTS | CHILDREN)) {
+
+            // In case a trampoline activity is used, it can happen that a new ActivityRecord is
+            // added and a new app transition starts before the previous app transition animation
+            // ends. So we cannot simply use app.isAnimating(PARENTS) to determine if the app must
+            // to be added to the list of tokens to be notified of app transition complete.
+            final WindowContainer wc = app.getAnimatingContainer(PARENTS,
+                    ANIMATION_TYPE_APP_TRANSITION);
+            if (wc == null || !wc.getAnimationSources().contains(app)) {
                 // This token isn't going to be animating. Add it to the list of tokens to
                 // be notified of app transition complete since the notification will not be
                 // sent be the app window animator.
@@ -599,8 +601,7 @@ public class AppTransitionController {
         for (int i = 0; i < appsCount; i++) {
             WindowContainer wc = apps.valueAt(i);
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS, "Now changing app %s", wc);
-            wc.applyAnimation(null, transit, true, false,
-                    null /* animationFinishedCallback */);
+            wc.applyAnimation(null, transit, true, false, null /* sources */);
         }
     }
 
