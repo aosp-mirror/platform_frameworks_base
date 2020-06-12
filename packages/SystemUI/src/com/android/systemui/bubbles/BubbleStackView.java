@@ -1780,6 +1780,9 @@ public class BubbleStackView extends FrameLayout
                         AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
                         mScaleInSpringConfig)
                 .addUpdateListener((target, values) -> {
+                    if (mExpandedBubble.getIconView() == null) {
+                        return;
+                    }
                     mExpandedViewContainerMatrix.postTranslate(
                             mExpandedBubble.getIconView().getTranslationX()
                                     - bubbleWillBeAtX,
