@@ -213,7 +213,8 @@
 
         <activity-alias android:name=".InflatingEmojiListActivity"
              android:label="Inflation/Inflating ListView with Emoji"
-             android:targetActivity=".InflatingListActivity">
+             android:targetActivity=".InflatingListActivity"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="com.android.test.uibench.TEST"/>
@@ -222,7 +223,8 @@
 
         <activity-alias android:name=".InflatingHanListActivity"
              android:label="Inflation/Inflating ListView with Han Characters"
-             android:targetActivity=".InflatingListActivity">
+             android:targetActivity=".InflatingListActivity"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="com.android.test.uibench.TEST"/>
@@ -231,7 +233,8 @@
 
         <activity-alias android:name=".InflatingLongStringListActivity"
              android:label="Inflation/Inflating ListView with long string"
-             android:targetActivity=".InflatingListActivity">
+             android:targetActivity=".InflatingListActivity"
+             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="com.android.test.uibench.TEST"/>
@@ -307,7 +310,8 @@
 
         <activity
             android:name="WindowInsetsControllerActivity"
-            android:label="WindowInsetsControllerActivity" >
+            android:label="WindowInsetsControllerActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="com.android.test.uibench.TEST" />
