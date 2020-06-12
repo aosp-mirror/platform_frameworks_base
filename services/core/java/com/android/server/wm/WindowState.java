@@ -241,8 +241,10 @@ import com.android.server.wm.utils.WmDisplayCutout;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -653,6 +655,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private long mFrameNumber = -1;
 
     private static final StringBuilder sTmpSB = new StringBuilder();
+
+    /**
+     * Whether the next surfacePlacement call should notify that the blast sync is ready.
+     * This is set to true when {@link #finishDrawing(Transaction)} is called so
+     * {@link #onTransactionReady(int, Set)} is called after the next surfacePlacement. This allows
+     * Transactions to get flushed into the syncTransaction before notifying {@link BLASTSyncEngine}
+     * that this WindowState is ready.
+     */
+    private boolean mNotifyBlastOnSurfacePlacement;
 
     /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
@@ -5335,6 +5346,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         updateFrameRateSelectionPriorityIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(true);
+        notifyBlastSyncTransaction();
         super.prepareSurfaces();
     }
 
@@ -5826,6 +5838,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mBLASTSyncTransaction.merge(postDrawTransaction);
         }
 
+        mNotifyBlastOnSurfacePlacement = true;
+        return mWinAnimator.finishDrawingLocked(null);
+    }
+
+    @VisibleForTesting
+    void notifyBlastSyncTransaction() {
+        if (!mNotifyBlastOnSurfacePlacement || mWaitingListener == null) {
+            mNotifyBlastOnSurfacePlacement = false;
+            return;
+        }
+
         // If localSyncId is >0 then we are syncing with children and will
         // invoke transaction ready from our own #transactionReady callback
         // we just need to signal our side of the sync (setReady). But if we
@@ -5833,15 +5856,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // be invoked and we need to invoke it ourself.
         if (mLocalSyncId >= 0) {
             mBLASTSyncEngine.setReady(mLocalSyncId);
-            return mWinAnimator.finishDrawingLocked(null);
+            return;
         }
 
-        mWaitingListener.onTransactionReady(mWaitingSyncId, mBLASTSyncTransaction);
-        mUsingBLASTSyncTransaction = false;
+        mWaitingListener.onTransactionReady(mWaitingSyncId,  Collections.singleton(this));
 
         mWaitingSyncId = 0;
         mWaitingListener = null;
-        return mWinAnimator.finishDrawingLocked(null);
+        mNotifyBlastOnSurfacePlacement = false;
     }
 
     private boolean requestResizeForBlastSync() {
