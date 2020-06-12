@@ -40,7 +40,7 @@ import javax.inject.Singleton
 private const val TAG = "MediaResumeListener"
 
 private const val MEDIA_PREFERENCES = "media_control_prefs"
-private const val MEDIA_PREFERENCE_KEY = "browser_components"
+private const val MEDIA_PREFERENCE_KEY = "browser_components_"
 
 @Singleton
 class MediaResumeListener @Inject constructor(
@@ -63,10 +63,15 @@ class MediaResumeListener @Inject constructor(
     lateinit var resumeComponentFoundCallback: (String, Runnable?) -> Unit
 
     private var mediaBrowser: ResumeMediaBrowser? = null
+    private var currentUserId: Int
 
-    private val unlockReceiver = object : BroadcastReceiver() {
+    private val userChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
             if (Intent.ACTION_USER_UNLOCKED == intent.action) {
+                loadMediaResumptionControls()
+            } else if (Intent.ACTION_USER_SWITCHED == intent.action) {
+                currentUserId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1)
+                loadSavedComponents()
                 loadMediaResumptionControls()
             }
         }
@@ -97,18 +102,22 @@ class MediaResumeListener @Inject constructor(
     }
 
     init {
+        currentUserId = context.userId
         if (useMediaResumption) {
             val unlockFilter = IntentFilter()
             unlockFilter.addAction(Intent.ACTION_USER_UNLOCKED)
-            broadcastDispatcher.registerReceiver(unlockReceiver, unlockFilter, null, UserHandle.ALL)
+            unlockFilter.addAction(Intent.ACTION_USER_SWITCHED)
+            broadcastDispatcher.registerReceiver(userChangeReceiver, unlockFilter, null,
+                UserHandle.ALL)
             loadSavedComponents()
         }
     }
 
     private fun loadSavedComponents() {
-        val userContext = context.createContextAsUser(context.getUser(), 0)
-        val prefs = userContext.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)
-        val listString = prefs.getString(MEDIA_PREFERENCE_KEY, null)
+        // Make sure list is empty (if we switched users)
+        resumeComponents.clear()
+        val prefs = context.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)
+        val listString = prefs.getString(MEDIA_PREFERENCE_KEY + currentUserId, null)
         val components = listString?.split(ResumeMediaBrowser.DELIMITER.toRegex())
             ?.dropLastWhile { it.isEmpty() }
         components?.forEach {
@@ -133,7 +142,6 @@ class MediaResumeListener @Inject constructor(
             val browser = ResumeMediaBrowser(context, mediaBrowserCallback, it)
             browser.findRecentMedia()
         }
-        broadcastDispatcher.unregisterReceiver(unlockReceiver) // only need to load once
     }
 
     override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
@@ -212,9 +220,8 @@ class MediaResumeListener @Inject constructor(
             sb.append(it.flattenToString())
             sb.append(ResumeMediaBrowser.DELIMITER)
         }
-        val userContext = context.createContextAsUser(context.getUser(), 0)
-        val prefs = userContext.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)
-        prefs.edit().putString(MEDIA_PREFERENCE_KEY, sb.toString()).apply()
+        val prefs = context.getSharedPreferences(MEDIA_PREFERENCES, Context.MODE_PRIVATE)
+        prefs.edit().putString(MEDIA_PREFERENCE_KEY + currentUserId, sb.toString()).apply()
     }
 
     /**
