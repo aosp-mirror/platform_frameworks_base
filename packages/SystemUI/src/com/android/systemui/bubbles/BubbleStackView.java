@@ -868,14 +868,7 @@ public class BubbleStackView extends FrameLayout
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
                     mStackAnimationController.updateResources(mOrientation);
-
-                    // Reposition & adjust the height for new orientation
-                    if (mIsExpanded) {
-                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
-                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-                            mExpandedBubble.getExpandedView().updateView(getLocationOnScreen());
-                        }
-                    }
+                    mBubbleOverflow.updateDimensions();
 
                     // Need to update the padding around the view
                     WindowInsets insets = getRootWindowInsets();
@@ -899,9 +892,15 @@ public class BubbleStackView extends FrameLayout
 
                     if (mIsExpanded) {
                         // Re-draw bubble row and pointer for new orientation.
+                        beforeExpandedViewAnimation();
+                        updateOverflowVisibility();
+                        updatePointerPosition();
                         mExpandedAnimationController.expandFromStack(() -> {
-                            updatePointerPosition();
+                            afterExpandedViewAnimation();
                         } /* after */);
+                        mExpandedViewContainer.setTranslationX(0);
+                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
+                        mExpandedViewContainer.setAlpha(1f);
                     }
                     if (mVerticalPosPercentBeforeRotation >= 0) {
                         mStackAnimationController.moveStackToSimilarPositionAfterRotation(
