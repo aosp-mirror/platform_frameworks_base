@@ -207,7 +207,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     static final int MSG_HIDE_CURRENT_INPUT_METHOD = 1035;
     static final int MSG_INITIALIZE_IME = 1040;
     static final int MSG_CREATE_SESSION = 1050;
-    static final int MSG_REMOVE_IME_SURFACE = 1060;
 
     static final int MSG_START_INPUT = 2000;
 
@@ -3947,12 +3946,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         }
     }
 
-    @Override
-    public void removeImeSurface() {
-        mContext.enforceCallingPermission(Manifest.permission.INTERNAL_SYSTEM_WINDOW, null);
-        mHandler.sendMessage(mHandler.obtainMessage(MSG_REMOVE_IME_SURFACE));
-    }
-
     @BinderThread
     private void notifyUserAction(@NonNull IBinder token) {
         if (DEBUG) {
@@ -4221,15 +4214,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                 }
                 args.recycle();
-                return true;
-            }
-            case MSG_REMOVE_IME_SURFACE: {
-                try {
-                    if (mEnabledSession != null && mEnabledSession.session != null) {
-                        mEnabledSession.session.removeImeSurface();
-                    }
-                } catch (RemoteException e) {
-                }
                 return true;
             }
             // ---------------------------------------------------------
