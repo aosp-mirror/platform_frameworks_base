@@ -233,7 +233,7 @@ public class AppStandbyController implements AppStandbyInternal {
      * Set of system apps that are headless (don't have any declared activities, enabled or
      * disabled). Presence in this map indicates that the app is a headless system app.
      */
-    @GuardedBy("mAppIdleLock")
+    @GuardedBy("mHeadlessSystemApps")
     private final ArrayMap<String, Boolean> mHeadlessSystemApps = new ArrayMap<>();
 
     private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
@@ -447,7 +447,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 userFileExists = mAppIdleHistory.userFileExists(UserHandle.USER_SYSTEM);
             }
 
-            loadHeadlessSystemAppCache();
+            // Offload to handler thread to avoid boottime impact.
+            mHandler.post(this::loadHeadlessSystemAppCache);
 
             if (mPendingInitializeDefaults || !userFileExists) {
                 initializeDefaultsForSystemApps(UserHandle.USER_SYSTEM);
@@ -1121,7 +1122,9 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     private boolean isHeadlessSystemApp(String packageName) {
-        return mHeadlessSystemApps.containsKey(packageName);
+        synchronized (mHeadlessSystemApps) {
+            return mHeadlessSystemApps.containsKey(packageName);
+        }
     }
 
     @Override
@@ -1697,19 +1700,24 @@ public class AppStandbyController implements AppStandbyInternal {
                     userId);
             evaluateSystemAppException(pi);
         } catch (PackageManager.NameNotFoundException e) {
-            mHeadlessSystemApps.remove(packageName);
+            synchronized (mHeadlessSystemApps) {
+                mHeadlessSystemApps.remove(packageName);
+            }
         }
     }
 
-    private void evaluateSystemAppException(@Nullable PackageInfo pkgInfo) {
-        if (pkgInfo.applicationInfo != null && pkgInfo.applicationInfo.isSystemApp()) {
-            synchronized (mAppIdleLock) {
-                if (pkgInfo.activities == null || pkgInfo.activities.length == 0) {
-                    // Headless system app.
-                    mHeadlessSystemApps.put(pkgInfo.packageName, true);
-                } else {
-                    mHeadlessSystemApps.remove(pkgInfo.packageName);
-                }
+    /** Returns true if the exception status changed. */
+    private boolean evaluateSystemAppException(@Nullable PackageInfo pkgInfo) {
+        if (pkgInfo == null || pkgInfo.applicationInfo == null
+                || !pkgInfo.applicationInfo.isSystemApp()) {
+            return false;
+        }
+        synchronized (mHeadlessSystemApps) {
+            if (pkgInfo.activities == null || pkgInfo.activities.length == 0) {
+                // Headless system app.
+                return mHeadlessSystemApps.put(pkgInfo.packageName, true) == null;
+            } else {
+                return mHeadlessSystemApps.remove(pkgInfo.packageName) != null;
             }
         }
     }
@@ -1754,7 +1762,12 @@ public class AppStandbyController implements AppStandbyInternal {
                 UserHandle.USER_SYSTEM);
         final int packageCount = packages.size();
         for (int i = 0; i < packageCount; i++) {
-            evaluateSystemAppException(packages.get(i));
+            PackageInfo pkgInfo = packages.get(i);
+            if (pkgInfo != null && evaluateSystemAppException(pkgInfo)) {
+                mHandler.obtainMessage(MSG_CHECK_PACKAGE_IDLE_STATE,
+                        UserHandle.USER_SYSTEM, -1, pkgInfo.packageName)
+                    .sendToTarget();
+            }
         }
     }
 
@@ -1852,9 +1865,12 @@ public class AppStandbyController implements AppStandbyInternal {
         pw.println();
 
         pw.println("mHeadlessSystemApps=[");
-        for (int i = mHeadlessSystemApps.size() - 1; i >= 0; --i) {
-            pw.print(mHeadlessSystemApps.keyAt(i));
-            pw.println(",");
+        synchronized (mHeadlessSystemApps) {
+            for (int i = mHeadlessSystemApps.size() - 1; i >= 0; --i) {
+                pw.print("  ");
+                pw.print(mHeadlessSystemApps.keyAt(i));
+                pw.println(",");
+            }
         }
         pw.println("]");
         pw.println();
