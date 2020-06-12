@@ -247,7 +247,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final Executor mBackgroundExecutor;
     private List<ControlsServiceInfo> mControlsServiceInfos = new ArrayList<>();
     private Optional<ControlsController> mControlsControllerOptional;
-    private SharedPreferences mControlsPreferences;
     private final RingerModeTracker mRingerModeTracker;
     private int mDialogPressDelay = DIALOG_PRESS_DELAY; // ms
     private Handler mMainHandler;
@@ -405,12 +404,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                     });
         }
 
-        // Need to be user-specific with the context to make sure we read the correct prefs
-        Context userContext = context.createContextAsUser(
-                new UserHandle(mUserManager.getUserHandle()), 0);
-        mControlsPreferences = userContext.getSharedPreferences(PREFS_CONTROLS_FILE,
-            Context.MODE_PRIVATE);
-
         // Listen for changes to show controls on the power menu while locked
         onPowerMenuLockScreenSettingsChanged();
         mContext.getContentResolver().registerContentObserver(
@@ -444,19 +437,22 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Collections.emptySet());
 
         List<ComponentName> componentsToSeed = new ArrayList<>();
-        for (ControlsServiceInfo info : mControlsServiceInfos) {
-            String pkg = info.componentName.getPackageName();
-            if (seededPackages.contains(pkg)
-                    || mControlsControllerOptional.get().countFavoritesForComponent(
-                            info.componentName) > 0) {
-                continue;
-            }
-
-            for (int i = 0; i < Math.min(SEEDING_MAX, preferredControlsPackages.length); i++) {
-                if (pkg.equals(preferredControlsPackages[i])) {
-                    componentsToSeed.add(info.componentName);
+        for (int i = 0; i < Math.min(SEEDING_MAX, preferredControlsPackages.length); i++) {
+            String pkg = preferredControlsPackages[i];
+            for (ControlsServiceInfo info : mControlsServiceInfos) {
+                if (!pkg.equals(info.componentName.getPackageName())) continue;
+                if (seededPackages.contains(pkg)) {
+                    break;
+                } else if (mControlsControllerOptional.get()
+                        .countFavoritesForComponent(info.componentName) > 0) {
+                    // When there are existing controls but no saved preference, assume it
+                    // is out of sync, perhaps through a device restore, and update the
+                    // preference
+                    addPackageToSeededSet(prefs, pkg);
                     break;
                 }
+                componentsToSeed.add(info.componentName);
+                break;
             }
         }
 
@@ -466,14 +462,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 componentsToSeed,
                 (response) -> {
                     Log.d(TAG, "Controls seeded: " + response);
-                    Set<String> completedPkgs = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
-                                                                   new HashSet<String>());
                     if (response.getAccepted()) {
-                        completedPkgs.add(response.getPackageName());
-                        prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
-                                                  completedPkgs).apply();
+                        addPackageToSeededSet(prefs, response.getPackageName());
                     }
                 });
+    }
+
+    private void addPackageToSeededSet(SharedPreferences prefs, String pkg) {
+        Set<String> seededPackages = prefs.getStringSet(PREFS_CONTROLS_SEEDING_COMPLETED,
+                Collections.emptySet());
+        Set<String> updatedPkgs = new HashSet<>(seededPackages);
+        updatedPkgs.add(pkg);
+        prefs.edit().putStringSet(PREFS_CONTROLS_SEEDING_COMPLETED, updatedPkgs).apply();
     }
 
     /**
