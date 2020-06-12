@@ -513,7 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Dzēst visu"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Pārvaldīt"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Vēsture"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Ienākošie"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Jauni"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Klusums"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Paziņojumi"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Sarunas"</string>
@@ -1007,8 +1007,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Pārvietot augšpusē pa labi"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Pārvietot apakšpusē pa kreisi"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Pārvietot apakšpusē pa labi"</string>
-    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Nerādīt burbuli"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nerādīt sarunu burbuļos"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Tērzēšana, izmantojot burbuļus"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Jaunas sarunas tiek rādītas kā peldošas ikonas vai burbuļi. Pieskarieties, lai atvērtu burbuli. Velciet, lai to pārvietotu."</string>

@@ -146,7 +146,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"உங்கள் முகத்தை அங்கீகரிக்கிறது"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்து\' என்பதை தட்டவும்"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
@@ -168,7 +168,7 @@
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"அடுத்த முறை தவறான கடவுச்சொல்லை உள்ளிட்டால் உங்கள் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தச் சாதனத்தின் தரவு நீக்கப்படும்."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தப் பயனர் நீக்கப்படுவார்."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தப் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"பலமுறை தவறாக முயன்றதால், இந்தப் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"நிராகரி"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"கைரேகை ஐகான்"</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"வரலாறு"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"உள்வருவது"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"புதிது"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"நிசப்தம்"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"அறிவிப்புகள்"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
@@ -1002,8 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"கீழே வலதுபுறமாக நகர்த்து"</string>
-    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"குமிழை அகற்று"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"உரையாடலைக் குமிழாக்காதே"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"குமிழ்களைப் பயன்படுத்தி அரட்டையடியுங்கள்"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"புதிய உரையாடல்கள் மிதக்கும் ஐகான்களாகவோ குமிழ்களாகவோ தோன்றும். குமிழைத் திறக்க தட்டவும். நகர்த்த இழுக்கவும்."</string>
