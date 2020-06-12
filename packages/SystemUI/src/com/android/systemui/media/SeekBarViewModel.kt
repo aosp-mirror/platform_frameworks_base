@@ -20,11 +20,13 @@ import android.media.MediaMetadata
 import android.media.session.MediaController
 import android.media.session.PlaybackState
 import android.os.SystemClock
+import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.widget.SeekBar
 import androidx.annotation.AnyThread
 import androidx.annotation.WorkerThread
+import androidx.core.view.GestureDetectorCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.LiveData
 import com.android.systemui.dagger.qualifiers.Background
@@ -68,7 +70,6 @@ private fun PlaybackState.computePosition(duration: Long): Long {
 
 /** ViewModel for seek bar in QS media player. */
 class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: RepeatableExecutor) {
-
     private var _data = Progress(false, false, null, null)
         set(value) {
             field = value
@@ -198,11 +199,11 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
             return SeekBarChangeListener(this, bgExecutor)
         }
 
-    /** Gets a listener to attach to the seek bar to disable touch intercepting. */
-    val seekBarTouchListener: View.OnTouchListener
-        get() {
-            return SeekBarTouchListener()
-        }
+    /** Attach touch handlers to the seek bar view. */
+    fun attachTouchHandlers(bar: SeekBar) {
+        bar.setOnSeekBarChangeListener(seekBarListener)
+        bar.setOnTouchListener(SeekBarTouchListener(bar))
+    }
 
     private class SeekBarChangeListener(
         val viewModel: SeekBarViewModel,
@@ -225,11 +226,130 @@ class SeekBarViewModel @Inject constructor(@Background private val bgExecutor: R
         }
     }
 
-    private class SeekBarTouchListener : View.OnTouchListener {
+    /**
+     * Responsible for intercepting touch events before they reach the seek bar.
+     *
+     * This reduces the gestures seen by the seek bar so that users don't accidentially seek when
+     * they intend to scroll the carousel.
+     */
+    private class SeekBarTouchListener(
+        private val bar: SeekBar
+    ) : View.OnTouchListener, GestureDetector.OnGestureListener {
+
+        // Gesture detector helps decide which touch events to intercept.
+        private val detector = GestureDetectorCompat(bar.context, this)
+        // Defines a tap target around the thumb at the beginning of a gesture.
+        private var onDownTargetBoxMinX: Int = -1
+        private var onDownTargetBoxMaxX: Int = -1
+
+        /**
+         * Decide which touch events to intercept before they reach the seek bar.
+         *
+         * Based on the gesture detected, we decide whether we want the event to reach the seek bar.
+         * If we want the seek bar to see the event, then we return false so that the event isn't
+         * handled here and it will be passed along. If, however, we don't want the seek bar to see
+         * the event, then return true so that the event is handled here.
+         *
+         * When the seek bar is contained in the carousel, the carousel still has the ability to
+         * intercept the touch event. So, even though we may handle the event here, the carousel can
+         * still intercept the event. This way, gestures that we consider falses on the seek bar can
+         * still be used by the carousel for paging.
+         *
+         * Returns true for events that we don't want dispatched to the seek bar.
+         */
         override fun onTouch(view: View, event: MotionEvent): Boolean {
-            view.parent.requestDisallowInterceptTouchEvent(true)
-            return view.onTouchEvent(event)
+            if (view != bar) {
+                return false
+            }
+            val shouldGoToSeekBar = detector.onTouchEvent(event)
+            return !shouldGoToSeekBar
         }
+
+        /**
+         * Handle down events that press down on the thumb.
+         *
+         * On the down action, determine a target box around the thumb to know when a scroll
+         * gesture starts by clicking on the thumb. The target box will be used by subsequent
+         * onScroll events.
+         *
+         * Returns true when the down event hits within the target box of the thumb.
+         */
+        override fun onDown(event: MotionEvent): Boolean {
+            val padL = bar.paddingLeft
+            val padR = bar.paddingRight
+            // Compute the X location of the thumb as a function of the seek bar progress.
+            // TODO: account for thumb offset
+            val progress = bar.getProgress()
+            val range = bar.max - bar.min
+            val widthFraction = if (range > 0) {
+                (progress - bar.min).toDouble() / range
+            } else {
+                0.0
+            }
+            val availableWidth = bar.width - padL - padR
+            val thumbX = if (bar.isLayoutRtl()) {
+                padL + availableWidth * (1 - widthFraction)
+            } else {
+                padL + availableWidth * widthFraction
+            }
+            // Set the min, max boundaries of the thumb box.
+            // I'm cheating by using the height of the seek bar as the width of the box.
+            val halfHeight: Int = bar.height / 2
+            onDownTargetBoxMinX = (Math.round(thumbX) - halfHeight).toInt()
+            onDownTargetBoxMaxX = (Math.round(thumbX) + halfHeight).toInt()
+            // If the x position of the down event is within the box, then request that the parent
+            // not intercept the event.
+            val x = Math.round(event.x)
+            val accept = x >= onDownTargetBoxMinX && x <= onDownTargetBoxMaxX
+            if (accept) {
+                bar.parent?.requestDisallowInterceptTouchEvent(true)
+            }
+            return accept
+        }
+
+        /**
+         * Always handle single tap up.
+         *
+         * This enables the user to single tap anywhere on the seek bar to seek to that position.
+         */
+        override fun onSingleTapUp(event: MotionEvent) = true
+
+        /**
+         * Handle scroll events when the down event is on the thumb.
+         *
+         * Returns true when the down event of the scroll hits within the target box of the thumb.
+         */
+        override fun onScroll(
+            eventStart: MotionEvent,
+            event: MotionEvent,
+            distanceX: Float,
+            distanceY: Float
+        ): Boolean {
+            val x = Math.round(eventStart.x)
+            return x >= onDownTargetBoxMinX && x <= onDownTargetBoxMaxX
+        }
+
+        /**
+         * Handle fling events when the down event is on the thumb.
+         *
+         * TODO: Ignore entire gesture when it includes a fling.
+         * If a user is flinging, then they are probably trying to page the carousel. It would be
+         * better to ignore the entire gesture when it includes a fling. This could be achieved by
+         * reseting the seek bar position to where it was when the gesture started.
+         */
+        override fun onFling(
+            eventStart: MotionEvent,
+            event: MotionEvent,
+            velocityX: Float,
+            velocityY: Float
+        ): Boolean {
+            val x = Math.round(eventStart.x)
+            return x >= onDownTargetBoxMinX && x <= onDownTargetBoxMaxX
+        }
+
+        override fun onShowPress(event: MotionEvent) {}
+
+        override fun onLongPress(event: MotionEvent) {}
     }
 
     /** State seen by seek bar UI. */
