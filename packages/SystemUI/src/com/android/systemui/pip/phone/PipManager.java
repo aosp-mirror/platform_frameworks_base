@@ -269,7 +269,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             if (stackInfo != null) {
                 // If SystemUI restart, and it already existed a pinned stack,
                 // register the pip input consumer to ensure touch can send to it.
-                mInputConsumerController.registerInputConsumer();
+                mInputConsumerController.registerInputConsumer(true /* withSfVsync */);
             }
         } catch (RemoteException | UnsupportedOperationException e) {
             e.printStackTrace();

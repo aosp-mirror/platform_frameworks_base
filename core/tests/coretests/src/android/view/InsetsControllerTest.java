@@ -678,7 +678,8 @@ public class InsetsControllerTest {
             final InsetsState currentState = new InsetsState(mController.getState());
             // The caption bar source should be synced with the info in mAttachInfo.
             assertEquals(captionFrame, currentState.peekSource(ITYPE_CAPTION_BAR).getFrame());
-            assertTrue(currentState.equals(state, true /* excludingCaptionInsets*/));
+            assertTrue(currentState.equals(state, true /* excludingCaptionInsets*/,
+                    true /* excludeInvisibleIme */));
             mController.setCaptionInsetsHeight(0);
             mController.onStateChanged(state);
             // The caption bar source should not be there at all, because we don't add empty

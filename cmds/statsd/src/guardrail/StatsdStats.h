@@ -660,6 +660,8 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestAtomMetricsStats);
     FRIEND_TEST(StatsdStatsTest, TestActivationBroadcastGuardrailHit);
     FRIEND_TEST(StatsdStatsTest, TestAtomErrorStats);
+
+    FRIEND_TEST(StatsLogProcessorTest, InvalidConfigRemoved);
 };
 
 }  // namespace statsd

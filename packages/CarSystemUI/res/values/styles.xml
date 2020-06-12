@@ -37,13 +37,9 @@
         <item name="android:textColor">@*android:color/car_grey_50</item>
     </style>
 
-    <style name="CarNavigationBarButtonTheme">
-        <item name="android:colorControlHighlight">@color/nav_bar_ripple_background_color</item>
-    </style>
-
     <style name="NavigationBarButton">
         <item name="android:layout_height">96dp</item>
         <item name="android:layout_width">96dp</item>
-        <item name="android:background">@*android:drawable/item_background_material</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
     </style>
 </resources>

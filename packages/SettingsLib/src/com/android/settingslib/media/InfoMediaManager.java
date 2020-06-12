@@ -56,7 +56,7 @@ import java.util.concurrent.Executors;
 public class InfoMediaManager extends MediaManager {
 
     private static final String TAG = "InfoMediaManager";
-    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
     @VisibleForTesting
     final RouterManagerCallback mMediaRouterCallback = new RouterManagerCallback();
     @VisibleForTesting
@@ -430,7 +430,7 @@ public class InfoMediaManager extends MediaManager {
             case TYPE_HEARING_AID:
             case TYPE_BLUETOOTH_A2DP:
                 final BluetoothDevice device =
-                        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getOriginalId());
+                        BluetoothAdapter.getDefaultAdapter().getRemoteDevice(route.getAddress());
                 final CachedBluetoothDevice cachedDevice =
                         mBluetoothManager.getCachedDeviceManager().findDevice(device);
                 if (cachedDevice != null) {

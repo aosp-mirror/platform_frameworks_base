@@ -529,7 +529,9 @@ void StatsLogProcessor::OnConfigUpdatedLocked(
         VLOG("StatsdConfig valid");
     } else {
         // If there is any error in the config, don't use it.
+        // Remove any existing config with the same key.
         ALOGE("StatsdConfig NOT valid");
+        mMetricsManagers.erase(key);
     }
 }
 

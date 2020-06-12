@@ -241,12 +241,7 @@ public class AdbService extends IAdbManager.Stub {
     private AdbService(Context context) {
         mContext = context;
         mContentResolver = context.getContentResolver();
-
-        boolean secureAdbEnabled = AdbProperties.secure().orElse(false);
-        boolean dataEncrypted = "1".equals(SystemProperties.get("vold.decrypt"));
-        if (secureAdbEnabled && !dataEncrypted) {
-            mDebuggingManager = new AdbDebuggingManager(context);
-        }
+        mDebuggingManager = new AdbDebuggingManager(context);
 
         initAdbState();
         LocalServices.addService(AdbManagerInternal.class, new AdbManagerInternalImpl());
