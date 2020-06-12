@@ -1887,9 +1887,11 @@ public class BubbleStackView extends FrameLayout
                 .withEndActions(this::releaseAnimatingOutBubbleBuffer)
                 .start();
 
+        boolean isOverflow = mExpandedBubble != null
+                && mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         float expandingFromBubbleDestinationX =
-                mExpandedAnimationController.getBubbleLeft(
-                        mBubbleData.getBubbles().indexOf(mExpandedBubble));
+                mExpandedAnimationController.getBubbleLeft(isOverflow ? getBubbleCount()
+                        : mBubbleData.getBubbles().indexOf(mExpandedBubble));
 
         mExpandedViewContainer.setAlpha(1f);
         mExpandedViewContainer.setVisibility(View.VISIBLE);
