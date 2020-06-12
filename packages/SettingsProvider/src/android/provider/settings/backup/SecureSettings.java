@@ -172,5 +172,6 @@ public class SecureSettings {
         Settings.Secure.ONE_HANDED_MODE_ENABLED,
         Settings.Secure.ONE_HANDED_MODE_TIMEOUT,
         Settings.Secure.TAPS_APP_TO_EXIT,
+        Settings.Secure.SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED,
     };
 }

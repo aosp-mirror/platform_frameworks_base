@@ -7883,19 +7883,26 @@ public final class Settings {
         public static final String AWARE_TAP_PAUSE_TOUCH_COUNT = "aware_tap_pause_touch_count";
 
         /**
+         * For user preference if swipe bottom to expand notification gesture enabled.
+         * @hide
+         */
+        public static final String SWIPE_BOTTOM_TO_NOTIFICATION_ENABLED =
+                "swipe_bottom_to_notification_enabled";
+
+        /**
          * For user preference if One-Handed Mode enabled.
          * @hide
          */
         public static final String ONE_HANDED_MODE_ENABLED = "one_handed_mode_enabled";
 
         /**
-         * For user perference if One-Handed Mode timeout.
+         * For user preference if One-Handed Mode timeout.
          * @hide
          */
         public static final String ONE_HANDED_MODE_TIMEOUT = "one_handed_mode_timeout";
 
         /**
-         * For user tapps app to exit One-Handed Mode.
+         * For user taps app to exit One-Handed Mode.
          * @hide
          */
         public static final String TAPS_APP_TO_EXIT = "taps_app_to_exit";
