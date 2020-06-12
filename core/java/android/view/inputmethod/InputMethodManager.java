@@ -541,6 +541,19 @@ public final class InputMethodManager {
         return servedView.hasWindowFocus() || isAutofillUIShowing(servedView);
     }
 
+    /**
+     * Reports whether the IME is currently perceptible or not, according to the leash applied by
+     * {@link android.view.WindowInsetsController}.
+     * @hide
+     */
+    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+        try {
+            mService.reportPerceptible(windowToken, perceptible);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     private final class DelegateImpl implements
             ImeFocusController.InputMethodManagerDelegate {
         /**

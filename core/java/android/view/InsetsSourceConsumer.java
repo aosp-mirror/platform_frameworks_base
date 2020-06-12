@@ -261,6 +261,15 @@ public class InsetsSourceConsumer {
     }
 
     /**
+     * Reports that this source's perceptibility has changed
+     *
+     * @param perceptible true if the source is perceptible, false otherwise.
+     * @see InsetsAnimationControlCallbacks#reportPerceptible
+     */
+    public void onPerceptible(boolean perceptible) {
+    }
+
+    /**
      * Notify listeners that window is now hidden.
      */
     void notifyHidden() {
@@ -339,5 +348,6 @@ public class InsetsSourceConsumer {
             t.hide(mSourceControl.getLeash());
         }
         t.apply();
+        onPerceptible(mRequestedVisible);
     }
 }

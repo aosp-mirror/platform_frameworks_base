@@ -482,6 +482,12 @@ class InsetsPolicy {
                     WindowInsetsAnimation animation,
                     Bounds bounds) {
             }
+
+            @Override
+            public void reportPerceptible(int types, boolean perceptible) {
+                // No-op for now - only client windows report perceptibility for now, with policy
+                // controllers assumed to always be perceptible.
+            }
         }
     }
 }

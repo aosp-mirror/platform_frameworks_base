@@ -72,5 +72,6 @@ interface IInputMethodManager {
     void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues);
 
+    oneway void reportPerceptible(in IBinder windowToken, boolean perceptible);
     void removeImeSurface();
 }

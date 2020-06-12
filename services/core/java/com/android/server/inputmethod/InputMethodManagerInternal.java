@@ -17,6 +17,7 @@
 package com.android.server.inputmethod;
 
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.os.IBinder;
 import android.view.inputmethod.InlineSuggestionsRequest;
@@ -109,6 +110,16 @@ public abstract class InputMethodManagerInternal {
             int displayId);
 
     /**
+     * Reports that IME control has transferred to the given window token, or if null that
+     * control has been taken away from client windows (and is instead controlled by the policy
+     * or SystemUI).
+     *
+     * @param windowToken the window token that is now in control, or {@code null} if no client
+     *                   window is in control of the IME.
+     */
+    public abstract void reportImeControl(@Nullable IBinder windowToken);
+
+    /**
      * Fake implementation of {@link InputMethodManagerInternal}.  All the methods do nothing.
      */
     private static final InputMethodManagerInternal NOP =
@@ -150,6 +161,10 @@ public abstract class InputMethodManagerInternal {
                 public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
                         int displayId) {
                     return false;
+                }
+
+                @Override
+                public void reportImeControl(@Nullable IBinder windowToken) {
                 }
             };
 

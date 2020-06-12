@@ -21,6 +21,7 @@ import static android.view.InsetsState.ITYPE_IME;
 
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
+import android.os.IBinder;
 import android.os.Parcel;
 import android.text.TextUtils;
 import android.view.SurfaceControl.Transaction;
@@ -151,6 +152,15 @@ public final class ImeInsetsSourceConsumer extends InsetsSourceConsumer {
     @Override
     protected boolean isRequestedVisibleAwaitingControl() {
         return mIsRequestedVisibleAwaitingControl || isRequestedVisible();
+    }
+
+    @Override
+    public void onPerceptible(boolean perceptible) {
+        super.onPerceptible(perceptible);
+        final IBinder window = mController.getHost().getWindowToken();
+        if (window != null) {
+            getImm().reportPerceptible(window, perceptible);
+        }
     }
 
     private boolean isDummyOrEmptyEditor(EditorInfo info) {
