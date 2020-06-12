@@ -56,7 +56,8 @@ import java.util.Objects;
 
 /**
  * Maintains a binding to the best service that matches the given intent information. Bind and
- * unbind callbacks, as well as all binder operations, will all be run on the given handler.
+ * unbind callbacks, as well as all binder operations, will all be run on the {@link FgThread}
+ * handler.
  */
 public class ServiceWatcher implements ServiceConnection {
 
