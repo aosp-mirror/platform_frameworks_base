@@ -366,15 +366,20 @@ class MediaDataManager @Inject constructor(
                     actionsToShowCollapsed.remove(index)
                     continue
                 }
+                val runnable = if (action.actionIntent != null) {
+                    Runnable {
+                        try {
+                            action.actionIntent.send()
+                        } catch (e: PendingIntent.CanceledException) {
+                            Log.d(TAG, "Intent canceled", e)
+                        }
+                    }
+                } else {
+                    null
+                }
                 val mediaAction = MediaAction(
                         action.getIcon().loadDrawable(packageContext),
-                        Runnable {
-                            try {
-                                action.actionIntent.send()
-                            } catch (e: PendingIntent.CanceledException) {
-                                Log.d(TAG, "Intent canceled", e)
-                            }
-                        },
+                        runnable,
                         action.title)
                 actionIcons.add(mediaAction)
             }
