@@ -40,6 +40,7 @@ import static android.view.WindowManager.TRANSIT_CRASHING_ACTIVITY_CLOSE;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_SHOW_SINGLE_TASK_DISPLAY;
 
+import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityStack.ActivityState.FINISHING;
@@ -3121,12 +3122,23 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         return hasVisibleActivities;
     }
 
-    void closeSystemDialogs() {
+    void closeSystemDialogActivities(String reason) {
         forAllActivities((r) -> {
-            if ((r.info.flags & ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0) {
-                r.finishIfPossible("close-sys", true /* oomAdj */);
+            if ((r.info.flags & ActivityInfo.FLAG_FINISH_ON_CLOSE_SYSTEM_DIALOGS) != 0
+                    || shouldCloseAssistant(r, reason)) {
+                r.finishIfPossible(reason, true /* oomAdj */);
             }
         });
+    }
+
+    private boolean shouldCloseAssistant(ActivityRecord r, String reason) {
+        if (!r.isActivityTypeAssistant()) return false;
+        if (reason == SYSTEM_DIALOG_REASON_ASSIST) return false;
+        // When the assistant is configured to be on top of the dream, it will have higher z-order
+        // than other activities. If it is also opaque, it will prevent other activities from
+        // starting. We want to close the assistant on closeSystemDialogs to allow other activities
+        // to start, e.g. on home button press.
+        return mWmService.mAssistantOnTopOfDream;
     }
 
     FinishDisabledPackageActivitiesHelper mFinishDisabledPackageActivitiesHelper =
