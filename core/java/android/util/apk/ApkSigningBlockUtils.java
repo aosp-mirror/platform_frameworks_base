@@ -420,6 +420,7 @@ final class ApkSigningBlockUtils {
     static final int CONTENT_DIGEST_CHUNKED_SHA256 = 1;
     static final int CONTENT_DIGEST_CHUNKED_SHA512 = 2;
     static final int CONTENT_DIGEST_VERITY_CHUNKED_SHA256 = 3;
+    static final int CONTENT_DIGEST_SHA256 = 4;
 
     private static final int[] V4_CONTENT_DIGEST_ALGORITHMS =
             {CONTENT_DIGEST_CHUNKED_SHA512, CONTENT_DIGEST_VERITY_CHUNKED_SHA256,
