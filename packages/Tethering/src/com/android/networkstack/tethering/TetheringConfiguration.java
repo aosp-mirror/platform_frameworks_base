@@ -107,7 +107,6 @@ public class TetheringConfiguration {
     public final String[] provisioningApp;
     public final String provisioningAppNoUi;
     public final int provisioningCheckPeriod;
-    public final String provisioningResponse;
 
     public final int activeDataSubId;
 
@@ -142,13 +141,10 @@ public class TetheringConfiguration {
         enableLegacyDhcpServer = getEnableLegacyDhcpServer(res);
 
         provisioningApp = getResourceStringArray(res, R.array.config_mobile_hotspot_provision_app);
-        provisioningAppNoUi = getResourceString(res,
-                R.string.config_mobile_hotspot_provision_app_no_ui);
+        provisioningAppNoUi = getProvisioningAppNoUi(res);
         provisioningCheckPeriod = getResourceInteger(res,
                 R.integer.config_mobile_hotspot_provision_check_period,
                 0 /* No periodic re-check */);
-        provisioningResponse = getResourceString(res,
-                R.string.config_mobile_hotspot_provision_response);
 
         mOffloadPollInterval = getResourceInteger(res,
                 R.integer.config_tether_offload_poll_interval,
@@ -341,9 +337,9 @@ public class TetheringConfiguration {
         return copy(LEGACY_DHCP_DEFAULT_RANGE);
     }
 
-    private static String getResourceString(Resources res, final int resId) {
+    private static String getProvisioningAppNoUi(Resources res) {
         try {
-            return res.getString(resId);
+            return res.getString(R.string.config_mobile_hotspot_provision_app_no_ui);
         } catch (Resources.NotFoundException e) {
             return "";
         }
