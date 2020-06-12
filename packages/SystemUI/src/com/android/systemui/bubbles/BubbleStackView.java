@@ -93,7 +93,6 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.RelativeTouchListener;
@@ -1515,7 +1514,15 @@ public class BubbleStackView extends FrameLayout
             // expanded view becomes visible on the screen. See b/126856255
             mExpandedViewContainer.setAlpha(0.0f);
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
-                previouslySelected.setContentVisibility(false);
+                if (previouslySelected != null) {
+                    previouslySelected.setContentVisibility(false);
+                }
+                if (previouslySelected != null && previouslySelected.getExpandedView() != null) {
+                    // Hide the currently expanded bubble's IME if it's visible before switching
+                    // to a new bubble.
+                    previouslySelected.getExpandedView().hideImeIfVisible();
+                }
+
                 updateExpandedBubble();
                 requestUpdate();
 
@@ -1779,6 +1786,9 @@ public class BubbleStackView extends FrameLayout
                         AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
                         mScaleInSpringConfig)
                 .addUpdateListener((target, values) -> {
+                    if (mExpandedBubble.getIconView() == null) {
+                        return;
+                    }
                     mExpandedViewContainerMatrix.postTranslate(
                             mExpandedBubble.getIconView().getTranslationX()
                                     - bubbleWillBeAtX,
@@ -1886,9 +1896,11 @@ public class BubbleStackView extends FrameLayout
                 .withEndActions(this::releaseAnimatingOutBubbleBuffer)
                 .start();
 
+        boolean isOverflow = mExpandedBubble != null
+                && mExpandedBubble.getKey().equals(BubbleOverflow.KEY);
         float expandingFromBubbleDestinationX =
-                mExpandedAnimationController.getBubbleLeft(
-                        mBubbleData.getBubbles().indexOf(mExpandedBubble));
+                mExpandedAnimationController.getBubbleLeft(isOverflow ? getBubbleCount()
+                        : mBubbleData.getBubbles().indexOf(mExpandedBubble));
 
         mExpandedViewContainer.setAlpha(1f);
         mExpandedViewContainer.setVisibility(View.VISIBLE);
@@ -2426,8 +2438,6 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedBubble()");
         }
-
-        hideImeFromExpandedBubble();
 
         mExpandedViewContainer.removeAllViews();
         if (mIsExpanded && mExpandedBubble != null

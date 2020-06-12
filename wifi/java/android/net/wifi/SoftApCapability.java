@@ -102,7 +102,9 @@ public final class SoftApCapability implements Parcelable {
     /**
      * Returns true when all of the queried features are supported, otherwise false.
      *
-     * @param features One or combination of the features from {@link @HotspotFeatures}
+     * @param features One or combination of the following features:
+     * {@link #SOFTAP_FEATURE_ACS_OFFLOAD}, {@link #SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT} or
+     * {@link #SOFTAP_FEATURE_WPA3_SAE}.
      */
     public boolean areFeaturesSupported(@HotspotFeatures long features) {
         return (mSupportedFeatures & features) == features;
@@ -122,7 +124,9 @@ public final class SoftApCapability implements Parcelable {
      * Constructor with combination of the feature.
      * Zero to no supported feature.
      *
-     * @param features One or combination of the features from {@link @HotspotFeatures}.
+     * @param features One or combination of the following features:
+     * {@link #SOFTAP_FEATURE_ACS_OFFLOAD}, {@link #SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT} or
+     * {@link #SOFTAP_FEATURE_WPA3_SAE}.
      * @hide
      */
     public SoftApCapability(@HotspotFeatures long features) {

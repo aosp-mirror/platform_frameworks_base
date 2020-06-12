@@ -95,7 +95,17 @@ cc_test {
     name: "libincident_test",
     test_config: "AndroidTest.xml",
     defaults: ["libincidentpriv_defaults"],
-    test_suites: ["device-tests"],
+    test_suites: ["device-tests", "mts"],
+    compile_multilib: "both",
+    multilib: {
+        lib64: {
+            suffix: "64",
+        },
+        lib32: {
+            suffix: "32",
+        },
+    },
+    require_root: true,
 
     include_dirs: [
         "frameworks/base/libs/incident/include",

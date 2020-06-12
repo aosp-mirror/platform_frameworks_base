@@ -247,6 +247,7 @@ class BluetoothRouteProvider {
                 .setType(type)
                 .setVolumeHandling(MediaRoute2Info.PLAYBACK_VOLUME_VARIABLE)
                 .setVolumeMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC))
+                .setAddress(device.getAddress())
                 .build();
         return newBtRoute;
     }
