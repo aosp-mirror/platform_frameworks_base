@@ -135,12 +135,16 @@ public class ResumeMediaBrowser {
          */
         @Override
         public void onConnected() {
+            Log.d(TAG, "Service connected for " + mComponentName);
             if (mMediaBrowser.isConnected()) {
-                mCallback.onConnected();
-                Log.d(TAG, "Service connected for " + mComponentName);
                 String root = mMediaBrowser.getRoot();
-                mMediaBrowser.subscribe(root, mSubscriptionCallback);
+                if (!TextUtils.isEmpty(root)) {
+                    mCallback.onConnected();
+                    mMediaBrowser.subscribe(root, mSubscriptionCallback);
+                    return;
+                }
             }
+            mCallback.onError();
         }
 
         /**
@@ -193,6 +197,10 @@ public class ResumeMediaBrowser {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "Connected for restart " + mMediaBrowser.isConnected());
+                        if (!mMediaBrowser.isConnected()) {
+                            mCallback.onError();
+                            return;
+                        }
                         MediaSession.Token token = mMediaBrowser.getSessionToken();
                         MediaController controller = new MediaController(mContext, token);
                         controller.getTransportControls();
@@ -251,7 +259,8 @@ public class ResumeMediaBrowser {
                     @Override
                     public void onConnected() {
                         Log.d(TAG, "connected");
-                        if (TextUtils.isEmpty(mMediaBrowser.getRoot())) {
+                        if (!mMediaBrowser.isConnected()
+                                || TextUtils.isEmpty(mMediaBrowser.getRoot())) {
                             mCallback.onError();
                         } else {
                             mCallback.onConnected();
