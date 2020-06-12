@@ -52,7 +52,7 @@ public class SELinuxMMACTest {
     @Test
     public void getSeInfoOptInToLatest() {
         AndroidPackage pkg = makePackage(Build.VERSION_CODES.P);
-        when(mMockCompatibility.isChangeEnabled(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
+        when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
                 argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
                 .thenReturn(true);
         assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
@@ -62,7 +62,7 @@ public class SELinuxMMACTest {
     @Test
     public void getSeInfoNoOptIn() {
         AndroidPackage pkg = makePackage(Build.VERSION_CODES.P);
-        when(mMockCompatibility.isChangeEnabled(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
+        when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
                 argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
                 .thenReturn(false);
         assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
@@ -72,7 +72,7 @@ public class SELinuxMMACTest {
     @Test
     public void getSeInfoNoOptInButAlreadyR() {
         AndroidPackage pkg = makePackage(OPT_IN_VERSION);
-        when(mMockCompatibility.isChangeEnabled(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
+        when(mMockCompatibility.isChangeEnabledInternal(eq(SELinuxMMAC.SELINUX_LATEST_CHANGES),
                 argThat(argument -> argument.packageName.equals(pkg.getPackageName()))))
                 .thenReturn(false);
         assertThat(SELinuxMMAC.getSeInfo(pkg, null, mMockCompatibility),
