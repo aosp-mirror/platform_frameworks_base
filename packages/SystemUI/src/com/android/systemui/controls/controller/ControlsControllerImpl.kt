@@ -200,9 +200,9 @@ class ControlsControllerImpl @Inject constructor (
                     GlobalActionsDialog.PREFS_CONTROLS_FILE, Context.MODE_PRIVATE)
                 val completedSeedingPackageSet = prefs.getStringSet(
                     GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED, mutableSetOf<String>())
-                val favoritePackageSet = favoriteComponentSet.map { it.packageName }
+                val servicePackageSet = serviceInfoSet.map { it.packageName }
                 prefs.edit().putStringSet(GlobalActionsDialog.PREFS_CONTROLS_SEEDING_COMPLETED,
-                    completedSeedingPackageSet.intersect(favoritePackageSet)).apply()
+                    completedSeedingPackageSet.intersect(servicePackageSet)).apply()
 
                 var changed = false
                 favoriteComponentSet.subtract(serviceInfoSet).forEach {
