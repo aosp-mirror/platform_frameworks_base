@@ -24,15 +24,16 @@ import android.os.UserHandle
 import android.util.ArraySet
 import android.util.Log
 import com.android.systemui.SysuiTestableContext
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
 import java.util.concurrent.Executor
 
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
-    handler: Handler,
     looper: Looper,
-    dumpManager: DumpManager
-) : BroadcastDispatcher(context, handler, looper, dumpManager) {
+    dumpManager: DumpManager,
+    logger: BroadcastDispatcherLogger
+) : BroadcastDispatcher(context, looper, dumpManager, logger) {
 
     private val registeredReceivers = ArraySet<BroadcastReceiver>()
 

@@ -2816,8 +2816,7 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         // no need to query direct share for work profile when its turned off
-        UserManager userManager = getSystemService(UserManager.class);
-        if (userManager.isQuietModeEnabled(chooserListAdapter.getUserHandle())) {
+        if (isQuietModeEnabled(chooserListAdapter.getUserHandle())) {
             getChooserActivityLogger().logSharesheetAppLoadComplete();
             return;
         }
@@ -2839,6 +2838,12 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         getChooserActivityLogger().logSharesheetAppLoadComplete();
+    }
+
+    @VisibleForTesting
+    protected boolean isQuietModeEnabled(UserHandle userHandle) {
+        UserManager userManager = getSystemService(UserManager.class);
+        return userManager.isQuietModeEnabled(userHandle);
     }
 
     private void setupScrollListener() {
@@ -3095,7 +3100,7 @@ public class ChooserActivity extends ResolverActivity implements
                 setVerticalScrollEnabled(false);
             }
         } else if (state == ViewPager.SCROLL_STATE_IDLE) {
-            if (mScrollStatus == SCROLL_STATUS_SCROLLING_VERTICAL) {
+            if (mScrollStatus == SCROLL_STATUS_SCROLLING_HORIZONTAL) {
                 mScrollStatus = SCROLL_STATUS_IDLE;
                 setVerticalScrollEnabled(true);
             }

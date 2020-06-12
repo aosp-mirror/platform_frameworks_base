@@ -1243,14 +1243,7 @@ public class LauncherApps {
 
     private ParcelFileDescriptor getUriShortcutIconFd(@NonNull String packageName,
             @NonNull String shortcutId, int userId) {
-        String uri = null;
-        try {
-            uri = mService.getShortcutIconUri(mContext.getPackageName(), packageName, shortcutId,
-                    userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-
+        String uri = getShortcutIconUri(packageName, shortcutId, userId);
         if (uri == null) {
             return null;
         }
@@ -1260,6 +1253,18 @@ public class LauncherApps {
             Log.e(TAG, "Icon file not found: " + uri);
             return null;
         }
+    }
+
+    private String getShortcutIconUri(@NonNull String packageName,
+            @NonNull String shortcutId, int userId) {
+        String uri = null;
+        try {
+            uri = mService.getShortcutIconUri(mContext.getPackageName(), packageName, shortcutId,
+                    userId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+        return uri;
     }
 
     /**
@@ -1356,6 +1361,17 @@ public class LauncherApps {
                     pfd.close();
                 } catch (IOException ignore) {
                 }
+            }
+        } else if (shortcut.hasIconUri()) {
+            String uri = getShortcutIconUri(shortcut.getPackage(), shortcut.getId(),
+                    shortcut.getUserId());
+            if (uri == null) {
+                return null;
+            }
+            if (shortcut.hasAdaptiveBitmap()) {
+                return Icon.createWithAdaptiveBitmapContentUri(uri);
+            } else {
+                return Icon.createWithContentUri(uri);
             }
         } else if (shortcut.hasIconResource()) {
             return Icon.createWithResource(shortcut.getPackage(), shortcut.getIconResourceId());

@@ -1430,6 +1430,32 @@ public class LockPatternUtils {
                 == StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
     }
 
+    private static class WrappedCallback extends ICheckCredentialProgressCallback.Stub {
+
+        private Handler mHandler;
+        private CheckCredentialProgressCallback mCallback;
+
+        WrappedCallback(Handler handler, CheckCredentialProgressCallback callback) {
+            mHandler = handler;
+            mCallback = callback;
+        }
+
+        @Override
+        public void onCredentialVerified() throws RemoteException {
+            if (mHandler == null) {
+                Log.e(TAG, "Handler is null during callback");
+            }
+            // Kill reference immediately to allow early GC at client side independent of
+            // when system_server decides to lose its reference to the
+            // ICheckCredentialProgressCallback binder object.
+            mHandler.post(() -> {
+                mCallback.onEarlyMatched();
+                mCallback = null;
+            });
+            mHandler = null;
+        }
+    }
+
     private ICheckCredentialProgressCallback wrapCallback(
             final CheckCredentialProgressCallback callback) {
         if (callback == null) {
@@ -1439,13 +1465,7 @@ public class LockPatternUtils {
                 throw new IllegalStateException("Must construct LockPatternUtils on a looper thread"
                         + " to use progress callbacks.");
             }
-            return new ICheckCredentialProgressCallback.Stub() {
-
-                @Override
-                public void onCredentialVerified() throws RemoteException {
-                    mHandler.post(callback::onEarlyMatched);
-                }
-            };
+            return new WrappedCallback(mHandler, callback);
         }
     }
 

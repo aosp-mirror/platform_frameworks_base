@@ -681,7 +681,7 @@ public class InfoMediaManagerTest {
         assertThat(mInfoMediaManager.mMediaDevices.get(0) instanceof PhoneMediaDevice).isTrue();
 
         when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
-        when(route2Info.getOriginalId()).thenReturn("00:00:00:00:00:00");
+        when(route2Info.getAddress()).thenReturn("00:00:00:00:00:00");
         when(mLocalBluetoothManager.getCachedDeviceManager())
                 .thenReturn(cachedBluetoothDeviceManager);
         when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))
@@ -703,7 +703,7 @@ public class InfoMediaManagerTest {
                 mock(CachedBluetoothDeviceManager.class);
 
         when(route2Info.getType()).thenReturn(TYPE_BLUETOOTH_A2DP);
-        when(route2Info.getOriginalId()).thenReturn("00:00:00:00:00:00");
+        when(route2Info.getAddress()).thenReturn("00:00:00:00:00:00");
         when(mLocalBluetoothManager.getCachedDeviceManager())
                 .thenReturn(cachedBluetoothDeviceManager);
         when(cachedBluetoothDeviceManager.findDevice(any(BluetoothDevice.class)))

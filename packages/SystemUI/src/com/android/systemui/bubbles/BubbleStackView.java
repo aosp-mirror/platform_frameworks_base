@@ -93,7 +93,6 @@ import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
-import com.android.systemui.statusbar.phone.NotificationShadeWindowController;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
 import com.android.systemui.util.RelativeTouchListener;
@@ -1100,13 +1099,11 @@ public class BubbleStackView extends FrameLayout
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
             mBubbleContainer.removeView(mBubbleOverflow.getBtn());
-            mBubbleOverflow.updateDimensions();
-            mBubbleOverflow.updateIcon(mContext,this);
+            mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
             overflowBtnIndex = mBubbleContainer.getChildCount();
         }
         mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-
         mBubbleOverflow.getBtn().setOnClickListener(v -> setSelectedBubble(mBubbleOverflow));
     }
     /**
@@ -1117,6 +1114,7 @@ public class BubbleStackView extends FrameLayout
         setUpOverflow();
         setUpUserEducation();
         setUpManageMenu();
+        updateExpandedViewTheme();
     }
 
     /** Respond to the phone being rotated by repositioning the stack and hiding any flyouts. */
@@ -1216,6 +1214,18 @@ public class BubbleStackView extends FrameLayout
     public void onInitializeAccessibilityNodeInfoInternal(AccessibilityNodeInfo info) {
         super.onInitializeAccessibilityNodeInfoInternal(info);
         setupLocalMenu(info);
+    }
+
+    void updateExpandedViewTheme() {
+        final List<Bubble> bubbles = mBubbleData.getBubbles();
+        if (bubbles.isEmpty()) {
+            return;
+        }
+        bubbles.forEach(bubble -> {
+            if (bubble.getExpandedView() != null) {
+                bubble.getExpandedView().applyThemeAttrs();
+            }
+        });
     }
 
     void setupLocalMenu(AccessibilityNodeInfo info) {
@@ -1504,7 +1514,9 @@ public class BubbleStackView extends FrameLayout
             // expanded view becomes visible on the screen. See b/126856255
             mExpandedViewContainer.setAlpha(0.0f);
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
-                previouslySelected.setContentVisibility(false);
+                if (previouslySelected != null) {
+                    previouslySelected.setContentVisibility(false);
+                }
                 updateExpandedBubble();
                 requestUpdate();
 

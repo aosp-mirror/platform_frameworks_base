@@ -40,8 +40,10 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -132,15 +134,21 @@ public abstract class MediaRoute2ProviderService extends Service {
     @Retention(RetentionPolicy.SOURCE)
     public @interface Reason {}
 
+    private static final int MAX_REQUEST_IDS_SIZE = 500;
+
     private final Handler mHandler;
     private final Object mSessionLock = new Object();
+    private final Object mRequestIdsLock = new Object();
     private final AtomicBoolean mStatePublishScheduled = new AtomicBoolean(false);
     private MediaRoute2ProviderServiceStub mStub;
     private IMediaRoute2ProviderServiceCallback mRemoteCallback;
     private volatile MediaRoute2ProviderInfo mProviderInfo;
 
+    @GuardedBy("mRequestIdsLock")
+    private final Deque<Long> mRequestIds = new ArrayDeque<>(MAX_REQUEST_IDS_SIZE);
+
     @GuardedBy("mSessionLock")
-    private ArrayMap<String, RoutingSessionInfo> mSessionInfo = new ArrayMap<>();
+    private final ArrayMap<String, RoutingSessionInfo> mSessionInfo = new ArrayMap<>();
 
     public MediaRoute2ProviderService() {
         mHandler = new Handler(Looper.getMainLooper());
@@ -229,6 +237,11 @@ public abstract class MediaRoute2ProviderService extends Service {
     public final void notifySessionCreated(long requestId,
             @NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
+
+        if (requestId != REQUEST_ID_NONE && !removeRequestId(requestId)) {
+            Log.w(TAG, "notifySessionCreated: The requestId doesn't exist. requestId=" + requestId);
+            return;
+        }
 
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
@@ -322,6 +335,13 @@ public abstract class MediaRoute2ProviderService extends Service {
         if (mRemoteCallback == null) {
             return;
         }
+
+        if (!removeRequestId(requestId)) {
+            Log.w(TAG, "notifyRequestFailed: The requestId doesn't exist. requestId="
+                    + requestId);
+            return;
+        }
+
         try {
             mRemoteCallback.notifyRequestFailed(requestId, reason);
         } catch (RemoteException ex) {
@@ -469,6 +489,36 @@ public abstract class MediaRoute2ProviderService extends Service {
         }
     }
 
+    /**
+     * Adds a requestId in the request ID list whose max size is {@link #MAX_REQUEST_IDS_SIZE}.
+     * When the max size is reached, the first element is removed (FIFO).
+     */
+    private void addRequestId(long requestId) {
+        synchronized (mRequestIdsLock) {
+            if (mRequestIds.size() >= MAX_REQUEST_IDS_SIZE) {
+                mRequestIds.removeFirst();
+            }
+            mRequestIds.addLast(requestId);
+        }
+    }
+
+    /**
+     * Removes the given {@code requestId} from received request ID list.
+     * <p>
+     * Returns whether the list contains the {@code requestId}. These are the cases when the list
+     * doesn't contain the given {@code requestId}:
+     * <ul>
+     *     <li>This service has never received a request with the requestId. </li>
+     *     <li>{@link #notifyRequestFailed} or {@link #notifySessionCreated} already has been called
+     *         for the requestId. </li>
+     * </ul>
+     */
+    private boolean removeRequestId(long requestId) {
+        synchronized (mRequestIdsLock) {
+            return mRequestIds.removeFirstOccurrence(requestId);
+        }
+    }
+
     final class MediaRoute2ProviderServiceStub extends IMediaRoute2ProviderService.Stub {
         MediaRoute2ProviderServiceStub() { }
 
@@ -529,6 +579,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             if (!checkRouteIdIsValid(routeId, "setRouteVolume")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetRouteVolume,
                     MediaRoute2ProviderService.this, requestId, routeId, volume));
         }
@@ -542,6 +593,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             if (!checkRouteIdIsValid(routeId, "requestCreateSession")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onCreateSession,
                     MediaRoute2ProviderService.this, requestId, packageName, routeId,
                     requestCreateSession));
@@ -556,6 +608,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                     || !checkRouteIdIsValid(routeId, "selectRoute")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSelectRoute,
                     MediaRoute2ProviderService.this, requestId, sessionId, routeId));
         }
@@ -569,6 +622,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                     || !checkRouteIdIsValid(routeId, "deselectRoute")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onDeselectRoute,
                     MediaRoute2ProviderService.this, requestId, sessionId, routeId));
         }
@@ -582,6 +636,7 @@ public abstract class MediaRoute2ProviderService extends Service {
                     || !checkRouteIdIsValid(routeId, "transferToRoute")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onTransferToRoute,
                     MediaRoute2ProviderService.this, requestId, sessionId, routeId));
         }
@@ -594,6 +649,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             if (!checkSessionIdIsValid(sessionId, "setSessionVolume")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onSetSessionVolume,
                     MediaRoute2ProviderService.this, requestId, sessionId, volume));
         }
@@ -606,6 +662,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             if (!checkSessionIdIsValid(sessionId, "releaseSession")) {
                 return;
             }
+            addRequestId(requestId);
             mHandler.sendMessage(obtainMessage(MediaRoute2ProviderService::onReleaseSession,
                     MediaRoute2ProviderService.this, requestId, sessionId));
         }

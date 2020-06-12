@@ -6431,7 +6431,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             final boolean shouldFilter = requiresVpnIsolation(nai, newNc, nai.linkProperties);
             final String iface = nai.linkProperties.getInterfaceName();
             // For VPN uid interface filtering, old ranges need to be removed before new ranges can
-            // be added, due to the range being expanded and stored as invidiual UIDs. For example
+            // be added, due to the range being expanded and stored as individual UIDs. For example
             // the UIDs might be updated from [0, 99999] to ([0, 10012], [10014, 99999]) which means
             // prevRanges = [0, 99999] while newRanges = [0, 10012], [10014, 99999]. If prevRanges
             // were added first and then newRanges got removed later, there would be only one uid
