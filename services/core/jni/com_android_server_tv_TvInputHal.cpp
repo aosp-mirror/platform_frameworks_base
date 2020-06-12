@@ -301,6 +301,7 @@ private:
     JTvInputHal(JNIEnv* env, jobject thiz, sp<ITvInput> tvInput, const sp<Looper>& looper);
 
     Mutex mLock;
+    Mutex mStreamLock;
     jweak mThiz;
     sp<Looper> mLooper;
 
@@ -338,6 +339,7 @@ JTvInputHal* JTvInputHal::createInstance(JNIEnv* env, jobject thiz, const sp<Loo
 }
 
 int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>& surface) {
+    Mutex::Autolock autoLock(&mStreamLock);
     KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
     if (connections.indexOfKey(streamId) < 0) {
         connections.add(streamId, Connection());
@@ -412,6 +414,7 @@ int JTvInputHal::addOrUpdateStream(int deviceId, int streamId, const sp<Surface>
 }
 
 int JTvInputHal::removeStream(int deviceId, int streamId) {
+    Mutex::Autolock autoLock(&mStreamLock);
     KeyedVector<int, Connection>& connections = mConnections.editValueFor(deviceId);
     if (connections.indexOfKey(streamId) < 0) {
         return BAD_VALUE;
