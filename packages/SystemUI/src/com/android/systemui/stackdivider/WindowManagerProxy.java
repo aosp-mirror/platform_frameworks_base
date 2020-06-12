@@ -229,7 +229,11 @@ public class WindowManagerProxy {
         // as a result, the above will not capture any tasks; yet, we need to clean-up the
         // home task bounds.
         List<ActivityManager.RunningTaskInfo> freeHomeAndRecents =
-                TaskOrganizer.getRootTasks(Display.DEFAULT_DISPLAY, HOME_AND_RECENTS);
+                TaskOrganizer.getRootTasks(DEFAULT_DISPLAY, HOME_AND_RECENTS);
+        // Filter out the root split tasks
+        freeHomeAndRecents.removeIf(p -> p.token.equals(tiles.mSecondary.token)
+                || p.token.equals(tiles.mPrimary.token));
+
         if (primaryChildren.isEmpty() && secondaryChildren.isEmpty()
                 && freeHomeAndRecents.isEmpty()) {
             return;
