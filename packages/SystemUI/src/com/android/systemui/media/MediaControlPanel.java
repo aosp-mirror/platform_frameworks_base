@@ -35,7 +35,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -165,9 +164,7 @@ public class MediaControlPanel {
         TransitionLayout player = vh.getPlayer();
         mSeekBarObserver = new SeekBarObserver(vh);
         mSeekBarViewModel.getProgress().observeForever(mSeekBarObserver);
-        SeekBar bar = vh.getSeekBar();
-        bar.setOnSeekBarChangeListener(mSeekBarViewModel.getSeekBarListener());
-        bar.setOnTouchListener(mSeekBarViewModel.getSeekBarTouchListener());
+        mSeekBarViewModel.attachTouchHandlers(vh.getSeekBar());
         mMediaViewController.attach(player);
     }
 
