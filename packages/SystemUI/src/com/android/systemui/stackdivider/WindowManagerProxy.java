@@ -125,7 +125,7 @@ public class WindowManagerProxy {
             final ActivityManager.RunningTaskInfo ti = rootTasks.get(i);
             out.add(ti.token);
             if (ti.topActivityType == ACTIVITY_TYPE_HOME) {
-                resizable = ti.isResizable();
+                resizable = ti.isResizeable;
             }
         }
         return resizable;
@@ -179,7 +179,7 @@ public class WindowManagerProxy {
         for (int i = rootTasks.size() - 1; i >= 0; --i) {
             final ActivityManager.RunningTaskInfo rootTask = rootTasks.get(i);
             // Only move resizeable task to split secondary. WM will just ignore this anyways...
-            if (!rootTask.isResizable()) continue;
+            if (!rootTask.isResizeable) continue;
             // Only move fullscreen tasks to split secondary.
             if (rootTask.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_FULLSCREEN) {

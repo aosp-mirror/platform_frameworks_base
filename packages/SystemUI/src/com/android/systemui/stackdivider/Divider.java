@@ -523,7 +523,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     void ensureMinimizedSplit() {
-        setHomeMinimized(true /* minimized */, mSplits.mSecondary.isResizable());
+        setHomeMinimized(true /* minimized */, mSplits.mSecondary.isResizeable);
         if (!isDividerVisible()) {
             // Wasn't in split-mode yet, so enter now.
             if (DEBUG) {
