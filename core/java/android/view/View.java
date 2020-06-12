@@ -4323,7 +4323,44 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     equals = STATUS_BAR_TRANSPARENT,
                     name = "STATUS_BAR_TRANSPARENT")
     }, formatToHexString = true)
+    @SystemUiVisibility
     int mSystemUiVisibility;
+
+    /**
+     * @hide
+     */
+    @IntDef(flag = true, prefix = "", value = {
+            SYSTEM_UI_FLAG_LOW_PROFILE,
+            SYSTEM_UI_FLAG_HIDE_NAVIGATION,
+            SYSTEM_UI_FLAG_FULLSCREEN,
+            SYSTEM_UI_FLAG_LAYOUT_STABLE,
+            SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION,
+            SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN,
+            SYSTEM_UI_FLAG_IMMERSIVE,
+            SYSTEM_UI_FLAG_IMMERSIVE_STICKY,
+            SYSTEM_UI_FLAG_LIGHT_STATUS_BAR,
+            SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
+            STATUS_BAR_DISABLE_EXPAND,
+            STATUS_BAR_DISABLE_NOTIFICATION_ICONS,
+            STATUS_BAR_DISABLE_NOTIFICATION_ALERTS,
+            STATUS_BAR_DISABLE_NOTIFICATION_TICKER,
+            STATUS_BAR_DISABLE_SYSTEM_INFO,
+            STATUS_BAR_DISABLE_HOME,
+            STATUS_BAR_DISABLE_BACK,
+            STATUS_BAR_DISABLE_CLOCK,
+            STATUS_BAR_DISABLE_RECENT,
+            STATUS_BAR_DISABLE_SEARCH,
+            STATUS_BAR_TRANSIENT,
+            NAVIGATION_BAR_TRANSIENT,
+            STATUS_BAR_UNHIDE,
+            NAVIGATION_BAR_UNHIDE,
+            STATUS_BAR_TRANSLUCENT,
+            NAVIGATION_BAR_TRANSLUCENT,
+            NAVIGATION_BAR_TRANSPARENT,
+            STATUS_BAR_TRANSPARENT,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface SystemUiVisibility {}
 
     /**
      * Reference count for transient state.

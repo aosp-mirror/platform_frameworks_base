@@ -626,6 +626,9 @@ java_library {
         // Additional dependencies needed to build the ike API classes.
         "ike-internals",
     ],
+    plugins: [
+        "intdef-annotation-processor",
+    ],
     libs: ["icing-java-proto-lite"],
     apex_available: ["//apex_available:platform"],
     visibility: [
@@ -886,6 +889,7 @@ java_library {
     exclude_srcs: [
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
+        "core/proto/android/typedef.proto",
     ],
     sdk_version: "9",
     srcs: [
@@ -911,6 +915,7 @@ java_library {
     exclude_srcs: [
         "core/proto/android/privacy.proto",
         "core/proto/android/section.proto",
+        "core/proto/android/typedef.proto",
     ],
     sdk_version: "core_current",
     // Protos have lots of MissingOverride and similar.
