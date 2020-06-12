@@ -133,8 +133,10 @@ final class PackageAbiHelperImpl implements PackageAbiHelper {
     @Override
     public NativeLibraryPaths getNativeLibraryPaths(AndroidPackage pkg, PackageSetting pkgSetting,
             File appLib32InstallDir) {
-        return getNativeLibraryPaths(new Abis(pkg, pkgSetting), appLib32InstallDir,
-                pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
+        // Trying to derive the paths, thus need the raw ABI info from the parsed package, and the
+        // current state in PackageSetting is irrelevant.
+        return getNativeLibraryPaths(new Abis(pkg.getPrimaryCpuAbi(), pkg.getSecondaryCpuAbi()),
+                appLib32InstallDir, pkg.getCodePath(), pkg.getBaseCodePath(), pkg.isSystem(),
                 pkgSetting.getPkgState().isUpdatedSystemApp());
     }
 
