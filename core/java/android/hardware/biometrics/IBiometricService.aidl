@@ -52,15 +52,12 @@ interface IBiometricService {
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback,
             int callingUserId);
 
-    // Explicitly set the active user.
-    void setActiveUser(int userId);
-
     // Notify BiometricService when <Biometric>Service is ready to start the prepared client.
     // Client lifecycle is still managed in <Biometric>Service.
     void onReadyForAuthentication(int cookie);
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(in byte [] token);
+    void resetLockout(int userId, in byte [] hardwareAuthToken);
 
     // Get a list of AuthenticatorIDs for authenticators which have enrolled templates and meet
     // the requirements for integrating with Keystore. The AuthenticatorID are known in Keystore

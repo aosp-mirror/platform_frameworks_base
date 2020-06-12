@@ -68,13 +68,8 @@ public final class FingerprintAuthenticator extends IBiometricAuthenticator.Stub
     }
 
     @Override
-    public void resetLockout(byte[] token) throws RemoteException {
-        mFingerprintService.resetTimeout(token);
-    }
-
-    @Override
-    public void setActiveUser(int uid) throws RemoteException {
-        mFingerprintService.setActiveUser(uid);
+    public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
+        mFingerprintService.resetLockout(userId, hardwareAuthToken);
     }
 
     @Override

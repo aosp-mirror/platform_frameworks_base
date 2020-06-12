@@ -87,7 +87,8 @@ public class LockoutFrameworkImpl implements LockoutTracker {
     // See AuthenticationClient#shouldFrameworkHandleLockout().
     void resetFailedAttemptsForUser(boolean clearAttemptCounter, int userId) {
         if (getLockoutModeForUser(userId) != LOCKOUT_NONE) {
-            Slog.v(TAG, "Reset biometric lockout, clearAttemptCounter=" + clearAttemptCounter);
+            Slog.v(TAG, "Reset biometric lockout for user: " + userId
+                    + ", clearAttemptCounter: " + clearAttemptCounter);
         }
         if (clearAttemptCounter) {
             mFailedAttempts.put(userId, 0);
