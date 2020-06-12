@@ -2640,7 +2640,7 @@
     <string name="bubble_accessibility_action_move_bottom_left">Move bottom left</string>
     <!-- Action in accessibility menu to move the stack of bubbles to the bottom right of the screen. [CHAR LIMIT=30]-->
     <string name="bubble_accessibility_action_move_bottom_right">Move bottom right</string>
-    <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=20] -->
+    <!-- Text used for the bubble dismiss area. Bubbles dragged to, or flung towards, this area will go away. [CHAR LIMIT=30] -->
     <string name="bubble_dismiss_text">Dismiss bubble</string>
     <!-- Button text to stop a conversation from bubbling [CHAR LIMIT=60]-->
     <string name="bubbles_dont_bubble_conversation">Don\u2019t bubble conversation</string>
