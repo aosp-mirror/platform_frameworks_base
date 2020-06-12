@@ -22,7 +22,6 @@ import static com.android.server.wm.AlphaAnimationSpecProto.TO;
 import static com.android.server.wm.AnimationSpecProto.ALPHA;
 import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_DIMMER;
 
-import android.annotation.Nullable;
 import android.graphics.Rect;
 import android.util.Log;
 import android.util.proto.ProtoOutputStream;
@@ -31,7 +30,6 @@ import android.view.SurfaceControl;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.wm.SurfaceAnimator.AnimationType;
-import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import java.io.PrintWriter;
 
@@ -160,8 +158,7 @@ class Dimmer {
     @VisibleForTesting
     interface SurfaceAnimatorStarter {
         void startAnimation(SurfaceAnimator surfaceAnimator, SurfaceControl.Transaction t,
-                AnimationAdapter anim, boolean hidden, @AnimationType int type,
-                @Nullable OnAnimationFinishedCallback animationFinishedCallback);
+                AnimationAdapter anim, boolean hidden, @AnimationType int type);
     }
 
     Dimmer(WindowContainer host) {
@@ -348,7 +345,7 @@ class Dimmer {
         mSurfaceAnimatorStarter.startAnimation(animator, t, new LocalAnimationAdapter(
                 new AlphaAnimationSpec(startAlpha, endAlpha, getDimDuration(container)),
                 mHost.mWmService.mSurfaceAnimationRunner), false /* hidden */,
-                ANIMATION_TYPE_DIMMER, null /* animationFinishedCallback */);
+                ANIMATION_TYPE_DIMMER);
     }
 
     private long getDimDuration(WindowContainer container) {
