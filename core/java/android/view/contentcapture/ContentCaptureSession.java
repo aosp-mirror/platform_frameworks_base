@@ -39,8 +39,8 @@ import com.android.internal.util.Preconditions;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * Session used when the Android a system-provided content capture service
@@ -50,7 +50,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
 
     private static final String TAG = ContentCaptureSession.class.getSimpleName();
 
-    private static final Random sIdGenerator = new Random();
+    // TODO(b/158778794): to make the session ids truly globally unique across
+    //  processes, we may need to explore other options.
+    private static final SecureRandom ID_GENERATOR = new SecureRandom();
 
     /**
      * Initial state, when there is no session.
@@ -622,7 +624,7 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     private static int getRandomSessionId() {
         int id;
         do {
-            id = sIdGenerator.nextInt();
+            id = ID_GENERATOR.nextInt();
         } while (id == NO_SESSION_ID);
         return id;
     }
