@@ -65,6 +65,7 @@ public final class Telecom extends BaseCommand {
     private static final String COMMAND_SET_DEFAULT_DIALER = "set-default-dialer";
     private static final String COMMAND_GET_DEFAULT_DIALER = "get-default-dialer";
     private static final String COMMAND_STOP_BLOCK_SUPPRESSION = "stop-block-suppression";
+    private static final String COMMAND_CLEANUP_STUCK_CALLS = "cleanup-stuck-calls";
 
     /**
      * Change the system dialer package name if a package name was specified,
@@ -115,6 +116,8 @@ public final class Telecom extends BaseCommand {
                 + "usage: telecom get-max-phones\n"
                 + "usage: telecom stop-block-suppression: Stop suppressing the blocked number"
                         + " provider after a call to emergency services.\n"
+                + "usage: telecom cleanup-stuck-calls: Clear any disconnected calls that have"
+                + " gotten wedged in Telecom.\n"
                 + "usage: telecom set-emer-phone-account-filter <PACKAGE>\n"
                 + "\n"
                 + "telecom set-phone-account-enabled: Enables the given phone account, if it has"
@@ -209,6 +212,9 @@ public final class Telecom extends BaseCommand {
                 break;
             case COMMAND_STOP_BLOCK_SUPPRESSION:
                 runStopBlockSuppression();
+                break;
+            case COMMAND_CLEANUP_STUCK_CALLS:
+                runCleanupStuckCalls();
                 break;
             case COMMAND_SET_DEFAULT_DIALER:
                 runSetDefaultDialer();
@@ -329,6 +335,10 @@ public final class Telecom extends BaseCommand {
 
     private void runStopBlockSuppression() throws RemoteException {
         mTelecomService.stopBlockSuppression();
+    }
+
+    private void runCleanupStuckCalls() throws RemoteException {
+        mTelecomService.cleanupStuckCalls();
     }
 
     private void runSetDefaultDialer() throws RemoteException {
