@@ -109,6 +109,24 @@ class MediaDataManager @Inject constructor(
         }
     }
 
+    private val appChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_PACKAGES_SUSPENDED -> {
+                    val packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST)
+                    packages?.forEach {
+                        removeAllForPackage(it)
+                    }
+                }
+                Intent.ACTION_PACKAGE_REMOVED, Intent.ACTION_PACKAGE_RESTARTED -> {
+                    intent.data?.encodedSchemeSpecificPart?.let {
+                        removeAllForPackage(it)
+                    }
+                }
+            }
+        }
+    }
+
     init {
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
             setTimedOut(token, timedOut) }
@@ -129,6 +147,17 @@ class MediaDataManager @Inject constructor(
 
         val userFilter = IntentFilter(Intent.ACTION_USER_SWITCHED)
         broadcastDispatcher.registerReceiver(userChangeReceiver, userFilter, null, UserHandle.ALL)
+
+        val suspendFilter = IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED)
+        broadcastDispatcher.registerReceiver(appChangeReceiver, suspendFilter, null, UserHandle.ALL)
+
+        val uninstallFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_RESTARTED)
+            addDataScheme("package")
+        }
+        // BroadcastDispatcher does not allow filters with data schemes
+        context.registerReceiver(appChangeReceiver, uninstallFilter)
     }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
@@ -158,6 +187,18 @@ class MediaDataManager @Inject constructor(
             }
         }
         mediaEntries.clear()
+    }
+
+    private fun removeAllForPackage(packageName: String) {
+        Assert.isMainThread()
+        val listenersCopy = listeners.toSet()
+        val toRemove = mediaEntries.filter { it.value.packageName == packageName }
+        toRemove.forEach {
+            mediaEntries.remove(it.key)
+            listenersCopy.forEach { listener ->
+                listener.onMediaDataRemoved(it.key)
+            }
+        }
     }
 
     private fun addResumptionControls(
