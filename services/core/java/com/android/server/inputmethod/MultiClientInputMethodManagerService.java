@@ -1462,6 +1462,12 @@ public final class MultiClientInputMethodManagerService {
 
         @BinderThread
         @Override
+        public void removeImeSurface() {
+            reportNotSupported();
+        }
+
+        @BinderThread
+        @Override
         public boolean showSoftInput(
                 IInputMethodClient client, IBinder token, int flags,
                 ResultReceiver resultReceiver) {
