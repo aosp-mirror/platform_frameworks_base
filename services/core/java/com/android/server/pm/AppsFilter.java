@@ -32,7 +32,6 @@ import android.content.pm.parsing.component.ParsedInstrumentation;
 import android.content.pm.parsing.component.ParsedIntentInfo;
 import android.content.pm.parsing.component.ParsedMainComponent;
 import android.content.pm.parsing.component.ParsedProvider;
-import android.os.Binder;
 import android.os.Process;
 import android.os.Trace;
 import android.os.UserHandle;
@@ -239,20 +238,13 @@ public class AppsFilter {
         }
 
         private void updateEnabledState(AndroidPackage pkg) {
-            final long token = Binder.clearCallingIdentity();
-            try {
-                // TODO(b/135203078): Do not use toAppInfo
-                final boolean enabled =
-                        mInjector.getCompatibility().isChangeEnabled(
-                                PackageManager.FILTER_APPLICATION_QUERY,
-                                pkg.toAppInfoWithoutState());
-                if (enabled) {
-                    mDisabledPackages.remove(pkg.getPackageName());
-                } else {
-                    mDisabledPackages.add(pkg.getPackageName());
-                }
-            } finally {
-                Binder.restoreCallingIdentity(token);
+            // TODO(b/135203078): Do not use toAppInfo
+            final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternal(
+                    PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
+            if (enabled) {
+                mDisabledPackages.remove(pkg.getPackageName());
+            } else {
+                mDisabledPackages.add(pkg.getPackageName());
             }
         }
 
