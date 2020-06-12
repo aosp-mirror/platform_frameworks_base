@@ -23,9 +23,12 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import android.util.Log;
+import android.view.IWindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -44,13 +47,14 @@ import javax.inject.Singleton;
  */
 @Singleton
 public class UserSwitchTransitionViewController extends OverlayViewController {
-    private static final String TAG = "UserSwitchTransitionViewController";
+    private static final String TAG = "UserSwitchTransition";
     private static final String ENABLE_DEVELOPER_MESSAGE_TRUE = "true";
 
     private final Context mContext;
     private final Handler mHandler;
     private final Resources mResources;
     private final UserManager mUserManager;
+    private final IWindowManager mWindowManagerService;
 
     @GuardedBy("this")
     private boolean mShowing;
@@ -62,6 +66,7 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
             @Main Handler handler,
             @Main Resources resources,
             UserManager userManager,
+            IWindowManager windowManagerService,
             OverlayViewGlobalStateController overlayViewGlobalStateController) {
 
         super(R.id.user_switching_dialog_stub, overlayViewGlobalStateController);
@@ -70,6 +75,7 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
         mHandler = handler;
         mResources = resources;
         mUserManager = userManager;
+        mWindowManagerService = windowManagerService;
     }
 
     /**
@@ -81,6 +87,13 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
         if (mPreviousUserId == newUserId || mShowing) return;
         mShowing = true;
         mHandler.post(() -> {
+            try {
+                mWindowManagerService.setSwitchingUser(true);
+                mWindowManagerService.lockNow(null);
+            } catch (RemoteException e) {
+                Log.e(TAG, "unable to notify window manager service regarding user switch");
+            }
+
             start();
             populateDialog(mPreviousUserId, newUserId);
             // next time a new user is selected, this current new user will be the previous user.
