@@ -1822,6 +1822,10 @@ public class BubbleStackView extends FrameLayout
             mExpandedBubble.getExpandedView().hideImeIfVisible();
         }
 
+        // Let the expanded animation controller know that it shouldn't animate child adds/reorders
+        // since we're about to animate collapsed.
+        mExpandedAnimationController.notifyPreparingToCollapse();
+
         final long startDelay =
                 (long) (ExpandedAnimationController.EXPAND_COLLAPSE_TARGET_ANIM_DURATION * 0.6f);
         postDelayed(() -> mExpandedAnimationController.collapseBackToStack(
