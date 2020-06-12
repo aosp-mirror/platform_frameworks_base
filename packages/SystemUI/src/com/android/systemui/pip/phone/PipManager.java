@@ -81,12 +81,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private InputConsumerController mInputConsumerController;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
+    private PipTaskOrganizer mPipTaskOrganizer;
     private PipAppOpsListener mAppOpsListener;
     private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
     private boolean mIsInFixedRotation;
 
     protected PipMenuActivityController mMenuController;
-    protected PipTaskOrganizer mPipTaskOrganizer;
 
     /**
      * Handler for display rotation changes.
