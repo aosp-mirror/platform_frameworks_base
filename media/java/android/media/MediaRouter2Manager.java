@@ -121,7 +121,7 @@ public final class MediaRouter2Manager {
 
         CallbackRecord callbackRecord = new CallbackRecord(executor, callback);
         if (!mCallbackRecords.addIfAbsent(callbackRecord)) {
-            Log.w(TAG, "Ignoring to add the same callback twice.");
+            Log.w(TAG, "Ignoring to register the same callback twice.");
             return;
         }
     }
@@ -384,7 +384,7 @@ public final class MediaRouter2Manager {
                 int requestId = mNextRequestId.getAndIncrement();
                 mMediaRouterService.setRouteVolumeWithManager(client, requestId, route, volume);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to send control request.", ex);
+                Log.e(TAG, "Unable to set route volume.", ex);
             }
         }
     }
@@ -414,7 +414,7 @@ public final class MediaRouter2Manager {
                 mMediaRouterService.setSessionVolumeWithManager(
                         client, requestId, sessionInfo.getId(), volume);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to send control request.", ex);
+                Log.e(TAG, "Unable to set session volume.", ex);
             }
         }
     }
