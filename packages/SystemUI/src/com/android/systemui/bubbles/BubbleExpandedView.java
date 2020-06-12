@@ -163,6 +163,11 @@ public class BubbleExpandedView extends LinearLayout {
                             Log.d(TAG, "onActivityViewReady: calling startActivity, "
                                     + "bubble=" + getBubbleKey());
                         }
+                        if (mActivityView == null) {
+                            mBubbleController.removeBubble(getBubbleKey(),
+                                    BubbleController.DISMISS_INVALID_INTENT);
+                            return;
+                        }
                         try {
                             if (!mIsOverflow && mBubble.usingShortcutInfo()) {
                                 options.setApplyActivityFlagsForBubbles(true);
