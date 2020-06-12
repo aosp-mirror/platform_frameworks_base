@@ -103,6 +103,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
     private KeyguardBouncer mBouncer;
     private OnKeyguardCancelClickedListener mKeyguardCancelClickedListener;
     private boolean mShowing;
+    private boolean mIsOccluded;
 
     @Inject
     public CarKeyguardViewController(
@@ -220,6 +221,7 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void setOccluded(boolean occluded, boolean animate) {
+        mIsOccluded = occluded;
         getOverlayViewGlobalStateController().setOccluded(occluded);
         if (!occluded) {
             reset(/* hideBouncerWhenShowing= */ false);
@@ -244,6 +246,12 @@ public class CarKeyguardViewController extends OverlayViewController implements
 
     @Override
     public void dismissAndCollapse() {
+        // If dismissing and collapsing Keyguard is requested (e.g. by a Keyguard-dismissing
+        // Activity) while Keyguard is occluded, unocclude Keyguard so the user can authenticate to
+        // dismiss Keyguard.
+        if (mIsOccluded) {
+            setOccluded(/* occluded= */ false, /* animate= */ false);
+        }
         if (!mBouncer.isSecure()) {
             hide(/* startTime= */ 0, /* fadeoutDuration= */ 0);
         }

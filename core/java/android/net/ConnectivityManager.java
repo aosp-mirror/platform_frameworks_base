@@ -2246,26 +2246,6 @@ public class ConnectivityManager {
                 .getPackageNameForUid(context, uid), true /* throwException */);
     }
 
-    /** {@hide} */
-    public static final void enforceTetherChangePermission(Context context, String callingPkg) {
-        Preconditions.checkNotNull(context, "Context cannot be null");
-        Preconditions.checkNotNull(callingPkg, "callingPkg cannot be null");
-
-        if (context.getResources().getStringArray(
-                com.android.internal.R.array.config_mobile_hotspot_provision_app).length == 2) {
-            // Have a provisioning app - must only let system apps (which check this app)
-            // turn on tethering
-            context.enforceCallingOrSelfPermission(
-                    android.Manifest.permission.TETHER_PRIVILEGED, "ConnectivityService");
-        } else {
-            int uid = Binder.getCallingUid();
-            // If callingPkg's uid is not same as Binder.getCallingUid(),
-            // AppOpsService throws SecurityException.
-            Settings.checkAndNoteWriteSettingsOperation(context, uid, callingPkg,
-                    true /* throwException */);
-        }
-    }
-
     /**
      * @deprecated - use getSystemService. This is a kludge to support static access in certain
      *               situations where a Context pointer is unavailable.

@@ -593,11 +593,16 @@ public class MediaRouter2ManagerTest {
 
         final int failureReason = REASON_REJECTED;
         final CountDownLatch onRequestFailedLatch = new CountDownLatch(1);
+        final CountDownLatch onRequestFailedSecondCallLatch = new CountDownLatch(1);
         addManagerCallback(new MediaRouter2Manager.Callback() {
             @Override
             public void onRequestFailed(int reason) {
                 if (reason == failureReason) {
-                    onRequestFailedLatch.countDown();
+                    if (onRequestFailedLatch.getCount() > 0) {
+                        onRequestFailedLatch.countDown();
+                    } else {
+                        onRequestFailedSecondCallLatch.countDown();
+                    }
                 }
             }
         });
@@ -609,6 +614,11 @@ public class MediaRouter2ManagerTest {
         final long validRequestId = requestIds.get(0);
         instance.notifyRequestFailed(validRequestId, failureReason);
         assertTrue(onRequestFailedLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        // Test calling notifyRequestFailed() multiple times with the same valid requestId.
+        // onRequestFailed() shouldn't be called since the requestId has been already handled.
+        instance.notifyRequestFailed(validRequestId, failureReason);
+        assertFalse(onRequestFailedSecondCallLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
     }
 
     @Test

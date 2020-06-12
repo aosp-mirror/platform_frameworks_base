@@ -28,6 +28,7 @@ import android.graphics.PixelFormat;
 import android.graphics.RecordingCanvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.util.Log;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -220,7 +221,7 @@ public class KeyButtonRipple extends Drawable {
 
     @Override
     public void jumpToCurrentState() {
-        cancelAnimations();
+        cancelAnimations("jumpToCurrentState");
     }
 
     @Override
@@ -234,6 +235,7 @@ public class KeyButtonRipple extends Drawable {
     }
 
     public void setPressed(boolean pressed) {
+        Log.d("b/63783866", "KeyButtonRipple.setPressed: pressed=" + pressed);
         if (mDark != mLastDark && pressed) {
             mRipplePaint = null;
             mLastDark = mDark;
@@ -253,7 +255,8 @@ public class KeyButtonRipple extends Drawable {
         mHandler.removeCallbacksAndMessages(null);
     }
 
-    private void cancelAnimations() {
+    private void cancelAnimations(String reason) {
+        Log.d("b/63783866", "KeyButtonRipple.cancelAnimations: reason=" + reason);
         mVisible = false;
         mTmpArray.addAll(mRunningAnimations);
         int size = mTmpArray.size();
@@ -284,7 +287,7 @@ public class KeyButtonRipple extends Drawable {
     }
 
     private void enterSoftware() {
-        cancelAnimations();
+        cancelAnimations("enterSoftware");
         mVisible = true;
         mGlowAlpha = getMaxGlowAlpha();
         ObjectAnimator scaleAnimator = ObjectAnimator.ofFloat(this, "glowScale",
@@ -370,7 +373,8 @@ public class KeyButtonRipple extends Drawable {
     }
 
     private void enterHardware() {
-        cancelAnimations();
+        Log.d("b/63783866", "enterHardware");
+        cancelAnimations("enterHardware");
         mVisible = true;
         mDrawingHardwareGlow = true;
         setExtendStart(CanvasProperty.createFloat(getExtendSize() / 2));
@@ -422,6 +426,7 @@ public class KeyButtonRipple extends Drawable {
     }
 
     private void exitHardware() {
+        Log.d("b/63783866", "exitHardware");
         mPaintProp = CanvasProperty.createPaint(getRipplePaint());
         final RenderNodeAnimator opacityAnim = new RenderNodeAnimator(mPaintProp,
                 RenderNodeAnimator.PAINT_ALPHA, 0);

@@ -23,9 +23,11 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Debug;
 import android.util.Log;
+import android.view.Choreographer;
 
 import androidx.dynamicanimation.animation.SpringForce;
 
+import com.android.internal.graphics.SfVsyncFrameCallbackProvider;
 import com.android.systemui.pip.PipSnapAlgorithm;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -68,6 +70,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** The region that all of PIP must stay within. */
     private final Rect mFloatingAllowedArea = new Rect();
 
+    private final SfVsyncFrameCallbackProvider mSfVsyncFrameProvider =
+            new SfVsyncFrameCallbackProvider();
+
     /**
      * Bounds that are animated using the physics animator.
      */
@@ -79,6 +84,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     /** Coordinator instance for resolving conflicts with other floating content. */
     private FloatingContentCoordinator mFloatingContentCoordinator;
 
+    /** Callback that re-sizes PIP to the animated bounds. */
+    private final Choreographer.FrameCallback mResizePipVsyncCallback =
+            l -> resizePipUnchecked(mAnimatedBounds);
+
     /**
      * PhysicsAnimator instance for animating {@link #mAnimatedBounds} using physics animations.
      */
@@ -89,7 +98,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
      * Update listener that resizes the PIP to {@link #mAnimatedBounds}.
      */
     final PhysicsAnimator.UpdateListener<Rect> mResizePipUpdateListener =
-            (target, values) -> resizePipUnchecked(mAnimatedBounds);
+            (target, values) -> mSfVsyncFrameProvider.postFrameCallback(mResizePipVsyncCallback);
 
     /** FlingConfig instances provided to PhysicsAnimator for fling gestures. */
     private PhysicsAnimator.FlingConfig mFlingConfigX;

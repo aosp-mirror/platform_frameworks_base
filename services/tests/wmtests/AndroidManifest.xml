@@ -54,6 +54,8 @@
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityViewTestActivity" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityInActivityView"
                   android:resizeableActivity="true" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityLaunchesNewActivityInActivityView"
+            android:resizeableActivity="true" />
         <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$LandscapeActivity"
                   android:screenOrientation="sensorLandscape"
                   android:showWhenLocked="true"

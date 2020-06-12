@@ -30,6 +30,7 @@ import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
+import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import java.io.FileDescriptor
 import java.io.PrintWriter
 import java.lang.IllegalArgumentException
@@ -54,7 +55,8 @@ private const val DEBUG = false
 class UserBroadcastDispatcher(
     private val context: Context,
     private val userId: Int,
-    private val bgLooper: Looper
+    private val bgLooper: Looper,
+    private val logger: BroadcastDispatcherLogger
 ) : BroadcastReceiver(), Dumpable {
 
     companion object {
@@ -109,10 +111,12 @@ class UserBroadcastDispatcher(
     }
 
     override fun onReceive(context: Context, intent: Intent) {
-        val id = if (DEBUG) index.getAndIncrement() else 0
+        val id = index.getAndIncrement()
         if (DEBUG) Log.w(TAG, "[$id] Received $intent")
+        logger.logBroadcastReceived(id, userId, intent)
         bgHandler.post(
-                HandleBroadcastRunnable(actionsToReceivers, context, intent, pendingResult, id))
+                HandleBroadcastRunnable(
+                        actionsToReceivers, context, intent, pendingResult, id, logger))
     }
 
     /**
@@ -143,6 +147,7 @@ class UserBroadcastDispatcher(
                 ArraySet()
             }.add(receiverData)
         }
+        logger.logReceiverRegistered(userId, receiverData.receiver)
         if (changed) {
             createFilterAndRegisterReceiverBG()
         }
@@ -163,6 +168,7 @@ class UserBroadcastDispatcher(
                 actionsToReceivers.remove(action)
             }
         }
+        logger.logReceiverUnregistered(userId, receiver)
         if (changed) {
             createFilterAndRegisterReceiverBG()
         }
@@ -187,7 +193,8 @@ class UserBroadcastDispatcher(
         val context: Context,
         val intent: Intent,
         val pendingResult: PendingResult,
-        val index: Int
+        val index: Int,
+        val logger: BroadcastDispatcherLogger
     ) : Runnable {
         override fun run() {
             if (DEBUG) Log.w(TAG, "[$index] Dispatching $intent")
@@ -199,6 +206,7 @@ class UserBroadcastDispatcher(
                         it.executor.execute {
                             if (DEBUG) Log.w(TAG,
                                     "[$index] Dispatching ${intent.action} to ${it.receiver}")
+                            logger.logBroadcastDispatched(index, intent.action, it.receiver)
                             it.receiver.pendingResult = pendingResult
                             it.receiver.onReceive(context, intent)
                         }
@@ -215,6 +223,7 @@ class UserBroadcastDispatcher(
             if (registered.get()) {
                 try {
                     context.unregisterReceiver(this@UserBroadcastDispatcher)
+                    logger.logContextReceiverUnregistered(userId)
                 } catch (e: IllegalArgumentException) {
                     Log.e(TAG, "Trying to unregister unregistered receiver for user $userId",
                             IllegalStateException(e))
@@ -230,6 +239,7 @@ class UserBroadcastDispatcher(
                         null,
                         bgHandler)
                 registered.set(true)
+                logger.logContextReceiverRegistered(userId, intentFilter)
             }
         }
     }
