@@ -89,6 +89,7 @@ class ControlViewHolder(
             return when {
                 status != Control.STATUS_OK -> StatusBehavior::class
                 deviceType == DeviceTypes.TYPE_CAMERA -> TouchBehavior::class
+                template == ControlTemplate.NO_TEMPLATE -> TouchBehavior::class
                 template is ToggleTemplate -> ToggleBehavior::class
                 template is StatelessTemplate -> TouchBehavior::class
                 template is ToggleRangeTemplate -> ToggleRangeBehavior::class
@@ -235,7 +236,10 @@ class ControlViewHolder(
         controlsController.action(cws.componentName, cws.ci, action)
     }
 
-    fun usePanel(): Boolean = deviceType in ControlViewHolder.FORCE_PANEL_DEVICES
+    fun usePanel(): Boolean {
+        return deviceType in ControlViewHolder.FORCE_PANEL_DEVICES ||
+            controlTemplate == ControlTemplate.NO_TEMPLATE
+    }
 
     fun bindBehavior(
         existingBehavior: Behavior?,

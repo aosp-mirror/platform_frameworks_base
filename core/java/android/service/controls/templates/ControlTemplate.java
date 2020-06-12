@@ -214,10 +214,13 @@ public abstract class ControlTemplate {
     }
 
     /**
-     * Get a singleton {@link ControlTemplate} that has no features.
+     * Get a singleton {@link ControlTemplate}, which supports no direct user input.
      *
-     * This template has no distinctive field, not even an identifier. Used for a {@link Control}
-     * that accepts no type of input, or when there is no known state.
+     * Used by {@link Control.StatelessBuilder} when there is no known state. Can also be used
+     * in {@link Control.StatefulBuilder} for conveying information to a user about the
+     * {@link Control} but direct user interaction is not desired. Since this template has no
+     * corresponding {@link ControlAction}, any user interaction will launch the
+     * {@link Control#getAppIntent()}.
      *
      * @return a singleton {@link ControlTemplate} to indicate no specific template is used by
      *         this {@link Control}
