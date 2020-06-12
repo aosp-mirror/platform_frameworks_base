@@ -196,7 +196,7 @@ public final class MediaRouter2 {
                 try {
                     mMediaRouterService.setDiscoveryRequestWithRouter2(mStub, mDiscoveryPreference);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "registerRouteCallback: Unable to set discovery request.");
+                    Log.e(TAG, "registerRouteCallback: Unable to set discovery request.", ex);
                 }
             }
         }
@@ -214,7 +214,7 @@ public final class MediaRouter2 {
 
         if (!mRouteCallbackRecords.remove(
                 new RouteCallbackRecord(null, routeCallback, null))) {
-            Log.w(TAG, "Ignoring unknown callback");
+            Log.w(TAG, "unregisterRouteCallback: Ignoring unknown callback");
             return;
         }
 
@@ -227,7 +227,7 @@ public final class MediaRouter2 {
                     mMediaRouterService.setDiscoveryRequestWithRouter2(
                             mStub, mDiscoveryPreference);
                 } catch (RemoteException ex) {
-                    Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.");
+                    Log.e(TAG, "unregisterRouteCallback: Unable to set discovery request.", ex);
                 }
             }
             if (mRouteCallbackRecords.isEmpty() && mNonSystemRoutingControllers.isEmpty()) {
@@ -500,7 +500,7 @@ public final class MediaRouter2 {
             try {
                 mMediaRouterService.setRouteVolumeWithRouter2(stub, route, volume);
             } catch (RemoteException ex) {
-                Log.e(TAG, "Unable to send control request.", ex);
+                Log.e(TAG, "Unable to set route volume.", ex);
             }
         }
     }
@@ -788,7 +788,8 @@ public final class MediaRouter2 {
                 mMediaRouterService.notifySessionHintsForCreatingSession(
                         stub, uniqueRequestId, route, controllerHints);
             } catch (RemoteException ex) {
-                Log.e(TAG, "getSessionHintsOnHandler: Unable to request.", ex);
+                Log.e(TAG, "onGetControllerHintsForCreatingSessionOnHandler: Unable to notify "
+                        + " session hints for creating session.", ex);
             }
         }
     }
@@ -1120,7 +1121,7 @@ public final class MediaRouter2 {
             Objects.requireNonNull(route, "route must not be null");
             synchronized (mControllerLock) {
                 if (mIsReleased) {
-                    Log.w(TAG, "selectRoute() called on released controller. Ignoring.");
+                    Log.w(TAG, "selectRoute: Called on released controller. Ignoring.");
                     return;
                 }
             }
@@ -1169,7 +1170,7 @@ public final class MediaRouter2 {
             Objects.requireNonNull(route, "route must not be null");
             synchronized (mControllerLock) {
                 if (mIsReleased) {
-                    Log.w(TAG, "deselectRoute() called on released controller. Ignoring.");
+                    Log.w(TAG, "deselectRoute: called on released controller. Ignoring.");
                     return;
                 }
             }
@@ -1216,7 +1217,7 @@ public final class MediaRouter2 {
             Objects.requireNonNull(route, "route must not be null");
             synchronized (mControllerLock) {
                 if (mIsReleased) {
-                    Log.w(TAG, "transferToRoute() called on released controller. Ignoring.");
+                    Log.w(TAG, "transferToRoute: Called on released controller. Ignoring.");
                     return;
                 }
 
@@ -1254,17 +1255,17 @@ public final class MediaRouter2 {
          */
         public void setVolume(int volume) {
             if (getVolumeHandling() == MediaRoute2Info.PLAYBACK_VOLUME_FIXED) {
-                Log.w(TAG, "setVolume: the routing session has fixed volume. Ignoring.");
+                Log.w(TAG, "setVolume: The routing session has fixed volume. Ignoring.");
                 return;
             }
             if (volume < 0 || volume > getVolumeMax()) {
-                Log.w(TAG, "setVolume: the target volume is out of range. Ignoring");
+                Log.w(TAG, "setVolume: The target volume is out of range. Ignoring");
                 return;
             }
 
             synchronized (mControllerLock) {
                 if (mIsReleased) {
-                    Log.w(TAG, "setVolume is called on released controller. Ignoring.");
+                    Log.w(TAG, "setVolume: Called on released controller. Ignoring.");
                     return;
                 }
             }
@@ -1298,7 +1299,7 @@ public final class MediaRouter2 {
         boolean releaseInternal(boolean shouldReleaseSession, boolean shouldNotifyStop) {
             synchronized (mControllerLock) {
                 if (mIsReleased) {
-                    Log.w(TAG, "releaseInternal() called on released controller. Ignoring.");
+                    Log.w(TAG, "releaseInternal: Called on released controller. Ignoring.");
                     return false;
                 }
                 mIsReleased = true;

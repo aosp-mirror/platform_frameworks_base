@@ -567,7 +567,8 @@ class MediaRouter2ServiceImpl {
             boolean hasModifyAudioRoutingPermission) {
         final IBinder binder = router.asBinder();
         if (mAllRouterRecords.get(binder) != null) {
-            Slog.w(TAG, "Same router already exists. packageName=" + packageName);
+            Slog.w(TAG, "registerRouter2Locked: Same router already exists. packageName="
+                    + packageName);
             return;
         }
 
@@ -665,8 +666,7 @@ class MediaRouter2ServiceImpl {
         final RouterRecord routerRecord = mAllRouterRecords.get(binder);
 
         if (routerRecord == null) {
-            Slog.w(TAG, "requestCreateSessionWithRouter2ByManagerRequestLocked: "
-                    + "Ignoring unknown router.");
+            Slog.w(TAG, "notifySessionHintsForCreatingSessionLocked: Ignoring unknown router.");
             return;
         }
 
@@ -789,7 +789,8 @@ class MediaRouter2ServiceImpl {
         ManagerRecord managerRecord = mAllManagerRecords.get(binder);
 
         if (managerRecord != null) {
-            Slog.w(TAG, "Same manager already exists. packageName=" + packageName);
+            Slog.w(TAG, "registerManagerLocked: Same manager already exists. packageName="
+                    + packageName);
             return;
         }
 
@@ -854,7 +855,8 @@ class MediaRouter2ServiceImpl {
 
         RouterRecord routerRecord = managerRecord.mUserRecord.findRouterRecordLocked(packageName);
         if (routerRecord == null) {
-            Slog.w(TAG, "Ignoring session creation for unknown router.");
+            Slog.w(TAG, "requestCreateSessionWithManagerLocked: Ignoring session creation for "
+                    + "unknown router.");
             return;
         }
 
@@ -1231,7 +1233,8 @@ class MediaRouter2ServiceImpl {
 
                 for (MediaRoute2Info route : currentRoutes) {
                     if (!route.isValid()) {
-                        Slog.w(TAG, "Ignoring invalid route : " + route);
+                        Slog.w(TAG, "onProviderStateChangedOnHandler: Ignoring invalid route : "
+                                + route);
                         continue;
                     }
                     MediaRoute2Info prevRoute = prevInfo.getRoute(route.getOriginalId());
@@ -1309,8 +1312,8 @@ class MediaRouter2ServiceImpl {
             try {
                 routerRecord.mRouter.getSessionHintsForCreatingSession(uniqueRequestId, route);
             } catch (RemoteException ex) {
-                Slog.w(TAG, "requestGetSessionHintsOnHandler: "
-                        + "Failed to request. Router probably died.");
+                Slog.w(TAG, "getSessionHintsForCreatingSessionOnHandler: "
+                        + "Failed to request. Router probably died.", ex);
                 mSessionCreationRequests.remove(request);
                 notifyRequestFailedToManager(managerRecord.mManager,
                         toOriginalRequestId(uniqueRequestId), REASON_UNKNOWN_ERROR);
@@ -1323,8 +1326,8 @@ class MediaRouter2ServiceImpl {
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
-                Slog.w(TAG, "Ignoring session creation request since no provider found for"
-                        + " given route=" + route);
+                Slog.w(TAG, "requestCreateSessionWithRouter2OnHandler: Ignoring session "
+                        + "creation request since no provider found for given route=" + route);
                 notifySessionCreationFailedToRouter(routerRecord,
                         toOriginalRequestId(uniqueRequestId));
                 return;
@@ -1349,22 +1352,21 @@ class MediaRouter2ServiceImpl {
                 }
             }
             if (matchingRequest == null) {
-                Slog.w(TAG, "requestCreateSessionWithKnownRequestOnHandler: "
-                        + "Ignoring an unknown request.");
+                Slog.w(TAG, "requestCreateSessionWithManagerOnHandler: "
+                        + "Ignoring an unknown session creation request.");
                 return;
             }
 
             if (!TextUtils.equals(matchingRequest.mRoute.getId(), route.getId())) {
-                Slog.w(TAG, "requestCreateSessionWithKnownRequestOnHandler: "
+                Slog.w(TAG, "requestCreateSessionWithManagerOnHandler: "
                         + "The given route is different from the requested route.");
                 return;
             }
 
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
-                Slog.w(TAG, "Ignoring session creation request since no provider found for"
-                        + " given route=" + route);
-
+                Slog.w(TAG, "requestCreateSessionWithManagerOnHandler: Ignoring session "
+                        + "creation request since no provider found for given route=" + route);
                 mSessionCreationRequests.remove(matchingRequest);
                 notifyRequestFailedToManager(matchingRequest.mRequestedManagerRecord.mManager,
                         toOriginalRequestId(uniqueRequestId), REASON_ROUTE_NOT_AVAILABLE);
@@ -1468,7 +1470,7 @@ class MediaRouter2ServiceImpl {
                 int volume) {
             final MediaRoute2Provider provider = findProvider(route.getProviderId());
             if (provider == null) {
-                Slog.w(TAG, "setRouteVolume: couldn't find provider for route=" + route);
+                Slog.w(TAG, "setRouteVolumeOnHandler: Couldn't find provider for route=" + route);
                 return;
             }
             provider.setRouteVolume(uniqueRequestId, route.getOriginalId(), volume);
@@ -1478,8 +1480,8 @@ class MediaRouter2ServiceImpl {
                 @NonNull String uniqueSessionId, int volume) {
             final MediaRoute2Provider provider = findProvider(getProviderId(uniqueSessionId));
             if (provider == null) {
-                Slog.w(TAG, "setSessionVolume: couldn't find provider for session "
-                        + "id=" + uniqueSessionId);
+                Slog.w(TAG, "setSessionVolumeOnHandler: Couldn't find provider for session id="
+                        + uniqueSessionId);
                 return;
             }
             provider.setSessionVolume(uniqueRequestId, getOriginalId(uniqueSessionId), volume);
@@ -1599,7 +1601,8 @@ class MediaRouter2ServiceImpl {
 
             RouterRecord routerRecord = mSessionToRouterMap.get(sessionInfo.getId());
             if (routerRecord == null) {
-                Slog.w(TAG, "No matching router found for session=" + sessionInfo);
+                Slog.w(TAG, "onSessionInfoChangedOnHandler: No matching router found for session="
+                        + sessionInfo);
                 return;
             }
             notifySessionInfoChangedToRouter(routerRecord, sessionInfo);
@@ -1612,7 +1615,8 @@ class MediaRouter2ServiceImpl {
 
             RouterRecord routerRecord = mSessionToRouterMap.get(sessionInfo.getId());
             if (routerRecord == null) {
-                Slog.w(TAG, "No matching router found for session=" + sessionInfo);
+                Slog.w(TAG, "onSessionReleasedOnHandler: No matching router found for session="
+                        + sessionInfo);
                 return;
             }
             notifySessionReleasedToRouter(routerRecord, sessionInfo);
@@ -1789,7 +1793,7 @@ class MediaRouter2ServiceImpl {
                     currentRoutes.addAll(systemProviderInfo.getRoutes());
                 } else {
                     // This shouldn't happen.
-                    Slog.w(TAG, "notifyRoutesToRouter: System route provider not found.");
+                    Slog.wtf(TAG, "System route provider not found.");
                 }
                 currentSystemSessionInfo = mSystemProvider.getSessionInfos().get(0);
             } else {
