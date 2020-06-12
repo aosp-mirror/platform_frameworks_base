@@ -575,21 +575,23 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     @VisibleForTesting
     public boolean onStateChanged(InsetsState state) {
-        boolean localStateChanged = !mState.equals(state, true /* excludingCaptionInsets */)
+        boolean stateChanged = !mState.equals(state, true /* excludingCaptionInsets */,
+                        false /* excludeInvisibleIme */)
                 || !captionInsetsUnchanged();
-        if (!localStateChanged && mLastDispatchedState.equals(state)) {
+        if (!stateChanged && mLastDispatchedState.equals(state)) {
             return false;
         }
         if (DEBUG) Log.d(TAG, "onStateChanged: " + state);
         updateState(state);
+
+        boolean localStateChanged = !mState.equals(mLastDispatchedState,
+                true /* excludingCaptionInsets */, true /* excludeInvisibleIme */);
         mLastDispatchedState.set(state, true /* copySources */);
+
         applyLocalVisibilityOverride();
         if (localStateChanged) {
-            if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged");
+            if (DEBUG) Log.d(TAG, "onStateChanged, notifyInsetsChanged, send state to WM: " + mState);
             mHost.notifyInsetsChanged();
-        }
-        if (!mState.equals(mLastDispatchedState, true /* excludingCaptionInsets */)) {
-            if (DEBUG) Log.d(TAG, "onStateChanged, send state to WM: " + mState);
             updateRequestedState();
         }
         return true;

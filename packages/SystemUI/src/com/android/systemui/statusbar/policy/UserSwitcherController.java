@@ -367,8 +367,14 @@ public class UserSwitcherController implements Dumpable {
         int id;
         if (record.isGuest && record.info == null) {
             // No guest user. Create one.
-            UserInfo guest = mUserManager.createGuest(
-                    mContext, mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            UserInfo guest;
+            try {
+                guest = mUserManager.createGuest(mContext,
+                        mContext.getString(com.android.settingslib.R.string.guest_nickname));
+            } catch (UserManager.UserOperationException e) {
+                Log.e(TAG, "Couldn't create guest user", e);
+                return;
+            }
             if (guest == null) {
                 // Couldn't create guest, most likely because there already exists one, we just
                 // haven't reloaded the user list yet.

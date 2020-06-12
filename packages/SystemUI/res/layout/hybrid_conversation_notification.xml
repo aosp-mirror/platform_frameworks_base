@@ -20,24 +20,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical|start"
+    android:paddingTop="1dp"
+    android:paddingBottom="1dp"
     android:paddingEnd="12dp">
 
     <FrameLayout
         android:layout_width="@*android:dimen/conversation_content_start"
-        android:layout_height="36dp"
+        android:layout_height="25dp"
     >
         <ImageView
             android:id="@*android:id/conversation_icon"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:layout_gravity="center"
         />
 
         <ViewStub
             android:id="@*android:id/conversation_face_pile"
             android:layout="@*android:layout/conversation_face_pile_layout"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
             android:layout_gravity="center"
         />
     </FrameLayout>

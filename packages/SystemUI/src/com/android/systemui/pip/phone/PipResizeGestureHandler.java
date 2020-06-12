@@ -32,6 +32,8 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.DeviceConfig;
+import android.view.BatchedInputEventReceiver;
+import android.view.Choreographer;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventReceiver;
@@ -323,9 +325,9 @@ public class PipResizeGestureHandler {
         mMinSize.set(minX, minY);
     }
 
-    class SysUiInputEventReceiver extends InputEventReceiver {
+    class SysUiInputEventReceiver extends BatchedInputEventReceiver {
         SysUiInputEventReceiver(InputChannel channel, Looper looper) {
-            super(channel, looper);
+            super(channel, looper, Choreographer.getSfInstance());
         }
 
         public void onInputEvent(InputEvent event) {
