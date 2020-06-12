@@ -41,7 +41,6 @@ public class WindowlessWindowManager implements IWindowSession {
     private final static String TAG = "WindowlessWindowManager";
 
     private class State {
-        //TODO : b/150190730 we should create it when view show and release it when view invisible.
         SurfaceControl mSurfaceControl;
         WindowManager.LayoutParams mParams = new WindowManager.LayoutParams();
         int mDisplayId;
