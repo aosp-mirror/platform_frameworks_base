@@ -37,9 +37,10 @@ class BubbleVolatileRepositoryTest : SysuiTestCase() {
     private val user0 = UserHandle.of(0)
     private val user10 = UserHandle.of(10)
 
-    private val bubble1 = BubbleEntity(0, PKG_MESSENGER, "shortcut-1", "k1", 120, 0)
-    private val bubble2 = BubbleEntity(10, PKG_CHAT, "alice and bob", "k2", 0, 16537428)
-    private val bubble3 = BubbleEntity(0, PKG_MESSENGER, "shortcut-2", "k3", 120, 0)
+    private val bubble1 = BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0)
+    private val bubble2 = BubbleEntity(10, "com.example.chat", "alice and bob",
+            "key-2", 0, 16537428, "title")
+    private val bubble3 = BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0)
 
     private val bubbles = listOf(bubble1, bubble2, bubble3)
 
