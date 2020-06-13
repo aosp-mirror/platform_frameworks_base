@@ -480,7 +480,17 @@ class MediaHierarchyManager @Inject constructor(
             if (inOverlay) {
                 rootOverlay!!.add(mediaFrame)
             } else {
+                // When adding back to the host, let's make sure to reset the bounds.
+                // Usually adding the view will trigger a layout that does this automatically,
+                // but we sometimes suppress this.
                 targetHost.addView(mediaFrame)
+                val left = targetHost.paddingLeft
+                val top = targetHost.paddingTop
+                mediaFrame.setLeftTopRightBottom(
+                        left,
+                        top,
+                        left + currentBounds.width(),
+                        top + currentBounds.height())
             }
         }
     }
