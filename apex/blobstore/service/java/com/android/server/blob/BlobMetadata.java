@@ -61,6 +61,8 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.XmlUtils;
 import com.android.server.blob.BlobStoreManagerService.DumpArgs;
 
+import libcore.io.IoUtils;
+
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
@@ -349,14 +351,16 @@ class BlobMetadata {
         } catch (ErrnoException e) {
             throw e.rethrowAsIOException();
         }
-        synchronized (mMetadataLock) {
-            return createRevocableFdLocked(fd, callingPackage);
+        try {
+            return createRevocableFd(fd, callingPackage);
+        } catch (IOException e) {
+            IoUtils.closeQuietly(fd);
+            throw e;
         }
     }
 
-    @GuardedBy("mMetadataLock")
     @NonNull
-    private ParcelFileDescriptor createRevocableFdLocked(FileDescriptor fd,
+    private ParcelFileDescriptor createRevocableFd(FileDescriptor fd,
             String callingPackage) throws IOException {
         final RevocableFileDescriptor revocableFd =
                 new RevocableFileDescriptor(mContext, fd);
