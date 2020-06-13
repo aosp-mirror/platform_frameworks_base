@@ -24,6 +24,7 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UserIdInt;
@@ -6240,6 +6241,8 @@ public final class Settings {
          * determines if the IME should be shown when a hard keyboard is attached.
          * @hide
          */
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SHOW_IME_WITH_HARD_KEYBOARD = "show_ime_with_hard_keyboard";
 
         /**

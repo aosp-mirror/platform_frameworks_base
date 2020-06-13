@@ -316,7 +316,7 @@ public class ScreenshotHelper {
             };
             msg.replyTo = new Messenger(h);
 
-            if (mScreenshotConnection == null) {
+            if (mScreenshotConnection == null || mScreenshotService == null) {
                 final ComponentName serviceComponent = ComponentName.unflattenFromString(
                         mContext.getResources().getString(
                                 com.android.internal.R.string.config_screenshotServiceComponent));

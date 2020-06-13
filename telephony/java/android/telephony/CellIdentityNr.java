@@ -242,7 +242,7 @@ public final class CellIdentityNr extends CellIdentity {
                 .append(" mPci = ").append(mPci)
                 .append(" mTac = ").append(mTac)
                 .append(" mNrArfcn = ").append(mNrArfcn)
-                .append(" mBands = ").append(mBands)
+                .append(" mBands = ").append(Arrays.toString(mBands))
                 .append(" mMcc = ").append(mMccStr)
                 .append(" mMnc = ").append(mMncStr)
                 .append(" mNci = ").append(mNci)

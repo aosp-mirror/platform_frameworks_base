@@ -280,7 +280,7 @@ class InsetsSourceProvider {
         }
         final Transaction t = mDisplayContent.getPendingTransaction();
         mWin.startAnimation(t, mAdapter, !mClientVisible /* hidden */,
-                ANIMATION_TYPE_INSETS_CONTROL, null /* animationFinishedCallback */);
+                ANIMATION_TYPE_INSETS_CONTROL);
 
         // The leash was just created. We cannot dispatch it until its surface transaction is
         // applied. Otherwise, the client's operation to the leash might be overwritten by us.
