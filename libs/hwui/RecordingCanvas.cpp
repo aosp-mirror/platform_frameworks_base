@@ -96,7 +96,7 @@ struct Restore final : Op {
 struct SaveLayer final : Op {
     static const auto kType = Type::SaveLayer;
     SaveLayer(const SkRect* bounds, const SkPaint* paint, const SkImageFilter* backdrop,
-              const SkImage* clipMask, const SkMatrix* clipMatrix, SkCanvas::SaveLayerFlags flags) {
+              SkCanvas::SaveLayerFlags flags) {
         if (bounds) {
             this->bounds = *bounds;
         }
@@ -104,19 +104,14 @@ struct SaveLayer final : Op {
             this->paint = *paint;
         }
         this->backdrop = sk_ref_sp(backdrop);
-        this->clipMask = sk_ref_sp(clipMask);
-        this->clipMatrix = clipMatrix ? *clipMatrix : SkMatrix::I();
         this->flags = flags;
     }
     SkRect bounds = kUnset;
     SkPaint paint;
     sk_sp<const SkImageFilter> backdrop;
-    sk_sp<const SkImage> clipMask;
-    SkMatrix clipMatrix;
     SkCanvas::SaveLayerFlags flags;
     void draw(SkCanvas* c, const SkMatrix&) const {
-        c->saveLayer({maybe_unset(bounds), &paint, backdrop.get(), clipMask.get(),
-                      clipMatrix.isIdentity() ? nullptr : &clipMatrix, flags});
+        c->saveLayer({maybe_unset(bounds), &paint, backdrop.get(), flags});
     }
 };
 struct SaveBehind final : Op {
@@ -564,9 +559,8 @@ void DisplayListData::restore() {
     this->push<Restore>(0);
 }
 void DisplayListData::saveLayer(const SkRect* bounds, const SkPaint* paint,
-                                const SkImageFilter* backdrop, const SkImage* clipMask,
-                                const SkMatrix* clipMatrix, SkCanvas::SaveLayerFlags flags) {
-    this->push<SaveLayer>(0, bounds, paint, backdrop, clipMask, clipMatrix, flags);
+                                const SkImageFilter* backdrop, SkCanvas::SaveLayerFlags flags) {
+    this->push<SaveLayer>(0, bounds, paint, backdrop, flags);
 }
 
 void DisplayListData::saveBehind(const SkRect* subset) {
@@ -819,8 +813,7 @@ void RecordingCanvas::willSave() {
     fDL->save();
 }
 SkCanvas::SaveLayerStrategy RecordingCanvas::getSaveLayerStrategy(const SaveLayerRec& rec) {
-    fDL->saveLayer(rec.fBounds, rec.fPaint, rec.fBackdrop, rec.fClipMask, rec.fClipMatrix,
-                   rec.fSaveLayerFlags);
+    fDL->saveLayer(rec.fBounds, rec.fPaint, rec.fBackdrop, rec.fSaveLayerFlags);
     return SkCanvas::kNoLayer_SaveLayerStrategy;
 }
 void RecordingCanvas::willRestore() {
