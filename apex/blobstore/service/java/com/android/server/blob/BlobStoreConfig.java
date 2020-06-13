@@ -49,6 +49,9 @@ class BlobStoreConfig {
 
     public static final int XML_VERSION_CURRENT = XML_VERSION_ADD_SESSION_CREATION_TIME;
 
+    public static final long INVALID_BLOB_ID = 0;
+    public static final long INVALID_BLOB_SIZE = 0;
+
     private static final String ROOT_DIR_NAME = "blobstore";
     private static final String BLOBS_DIR_NAME = "blobs";
     private static final String SESSIONS_INDEX_FILE_NAME = "sessions_index.xml";
