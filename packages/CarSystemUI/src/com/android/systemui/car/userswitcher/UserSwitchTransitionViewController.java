@@ -33,6 +33,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.R;
 import com.android.systemui.car.window.OverlayViewController;
@@ -49,12 +50,22 @@ import javax.inject.Singleton;
 public class UserSwitchTransitionViewController extends OverlayViewController {
     private static final String TAG = "UserSwitchTransition";
     private static final String ENABLE_DEVELOPER_MESSAGE_TRUE = "true";
+    private static final boolean DEBUG = false;
 
     private final Context mContext;
     private final Handler mHandler;
     private final Resources mResources;
     private final UserManager mUserManager;
     private final IWindowManager mWindowManagerService;
+    private final int mWindowShownTimeoutMs;
+    private final Runnable mWindowShownTimeoutCallback = () -> {
+        if (DEBUG) {
+            Log.w(TAG, "Window was not hidden within " + getWindowShownTimeoutMs() + " ms, so it"
+                    + "was hidden by mWindowShownTimeoutCallback.");
+        }
+
+        handleHide();
+    };
 
     @GuardedBy("this")
     private boolean mShowing;
@@ -76,6 +87,8 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
         mResources = resources;
         mUserManager = userManager;
         mWindowManagerService = windowManagerService;
+        mWindowShownTimeoutMs = mResources.getInteger(
+                R.integer.config_userSwitchTransitionViewShownTimeoutMs);
     }
 
     /**
@@ -98,6 +111,9 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
             populateDialog(mPreviousUserId, newUserId);
             // next time a new user is selected, this current new user will be the previous user.
             mPreviousUserId = newUserId;
+            // In case the window is still showing after WINDOW_SHOWN_TIMEOUT_MS, then hide the
+            // window and log a warning message.
+            mHandler.postDelayed(mWindowShownTimeoutCallback, mWindowShownTimeoutMs);
         });
     }
 
@@ -105,6 +121,12 @@ public class UserSwitchTransitionViewController extends OverlayViewController {
         if (!mShowing) return;
         mShowing = false;
         mHandler.post(this::stop);
+        mHandler.removeCallbacks(mWindowShownTimeoutCallback);
+    }
+
+    @VisibleForTesting
+    int getWindowShownTimeoutMs() {
+        return mWindowShownTimeoutMs;
     }
 
     private void populateDialog(@UserIdInt int previousUserId, @UserIdInt int newUserId) {
