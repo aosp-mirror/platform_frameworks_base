@@ -1033,6 +1033,26 @@ public class ServiceState implements Parcelable {
     }
 
     /**
+     * Convert frequency range into string
+     *
+     * @param range The cellular frequency range
+     * @return Frequency range in string format
+     *
+     * @hide
+     */
+    public static @NonNull String frequencyRangeToString(@FrequencyRange int range) {
+        switch (range) {
+            case FREQUENCY_RANGE_UNKNOWN: return "UNKNOWN";
+            case FREQUENCY_RANGE_LOW: return "LOW";
+            case FREQUENCY_RANGE_MID: return "MID";
+            case FREQUENCY_RANGE_HIGH: return "HIGH";
+            case FREQUENCY_RANGE_MMWAVE: return "MMWAVE";
+            default:
+                return Integer.toString(range);
+        }
+    }
+
+    /**
      * Convert RIL Service State to String
      *
      * @param serviceState
