@@ -959,7 +959,10 @@ void ValueMetricProducer::flushCurrentBucketLocked(const int64_t& eventTimeNs,
     int64_t fullBucketEndTimeNs = getCurrentBucketEndTimeNs();
     int64_t bucketEndTime = fullBucketEndTimeNs;
     int64_t numBucketsForward = calcBucketsForwardCount(eventTimeNs);
-    if (numBucketsForward > 1) {
+
+    // Skip buckets if this is a pulled metric or a pushed metric that is diffed.
+    if (numBucketsForward > 1 && (mIsPulled || mUseDiff)) {
+
         VLOG("Skipping forward %lld buckets", (long long)numBucketsForward);
         StatsdStats::getInstance().noteSkippedForwardBuckets(mMetricId);
         // Something went wrong. Maybe the device was sleeping for a long time. It is better
