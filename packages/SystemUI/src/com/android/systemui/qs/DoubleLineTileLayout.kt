@@ -139,12 +139,7 @@ class DoubleLineTileLayout(
         }
         tilesToShow = actualColumns * NUM_LINES
 
-        val interTileSpace = if (actualColumns <= 2) {
-            // Extra "column" of padding to be distributed on each end
-            (availableWidth - actualColumns * smallTileSize) / actualColumns
-        } else {
-            (availableWidth - actualColumns * smallTileSize) / (actualColumns - 1)
-        }
+        val spacePerTile = availableWidth / actualColumns
 
         for (index in 0 until mRecords.size) {
             val tileView = mRecords[index].tileView
@@ -154,15 +149,16 @@ class DoubleLineTileLayout(
                 tileView.visibility = View.VISIBLE
                 if (index > 0) tileView.updateAccessibilityOrder(mRecords[index - 1].tileView)
                 val column = index % actualColumns
-                val left = getLeftForColumn(column, interTileSpace, actualColumns <= 2)
+                val left = getLeftForColumn(column, spacePerTile)
                 val top = if (index < actualColumns) 0 else getTopBottomRow()
                 tileView.layout(left, top, left + smallTileSize, top + smallTileSize)
             }
         }
     }
 
-    private fun getLeftForColumn(column: Int, interSpace: Int, sideMargin: Boolean): Int {
-        return (if (sideMargin) interSpace / 2 else 0) + column * (smallTileSize + interSpace)
+    private fun getLeftForColumn(column: Int, spacePerTile: Int): Int {
+        // Distribute the space evenly among all tiles.
+        return (column * spacePerTile + spacePerTile / 2.0f - smallTileSize / 2.0f).toInt()
     }
 
     private fun getTopBottomRow() = smallTileSize + cellMarginVertical
