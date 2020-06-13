@@ -18,6 +18,8 @@ package com.android.systemui.car.userswitcher;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -120,6 +122,29 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
         // Verify that the request was processed only once.
         verify(mOverlayViewGlobalStateController).hideView(eq(mCarUserSwitchingDialogController),
                 any());
+    }
+
+    @Test
+    public void onWindowShownTimeoutPassed_viewNotHidden_hidesUserSwitchTransitionView() {
+        mCarUserSwitchingDialogController.handleShow(/* currentUserId= */ TEST_USER_1);
+        reset(mOverlayViewGlobalStateController);
+
+        getContext().getMainThreadHandler().postDelayed(() -> {
+            verify(mOverlayViewGlobalStateController).hideView(
+                    eq(mCarUserSwitchingDialogController), any());
+        }, mCarUserSwitchingDialogController.getWindowShownTimeoutMs() + 10);
+    }
+
+    @Test
+    public void onWindowShownTimeoutPassed_viewHidden_doesNotHideUserSwitchTransitionViewAgain() {
+        mCarUserSwitchingDialogController.handleShow(/* currentUserId= */ TEST_USER_1);
+        mCarUserSwitchingDialogController.handleHide();
+        reset(mOverlayViewGlobalStateController);
+
+        getContext().getMainThreadHandler().postDelayed(() -> {
+            verify(mOverlayViewGlobalStateController, never()).hideView(
+                    eq(mCarUserSwitchingDialogController), any());
+        }, mCarUserSwitchingDialogController.getWindowShownTimeoutMs() + 10);
     }
 
     private final class TestableUserSwitchTransitionViewController extends
