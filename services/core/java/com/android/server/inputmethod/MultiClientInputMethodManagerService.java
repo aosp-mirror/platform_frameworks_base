@@ -1347,13 +1347,14 @@ public final class MultiClientInputMethodManagerService {
                 for (WindowInfo windowInfo : clientInfo.mWindowMap.values()) {
                     if (windowInfo.mWindowHandle == targetWindowHandle) {
                         final IBinder targetWindowToken = windowInfo.mWindowToken;
-                        // TODO(yukawa): Report targetWindowToken and targetWindowToken to WMS.
                         if (DEBUG) {
                             Slog.v(TAG, "reportImeWindowTarget"
                                     + " clientId=" + clientId
                                     + " imeWindowToken=" + imeWindowToken
                                     + " targetWindowToken=" + targetWindowToken);
                         }
+                        mIWindowManagerInternal.updateInputMethodTargetWindow(
+                                imeWindowToken, targetWindowToken);
                     }
                 }
                 // not found.
@@ -1490,6 +1491,9 @@ public final class MultiClientInputMethodManagerService {
                     case InputMethodClientState.ALREADY_SENT_BIND_RESULT:
                         try {
                             clientInfo.mMSInputMethodSession.showSoftInput(flags, resultReceiver);
+
+                            // Forcing WM to show IME on imeTargetWindow
+                            mWindowManagerInternal.showImePostLayout(token);
                         } catch (RemoteException e) {
                         }
                         break;
