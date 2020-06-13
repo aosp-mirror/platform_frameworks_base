@@ -478,13 +478,16 @@ message Atom {
             296;
         MediametricsAudioDeviceConnectionReported mediametrics_audiodeviceconnection_reported =
             297;
+        BlobCommitted blob_committed = 298 [(module) = "framework"];
+        BlobLeased blob_leased = 299 [(module) = "framework"];
+        BlobOpened blob_opened = 300 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10081
+    // Next: 10084
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -575,7 +578,7 @@ message Atom {
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
-        //10081 free for use
+        BlobInfo blob_info = 10081 [(module) = "framework"];
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
@@ -4916,6 +4919,94 @@ message SnapshotMergeReported {
     // containing the dm-snapshot's copy-on-write data generated during a
     // Virtual A/B update.
     optional int64 cow_file_size_bytes = 5;
+}
+
+/**
+ * Event representing when BlobStoreManager.Session#commit() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobCommitted {
+    // Uid of the Blob committer
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob committed
+    optional int64 blob_id = 2;
+
+    // Size of the Blob
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Commit Succeeded
+        SUCCESS = 1;
+        // Commit Failed: Error occurred during commit
+        ERROR_DURING_COMMIT = 2;
+        // Commit Failed: Digest of the data did not match Blob digest
+        DIGEST_MISMATCH = 3;
+    }
+    optional Result result = 4;
+}
+
+/**
+ * Event representing when BlobStoreManager#acquireLease() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobLeased{
+    // Uid of the Blob leasee
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob leased or 0 if the Blob does not exist
+    optional int64 blob_id = 2;
+
+    // Size of the Blob or 0 if the Blob does not exist
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Lease Succeeded
+        SUCCESS = 1;
+        // Lease Failed: Blob does not exist
+        BLOB_DNE = 2;
+        // Lease Failed: Leasee does not have access to the Blob
+        ACCESS_NOT_ALLOWED = 3;
+        // Lease Failed: Leasee requested an invalid expiry duration
+        LEASE_EXPIRY_INVALID = 4;
+        // Lease Failed: Leasee has exceeded the total data lease limit
+        DATA_SIZE_LIMIT_EXCEEDED = 5;
+    }
+    optional Result result = 4;
+}
+
+/**
+ * Event representing when BlobStoreManager#openBlob() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobOpened{
+    // Uid of the Blob opener
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob opened or 0 if the Blob does not exist
+    optional int64 blob_id = 2;
+
+    // Size of the Blob or 0 if the Blob does not exist
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Open Succeeded
+        SUCCESS = 1;
+        // Open Failed: Blob does not exist
+        BLOB_DNE = 2;
+        // Open Failed: Opener does not have access to the Blob
+        ACCESS_NOT_ALLOWED = 3;
+    }
+    optional Result result = 4;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -10803,4 +10894,73 @@ message MediametricsAudioDeviceConnectionReported {
 
     // Number of connections if aggregated statistics, otherwise 1.
     optional int32 connection_count = 6;
+}
+
+// Blob Committer stats
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobCommitterProto {
+    // Committer app's uid
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Unix epoch timestamp of the commit in milliseconds
+    optional int64 commit_timestamp_millis = 2;
+
+    // Flags of what access types the committer has set for the Blob
+    optional int32 access_mode = 3;
+
+    // Number of packages that have been whitelisted for ACCESS_TYPE_WHITELIST
+    optional int32 num_whitelisted_package = 4;
+}
+
+// Blob Leasee stats
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobLeaseeProto {
+    // Leasee app's uid
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Unix epoch timestamp for lease expiration in milliseconds
+    optional int64 lease_expiry_timestamp_millis = 2;
+}
+
+// List of Blob Committers
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobCommitterListProto {
+    repeated BlobCommitterProto committer = 1;
+}
+
+// List of Blob Leasees
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobLeaseeListProto {
+    repeated BlobLeaseeProto leasee = 1;
+}
+
+/**
+ * Logs the current state of a Blob committed with BlobStoreManager
+ *
+ * Pulled from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobInfo {
+    // Id of the Blob
+    optional int64 blob_id = 1;
+
+    // Size of the Blob data
+    optional int64 size = 2;
+
+    // Unix epoch timestamp of the Blob's expiration in milliseconds
+    optional int64 expiry_timestamp_millis = 3;
+
+    // List of committers of this Blob
+    optional BlobCommitterListProto committers = 4;
+
+    // List of leasees of this Blob
+    optional BlobLeaseeListProto leasees = 5;
 }
