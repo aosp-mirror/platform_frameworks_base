@@ -50,13 +50,13 @@ TEST(MultiConditionTrigger, TestMultipleConditions) {
     });
 
     vector<thread> threads;
-    vector<bool> done(numConditions, false);
+    vector<int> done(numConditions, 0);
 
     int i = 0;
     for (const string& conditionName : conditionNames) {
         threads.emplace_back([&done, &conditionName, &trigger, i] {
             sleep_for(chrono::milliseconds(3));
-            done[i] = true;
+            done[i] = 1;
             trigger.markComplete(conditionName);
         });
         i++;
