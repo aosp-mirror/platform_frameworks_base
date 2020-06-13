@@ -104,6 +104,9 @@ public class NotificationListener extends NotificationListenerWithPlugins {
                     listener.onNotificationPosted(sbn, completeMap);
                 }
             }
+            for (NotificationHandler listener : mNotificationHandlers) {
+                listener.onNotificationsInitialized();
+            }
         });
         onSilentStatusBarIconsVisibilityChanged(
                 mNotificationManager.shouldHideSilentStatusBarIcons());
@@ -224,5 +227,10 @@ public class NotificationListener extends NotificationListenerWithPlugins {
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap);
         void onNotificationRemoved(StatusBarNotification sbn, RankingMap rankingMap, int reason);
         void onNotificationRankingUpdate(RankingMap rankingMap);
+
+        /**
+         * Called after the listener has connected to NoMan and posted any current notifications.
+         */
+        void onNotificationsInitialized();
     }
 }

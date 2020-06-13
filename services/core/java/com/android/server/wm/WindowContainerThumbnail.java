@@ -133,15 +133,14 @@ class WindowContainerThumbnail implements Animatable {
                         mWindowContainer.getDisplayContent().mAppTransition.canSkipFirstFrame(),
                         mWindowContainer.getDisplayContent().getWindowCornerRadius()),
                 mWindowContainer.mWmService.mSurfaceAnimationRunner), false /* hidden */,
-                ANIMATION_TYPE_RECENTS, null /* animationFinishedCallback */);
+                ANIMATION_TYPE_RECENTS);
     }
 
     /**
      * Start animation with existing adapter.
      */
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden) {
-        mSurfaceAnimator.startAnimation(t, anim, hidden, ANIMATION_TYPE_RECENTS,
-                null /* animationFinishedCallback */);
+        mSurfaceAnimator.startAnimation(t, anim, hidden, ANIMATION_TYPE_RECENTS);
     }
 
     private void onAnimationFinished(@AnimationType int type, AnimationAdapter anim) {

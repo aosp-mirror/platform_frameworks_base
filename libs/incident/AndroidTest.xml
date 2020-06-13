@@ -16,13 +16,17 @@
 <configuration description="Config for libincident_test">
     <option name="test-suite-tag" value="device-tests" />
     <option name="config-descriptor:metadata" key="component" value="misc" />
-    <target_preparer class="com.android.tradefed.targetprep.PushFilePreparer">
+    <target_preparer class="com.android.compatibility.common.tradefed.targetprep.FilePusher">
         <option name="cleanup" value="true" />
         <option name="push" value="libincident_test->/data/local/tmp/libincident_test" />
+        <option name="append-bitness" value="true" />
     </target_preparer>
     <test class="com.android.tradefed.testtype.GTest" >
         <option name="native-test-device-path" value="/data/local/tmp" />
         <option name="module-name" value="libincident_test" />
     </test>
+    <object type="module_controller" class="com.android.tradefed.testtype.suite.module.MainlineTestModuleController">
+        <option name="mainline-module-package-name" value="com.google.android.os.statsd" />
+    </object>
 </configuration>
 

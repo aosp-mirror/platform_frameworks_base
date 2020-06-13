@@ -28,6 +28,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -52,6 +53,8 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
     private TestableResources mTestableResources;
     @Mock
     private OverlayViewGlobalStateController mOverlayViewGlobalStateController;
+    @Mock
+    private IWindowManager mWindowManagerService;
 
     @Before
     public void setUp() {
@@ -62,6 +65,7 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
                 Handler.getMain(),
                 mTestableResources.getResources(),
                 (UserManager) mContext.getSystemService(Context.USER_SERVICE),
+                mWindowManagerService,
                 mOverlayViewGlobalStateController
         );
 
@@ -125,8 +129,10 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
 
         TestableUserSwitchTransitionViewController(Context context, Handler handler,
                 Resources resources, UserManager userManager,
+                IWindowManager windowManagerService,
                 OverlayViewGlobalStateController overlayViewGlobalStateController) {
-            super(context, handler, resources, userManager, overlayViewGlobalStateController);
+            super(context, handler, resources, userManager, windowManagerService,
+                    overlayViewGlobalStateController);
             mHandler = handler;
         }
 

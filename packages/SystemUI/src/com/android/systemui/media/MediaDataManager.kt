@@ -18,8 +18,11 @@ package com.android.systemui.media
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -30,11 +33,13 @@ import android.media.MediaDescription
 import android.media.MediaMetadata
 import android.media.session.MediaSession
 import android.net.Uri
+import android.os.UserHandle
 import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
 import com.android.internal.graphics.ColorUtils
 import com.android.systemui.R
+import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.statusbar.NotificationMediaManager
@@ -87,12 +92,40 @@ class MediaDataManager @Inject constructor(
     private val notificationEntryManager: NotificationEntryManager,
     private val mediaResumeListener: MediaResumeListener,
     @Background private val backgroundExecutor: Executor,
-    @Main private val foregroundExecutor: Executor
+    @Main private val foregroundExecutor: Executor,
+    private val broadcastDispatcher: BroadcastDispatcher
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
     private val useMediaResumption: Boolean = Utils.useMediaResumption(context)
+
+    private val userChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (Intent.ACTION_USER_SWITCHED == intent.action) {
+                // Remove all controls, regardless of state
+                clearData()
+            }
+        }
+    }
+
+    private val appChangeReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_PACKAGES_SUSPENDED -> {
+                    val packages = intent.getStringArrayExtra(Intent.EXTRA_CHANGED_PACKAGE_LIST)
+                    packages?.forEach {
+                        removeAllForPackage(it)
+                    }
+                }
+                Intent.ACTION_PACKAGE_REMOVED, Intent.ACTION_PACKAGE_RESTARTED -> {
+                    intent.data?.encodedSchemeSpecificPart?.let {
+                        removeAllForPackage(it)
+                    }
+                }
+            }
+        }
+    }
 
     init {
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
@@ -111,6 +144,20 @@ class MediaDataManager @Inject constructor(
             }
             addListener(mediaResumeListener)
         }
+
+        val userFilter = IntentFilter(Intent.ACTION_USER_SWITCHED)
+        broadcastDispatcher.registerReceiver(userChangeReceiver, userFilter, null, UserHandle.ALL)
+
+        val suspendFilter = IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED)
+        broadcastDispatcher.registerReceiver(appChangeReceiver, suspendFilter, null, UserHandle.ALL)
+
+        val uninstallFilter = IntentFilter().apply {
+            addAction(Intent.ACTION_PACKAGE_REMOVED)
+            addAction(Intent.ACTION_PACKAGE_RESTARTED)
+            addDataScheme("package")
+        }
+        // BroadcastDispatcher does not allow filters with data schemes
+        context.registerReceiver(appChangeReceiver, uninstallFilter)
     }
 
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
@@ -128,6 +175,29 @@ class MediaDataManager @Inject constructor(
             loadMediaData(key, sbn, oldKey)
         } else {
             onNotificationRemoved(key)
+        }
+    }
+
+    private fun clearData() {
+        // Called on user change. Remove all current MediaData objects and inform listeners
+        val listenersCopy = listeners.toSet()
+        mediaEntries.forEach {
+            listenersCopy.forEach { listener ->
+                listener.onMediaDataRemoved(it.key)
+            }
+        }
+        mediaEntries.clear()
+    }
+
+    private fun removeAllForPackage(packageName: String) {
+        Assert.isMainThread()
+        val listenersCopy = listeners.toSet()
+        val toRemove = mediaEntries.filter { it.value.packageName == packageName }
+        toRemove.forEach {
+            mediaEntries.remove(it.key)
+            listenersCopy.forEach { listener ->
+                listener.onMediaDataRemoved(it.key)
+            }
         }
     }
 
@@ -337,15 +407,20 @@ class MediaDataManager @Inject constructor(
                     actionsToShowCollapsed.remove(index)
                     continue
                 }
+                val runnable = if (action.actionIntent != null) {
+                    Runnable {
+                        try {
+                            action.actionIntent.send()
+                        } catch (e: PendingIntent.CanceledException) {
+                            Log.d(TAG, "Intent canceled", e)
+                        }
+                    }
+                } else {
+                    null
+                }
                 val mediaAction = MediaAction(
                         action.getIcon().loadDrawable(packageContext),
-                        Runnable {
-                            try {
-                                action.actionIntent.send()
-                            } catch (e: PendingIntent.CanceledException) {
-                                Log.d(TAG, "Intent canceled", e)
-                            }
-                        },
+                        runnable,
                         action.title)
                 actionIcons.add(mediaAction)
             }
