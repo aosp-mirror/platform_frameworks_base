@@ -256,16 +256,18 @@ public class MediaControlPanel {
         rect.setColor(Color.TRANSPARENT);
 
         final MediaDeviceData device = data.getDevice();
+        int seamlessId = mViewHolder.getSeamless().getId();
         if (device != null && !device.getEnabled()) {
             mViewHolder.getSeamless().setEnabled(false);
-            // TODO(b/156875717): setEnabled should cause the alpha to change.
-            mViewHolder.getSeamless().setAlpha(0.38f);
+            expandedSet.setAlpha(seamlessId, 0.38f);
+            collapsedSet.setAlpha(seamlessId, 0.38f);
             iconView.setImageResource(R.drawable.ic_hardware_speaker);
             iconView.setVisibility(View.VISIBLE);
             deviceName.setText(R.string.media_seamless_remote_device);
         } else if (device != null) {
             mViewHolder.getSeamless().setEnabled(true);
-            mViewHolder.getSeamless().setAlpha(1f);
+            expandedSet.setAlpha(seamlessId, 1.0f);
+            collapsedSet.setAlpha(seamlessId, 1.0f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
 
@@ -281,7 +283,8 @@ public class MediaControlPanel {
             // Reset to default
             Log.w(TAG, "device is null. Not binding output chip.");
             mViewHolder.getSeamless().setEnabled(true);
-            mViewHolder.getSeamless().setAlpha(1f);
+            expandedSet.setAlpha(seamlessId, 1.0f);
+            collapsedSet.setAlpha(seamlessId, 1.0f);
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }
