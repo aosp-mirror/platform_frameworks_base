@@ -54,6 +54,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsEvent;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -412,6 +414,49 @@ class BlobMetadata {
             }
         }
         return true;
+    }
+
+    StatsEvent dumpAsStatsEvent(int atomTag) {
+        synchronized (mMetadataLock) {
+            ProtoOutputStream proto = new ProtoOutputStream();
+            // Write Committer data to proto format
+            for (int i = 0, size = mCommitters.size(); i < size; ++i) {
+                final Committer committer = mCommitters.valueAt(i);
+                final long token = proto.start(
+                        BlobStatsEventProto.BlobCommitterListProto.COMMITTER);
+                proto.write(BlobStatsEventProto.BlobCommitterProto.UID, committer.uid);
+                proto.write(BlobStatsEventProto.BlobCommitterProto.COMMIT_TIMESTAMP_MILLIS,
+                        committer.commitTimeMs);
+                proto.write(BlobStatsEventProto.BlobCommitterProto.ACCESS_MODE,
+                        committer.blobAccessMode.getAccessType());
+                proto.write(BlobStatsEventProto.BlobCommitterProto.NUM_WHITELISTED_PACKAGE,
+                        committer.blobAccessMode.getNumWhitelistedPackages());
+                proto.end(token);
+            }
+            final byte[] committersBytes = proto.getBytes();
+
+            proto = new ProtoOutputStream();
+            // Write Leasee data to proto format
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                final Leasee leasee = mLeasees.valueAt(i);
+                final long token = proto.start(BlobStatsEventProto.BlobLeaseeListProto.LEASEE);
+                proto.write(BlobStatsEventProto.BlobLeaseeProto.UID, leasee.uid);
+                proto.write(BlobStatsEventProto.BlobLeaseeProto.LEASE_EXPIRY_TIMESTAMP_MILLIS,
+                        leasee.expiryTimeMillis);
+                proto.end(token);
+            }
+            final byte[] leaseesBytes = proto.getBytes();
+
+            // Construct the StatsEvent to represent this Blob
+            return StatsEvent.newBuilder()
+                    .setAtomId(atomTag)
+                    .writeLong(mBlobId)
+                    .writeLong(getSize())
+                    .writeLong(mBlobHandle.getExpiryTimeMillis())
+                    .writeByteArray(committersBytes)
+                    .writeByteArray(leaseesBytes)
+                    .build();
+        }
     }
 
     void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
