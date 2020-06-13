@@ -61,7 +61,10 @@
                 android:clickable="true"
                 android:gravity="center_vertical"
                 android:focusable="true"
+                android:singleLine="true"
+                android:ellipsize="end"
                 android:textAppearance="@style/TextAppearance.QS.Status"
+                android:layout_marginEnd="4dp"
                 android:visibility="gone"/>
          </com.android.keyguard.AlphaOptimizedLinearLayout>
 
