@@ -53,6 +53,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
@@ -450,6 +451,9 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                         + ") didn't match the given BlobHandle.digest ("
                         + BlobHandle.safeDigest(mBlobHandle.digest) + ")");
                 mState = STATE_VERIFIED_INVALID;
+
+                FrameworkStatsLog.write(FrameworkStatsLog.BLOB_COMMITTED, getOwnerUid(), mSessionId,
+                        getSize(), FrameworkStatsLog.BLOB_COMMITTED__RESULT__DIGEST_MISMATCH);
                 sendCommitCallbackResult(COMMIT_RESULT_ERROR);
             }
             mListener.onStateChanged(this);
