@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.policy.SecurityController;
 public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClickListener {
     protected static final String TAG = "QSSecurityFooter";
     protected static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean DEBUG_FORCE_VISIBLE = false;
 
     private final View mRootView;
     private final TextView mFooterText;
@@ -60,7 +61,6 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     private final SecurityController mSecurityController;
     private final ActivityStarter mActivityStarter;
     private final Handler mMainHandler;
-    private final View mDivider;
 
     private final UserManager mUm;
 
@@ -85,7 +85,6 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         mActivityStarter = Dependency.get(ActivityStarter.class);
         mSecurityController = Dependency.get(SecurityController.class);
         mHandler = new H(Dependency.get(Dependency.BG_LOOPER));
-        mDivider = qsPanel == null ? null : qsPanel.getDivider();
         mUm = (UserManager) mContext.getSystemService(Context.USER_SERVICE);
     }
 
@@ -177,7 +176,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             boolean hasCACerts, boolean hasCACertsInWorkProfile, boolean isNetworkLoggingEnabled,
             String vpnName, String vpnNameWorkProfile, CharSequence organizationName,
             CharSequence workProfileName) {
-        if (isDeviceManaged) {
+        if (isDeviceManaged || DEBUG_FORCE_VISIBLE) {
             if (hasCACerts || hasCACertsInWorkProfile || isNetworkLoggingEnabled) {
                 if (organizationName == null) {
                     return mContext.getString(
@@ -451,8 +450,7 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             if (mFooterTextContent != null) {
                 mFooterText.setText(mFooterTextContent);
             }
-            mRootView.setVisibility(mIsVisible ? View.VISIBLE : View.GONE);
-            if (mDivider != null) mDivider.setVisibility(mIsVisible ? View.GONE : View.VISIBLE);
+            mRootView.setVisibility(mIsVisible || DEBUG_FORCE_VISIBLE ? View.VISIBLE : View.GONE);
         }
     };
 
