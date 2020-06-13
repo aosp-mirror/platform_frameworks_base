@@ -88,10 +88,7 @@ public class RelayoutPerfTest extends WindowManagerPerfTestBase {
     public void testRelayout() throws Throwable {
         final Activity activity = mActivityRule.getActivity();
         final ContentView contentView = new ContentView(activity);
-        mActivityRule.runOnUiThread(() -> {
-            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-            activity.setContentView(contentView);
-        });
+        mActivityRule.runOnUiThread(() -> activity.setContentView(contentView));
         getInstrumentation().waitForIdleSync();
 
         final RelayoutRunner relayoutRunner = new RelayoutRunner(activity, contentView.getWindow(),

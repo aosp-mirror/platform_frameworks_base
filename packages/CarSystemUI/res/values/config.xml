@@ -118,4 +118,7 @@
         <item>com.android.systemui.car.window.SystemUIOverlayWindowManager</item>
         <item>com.android.systemui.car.volume.VolumeUI</item>
     </string-array>
+
+    <!-- How many milliseconds to wait before force hiding the UserSwitchTransitionView -->
+    <integer name="config_userSwitchTransitionViewShownTimeoutMs" translatable="false">5000</integer>
 </resources>

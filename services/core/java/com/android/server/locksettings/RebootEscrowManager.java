@@ -26,6 +26,7 @@ import android.content.pm.UserInfo;
 import android.hardware.rebootescrow.IRebootEscrow;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.SystemClock;
 import android.os.UserManager;
 import android.provider.Settings;
@@ -244,6 +245,9 @@ class RebootEscrowManager {
         } catch (RemoteException e) {
             Slog.w(TAG, "Could not retrieve escrow data");
             return null;
+        } catch (ServiceSpecificException e) {
+            Slog.w(TAG, "Got service-specific exception: " + e.errorCode);
+            return null;
         }
     }
 
@@ -335,7 +339,7 @@ class RebootEscrowManager {
 
         try {
             rebootEscrow.storeKey(new byte[32]);
-        } catch (RemoteException e) {
+        } catch (RemoteException | ServiceSpecificException e) {
             Slog.w(TAG, "Could not call RebootEscrow HAL to shred key");
         }
 
@@ -373,7 +377,7 @@ class RebootEscrowManager {
             rebootEscrow.storeKey(escrowKey.getKeyBytes());
             armedRebootEscrow = true;
             Slog.i(TAG, "Reboot escrow key stored with RebootEscrow HAL");
-        } catch (RemoteException e) {
+        } catch (RemoteException | ServiceSpecificException e) {
             Slog.e(TAG, "Failed escrow secret to RebootEscrow HAL", e);
         }
 

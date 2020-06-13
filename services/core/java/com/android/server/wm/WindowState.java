@@ -5049,16 +5049,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.updateLastInsetValues();
     }
 
+    @Nullable
     @Override
-    boolean isAnimating(int flags, int typesToCheck) {
-
-        // If we are an inset provider, all our animations are driven by the inset client, so we
-        // aren't really animating.
-        // TODO: Replace this with a proper animation type system.
+    WindowContainer<WindowState> getAnimatingContainer(int flags, int typesToCheck) {
         if (mControllableInsetProvider != null) {
-            return false;
+            return null;
         }
-        return super.isAnimating(flags, typesToCheck);
+        return super.getAnimatingContainer(flags, typesToCheck);
     }
 
     void startAnimation(Animation anim) {
@@ -5101,8 +5098,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     private void startAnimation(Transaction t, AnimationAdapter adapter) {
-        startAnimation(t, adapter, mWinAnimator.mLastHidden, ANIMATION_TYPE_WINDOW_ANIMATION,
-                null /* animationFinishedCallback */);
+        startAnimation(t, adapter, mWinAnimator.mLastHidden, ANIMATION_TYPE_WINDOW_ANIMATION);
     }
 
     @Override
