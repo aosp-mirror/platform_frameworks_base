@@ -169,7 +169,7 @@ public class BubbleExpandedView extends LinearLayout {
                             return;
                         }
                         try {
-                            if (!mIsOverflow && mBubble.usingShortcutInfo()) {
+                            if (!mIsOverflow && mBubble.getShortcutInfo() != null) {
                                 options.setApplyActivityFlagsForBubbles(true);
                                 mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
                                         options, null /* sourceBounds */);
@@ -438,10 +438,10 @@ public class BubbleExpandedView extends LinearLayout {
                 getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         switch (mode) {
             case Configuration.UI_MODE_NIGHT_NO:
-                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_pointer_light));
+                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_light));
                 break;
             case Configuration.UI_MODE_NIGHT_YES:
-                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_pointer_dark));
+                mPointerDrawable.setTint(getResources().getColor(R.color.bubbles_dark));
                 break;
         }
         mPointerView.setBackground(mPointerDrawable);

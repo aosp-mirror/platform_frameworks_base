@@ -2105,6 +2105,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                 baseApk = apk;
             }
 
+            // Validate and add Dex Metadata (.dm).
             final File dexMetadataFile = DexMetadataHelper.findDexMetadataForFile(addedFile);
             if (dexMetadataFile != null) {
                 if (!FileUtils.isValidExtFilename(dexMetadataFile.getName())) {
@@ -2291,6 +2292,13 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         if (baseApk.isSplitRequired && stagedSplits.size() <= 1) {
             throw new PackageManagerException(INSTALL_FAILED_MISSING_SPLIT,
                     "Missing split for " + mPackageName);
+        }
+
+        final boolean isInstallerShell = (mInstallerUid == Process.SHELL_UID);
+        if (isInstallerShell && isIncrementalInstallation() && mIncrementalFileStorages != null) {
+            if (!baseApk.debuggable && !baseApk.profilableByShell) {
+                mIncrementalFileStorages.disableReadLogs();
+            }
         }
     }
 
