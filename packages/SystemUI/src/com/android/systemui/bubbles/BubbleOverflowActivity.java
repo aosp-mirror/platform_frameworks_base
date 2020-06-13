@@ -27,6 +27,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -100,7 +101,6 @@ public class BubbleOverflowActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bubble_overflow_activity);
-        setBackgroundColor();
 
         mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
@@ -141,32 +141,23 @@ public class BubbleOverflowActivity extends Activity {
      * Handle theme changes.
      */
     void updateTheme() {
-        final int mode =
-                getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+        Resources res = getResources();
+        final int mode = res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
         switch (mode) {
-            case Configuration.UI_MODE_NIGHT_NO:
-                if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "Set overflow UI to light mode");
-                }
-                mEmptyStateImage.setImageDrawable(
-                        getResources().getDrawable(R.drawable.ic_empty_bubble_overflow_light));
-                break;
             case Configuration.UI_MODE_NIGHT_YES:
-                if (DEBUG_OVERFLOW) {
-                    Log.d(TAG, "Set overflow UI to dark mode");
-                }
                 mEmptyStateImage.setImageDrawable(
-                        getResources().getDrawable(R.drawable.ic_empty_bubble_overflow_dark));
+                        res.getDrawable(R.drawable.ic_empty_bubble_overflow_dark));
+                findViewById(android.R.id.content)
+                        .setBackgroundColor(res.getColor(R.color.bubbles_dark));
+                break;
+
+            case Configuration.UI_MODE_NIGHT_NO:
+                mEmptyStateImage.setImageDrawable(
+                        res.getDrawable(R.drawable.ic_empty_bubble_overflow_light));
+                findViewById(android.R.id.content)
+                        .setBackgroundColor(res.getColor(R.color.bubbles_light));
                 break;
         }
-    }
-
-    void setBackgroundColor() {
-        final TypedArray ta = getApplicationContext().obtainStyledAttributes(
-                new int[]{android.R.attr.colorBackgroundFloating});
-        int bgColor = ta.getColor(0, Color.WHITE);
-        ta.recycle();
-        findViewById(android.R.id.content).setBackgroundColor(bgColor);
     }
 
     void onDataChanged(List<Bubble> bubbles) {
