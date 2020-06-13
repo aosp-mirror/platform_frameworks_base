@@ -24,7 +24,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -72,6 +71,7 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     protected QuickStatusBarHeader mHeader;
     private QSCustomizer mQSCustomizer;
     protected QSPanel mQSPanel;
+    protected NonInterceptingScrollView mQSPanelScrollView;
     private QSDetail mQSDetail;
     private boolean mListening;
     private QSContainerImpl mContainer;
@@ -122,8 +122,20 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mQSPanel = view.findViewById(R.id.quick_settings_panel);
+        mQSPanelScrollView = view.findViewById(R.id.expanded_qs_scroll_view);
+        mQSPanelScrollView.addOnLayoutChangeListener(
+                (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
+                    updateQsBounds();
+                });
+        mQSPanelScrollView.setOnScrollChangeListener(
+                (v, scrollX, scrollY, oldScrollX, oldScrollY) -> {
+            // Lazily update animators whenever the scrolling changes
+            mQSAnimator.onQsScrollingChanged();
+            mHeader.setExpandedScrollAmount(scrollY);
+        });
         mQSDetail = view.findViewById(R.id.qs_detail);
         mHeader = view.findViewById(R.id.header);
+        mQSPanel.setHeaderContainer(view.findViewById(R.id.header_text_container));
         mFooter = view.findViewById(R.id.qs_footer);
         mContainer = view.findViewById(id.quick_settings_container);
 
@@ -133,8 +145,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
 
 
         mQSDetail.setQsPanel(mQSPanel, mHeader, (View) mFooter);
-        mQSAnimator = new QSAnimator(this,
-                mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+        mQSAnimator = new QSAnimator(this, mHeader.findViewById(R.id.quick_qs_panel), mQSPanel);
+
 
         mQSCustomizer = view.findViewById(R.id.qs_customize);
         mQSCustomizer.setQs(this);
@@ -319,11 +331,6 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent event) {
-        return isCustomizing();
-    }
-
-    @Override
     public void setHeaderClickable(boolean clickable) {
         if (DEBUG) Log.d(TAG, "setHeaderClickable " + clickable);
     }
@@ -394,7 +401,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mLastViewHeight = currentHeight;
 
         boolean fullyExpanded = expansion == 1;
-        int heightDiff = mQSPanel.getBottom() - mHeader.getBottom() + mHeader.getPaddingBottom();
+        boolean fullyCollapsed = expansion == 0.0f;
+        int heightDiff = mQSPanelScrollView.getBottom() - mHeader.getBottom()
+                + mHeader.getPaddingBottom();
         float panelTranslationY = translationScaleY * heightDiff;
 
         // Let the views animate their contents correctly by giving them the necessary context.
@@ -403,19 +412,19 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         mFooter.setExpansion(onKeyguardAndExpanded ? 1 : expansion);
         mQSPanel.getQsTileRevealController().setExpansion(expansion);
         mQSPanel.getTileLayout().setExpansion(expansion);
-        mQSPanel.setTranslationY(translationScaleY * heightDiff);
+        mQSPanelScrollView.setTranslationY(translationScaleY * heightDiff);
+        if (fullyCollapsed) {
+            mQSPanelScrollView.setScrollY(0);
+        }
         mQSDetail.setFullyExpanded(fullyExpanded);
 
-        if (fullyExpanded) {
-            // Always draw within the bounds of the view when fully expanded.
-            mQSPanel.setClipBounds(null);
-        } else {
+        if (!fullyExpanded) {
             // Set bounds on the QS panel so it doesn't run over the header when animating.
-            mQsBounds.top = (int) -mQSPanel.getTranslationY();
-            mQsBounds.right = mQSPanel.getWidth();
-            mQsBounds.bottom = mQSPanel.getHeight();
-            mQSPanel.setClipBounds(mQsBounds);
+            mQsBounds.top = (int) -mQSPanelScrollView.getTranslationY();
+            mQsBounds.right = mQSPanelScrollView.getWidth();
+            mQsBounds.bottom = mQSPanelScrollView.getHeight();
         }
+        updateQsBounds();
 
         if (mQSAnimator != null) {
             mQSAnimator.setPosition(expansion);
@@ -423,29 +432,61 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
         updateMediaPositions();
     }
 
+    private void updateQsBounds() {
+        if (mLastQSExpansion == 1.0f) {
+            // Fully expanded, let's set the layout bounds as clip bounds. This is necessary because
+            // it's a scrollview and otherwise wouldn't be clipped.
+            mQsBounds.set(0, 0, mQSPanelScrollView.getWidth(), mQSPanelScrollView.getHeight());
+        }
+        mQSPanelScrollView.setClipBounds(mQsBounds);
+    }
+
     private void updateMediaPositions() {
         if (Utils.useQsMediaPlayer(getContext())) {
             mContainer.getLocationOnScreen(mTmpLocation);
             float absoluteBottomPosition = mTmpLocation[1] + mContainer.getHeight();
-            pinToBottom(absoluteBottomPosition, mQSPanel.getMediaHost());
-            pinToBottom(absoluteBottomPosition - mHeader.getPaddingBottom(),
-                    mHeader.getHeaderQsPanel().getMediaHost());
+            // The Media can be scrolled off screen by default, let's offset it
+            float expandedMediaPosition = absoluteBottomPosition - mQSPanelScrollView.getScrollY()
+                    + mQSPanelScrollView.getScrollRange();
+            // The expanded media host should never move below the laid out position
+            pinToBottom(expandedMediaPosition, mQSPanel.getMediaHost(), true /* expanded */);
+            // The expanded media host should never move above the laid out position
+            pinToBottom(absoluteBottomPosition, mHeader.getHeaderQsPanel().getMediaHost(),
+                    false /* expanded */);
         }
     }
 
-    private void pinToBottom(float absoluteBottomPosition, MediaHost mediaHost) {
+    private void pinToBottom(float absoluteBottomPosition, MediaHost mediaHost, boolean expanded) {
         View hostView = mediaHost.getHostView();
         if (mLastQSExpansion > 0) {
-            ViewGroup.MarginLayoutParams params =
-                    (ViewGroup.MarginLayoutParams) hostView.getLayoutParams();
-            float targetPosition = absoluteBottomPosition - params.bottomMargin
+            float targetPosition = absoluteBottomPosition - getTotalBottomMargin(hostView)
                     - hostView.getHeight();
             float currentPosition = mediaHost.getCurrentBounds().top
                     - hostView.getTranslationY();
-            hostView.setTranslationY(targetPosition - currentPosition);
+            float translationY = targetPosition - currentPosition;
+            if (expanded) {
+                // Never go below the laid out position. This is necessary since the qs panel can
+                // change in height and we don't want to ever go below it's position
+                translationY = Math.min(translationY, 0);
+            } else {
+                translationY = Math.max(translationY, 0);
+            }
+            hostView.setTranslationY(translationY);
         } else {
             hostView.setTranslationY(0);
         }
+    }
+
+    private float getTotalBottomMargin(View startView) {
+        int result = 0;
+        View child = startView;
+        View parent = (View) startView.getParent();
+        while (!(parent instanceof QSContainerImpl) && parent != null) {
+            result += parent.getHeight() - child.getBottom();
+            child = parent;
+            parent = (View) parent.getParent();
+        }
+        return result;
     }
 
     private boolean headerWillBeAnimating() {
@@ -504,7 +545,8 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
     public void notifyCustomizeChanged() {
         // The customize state changed, so our height changed.
         mContainer.updateExpansion();
-        mQSPanel.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
+        mQSPanelScrollView.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE
+                : View.INVISIBLE);
         mFooter.setVisibility(!mQSCustomizer.isCustomizing() ? View.VISIBLE : View.INVISIBLE);
         // Let the panel know the position changed and it needs to update where notifications
         // and whatnot are.
@@ -521,9 +563,9 @@ public class QSFragment extends LifecycleFragment implements QS, CommandQueue.Ca
             return getView().getHeight();
         }
         if (mQSDetail.isClosingDetail()) {
-            LayoutParams layoutParams = (LayoutParams) mQSPanel.getLayoutParams();
+            LayoutParams layoutParams = (LayoutParams) mQSPanelScrollView.getLayoutParams();
             int panelHeight = layoutParams.topMargin + layoutParams.bottomMargin +
-                    + mQSPanel.getMeasuredHeight();
+                    + mQSPanelScrollView.getMeasuredHeight();
             return panelHeight + getView().getPaddingBottom();
         } else {
             return getView().getMeasuredHeight();

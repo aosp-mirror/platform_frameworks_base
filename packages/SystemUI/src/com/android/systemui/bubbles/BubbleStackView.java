@@ -91,7 +91,6 @@ import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -287,7 +286,7 @@ public class BubbleStackView extends FrameLayout
     private BubbleController.BubbleExpandListener mExpandListener;
 
     /** Callback to run when we want to unbubble the given notification's conversation. */
-    private Consumer<NotificationEntry> mUnbubbleConversationCallback;
+    private Consumer<String> mUnbubbleConversationCallback;
 
     private SysUiState mSysUiState;
 
@@ -999,10 +998,7 @@ public class BubbleStackView extends FrameLayout
         mManageMenu.findViewById(R.id.bubble_manage_menu_dont_bubble_container).setOnClickListener(
                 view -> {
                     showManageMenu(false /* show */);
-                    final Bubble bubble = mBubbleData.getSelectedBubble();
-                    if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-                        mUnbubbleConversationCallback.accept(bubble.getEntry());
-                    }
+                    mUnbubbleConversationCallback.accept(mBubbleData.getSelectedBubble().getKey());
                 });
 
         mManageMenu.findViewById(R.id.bubble_manage_menu_settings_container).setOnClickListener(
@@ -1100,16 +1096,17 @@ public class BubbleStackView extends FrameLayout
             mBubbleOverflow = new BubbleOverflow(getContext());
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
         } else {
-            mBubbleContainer.removeView(mBubbleOverflow.getBtn());
+            mBubbleContainer.removeView(mBubbleOverflow.getIconView());
             mBubbleOverflow.setUpOverflow(mBubbleContainer, this);
             overflowBtnIndex = mBubbleContainer.getChildCount();
         }
-        mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
+        mBubbleContainer.addView(mBubbleOverflow.getIconView(), overflowBtnIndex,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mBubbleOverflow.getBtn().setOnClickListener(v -> {
+        mBubbleOverflow.getIconView().setOnClickListener(v -> {
             setSelectedBubble(mBubbleOverflow);
             showManageMenu(false);
         });
+        updateOverflowVisibility();
     }
     /**
      * Handle theme changes.
@@ -1353,7 +1350,7 @@ public class BubbleStackView extends FrameLayout
 
     /** Sets the function to call to un-bubble the given conversation. */
     public void setUnbubbleConversationCallback(
-            Consumer<NotificationEntry> unbubbleConversationCallback) {
+            Consumer<String> unbubbleConversationCallback) {
         mUnbubbleConversationCallback = unbubbleConversationCallback;
     }
 
