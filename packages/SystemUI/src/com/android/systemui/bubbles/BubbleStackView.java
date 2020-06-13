@@ -534,6 +534,8 @@ public class BubbleStackView extends FrameLayout
                         mMagneticTarget,
                         mIndividualBubbleMagnetListener);
 
+                hideImeFromExpandedBubble();
+
                 // Save the magnetized individual bubble so we can dispatch touch events to it.
                 mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
             } else {
@@ -1104,7 +1106,10 @@ public class BubbleStackView extends FrameLayout
         }
         mBubbleContainer.addView(mBubbleOverflow.getBtn(), overflowBtnIndex,
                 new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
-        mBubbleOverflow.getBtn().setOnClickListener(v -> setSelectedBubble(mBubbleOverflow));
+        mBubbleOverflow.getBtn().setOnClickListener(v -> {
+            setSelectedBubble(mBubbleOverflow);
+            showManageMenu(false);
+        });
     }
     /**
      * Handle theme changes.
@@ -1517,6 +1522,12 @@ public class BubbleStackView extends FrameLayout
                 if (previouslySelected != null) {
                     previouslySelected.setContentVisibility(false);
                 }
+                if (previouslySelected != null && previouslySelected.getExpandedView() != null) {
+                    // Hide the currently expanded bubble's IME if it's visible before switching
+                    // to a new bubble.
+                    previouslySelected.getExpandedView().hideImeIfVisible();
+                }
+
                 updateExpandedBubble();
                 requestUpdate();
 
@@ -1780,6 +1791,9 @@ public class BubbleStackView extends FrameLayout
                         AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
                         mScaleInSpringConfig)
                 .addUpdateListener((target, values) -> {
+                    if (mExpandedBubble.getIconView() == null) {
+                        return;
+                    }
                     mExpandedViewContainerMatrix.postTranslate(
                             mExpandedBubble.getIconView().getTranslationX()
                                     - bubbleWillBeAtX,
@@ -1812,6 +1826,10 @@ public class BubbleStackView extends FrameLayout
         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
             mExpandedBubble.getExpandedView().hideImeIfVisible();
         }
+
+        // Let the expanded animation controller know that it shouldn't animate child adds/reorders
+        // since we're about to animate collapsed.
+        mExpandedAnimationController.notifyPreparingToCollapse();
 
         final long startDelay =
                 (long) (ExpandedAnimationController.EXPAND_COLLAPSE_TARGET_ANIM_DURATION * 0.6f);
@@ -2429,8 +2447,6 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "updateExpandedBubble()");
         }
-
-        hideImeFromExpandedBubble();
 
         mExpandedViewContainer.removeAllViews();
         if (mIsExpanded && mExpandedBubble != null

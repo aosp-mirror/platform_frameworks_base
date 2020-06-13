@@ -513,7 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Долазно"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Ново"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Нечујно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Обавештења"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
@@ -598,7 +598,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Апликација је закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"На овај начин се стално приказује док га не откачите. Превуците нагоре и задржите да бисте га откачили."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Стално ће се приказивати док је не откачите. Превуците нагоре и задржите да бисте је откачили."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Почетна да бисте га откачили."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Могу да буду доступни лични подаци (као што су контакти и садржај имејлова)."</string>
@@ -1007,8 +1007,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Премести горе десно"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Премести доле лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Премести доле десно"</string>
-    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Одбацивање облачића"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не користи облачиће за конверзацију"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Ћаскајте у облачићима"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Нове конверзације се приказују као плутајуће иконе или облачићи. Додирните да бисте отворили облачић. Превуците да бисте га преместили."</string>

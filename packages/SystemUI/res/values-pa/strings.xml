@@ -510,7 +510,8 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ਇਤਿਹਾਸ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ਇਨਕਮਿੰਗ"</string>
+    <!-- no translation found for notification_section_header_incoming (850925217908095197) -->
+    <skip />
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ਸ਼ਾਂਤ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ਗੱਲਾਂਬਾਤਾਂ"</string>
@@ -1002,8 +1003,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ਉੱਪਰ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ਹੇਠਾਂ ਵੱਲ ਖੱਬੇ ਲਿਜਾਓ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ਹੇਠਾਂ ਵੱਲ ਸੱਜੇ ਲਿਜਾਓ"</string>
-    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ਬਬਲ ਨੂੰ ਖਾਰਜ ਕਰੋ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ਗੱਲਬਾਤ \'ਤੇ ਬਬਲ ਨਾ ਲਾਓ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ਬਬਲ ਵਰਤਦੇ ਹੋਏ ਚੈਟ ਕਰੋ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ਨਵੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਫਲੋਟਿੰਗ ਪ੍ਰਤੀਕਾਂ ਜਾਂ ਬਬਲ ਦੇ ਰੂਪ ਵਿੱਚ ਦਿਸਦੀਆਂ ਹਨ। ਬਬਲ ਨੂੰ ਖੋਲ੍ਹਣ ਲਈ ਟੈਪ ਕਰੋ। ਇਸਨੂੰ ਲਿਜਾਣ ਲਈ ਘਸੀਟੋ।"</string>
@@ -1068,7 +1068,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"ਗੜਬੜ, ਮੁੜ ਕੋਸ਼ਿਸ਼ ਹੋ ਰਹੀ ਹੈ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ਨਹੀਂ ਮਿਲਿਆ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ਕੰਟਰੋਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ <xliff:g id="APPLICATION">%2$s</xliff:g> ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿ ਕੰਟਰੋਲ ਹਾਲੇ ਵੀ ਉਪਲਬਧ ਹੈ ਅਤੇ ਐਪ ਸੈਟਿੰਗ ਬਦਲੀ ਨਹੀਂ ਹੈ।"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕੀ। ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ <xliff:g id="APPLICATION">%2$s</xliff:g> ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿ ਕੰਟਰੋਲ ਹਾਲੇ ਉਪਲਬਧ ਹੈ ਅਤੇ ਐਪ ਸੈਟਿੰਗਾਂ ਨਹੀਂ ਬਦਲੀਆਂ ਹਨ।"</string>
     <string name="controls_open_app" msgid="483650971094300141">"ਐਪ ਖੋਲ੍ਹੋ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ਸਥਿਤੀ ਲੋਡ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ਗੜਬੜ, ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ"</string>

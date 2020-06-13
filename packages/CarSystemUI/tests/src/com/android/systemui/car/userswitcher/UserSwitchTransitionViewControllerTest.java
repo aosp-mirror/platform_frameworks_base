@@ -18,6 +18,8 @@ package com.android.systemui.car.userswitcher;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
@@ -28,6 +30,7 @@ import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 import android.testing.TestableResources;
+import android.view.IWindowManager;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -52,6 +55,8 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
     private TestableResources mTestableResources;
     @Mock
     private OverlayViewGlobalStateController mOverlayViewGlobalStateController;
+    @Mock
+    private IWindowManager mWindowManagerService;
 
     @Before
     public void setUp() {
@@ -62,6 +67,7 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
                 Handler.getMain(),
                 mTestableResources.getResources(),
                 (UserManager) mContext.getSystemService(Context.USER_SERVICE),
+                mWindowManagerService,
                 mOverlayViewGlobalStateController
         );
 
@@ -118,6 +124,29 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
                 any());
     }
 
+    @Test
+    public void onWindowShownTimeoutPassed_viewNotHidden_hidesUserSwitchTransitionView() {
+        mCarUserSwitchingDialogController.handleShow(/* currentUserId= */ TEST_USER_1);
+        reset(mOverlayViewGlobalStateController);
+
+        getContext().getMainThreadHandler().postDelayed(() -> {
+            verify(mOverlayViewGlobalStateController).hideView(
+                    eq(mCarUserSwitchingDialogController), any());
+        }, mCarUserSwitchingDialogController.getWindowShownTimeoutMs() + 10);
+    }
+
+    @Test
+    public void onWindowShownTimeoutPassed_viewHidden_doesNotHideUserSwitchTransitionViewAgain() {
+        mCarUserSwitchingDialogController.handleShow(/* currentUserId= */ TEST_USER_1);
+        mCarUserSwitchingDialogController.handleHide();
+        reset(mOverlayViewGlobalStateController);
+
+        getContext().getMainThreadHandler().postDelayed(() -> {
+            verify(mOverlayViewGlobalStateController, never()).hideView(
+                    eq(mCarUserSwitchingDialogController), any());
+        }, mCarUserSwitchingDialogController.getWindowShownTimeoutMs() + 10);
+    }
+
     private final class TestableUserSwitchTransitionViewController extends
             UserSwitchTransitionViewController {
 
@@ -125,8 +154,10 @@ public class UserSwitchTransitionViewControllerTest extends SysuiTestCase {
 
         TestableUserSwitchTransitionViewController(Context context, Handler handler,
                 Resources resources, UserManager userManager,
+                IWindowManager windowManagerService,
                 OverlayViewGlobalStateController overlayViewGlobalStateController) {
-            super(context, handler, resources, userManager, overlayViewGlobalStateController);
+            super(context, handler, resources, userManager, windowManagerService,
+                    overlayViewGlobalStateController);
             mHandler = handler;
         }
 
