@@ -598,7 +598,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ນີ້ຈະເຮັດໃຫ້ມັນຢູ່ໃນມຸມມອງຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ປັດຂຶ້ນຄ້າງໄວ້ເພື່ອເຊົາປັກໝຸດ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ອາດສາມາດເຂົ້າເຖິງຂໍ້ມູນສ່ວນຕົວໄດ້ (ເຊັ່ນ: ລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ເນື້ອຫາອີເມວ)"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ອາດສາມາດເຂົ້າເຖິງຂໍ້ມູນສ່ວນຕົວໄດ້ (ເຊັ່ນ: ລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ເນື້ອຫາອີເມວ)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ແອັບທີ່ປັກໝຸດໄວ້ອາດເປີດແອັບອື່ນ."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ເພື່ອຍົກເລີກການປັກໝຸດແອັບນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ເພື່ອຍົກເລີກການປັກໝຸດແອັບນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>

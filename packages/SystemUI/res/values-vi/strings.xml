@@ -593,12 +593,12 @@
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"tắt"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Chuyển đổi thiết bị đầu ra"</string>
     <string name="screen_pinning_title" msgid="9058007390337841305">"Đã ghim ứng dụng"</string>
-    <string name="screen_pinning_description" msgid="8699395373875667743">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Quay lại và Tổng quan để bỏ ghim."</string>
-    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Quay lại và nút Màn hình chính để bỏ ghim."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Màn hình tiếp tục hiển thị cho tới khi bạn bỏ ghim. Hãy vuốt lên và giữ để bỏ ghim."</string>
-    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Tổng quan để bỏ ghim."</string>
-    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Thao tác này sẽ duy trì hiển thị màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Màn hình chính để bỏ ghim."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dữ liệu cá nhân có thể bị truy cập (chẳng hạn như danh bạ và nội dung email)."</string>
+    <string name="screen_pinning_description" msgid="8699395373875667743">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Quay lại và Tổng quan để bỏ ghim."</string>
+    <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Quay lại và nút Màn hình chính để bỏ ghim."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy vuốt lên và giữ để bỏ ghim."</string>
+    <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ Tổng quan để bỏ ghim."</string>
+    <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ứng dụng này sẽ ở cố định trên màn hình cho đến khi bạn bỏ ghim. Hãy chạm và giữ nút Màn hình chính để bỏ ghim."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Ứng dụng này có thể truy cập dữ liệu cá nhân (chẳng hạn như danh bạ và nội dung email)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Ứng dụng đã ghim có thể mở các ứng dụng khác."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Để bỏ ghim ứng dụng này, hãy chạm và giữ nút Quay lại và nút Tổng quan"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Để bỏ ghim ứng dụng này, hãy chạm và giữ nút Quay lại và nút Màn hình chính"</string>

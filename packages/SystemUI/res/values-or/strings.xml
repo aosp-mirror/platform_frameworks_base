@@ -596,7 +596,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ଆପକୁ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ଆକ୍ସେସ୍ କରାଯାଇପାରେ (ଯେପରିକି ଯୋଗାଯୋଗଗୁଡ଼ିକ ଏବଂ ଇମେଲ୍ ବିଷୟବସ୍ତୁ)।"</string>
