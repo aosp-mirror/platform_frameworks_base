@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"অ্যাপ পিন করা হয়েছে"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ফিরুন এবং ওভারভিউ স্পর্শ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"ফিরে যান\" এবং \"হোম\" বোতামদুটি ট্যাপ করে ধরে রাখুন।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"এর ফলে আপনি আনপিন না করা পর্যন্ত এটি দেখানো হবে। আনপিন করার জন্য উপরের দিকে সোয়াইপ করে ধরে থাকুন।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"এটি আপনি আনপিন না করা পর্যন্ত এটিকে প্রদর্শিত করবে৷ আনপিন করতে ওভারভিউ স্পর্শ করে ধরে থাকুন৷"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"এর ফলে আপনি এটি আনপিন না করা পর্যন্ত এটি দেখানো হতে থাকবে। আনপিন করতে \"হোম\" বোতামটি ট্যাপ করে ধরে রাখুন।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ব্যক্তিগত তথ্য অ্যাক্সেস করা যেতে পারে (যেমন, পরিচিতি ও ইমেল কন্টেন্ট)।"</string>

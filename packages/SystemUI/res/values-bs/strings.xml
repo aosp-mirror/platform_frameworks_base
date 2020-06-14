@@ -601,7 +601,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Prevucite prema gore i držite da otkačite."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Pregled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Da okačite ekran, dodirnite ili držite dugme Početna."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Lični podaci mogu biti dostupni (kao što su kontakti i sadržaj e-pošte)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Lični podaci mogu biti dostupni (naprimjer kontakti i sadržaj e-pošte)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Zakačena aplikacija može otvoriti druge aplikacije."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Dodirnite i držite dugmad Nazad i Pregled da otkačite ovu aplikaciju"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Dodirnite i držite dugmad Nazad i Početni ekran da otkačite ovu aplikaciju"</string>
