@@ -385,6 +385,10 @@ public class NotificationEntryManager implements
         public void onNotificationRankingUpdate(RankingMap rankingMap) {
             updateNotificationRanking(rankingMap);
         }
+
+        @Override
+        public void onNotificationsInitialized() {
+        }
     };
 
     /**

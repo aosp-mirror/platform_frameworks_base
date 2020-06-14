@@ -3071,7 +3071,7 @@ public class NotificationPanelViewController extends PanelViewController {
         return new TouchHandler() {
             @Override
             public boolean onInterceptTouchEvent(MotionEvent event) {
-                if (mBlockTouches || mQsFullyExpanded && mQs.onInterceptTouchEvent(event)) {
+                if (mBlockTouches || mQsFullyExpanded && mQs.disallowPanelTouches()) {
                     return false;
                 }
                 initDownStates(event);
@@ -3098,7 +3098,8 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                if (mBlockTouches || (mQs != null && mQs.isCustomizing())) {
+                if (mBlockTouches || (mQsFullyExpanded && mQs != null
+                        && mQs.disallowPanelTouches())) {
                     return false;
                 }
 

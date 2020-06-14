@@ -20,6 +20,7 @@ import android.os.RemoteException
 import android.service.notification.NotificationListenerService.RankingMap
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogLevel.DEBUG
+import com.android.systemui.log.LogLevel.ERROR
 import com.android.systemui.log.LogLevel.INFO
 import com.android.systemui.log.LogLevel.WARNING
 import com.android.systemui.log.LogLevel.WTF
@@ -165,6 +166,14 @@ class NotifCollectionLogger @Inject constructor(
             int1 = totalExtenders
         }, {
             "LIFETIME EXTENSION ENDED for $str1 by '$str2'; $int1 remaining extensions"
+        })
+    }
+
+    fun logIgnoredError(message: String?) {
+        buffer.log(TAG, ERROR, {
+            str1 = message
+        }, {
+            "ERROR suppressed due to initialization forgiveness: $str1"
         })
     }
 }

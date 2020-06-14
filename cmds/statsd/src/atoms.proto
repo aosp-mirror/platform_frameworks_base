@@ -470,13 +470,24 @@ message Atom {
         NetworkDhcpRenewReported network_dhcp_renew_reported = 291 [(module) = "network_stack"];
         NetworkValidationReported network_validation_reported = 292 [(module) = "network_stack"];
         NetworkStackQuirkReported network_stack_quirk_reported = 293 [(module) = "network_stack"];
+        MediametricsAudioRecordDeviceUsageReported mediametrics_audiorecorddeviceusage_reported =
+            294;
+        MediametricsAudioThreadDeviceUsageReported mediametrics_audiothreaddeviceusage_reported =
+            295;
+        MediametricsAudioTrackDeviceUsageReported mediametrics_audiotrackdeviceusage_reported =
+            296;
+        MediametricsAudioDeviceConnectionReported mediametrics_audiodeviceconnection_reported =
+            297;
+        BlobCommitted blob_committed = 298 [(module) = "framework"];
+        BlobLeased blob_leased = 299 [(module) = "framework"];
+        BlobOpened blob_opened = 300 [(module) = "framework"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10081
+    // Next: 10084
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000 [(module) = "framework"];
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001 [(module) = "framework"];
@@ -567,7 +578,7 @@ message Atom {
         SimSlotState sim_slot_state = 10078 [(module) = "telephony"];
         SupportedRadioAccessFamily supported_radio_access_family = 10079 [(module) = "telephony"];
         SettingSnapshot setting_snapshot = 10080 [(module) = "framework"];
-        //10081 free for use
+        BlobInfo blob_info = 10081 [(module) = "framework"];
         DataUsageBytesTransfer data_usage_bytes_transfer = 10082 [(module) = "framework"];
         BytesTransferByTagAndMetered bytes_transfer_by_tag_and_metered =
                 10083 [(module) = "framework"];
@@ -4895,6 +4906,94 @@ message SnapshotMergeReported {
     // containing the dm-snapshot's copy-on-write data generated during a
     // Virtual A/B update.
     optional int64 cow_file_size_bytes = 5;
+}
+
+/**
+ * Event representing when BlobStoreManager.Session#commit() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobCommitted {
+    // Uid of the Blob committer
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob committed
+    optional int64 blob_id = 2;
+
+    // Size of the Blob
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Commit Succeeded
+        SUCCESS = 1;
+        // Commit Failed: Error occurred during commit
+        ERROR_DURING_COMMIT = 2;
+        // Commit Failed: Digest of the data did not match Blob digest
+        DIGEST_MISMATCH = 3;
+    }
+    optional Result result = 4;
+}
+
+/**
+ * Event representing when BlobStoreManager#acquireLease() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobLeased{
+    // Uid of the Blob leasee
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob leased or 0 if the Blob does not exist
+    optional int64 blob_id = 2;
+
+    // Size of the Blob or 0 if the Blob does not exist
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Lease Succeeded
+        SUCCESS = 1;
+        // Lease Failed: Blob does not exist
+        BLOB_DNE = 2;
+        // Lease Failed: Leasee does not have access to the Blob
+        ACCESS_NOT_ALLOWED = 3;
+        // Lease Failed: Leasee requested an invalid expiry duration
+        LEASE_EXPIRY_INVALID = 4;
+        // Lease Failed: Leasee has exceeded the total data lease limit
+        DATA_SIZE_LIMIT_EXCEEDED = 5;
+    }
+    optional Result result = 4;
+}
+
+/**
+ * Event representing when BlobStoreManager#openBlob() is called
+ *
+ * Logged from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobOpened{
+    // Uid of the Blob opener
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Id of the Blob opened or 0 if the Blob does not exist
+    optional int64 blob_id = 2;
+
+    // Size of the Blob or 0 if the Blob does not exist
+    optional int64 size = 3;
+
+    enum Result {
+        UNKNOWN = 0;
+        // Open Succeeded
+        SUCCESS = 1;
+        // Open Failed: Blob does not exist
+        BLOB_DNE = 2;
+        // Open Failed: Opener does not have access to the Blob
+        ACCESS_NOT_ALLOWED = 3;
+    }
+    optional Result result = 4;
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -10000,7 +10099,7 @@ message GnssStats {
     optional int64 time_to_first_fix_reports = 3;
 
     // Total pulled reported time to first fix (in milli-seconds) since boot
-    optional int64 time_to_first_fix_milli_s = 4;
+    optional int64 time_to_first_fix_millis = 4;
 
     // Number of position accuracy reports since boot
     optional int64 position_accuracy_reports = 5;
@@ -10548,4 +10647,307 @@ message AssistantInvocationReported {
 
     // Whether the Assistant handles were showing at the time of invocation.
     optional bool assistant_handles_showing = 6;
+}
+
+/**
+ * Logs when an AudioRecord finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioRecordDeviceUsageReported {
+    // The devices connected to this AudioRecord.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<INPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The client-server buffer framecount.
+    // The framecount is generally between 960 - 48000 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the AudioRecord.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio input flags used to construct the AudioRecord.
+    // A string OR from system/media/audio/include/system/audio-base.h audio_input_flags_t
+    optional string flags = 8;
+
+    // The santized package name of the audio client associated with the AudioRecord.
+    // See getSanitizedPackageNameAndVersionCode() in
+    // frameworks/av/services/mediametrics/MediaMetricsService.cpp
+    optional string package_name = 9;
+
+    // The selected device id (nonzero if a non-default device is selected)
+    optional int32 selected_device_id = 10;
+
+    // The caller of the AudioRecord.
+    // See lookup<CALLER_NAME>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string caller = 11;
+
+    // The audio source for AudioRecord.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_source_t
+    optional string source = 12;
+}
+
+/**
+ * Logs when an AudioThread finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioThreadDeviceUsageReported {
+    // The devices connected to this audio thread.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // (for record threads):
+    // See lookup<INPUT_DEVICE> in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // (for playback threads):
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The framecount of the buffer delivered to (or from) the HAL.
+    // The framecount is generally ~960 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the audio thread.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio flags used to construct the thread
+    // (for record threads):
+    // A string OR from system/media/audio/include/system/audio-base.h audio_input_flags_t
+    // (for playback threads):
+    // A string OR from system/media/audio/include/system/audio-base.h audio_output_flags_t
+    optional string flags = 8;
+
+    // The number of underruns encountered for a playback thread or the
+    // number of overruns encountered for a capture thread.
+    optional int32 xruns = 9;
+
+    // The type of thread
+    // A thread type enumeration from
+    // frameworks/av/mediametrics/services/Translate.h
+    optional string type = 10;
+}
+
+/**
+ * Logs when an AudioTrack finishes running on an audio device
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioTrackDeviceUsageReported {
+    // The output devices connected to this AudioTrack.
+    // A string OR of various output device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string devices = 1;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 2;
+
+    // The amount of time spent in the device as measured by the active track in AudioFlinger.
+    optional int64 device_time_nanos = 3;
+
+    // The audio data format used for encoding.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_format_t
+    optional string encoding = 4;
+
+    // The client-server buffer framecount.
+    // The framecount is generally between 960 - 48000 for PCM encoding.
+    // The framecount represents raw buffer size in bytes for non-PCM encoding.
+    // A static track (see traits) may have a very large framecount.
+    optional int32 frame_count = 5;
+
+    // The number of audio intervals (contiguous, continuous playbacks).
+    optional int32 interval_count = 6;
+
+    // The sample rate of the AudioTrack.
+    // A number generally between 8000-96000 (frames per second).
+    optional int32 sample_rate = 7;
+
+    // The audio flags used to construct the AudioTrack.
+    // A string OR from system/media/audio/include/system/audio-base.h audio_output_flags_t
+    optional string flags = 8;
+
+    // The number of underruns encountered.
+    optional int32 xruns = 9;
+
+    // The santized package name of the audio client associated with the AudioTrack.
+    // See getSanitizedPackageNameAndVersionCode() in
+    // frameworks/av/services/mediametrics/MediaMetricsService.cpp
+    optional string package_name = 10;
+
+    // The latency of the last sample in the buffer in milliseconds.
+    optional float device_latency_millis = 11;
+
+    // The startup time in milliseconds from start() to sample played.
+    optional float device_startup_millis = 12;
+
+    // The average volume of the track on the device [ 0.f - 1.f ]
+    optional float device_volume = 13;
+
+    // The selected device id (nonzero if a non-default device is selected)
+    optional int32 selected_device_id = 14;
+
+    // The stream_type category for the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_stream_type_t
+    optional string stream_type = 15;
+
+    // The usage for the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_usage_t
+    optional string usage = 16;
+
+    // The content type of the AudioTrack.
+    // An enumeration from system/media/audio/include/system/audio-base.h audio_content_type_t
+    optional string content_type = 17;
+
+    // The caller of the AudioTrack.
+    // See lookup<CALLER_NAME>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string caller = 18;
+
+    // The traits of the AudioTrack.
+    // A string OR of different traits, may be empty string.
+    // Only "static" is supported for R.
+    // See lookup<TRACK_TRAITS>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    optional string traits = 19;
+}
+
+/**
+ * Logs the status of an audio device connection attempt.
+ *
+ * Logged from:
+ *   frameworks/av/services/mediametrics/AudioAnalytics.cpp
+ */
+message MediametricsAudioDeviceConnectionReported {
+    // The input devices represented by this report.
+    // A string OR of various input device categories, e.g. "DEVICE1|DEVICE2".
+    // See lookup<INPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string input_devices = 1;
+
+    // The output devices represented by this report.
+    // A string OR of various output device categories.
+    // See lookup<OUTPUT_DEVICE>() in frameworks/av/services/mediametrics/AudioTypes.cpp
+    // See audio_device_t in system/media/audio/include/system/audio-base.h
+    optional string output_devices = 2;
+
+    // The name of the remote device attached to the device, typically available for USB or BT.
+    // This may be empty for a fixed device, or separated by "|" if more than one.
+    optional string device_names = 3;
+
+    // The result of the audio device connection.
+    // 0 indicates success: connection verified.
+    // 1 indicates unknown: connection not verified or not known if diverted properly.
+    // Other values indicate specific status.
+    // See DeviceConnectionResult in frameworks/av/services/mediametrics/AudioTypes.h
+    optional int32 result = 4;
+
+    // Average milliseconds of time to connect
+    optional float time_to_connect_millis = 5;
+
+    // Number of connections if aggregated statistics, otherwise 1.
+    optional int32 connection_count = 6;
+}
+
+// Blob Committer stats
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobCommitterProto {
+    // Committer app's uid
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Unix epoch timestamp of the commit in milliseconds
+    optional int64 commit_timestamp_millis = 2;
+
+    // Flags of what access types the committer has set for the Blob
+    optional int32 access_mode = 3;
+
+    // Number of packages that have been whitelisted for ACCESS_TYPE_WHITELIST
+    optional int32 num_whitelisted_package = 4;
+}
+
+// Blob Leasee stats
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobLeaseeProto {
+    // Leasee app's uid
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Unix epoch timestamp for lease expiration in milliseconds
+    optional int64 lease_expiry_timestamp_millis = 2;
+}
+
+// List of Blob Committers
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobCommitterListProto {
+    repeated BlobCommitterProto committer = 1;
+}
+
+// List of Blob Leasees
+// Keep in sync between:
+//     frameworks/base/core/proto/android/server/blobstoremanagerservice.proto
+//     frameworks/base/cmds/statsd/src/atoms.proto
+message BlobLeaseeListProto {
+    repeated BlobLeaseeProto leasee = 1;
+}
+
+/**
+ * Logs the current state of a Blob committed with BlobStoreManager
+ *
+ * Pulled from:
+ *  frameworks/base/apex/blobstore/service/java/com/android/server/blob/BlobStoreManagerService.java
+ */
+message BlobInfo {
+    // Id of the Blob
+    optional int64 blob_id = 1;
+
+    // Size of the Blob data
+    optional int64 size = 2;
+
+    // Unix epoch timestamp of the Blob's expiration in milliseconds
+    optional int64 expiry_timestamp_millis = 3;
+
+    // List of committers of this Blob
+    optional BlobCommitterListProto committers = 4;
+
+    // List of leasees of this Blob
+    optional BlobLeaseeListProto leasees = 5;
 }

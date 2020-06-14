@@ -16,16 +16,8 @@
 
 package com.android.networkstack.tethering;
 
-import static android.net.TetheringConstants.EXTRA_ADD_TETHER_TYPE;
-import static android.net.TetheringConstants.EXTRA_PROVISION_CALLBACK;
-import static android.net.TetheringConstants.EXTRA_RUN_PROVISION;
-import static android.net.TetheringConstants.EXTRA_TETHER_PROVISIONING_RESPONSE;
-import static android.net.TetheringConstants.EXTRA_TETHER_SILENT_PROVISIONING_ACTION;
-import static android.net.TetheringConstants.EXTRA_TETHER_SUBID;
-import static android.net.TetheringConstants.EXTRA_TETHER_UI_PROVISIONING_APP_NAME;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_ETHERNET;
-import static android.net.TetheringManager.TETHERING_INVALID;
 import static android.net.TetheringManager.TETHERING_USB;
 import static android.net.TetheringManager.TETHERING_WIFI;
 import static android.net.TetheringManager.TETHERING_WIFI_P2P;
@@ -52,7 +44,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.net.util.SharedLog;
 import android.os.Bundle;
@@ -62,7 +53,6 @@ import android.os.ResultReceiver;
 import android.os.SystemProperties;
 import android.os.test.TestLooper;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.telephony.CarrierConfigManager;
 
 import androidx.test.filters.SmallTest;
@@ -86,7 +76,6 @@ public final class EntitlementManagerTest {
 
     private static final String[] PROVISIONING_APP_NAME = {"some", "app"};
     private static final String PROVISIONING_NO_UI_APP_NAME = "no_ui_app";
-    private static final String PROVISIONING_APP_RESPONSE = "app_response";
 
     @Mock private CarrierConfigManager mCarrierConfigManager;
     @Mock private Context mContext;
@@ -133,51 +122,15 @@ public final class EntitlementManagerTest {
         }
 
         @Override
-        protected Intent runUiTetherProvisioning(int type,
-                final TetheringConfiguration config, final ResultReceiver receiver) {
-            Intent intent = super.runUiTetherProvisioning(type, config, receiver);
-            assertUiTetherProvisioningIntent(type, config, receiver, intent);
+        protected void runUiTetherProvisioning(int type, int subId, ResultReceiver receiver) {
             uiProvisionCount++;
             receiver.send(fakeEntitlementResult, null);
-            return intent;
-        }
-
-        private void assertUiTetherProvisioningIntent(int type, final TetheringConfiguration config,
-                final ResultReceiver receiver, final Intent intent) {
-            assertEquals(Settings.ACTION_TETHER_PROVISIONING_UI, intent.getAction());
-            assertEquals(type, intent.getIntExtra(EXTRA_ADD_TETHER_TYPE, TETHERING_INVALID));
-            final String[] appName = intent.getStringArrayExtra(
-                    EXTRA_TETHER_UI_PROVISIONING_APP_NAME);
-            assertEquals(PROVISIONING_APP_NAME.length, appName.length);
-            for (int i = 0; i < PROVISIONING_APP_NAME.length; i++) {
-                assertEquals(PROVISIONING_APP_NAME[i], appName[i]);
-            }
-            assertEquals(receiver, intent.getParcelableExtra(EXTRA_PROVISION_CALLBACK));
-            assertEquals(config.activeDataSubId,
-                    intent.getIntExtra(EXTRA_TETHER_SUBID, INVALID_SUBSCRIPTION_ID));
         }
 
         @Override
-        protected Intent runSilentTetherProvisioning(int type,
-                final TetheringConfiguration config) {
-            Intent intent = super.runSilentTetherProvisioning(type, config);
-            assertSilentTetherProvisioning(type, config, intent);
+        protected void runSilentTetherProvisioning(int type, int subId) {
             silentProvisionCount++;
             addDownstreamMapping(type, fakeEntitlementResult);
-            return intent;
-        }
-
-        private void assertSilentTetherProvisioning(int type, final TetheringConfiguration config,
-                final Intent intent) {
-            assertEquals(type, intent.getIntExtra(EXTRA_ADD_TETHER_TYPE, TETHERING_INVALID));
-            assertEquals(true, intent.getBooleanExtra(EXTRA_RUN_PROVISION, false));
-            assertEquals(PROVISIONING_NO_UI_APP_NAME,
-                    intent.getStringExtra(EXTRA_TETHER_SILENT_PROVISIONING_ACTION));
-            assertEquals(PROVISIONING_APP_RESPONSE,
-                    intent.getStringExtra(EXTRA_TETHER_PROVISIONING_RESPONSE));
-            assertTrue(intent.hasExtra(EXTRA_PROVISION_CALLBACK));
-            assertEquals(config.activeDataSubId,
-                    intent.getIntExtra(EXTRA_TETHER_SUBID, INVALID_SUBSCRIPTION_ID));
         }
     }
 
@@ -234,8 +187,6 @@ public final class EntitlementManagerTest {
                 .thenReturn(PROVISIONING_APP_NAME);
         when(mResources.getString(R.string.config_mobile_hotspot_provision_app_no_ui))
                 .thenReturn(PROVISIONING_NO_UI_APP_NAME);
-        when(mResources.getString(R.string.config_mobile_hotspot_provision_response)).thenReturn(
-                PROVISIONING_APP_RESPONSE);
         // Act like the CarrierConfigManager is present and ready unless told otherwise.
         when(mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE))
                 .thenReturn(mCarrierConfigManager);
