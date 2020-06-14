@@ -56,6 +56,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.view.InputMonitor;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.accessibility.AccessibilityManager;
@@ -131,6 +132,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
     private final Intent mQuickStepIntent;
     private final ScreenshotHelper mScreenshotHelper;
     private final OneHandedUI mOneHandedUI;
+    private final CommandQueue mCommandQueue;
 
     private Region mActiveNavBarRegion;
 
@@ -483,6 +485,19 @@ public class OverviewProxyService extends CurrentUserTracker implements
                     null);
         }
 
+        @Override
+        public void expandNotificationPanel() {
+            if (!verifyCaller("expandNotificationPanel")) {
+                return;
+            }
+            long token = Binder.clearCallingIdentity();
+            try {
+                mCommandQueue.handleSystemKey(KeyEvent.KEYCODE_SYSTEM_NAVIGATION_DOWN);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
         private boolean verifyCaller(String reason) {
             final int callerId = Binder.getCallingUserHandle().getIdentifier();
             if (callerId != mCurrentBoundedUserId) {
@@ -632,6 +647,7 @@ public class OverviewProxyService extends CurrentUserTracker implements
                         .commitUpdate(mContext.getDisplayId());
             }
         });
+        mCommandQueue = commandQueue;
 
         // Listen for user setup
         startTracking();

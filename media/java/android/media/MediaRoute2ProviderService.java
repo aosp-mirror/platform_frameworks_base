@@ -246,7 +246,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
-                Log.w(TAG, "Ignoring duplicate session id.");
+                Log.w(TAG, "notifySessionCreated: Ignoring duplicate session id.");
                 return;
             }
             mSessionInfo.put(sessionInfo.getId(), sessionInfo);
@@ -274,7 +274,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             if (mSessionInfo.containsKey(sessionId)) {
                 mSessionInfo.put(sessionId, sessionInfo);
             } else {
-                Log.w(TAG, "Ignoring unknown session info.");
+                Log.w(TAG, "notifySessionUpdated: Ignoring unknown session info.");
                 return;
             }
 
@@ -304,7 +304,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             sessionInfo = mSessionInfo.remove(sessionId);
 
             if (sessionInfo == null) {
-                Log.w(TAG, "Ignoring unknown session info.");
+                Log.w(TAG, "notifySessionReleased: Ignoring unknown session info.");
                 return;
             }
 
@@ -314,7 +314,7 @@ public abstract class MediaRoute2ProviderService extends Service {
             try {
                 mRemoteCallback.notifySessionReleased(sessionInfo);
             } catch (RemoteException ex) {
-                Log.w(TAG, "Failed to notify session info changed.");
+                Log.w(TAG, "Failed to notify session released.", ex);
             }
         }
     }
@@ -485,7 +485,7 @@ public abstract class MediaRoute2ProviderService extends Service {
         try {
             mRemoteCallback.updateState(mProviderInfo);
         } catch (RemoteException ex) {
-            Log.w(TAG, "Failed to send onProviderInfoUpdated");
+            Log.w(TAG, "Failed to publish provider state.", ex);
         }
     }
 

@@ -74,7 +74,7 @@ public:
                                    std::vector<uint8_t>* _aidl_return) final;
     binder::Status startLoading(int32_t storageId, bool* _aidl_return) final;
     binder::Status deleteStorage(int32_t storageId) final;
-
+    binder::Status disableReadLogs(int32_t storageId) final;
     binder::Status configureNativeBinaries(int32_t storageId, const std::string& apkFullPath,
                                            const std::string& libDirRelativePath,
                                            const std::string& abi, bool extractNativeLibs,

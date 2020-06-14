@@ -39,7 +39,7 @@
             android:layout_alignParentLeft="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textColor="@color/media_primary_text"
-            android:gravity="left"
+            android:gravity="start"
             android:textSize="14sp" />
 
         <TextView
@@ -49,7 +49,7 @@
             android:layout_alignParentRight="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textColor="@color/media_primary_text"
-            android:gravity="right"
+            android:gravity="end"
             android:textSize="14sp" />
     </FrameLayout>
 
