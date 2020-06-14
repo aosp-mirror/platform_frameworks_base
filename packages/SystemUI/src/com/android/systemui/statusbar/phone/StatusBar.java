@@ -3982,7 +3982,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mIsKeyguard && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else if (mBubbleController.isStackExpanded()) {
-            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
+            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED, mUnlockScrimCallback);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
