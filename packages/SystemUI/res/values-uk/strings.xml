@@ -609,7 +609,7 @@
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Щоб відкріпити цей додаток, натисніть і утримуйте кнопки \"Назад\" та \"Огляд\""</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Щоб відкріпити цей додаток, натисніть і утримуйте кнопки \"Назад\" та \"Головний екран\""</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Щоб відкріпити цей додаток, проведіть пальцем вгору й утримуйте його на екрані"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"Зрозуміло"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Ні, дякую"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"Додаток закріплено"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Додаток відкріплено"</string>
@@ -673,7 +673,7 @@
     <string name="tuner_warning_title" msgid="7721976098452135267">"Це цікаво, але будьте обачні"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner пропонує нові способи налаштувати та персоналізувати інтерфейс користувача Android. Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
     <string name="tuner_persistent_warning" msgid="230466285569307806">"Ці експериментальні функції можуть змінюватися, не працювати чи зникати в майбутніх версіях. Будьте обачні."</string>
-    <string name="got_it" msgid="477119182261892069">"Зрозуміло"</string>
+    <string name="got_it" msgid="477119182261892069">"OK"</string>
     <string name="tuner_toast" msgid="3812684836514766951">"Вітаємо! System UI Tuner установлено в додатку Налаштування"</string>
     <string name="remove_from_settings" msgid="633775561782209994">"Видалити з додатка Налаштування"</string>
     <string name="remove_from_settings_prompt" msgid="551565437265615426">"Видалити інструмент System UI Tuner із додатка Налаштування та припинити користуватися всіма його функціями?"</string>
@@ -1018,7 +1018,7 @@
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Нові повідомлення чату з\'являються у вигляді спливаючих значків. Щоб відкрити чат, натисніть його, а щоб перемістити – перетягніть."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Налаштовуйте спливаючі чати будь-коли"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Натисніть \"Налаштувати\", щоб вимкнути спливаючі чати від цього додатка"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Зрозуміло"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Налаштування параметра \"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>\""</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Навігацію в системі оновлено. Щоб внести зміни, перейдіть у налаштування."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Перейдіть у налаштування, щоб оновити навігацію в системі"</string>

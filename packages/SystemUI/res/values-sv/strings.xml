@@ -599,7 +599,7 @@
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Skärmen visas tills du lossar den. Tryck länge på Översikt om du vill lossa skärmen."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Skärmen visas tills du lossar den. Tryck länge på Startsida om du vill lossa skärmen."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Personliga uppgifter kan bli tillgängliga (t.ex. kontakter och innehåll i e-post)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Det kan gå att öppna andra appar med appen du har fäst."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Den fästa appen kan öppna andra appar."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Om du vill lossa appen trycker du länge på knapparna Tillbaka och Översikt"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Om du vill lossa appen trycker du länge på knapparna Tillbaka och Startsida"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"Svep uppåt och håll kvar fingret om du vill lossa appen"</string>

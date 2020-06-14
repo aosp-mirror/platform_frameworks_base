@@ -596,7 +596,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"एप पिन गरिएको छ"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न पछाडि र गृह नामक बटनहरूलाई छोइराख्नुहोस्।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"तपाईंले अनपिन नगरेसम्म यस कार्यले यसलाई दृश्यमा राख्छ। अनपिन गर्न माथितिर स्वाइप गरी होल्ड गर्नुहोस्।"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"तपाईंले यो एप अनपिन नगरेसम्म यो एप यहाँ देखिइरहने छ। अनपिन गर्न माथितिर स्वाइप गरी होल्ड गर्नुहोस्।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न परिदृश्य बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"तपाईंले अनपिन नगरेसम्म यसले त्यसलाई दृश्यमा कायम राख्छ। अनपिन गर्न गृह नामक बटनलाई छोइराख्नुहोस्।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"स्क्रिनमा व्यक्तिगत डेटा (जस्तै सम्पर्क ठेगाना र इमेलको सामग्री) देखिन सक्छ।"</string>
@@ -1003,8 +1003,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"सिरानमा दायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"पुछारमा बायाँतिर सार्नुहोस्"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"पुछारमा दायाँतिर सार्नुहोस्"</string>
-    <!-- no translation found for bubble_dismiss_text (1314082410868930066) -->
-    <skip />
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"बबल खारेज गर्नुहोस्"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"वार्तालाप बबलको रूपमा नदेखाइयोस्"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबलहरू प्रयोग गरी कुराकानी गर्नुहोस्"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"नयाँ वार्तालापहरू तैरने आइकन वा बबलका रूपमा देखिन्छन्। बबल खोल्न ट्याप गर्नुहोस्। बबल सार्न सो बबललाई ड्र्याग गर्नुहोस्।"</string>

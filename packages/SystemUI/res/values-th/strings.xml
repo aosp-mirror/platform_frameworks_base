@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ตรึงแอปอยู่"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"กลับ\" และ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"วิธีนี้ช่วยให้เห็นแอปบนหน้าจอตลอดจนกว่าจะเลิกตรึง เลื่อนขึ้นค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"ภาพรวม\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"การดำเนินการนี้จะแสดงหน้าจอนี้ไว้เสมอจนกว่าคุณจะเลิกตรึง แตะ \"หน้าแรก\" ค้างไว้เพื่อเลิกตรึง"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"อาจมีการเข้าถึงข้อมูลส่วนตัว (เช่น รายชื่อติดต่อและเนื้อหาในอีเมล)"</string>

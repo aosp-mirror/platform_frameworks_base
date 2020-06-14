@@ -595,11 +595,11 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"應用程式已固定"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [返回] 按鈕和 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住 [返回] 按鈕和主螢幕按鈕即可取消固定。"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"這會讓目前的螢幕畫面保持顯示，直到取消固定為止。向上滑動並按住即可取消固定。"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"這會讓目前的螢幕畫面保持顯示狀態，直到取消固定為止。按住 [總覽] 按鈕即可取消固定。"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"這會讓應用程式顯示在螢幕上，直到取消固定為止。按住主螢幕按鈕即可取消固定。"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"個人資料 (例如聯絡人和電子郵件內容) 可能會遭存取。"</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"已設為固定的應用程式或許仍可開啟其他應用程式。"</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"已設為固定的應用程式仍可開啟其他應用程式。"</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"如要取消固定這個應用程式，請按住「返回」按鈕和「總覽」按鈕"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"如要取消固定這個應用程式，請按住「返回」按鈕和主畫面按鈕"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"如要取消固定這個應用程式，請向上滑動並按住"</string>
