@@ -323,6 +323,20 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 buttonDispatcher.setAlpha(forceVisible ? 1f : alpha, animate);
             }
         }
+
+        @Override
+        public void onOverviewShown(boolean fromHome) {
+            // If the overview has fixed orientation that may change display to natural rotation,
+            // we don't want the user rotation to be reset. So after user returns to application,
+            // it can keep in the original rotation.
+            mNavigationBarView.getRotationButtonController().setSkipOverrideUserLockPrefsOnce();
+        }
+
+        @Override
+        public void onToggleRecentApps() {
+            // The same case as onOverviewShown but only for 3-button navigation.
+            mNavigationBarView.getRotationButtonController().setSkipOverrideUserLockPrefsOnce();
+        }
     };
 
     private NavigationBarTransitions.DarkIntensityListener mOrientationHandleIntensityListener =
