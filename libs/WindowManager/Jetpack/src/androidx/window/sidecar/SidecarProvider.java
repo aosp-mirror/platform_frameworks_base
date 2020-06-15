@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions;
+package androidx.window.sidecar;
 
 import android.content.Context;
 
@@ -22,14 +22,13 @@ import android.content.Context;
  * Provider class that will instantiate the library implementation. It must be included in the
  * vendor library, and the vendor implementation must match the signature of this class.
  */
-public class ExtensionProvider {
-
+public class SidecarProvider {
     /**
-     * The support library will instantiate the vendor implementation using this interface.
-     * @return An implementation of {@link ExtensionInterface}.
+     * Provide a simple implementation of {@link SidecarInterface} that can be replaced by
+     * an OEM by overriding this method.
      */
-    public static ExtensionInterface getExtensionImpl(Context context) {
-        return new SettingsExtensionImpl(context);
+    public static SidecarInterface getSidecarImpl(Context context) {
+        return new SettingsSidecarImpl(context);
     }
 
     /**
@@ -37,6 +36,6 @@ public class ExtensionProvider {
      * @return API version string in MAJOR.MINOR.PATCH-description format.
      */
     public static String getApiVersion() {
-        return "1.0.0-settings_sample";
+        return "0.1.0-settings_sample";
     }
 }
