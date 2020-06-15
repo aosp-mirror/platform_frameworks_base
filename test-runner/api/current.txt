@@ -100,6 +100,13 @@ package android.test {
     method @Deprecated public java.util.List<android.content.Intent> getAndClearBroadcastIntents();
   }
 
+  @Deprecated public class LaunchPerformanceBase extends android.app.Instrumentation {
+    ctor @Deprecated public LaunchPerformanceBase();
+    method @Deprecated protected void LaunchApp();
+    field @Deprecated protected android.content.Intent mIntent;
+    field @Deprecated protected android.os.Bundle mResults;
+  }
+
   public class LoaderTestCase extends android.test.AndroidTestCase {
     ctor public LoaderTestCase();
     method public <T> T getLoaderResultSynchronously(android.content.Loader<T>);
@@ -283,6 +290,11 @@ package android.test.suitebuilder {
   @Deprecated public static class TestSuiteBuilder.FailedToCreateTests extends junit.framework.TestCase {
     ctor @Deprecated public TestSuiteBuilder.FailedToCreateTests(Exception);
     method @Deprecated public void testSuiteConstructionFailed();
+  }
+
+  @Deprecated public class UnitTestSuiteBuilder extends android.test.suitebuilder.TestSuiteBuilder {
+    ctor @Deprecated public UnitTestSuiteBuilder(Class);
+    ctor @Deprecated public UnitTestSuiteBuilder(String, ClassLoader);
   }
 
 }
