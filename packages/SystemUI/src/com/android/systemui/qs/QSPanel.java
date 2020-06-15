@@ -240,8 +240,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
         if (mTileLayout instanceof PagedTileLayout) {
+            // Since PageIndicator gets measured before PagedTileLayout, we preemptively set the
+            // # of pages before the measurement pass so PageIndicator is measured appropriately
+            if (mFooterPageIndicator != null) {
+                mFooterPageIndicator.setNumPages(((PagedTileLayout) mTileLayout).getNumPages());
+            }
+
             // Allow the UI to be as big as it want's to, we're in a scroll view
             int newHeight = 10000;
             int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
