@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.Context;
+import android.media.IResourceManagerService;
 import android.media.tv.TvInputManager;
 import android.media.tv.tunerresourcemanager.CasSessionRequest;
 import android.media.tv.tunerresourcemanager.IResourcesReclaimListener;
@@ -53,7 +54,7 @@ import java.util.Set;
  *
  * @hide
  */
-public class TunerResourceManagerService extends SystemService {
+public class TunerResourceManagerService extends SystemService implements IBinder.DeathRecipient {
     private static final String TAG = "TunerResourceManagerService";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -76,6 +77,7 @@ public class TunerResourceManagerService extends SystemService {
 
     private TvInputManager mTvInputManager;
     private ActivityManager mActivityManager;
+    private IResourceManagerService mMediaResourceManager;
     private UseCasePriorityHints mPriorityCongfig = new UseCasePriorityHints();
 
     // An internal resource request count to help generate resource handle.
@@ -102,6 +104,22 @@ public class TunerResourceManagerService extends SystemService {
         mActivityManager =
                 (ActivityManager) getContext().getSystemService(Context.ACTIVITY_SERVICE);
         mPriorityCongfig.parse();
+
+        if (mMediaResourceManager == null) {
+            IBinder mediaResourceManagerBinder = getBinderService("media.resource_manager");
+            if (mediaResourceManagerBinder == null) {
+                Slog.w(TAG, "Resource Manager Service not available.");
+                return;
+            }
+            try {
+                mediaResourceManagerBinder.linkToDeath(this, /*flags*/ 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Could not link to death of native resource manager service.");
+                return;
+            }
+            mMediaResourceManager = IResourceManagerService.Stub.asInterface(
+                    mediaResourceManagerBinder);
+        }
     }
 
     private final class BinderService extends ITunerResourceManager.Stub {
@@ -380,6 +398,19 @@ public class TunerResourceManagerService extends SystemService {
         }
     }
 
+    /**
+     * Handle the death of the native resource manager service
+     */
+    @Override
+    public void binderDied() {
+        if (DEBUG) {
+            Slog.w(TAG, "Native media resource manager service has died");
+        }
+        synchronized (mLock) {
+            mMediaResourceManager = null;
+        }
+    }
+
     @VisibleForTesting
     protected void registerClientProfileInternal(ResourceClientProfile profile,
             IResourcesReclaimListener listener, int[] clientId) {
@@ -399,6 +430,16 @@ public class TunerResourceManagerService extends SystemService {
                 ? Binder.getCallingPid() /*callingPid*/
                 : mTvInputManager.getClientPid(profile.getTvInputSessionId()); /*tvAppId*/
 
+        // Update Media Resource Manager with the tvAppId
+        if (profile.getTvInputSessionId() != null && mMediaResourceManager != null) {
+            try {
+                mMediaResourceManager.overridePid(Binder.getCallingPid(), pid);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Could not overridePid in resourceManagerSercice,"
+                        + " remote exception: " + e);
+            }
+        }
+
         ClientProfile clientProfile = new ClientProfile.Builder(clientId[0])
                                               .tvInputSessionId(profile.getTvInputSessionId())
                                               .useCase(profile.getUseCase())
@@ -415,6 +456,15 @@ public class TunerResourceManagerService extends SystemService {
             Slog.d(TAG, "unregisterClientProfile(clientId=" + clientId + ")");
         }
         removeClientProfile(clientId);
+        // Remove the Media Resource Manager callingPid to tvAppId mapping
+        if (mMediaResourceManager != null) {
+            try {
+                mMediaResourceManager.overridePid(Binder.getCallingPid(), -1);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Could not overridePid in resourceManagerSercice when unregister,"
+                        + " remote exception: " + e);
+            }
+        }
     }
 
     @VisibleForTesting
