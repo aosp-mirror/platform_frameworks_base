@@ -29,6 +29,8 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.util.Assert;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -62,7 +64,7 @@ public class ForegroundServiceController {
 
     /**
      * @return true if this user has services missing notifications and therefore needs a
-     * disclosure notification.
+     * disclosure notification for running a foreground service.
      */
     public boolean isDisclosureNeededForUser(int userId) {
         synchronized (mMutex) {
@@ -74,26 +76,26 @@ public class ForegroundServiceController {
 
     /**
      * @return true if this user/pkg has a missing or custom layout notification and therefore needs
-     * a disclosure notification for system alert windows.
+     * a disclosure notification showing the user which appsOps the app is using.
      */
     public boolean isSystemAlertWarningNeeded(int userId, String pkg) {
         synchronized (mMutex) {
             final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) return false;
-            return services.getStandardLayoutKey(pkg) == null;
+            return services.getStandardLayoutKeys(pkg) == null;
         }
     }
 
     /**
-     * Returns the key of the foreground service from this package using the standard template,
-     * if one exists.
+     * Returns the keys for notifications from this package using the standard template,
+     * if they exist.
      */
     @Nullable
-    public String getStandardLayoutKey(int userId, String pkg) {
+    public ArraySet<String> getStandardLayoutKeys(int userId, String pkg) {
         synchronized (mMutex) {
             final ForegroundServicesUserState services = mUserServices.get(userId);
             if (services == null) return null;
-            return services.getStandardLayoutKey(pkg);
+            return services.getStandardLayoutKeys(pkg);
         }
     }
 
@@ -140,25 +142,27 @@ public class ForegroundServiceController {
         }
 
         // TODO: (b/145659174) remove when moving to NewNotifPipeline. Replaced by
-        //  ForegroundCoordinator
-        // Update appOp if there's an associated pending or visible notification:
-        final String foregroundKey = getStandardLayoutKey(userId, packageName);
-        if (foregroundKey != null) {
-            final NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(foregroundKey);
-            if (entry != null
-                    && uid == entry.getSbn().getUid()
-                    && packageName.equals(entry.getSbn().getPackageName())) {
-                boolean changed;
-                synchronized (entry.mActiveAppOps) {
-                    if (active) {
-                        changed = entry.mActiveAppOps.add(appOpCode);
-                    } else {
-                        changed = entry.mActiveAppOps.remove(appOpCode);
+        //  AppOpsCoordinator
+        // Update appOps if there are associated pending or visible notifications
+        final Set<String> notificationKeys = getStandardLayoutKeys(userId, packageName);
+        if (notificationKeys != null) {
+            boolean changed = false;
+            for (String key : notificationKeys) {
+                final NotificationEntry entry = mEntryManager.getPendingOrActiveNotif(key);
+                if (entry != null
+                        && uid == entry.getSbn().getUid()
+                        && packageName.equals(entry.getSbn().getPackageName())) {
+                    synchronized (entry.mActiveAppOps) {
+                        if (active) {
+                            changed |= entry.mActiveAppOps.add(appOpCode);
+                        } else {
+                            changed |= entry.mActiveAppOps.remove(appOpCode);
+                        }
                     }
                 }
-                if (changed) {
-                    mEntryManager.updateNotifications("appOpChanged pkg=" + packageName);
-                }
+            }
+            if (changed) {
+                mEntryManager.updateNotifications("appOpChanged pkg=" + packageName);
             }
         }
     }

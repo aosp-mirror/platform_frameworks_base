@@ -39,8 +39,8 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
- * Handles ForegroundService interactions with notifications.
- *  Tags notifications with appOps.
+ * Handles ForegroundService and AppOp interactions with notifications.
+ *  Tags notifications with appOps
  *  Lifetime extends notifications associated with an ongoing ForegroundService.
  *  Filters out notifications that represent foreground services that are no longer running
  *
@@ -48,12 +48,10 @@ import javax.inject.Singleton;
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceController
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceNotificationListener
  *  frameworks/base/packages/SystemUI/src/com/android/systemui/ForegroundServiceLifetimeExtender
- *
- *  TODO: AppOps stuff should be spun off into its own coordinator
  */
 @Singleton
-public class ForegroundCoordinator implements Coordinator {
-    private static final String TAG = "ForegroundCoordinator";
+public class AppOpsCoordinator implements Coordinator {
+    private static final String TAG = "AppOpsCoordinator";
 
     private final ForegroundServiceController mForegroundServiceController;
     private final AppOpsController mAppOpsController;
@@ -62,7 +60,7 @@ public class ForegroundCoordinator implements Coordinator {
     private NotifPipeline mNotifPipeline;
 
     @Inject
-    public ForegroundCoordinator(
+    public AppOpsCoordinator(
             ForegroundServiceController foregroundServiceController,
             AppOpsController appOpsController,
             @Main DelayableExecutor mainExecutor) {
@@ -89,18 +87,22 @@ public class ForegroundCoordinator implements Coordinator {
     }
 
     /**
-     * Filters out notifications that represent foreground services that are no longer running.
+     * Filters out notifications that represent foreground services that are no longer running or
+     * that already have an app notification with the appOps tagged to
      */
     private final NotifFilter mNotifFilter = new NotifFilter(TAG) {
         @Override
         public boolean shouldFilterOut(NotificationEntry entry, long now) {
             StatusBarNotification sbn = entry.getSbn();
+
+            // Filters out system-posted disclosure notifications when unneeded
             if (mForegroundServiceController.isDisclosureNotification(sbn)
                     && !mForegroundServiceController.isDisclosureNeededForUser(
                             sbn.getUser().getIdentifier())) {
                 return true;
             }
 
+            // Filters out system alert notifications when unneeded
             if (mForegroundServiceController.isSystemAlertNotification(sbn)) {
                 final String[] apps = sbn.getNotification().extras.getStringArray(
                         Notification.EXTRA_FOREGROUND_APPS);
@@ -179,23 +181,24 @@ public class ForegroundCoordinator implements Coordinator {
     private NotifCollectionListener mNotifCollectionListener = new NotifCollectionListener() {
         @Override
         public void onEntryAdded(NotificationEntry entry) {
-            tagForeground(entry);
+            tagAppOps(entry);
         }
 
         @Override
         public void onEntryUpdated(NotificationEntry entry) {
-            tagForeground(entry);
+            tagAppOps(entry);
         }
 
-        private void tagForeground(NotificationEntry entry) {
+        private void tagAppOps(NotificationEntry entry) {
             final StatusBarNotification sbn = entry.getSbn();
             // note: requires that the ForegroundServiceController is updating their appOps first
             ArraySet<Integer> activeOps =
                     mForegroundServiceController.getAppOps(
                             sbn.getUser().getIdentifier(),
                             sbn.getPackageName());
+
+            entry.mActiveAppOps.clear();
             if (activeOps != null) {
-                entry.mActiveAppOps.clear();
                 entry.mActiveAppOps.addAll(activeOps);
             }
         }
@@ -218,23 +221,25 @@ public class ForegroundCoordinator implements Coordinator {
 
         int userId = UserHandle.getUserId(uid);
 
-        // Update appOp if there's an associated posted notification:
-        final String foregroundKey = mForegroundServiceController.getStandardLayoutKey(userId,
-                packageName);
-        if (foregroundKey != null) {
-            final NotificationEntry entry = findNotificationEntryWithKey(foregroundKey);
-            if (entry != null
-                    && uid == entry.getSbn().getUid()
-                    && packageName.equals(entry.getSbn().getPackageName())) {
-                boolean changed;
-                if (active) {
-                    changed = entry.mActiveAppOps.add(code);
-                } else {
-                    changed = entry.mActiveAppOps.remove(code);
+        // Update appOps of the app's posted notifications with standard layouts
+        final ArraySet<String> notifKeys =
+                mForegroundServiceController.getStandardLayoutKeys(userId, packageName);
+        if (notifKeys != null) {
+            boolean changed = false;
+            for (int i = 0; i < notifKeys.size(); i++) {
+                final NotificationEntry entry = findNotificationEntryWithKey(notifKeys.valueAt(i));
+                if (entry != null
+                        && uid == entry.getSbn().getUid()
+                        && packageName.equals(entry.getSbn().getPackageName())) {
+                    if (active) {
+                        changed |= entry.mActiveAppOps.add(code);
+                    } else {
+                        changed |= entry.mActiveAppOps.remove(code);
+                    }
                 }
-                if (changed) {
-                    mNotifFilter.invalidateList();
-                }
+            }
+            if (changed) {
+                mNotifFilter.invalidateList();
             }
         }
     }
