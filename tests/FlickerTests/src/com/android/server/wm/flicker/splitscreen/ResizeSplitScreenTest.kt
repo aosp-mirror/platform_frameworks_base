@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.splitscreen
 
 import android.graphics.Region
 import android.util.Rational
@@ -24,6 +24,15 @@ import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.UiDevice
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.FlickerTestBase
+import com.android.server.wm.flicker.LayersTrace
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.TransitionResult
+import com.android.server.wm.flicker.WindowUtils
+import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.AutomationUtils
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import com.google.common.truth.Truth

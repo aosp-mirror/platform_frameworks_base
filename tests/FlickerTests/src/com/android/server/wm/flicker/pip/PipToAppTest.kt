@@ -14,65 +14,52 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.pip
 
-import androidx.test.InstrumentationRegistry
+import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
-import androidx.test.uiautomator.UiDevice
-import com.android.server.wm.flicker.helpers.AutomationUtils
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.PipAppHelper
-import org.junit.AfterClass
 import org.junit.FixMethodOrder
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
+/**
+ * Test Pip launch.
+ * To run this test: `atest FlickerTests:PipToAppTest`
+ */
 @LargeTest
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-abstract class PipTestBase(
+@FlakyTest(bugId = 152738416)
+@Ignore("Waiting bug feedback")
+class PipToAppTest(
     beginRotationName: String,
     beginRotation: Int
-) : NonRotationTestBase(beginRotationName, beginRotation) {
-    init {
-        testApp = PipAppHelper(instrumentation)
-    }
+) : PipTestBase(beginRotationName, beginRotation) {
+    override val transitionToRun: TransitionRunner
+        get() = CommonTransitions.exitPipModeToApp(testApp as PipAppHelper, instrumentation,
+                uiDevice, beginRotation)
+                .includeJankyRuns().build()
 
     @Test
-    fun checkVisibility_pipWindowBecomesVisible() {
+    fun checkVisibility_backgroundWindowVisibleBehindPipLayer() {
         checkResults {
             WmTraceSubject.assertThat(it)
                     .skipUntilFirstAssertion()
                     .showsAppWindowOnTop(sPipWindowTitle)
                     .then()
-                    .hidesAppWindow(sPipWindowTitle)
-                    .forAllEntries()
-        }
-    }
-
-    @Test
-    fun checkVisibility_pipLayerBecomesVisible() {
-        checkResults {
-            LayersTraceSubject.assertThat(it)
-                    .skipUntilFirstAssertion()
-                    .showsLayer(sPipWindowTitle)
+                    .showsBelowAppWindow("Wallpaper")
                     .then()
-                    .hidesLayer(sPipWindowTitle)
+                    .showsAppWindowOnTop(testApp.getPackage())
+                    .then()
+                    .hidesAppWindowOnTop(testApp.getPackage())
                     .forAllEntries()
-        }
-    }
-
-    companion object {
-        const val sPipWindowTitle = "PipMenuActivity"
-
-        @AfterClass
-        @JvmStatic
-        fun teardown() {
-            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
-            if (AutomationUtils.hasPipWindow(device)) {
-                AutomationUtils.closePipWindow(device)
-            }
         }
     }
 }

@@ -367,10 +367,10 @@ internal object CommonTransitions {
     }
 
     fun editTextLoseFocusToApp(
-            testApp: ImeAppHelper,
-            instrumentation: Instrumentation,
-            device: UiDevice,
-            beginRotation: Int
+        testApp: ImeAppHelper,
+        instrumentation: Instrumentation,
+        device: UiDevice,
+        beginRotation: Int
     ): TransitionRunner.TransitionBuilder {
         return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("editTextLoseFocusToApp", testApp, beginRotation))
@@ -387,10 +387,10 @@ internal object CommonTransitions {
     }
 
     fun enterPipMode(
-            testApp: PipAppHelper,
-            instrumentation: Instrumentation,
-            device: UiDevice,
-            beginRotation: Int
+        testApp: PipAppHelper,
+        instrumentation: Instrumentation,
+        device: UiDevice,
+        beginRotation: Int
     ): TransitionRunner.TransitionBuilder {
         return TransitionRunner.TransitionBuilder(instrumentation)
                 .withTag(buildTestTag("enterPipMode", testApp, beginRotation))

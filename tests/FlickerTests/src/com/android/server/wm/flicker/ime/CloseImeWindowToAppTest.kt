@@ -14,9 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.ime
 
 import androidx.test.filters.LargeTest
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.NonRotationTestBase
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Ignore

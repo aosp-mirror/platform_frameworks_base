@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.splitscreen
 
 import android.view.Surface
 import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
 import androidx.test.runner.AndroidJUnit4
 import androidx.test.uiautomator.UiDevice
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.FlickerTestBase
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WindowUtils
+import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.AutomationUtils
 import org.junit.AfterClass
 import org.junit.FixMethodOrder
@@ -42,8 +49,8 @@ class SplitScreenToLauncherTest : FlickerTestBase() {
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.splitScreenToLauncher(testApp, instrumentation, uiDevice, Surface.ROTATION_0)
-                .includeJankyRuns().build()
+        get() = CommonTransitions.splitScreenToLauncher(testApp, instrumentation, uiDevice,
+                Surface.ROTATION_0).includeJankyRuns().build()
 
     @Test
     fun checkCoveredRegion_noUncoveredRegions() {

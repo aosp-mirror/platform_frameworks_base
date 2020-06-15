@@ -14,60 +14,68 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.pip
 
+import androidx.test.InstrumentationRegistry
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.helpers.ImeAppHelper
+import androidx.test.uiautomator.UiDevice
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.NonRotationTestBase
+import com.android.server.wm.flicker.WmTraceSubject
+import com.android.server.wm.flicker.helpers.AutomationUtils
+import com.android.server.wm.flicker.helpers.PipAppHelper
+import org.junit.AfterClass
 import org.junit.FixMethodOrder
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
-/**
- * Test IME window opening transitions.
- * To run this test: `atest FlickerTests:OpenImeWindowTest`
- */
 @LargeTest
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenImeWindowTest(
+abstract class PipTestBase(
     beginRotationName: String,
     beginRotation: Int
 ) : NonRotationTestBase(beginRotationName, beginRotation) {
     init {
-        testApp = ImeAppHelper(instrumentation)
+        testApp = PipAppHelper(instrumentation)
     }
 
-    override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.editTextSetFocus(testApp as ImeAppHelper,
-                instrumentation, uiDevice, beginRotation)
-                .includeJankyRuns().build()
-
     @Test
-    fun checkVisibility_imeWindowBecomesVisible() {
+    fun checkVisibility_pipWindowBecomesVisible() {
         checkResults {
             WmTraceSubject.assertThat(it)
                     .skipUntilFirstAssertion()
-                    .hidesImeWindow(IME_WINDOW_TITLE)
+                    .showsAppWindowOnTop(sPipWindowTitle)
                     .then()
-                    .showsImeWindow(IME_WINDOW_TITLE)
+                    .hidesAppWindow(sPipWindowTitle)
                     .forAllEntries()
         }
     }
 
     @Test
-    fun checkVisibility_imeLayerBecomesVisible() {
+    fun checkVisibility_pipLayerBecomesVisible() {
         checkResults {
             LayersTraceSubject.assertThat(it)
-                    .hidesLayer(IME_WINDOW_TITLE)
+                    .skipUntilFirstAssertion()
+                    .showsLayer(sPipWindowTitle)
                     .then()
-                    .showsLayer(IME_WINDOW_TITLE)
+                    .hidesLayer(sPipWindowTitle)
                     .forAllEntries()
         }
     }
 
     companion object {
-        private const val IME_WINDOW_TITLE = "InputMethod"
+        const val sPipWindowTitle = "PipMenuActivity"
+
+        @AfterClass
+        @JvmStatic
+        fun teardown() {
+            val device = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation())
+            if (AutomationUtils.hasPipWindow(device)) {
+                AutomationUtils.closePipWindow(device)
+            }
+        }
     }
 }

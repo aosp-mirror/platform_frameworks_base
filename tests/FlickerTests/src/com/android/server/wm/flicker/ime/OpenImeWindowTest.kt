@@ -14,49 +14,65 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.ime
 
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
-import com.android.server.wm.flicker.helpers.PipAppHelper
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.NonRotationTestBase
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WmTraceSubject
+import com.android.server.wm.flicker.helpers.ImeAppHelper
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test Pip launch.
- * To run this test: `atest FlickerTests:PipToAppTest`
+ * Test IME window opening transitions.
+ * To run this test: `atest FlickerTests:OpenImeWindowTest`
  */
 @LargeTest
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-@FlakyTest(bugId = 152738416)
-@Ignore("Waiting bug feedback")
-class PipToAppTest(
+class OpenImeWindowTest(
     beginRotationName: String,
     beginRotation: Int
-) : PipTestBase(beginRotationName, beginRotation) {
+) : NonRotationTestBase(beginRotationName, beginRotation) {
+    init {
+        testApp = ImeAppHelper(instrumentation)
+    }
+
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.exitPipModeToApp(testApp as PipAppHelper, instrumentation,
-                uiDevice, beginRotation)
+        get() = CommonTransitions.editTextSetFocus(testApp as ImeAppHelper,
+                instrumentation, uiDevice, beginRotation)
                 .includeJankyRuns().build()
 
     @Test
-    fun checkVisibility_backgroundWindowVisibleBehindPipLayer() {
+    fun checkVisibility_imeWindowBecomesVisible() {
         checkResults {
             WmTraceSubject.assertThat(it)
                     .skipUntilFirstAssertion()
-                    .showsAppWindowOnTop(sPipWindowTitle)
+                    .hidesImeWindow(IME_WINDOW_TITLE)
                     .then()
-                    .showsBelowAppWindow("Wallpaper")
-                    .then()
-                    .showsAppWindowOnTop(testApp.getPackage())
-                    .then()
-                    .hidesAppWindowOnTop(testApp.getPackage())
+                    .showsImeWindow(IME_WINDOW_TITLE)
                     .forAllEntries()
         }
+    }
+
+    @Test
+    fun checkVisibility_imeLayerBecomesVisible() {
+        checkResults {
+            LayersTraceSubject.assertThat(it)
+                    .hidesLayer(IME_WINDOW_TITLE)
+                    .then()
+                    .showsLayer(IME_WINDOW_TITLE)
+                    .forAllEntries()
+        }
+    }
+
+    companion object {
+        private const val IME_WINDOW_TITLE = "InputMethod"
     }
 }

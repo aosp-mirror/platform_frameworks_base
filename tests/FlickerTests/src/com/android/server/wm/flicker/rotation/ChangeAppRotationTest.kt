@@ -14,10 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.rotation
 
 import android.util.Log
 import androidx.test.filters.LargeTest
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.RotationTestBase
+import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WindowUtils
 import org.junit.FixMethodOrder
 import org.junit.Ignore
 import org.junit.Test

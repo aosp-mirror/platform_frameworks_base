@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.ime
 
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.TransitionRunner
 import com.android.server.wm.flicker.helpers.ImeAppAutoFocusHelper
 import org.junit.FixMethodOrder
 import org.junit.Ignore
@@ -33,18 +35,25 @@ import org.junit.runners.Parameterized
 @LargeTest
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class CloseImeAutoOpenWindowToAppTest(
+class CloseImeAutoOpenWindowToHomeTest(
     beginRotationName: String,
     beginRotation: Int
-) : CloseImeWindowToAppTest(beginRotationName, beginRotation) {
+) : CloseImeWindowToHomeTest(beginRotationName, beginRotation) {
     init {
         testApp = ImeAppAutoFocusHelper(instrumentation)
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.editTextLoseFocusToApp(testApp as ImeAppAutoFocusHelper,
+        get() = CommonTransitions.editTextLoseFocusToHome(testApp as ImeAppAutoFocusHelper,
                 instrumentation, uiDevice, beginRotation)
                 .includeJankyRuns().build()
+
+    @FlakyTest(bugId = 141458352)
+    @Ignore("Waiting bug feedback")
+    @Test
+    override fun checkVisibility_imeWindowBecomesInvisible() {
+        super.checkVisibility_imeWindowBecomesInvisible()
+    }
 
     @FlakyTest(bugId = 141458352)
     @Ignore("Waiting bug feedback")
@@ -53,17 +62,10 @@ class CloseImeAutoOpenWindowToAppTest(
         super.checkVisibility_imeLayerBecomesInvisible()
     }
 
-    @FlakyTest(bugId = 141458352)
+    @FlakyTest(bugId = 157449248)
     @Ignore("Waiting bug feedback")
     @Test
-    override fun checkVisibility_imeAppLayerIsAlwaysVisible() {
-        super.checkVisibility_imeAppLayerIsAlwaysVisible()
-    }
-
-    @FlakyTest(bugId = 141458352)
-    @Ignore("Waiting bug feedback")
-    @Test
-    override fun checkVisibility_imeAppWindowIsAlwaysVisible() {
-        super.checkVisibility_imeAppWindowIsAlwaysVisible()
+    override fun checkVisibility_imeAppWindowBecomesInvisible() {
+        super.checkVisibility_imeAppWindowBecomesInvisible()
     }
 }

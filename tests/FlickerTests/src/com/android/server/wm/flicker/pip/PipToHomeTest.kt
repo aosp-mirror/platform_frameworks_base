@@ -14,10 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.pip
 
 import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WmTraceSubject
 import com.android.server.wm.flicker.helpers.PipAppHelper
 import org.junit.FixMethodOrder
 import org.junit.Ignore

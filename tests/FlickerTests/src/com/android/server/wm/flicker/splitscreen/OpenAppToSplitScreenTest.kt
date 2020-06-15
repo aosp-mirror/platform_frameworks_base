@@ -14,25 +14,29 @@
  * limitations under the License.
  */
 
-package com.android.server.wm.flicker
+package com.android.server.wm.flicker.splitscreen
 
-import androidx.test.filters.FlakyTest
 import androidx.test.filters.LargeTest
+import com.android.server.wm.flicker.CommonTransitions
+import com.android.server.wm.flicker.LayersTraceSubject
+import com.android.server.wm.flicker.NonRotationTestBase
+import com.android.server.wm.flicker.StandardAppHelper
+import com.android.server.wm.flicker.TransitionRunner
+import com.android.server.wm.flicker.WmTraceSubject
 import org.junit.FixMethodOrder
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.MethodSorters
 import org.junit.runners.Parameterized
 
 /**
- * Test warm launch app.
- * To run this test: `atest FlickerTests:OpenAppWarmTest`
+ * Test open app to split screen.
+ * To run this test: `atest FlickerTests:OpenAppToSplitScreenTest`
  */
 @LargeTest
 @RunWith(Parameterized::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-class OpenAppWarmTest(
+class OpenAppToSplitScreenTest(
     beginRotationName: String,
     beginRotation: Int
 ) : NonRotationTestBase(beginRotationName, beginRotation) {
@@ -42,41 +46,32 @@ class OpenAppWarmTest(
     }
 
     override val transitionToRun: TransitionRunner
-        get() = CommonTransitions.openAppWarm(testApp, instrumentation, uiDevice, beginRotation)
-                .includeJankyRuns().build()
+        get() = CommonTransitions.appToSplitScreen(testApp, instrumentation, uiDevice,
+                beginRotation).includeJankyRuns().build()
 
     @Test
-    fun checkVisibility_wallpaperBecomesInvisible() {
+    fun checkVisibility_navBarWindowIsAlwaysVisible() {
         checkResults {
             WmTraceSubject.assertThat(it)
-                    .showsBelowAppWindow("Wallpaper")
-                    .then()
-                    .hidesBelowAppWindow("Wallpaper")
-                    .forAllEntries()
-        }
-    }
-
-    @FlakyTest(bugId = 140855415)
-    @Ignore("Waiting bug feedback")
-    @Test
-    fun checkZOrder_appWindowReplacesLauncherAsTopWindow() {
-        checkResults {
-            WmTraceSubject.assertThat(it)
-                    .showsAppWindowOnTop(
-                            "com.android.launcher3/.Launcher")
-                    .then()
-                    .showsAppWindowOnTop(testApp.getPackage())
-                    .forAllEntries()
+                    .showsAboveAppWindow(NAVIGATION_BAR_WINDOW_TITLE).forAllEntries()
         }
     }
 
     @Test
-    fun checkVisibility_wallpaperLayerBecomesInvisible() {
+    fun checkVisibility_statusBarWindowIsAlwaysVisible() {
+        checkResults {
+            WmTraceSubject.assertThat(it)
+                    .showsAboveAppWindow(STATUS_BAR_WINDOW_TITLE).forAllEntries()
+        }
+    }
+
+    @Test
+    fun checkVisibility_dividerLayerBecomesVisible() {
         checkResults {
             LayersTraceSubject.assertThat(it)
-                    .showsLayer("Wallpaper")
+                    .hidesLayer(DOCKED_STACK_DIVIDER)
                     .then()
-                    .replaceVisibleLayer("Wallpaper", testApp.getPackage())
+                    .showsLayer(DOCKED_STACK_DIVIDER)
                     .forAllEntries()
         }
     }
