@@ -491,10 +491,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             Log.d(TAG, "resizeAndAnimatePipUnchecked: toBounds=" + toBounds
                     + " duration=" + duration + " callers=\n" + Debug.getCallers(5, "    "));
         }
-        if (!toBounds.equals(mBounds)) {
-            mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration, mUpdateBoundsCallback);
-            setAnimatingToBounds(toBounds);
-        }
+
+        // Intentionally resize here even if the current bounds match the destination bounds.
+        // This is so all the proper callbacks are performed.
+        mPipTaskOrganizer.scheduleAnimateResizePip(toBounds, duration, mUpdateBoundsCallback);
+        setAnimatingToBounds(toBounds);
     }
 
     /**
