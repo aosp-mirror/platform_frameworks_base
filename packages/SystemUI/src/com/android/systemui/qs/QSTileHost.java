@@ -255,9 +255,6 @@ public class QSTileHost implements QSHost, Tunable, PluginListener<QSFactory>, D
         int currentUser = ActivityManager.getCurrentUser();
         if (currentUser != mCurrentUser) {
             mUserContext = mContext.createContextAsUser(UserHandle.of(currentUser), 0);
-            if (mAutoTiles != null) {
-                mAutoTiles.changeUser(UserHandle.of(currentUser));
-            }
         }
         if (tileSpecs.equals(mTileSpecs) && currentUser == mCurrentUser) return;
         mTiles.entrySet().stream().filter(tile -> !tileSpecs.contains(tile.getKey())).forEach(
