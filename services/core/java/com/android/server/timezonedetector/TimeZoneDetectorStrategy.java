@@ -16,8 +16,11 @@
 package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
+import android.annotation.UserIdInt;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
+import android.app.timezonedetector.TimeZoneCapabilities;
+import android.app.timezonedetector.TimeZoneConfiguration;
 
 import java.io.PrintWriter;
 
@@ -36,6 +39,33 @@ import java.io.PrintWriter;
  */
 public interface TimeZoneDetectorStrategy {
 
+    /** A listener for strategy events. */
+    interface StrategyListener {
+        /**
+         * Invoked when configuration has been changed.
+         */
+        void onConfigurationChanged();
+    }
+
+    /** Sets the listener that enables the strategy to communicate with the surrounding service. */
+    void setStrategyListener(@NonNull StrategyListener listener);
+
+    /** Returns the user's time zone capabilities. */
+    @NonNull
+    TimeZoneCapabilities getCapabilities(@UserIdInt int userId);
+
+    /**
+     * Returns the configuration that controls time zone detector behavior.
+     */
+    @NonNull
+    TimeZoneConfiguration getConfiguration(@UserIdInt int userId);
+
+    /**
+     * Updates the configuration settings that control time zone detector behavior.
+     */
+    boolean updateConfiguration(
+            @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration);
+
     /**
      * Suggests a time zone for the device, determined from the user's manually entered information.
      * Returns {@code false} if the suggestion was invalid, or the device configuration prevented
@@ -43,7 +73,8 @@ public interface TimeZoneDetectorStrategy {
      * valid but does not change the time zone because it matches the current device time zone is
      * considered accepted.
      */
-    boolean suggestManualTimeZone(@NonNull ManualTimeZoneSuggestion suggestion);
+    boolean suggestManualTimeZone(
+            @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion suggestion);
 
     /**
      * Suggests a time zone for the device, or withdraws a previous suggestion if
@@ -55,9 +86,9 @@ public interface TimeZoneDetectorStrategy {
     void suggestTelephonyTimeZone(@NonNull TelephonyTimeZoneSuggestion suggestion);
 
     /**
-     * Called when there has been a change to the automatic time zone detection setting.
+     * Called when there has been a change to the automatic time zone detection configuration.
      */
-    void handleAutoTimeZoneDetectionChanged();
+    void handleAutoTimeZoneConfigChanged();
 
     /**
      * Dumps internal state such as field values.

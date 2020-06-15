@@ -40,6 +40,11 @@ import java.util.Objects;
 
 /**
  * The implementation of ITimeDetectorService.aidl.
+ *
+ * <p>This service is implemented as a wrapper around {@link TimeDetectorStrategy}. It handles
+ * interaction with Android framework classes, enforcing caller permissions, capturing user identity
+ * and making calls async, leaving the (consequently more testable) {@link TimeDetectorStrategy}
+ * implementation to deal with the logic around time detection.
  */
 public final class TimeDetectorService extends ITimeDetectorService.Stub {
     private static final String TAG = "TimeDetectorService";
