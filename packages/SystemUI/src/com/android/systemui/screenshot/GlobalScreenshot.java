@@ -215,7 +215,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     private Animator mScreenshotAnimation;
     private Runnable mOnCompleteRunnable;
     private Animator mDismissAnimation;
-    private SavedImageData mImageData;
     private boolean mInDarkMode = false;
     private boolean mDirectionLTR = true;
     private boolean mOrientationPortrait = true;
@@ -234,9 +233,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
             switch (msg.what) {
                 case MESSAGE_CORNER_TIMEOUT:
                     mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_INTERACTION_TIMEOUT);
-                    if (mImageData != null) {
-                        mNotificationsController.showSilentScreenshotNotification(mImageData);
-                    }
                     GlobalScreenshot.this.dismissScreenshot("timeout", false);
                     mOnCompleteRunnable.run();
                     break;
@@ -408,9 +404,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         mDismissButton = mScreenshotLayout.findViewById(R.id.global_screenshot_dismiss_button);
         mDismissButton.setOnClickListener(view -> {
             mUiEventLogger.log(ScreenshotEvent.SCREENSHOT_EXPLICIT_DISMISSAL);
-            if (mImageData != null) {
-                mNotificationsController.showSilentScreenshotNotification(mImageData);
-            }
             dismissScreenshot("dismiss_button", false);
             mOnCompleteRunnable.run();
         });
@@ -449,10 +442,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                 }
             });
         }
-
-        mImageData = null; // make sure we clear the current stored data
-        mNotificationsController.reset();
-        mNotificationsController.setImage(mScreenBitmap);
 
         mSaveInBgTask = new SaveImageInBackgroundTask(mContext, data);
         mSaveInBgTask.execute();
@@ -670,7 +659,6 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
      */
     private void showUiOnActionsReady(SavedImageData imageData) {
         logSuccessOnActionsReady(imageData);
-        mImageData = imageData;
 
         AccessibilityManager accessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
