@@ -38,6 +38,7 @@ import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentat
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doCallRealMethod;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_AFTER_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_BEFORE_ANIM;
 import static com.android.server.wm.WindowStateAnimator.STACK_CLIP_NONE;
@@ -450,6 +451,32 @@ public class AppWindowTokenTests extends WindowTestsBase {
         // The activity was visible by mVisibleSetFromTransferredStartingWindow, so after its
         // starting window is transferred, it should restore to invisible.
         assertFalse(middle.isVisible());
+    }
+
+    @Test
+    public void testTransferStartingWindowSetFixedRotation() {
+        mWm.mIsFixedRotationTransformEnabled = true;
+        final ActivityRecord topActivity = createTestActivityRecordForGivenTask(mTask);
+        mTask.positionChildAt(topActivity, POSITION_TOP);
+        mActivity.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
+                false);
+        waitUntilHandlersIdle();
+
+        // Make activities to have different rotation from it display and set fixed rotation
+        // transform to activity1.
+        int rotation = (mDisplayContent.getRotation() + 1) % 4;
+        mDisplayContent.setFixedRotationLaunchingApp(mActivity, rotation);
+        doReturn(rotation).when(mDisplayContent)
+                .rotationForActivityInDifferentOrientation(topActivity);
+
+        // Make sure the fixed rotation transform linked to activity2 when adding starting window
+        // on activity2.
+        topActivity.addStartingWindow(mPackageName,
+                android.R.style.Theme, null, "Test", 0, 0, 0, 0, mActivity.appToken.asBinder(),
+                false, false, false, true, false);
+        waitUntilHandlersIdle();
+        assertTrue(topActivity.hasFixedRotationTransform());
     }
 
     private ActivityRecord createIsolatedTestActivityRecord() {

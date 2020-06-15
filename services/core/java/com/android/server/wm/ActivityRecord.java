@@ -3355,6 +3355,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
             final long origId = Binder.clearCallingIdentity();
             try {
+                // Link the fixed rotation transform to this activity since we are transferring the
+                // starting window.
+                if (fromActivity.hasFixedRotationTransform()) {
+                    mDisplayContent.handleTopActivityLaunchingInDifferentOrientation(this,
+                            false /* checkOpening */);
+                }
+
                 // Transfer the starting window over to the new token.
                 mStartingData = fromActivity.mStartingData;
                 startingSurface = fromActivity.startingSurface;
