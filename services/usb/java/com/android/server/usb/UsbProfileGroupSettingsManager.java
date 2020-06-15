@@ -261,6 +261,15 @@ class UsbProfileGroupSettingsManager {
     }
 
     /**
+     * Unregister all broadcast receivers. Must be called explicitly before
+     * object deletion.
+     */
+    public void unregisterReceivers() {
+        mPackageMonitor.unregister();
+        mMtpNotificationManager.unregister();
+    }
+
+    /**
      * Remove all defaults and denied packages for a user.
      *
      * @param userToRemove The user
