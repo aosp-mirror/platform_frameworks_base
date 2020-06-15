@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -245,10 +246,10 @@ public final class MediaTranscodeManager {
 
                     Uri uri = Uri.parse(fileUri);
                     try {
-                        ParcelFileDescriptor pfd = mContentResolver.openFileDescriptor(uri,
+                        AssetFileDescriptor afd = mContentResolver.openAssetFileDescriptor(uri,
                                 mode);
-                        if (pfd != null) {
-                            return pfd;
+                        if (afd != null) {
+                            return afd.getParcelFileDescriptor();
                         }
                     } catch (FileNotFoundException e) {
                         Log.w(TAG, "Cannot find content uri: " + uri, e);
@@ -411,8 +412,8 @@ public final class MediaTranscodeManager {
             // TODO(hkuang): Implement all the fields here to pass to service.
             parcel.priority = mPriority;
             parcel.transcodingType = mType;
-            parcel.sourceFilePath = mSourceUri.getPath();
-            parcel.destinationFilePath = mDestinationUri.getPath();
+            parcel.sourceFilePath = mSourceUri.toString();
+            parcel.destinationFilePath = mDestinationUri.toString();
             if (mTestConfig != null) {
                 parcel.isForTesting = true;
                 parcel.testConfig = mTestConfig;
@@ -441,6 +442,7 @@ public final class MediaTranscodeManager {
              * @return The same builder instance.
              * @throws IllegalArgumentException if Uri is null or empty.
              */
+            // TODO(hkuang): Add documentation on how the app could generate the correct Uri.
             @NonNull
             public Builder setSourceUri(@NonNull Uri sourceUri) throws IllegalArgumentException {
                 if (sourceUri == null || Uri.EMPTY.equals(sourceUri)) {
