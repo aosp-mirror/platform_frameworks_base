@@ -576,6 +576,10 @@ public final class MediaRouter2Manager {
     }
 
     void updatePreferredFeatures(String packageName, List<String> preferredFeatures) {
+        if (preferredFeatures == null) {
+            mPreferredFeaturesMap.remove(packageName);
+            return;
+        }
         List<String> prevFeatures = mPreferredFeaturesMap.put(packageName, preferredFeatures);
         if ((prevFeatures == null && preferredFeatures.size() == 0)
                 || Objects.equals(preferredFeatures, prevFeatures)) {
