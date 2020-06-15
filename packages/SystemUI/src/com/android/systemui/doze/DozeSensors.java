@@ -37,6 +37,7 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Display;
 
 import androidx.annotation.VisibleForTesting;
 
@@ -264,6 +265,13 @@ public class DozeSensors {
         for (TriggerSensor s : mSensors) {
             s.updateListening();
         }
+    }
+
+    void onScreenState(int state) {
+        mProximitySensor.setSecondarySafe(
+                state == Display.STATE_DOZE
+                || state == Display.STATE_DOZE_SUSPEND
+                || state == Display.STATE_OFF);
     }
 
     public void setProxListening(boolean listen) {
