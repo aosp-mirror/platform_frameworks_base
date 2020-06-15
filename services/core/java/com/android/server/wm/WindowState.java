@@ -2339,6 +2339,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
+        if (inPinnedWindowingMode()) {
+            return false;
+        }
+
         final boolean windowsAreFocusable = mActivityRecord == null || mActivityRecord.windowsAreFocusable();
         if (!windowsAreFocusable) {
             // This window can't be an IME target if the app's windows should not be focusable.
