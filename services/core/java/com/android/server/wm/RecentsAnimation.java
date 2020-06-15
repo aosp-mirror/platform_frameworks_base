@@ -233,6 +233,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
             // duration of the gesture that is driven by the recents component
             targetActivity.mLaunchTaskBehind = true;
             mLaunchedTargetActivity = targetActivity;
+            // TODO(b/156772625): Evaluate to send new intents vs. replacing the intent extras.
+            targetActivity.intent.replaceExtras(mTargetIntent);
 
             // Fetch all the surface controls and pass them to the client to get the animation
             // started. Cancel any existing recents animation running synchronously (do not hold the
