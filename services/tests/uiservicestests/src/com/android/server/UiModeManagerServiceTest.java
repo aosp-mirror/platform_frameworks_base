@@ -31,9 +31,10 @@ import android.os.PowerManager;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.RemoteException;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+
+import com.android.server.twilight.TwilightListener;
 import com.android.server.twilight.TwilightManager;
 import com.android.server.twilight.TwilightState;
 import com.android.server.wm.WindowManagerInternal;
@@ -56,7 +57,6 @@ import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -66,6 +66,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,12 +102,17 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     private BroadcastReceiver mTimeChangedCallback;
     private AlarmManager.OnAlarmListener mCustomListener;
     private Consumer<PowerSaveState> mPowerSaveConsumer;
+    private TwilightListener mTwilightListener;
 
     @Before
     public void setUp() {
         initMocks(this);
         when(mContext.checkCallingOrSelfPermission(anyString()))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
+        doAnswer(inv -> {
+            mTwilightListener = (TwilightListener) inv.getArgument(0);
+            return null;
+        }).when(mTwilightManager).registerListener(any(), any());
         doAnswer(inv -> {
             mPowerSaveConsumer = (Consumer<PowerSaveState>) inv.getArgument(1);
             return null;
@@ -161,6 +167,37 @@ public class UiModeManagerServiceTest extends UiServiceTestCase {
     }
 
     @Ignore // b/152719290 - Fails on stage-aosp-master
+    @Test
+    public void setNightMoveActivated_overridesFunctionCorrectly() throws RemoteException {
+        // set up
+        when(mPowerManager.isInteractive()).thenReturn(false);
+        mService.setNightMode(MODE_NIGHT_NO);
+        assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
+
+        // assume it is day time
+        doReturn(false).when(mTwilightState).isNight();
+
+        // set mode to auto
+        mService.setNightMode(MODE_NIGHT_AUTO);
+
+        // set night mode on overriding current config
+        mService.setNightModeActivated(true);
+
+        assertTrue(mUiManagerService.getConfiguration().isNightModeActive());
+
+        // now it is night time
+        doReturn(true).when(mTwilightState).isNight();
+        mTwilightListener.onTwilightStateChanged(mTwilightState);
+
+        assertTrue(mUiManagerService.getConfiguration().isNightModeActive());
+
+        // now it is next day mid day
+        doReturn(false).when(mTwilightState).isNight();
+        mTwilightListener.onTwilightStateChanged(mTwilightState);
+
+        assertFalse(mUiManagerService.getConfiguration().isNightModeActive());
+    }
+
     @Test
     public void setAutoMode_screenOffRegistered() throws RemoteException {
         try {
