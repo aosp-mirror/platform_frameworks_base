@@ -57,6 +57,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
+import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
@@ -776,15 +777,15 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     }
 
     private void assertSimulateLayoutSameDisplayFrames() {
-        final int uiMode = 0;
         final String prefix = "";
         final InsetsState simulatedInsetsState = new InsetsState();
         final DisplayFrames simulatedDisplayFrames = createDisplayFrames();
-        mDisplayPolicy.beginLayoutLw(mFrames, uiMode);
+        mDisplayPolicy.beginLayoutLw(mFrames, mDisplayContent.getConfiguration().uiMode);
         // Force the display bounds because it is not synced with display frames in policy test.
         mDisplayContent.getWindowConfiguration().setBounds(mFrames.mUnrestricted);
         mDisplayContent.getInsetsStateController().onPostLayout();
-        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames, simulatedInsetsState, uiMode);
+        mDisplayPolicy.simulateLayoutDisplay(simulatedDisplayFrames, simulatedInsetsState,
+                new SparseArray<>() /* barContentFrames */);
 
         final StringWriter realFramesDump = new StringWriter();
         mFrames.dump(prefix, new PrintWriter(realFramesDump));
