@@ -274,7 +274,6 @@ class ControlViewHolder(
         val ri = RenderInfo.lookup(context, cws.componentName, deviceTypeOrError, offset)
         val fg = context.resources.getColorStateList(ri.foreground, context.theme)
         val newText = nextStatusText
-        nextStatusText = ""
         val control = cws.control
 
         var shouldAnimate = animated
@@ -297,10 +296,8 @@ class ControlViewHolder(
         if (immediately) {
             status.alpha = STATUS_ALPHA_ENABLED
             status.text = text
-            nextStatusText = ""
-        } else {
-            nextStatusText = text
         }
+        nextStatusText = text
     }
 
     private fun animateBackgroundChange(
