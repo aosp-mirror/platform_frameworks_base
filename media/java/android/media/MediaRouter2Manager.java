@@ -321,6 +321,8 @@ public final class MediaRouter2Manager {
         Objects.requireNonNull(packageName, "packageName must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
+        Log.v(TAG, "Selecting route. packageName= " + packageName + ", route=" + route);
+
         List<RoutingSessionInfo> sessionInfos = getRoutingSessions(packageName);
         RoutingSessionInfo targetSession = sessionInfos.get(sessionInfos.size() - 1);
         transfer(targetSession, route);

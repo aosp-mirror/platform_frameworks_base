@@ -378,6 +378,7 @@ public final class MediaRouter2 {
      */
     public void transferTo(@NonNull MediaRoute2Info route) {
         Objects.requireNonNull(route, "route must not be null");
+        Log.v(TAG, "Transferring to route: " + route);
         transfer(getCurrentController(), route);
     }
 

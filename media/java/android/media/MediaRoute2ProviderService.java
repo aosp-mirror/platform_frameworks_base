@@ -71,6 +71,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public abstract class MediaRoute2ProviderService extends Service {
     private static final String TAG = "MR2ProviderService";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
      * The {@link Intent} action that must be declared as handled by the service.
@@ -238,6 +239,11 @@ public abstract class MediaRoute2ProviderService extends Service {
             @NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
+        if (DEBUG) {
+            Log.d(TAG, "notifySessionCreated: Creating a session. requestId=" + requestId
+                    + ", sessionInfo=" + sessionInfo);
+        }
+
         if (requestId != REQUEST_ID_NONE && !removeRequestId(requestId)) {
             Log.w(TAG, "notifySessionCreated: The requestId doesn't exist. requestId=" + requestId);
             return;
@@ -269,6 +275,10 @@ public abstract class MediaRoute2ProviderService extends Service {
     public final void notifySessionUpdated(@NonNull RoutingSessionInfo sessionInfo) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
 
+        if (DEBUG) {
+            Log.d(TAG, "notifySessionUpdated: Updating session id=" + sessionInfo);
+        }
+
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
             if (mSessionInfo.containsKey(sessionId)) {
@@ -299,6 +309,10 @@ public abstract class MediaRoute2ProviderService extends Service {
         if (TextUtils.isEmpty(sessionId)) {
             throw new IllegalArgumentException("sessionId must not be empty");
         }
+        if (DEBUG) {
+            Log.d(TAG, "notifySessionReleased: Releasing session id=" + sessionId);
+        }
+
         RoutingSessionInfo sessionInfo;
         synchronized (mSessionLock) {
             sessionInfo = mSessionInfo.remove(sessionId);
