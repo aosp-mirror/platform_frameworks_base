@@ -111,6 +111,11 @@ interface IIncrementalService {
     void deleteStorage(int storageId);
 
     /**
+     * Permanently disable readlogs reporting for a storage given its ID.
+     */
+    void disableReadLogs(int storageId);
+
+    /**
      * Setting up native library directories and extract native libs onto a storage if needed.
      */
     boolean configureNativeBinaries(int storageId, in @utf8InCpp String apkFullPath, in @utf8InCpp String libDirRelativePath, in @utf8InCpp String abi, boolean extractNativeLibs);
