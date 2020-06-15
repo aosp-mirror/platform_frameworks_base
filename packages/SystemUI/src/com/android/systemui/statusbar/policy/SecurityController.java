@@ -24,6 +24,8 @@ public interface SecurityController extends CallbackController<SecurityControlle
     boolean isDeviceManaged();
     boolean hasProfileOwner();
     boolean hasWorkProfile();
+    /** Whether this device is organization-owned with a work profile **/
+    boolean isProfileOwnerOfOrganizationOwnedDevice();
     String getDeviceOwnerName();
     String getProfileOwnerName();
     CharSequence getDeviceOwnerOrganizationName();
