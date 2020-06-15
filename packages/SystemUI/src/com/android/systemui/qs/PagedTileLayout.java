@@ -291,15 +291,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     }
 
     private void emptyAndInflateOrRemovePages() {
-        final int nTiles = mTiles.size();
-        // We should always have at least one page, even if it's empty.
-        int numPages = Math.max(nTiles / mPages.get(0).maxTiles(), 1);
-
-        // Add one more not full page if needed
-        if (nTiles > numPages * mPages.get(0).maxTiles()) {
-            numPages++;
-        }
-
+        final int numPages = getNumPages();
         final int NP = mPages.size();
         for (int i = 0; i < NP; i++) {
             mPages.get(i).removeAllViews();
@@ -429,6 +421,22 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     public int getColumnCount() {
         if (mPages.size() == 0) return 0;
         return mPages.get(0).mColumns;
+    }
+
+    /**
+     * Gets the number of pages in this paged tile layout
+     */
+    public int getNumPages() {
+        final int nTiles = mTiles.size();
+        // We should always have at least one page, even if it's empty.
+        int numPages = Math.max(nTiles / mPages.get(0).maxTiles(), 1);
+
+        // Add one more not full page if needed
+        if (nTiles > numPages * mPages.get(0).maxTiles()) {
+            numPages++;
+        }
+
+        return numPages;
     }
 
     public int getNumVisibleTiles() {
