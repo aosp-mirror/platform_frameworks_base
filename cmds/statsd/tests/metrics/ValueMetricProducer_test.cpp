@@ -3295,11 +3295,15 @@ TEST(ValueMetricProducerTest_BucketDrop, TestInvalidBucketWhenConditionEventWron
               report.value_metrics().skipped(0).start_bucket_elapsed_millis());
     EXPECT_EQ(NanoToMillis(bucket2StartTimeNs + 100),
               report.value_metrics().skipped(0).end_bucket_elapsed_millis());
-    ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+    ASSERT_EQ(2, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
     EXPECT_EQ(BucketDropReason::EVENT_IN_WRONG_BUCKET, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(bucket2StartTimeNs - 100), dropEvent.drop_time_millis());
+
+    dropEvent = report.value_metrics().skipped(0).drop_event(1);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs + 100), dropEvent.drop_time_millis());
 }
 
 /*
@@ -3615,7 +3619,7 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenDataUnavailable) {
 
     sp<ValueMetricProducer> valueProducer =
             ValueMetricProducerTestHelper::createValueProducerWithCondition(
-                    pullerManager, metric, ConditionState::kUnknown);
+                    pullerManager, metric, ConditionState::kFalse);
 
     // Check dump report.
     ProtoOutputStream output;
@@ -3638,6 +3642,94 @@ TEST(ValueMetricProducerTest_BucketDrop, TestBucketDropWhenDataUnavailable) {
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
     EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(dumpReportTimeNs), dropEvent.drop_time_millis());
+}
+
+/*
+ * Test that all buckets are dropped due to condition unknown until the first onConditionChanged.
+ */
+TEST(ValueMetricProducerTest_BucketDrop, TestConditionUnknownMultipleBuckets) {
+    ValueMetric metric = ValueMetricProducerTestHelper::createMetricWithCondition();
+
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, Pull(tagId, kConfigKey, _, _, _))
+            // Condition change to true.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 10 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucket2StartTimeNs + 10 * NS_PER_SEC, 10));
+                return true;
+            }))
+            // Dump report requested.
+            .WillOnce(Invoke([](int tagId, const ConfigKey&, const int64_t eventTimeNs,
+                                vector<std::shared_ptr<LogEvent>>* data, bool) {
+                EXPECT_EQ(eventTimeNs, bucket2StartTimeNs + 15 * NS_PER_SEC);
+                data->clear();
+                data->push_back(CreateRepeatedValueLogEvent(
+                        tagId, bucket2StartTimeNs + 15 * NS_PER_SEC, 15));
+                return true;
+            }));
+
+    sp<ValueMetricProducer> valueProducer =
+            ValueMetricProducerTestHelper::createValueProducerWithCondition(
+                    pullerManager, metric, ConditionState::kUnknown);
+
+    // Bucket should be dropped because of condition unknown.
+    int64_t appUpgradeTimeNs = bucketStartTimeNs + 5 * NS_PER_SEC;
+    valueProducer->notifyAppUpgrade(appUpgradeTimeNs);
+
+    // Bucket also dropped due to condition unknown
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    allData.push_back(CreateRepeatedValueLogEvent(tagId, bucket2StartTimeNs + 1, 3));
+    valueProducer->onDataPulled(allData, /** succeed */ true, bucket2StartTimeNs);
+
+    // This bucket is also dropped due to condition unknown.
+    int64_t conditionChangeTimeNs = bucket2StartTimeNs + 10 * NS_PER_SEC;
+    valueProducer->onConditionChanged(true, conditionChangeTimeNs);
+
+    // Check dump report.
+    ProtoOutputStream output;
+    std::set<string> strSet;
+    int64_t dumpReportTimeNs = bucket2StartTimeNs + 15 * NS_PER_SEC; // 15 seconds
+    valueProducer->onDumpReport(dumpReportTimeNs, true /* include current bucket */, true,
+                                NO_TIME_CONSTRAINTS /* dumpLatency */, &strSet, &output);
+
+    StatsLogReport report = outputStreamToProto(&output);
+    EXPECT_TRUE(report.has_value_metrics());
+    ASSERT_EQ(0, report.value_metrics().data_size());
+    ASSERT_EQ(3, report.value_metrics().skipped_size());
+
+    EXPECT_EQ(NanoToMillis(bucketStartTimeNs),
+              report.value_metrics().skipped(0).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(appUpgradeTimeNs),
+              report.value_metrics().skipped(0).end_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
+
+    auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(appUpgradeTimeNs), dropEvent.drop_time_millis());
+
+    EXPECT_EQ(NanoToMillis(appUpgradeTimeNs),
+              report.value_metrics().skipped(1).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(1).end_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().skipped(1).drop_event_size());
+
+    dropEvent = report.value_metrics().skipped(1).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs), dropEvent.drop_time_millis());
+
+    EXPECT_EQ(NanoToMillis(bucket2StartTimeNs),
+              report.value_metrics().skipped(2).start_bucket_elapsed_millis());
+    EXPECT_EQ(NanoToMillis(dumpReportTimeNs),
+              report.value_metrics().skipped(2).end_bucket_elapsed_millis());
+    ASSERT_EQ(1, report.value_metrics().skipped(2).drop_event_size());
+
+    dropEvent = report.value_metrics().skipped(2).drop_event(0);
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
+    EXPECT_EQ(NanoToMillis(conditionChangeTimeNs), dropEvent.drop_time_millis());
 }
 
 /*
@@ -4957,7 +5049,7 @@ TEST(ValueMetricProducerTest, TestForcedBucketSplitWhenConditionUnknownSkipsBuck
     ASSERT_EQ(1, report.value_metrics().skipped(0).drop_event_size());
 
     auto dropEvent = report.value_metrics().skipped(0).drop_event(0);
-    EXPECT_EQ(BucketDropReason::NO_DATA, dropEvent.drop_reason());
+    EXPECT_EQ(BucketDropReason::CONDITION_UNKNOWN, dropEvent.drop_reason());
     EXPECT_EQ(NanoToMillis(appUpdateTimeNs), dropEvent.drop_time_millis());
 }
 
