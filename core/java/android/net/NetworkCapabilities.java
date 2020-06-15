@@ -900,9 +900,17 @@ public final class NetworkCapabilities implements Parcelable {
      * <p>For NetworkCapability instances being sent from ConnectivityService, this value MUST be
      * reset to Process.INVALID_UID unless all the following conditions are met:
      *
+     * <p>The caller is the network owner, AND one of the following sets of requirements is met:
+     *
      * <ol>
-     *   <li>The destination app is the network owner
-     *   <li>The destination app has the ACCESS_FINE_LOCATION permission granted
+     *   <li>The described Network is a VPN
+     * </ol>
+     *
+     * <p>OR:
+     *
+     * <ol>
+     *   <li>The calling app is the network owner
+     *   <li>The calling app has the ACCESS_FINE_LOCATION permission granted
      *   <li>The user's location toggle is on
      * </ol>
      *
@@ -928,7 +936,16 @@ public final class NetworkCapabilities implements Parcelable {
     /**
      * Retrieves the UID of the app that owns this network.
      *
-     * <p>For user privacy reasons, this field will only be populated if:
+     * <p>For user privacy reasons, this field will only be populated if the following conditions
+     * are met:
+     *
+     * <p>The caller is the network owner, AND one of the following sets of requirements is met:
+     *
+     * <ol>
+     *   <li>The described Network is a VPN
+     * </ol>
+     *
+     * <p>OR:
      *
      * <ol>
      *   <li>The calling app is the network owner
@@ -936,8 +953,8 @@ public final class NetworkCapabilities implements Parcelable {
      *   <li>The user's location toggle is on
      * </ol>
      *
-     * Instances of NetworkCapabilities sent to apps without the appropriate permissions will
-     * have this field cleared out.
+     * Instances of NetworkCapabilities sent to apps without the appropriate permissions will have
+     * this field cleared out.
      */
     public int getOwnerUid() {
         return mOwnerUid;
