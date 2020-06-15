@@ -153,6 +153,13 @@ public final class IncrementalFileStorages {
     }
 
     /**
+     * Permanently disables readlogs.
+     */
+    public void disableReadLogs() {
+        mDefaultStorage.disableReadLogs();
+    }
+
+    /**
      * Resets the states and unbinds storage instances for an installation session.
      * TODO(b/136132412): make sure unnecessary binds are removed but useful storages are kept
      */
