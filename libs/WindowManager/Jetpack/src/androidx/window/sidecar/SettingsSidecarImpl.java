@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions;
+package androidx.window.sidecar;
 
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static androidx.window.extensions.ExtensionHelper.getWindowDisplay;
-import static androidx.window.extensions.ExtensionHelper.isInMultiWindow;
-import static androidx.window.extensions.ExtensionHelper.rotateRectToDisplayRotation;
-import static androidx.window.extensions.ExtensionHelper.transformToWindowSpaceRect;
+import static androidx.window.sidecar.SidecarHelper.getWindowDisplay;
+import static androidx.window.sidecar.SidecarHelper.isInMultiWindow;
+import static androidx.window.sidecar.SidecarHelper.rotateRectToDisplayRotation;
+import static androidx.window.sidecar.SidecarHelper.transformToWindowSpaceRect;
 
 import android.content.ContentResolver;
 import android.content.Context;
@@ -42,8 +42,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-class SettingsExtensionImpl extends StubExtension {
-    private static final String TAG = "SettingsExtension";
+class SettingsSidecarImpl extends StubSidecar {
+    private static final String TAG = "SettingsSidecar";
 
     private static final String DEVICE_POSTURE = "device_posture";
     private static final String DISPLAY_FEATURES = "display_features";
@@ -106,7 +106,7 @@ class SettingsExtensionImpl extends StubExtension {
         }
     }
 
-    SettingsExtensionImpl(Context context) {
+    SettingsSidecarImpl(Context context) {
         mContext = context;
         mSettingsObserver = new SettingsObserver();
     }
@@ -118,29 +118,33 @@ class SettingsExtensionImpl extends StubExtension {
     /** Update display features with values read from settings. */
     private void updateDisplayFeatures() {
         for (IBinder windowToken : getWindowsListeningForLayoutChanges()) {
-            ExtensionWindowLayoutInfo newLayout = getWindowLayoutInfo(windowToken);
+            SidecarWindowLayoutInfo newLayout = getWindowLayoutInfo(windowToken);
             updateWindowLayout(windowToken, newLayout);
         }
     }
 
     @NonNull
     @Override
-    public ExtensionDeviceState getDeviceState() {
+    public SidecarDeviceState getDeviceState() {
         ContentResolver resolver = mContext.getContentResolver();
         int posture = Settings.Global.getInt(resolver, DEVICE_POSTURE,
-                ExtensionDeviceState.POSTURE_UNKNOWN);
-        return new ExtensionDeviceState(posture);
+                SidecarDeviceState.POSTURE_UNKNOWN);
+        SidecarDeviceState deviceState = new SidecarDeviceState();
+        deviceState.posture = posture;
+        return deviceState;
     }
 
     @NonNull
     @Override
-    public ExtensionWindowLayoutInfo getWindowLayoutInfo(@NonNull IBinder windowToken) {
-        List<ExtensionDisplayFeature> displayFeatures = readDisplayFeatures(windowToken);
-        return new ExtensionWindowLayoutInfo(displayFeatures);
+    public SidecarWindowLayoutInfo getWindowLayoutInfo(@NonNull IBinder windowToken) {
+        List<SidecarDisplayFeature> displayFeatures = readDisplayFeatures(windowToken);
+        SidecarWindowLayoutInfo windowLayoutInfo = new SidecarWindowLayoutInfo();
+        windowLayoutInfo.displayFeatures = displayFeatures;
+        return windowLayoutInfo;
     }
 
-    private List<ExtensionDisplayFeature> readDisplayFeatures(IBinder windowToken) {
-        List<ExtensionDisplayFeature> features = new ArrayList<ExtensionDisplayFeature>();
+    private List<SidecarDisplayFeature> readDisplayFeatures(IBinder windowToken) {
+        List<SidecarDisplayFeature> features = new ArrayList<SidecarDisplayFeature>();
         int displayId = getWindowDisplay(windowToken);
         if (displayId != DEFAULT_DISPLAY) {
             Log.w(TAG, "This sample doesn't support display features on secondary displays");
@@ -170,10 +174,10 @@ class SettingsExtensionImpl extends StubExtension {
                 int type;
                 switch (featureType) {
                     case FEATURE_TYPE_FOLD:
-                        type = ExtensionDisplayFeature.TYPE_FOLD;
+                        type = SidecarDisplayFeature.TYPE_FOLD;
                         break;
                     case FEATURE_TYPE_HINGE:
-                        type = ExtensionDisplayFeature.TYPE_HINGE;
+                        type = SidecarDisplayFeature.TYPE_HINGE;
                         break;
                     default: {
                         Log.e(TAG, "Malformed feature type: " + featureType);
@@ -189,8 +193,9 @@ class SettingsExtensionImpl extends StubExtension {
                 rotateRectToDisplayRotation(featureRect, displayId);
                 transformToWindowSpaceRect(featureRect, windowToken);
                 if (!featureRect.isEmpty()) {
-                    ExtensionDisplayFeature feature =
-                            new ExtensionDisplayFeature(featureRect, type);
+                    SidecarDisplayFeature feature = new SidecarDisplayFeature();
+                    feature.setRect(featureRect);
+                    feature.setType(type);
                     features.add(feature);
                 } else {
                     Log.w(TAG, "Failed to adjust feature to window");

@@ -1,5 +1,5 @@
 /*
- * Copyright 2020 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package androidx.window.extensions;
+package androidx.window.sidecar;
 
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Surface.ROTATION_0;
@@ -32,12 +32,7 @@ import android.view.Surface;
 
 import androidx.annotation.Nullable;
 
-/**
- * Toolkit class for calculation of the display feature bounds within the window.
- * NOTE: This sample implementation only works for Activity windows, because there is no public APIs
- * to obtain layout params or bounds for arbitrary windows.
- */
-class ExtensionHelper {
+class SidecarHelper {
     /**
      * Rotate the input rectangle specified in default display orientation to the current display
      * rotation.
