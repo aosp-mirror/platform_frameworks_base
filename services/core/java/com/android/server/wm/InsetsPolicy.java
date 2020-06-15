@@ -42,6 +42,7 @@ import android.view.InsetsState.InternalInsetsType;
 import android.view.SurfaceControl;
 import android.view.SyncRtSurfaceTransactionApplier;
 import android.view.ViewRootImpl;
+import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
@@ -127,14 +128,16 @@ class InsetsPolicy {
         return provider != null && provider.hasWindow() && !provider.getSource().isVisible();
     }
 
-    void showTransient(IntArray types) {
+    @InsetsType int showTransient(IntArray types) {
+        @InsetsType int showingTransientTypes = 0;
         boolean changed = false;
         for (int i = types.size() - 1; i >= 0; i--) {
             final int type = types.get(i);
-            if (mShowingTransientTypes.indexOf(type) != -1) {
+            if (!isHidden(type)) {
                 continue;
             }
-            if (!isHidden(type)) {
+            showingTransientTypes |= InsetsState.toPublicType(type);
+            if (mShowingTransientTypes.indexOf(type) != -1) {
                 continue;
             }
             mShowingTransientTypes.add(type);
@@ -161,6 +164,7 @@ class InsetsPolicy {
                 }
             });
         }
+        return showingTransientTypes;
     }
 
     void hideTransient() {
@@ -191,18 +195,6 @@ class InsetsPolicy {
         for (int i = mShowingTransientTypes.size() - 1; i >= 0; i--) {
             state = new InsetsState(state);
             state.setSourceVisible(mShowingTransientTypes.get(i), false);
-        }
-        if (mFocusedWin != null && getStatusControlTarget(mFocusedWin) == mDummyControlTarget) {
-            if (state == originalState) {
-                state = new InsetsState(state);
-            }
-            state.setSourceVisible(ITYPE_STATUS_BAR, mFocusedWin.getRequestedInsetsState());
-        }
-        if (mFocusedWin != null && getNavControlTarget(mFocusedWin) == mDummyControlTarget) {
-            if (state == originalState) {
-                state = new InsetsState(state);
-            }
-            state.setSourceVisible(ITYPE_NAVIGATION_BAR, mFocusedWin.getRequestedInsetsState());
         }
         return state;
     }
@@ -373,7 +365,7 @@ class InsetsPolicy {
             final WindowState controllingWin =
                     controlTarget instanceof WindowState ? (WindowState) controlTarget : null;
             setVisible(controllingWin == null
-                    || controllingWin.getRequestedInsetsState().getSource(type).isVisible());
+                    || controllingWin.getRequestedInsetsState().getSourceOrDefaultVisibility(type));
         }
 
         private void setVisible(boolean visible) {
