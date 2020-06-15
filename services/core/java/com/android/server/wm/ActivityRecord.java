@@ -7731,24 +7731,25 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     outAppBounds.set(outBounds);
                 }
             } else {
-                outBounds.set(0, 0, mWidth, mHeight);
-                getFrameByOrientation(outAppBounds, orientation);
-                if (orientationRequested && !canChangeOrientation
-                        && (outAppBounds.width() > outAppBounds.height()) != (mWidth > mHeight)) {
-                    // The orientation is mismatched but the display cannot rotate. The bounds will
-                    // fit to the short side of display.
-                    if (orientation == ORIENTATION_LANDSCAPE) {
-                        outAppBounds.bottom = (int) ((float) mWidth * mWidth / mHeight);
-                        outAppBounds.right = mWidth;
-                    } else {
-                        outAppBounds.bottom = mHeight;
-                        outAppBounds.right = (int) ((float) mHeight * mHeight / mWidth);
+                if (orientationRequested) {
+                    getFrameByOrientation(outBounds, orientation);
+                    if ((outBounds.width() > outBounds.height()) != (mWidth > mHeight)) {
+                        // The orientation is mismatched but the display cannot rotate. The bounds
+                        // will fit to the short side of display.
+                        if (orientation == ORIENTATION_LANDSCAPE) {
+                            outBounds.bottom = (int) ((float) mWidth * mWidth / mHeight);
+                            outBounds.right = mWidth;
+                        } else {
+                            outBounds.bottom = mHeight;
+                            outBounds.right = (int) ((float) mHeight * mHeight / mWidth);
+                        }
+                        outBounds.offset(
+                                getHorizontalCenterOffset(mWidth, outBounds.width()), 0 /* dy */);
                     }
-                    outAppBounds.offset(getHorizontalCenterOffset(outBounds.width(),
-                            outAppBounds.width()), 0 /* dy */);
                 } else {
-                    outAppBounds.set(outBounds);
+                    outBounds.set(0, 0, mWidth, mHeight);
                 }
+                outAppBounds.set(outBounds);
             }
 
             if (rotation != ROTATION_UNDEFINED) {
