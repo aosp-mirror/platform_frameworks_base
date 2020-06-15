@@ -291,7 +291,9 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
                 });
 
         // If the bubble was persisted, the entry is null but it should have shortcut info
-        ShortcutInfo info = b.getShortcutInfo();
+        ShortcutInfo info = b.getEntry() == null
+                ? b.getShortcutInfo()
+                : b.getEntry().getRanking().getShortcutInfo();
         if (info == null) {
             Log.d(TAG, "ShortcutInfo required to bubble but none found for " + b);
         } else {
