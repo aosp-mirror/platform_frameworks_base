@@ -12833,15 +12833,8 @@ public class PackageManagerService extends IPackageManager.Stub
         return installReason;
     }
 
-    void installStage(ActiveInstallSession activeInstallSession) {
-        if (DEBUG_INSTANT) {
-            if ((activeInstallSession.getSessionParams().installFlags
-                    & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
-            }
-        }
+    void installStage(InstallParams params) {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
-        final InstallParams params = new InstallParams(activeInstallSession);
         params.setTraceMethod("installStage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -12853,11 +12846,11 @@ public class PackageManagerService extends IPackageManager.Stub
         mHandler.sendMessage(msg);
     }
 
-    void installStage(ActiveInstallSession parent, List<ActiveInstallSession> children)
+    void installStage(InstallParams parent, List<InstallParams> children)
             throws PackageManagerException {
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final MultiPackageInstallParams params =
-                new MultiPackageInstallParams(UserHandle.ALL, parent, children);
+                new MultiPackageInstallParams(parent, children);
         params.setTraceMethod("installStageMultiPackage")
                 .setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
@@ -14744,23 +14737,19 @@ public class PackageManagerService extends IPackageManager.Stub
      * committed together.
      */
     class MultiPackageInstallParams extends HandlerParams {
-        private final ArrayList<InstallParams> mChildParams;
+        private final List<InstallParams> mChildParams;
         private final Map<InstallArgs, Integer> mCurrentState;
 
-        MultiPackageInstallParams(
-                @NonNull UserHandle user,
-                @NonNull ActiveInstallSession parent,
-                @NonNull List<ActiveInstallSession> activeInstallSessions)
+        MultiPackageInstallParams(InstallParams parent, List<InstallParams> childParams)
                 throws PackageManagerException {
-            super(user);
-            if (activeInstallSessions.size() == 0) {
+            super(parent.getUser());
+            if (childParams.size() == 0) {
                 throw new PackageManagerException("No child sessions found!");
             }
-            mChildParams = new ArrayList<>(activeInstallSessions.size());
-            for (int i = 0; i < activeInstallSessions.size(); i++) {
-                final InstallParams childParams = new InstallParams(activeInstallSessions.get(i));
-                childParams.mParentInstallParams = this;
-                this.mChildParams.add(childParams);
+            mChildParams = childParams;
+            for (int i = 0; i < childParams.size(); i++) {
+                final InstallParams childParam = childParams.get(i);
+                childParam.mParentInstallParams = this;
             }
             this.mCurrentState = new ArrayMap<>(mChildParams.size());
         }
@@ -14805,7 +14794,6 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     class InstallParams extends HandlerParams {
-        // TODO: see if we can collapse this into ActiveInstallSession
         final OriginInfo origin;
         final MoveInfo move;
         final IPackageInstallObserver2 observer;
@@ -14825,10 +14813,7 @@ public class PackageManagerService extends IPackageManager.Stub
 
         InstallParams(OriginInfo origin, MoveInfo move, IPackageInstallObserver2 observer,
                 int installFlags, InstallSource installSource, String volumeUuid,
-                UserHandle user, String packageAbiOverride,
-                String[] grantedPermissions, List<String> whitelistedRestrictedPermissions,
-                int autoRevokePermissionsMode,
-                SigningDetails signingDetails, int installReason, int dataLoaderType) {
+                UserHandle user, String packageAbiOverride) {
             super(user);
             this.origin = origin;
             this.move = move;
@@ -14837,40 +14822,33 @@ public class PackageManagerService extends IPackageManager.Stub
             this.installSource = Preconditions.checkNotNull(installSource);
             this.volumeUuid = volumeUuid;
             this.packageAbiOverride = packageAbiOverride;
-            this.grantedRuntimePermissions = grantedPermissions;
-            this.whitelistedRestrictedPermissions = whitelistedRestrictedPermissions;
-            this.autoRevokePermissionsMode = autoRevokePermissionsMode;
-            this.signingDetails = signingDetails;
-            this.installReason = installReason;
+
+            this.grantedRuntimePermissions = null;
+            this.whitelistedRestrictedPermissions = null;
+            this.autoRevokePermissionsMode = MODE_DEFAULT;
+            this.signingDetails = PackageParser.SigningDetails.UNKNOWN;
+            this.installReason = PackageManager.INSTALL_REASON_UNKNOWN;
             this.forceQueryableOverride = false;
-            this.mDataLoaderType = dataLoaderType;
+            this.mDataLoaderType = DataLoaderType.NONE;
         }
 
-        InstallParams(ActiveInstallSession activeInstallSession) {
-            super(activeInstallSession.getUser());
-            final PackageInstaller.SessionParams sessionParams =
-                    activeInstallSession.getSessionParams();
-            if (DEBUG_INSTANT) {
-                if ((sessionParams.installFlags
-                        & PackageManager.INSTALL_INSTANT_APP) != 0) {
-                    Slog.d(TAG, "Ephemeral install of " + activeInstallSession.getPackageName());
-                }
-            }
-            origin = OriginInfo.fromStagedFile(activeInstallSession.getStagedDir());
+        InstallParams(File stagedDir, IPackageInstallObserver2 observer,
+                PackageInstaller.SessionParams sessionParams, InstallSource installSource,
+                UserHandle user, SigningDetails signingDetails, int installerUid) {
+            super(user);
+            origin = OriginInfo.fromStagedFile(stagedDir);
             move = null;
             installReason = fixUpInstallReason(
-                    activeInstallSession.getInstallSource().installerPackageName,
-                    activeInstallSession.getInstallerUid(),
-                    sessionParams.installReason);
-            observer = activeInstallSession.getObserver();
+                    installSource.installerPackageName, installerUid, sessionParams.installReason);
+            this.observer = observer;
             installFlags = sessionParams.installFlags;
-            installSource = activeInstallSession.getInstallSource();
+            this.installSource = installSource;
             volumeUuid = sessionParams.volumeUuid;
             packageAbiOverride = sessionParams.abiOverride;
             grantedRuntimePermissions = sessionParams.grantedRuntimePermissions;
             whitelistedRestrictedPermissions = sessionParams.whitelistedRestrictedPermissions;
             autoRevokePermissionsMode = sessionParams.autoRevokePermissionsMode;
-            signingDetails = activeInstallSession.getSigningDetails();
+            this.signingDetails = signingDetails;
             forceQueryableOverride = sessionParams.forceQueryableOverride;
             mDataLoaderType = (sessionParams.dataLoaderParams != null)
                     ? sessionParams.dataLoaderParams.getType() : DataLoaderType.NONE;
@@ -23429,11 +23407,7 @@ public class PackageManagerService extends IPackageManager.Stub
         final Message msg = mHandler.obtainMessage(INIT_COPY);
         final OriginInfo origin = OriginInfo.fromExistingFile(codeFile);
         final InstallParams params = new InstallParams(origin, move, installObserver, installFlags,
-                installSource, volumeUuid, user,
-                packageAbiOverride, null /*grantedPermissions*/,
-                null /*whitelistedRestrictedPermissions*/, MODE_DEFAULT /* autoRevokePermissions */,
-                PackageParser.SigningDetails.UNKNOWN,
-                PackageManager.INSTALL_REASON_UNKNOWN, DataLoaderType.NONE);
+                installSource, volumeUuid, user, packageAbiOverride);
         params.setTraceMethod("movePackage").setTraceCookie(System.identityHashCode(params));
         msg.obj = params;
 
@@ -25678,71 +25652,6 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public List<String> getMimeGroup(String packageName, String mimeGroup) {
         return mSettings.mPackages.get(packageName).getMimeGroup(mimeGroup);
-    }
-
-    // TODO(samiul): Get rid of this class. The callers can create InstallParams and
-    //  VerificationParams directly.
-    static class ActiveInstallSession {
-        private final String mPackageName;
-        private final File mStagedDir;
-        private final IPackageInstallObserver2 mObserver;
-        private final int mSessionId;
-        private final PackageInstaller.SessionParams mSessionParams;
-        private final int mInstallerUid;
-        @NonNull private final InstallSource mInstallSource;
-        private final UserHandle mUser;
-        private final SigningDetails mSigningDetails;
-
-        ActiveInstallSession(String packageName, File stagedDir, IPackageInstallObserver2 observer,
-                int sessionId, PackageInstaller.SessionParams sessionParams, int installerUid,
-                InstallSource installSource, UserHandle user, SigningDetails signingDetails) {
-            mPackageName = packageName;
-            mStagedDir = stagedDir;
-            mObserver = observer;
-            mSessionId = sessionId;
-            mSessionParams = sessionParams;
-            mInstallerUid = installerUid;
-            mInstallSource = Preconditions.checkNotNull(installSource);
-            mUser = user;
-            mSigningDetails = signingDetails;
-        }
-
-        public String getPackageName() {
-            return mPackageName;
-        }
-
-        public File getStagedDir() {
-            return mStagedDir;
-        }
-
-        public IPackageInstallObserver2 getObserver() {
-            return mObserver;
-        }
-
-        public int getSessionId() {
-            return mSessionId;
-        }
-
-        public PackageInstaller.SessionParams getSessionParams() {
-            return mSessionParams;
-        }
-
-        public int getInstallerUid() {
-            return mInstallerUid;
-        }
-
-        @NonNull
-        public InstallSource getInstallSource() {
-            return mInstallSource;
-        }
-
-        public UserHandle getUser() {
-            return mUser;
-        }
-
-        public SigningDetails getSigningDetails() {
-            return mSigningDetails;
-        }
     }
 }
 

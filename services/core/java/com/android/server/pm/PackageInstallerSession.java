@@ -1788,21 +1788,21 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     private void installNonStaged(List<PackageInstallerSession> childSessions)
             throws PackageManagerException {
-        final PackageManagerService.ActiveInstallSession installingSession =
-                makeSessionActiveForInstall();
+        final PackageManagerService.InstallParams installingSession =
+                makeInstallParams();
         if (installingSession == null) {
             return;
         }
         if (isMultiPackage()) {
-            List<PackageManagerService.ActiveInstallSession> installingChildSessions =
+            List<PackageManagerService.InstallParams> installingChildSessions =
                     new ArrayList<>(childSessions.size());
             boolean success = true;
             PackageManagerException failure = null;
             for (int i = 0; i < childSessions.size(); ++i) {
                 final PackageInstallerSession session = childSessions.get(i);
                 try {
-                    final PackageManagerService.ActiveInstallSession installingChildSession =
-                            session.makeSessionActiveForInstall();
+                    final PackageManagerService.InstallParams installingChildSession =
+                            session.makeInstallParams();
                     if (installingChildSession != null) {
                         installingChildSessions.add(installingChildSession);
                     }
@@ -2000,9 +2000,9 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
 
     /**
      * Stages this session for install and returns a
-     * {@link PackageManagerService.ActiveInstallSession} representing this new staged state.
+     * {@link PackageManagerService.InstallParams} representing this new staged state.
      */
-    private PackageManagerService.ActiveInstallSession makeSessionActiveForInstall()
+    private PackageManagerService.InstallParams makeInstallParams()
             throws PackageManagerException {
         synchronized (mLock) {
             if (mDestroyed) {
@@ -2039,9 +2039,8 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         }
 
         synchronized (mLock) {
-            return new PackageManagerService.ActiveInstallSession(mPackageName, stageDir,
-                    localObserver, sessionId, params, mInstallerUid, mInstallSource, user,
-                    mSigningDetails);
+            return mPm.new InstallParams(stageDir, localObserver, params, mInstallSource, user,
+                    mSigningDetails, mInstallerUid);
         }
     }
 
