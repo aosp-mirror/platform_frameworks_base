@@ -1328,11 +1328,15 @@ public class NotificationPanelViewController extends PanelViewController {
      *
      * @param velocity unit is in px / millis
      */
-    public void stopWaitingForOpenPanelGesture(final float velocity) {
+    public void stopWaitingForOpenPanelGesture(boolean cancel, final float velocity) {
         if (mExpectingSynthesizedDown) {
             mExpectingSynthesizedDown = false;
-            maybeVibrateOnOpening();
-            fling(velocity > 1f ? 1000f * velocity : 0, true /* expand */);
+            if (cancel) {
+                collapse(false /* delayed */, 1.0f /* speedUpFactor */);
+            } else {
+                maybeVibrateOnOpening();
+                fling(velocity > 1f ? 1000f * velocity : 0, true /* expand */);
+            }
             onTrackingStopped(false);
         }
     }

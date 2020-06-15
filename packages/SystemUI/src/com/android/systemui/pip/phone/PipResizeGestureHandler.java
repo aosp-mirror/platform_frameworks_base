@@ -260,12 +260,14 @@ public class PipResizeGestureHandler {
 
     private void onMotionEvent(MotionEvent ev) {
         int action = ev.getActionMasked();
+        float x = ev.getX();
+        float y = ev.getY();
         if (action == MotionEvent.ACTION_DOWN) {
             mLastResizeBounds.setEmpty();
-            mAllowGesture = isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
+            mAllowGesture = isWithinTouchRegion((int) x, (int) y);
             if (mAllowGesture) {
-                setCtrlType((int) ev.getX(), (int) ev.getY());
-                mDownPoint.set(ev.getX(), ev.getY());
+                setCtrlType((int) x, (int) y);
+                mDownPoint.set(x, y);
                 mLastDownBounds.set(mMotionHelper.getBounds());
             }
 
@@ -277,20 +279,23 @@ public class PipResizeGestureHandler {
                     break;
                 case MotionEvent.ACTION_MOVE:
                     // Capture inputs
-                    float dx = Math.abs(ev.getX() - mDownPoint.x);
-                    float dy = Math.abs(ev.getY() - mDownPoint.y);
-                    if (!mThresholdCrossed && dx > mTouchSlop && dy > mTouchSlop) {
+                    if (!mThresholdCrossed
+                            && Math.hypot(x - mDownPoint.x, y - mDownPoint.y) > mTouchSlop) {
                         mThresholdCrossed = true;
+                        // Reset the down to begin resizing from this point
+                        mDownPoint.set(x, y);
                         mInputMonitor.pilferPointers();
                     }
-                    final Rect currentPipBounds = mMotionHelper.getBounds();
-                    mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(ev.getX(), ev.getY(),
-                            mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
-                            mMinSize.y, mMaxSize, true,
-                            mLastDownBounds.width() > mLastDownBounds.height()));
-                    mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds);
-                    mPipTaskOrganizer.scheduleUserResizePip(mLastDownBounds, mLastResizeBounds,
-                            null);
+                    if (mThresholdCrossed) {
+                        final Rect currentPipBounds = mMotionHelper.getBounds();
+                        mLastResizeBounds.set(TaskResizingAlgorithm.resizeDrag(x, y,
+                                mDownPoint.x, mDownPoint.y, currentPipBounds, mCtrlType, mMinSize.x,
+                                mMinSize.y, mMaxSize, true,
+                                mLastDownBounds.width() > mLastDownBounds.height()));
+                        mPipBoundsHandler.transformBoundsToAspectRatio(mLastResizeBounds);
+                        mPipTaskOrganizer.scheduleUserResizePip(mLastDownBounds, mLastResizeBounds,
+                                null);
+                    }
                     break;
                 case MotionEvent.ACTION_UP:
                 case MotionEvent.ACTION_CANCEL:
