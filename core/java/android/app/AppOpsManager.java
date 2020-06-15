@@ -261,8 +261,9 @@ public class AppOpsManager {
                             < SystemClock.elapsedRealtime()) {
                         String stackTrace = getFormattedStackTrace();
                         try {
+                            String packageName = ActivityThread.currentOpPackageName();
                             sConfig = getService().reportRuntimeAppOpAccessMessageAndGetConfig(
-                                    ActivityThread.currentOpPackageName(), op, stackTrace);
+                                    packageName == null ? "" : packageName, op, stackTrace);
                         } catch (RemoteException e) {
                             e.rethrowFromSystemServer();
                         }
