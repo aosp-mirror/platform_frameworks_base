@@ -19,6 +19,7 @@ import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.net.NetworkRequest.Type.LISTEN;
 import static android.net.NetworkRequest.Type.REQUEST;
 import static android.net.NetworkRequest.Type.TRACK_DEFAULT;
+import static android.net.QosCallback.QosCallbackRegistrationException;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntDef;
@@ -4847,5 +4848,119 @@ public class ConnectivityManager {
     private void setOemNetworkPreference(@NonNull OemNetworkPreferences preference) {
         Log.d(TAG, "setOemNetworkPreference called with preference: "
                 + preference.toString());
+    }
+
+    @NonNull
+    private final List<QosCallbackConnection> mQosCallbackConnections = new ArrayList<>();
+
+    /**
+     * Registers a {@link QosSocketInfo} with an associated {@link QosCallback}.  The callback will
+     * receive available QoS events related to the {@link Network} and local ip + port
+     * specified within socketInfo.
+     * <p/>
+     * The same {@link QosCallback} must be unregistered before being registered a second time,
+     * otherwise {@link QosCallbackRegistrationException} is thrown.
+     * <p/>
+     * This API does not, in itself, require any permission if called with a network that is not
+     * restricted. However, the underlying implementation currently only supports the IMS network,
+     * which is always restricted. That means non-preinstalled callers can't possibly find this API
+     * useful, because they'd never be called back on networks that they would have access to.
+     *
+     * @throws SecurityException if {@link QosSocketInfo#getNetwork()} is restricted and the app is
+     * missing CONNECTIVITY_USE_RESTRICTED_NETWORKS permission.
+     * @throws QosCallback.QosCallbackRegistrationException if qosCallback is already registered.
+     * @throws RuntimeException if the app already has too many callbacks registered.
+     *
+     * Exceptions after the time of registration is passed through
+     * {@link QosCallback#onError(QosCallbackException)}.  see: {@link QosCallbackException}.
+     *
+     * @param socketInfo the socket information used to match QoS events
+     * @param callback receives qos events that satisfy socketInfo
+     * @param executor The executor on which the callback will be invoked. The provided
+     *                 {@link Executor} must run callback sequentially, otherwise the order of
+     *                 callbacks cannot be guaranteed.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void registerQosCallback(@NonNull final QosSocketInfo socketInfo,
+            @NonNull final QosCallback callback,
+            @CallbackExecutor @NonNull final Executor executor) {
+        Objects.requireNonNull(socketInfo, "socketInfo must be non-null");
+        Objects.requireNonNull(callback, "callback must be non-null");
+        Objects.requireNonNull(executor, "executor must be non-null");
+
+        try {
+            synchronized (mQosCallbackConnections) {
+                if (getQosCallbackConnection(callback) == null) {
+                    final QosCallbackConnection connection =
+                            new QosCallbackConnection(this, callback, executor);
+                    mQosCallbackConnections.add(connection);
+                    mService.registerQosSocketCallback(socketInfo, connection);
+                } else {
+                    Log.e(TAG, "registerQosCallback: Callback already registered");
+                    throw new QosCallbackRegistrationException();
+                }
+            }
+        } catch (final RemoteException e) {
+            Log.e(TAG, "registerQosCallback: Error while registering ", e);
+
+            // The same unregister method method is called for consistency even though nothing
+            // will be sent to the ConnectivityService since the callback was never successfully
+            // registered.
+            unregisterQosCallback(callback);
+            e.rethrowFromSystemServer();
+        } catch (final ServiceSpecificException e) {
+            Log.e(TAG, "registerQosCallback: Error while registering ", e);
+            unregisterQosCallback(callback);
+            throw convertServiceException(e);
+        }
+    }
+
+    /**
+     * Unregisters the given {@link QosCallback}.  The {@link QosCallback} will no longer receive
+     * events once unregistered and can be registered a second time.
+     * <p/>
+     * If the {@link QosCallback} does not have an active registration, it is a no-op.
+     *
+     * @param callback the callback being unregistered
+     *
+     * @hide
+     */
+    @SystemApi
+    public void unregisterQosCallback(@NonNull final QosCallback callback) {
+        Objects.requireNonNull(callback, "The callback must be non-null");
+        try {
+            synchronized (mQosCallbackConnections) {
+                final QosCallbackConnection connection = getQosCallbackConnection(callback);
+                if (connection != null) {
+                    connection.stopReceivingMessages();
+                    mService.unregisterQosCallback(connection);
+                    mQosCallbackConnections.remove(connection);
+                } else {
+                    Log.d(TAG, "unregisterQosCallback: Callback not registered");
+                }
+            }
+        } catch (final RemoteException e) {
+            Log.e(TAG, "unregisterQosCallback: Error while unregistering ", e);
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Gets the connection related to the callback.
+     *
+     * @param callback the callback to look up
+     * @return the related connection
+     */
+    @Nullable
+    private QosCallbackConnection getQosCallbackConnection(final QosCallback callback) {
+        for (final QosCallbackConnection connection : mQosCallbackConnections) {
+            // Checking by reference here is intentional
+            if (connection.getCallback() == callback) {
+                return connection;
+            }
+        }
+        return null;
     }
 }
