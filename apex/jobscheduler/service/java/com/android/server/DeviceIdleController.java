@@ -79,7 +79,6 @@ import android.util.Xml;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
@@ -1893,7 +1892,7 @@ public class DeviceIdleController extends SystemService
         }
 
         MyHandler getHandler(DeviceIdleController controller) {
-            return controller.new MyHandler(BackgroundThread.getHandler().getLooper());
+            return controller.new MyHandler(JobSchedulerBackgroundThread.getHandler().getLooper());
         }
 
         Sensor getMotionSensor() {
@@ -1960,7 +1959,8 @@ public class DeviceIdleController extends SystemService
         mInjector = injector;
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
         mHandler = mInjector.getHandler(this);
-        mAppStateTracker = mInjector.getAppStateTracker(context, FgThread.get().getLooper());
+        mAppStateTracker = mInjector.getAppStateTracker(context,
+                JobSchedulerBackgroundThread.get().getLooper());
         LocalServices.addService(AppStateTracker.class, mAppStateTracker);
         mUseMotionSensor = mInjector.useMotionSensor();
     }
