@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util
+package com.android.systemui.controls
 
 import android.os.UserHandle
 
@@ -23,8 +23,6 @@ import android.os.UserHandle
  * changes.
  */
 interface UserAwareController {
-    @JvmDefault
     fun changeUser(newUser: UserHandle) {}
-
     val currentUserId: Int
 }
