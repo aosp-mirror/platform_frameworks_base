@@ -289,14 +289,29 @@ public class SizeCompatTests extends ActivityTestsBase {
 
         // Move the non-resizable activity to the new display.
         mStack.reparent(newDisplay.getDefaultTaskDisplayArea(), true /* onTop */);
-        // The configuration bounds should keep the same.
+        // The configuration bounds [820, 0 - 1820, 2500] should keep the same.
         assertEquals(origWidth, configBounds.width());
         assertEquals(origHeight, configBounds.height());
         assertScaled();
 
+        final Rect newDisplayBounds = newDisplay.getWindowConfiguration().getBounds();
         // The scaled bounds should exclude notch area (1000 - 100 == 360 * 2500 / 1000 = 900).
-        assertEquals(newDisplay.getBounds().height() - notchHeight,
+        assertEquals(newDisplayBounds.height() - notchHeight,
                 (int) ((float) mActivity.getBounds().width() * origHeight / origWidth));
+
+        // Recompute the natural configuration in the new display.
+        mActivity.clearSizeCompatMode();
+        mActivity.ensureActivityConfiguration(0 /* globalChanges */, false /* preserveWindow */);
+        // Because the display cannot rotate, the portrait activity will fit the short side of
+        // display with keeping portrait bounds [200, 0 - 700, 1000] in center.
+        assertEquals(newDisplayBounds.height(), configBounds.height());
+        assertEquals(configBounds.height() * newDisplayBounds.height() / newDisplayBounds.width(),
+                configBounds.width());
+        assertFitted();
+        // The appBounds should be [200, 100 - 700, 1000].
+        final Rect appBounds = mActivity.getWindowConfiguration().getAppBounds();
+        assertEquals(configBounds.width(), appBounds.width());
+        assertEquals(configBounds.height() - notchHeight, appBounds.height());
     }
 
     @Test
