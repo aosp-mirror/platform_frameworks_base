@@ -42,7 +42,6 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
@@ -80,7 +79,6 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     private final ApexManager mApexManager;
     private final File mLastStagedRollbackIdsFile;
     // Staged rollback ids that have been committed but their session is not yet ready
-    @GuardedBy("mPendingStagedRollbackIds")
     private final Set<Integer> mPendingStagedRollbackIds = new ArraySet<>();
 
     RollbackPackageHealthObserver(Context context) {
@@ -269,9 +267,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     @WorkerThread
     private boolean markStagedSessionHandled(int rollbackId) {
         assertInWorkerThread();
-        synchronized (mPendingStagedRollbackIds) {
-            return mPendingStagedRollbackIds.remove(rollbackId);
-        }
+        return mPendingStagedRollbackIds.remove(rollbackId);
     }
 
     /**
@@ -281,9 +277,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
     @WorkerThread
     private boolean isPendingStagedSessionsEmpty() {
         assertInWorkerThread();
-        synchronized (mPendingStagedRollbackIds) {
-            return mPendingStagedRollbackIds.isEmpty();
-        }
+        return mPendingStagedRollbackIds.isEmpty();
     }
 
     @WorkerThread
@@ -402,9 +396,7 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
             if (status == RollbackManager.STATUS_SUCCESS) {
                 if (rollback.isStaged()) {
                     int rollbackId = rollback.getRollbackId();
-                    synchronized (mPendingStagedRollbackIds) {
-                        mPendingStagedRollbackIds.add(rollbackId);
-                    }
+                    mPendingStagedRollbackIds.add(rollbackId);
                     BroadcastReceiver listener =
                             listenForStagedSessionReady(rollbackManager, rollbackId,
                                     logPackage);
@@ -444,11 +436,9 @@ final class RollbackPackageHealthObserver implements PackageHealthObserver {
 
         // Add all rollback ids to mPendingStagedRollbackIds, so that we do not reboot before all
         // pending staged rollbacks are handled.
-        synchronized (mPendingStagedRollbackIds) {
-            for (RollbackInfo rollback : rollbacks) {
-                if (rollback.isStaged()) {
-                    mPendingStagedRollbackIds.add(rollback.getRollbackId());
-                }
+        for (RollbackInfo rollback : rollbacks) {
+            if (rollback.isStaged()) {
+                mPendingStagedRollbackIds.add(rollback.getRollbackId());
             }
         }
 
