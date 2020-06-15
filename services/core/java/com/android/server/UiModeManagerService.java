@@ -233,7 +233,7 @@ final class UiModeManagerService extends SystemService {
         public void onTwilightStateChanged(@Nullable TwilightState state) {
             synchronized (mLock) {
                 if (mNightMode == UiModeManager.MODE_NIGHT_AUTO && mSystemReady) {
-                    if (mCar) {
+                    if (shouldApplyAutomaticChangesImmediately()) {
                         updateLocked(0, 0);
                     } else {
                         registerScreenOffEventLocked();
@@ -1155,7 +1155,6 @@ final class UiModeManagerService extends SystemService {
     void updateLocked(int enableFlags, int disableFlags) {
         String action = null;
         String oldAction = null;
-        boolean originalComputedNightMode = mComputedNightMode;
         if (mLastBroadcastState == Intent.EXTRA_DOCK_STATE_CAR) {
             adjustStatusBarCarModeLocked();
             oldAction = UiModeManager.ACTION_EXIT_CAR_MODE;
@@ -1236,16 +1235,11 @@ final class UiModeManagerService extends SystemService {
             sendConfigurationAndStartDreamOrDockAppLocked(category);
         }
 
-        // reset overrides if mComputedNightMode changes
-        if (originalComputedNightMode != mComputedNightMode) {
-            resetNightModeOverrideLocked();
-        }
-
         // keep screen on when charging and in car mode
         boolean keepScreenOn = mCharging &&
                 ((mCarModeEnabled && mCarModeKeepsScreenOn &&
-                  (mCarModeEnableFlags & UiModeManager.ENABLE_CAR_MODE_ALLOW_SLEEP) == 0) ||
-                 (mCurUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
+                (mCarModeEnableFlags & UiModeManager.ENABLE_CAR_MODE_ALLOW_SLEEP) == 0) ||
+                (mCurUiMode == Configuration.UI_MODE_TYPE_DESK && mDeskModeKeepsScreenOn));
         if (keepScreenOn != mWakeLock.isHeld()) {
             if (keepScreenOn) {
                 mWakeLock.acquire();
@@ -1403,6 +1397,7 @@ final class UiModeManagerService extends SystemService {
             mComputedNightMode = false;
             return;
         }
+        resetNightModeOverrideLocked();
     }
 
     private boolean resetNightModeOverrideLocked() {
