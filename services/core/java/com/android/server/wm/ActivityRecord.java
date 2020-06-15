@@ -2198,10 +2198,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Override
     boolean isFocusable() {
+        return super.isFocusable() && (canReceiveKeys() || isAlwaysFocusable());
+    }
+
+    boolean canReceiveKeys() {
         // TODO(156521483): Propagate the state down the hierarchy instead of checking the parent
-        boolean canReceiveKeys = getWindowConfiguration().canReceiveKeys()
-                && getTask().getWindowConfiguration().canReceiveKeys();
-        return super.isFocusable() && (canReceiveKeys || isAlwaysFocusable());
+        return getWindowConfiguration().canReceiveKeys()
+                && (task == null || task.getWindowConfiguration().canReceiveKeys());
     }
 
     boolean isResizeable() {
@@ -2371,10 +2374,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // For the apps below Q, there can be only one app which has the focused window per
                 // process, because legacy apps may not be ready for a multi-focus system.
                 return false;
+
             }
         }
-        return (getWindowConfiguration().canReceiveKeys() || isAlwaysFocusable())
-                && getDisplay() != null;
+        return (canReceiveKeys() || isAlwaysFocusable()) && getDisplay() != null;
     }
 
     /**
