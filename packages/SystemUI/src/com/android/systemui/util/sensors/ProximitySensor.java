@@ -72,6 +72,7 @@ public class ProximitySensor implements ThresholdSensor {
     private final AtomicBoolean mAlerting = new AtomicBoolean();
     private Runnable mCancelSecondaryRunnable;
     private boolean mInitializedListeners = false;
+    private boolean mSecondarySafe = false;
 
     private ThresholdSensor.Listener mPrimaryEventListener = new ThresholdSensor.Listener() {
         @Override
@@ -83,21 +84,22 @@ public class ProximitySensor implements ThresholdSensor {
     private ThresholdSensor.Listener mSecondaryEventListener = new ThresholdSensor.Listener() {
         @Override
         public void onThresholdCrossed(ThresholdSensorEvent event) {
-            // Only check the secondary as long as the primary thinks we're near.
-            if (!mLastPrimaryEvent.getBelow()) {
+            // If we no longer have a "below" signal and the secondary sensor is not
+            // considered "safe", then we need to turn it off.
+            if (!mSecondarySafe && (!mLastPrimaryEvent.getBelow() || !event.getBelow())) {
                 mSecondaryThresholdSensor.pause();
-                mCancelSecondaryRunnable = null;
-                return;
+                if (!mLastPrimaryEvent.getBelow()) {
+                    // Only check the secondary as long as the primary thinks we're near.
+                    mCancelSecondaryRunnable = null;
+                    return;
+                } else {
+                    // Check this sensor again in a moment.
+                    mCancelSecondaryRunnable = mDelayableExecutor.executeDelayed(
+                            mSecondaryThresholdSensor::resume, SECONDARY_PING_INTERVAL_MS);
+                }
             }
             logDebug("Secondary sensor event: " + event.getBelow() + ".");
 
-            // This sensor should only be used briefly when uncovered.
-            if (!event.getBelow()) {
-                mSecondaryThresholdSensor.pause();
-                // Check this sensor again in a moment.
-                mCancelSecondaryRunnable = mDelayableExecutor.executeDelayed(
-                        mSecondaryThresholdSensor::resume, SECONDARY_PING_INTERVAL_MS);
-            }
             onSensorEvent(event);
         }
     };
@@ -145,6 +147,15 @@ public class ProximitySensor implements ThresholdSensor {
         registerInternal();
     }
 
+    /**
+     * Sets that it is safe to leave the secondary sensor on indefinitely.
+     */
+    public void setSecondarySafe(boolean safe) {
+        mSecondarySafe = safe;
+        if (!mSecondarySafe) {
+            mSecondaryThresholdSensor.pause();
+        }
+    }
 
     /**
      * Returns true if we are registered with the SensorManager.
@@ -276,6 +287,10 @@ public class ProximitySensor implements ThresholdSensor {
         Assert.isMainThread();
         if (mLastEvent != null && event.getBelow() == mLastEvent.getBelow()) {
             return;
+        }
+
+        if (!mSecondarySafe && !event.getBelow()) {
+            mSecondaryThresholdSensor.pause();
         }
 
         mLastEvent = event;
