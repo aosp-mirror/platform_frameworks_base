@@ -15,6 +15,7 @@
  */
 package com.android.systemui.bubbles;
 
+import static android.app.Notification.FLAG_BUBBLE;
 import static android.os.AsyncTask.Status.FINISHED;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -28,19 +29,21 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Path;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.InstanceId;
 import com.android.systemui.shared.system.SysUiStatsLog;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
@@ -54,12 +57,17 @@ import java.util.Objects;
 class Bubble implements BubbleViewProvider {
     private static final String TAG = "Bubble";
 
+    /**
+     * NotificationEntry associated with the bubble. A null value implies this bubble is loaded
+     * from disk.
+     */
+    @Nullable
+    private NotificationEntry mEntry;
     private final String mKey;
 
     private long mLastUpdated;
     private long mLastAccessed;
 
-    @Nullable
     private BubbleController.NotificationSuppressionChangedListener mSuppressionListener;
 
     /** Whether the bubble should show a dot for the notification indicating updated content. */
@@ -67,6 +75,8 @@ class Bubble implements BubbleViewProvider {
 
     /** Whether flyout text should be suppressed, regardless of any other flags or state. */
     private boolean mSuppressFlyout;
+    /** Whether this bubble should auto expand regardless of the normal flag, used for overflow. */
+    private boolean mShouldAutoExpand;
 
     // Items that are typically loaded later
     private String mAppName;
@@ -82,7 +92,6 @@ class Bubble implements BubbleViewProvider {
      * Presentational info about the flyout.
      */
     public static class FlyoutMessage {
-        @Nullable public Icon senderIcon;
         @Nullable public Drawable senderAvatar;
         @Nullable public CharSequence senderName;
         @Nullable public CharSequence message;
@@ -100,39 +109,16 @@ class Bubble implements BubbleViewProvider {
     private UserHandle mUser;
     @NonNull
     private String mPackageName;
-    @Nullable
-    private String mTitle;
-    @Nullable
-    private Icon mIcon;
-    private boolean mIsBubble;
-    private boolean mIsVisuallyInterruptive;
-    private boolean mIsClearable;
-    private boolean mShouldSuppressNotificationDot;
-    private boolean mShouldSuppressNotificationList;
-    private boolean mShouldSuppressPeek;
     private int mDesiredHeight;
     @DimenRes
     private int mDesiredHeightResId;
-
-    /** for logging **/
-    @Nullable
-    private InstanceId mInstanceId;
-    @Nullable
-    private String mChannelId;
-    private int mNotificationId;
-    private int mAppUid = -1;
-
-    @Nullable
-    private PendingIntent mIntent;
-    @Nullable
-    private PendingIntent mDeleteIntent;
 
     /**
      * Create a bubble with limited information based on given {@link ShortcutInfo}.
      * Note: Currently this is only being used when the bubble is persisted to disk.
      */
     Bubble(@NonNull final String key, @NonNull final ShortcutInfo shortcutInfo,
-            final int desiredHeight, final int desiredHeightResId, @Nullable final String title) {
+            final int desiredHeight, final int desiredHeightResId) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
         mShortcutInfo = shortcutInfo;
@@ -140,10 +126,8 @@ class Bubble implements BubbleViewProvider {
         mFlags = 0;
         mUser = shortcutInfo.getUserHandle();
         mPackageName = shortcutInfo.getPackage();
-        mIcon = shortcutInfo.getIcon();
         mDesiredHeight = desiredHeight;
         mDesiredHeightResId = desiredHeightResId;
-        mTitle = title;
     }
 
     /** Used in tests when no UI is required. */
@@ -161,6 +145,12 @@ class Bubble implements BubbleViewProvider {
         return mKey;
     }
 
+    @Nullable
+    public NotificationEntry getEntry() {
+        return mEntry;
+    }
+
+    @NonNull
     public UserHandle getUser() {
         return mUser;
     }
@@ -213,7 +203,14 @@ class Bubble implements BubbleViewProvider {
 
     @Nullable
     public String getTitle() {
-        return mTitle;
+        final CharSequence titleCharSeq;
+        if (mEntry == null) {
+            titleCharSeq = null;
+        } else {
+            titleCharSeq = mEntry.getSbn().getNotification().extras.getCharSequence(
+                    Notification.EXTRA_TITLE);
+        }
+        return titleCharSeq != null ? titleCharSeq.toString() : null;
     }
 
     /**
@@ -334,42 +331,15 @@ class Bubble implements BubbleViewProvider {
     void setEntry(@NonNull final NotificationEntry entry) {
         Objects.requireNonNull(entry);
         Objects.requireNonNull(entry.getSbn());
+        mEntry = entry;
         mLastUpdated = entry.getSbn().getPostTime();
-        mIsBubble = entry.getSbn().getNotification().isBubbleNotification();
+        mFlags = entry.getSbn().getNotification().flags;
         mPackageName = entry.getSbn().getPackageName();
         mUser = entry.getSbn().getUser();
-        mTitle = getTitle(entry);
-        mIsClearable = entry.isClearable();
-        mShouldSuppressNotificationDot = entry.shouldSuppressNotificationDot();
-        mShouldSuppressNotificationList = entry.shouldSuppressNotificationList();
-        mShouldSuppressPeek = entry.shouldSuppressPeek();
-        mChannelId = entry.getSbn().getNotification().getChannelId();
-        mNotificationId = entry.getSbn().getId();
-        mAppUid = entry.getSbn().getUid();
-        mInstanceId = entry.getSbn().getInstanceId();
-        mFlyoutMessage = BubbleViewInfoTask.extractFlyoutMessage(entry);
-        if (entry.getRanking() != null) {
-            mShortcutInfo = entry.getRanking().getShortcutInfo() != null
-                    ? entry.getRanking().getShortcutInfo() : mShortcutInfo;
-            mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
-        }
         if (entry.getBubbleMetadata() != null) {
-            mFlags = entry.getBubbleMetadata().getFlags();
             mDesiredHeight = entry.getBubbleMetadata().getDesiredHeight();
             mDesiredHeightResId = entry.getBubbleMetadata().getDesiredHeightResId();
-            mIcon = entry.getBubbleMetadata().getIcon();
-            mIntent = entry.getBubbleMetadata().getIntent();
-            mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
-    }
-
-    @Nullable
-    Icon getIcon() {
-        return mIcon;
-    }
-
-    boolean isVisuallyInterruptive() {
-        return mIsVisuallyInterruptive;
     }
 
     /**
@@ -394,19 +364,6 @@ class Bubble implements BubbleViewProvider {
         return mExpandedView != null ? mExpandedView.getVirtualDisplayId() : INVALID_DISPLAY;
     }
 
-    public InstanceId getInstanceId() {
-        return mInstanceId;
-    }
-
-    @Nullable
-    public String getChannelId() {
-        return mChannelId;
-    }
-
-    public int getNotificationId() {
-        return mNotificationId;
-    }
-
     /**
      * Should be invoked whenever a Bubble is accessed (selected while expanded).
      */
@@ -427,19 +384,24 @@ class Bubble implements BubbleViewProvider {
      * Whether this notification should be shown in the shade.
      */
     boolean showInShade() {
-        return !shouldSuppressNotification() || !mIsClearable;
+        if (mEntry == null) return false;
+        return !shouldSuppressNotification() || !mEntry.isClearable();
     }
 
     /**
      * Sets whether this notification should be suppressed in the shade.
      */
     void setSuppressNotification(boolean suppressNotification) {
+        if (mEntry == null) return;
         boolean prevShowInShade = showInShade();
+        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
+        int flags = data.getFlags();
         if (suppressNotification) {
-            mFlags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            flags |= Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
         } else {
-            mFlags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            flags &= ~Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
         }
+        data.setFlags(flags);
 
         if (showInShade() != prevShowInShade && mSuppressionListener != null) {
             mSuppressionListener.onBubbleNotificationSuppressionChange(this);
@@ -462,8 +424,9 @@ class Bubble implements BubbleViewProvider {
      */
     @Override
     public boolean showDot() {
+        if (mEntry == null) return false;
         return mShowBubbleUpdateDot
-                && !mShouldSuppressNotificationDot
+                && !mEntry.shouldSuppressNotificationDot()
                 && !shouldSuppressNotification();
     }
 
@@ -471,9 +434,10 @@ class Bubble implements BubbleViewProvider {
      * Whether the flyout for the bubble should be shown.
      */
     boolean showFlyout() {
-        return !mSuppressFlyout && !mShouldSuppressPeek
+        if (mEntry == null) return false;
+        return !mSuppressFlyout && !mEntry.shouldSuppressPeek()
                 && !shouldSuppressNotification()
-                && !mShouldSuppressNotificationList;
+                && !mEntry.shouldSuppressNotificationList();
     }
 
     /**
@@ -516,14 +480,25 @@ class Bubble implements BubbleViewProvider {
         }
     }
 
-    @Nullable
-    PendingIntent getBubbleIntent() {
-        return mIntent;
+    /**
+     * Whether shortcut information should be used to populate the bubble.
+     * <p>
+     * To populate the activity use {@link LauncherApps#startShortcut(ShortcutInfo, Rect, Bundle)}.
+     * To populate the icon use {@link LauncherApps#getShortcutIconDrawable(ShortcutInfo, int)}.
+     */
+    boolean usingShortcutInfo() {
+        return mEntry != null && mEntry.getBubbleMetadata().getShortcutId() != null
+                || mShortcutInfo != null;
     }
 
     @Nullable
-    PendingIntent getDeleteIntent() {
-        return mDeleteIntent;
+    PendingIntent getBubbleIntent() {
+        if (mEntry == null) return null;
+        Notification.BubbleMetadata data = mEntry.getBubbleMetadata();
+        if (data != null) {
+            return data.getIntent();
+        }
+        return null;
     }
 
     Intent getSettingsIntent(final Context context) {
@@ -539,12 +514,8 @@ class Bubble implements BubbleViewProvider {
         return intent;
     }
 
-    public int getAppUid() {
-        return mAppUid;
-    }
-
     private int getUid(final Context context) {
-        if (mAppUid != -1) return mAppUid;
+        if (mEntry != null) return mEntry.getSbn().getUid();
         final PackageManager pm = context.getPackageManager();
         if (pm == null) return -1;
         try {
@@ -577,27 +548,24 @@ class Bubble implements BubbleViewProvider {
     }
 
     private boolean shouldSuppressNotification() {
-        return isEnabled(Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION);
+        if (mEntry == null) return true;
+        return mEntry.getBubbleMetadata() != null
+                && mEntry.getBubbleMetadata().isNotificationSuppressed();
     }
 
-    public boolean shouldAutoExpand() {
-        return isEnabled(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
+    boolean shouldAutoExpand() {
+        if (mEntry == null) return mShouldAutoExpand;
+        Notification.BubbleMetadata metadata = mEntry.getBubbleMetadata();
+        return (metadata != null && metadata.getAutoExpandBubble()) ||  mShouldAutoExpand;
     }
 
     void setShouldAutoExpand(boolean shouldAutoExpand) {
-        if (shouldAutoExpand) {
-            enable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
-        } else {
-            disable(Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE);
-        }
-    }
-
-    public void setIsBubble(final boolean isBubble) {
-        mIsBubble = isBubble;
+        mShouldAutoExpand = shouldAutoExpand;
     }
 
     public boolean isBubble() {
-        return mIsBubble;
+        if (mEntry == null) return (mFlags & FLAG_BUBBLE) != 0;
+        return (mEntry.getSbn().getNotification().flags & FLAG_BUBBLE) != 0;
     }
 
     public void enable(int option) {
@@ -606,10 +574,6 @@ class Bubble implements BubbleViewProvider {
 
     public void disable(int option) {
         mFlags &= ~option;
-    }
-
-    public boolean isEnabled(int option) {
-        return (mFlags & option) != 0;
     }
 
     @Override
@@ -646,24 +610,34 @@ class Bubble implements BubbleViewProvider {
 
     @Override
     public void logUIEvent(int bubbleCount, int action, float normalX, float normalY, int index) {
-        SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
-                mPackageName,
-                mChannelId,
-                mNotificationId,
-                index,
-                bubbleCount,
-                action,
-                normalX,
-                normalY,
-                showInShade(),
-                false /* isOngoing (unused) */,
-                false /* isAppForeground (unused) */);
-    }
-
-    @Nullable
-    private static String getTitle(@NonNull final NotificationEntry e) {
-        final CharSequence titleCharSeq = e.getSbn().getNotification().extras.getCharSequence(
-                Notification.EXTRA_TITLE);
-        return titleCharSeq == null ? null : titleCharSeq.toString();
+        if (this.getEntry() == null
+                || this.getEntry().getSbn() == null) {
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    null /* package name */,
+                    null /* notification channel */,
+                    0 /* notification ID */,
+                    0 /* bubble position */,
+                    bubbleCount,
+                    action,
+                    normalX,
+                    normalY,
+                    false /* unread bubble */,
+                    false /* on-going bubble */,
+                    false /* isAppForeground (unused) */);
+        } else {
+            StatusBarNotification notification = this.getEntry().getSbn();
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    notification.getPackageName(),
+                    notification.getNotification().getChannelId(),
+                    notification.getId(),
+                    index,
+                    bubbleCount,
+                    action,
+                    normalX,
+                    normalY,
+                    this.showInShade(),
+                    false /* isOngoing (unused) */,
+                    false /* isAppForeground (unused) */);
+        }
     }
 }
