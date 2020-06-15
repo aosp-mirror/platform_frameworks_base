@@ -299,8 +299,17 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
 
     @Override
     void positionChildAt(int position, ActivityStack child, boolean includingParents) {
-        final boolean moveToTop = (position == POSITION_TOP || position == getChildCount());
+        final boolean moveToTop = position >= getChildCount() - 1;
         final boolean moveToBottom = (position == POSITION_BOTTOM || position == 0);
+
+        // Reset mPreferredTopFocusableStack before positioning to top or {@link
+        // ActivityStackSupervisor#updateTopResumedActivityIfNeeded()} won't update the top
+        // resumed activity.
+        final boolean wasContained = mChildren.contains(child);
+        if (moveToTop && wasContained && child.isFocusable()) {
+            mPreferredTopFocusableStack = null;
+        }
+
         if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
             // This stack is always-on-top, override the default behavior.
             Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
@@ -330,6 +339,17 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         child.updateTaskMovement(moveToTop);
 
         mDisplayContent.setLayoutNeeded();
+
+        // The insert position may be adjusted to non-top when there is always-on-top stack. Since
+        // the original position is preferred to be top, the stack should have higher priority when
+        // we are looking for top focusable stack. The condition {@code wasContained} restricts the
+        // preferred stack is set only when moving an existing stack to top instead of adding a new
+        // stack that may be too early (e.g. in the middle of launching or reparenting).
+        if (moveToTop && child.isFocusableAndVisible()) {
+            mPreferredTopFocusableStack = child;
+        } else if (mPreferredTopFocusableStack == child) {
+            mPreferredTopFocusableStack = null;
+        }
     }
 
     /**
@@ -727,28 +747,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                     "positionStackAt: Can only have one task on display=" + this);
         }
 
-        final boolean movingToTop = wasContained && position >= getStackCount() - 1;
-        // Reset mPreferredTopFocusableStack before positioning to top or {@link
-        // ActivityStackSupervisor#updateTopResumedActivityIfNeeded()} won't update the top
-        // resumed activity.
-        if (movingToTop && stack.isFocusable()) {
-            mPreferredTopFocusableStack = null;
-        }
-
         // Since positionChildAt() is called during the creation process of pinned stacks,
         // ActivityStack#getStack() can be null.
         positionStackAt(position, stack, includingParents);
-
-        // The insert position may be adjusted to non-top when there is always-on-top stack. Since
-        // the original position is preferred to be top, the stack should have higher priority when
-        // we are looking for top focusable stack. The condition {@code wasContained} restricts the
-        // preferred stack is set only when moving an existing stack to top instead of adding a new
-        // stack that may be too early (e.g. in the middle of launching or reparenting).
-        if (movingToTop && stack.isFocusableAndVisible()) {
-            mPreferredTopFocusableStack = stack;
-        } else if (mPreferredTopFocusableStack == stack) {
-            mPreferredTopFocusableStack = null;
-        }
 
         if (updateLastFocusedStackReason != null) {
             final ActivityStack currentFocusedStack = getFocusedStack();
