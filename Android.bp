@@ -264,6 +264,7 @@ filegroup {
         ":libcamera_client_aidl",
         ":libcamera_client_framework_aidl",
         ":libupdate_engine_aidl",
+        ":resourcemanager_aidl",
         ":storaged_aidl",
         ":vold_aidl",
 
