@@ -164,6 +164,7 @@ public class StagingManager {
         public void onBootPhase(int phase) {
             if (phase == SystemService.PHASE_BOOT_COMPLETED && sStagingManager != null) {
                 sStagingManager.markStagedSessionsAsSuccessful();
+                sStagingManager.markBootCompleted();
             }
         }
     }
@@ -177,6 +178,10 @@ public class StagingManager {
                 mStagedSessions.put(sessionInfo.sessionId, sessionInfo);
             }
         }
+    }
+
+    private void markBootCompleted() {
+        mApexManager.markBootCompleted();
     }
 
     /**
