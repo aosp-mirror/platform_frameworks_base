@@ -13,6 +13,11 @@
 // limitations under the License.
 
 #include "StatsLogProcessor.h"
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <stdio.h>
+
 #include "StatsService.h"
 #include "config/ConfigKey.h"
 #include "frameworks/base/cmds/statsd/src/stats_log.pb.h"
@@ -20,15 +25,9 @@
 #include "guardrail/StatsdStats.h"
 #include "logd/LogEvent.h"
 #include "packages/UidMap.h"
-#include "storage/StorageManager.h"
 #include "statslog_statsdtest.h"
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-
+#include "storage/StorageManager.h"
 #include "tests/statsd_test_util.h"
-
-#include <stdio.h>
 
 using namespace android;
 using namespace testing;
@@ -1836,6 +1835,11 @@ TEST(StatsLogProcessorTest, TestDumpReportWithoutErasingDataDoesNotUpdateTimesta
     int isolatedUid = 30;
     sp<MockUidMap> mockUidMap = makeMockUidMapForOneHost(hostUid, {isolatedUid});
     ConfigKey key(3, 4);
+
+    // TODO: All tests should not persist state on disk. This removes any reports that were present.
+    ProtoOutputStream proto;
+    StorageManager::appendConfigMetricsReport(key, &proto, /*erase data=*/true, /*isAdb=*/false);
+
     StatsdConfig config = MakeConfig(false);
     sp<StatsLogProcessor> processor =
             CreateStatsLogProcessor(1, 1, config, key, nullptr, 0, mockUidMap);
