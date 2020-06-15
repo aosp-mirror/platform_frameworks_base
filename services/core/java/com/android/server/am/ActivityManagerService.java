@@ -405,9 +405,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19278,6 +19276,32 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean shouldConfirmCredentials(int userId) {
             return mUserController.shouldConfirmCredentials(userId);
+        }
+
+        @Override
+        public void noteAlarmFinish(PendingIntent ps, WorkSource workSource, int sourceUid,
+                String tag) {
+            ActivityManagerService.this.noteAlarmFinish((ps != null) ? ps.getTarget() : null,
+                    workSource, sourceUid, tag);
+        }
+
+        @Override
+        public void noteAlarmStart(PendingIntent ps, WorkSource workSource, int sourceUid,
+                String tag) {
+            ActivityManagerService.this.noteAlarmStart((ps != null) ? ps.getTarget() : null,
+                    workSource, sourceUid, tag);
+        }
+
+        @Override
+        public void noteWakeupAlarm(PendingIntent ps, WorkSource workSource, int sourceUid,
+                String sourcePkg, String tag) {
+            ActivityManagerService.this.noteWakeupAlarm((ps != null) ? ps.getTarget() : null,
+                    workSource, sourceUid, sourcePkg, tag);
+        }
+
+        @Override
+        public boolean isAppStartModeDisabled(int uid, String packageName) {
+            return ActivityManagerService.this.isAppStartModeDisabled(uid, packageName);
         }
 
         @Override

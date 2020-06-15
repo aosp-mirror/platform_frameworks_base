@@ -60,11 +60,11 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.atLeastOnce;
 
 import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
 import android.app.IAlarmCompleteListener;
 import android.app.IAlarmListener;
-import android.app.IUidObserver;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.ContentResolver;
@@ -128,6 +128,8 @@ public class AlarmManagerServiceTest {
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
     @Mock
     private AppStandbyInternal mAppStandbyInternal;
+    @Mock
+    private ActivityManagerInternal mActivityManagerInternal;
     @Mock
     private AppStateTracker mAppStateTracker;
     @Mock
@@ -253,7 +255,7 @@ public class AlarmManagerServiceTest {
     }
 
     @Before
-    public final void setUp() throws Exception {
+    public final void setUp() {
         mMockingSession = mockitoSession()
                 .initMocks(this)
                 .spyStatic(ActivityManager.class)
@@ -265,6 +267,8 @@ public class AlarmManagerServiceTest {
                 .strictness(Strictness.WARN)
                 .startMocking();
         doReturn(mIActivityManager).when(ActivityManager::getService);
+        doReturn(mActivityManagerInternal).when(
+                () -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mAppStateTracker).when(() -> LocalServices.getService(AppStateTracker.class));
         doReturn(mAppStandbyInternal).when(
                 () -> LocalServices.getService(AppStandbyInternal.class));
@@ -294,8 +298,6 @@ public class AlarmManagerServiceTest {
         assertEquals(mService.mSystemUiUid, SYSTEM_UI_UID);
         assertEquals(mService.mClockReceiver, mClockReceiver);
         assertEquals(mService.mWakeLock, mWakeLock);
-        verify(mIActivityManager).registerUidObserver(any(IUidObserver.class), anyInt(), anyInt(),
-                isNull());
 
         // Other boot phases don't matter
         mService.onBootPhase(SystemService.PHASE_SYSTEM_SERVICES_READY);
@@ -789,6 +791,27 @@ public class AlarmManagerServiceTest {
         verify(alarmPi).send(eq(mMockContext), eq(0), any(Intent.class), any(),
                 any(Handler.class), isNull(), any());
         assertNull(restrictedAlarms.get(TEST_CALLING_UID));
+    }
+
+    @Test
+    public void alarmsRemovedOnAppStartModeDisabled() {
+        final ArgumentCaptor<AppStateTracker.Listener> listenerArgumentCaptor =
+                ArgumentCaptor.forClass(AppStateTracker.Listener.class);
+        verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
+        final AppStateTracker.Listener listener = listenerArgumentCaptor.getValue();
+
+        final PendingIntent alarmPi1 = getNewMockPendingIntent();
+        final PendingIntent alarmPi2 = getNewMockPendingIntent();
+
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 2, alarmPi1);
+        setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 4, alarmPi2);
+
+        assertEquals(2, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
+
+        when(mActivityManagerInternal.isAppStartModeDisabled(TEST_CALLING_UID,
+                TEST_CALLING_PACKAGE)).thenReturn(true);
+        listener.removeAlarmsForUid(TEST_CALLING_UID);
+        assertEquals(0, mService.mAlarmsPerUid.get(TEST_CALLING_UID));
     }
 
     @Test
