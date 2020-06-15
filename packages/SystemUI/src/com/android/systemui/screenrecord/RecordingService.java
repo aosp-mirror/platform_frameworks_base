@@ -362,7 +362,7 @@ public class RecordingService extends Service {
                         this,
                         REQUEST_CODE,
                         viewIntent,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION))
+                        PendingIntent.FLAG_IMMUTABLE))
                 .addAction(shareAction)
                 .addAction(deleteAction)
                 .setAutoCancel(true);
