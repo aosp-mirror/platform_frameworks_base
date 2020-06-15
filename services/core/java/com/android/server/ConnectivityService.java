@@ -1698,6 +1698,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return newNc;
         }
 
+        // Allow VPNs to see ownership of their own VPN networks - not location sensitive.
+        if (nc.hasTransport(TRANSPORT_VPN)) {
+            // Owner UIDs already checked above. No need to re-check.
+            return newNc;
+        }
+
         Binder.withCleanCallingIdentity(
                 () -> {
                     if (!mLocationPermissionChecker.checkLocationPermission(
