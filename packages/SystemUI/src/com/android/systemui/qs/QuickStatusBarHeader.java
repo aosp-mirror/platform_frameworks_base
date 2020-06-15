@@ -15,6 +15,7 @@
 package com.android.systemui.qs;
 
 import static android.app.StatusBarManager.DISABLE2_QUICK_SETTINGS;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.util.InjectionInflationController.VIEW_CONTEXT;
 
@@ -41,6 +42,7 @@ import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.DisplayCutout;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -346,6 +348,15 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mSystemIconsView.getLayoutParams().height = resources.getDimensionPixelSize(
                 com.android.internal.R.dimen.quick_qs_offset_height);
         mSystemIconsView.setLayoutParams(mSystemIconsView.getLayoutParams());
+
+        ViewGroup.LayoutParams lp = getLayoutParams();
+        if (mQsDisabled) {
+            lp.height = resources.getDimensionPixelSize(
+                    com.android.internal.R.dimen.quick_qs_offset_height);
+        } else {
+            lp.height = WRAP_CONTENT;
+        }
+        setLayoutParams(lp);
 
         updateStatusIconAlphaAnimator();
         updateHeaderTextContainerAlphaAnimator();
