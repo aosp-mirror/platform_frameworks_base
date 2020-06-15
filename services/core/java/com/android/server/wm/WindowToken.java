@@ -554,6 +554,25 @@ class WindowToken extends WindowContainer<WindowState> {
         notifyFixedRotationTransform(true /* enabled */);
     }
 
+    /**
+     * Return {@code true} if one of the associated activity is still animating. Otherwise,
+     * return {@code false}.
+     */
+    boolean hasAnimatingFixedRotationTransition() {
+        if (mFixedRotationTransformState == null) {
+            return false;
+        }
+
+        for (int i = mFixedRotationTransformState.mAssociatedTokens.size() - 1; i >= 0; i--) {
+            final ActivityRecord r =
+                    mFixedRotationTransformState.mAssociatedTokens.get(i).asActivityRecord();
+            if (r != null && r.isAnimating(TRANSITION | PARENTS)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     void finishFixedRotationTransform() {
         finishFixedRotationTransform(null /* applyDisplayRotation */);
     }
