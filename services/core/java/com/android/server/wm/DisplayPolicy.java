@@ -1579,10 +1579,9 @@ public class DisplayPolicy {
                 navControlTarget instanceof WindowState ? (WindowState) navControlTarget : null;
         final InsetsState requestedState = navControllingWin != null
                 ? navControllingWin.getRequestedInsetsState() : null;
-        final InsetsSource navSource = requestedState != null
-                ? requestedState.peekSource(ITYPE_NAVIGATION_BAR) : null;
-        final boolean navVisible = navSource != null
-                ? navSource.isVisible() : InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR);
+        final boolean navVisible = requestedState != null
+                ? requestedState.getSourceOrDefaultVisibility(ITYPE_NAVIGATION_BAR)
+                : InsetsState.getDefaultVisibility(ITYPE_NAVIGATION_BAR);
         final boolean showBarsByTouch = navControllingWin != null
                 && navControllingWin.mAttrs.insetsFlags.behavior == BEHAVIOR_SHOW_BARS_BY_TOUCH;
         // When the navigation bar isn't visible, we put up a fake input window to catch all
@@ -2372,12 +2371,13 @@ public class DisplayPolicy {
         final boolean requestedFullscreen = (fl & FLAG_FULLSCREEN) != 0
                 || (requestedSysUiFl & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
                 || (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL
-                        && !win.getRequestedInsetsState().getSource(ITYPE_STATUS_BAR).isVisible());
+                        && !win.getRequestedInsetsState().getSourceOrDefaultVisibility(
+                                ITYPE_STATUS_BAR));
         final boolean requestedHideNavigation =
                 (requestedSysUiFl & View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) != 0
                 || (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL
-                        && !win.getRequestedInsetsState().getSource(ITYPE_NAVIGATION_BAR)
-                                .isVisible());
+                        && !win.getRequestedInsetsState().getSourceOrDefaultVisibility(
+                                ITYPE_NAVIGATION_BAR));
 
         // TYPE_BASE_APPLICATION windows are never considered floating here because they don't get
         // cropped / shifted to the displayFrame in WindowState.
@@ -3187,24 +3187,32 @@ public class DisplayPolicy {
             return;
         }
         if (ViewRootImpl.sNewInsetsMode == NEW_INSETS_MODE_FULL) {
-            if (swipeTarget == mNavigationBar
-                    && !getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)) {
-                // Don't show status bar when swiping on already visible navigation bar
-                return;
-            }
             final InsetsSourceProvider provider = swipeTarget.getControllableInsetProvider();
             final InsetsControlTarget controlTarget = provider != null
                     ? provider.getControlTarget() : null;
 
-            // No transient mode on lockscreen (in notification shade window).
             if (controlTarget == null || controlTarget == getNotificationShade()) {
+                // No transient mode on lockscreen (in notification shade window).
                 return;
             }
+
+            if (swipeTarget == mNavigationBar
+                    && !getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)) {
+                // Don't show status bar when swiping on already visible navigation bar.
+                // But restore the position of navigation bar if it has been moved by the control
+                // target.
+                controlTarget.showInsets(Type.navigationBars(), false);
+                return;
+            }
+
+            int insetsTypesToShow = Type.systemBars();
+
             if (controlTarget.canShowTransient()) {
-                mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
+                insetsTypesToShow &= ~mDisplayContent.getInsetsPolicy().showTransient(IntArray.wrap(
                         new int[]{ITYPE_STATUS_BAR, ITYPE_NAVIGATION_BAR}));
-            } else {
-                controlTarget.showInsets(Type.systemBars(), false);
+            }
+            if (insetsTypesToShow != 0) {
+                controlTarget.showInsets(insetsTypesToShow, false);
             }
         } else {
             boolean sb = mStatusBarController.checkShowTransientBarLw();
