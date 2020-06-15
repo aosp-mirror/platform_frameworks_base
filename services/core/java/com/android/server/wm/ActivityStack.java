@@ -813,7 +813,7 @@ class ActivityStack extends Task {
     /** Resume next focusable stack after reparenting to another display. */
     void postReparent() {
         adjustFocusToNextFocusableTask("reparent", true /* allowFocusSelf */,
-                true /* moveParentsToTop */);
+                true /* moveDisplayToTop */);
         mRootWindowContainer.resumeFocusedStacksTopActivities();
         // Update visibility of activities before notifying WM. This way it won't try to resize
         // windows that are no longer visible.
