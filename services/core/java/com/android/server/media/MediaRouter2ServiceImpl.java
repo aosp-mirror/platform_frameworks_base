@@ -598,6 +598,10 @@ class MediaRouter2ServiceImpl {
 
         UserRecord userRecord = routerRecord.mUserRecord;
         userRecord.mRouterRecords.remove(routerRecord);
+        routerRecord.mUserRecord.mHandler.sendMessage(
+                obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
+                        routerRecord.mUserRecord.mHandler,
+                        routerRecord.mPackageName, /* preferredFeatures=*/ null));
         userRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         userRecord.mHandler));
@@ -613,7 +617,9 @@ class MediaRouter2ServiceImpl {
         routerRecord.mDiscoveryPreference = discoveryRequest;
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::notifyPreferredFeaturesChangedToManagers,
-                        routerRecord.mUserRecord.mHandler, routerRecord));
+                        routerRecord.mUserRecord.mHandler,
+                        routerRecord.mPackageName,
+                        routerRecord.mDiscoveryPreference.getPreferredFeatures()));
         routerRecord.mUserRecord.mHandler.sendMessage(
                 obtainMessage(UserHandler::updateDiscoveryPreferenceOnHandler,
                         routerRecord.mUserRecord.mHandler));
@@ -1954,7 +1960,8 @@ class MediaRouter2ServiceImpl {
             }
         }
 
-        private void notifyPreferredFeaturesChangedToManagers(@NonNull RouterRecord routerRecord) {
+        private void notifyPreferredFeaturesChangedToManagers(@NonNull String routerPackageName,
+                @Nullable List<String> preferredFeatures) {
             MediaRouter2ServiceImpl service = mServiceRef.get();
             if (service == null) {
                 return;
@@ -1967,8 +1974,7 @@ class MediaRouter2ServiceImpl {
             }
             for (IMediaRouter2Manager manager : managers) {
                 try {
-                    manager.notifyPreferredFeaturesChanged(routerRecord.mPackageName,
-                            routerRecord.mDiscoveryPreference.getPreferredFeatures());
+                    manager.notifyPreferredFeaturesChanged(routerPackageName, preferredFeatures);
                 } catch (RemoteException ex) {
                     Slog.w(TAG, "Failed to notify preferred features changed."
                             + " Manager probably died.", ex);
