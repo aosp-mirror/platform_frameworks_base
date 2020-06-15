@@ -929,6 +929,34 @@ TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccess) {
     ASSERT_GE(mDataLoader->setStorageParams(true), 0);
 }
 
+TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndDisabled) {
+    mVold->mountIncFsSuccess();
+    mIncFs->makeFileSuccess();
+    mVold->bindMountSuccess();
+    mVold->setIncFsMountOptionsSuccess();
+    mDataLoaderManager->bindToDataLoaderSuccess();
+    mDataLoaderManager->getDataLoaderSuccess();
+    mAppOpsManager->checkPermissionSuccess();
+    EXPECT_CALL(*mDataLoaderManager, unbindFromDataLoader(_));
+    EXPECT_CALL(*mVold, unmountIncFs(_)).Times(2);
+    // Enabling and then disabling readlogs.
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, true)).Times(1);
+    EXPECT_CALL(*mVold, setIncFsMountOptions(_, false)).Times(1);
+    // After setIncFsMountOptions succeeded expecting to start watching.
+    EXPECT_CALL(*mAppOpsManager, startWatchingMode(_, _, _)).Times(1);
+    // Not expecting callback removal.
+    EXPECT_CALL(*mAppOpsManager, stopWatchingMode(_)).Times(0);
+    TemporaryDir tempDir;
+    int storageId = mIncrementalService->createStorage(tempDir.path, std::move(mDataLoaderParcel),
+                                                       IncrementalService::CreateOptions::CreateNew,
+                                                       {}, {}, {});
+    ASSERT_GE(storageId, 0);
+    ASSERT_GE(mDataLoader->setStorageParams(true), 0);
+    // Now disable.
+    mIncrementalService->disableReadLogs(storageId);
+    ASSERT_EQ(mDataLoader->setStorageParams(true), -EPERM);
+}
+
 TEST_F(IncrementalServiceTest, testSetIncFsMountOptionsSuccessAndPermissionChanged) {
     mVold->mountIncFsSuccess();
     mIncFs->makeFileSuccess();
