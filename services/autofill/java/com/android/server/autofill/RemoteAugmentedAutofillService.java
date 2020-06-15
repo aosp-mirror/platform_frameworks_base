@@ -167,14 +167,16 @@ final class RemoteAugmentedAutofillService
                             new IFillCallback.Stub() {
                                 @Override
                                 public void onSuccess(@Nullable List<Dataset> inlineSuggestionsData,
-                                        @Nullable Bundle clientState) {
+                                        @Nullable Bundle clientState, boolean showingFillWindow) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             clientState, focusedId, focusedValue,
                                             inlineSuggestionsCallback,
                                             client, onErrorCallback, remoteRenderService);
-                                    requestAutofill.complete(null);
+                                    if (!showingFillWindow) {
+                                        requestAutofill.complete(null);
+                                    }
                                 }
 
                                 @Override
