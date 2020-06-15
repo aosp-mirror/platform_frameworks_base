@@ -86,7 +86,8 @@ public class BubbleTest extends SysuiTestCase {
         final String msg = "Hello there!";
         doReturn(Notification.Style.class).when(mNotif).getNotificationStyle();
         mExtras.putCharSequence(Notification.EXTRA_TEXT, msg);
-        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                mEntry).message);
     }
 
     @Test
@@ -97,7 +98,8 @@ public class BubbleTest extends SysuiTestCase {
         mExtras.putCharSequence(Notification.EXTRA_BIG_TEXT, msg);
 
         // Should be big text, not the small text.
-        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+        assertEquals(msg, BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                mEntry).message);
     }
 
     @Test
@@ -105,7 +107,8 @@ public class BubbleTest extends SysuiTestCase {
         doReturn(Notification.MediaStyle.class).when(mNotif).getNotificationStyle();
 
         // Media notifs don't get update messages.
-        assertNull(BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+        assertNull(BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                mEntry).message);
     }
 
     @Test
@@ -121,7 +124,7 @@ public class BubbleTest extends SysuiTestCase {
 
         // Should be the last one only.
         assertEquals("Really? I prefer them that way.",
-                BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
+                BubbleViewInfoTask.extractFlyoutMessage(mContext, mEntry).message);
     }
 
     @Test
@@ -136,8 +139,11 @@ public class BubbleTest extends SysuiTestCase {
                                 "Oh, hello!", 0, "Mady").toBundle()});
 
         // Should be the last one only.
-        assertEquals("Oh, hello!", BubbleViewInfoTask.extractFlyoutMessage(mEntry).message);
-        assertEquals("Mady", BubbleViewInfoTask.extractFlyoutMessage(mEntry).senderName);
+        assertEquals("Oh, hello!",
+                BubbleViewInfoTask.extractFlyoutMessage(mContext, mEntry).message);
+        assertEquals("Mady",
+                BubbleViewInfoTask.extractFlyoutMessage(mContext,
+                        mEntry).senderName);
     }
 
     @Test
