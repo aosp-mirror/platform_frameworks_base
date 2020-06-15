@@ -5495,7 +5495,11 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
             }
             if (mFixedRotationLaunchingApp != null
                     && mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
-                continueUpdateOrientationForDiffOrienLaunchingApp();
+                // Waiting until all of the associated activities have done animation, or the
+                // orientation would be updated too early and cause flickers.
+                if (!mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
+                    continueUpdateOrientationForDiffOrienLaunchingApp();
+                }
             } else {
                 r.finishFixedRotationTransform();
             }
