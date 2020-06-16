@@ -31,7 +31,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -224,10 +223,9 @@ public class BubbleFlyoutView extends FrameLayout {
             float[] dotCenter,
             boolean hideDot) {
 
-        final Drawable senderAvatar = flyoutMessage.senderAvatar;
-        if (senderAvatar != null && flyoutMessage.isGroupChat) {
+        if (flyoutMessage.senderAvatar != null && flyoutMessage.isGroupChat) {
             mSenderAvatar.setVisibility(VISIBLE);
-            mSenderAvatar.setImageDrawable(senderAvatar);
+            mSenderAvatar.setImageDrawable(flyoutMessage.senderAvatar);
         } else {
             mSenderAvatar.setVisibility(GONE);
             mSenderAvatar.setTranslationX(0);

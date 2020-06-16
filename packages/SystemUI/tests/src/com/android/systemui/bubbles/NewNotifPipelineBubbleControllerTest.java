@@ -302,8 +302,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     public void testRemoveBubble_withDismissedNotif_notInOverflow() {
         mEntryListener.onEntryAdded(mRow.getEntry());
         mBubbleController.updateBubble(mRow.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(mRow.getEntry().getKey()))
-                .thenReturn(mRow.getEntry());
 
         assertTrue(mBubbleController.hasBubbles());
         assertFalse(mBubbleController.isBubbleNotificationSuppressedFromShade(mRow.getEntry()));
@@ -390,14 +388,14 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 true, mRow2.getEntry().getKey());
 
         // Last added is the one that is expanded
-        assertEquals(mRow2.getEntry().getKey(), mBubbleData.getSelectedBubble().getKey());
+        assertEquals(mRow2.getEntry(), mBubbleData.getSelectedBubble().getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(mRow2.getEntry()));
 
         // Switch which bubble is expanded
         mBubbleData.setSelectedBubble(mBubbleData.getBubbleInStackWithKey(mRow.getEntry().getKey()));
         mBubbleData.setExpanded(true);
-        assertEquals(mRow.getEntry().getKey(), mBubbleData.getBubbleInStackWithKey(
-                stackView.getExpandedBubble().getKey()).getKey());
+        assertEquals(mRow.getEntry(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow.getEntry()));
 
@@ -491,27 +489,27 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow2.getEntry().getKey());
 
         // Last added is the one that is expanded
-        assertEquals(mRow2.getEntry().getKey(), mBubbleData.getBubbleInStackWithKey(
-                stackView.getExpandedBubble().getKey()).getKey());
+        assertEquals(mRow2.getEntry(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         assertTrue(mBubbleController.isBubbleNotificationSuppressedFromShade(
                 mRow2.getEntry()));
 
         // Dismiss currently expanded
         mBubbleController.removeBubble(
                 mBubbleData.getBubbleInStackWithKey(
-                        stackView.getExpandedBubble().getKey()).getKey(),
+                        stackView.getExpandedBubble().getKey()).getEntry().getKey(),
                 BubbleController.DISMISS_USER_GESTURE);
         verify(mBubbleExpandListener).onBubbleExpandChanged(false, mRow2.getEntry().getKey());
 
         // Make sure first bubble is selected
-        assertEquals(mRow.getEntry().getKey(), mBubbleData.getBubbleInStackWithKey(
-                stackView.getExpandedBubble().getKey()).getKey());
+        assertEquals(mRow.getEntry(),
+                mBubbleData.getBubbleInStackWithKey(stackView.getExpandedBubble().getKey()).getEntry());
         verify(mBubbleExpandListener).onBubbleExpandChanged(true, mRow.getEntry().getKey());
 
         // Dismiss that one
         mBubbleController.removeBubble(
                 mBubbleData.getBubbleInStackWithKey(
-                        stackView.getExpandedBubble().getKey()).getKey(),
+                        stackView.getExpandedBubble().getKey()).getEntry().getKey(),
                 BubbleController.DISMISS_USER_GESTURE);
 
         // Make sure state changes and collapse happens
@@ -770,8 +768,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
-                .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
 
@@ -790,8 +786,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(0);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
-                .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
         assertTrue(mBubbleData.hasBubbleInStackWithKey(groupedBubble.getEntry().getKey()));
 
@@ -814,8 +808,6 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
         ExpandableNotificationRow groupSummary = mNotificationTestHelper.createGroup(2);
         ExpandableNotificationRow groupedBubble = mNotificationTestHelper.createBubbleInGroup();
         mEntryListener.onEntryAdded(groupedBubble.getEntry());
-        when(mNotificationEntryManager.getPendingOrActiveNotif(groupedBubble.getEntry().getKey()))
-                .thenReturn(groupedBubble.getEntry());
         groupSummary.addChildNotification(groupedBubble);
 
         // WHEN the summary is dismissed
