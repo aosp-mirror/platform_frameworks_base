@@ -184,7 +184,7 @@
     <string name="ssl_ca_cert_noti_by_unknown" msgid="4961102218216815242">"किसी अज्ञात तृतीय पक्ष के द्वारा"</string>
     <string name="ssl_ca_cert_noti_by_administrator" msgid="4564941950768783879">"आपकी वर्क प्रोफ़ाइल का व्यवस्थापक करता है"</string>
     <string name="ssl_ca_cert_noti_managed" msgid="217337232273211674">"<xliff:g id="MANAGING_DOMAIN">%s</xliff:g> के द्वारा"</string>
-    <string name="work_profile_deleted" msgid="5891181538182009328">"वर्क प्रोफ़ाइल हटाई गई"</string>
+    <string name="work_profile_deleted" msgid="5891181538182009328">"वर्क प्रोफ़ाइल मिटाई गई"</string>
     <string name="work_profile_deleted_details" msgid="3773706828364418016">"वर्क प्रोफ़ाइल व्यवस्थापक ऐप्लिकेशन या तो मौजूद नहीं है या वह खराब हो गया है. परिणामस्वरूप, आपकी वर्क प्रोफ़ाइल और उससे जुड़े डेटा को हटा दिया गया है. सहायता के लिए अपने व्यवस्थापक से संपर्क करें."</string>
     <string name="work_profile_deleted_description_dpm_wipe" msgid="2477244968924647232">"आपकी वर्क प्रोफ़ाइल अब इस डिवाइस पर उपलब्‍ध नहीं है"</string>
     <string name="work_profile_deleted_reason_maximum_password_failure" msgid="1080323158315663167">"कई बार गलत पासवर्ड डाला गया"</string>

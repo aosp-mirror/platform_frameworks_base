@@ -1624,11 +1624,11 @@
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"접근성 단축키를 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"단축키가 사용 설정된 경우 볼륨 버튼 두 개를 동시에 3초간 누르면 접근성 기능이 시작됩니다."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"접근성 기능을 사용하시겠습니까?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"볼륨 키 2개를 몇 초 동안 길게 누르면 접근성 기능이 사용 설정됩니다. 이렇게 되면 기기 작동 방식이 달라질 수 있습니다.\n\n현재 기능:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n설정 &gt; 접근성에서 선택한 기능을 변경할 수 있습니다."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"볼륨 키 2개를 몇 초 동안 길게 누르면 접근성 기능이 사용 설정됩니다. 이때 기기 작동 방식이 달라질 수 있습니다.\n\n현재 기능:\n<xliff:g id="SERVICE">%1$s</xliff:g>\n설정 &gt; 접근성에서 선택한 기능을 변경할 수 있습니다."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g>을(를) 사용하시겠습니까?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"볼륨 키 2개를 몇 초 동안 길게 누르면 <xliff:g id="SERVICE">%1$s</xliff:g> 접근성 기능이 사용 설정됩니다. 이렇게 되면 기기 작동 방식이 달라질 수 있습니다.\n\n설정 &gt; 접근성에서 이 단축키를 다른 기능으로 변경할 수 있습니다."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"사용 설정"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"사용"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"사용 안 함"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"사용"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"사용 안함"</string>
