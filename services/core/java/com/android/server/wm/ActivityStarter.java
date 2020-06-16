@@ -639,8 +639,14 @@ class ActivityStarter {
                         mRequest.intent, caller);
             }
 
-            // Do not lock the resolving to avoid potential deadlock.
+            // If the caller hasn't already resolved the activity, we're willing
+            // to do so here, but because that may require acquiring the AM lock
+            // as part of calculating the NeededUriGrants, we must never hold
+            // the WM lock here to avoid deadlocking.
             if (mRequest.activityInfo == null) {
+                if (Thread.holdsLock(mService.mGlobalLock)) {
+                    Slog.wtf(TAG, new IllegalStateException("Caller must not hold WM lock"));
+                }
                 mRequest.resolveActivity(mSupervisor);
             }
 
