@@ -2798,14 +2798,12 @@ public class CarrierConfigManager {
     /**
      * A list of 4 customized LTE Reference Signal Signal to Noise Ratio (RSSNR) thresholds.
      *
-     * 4 threshold integers must be within the boundaries [-200, 300], and the levels are:
-     *     "NONE: [-200, threshold1)"
+     * 4 threshold integers must be within the boundaries [-20 dB, 30 dB], and the levels are:
+     *     "NONE: [-20, threshold1)"
      *     "POOR: [threshold1, threshold2)"
      *     "MODERATE: [threshold2, threshold3)"
      *     "GOOD:  [threshold3, threshold4)"
-     *     "EXCELLENT:  [threshold4, 300]"
-     * Note: the unit of the values is 10*db; it is derived by multiplying 10 on the original dB
-     * value reported by modem.
+     *     "EXCELLENT:  [threshold4, 30]"
      *
      * This key is considered invalid if the format is violated. If the key is invalid or
      * not configured, a default value set will apply.
@@ -4143,10 +4141,10 @@ public class CarrierConfigManager {
                 });
         sDefaults.putIntArray(KEY_LTE_RSSNR_THRESHOLDS_INT_ARRAY,
                 new int[] {
-                        -30, /* SIGNAL_STRENGTH_POOR */
-                        10,  /* SIGNAL_STRENGTH_MODERATE */
-                        45,  /* SIGNAL_STRENGTH_GOOD */
-                        130  /* SIGNAL_STRENGTH_GREAT */
+                        -3, /* SIGNAL_STRENGTH_POOR */
+                        1,  /* SIGNAL_STRENGTH_MODERATE */
+                        5,  /* SIGNAL_STRENGTH_GOOD */
+                        13  /* SIGNAL_STRENGTH_GREAT */
                 });
         sDefaults.putIntArray(KEY_WCDMA_RSCP_THRESHOLDS_INT_ARRAY,
                 new int[] {
