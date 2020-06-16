@@ -159,10 +159,10 @@ public class ActivityManager {
      */
     public static final int INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
     /**
-     * Mount full external storage for the newly started instrumentation.
+     * Grant full access to the external storage for the newly started instrumentation.
      * @hide
      */
-    public static final int INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL = 1 << 1;
+    public static final int INSTR_FLAG_DISABLE_ISOLATED_STORAGE = 1 << 1;
 
     /**
      * Disable test API access for the newly started instrumentation.
