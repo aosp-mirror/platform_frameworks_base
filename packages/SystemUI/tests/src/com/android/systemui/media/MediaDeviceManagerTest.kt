@@ -119,7 +119,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
             setStyle(Notification.MediaStyle().setMediaSession(session.getSessionToken()))
         }
         mediaData = MediaData(true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-            emptyList(), emptyList(), PACKAGE, session.sessionToken, null, null, null)
+            emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
+            device = null, active = true, resumeAction = null)
     }
 
     @After
