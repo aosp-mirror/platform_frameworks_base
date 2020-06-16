@@ -2748,9 +2748,11 @@ public class ParsingPackageUtils {
         SigningDetails verified;
         try {
             if (skipVerify) {
-                // systemDir APKs are already trusted, save time by not verifying
+                // systemDir APKs are already trusted, save time by not verifying; since the
+                // signature is not verified and some system apps can have their V2+ signatures
+                // stripped allow pulling the certs from the jar signature.
                 verified = ApkSignatureVerifier.unsafeGetCertsWithoutVerification(
-                        baseCodePath, minSignatureScheme);
+                        baseCodePath, SigningDetails.SignatureSchemeVersion.JAR);
             } else {
                 verified = ApkSignatureVerifier.verify(baseCodePath, minSignatureScheme);
             }
