@@ -747,11 +747,7 @@ public class BubbleExpandedView extends LinearLayout {
         if (mActivityView == null) {
             return;
         }
-        switch (mActivityViewStatus) {
-            case INITIALIZED:
-            case ACTIVITY_STARTED:
-                mActivityView.release();
-        }
+        mActivityView.release();
         if (mTaskId != -1) {
             try {
                 ActivityTaskManager.getService().removeTask(mTaskId);

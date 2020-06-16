@@ -360,18 +360,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     }
 
     /**
-     * Release this container. Activity launching will no longer be permitted.
-     * <p>Note: Calling this method is allowed after
-     * {@link StateCallback#onActivityViewReady(ActivityView)} callback was triggered and before
-     * {@link StateCallback#onActivityViewDestroyed(ActivityView)}.
-     *
-     * @see StateCallback
+     * Release this container if it is initialized. Activity launching will no longer be permitted.
      */
     public void release() {
-        if (!mTaskEmbedder.isInitialized()) {
-            throw new IllegalStateException(
-                    "Trying to release container that is not initialized.");
-        }
         performRelease();
     }
 
@@ -487,7 +478,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
             return;
         }
         mSurfaceView.getHolder().removeCallback(mSurfaceCallback);
-        mTaskEmbedder.release();
+        if (mTaskEmbedder.isInitialized()) {
+            mTaskEmbedder.release();
+        }
         mTaskEmbedder.setListener(null);
 
         mGuard.close();
