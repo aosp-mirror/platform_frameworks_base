@@ -60,6 +60,7 @@ struct Constants {
     static constexpr auto storagePrefix = "st"sv;
     static constexpr auto mountpointMdPrefix = ".mountpoint."sv;
     static constexpr auto infoMdName = ".info"sv;
+    static constexpr auto readLogsDisabledMarkerName = ".readlogs_disabled"sv;
     static constexpr auto libDir = "lib"sv;
     static constexpr auto libSuffix = ".so"sv;
     static constexpr auto blockSize = 4096;
@@ -172,6 +173,13 @@ std::string makeBindMdName() {
 
     return name;
 }
+
+static bool checkReadLogsDisabledMarker(std::string_view root) {
+    const auto markerPath = path::c_str(path::join(root, constants().readLogsDisabledMarkerName));
+    struct stat st;
+    return (::stat(markerPath, &st) == 0);
+}
+
 } // namespace
 
 IncrementalService::IncFsMount::~IncFsMount() {
@@ -618,6 +626,32 @@ StorageId IncrementalService::findStorageId(std::string_view path) const {
     return it->second->second.storage;
 }
 
+void IncrementalService::disableReadLogs(StorageId storageId) {
+    std::unique_lock l(mLock);
+    const auto ifs = getIfsLocked(storageId);
+    if (!ifs) {
+        LOG(ERROR) << "disableReadLogs failed, invalid storageId: " << storageId;
+        return;
+    }
+    if (!ifs->readLogsEnabled()) {
+        return;
+    }
+    ifs->disableReadLogs();
+    l.unlock();
+
+    const auto metadata = constants().readLogsDisabledMarkerName;
+    if (auto err = mIncFs->makeFile(ifs->control,
+                                    path::join(ifs->root, constants().mount,
+                                               constants().readLogsDisabledMarkerName),
+                                    0777, idFromMetadata(metadata), {})) {
+        //{.metadata = {metadata.data(), (IncFsSize)metadata.size()}})) {
+        LOG(ERROR) << "Failed to make marker file for storageId: " << storageId;
+        return;
+    }
+
+    setStorageParams(storageId, /*enableReadLogs=*/false);
+}
+
 int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLogs) {
     const auto ifs = getIfs(storageId);
     if (!ifs) {
@@ -627,6 +661,11 @@ int IncrementalService::setStorageParams(StorageId storageId, bool enableReadLog
 
     const auto& params = ifs->dataLoaderStub->params();
     if (enableReadLogs) {
+        if (!ifs->readLogsEnabled()) {
+            LOG(ERROR) << "setStorageParams failed, readlogs disabled for storageId: " << storageId;
+            return -EPERM;
+        }
+
         if (auto status = mAppOpsManager->checkPermission(kDataUsageStats, kOpUsage,
                                                           params.packageName.c_str());
             !status.isOk()) {
@@ -1072,6 +1111,11 @@ std::unordered_set<std::string_view> IncrementalService::adoptMountedInstances()
                                                 std::move(control), *this);
         cleanupFiles.release(); // ifs will take care of that now
 
+        // Check if marker file present.
+        if (checkReadLogsDisabledMarker(root)) {
+            ifs->disableReadLogs();
+        }
+
         std::vector<std::pair<std::string, metadata::BindPoint>> permanentBindPoints;
         auto d = openDir(root);
         while (auto e = ::readdir(d.get())) {
@@ -1242,6 +1286,11 @@ bool IncrementalService::mountExistingImage(std::string_view root) {
 
     ifs->mountId = mount.storage().id();
     mNextId = std::max(mNextId, ifs->mountId + 1);
+
+    // Check if marker file present.
+    if (checkReadLogsDisabledMarker(mountTarget)) {
+        ifs->disableReadLogs();
+    }
 
     // DataLoader params
     DataLoaderParamsParcel dataLoaderParams;

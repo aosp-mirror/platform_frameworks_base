@@ -1197,6 +1197,10 @@ public class SystemConfig {
             addFeature(PackageManager.FEATURE_APP_ENUMERATION, 0);
         }
 
+        if (Build.VERSION.FIRST_SDK_INT >= Build.VERSION_CODES.Q) {
+            addFeature(PackageManager.FEATURE_IPSEC_TUNNELS, 0);
+        }
+
         for (String featureName : mUnavailableFeatures) {
             removeFeature(featureName);
         }

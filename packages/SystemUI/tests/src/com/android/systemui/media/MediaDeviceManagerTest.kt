@@ -30,6 +30,7 @@ import androidx.test.filters.SmallTest
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
 
@@ -71,6 +72,7 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Mock private lateinit var lmm: LocalMediaManager
     @Mock private lateinit var mr2: MediaRouter2Manager
     private lateinit var fakeExecutor: FakeExecutor
+    @Mock private lateinit var dumpster: DumpManager
     @Mock private lateinit var listener: MediaDeviceManager.Listener
     @Mock private lateinit var device: MediaDevice
     @Mock private lateinit var icon: Drawable
@@ -85,7 +87,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
     @Before
     fun setUp() {
         fakeExecutor = FakeExecutor(FakeSystemClock())
-        manager = MediaDeviceManager(context, lmmFactory, mr2, fakeExecutor, mediaDataManager)
+        manager = MediaDeviceManager(context, lmmFactory, mr2, fakeExecutor, mediaDataManager,
+                dumpster)
         manager.addListener(listener)
 
         // Configure mocks.
@@ -116,7 +119,8 @@ public class MediaDeviceManagerTest : SysuiTestCase() {
             setStyle(Notification.MediaStyle().setMediaSession(session.getSessionToken()))
         }
         mediaData = MediaData(true, 0, PACKAGE, null, null, SESSION_TITLE, null,
-            emptyList(), emptyList(), PACKAGE, session.sessionToken, null, null, null)
+            emptyList(), emptyList(), PACKAGE, session.sessionToken, clickIntent = null,
+            device = null, active = true, resumeAction = null)
     }
 
     @After

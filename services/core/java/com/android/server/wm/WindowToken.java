@@ -48,6 +48,7 @@ import android.os.Debug;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 import android.view.DisplayAdjustments.FixedRotationAdjustments;
 import android.view.DisplayInfo;
@@ -124,7 +125,7 @@ class WindowToken extends WindowContainer<WindowState> {
     private static class FixedRotationTransformState {
         final DisplayInfo mDisplayInfo;
         final DisplayFrames mDisplayFrames;
-        final InsetsState mInsetsState;
+        final InsetsState mInsetsState = new InsetsState();
         final Configuration mRotatedOverrideConfiguration;
         final SeamlessRotator mRotator;
         /**
@@ -133,14 +134,14 @@ class WindowToken extends WindowContainer<WindowState> {
          */
         final ArrayList<WindowToken> mAssociatedTokens = new ArrayList<>(3);
         final ArrayList<WindowContainer<?>> mRotatedContainers = new ArrayList<>(3);
+        final SparseArray<Rect> mBarContentFrames = new SparseArray<>();
         boolean mIsTransforming = true;
 
         FixedRotationTransformState(DisplayInfo rotatedDisplayInfo,
-                DisplayFrames rotatedDisplayFrames, InsetsState rotatedInsetsState,
-                Configuration rotatedConfig, int currentRotation) {
+                DisplayFrames rotatedDisplayFrames, Configuration rotatedConfig,
+                int currentRotation) {
             mDisplayInfo = rotatedDisplayInfo;
             mDisplayFrames = rotatedDisplayFrames;
-            mInsetsState = rotatedInsetsState;
             mRotatedOverrideConfiguration = rotatedConfig;
             // This will use unrotate as rotate, so the new and old rotation are inverted.
             mRotator = new SeamlessRotator(rotatedDisplayInfo.rotation, currentRotation,
@@ -516,6 +517,12 @@ class WindowToken extends WindowContainer<WindowState> {
                 : null;
     }
 
+    Rect getFixedRotationBarContentFrame(int windowType) {
+        return isFixedRotationTransforming()
+                ? mFixedRotationTransformState.mBarContentFrames.get(windowType)
+                : null;
+    }
+
     InsetsState getFixedRotationTransformInsetsState() {
         return isFixedRotationTransforming() ? mFixedRotationTransformState.mInsetsState : null;
     }
@@ -526,12 +533,12 @@ class WindowToken extends WindowContainer<WindowState> {
         if (mFixedRotationTransformState != null) {
             return;
         }
-        final InsetsState insetsState = new InsetsState();
-        mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames, insetsState,
-                mDisplayContent.getConfiguration().uiMode);
         mFixedRotationTransformState = new FixedRotationTransformState(info, displayFrames,
-                insetsState, new Configuration(config), mDisplayContent.getRotation());
+                new Configuration(config), mDisplayContent.getRotation());
         mFixedRotationTransformState.mAssociatedTokens.add(this);
+        mDisplayContent.getDisplayPolicy().simulateLayoutDisplay(displayFrames,
+                mFixedRotationTransformState.mInsetsState,
+                mFixedRotationTransformState.mBarContentFrames);
         onConfigurationChanged(getParent().getConfiguration());
         notifyFixedRotationTransform(true /* enabled */);
     }
@@ -552,6 +559,25 @@ class WindowToken extends WindowContainer<WindowState> {
         fixedRotationState.mAssociatedTokens.add(this);
         onConfigurationChanged(getParent().getConfiguration());
         notifyFixedRotationTransform(true /* enabled */);
+    }
+
+    /**
+     * Return {@code true} if one of the associated activity is still animating. Otherwise,
+     * return {@code false}.
+     */
+    boolean hasAnimatingFixedRotationTransition() {
+        if (mFixedRotationTransformState == null) {
+            return false;
+        }
+
+        for (int i = mFixedRotationTransformState.mAssociatedTokens.size() - 1; i >= 0; i--) {
+            final ActivityRecord r =
+                    mFixedRotationTransformState.mAssociatedTokens.get(i).asActivityRecord();
+            if (r != null && r.isAnimating(TRANSITION | PARENTS)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void finishFixedRotationTransform() {

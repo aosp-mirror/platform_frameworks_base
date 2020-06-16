@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -99,6 +100,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     private ActivityStack mRootPinnedTask;
     private ActivityStack mRootSplitScreenPrimaryTask;
 
+    // TODO(b/159029784): Remove when getStack() behavior is cleaned-up
+    private ActivityStack mRootRecentsTask;
+
     private final ArrayList<ActivityStack> mTmpAlwaysOnTopStacks = new ArrayList<>();
     private final ArrayList<ActivityStack> mTmpNormalStacks = new ArrayList<>();
     private final ArrayList<ActivityStack> mTmpHomeStacks = new ArrayList<>();
@@ -163,6 +167,8 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     ActivityStack getStack(int windowingMode, int activityType) {
         if (activityType == ACTIVITY_TYPE_HOME) {
             return mRootHomeTask;
+        } else if (activityType == ACTIVITY_TYPE_RECENTS) {
+            return mRootRecentsTask;
         }
         if (windowingMode == WINDOWING_MODE_PINNED) {
             return mRootPinnedTask;
@@ -199,12 +205,25 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         return mRootHomeTask;
     }
 
+    @Nullable ActivityStack getRootRecentsTask() {
+        return mRootRecentsTask;
+    }
+
     ActivityStack getRootPinnedTask() {
         return mRootPinnedTask;
     }
 
     ActivityStack getRootSplitScreenPrimaryTask() {
         return mRootSplitScreenPrimaryTask;
+    }
+
+    ActivityStack getRootSplitScreenSecondaryTask() {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            if (mChildren.get(i).inSplitScreenSecondaryWindowingMode()) {
+                return mChildren.get(i);
+            }
+        }
+        return null;
     }
 
     ArrayList<Task> getVisibleTasks() {
@@ -237,6 +256,16 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             } else {
                 mRootHomeTask = stack;
             }
+        } else if (stack.isActivityTypeRecents()) {
+            if (mRootRecentsTask != null) {
+                if (!stack.isDescendantOf(mRootRecentsTask)) {
+                    throw new IllegalArgumentException("addStackReferenceIfNeeded: recents stack="
+                            + mRootRecentsTask + " already exist on display=" + this
+                            + " stack=" + stack);
+                }
+            } else {
+                mRootRecentsTask = stack;
+            }
         }
 
         if (!stack.isRootTask()) {
@@ -264,6 +293,8 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     void removeStackReferenceIfNeeded(ActivityStack stack) {
         if (stack == mRootHomeTask) {
             mRootHomeTask = null;
+        } else if (stack == mRootRecentsTask) {
+            mRootRecentsTask = null;
         } else if (stack == mRootPinnedTask) {
             mRootPinnedTask = null;
         } else if (stack == mRootSplitScreenPrimaryTask) {
@@ -299,8 +330,17 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
 
     @Override
     void positionChildAt(int position, ActivityStack child, boolean includingParents) {
-        final boolean moveToTop = (position == POSITION_TOP || position == getChildCount());
+        final boolean moveToTop = position >= getChildCount() - 1;
         final boolean moveToBottom = (position == POSITION_BOTTOM || position == 0);
+
+        // Reset mPreferredTopFocusableStack before positioning to top or {@link
+        // ActivityStackSupervisor#updateTopResumedActivityIfNeeded()} won't update the top
+        // resumed activity.
+        final boolean wasContained = mChildren.contains(child);
+        if (moveToTop && wasContained && child.isFocusable()) {
+            mPreferredTopFocusableStack = null;
+        }
+
         if (child.getWindowConfiguration().isAlwaysOnTop() && !moveToTop) {
             // This stack is always-on-top, override the default behavior.
             Slog.w(TAG_WM, "Ignoring move of always-on-top stack=" + this + " to bottom");
@@ -330,6 +370,17 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         child.updateTaskMovement(moveToTop);
 
         mDisplayContent.setLayoutNeeded();
+
+        // The insert position may be adjusted to non-top when there is always-on-top stack. Since
+        // the original position is preferred to be top, the stack should have higher priority when
+        // we are looking for top focusable stack. The condition {@code wasContained} restricts the
+        // preferred stack is set only when moving an existing stack to top instead of adding a new
+        // stack that may be too early (e.g. in the middle of launching or reparenting).
+        if (moveToTop && child.isFocusableAndVisible()) {
+            mPreferredTopFocusableStack = child;
+        } else if (mPreferredTopFocusableStack == child) {
+            mPreferredTopFocusableStack = null;
+        }
     }
 
     /**
@@ -727,28 +778,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
                     "positionStackAt: Can only have one task on display=" + this);
         }
 
-        final boolean movingToTop = wasContained && position >= getStackCount() - 1;
-        // Reset mPreferredTopFocusableStack before positioning to top or {@link
-        // ActivityStackSupervisor#updateTopResumedActivityIfNeeded()} won't update the top
-        // resumed activity.
-        if (movingToTop && stack.isFocusable()) {
-            mPreferredTopFocusableStack = null;
-        }
-
         // Since positionChildAt() is called during the creation process of pinned stacks,
         // ActivityStack#getStack() can be null.
         positionStackAt(position, stack, includingParents);
-
-        // The insert position may be adjusted to non-top when there is always-on-top stack. Since
-        // the original position is preferred to be top, the stack should have higher priority when
-        // we are looking for top focusable stack. The condition {@code wasContained} restricts the
-        // preferred stack is set only when moving an existing stack to top instead of adding a new
-        // stack that may be too early (e.g. in the middle of launching or reparenting).
-        if (movingToTop && stack.isFocusableAndVisible()) {
-            mPreferredTopFocusableStack = stack;
-        } else if (mPreferredTopFocusableStack == stack) {
-            mPreferredTopFocusableStack = null;
-        }
 
         if (updateLastFocusedStackReason != null) {
             final ActivityStack currentFocusedStack = getFocusedStack();
@@ -1741,21 +1773,23 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         // reparenting stack finished.
         // Keep the order from bottom to top.
         int numStacks = getStackCount();
+
+        final boolean splitScreenActivated = toDisplayArea.isSplitScreenModeActivated();
+        final ActivityStack rootStack = splitScreenActivated ? toDisplayArea
+                .getTopStackInWindowingMode(WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) : null;
         for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
             final ActivityStack stack = getStackAt(stackNdx);
             // Always finish non-standard type stacks.
             if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
                 stack.finishAllActivitiesImmediately();
             } else {
-                // If default display is in split-window mode, set windowing mode of the
-                // stack to split-screen secondary. Otherwise, set the windowing mode to
-                // undefined by default to let stack inherited the windowing mode from the
-                // new display.
-                final int windowingMode = toDisplayArea.isSplitScreenModeActivated()
-                        ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
-                        : WINDOWING_MODE_UNDEFINED;
-                stack.reparent(toDisplayArea, true /* onTop */);
-                stack.setWindowingMode(windowingMode);
+                // Reparent the stack to the root task of secondary-split-screen or display area.
+                stack.reparent(stack.supportsSplitScreenWindowingMode() && rootStack != null
+                        ? rootStack : toDisplayArea, POSITION_TOP);
+
+                // Set the windowing mode to undefined by default to let the stack inherited the
+                // windowing mode.
+                stack.setWindowingMode(WINDOWING_MODE_UNDEFINED);
                 lastReparentedStack = stack;
             }
             // Stacks may be removed from this display. Ensure each stack will be processed
@@ -1763,6 +1797,17 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             stackNdx -= numStacks - getStackCount();
             numStacks = getStackCount();
         }
+        if (lastReparentedStack != null && splitScreenActivated) {
+            if (!lastReparentedStack.supportsSplitScreenWindowingMode()) {
+                mAtmService.getTaskChangeNotificationController()
+                        .notifyActivityDismissingDockedStack();
+                toDisplayArea.onSplitScreenModeDismissed(lastReparentedStack);
+            } else if (rootStack != null) {
+                // update focus
+                rootStack.moveToFront("display-removed");
+            }
+        }
+
         mRemoved = true;
 
         return lastReparentedStack;

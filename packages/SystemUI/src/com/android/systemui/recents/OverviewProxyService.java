@@ -200,11 +200,13 @@ public class OverviewProxyService extends CurrentUserTracker implements
                             mInputFocusTransferStartY = event.getY();
                             mInputFocusTransferStartMillis = event.getEventTime();
                             statusBar.onInputFocusTransfer(
-                                    mInputFocusTransferStarted, 0 /* velocity */);
+                                    mInputFocusTransferStarted, false /* cancel */,
+                                    0 /* velocity */);
                         }
                         if (action == ACTION_UP || action == ACTION_CANCEL) {
                             mInputFocusTransferStarted = false;
                             statusBar.onInputFocusTransfer(mInputFocusTransferStarted,
+                                    action == ACTION_CANCEL,
                                     (event.getY() - mInputFocusTransferStartY)
                                     / (event.getEventTime() - mInputFocusTransferStartMillis));
                         }
@@ -692,7 +694,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
             mHandler.post(()-> {
                 mStatusBarOptionalLazy.ifPresent(statusBarLazy -> {
                     mInputFocusTransferStarted = false;
-                    statusBarLazy.get().onInputFocusTransfer(false, 0 /* velocity */);
+                    statusBarLazy.get().onInputFocusTransfer(false, true /* cancel */,
+                            0 /* velocity */);
                 });
             });
         }
@@ -871,6 +874,12 @@ public class OverviewProxyService extends CurrentUserTracker implements
         }
     }
 
+    void notifyToggleRecentApps() {
+        for (int i = mConnectionCallbacks.size() - 1; i >= 0; --i) {
+            mConnectionCallbacks.get(i).onToggleRecentApps();
+        }
+    }
+
     private void updateEnabledState() {
         mIsEnabled = mContext.getPackageManager().resolveServiceAsUser(mQuickStepIntent,
                 MATCH_SYSTEM_ONLY,
@@ -901,6 +910,8 @@ public class OverviewProxyService extends CurrentUserTracker implements
         default void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {}
         default void onOverviewShown(boolean fromHome) {}
         default void onQuickScrubStarted() {}
+        /** Notify the recents app (overview) is started by 3-button navigation. */
+        default void onToggleRecentApps() {}
         /** Notify changes in the nav bar button alpha */
         default void onNavBarButtonAlphaChanged(float alpha, boolean animate) {}
         default void onSystemUiStateChanged(int sysuiStateFlags) {}

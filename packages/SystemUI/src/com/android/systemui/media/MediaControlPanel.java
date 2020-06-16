@@ -96,13 +96,13 @@ public class MediaControlPanel {
      */
     @Inject
     public MediaControlPanel(Context context, @Background Executor backgroundExecutor,
-            ActivityStarter activityStarter, MediaHostStatesManager mediaHostStatesManager,
+            ActivityStarter activityStarter, MediaViewController mediaViewController,
             SeekBarViewModel seekBarViewModel) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
         mSeekBarViewModel = seekBarViewModel;
-        mMediaViewController = new MediaViewController(context, mediaHostStatesManager);
+        mMediaViewController = mediaViewController;
         loadDimens();
     }
 
@@ -257,16 +257,18 @@ public class MediaControlPanel {
         rect.setColor(Color.TRANSPARENT);
 
         final MediaDeviceData device = data.getDevice();
+        int seamlessId = mViewHolder.getSeamless().getId();
         if (device != null && !device.getEnabled()) {
             mViewHolder.getSeamless().setEnabled(false);
-            // TODO(b/156875717): setEnabled should cause the alpha to change.
-            mViewHolder.getSeamless().setAlpha(0.38f);
+            expandedSet.setAlpha(seamlessId, 0.38f);
+            collapsedSet.setAlpha(seamlessId, 0.38f);
             iconView.setImageResource(R.drawable.ic_hardware_speaker);
             iconView.setVisibility(View.VISIBLE);
             deviceName.setText(R.string.media_seamless_remote_device);
         } else if (device != null) {
             mViewHolder.getSeamless().setEnabled(true);
-            mViewHolder.getSeamless().setAlpha(1f);
+            expandedSet.setAlpha(seamlessId, 1.0f);
+            collapsedSet.setAlpha(seamlessId, 1.0f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
 
@@ -282,7 +284,8 @@ public class MediaControlPanel {
             // Reset to default
             Log.w(TAG, "device is null. Not binding output chip.");
             mViewHolder.getSeamless().setEnabled(true);
-            mViewHolder.getSeamless().setAlpha(1f);
+            expandedSet.setAlpha(seamlessId, 1.0f);
+            collapsedSet.setAlpha(seamlessId, 1.0f);
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }
@@ -363,38 +366,11 @@ public class MediaControlPanel {
     }
 
     /**
-     * Return the token for the current media session
-     * @return the token
-     */
-    public MediaSession.Token getMediaSessionToken() {
-        return mToken;
-    }
-
-    /**
      * Get the current media controller
      * @return the controller
      */
     public MediaController getController() {
         return mController;
-    }
-
-    /**
-     * Get the name of the package associated with the current media controller
-     * @return the package name, or null if no controller
-     */
-    public String getMediaPlayerPackage() {
-        if (mController == null) {
-            return null;
-        }
-        return mController.getPackageName();
-    }
-
-    /**
-     * Check whether this player has an attached media session.
-     * @return whether there is a controller with a current media session.
-     */
-    public boolean hasMediaSession() {
-        return mController != null && mController.getPlaybackState() != null;
     }
 
     /**

@@ -30,9 +30,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.DrawableWrapper;
 import android.os.RemoteException;
-import android.util.DisplayMetrics;
 import android.util.PathParser;
-import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
 
@@ -46,6 +44,9 @@ import java.lang.annotation.RetentionPolicy;
  * Adaptive outline drawable with white plain background color and black outline
  */
 public class AdaptiveOutlineDrawable extends DrawableWrapper {
+
+    private static final float ADVANCED_ICON_CENTER = 50f;
+    private static final float ADVANCED_ICON_RADIUS = 48f;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_DEFAULT, TYPE_ADVANCED})
@@ -61,7 +62,6 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
     private int mStrokeWidth;
     private Bitmap mBitmap;
     private int mType;
-    private float mDensity;
 
     public AdaptiveOutlineDrawable(Resources resources, Bitmap bitmap) {
         super(new AdaptiveIconShapeDrawable(resources));
@@ -83,7 +83,6 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
         mPath = new Path(PathParser.createPathFromPathData(
                 resources.getString(com.android.internal.R.string.config_icon_mask)));
         mStrokeWidth = resources.getDimensionPixelSize(R.dimen.adaptive_outline_stroke);
-        mDensity = resources.getDisplayMetrics().density;
         mOutlinePaint = new Paint();
         mOutlinePaint.setColor(getColor(resources, type));
         mOutlinePaint.setStyle(Paint.Style.STROKE);
@@ -137,12 +136,7 @@ public class AdaptiveOutlineDrawable extends DrawableWrapper {
         if (mType == TYPE_DEFAULT) {
             canvas.drawPath(mPath, mOutlinePaint);
         } else {
-            final float defaultDensity = getDefaultDisplayDensity(Display.DEFAULT_DISPLAY)
-                    / (float) DisplayMetrics.DENSITY_DEFAULT;
-            final int insetPx =
-                    Math.round(mInsetPx / (float) (Math.floor(
-                            (mDensity / defaultDensity) * 100) / 100.0));
-            canvas.drawCircle(2 * insetPx, 2 * insetPx, 2 * insetPx - mStrokeWidth,
+            canvas.drawCircle(ADVANCED_ICON_CENTER, ADVANCED_ICON_CENTER, ADVANCED_ICON_RADIUS,
                     mOutlinePaint);
         }
         canvas.restoreToCount(count);

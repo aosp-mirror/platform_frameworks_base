@@ -235,13 +235,20 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void initMediaHostState() {
         mMediaHost.setExpansion(1.0f);
         mMediaHost.setShowsOnlyActiveMedia(false);
+        // Reveal player with some parallax (1.0f would also work)
+        mMediaHost.setGonePivot(0.0f, 0.8f);
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-
         if (mTileLayout instanceof PagedTileLayout) {
+            // Since PageIndicator gets measured before PagedTileLayout, we preemptively set the
+            // # of pages before the measurement pass so PageIndicator is measured appropriately
+            if (mFooterPageIndicator != null) {
+                mFooterPageIndicator.setNumPages(((PagedTileLayout) mTileLayout).getNumPages());
+            }
+
             // Allow the UI to be as big as it want's to, we're in a scroll view
             int newHeight = 10000;
             int availableHeight = MeasureSpec.getSize(heightMeasureSpec);
