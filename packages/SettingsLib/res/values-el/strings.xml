@@ -465,7 +465,7 @@
     <item msgid="8894873528875953317">"50%"</item>
     <item msgid="7529124349186240216">"100%"</item>
   </string-array>
-    <string name="charge_length_format" msgid="6941645744588690932">"Πριν από <xliff:g id="ID_1">%1$s</xliff:g>"</string>
+    <string name="charge_length_format" msgid="6941645744588690932">"Πριν <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="remaining_length_format" msgid="4310625772926171089">"Απομένουν <xliff:g id="ID_1">%1$s</xliff:g>"</string>
     <string name="screen_zoom_summary_small" msgid="6050633151263074260">"Μικρά"</string>
     <string name="screen_zoom_summary_default" msgid="1888865694033865408">"Προεπιλογή"</string>
