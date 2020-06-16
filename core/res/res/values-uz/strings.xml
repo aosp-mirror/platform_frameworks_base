@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Siz grafik kalitni <xliff:g id="NUMBER_0">%1$d</xliff:g> marta noto‘g‘ri chizdingiz. <xliff:g id="NUMBER_1">%2$d</xliff:g> marta muvaffaqiyatsiz urinishdan so‘ng, sizdan e-pochtangizdan foydalanib, telefon qulfini ochishingiz so‘raladi.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> soniyadan so‘ng yana urinib ko‘ring."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Olib tashlash"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Fonda faol <xliff:g id="PACKAGENAME">%1$s</xliff:g> xizmatini ishga tushirish uchun kelgusi R nashrlarida ishlatilayotganda ruxsat berish imkoniyati boʻlmaydi. go/r-bg-fgs-restriction sahifasiga kiring va xatolik hisobotini yuboring."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Tovush balandligi tavsiya etilgan darajadan ham yuqori qilinsinmi?\n\nUzoq vaqt davomida baland ovozda tinglash eshitish qobiliyatingizga salbiy ta’sir ko‘rsatishi mumkin."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Tezkor ishga tushirishdan foydalanilsinmi?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Maxsus imkoniyatlar funksiyasidan foydalanish uchun u yoniqligida ikkala tovush tugmasini 3 soniya bosib turing."</string>
@@ -1641,9 +1640,9 @@
     <string name="accessibility_service_action_perform_description" msgid="2718852014003170558">"Ilova yoki qurilma sensori bilan munosabatlaringizni kuzatishi hamda sizning nomingizdan ilovalar bilan ishlashi mumkin."</string>
     <string name="accessibility_dialog_button_allow" msgid="2092558122987144530">"Ruxsat"</string>
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rad etish"</string>
-    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Funksiyadan foydalanish uchun ustiga bosing:"</string>
+    <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Kerakli funksiyani tanlang"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Maxsus imkoniyatlar tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tovush balandligi tugmasi bilan foydalanish uchun funksiyalarni tanlang"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Tovush tugmasi bilan ishga tushiriladigan funksiyalarni tanlang"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> faolsizlantirildi"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Tezkor tugmalarni tahrirlash"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"OK"</string>

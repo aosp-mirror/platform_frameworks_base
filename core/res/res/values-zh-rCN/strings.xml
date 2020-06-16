@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"您已连续 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次画错解锁图案。如果再尝试 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次后仍不成功，系统就会要求您使用自己的电子邮件帐号解锁手机。\n\n请在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒后重试。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"删除"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"在未来的 R 版本中，在后台启动的 <xliff:g id="PACKAGENAME">%1$s</xliff:g> 中的前台服务将不具有仅在使用时授予的权限。请访问 go/r-bg-fgs-restriction 并提交错误报告。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要将音量调高到建议的音量以上吗？\n\n长时间保持高音量可能会损伤听力。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用无障碍快捷方式吗？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"启用这项快捷方式后，同时按下两个音量按钮 3 秒钟即可启动无障碍功能。"</string>
@@ -1651,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"使用快捷方式"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"颜色反转"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"色彩校正"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已开启。"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量键。<xliff:g id="SERVICE_NAME">%1$s</xliff:g>已关闭。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"同时按住两个音量键 3 秒钟即可使用 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"选择点按“无障碍”按钮后要使用的功能："</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"选择要搭配无障碍手势（用两根手指从屏幕底部向上滑动）使用的功能："</string>

@@ -1619,11 +1619,10 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"您已畫錯解鎖圖案 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統會要求您透過電郵帳戶解開上鎖的手機。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"從「<xliff:g id="PACKAGENAME">%1$s</xliff:g>」啟動前景服務的背景將不會在未來的 R 版本中提供「僅在使用此應用程式時允許」權限。請參閱 go/r-bg-fgs-restriction，提交錯誤報告。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量 (比建議的音量更大聲) 嗎？\n\n長時間聆聽高分貝音量可能會導致您的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙功能快速鍵嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用快速鍵後，同時按住音量按鈕 3 秒便可啟用無障礙功能。"</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"要啟用無障礙功能嗎？"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"要開啟無障礙功能嗎？"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按下兩個音量鍵幾秒，以開啟無障礙功能。這可能會變更裝置的運作。\n\n目前功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n您可在「設定」&gt;「無障礙功能」中變更所選功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"要啟用 <xliff:g id="SERVICE">%1$s</xliff:g> 嗎？"</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"拒絕"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"輕按即可開始使用所需功能："</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"選擇要配搭無障礙功能按鈕使用的功能"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"選擇要配搭音量快速鍵使用的功能"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"選擇要用音量快速鍵的功能"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> 已關閉"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"編輯捷徑"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"完成"</string>

@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Elimina"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"El servei en primer pla (<xliff:g id="PACKAGENAME">%1$s</xliff:g>) iniciat en segon pla no tindrà permís durant l\'ús en compilacions R posteriors. Consulta la pàgina go/r-bg-fgs-restriction i presenta un informe d\'errors."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vols apujar el volum per sobre del nivell recomanat?\n\nSi escoltes música a un volum alt durant períodes llargs, pots danyar-te l\'oïda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vols fer servir la drecera d\'accessibilitat?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si la drecera està activada, prem els dos botons de volum durant 3 segons per iniciar una funció d\'accessibilitat."</string>

@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"திறப்பதற்கான வடிவத்தை <xliff:g id="NUMBER_0">%1$d</xliff:g> முறை தவறாக வரைந்துள்ளீர்கள். மேலும் <xliff:g id="NUMBER_1">%2$d</xliff:g> தோல்வி முயற்சிகளுக்குப் பிறகு, மின்னஞ்சல் கணக்கைப் பயன்படுத்தி உங்கள் மொபைலைத் திறக்கக் கேட்கப்படுவீர்கள்.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> வினாடிகள் கழித்து முயற்சிக்கவும்."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"அகற்று"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> இல் இருந்து பின்னணியில் தொடங்கப்பட்ட முன்புலச் சேவைக்கு, வரவுள்ள R பதிப்புகளில் உபயோகத்தின்போது மட்டுமான அனுமதி இருக்காது. go/r-bg-fgs-restriction என்பதைப் பார்த்து பிழை அறிக்கை ஒன்றைச் சமர்ப்பிக்கவும்."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"பரிந்துரைத்த அளவை விட ஒலியை அதிகரிக்கவா?\n\nநீண்ட நேரத்திற்கு அதிகளவில் ஒலி கேட்பது கேட்கும் திறனைப் பாதிக்கலாம்."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"அணுகல்தன்மை ஷார்ட்கட்டைப் பயன்படுத்தவா?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ஷார்ட்கட் இயக்கத்தில் இருக்கும்போது ஒலியளவு பட்டன்கள் இரண்டையும் 3 வினாடிகளுக்கு அழுத்தினால் அணுகல்தன்மை அம்சம் இயக்கப்படும்."</string>
