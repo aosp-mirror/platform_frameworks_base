@@ -84,8 +84,8 @@ public class AppsFilterTest {
     private static final int SYSTEM_USER = 0;
     private static final int SECONDARY_USER = 10;
     private static final int[] USER_ARRAY = {SYSTEM_USER, SECONDARY_USER};
-    private static final List<UserInfo> USER_INFO_LIST = Arrays.stream(USER_ARRAY).mapToObj(
-            id -> new UserInfo(id, Integer.toString(id), 0)).collect(Collectors.toList());
+    private static final UserInfo[] USER_INFO_LIST = Arrays.stream(USER_ARRAY).mapToObj(
+            id -> new UserInfo(id, Integer.toString(id), 0)).toArray(UserInfo[]::new);
 
     @Mock
     AppsFilter.FeatureConfig mFeatureConfigMock;

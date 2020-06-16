@@ -149,7 +149,7 @@ public class AppsFilter {
         void runWithState(CurrentStateCallback callback);
 
         interface CurrentStateCallback {
-            void currentState(ArrayMap<String, PackageSetting> settings, List<UserInfo> users);
+            void currentState(ArrayMap<String, PackageSetting> settings, UserInfo[] users);
         }
     }
 
@@ -322,7 +322,7 @@ public class AppsFilter {
         final StateProvider stateProvider = command -> {
             synchronized (injector.getLock()) {
                 command.currentState(injector.getSettings().mPackages,
-                        injector.getUserManagerService().getUsers(false, false, false));
+                        injector.getUserManagerInternal().getUserInfos());
             }
         };
         AppsFilter appsFilter = new AppsFilter(stateProvider, featureConfig,
@@ -474,8 +474,8 @@ public class AppsFilter {
         mStateProvider.runWithState(new StateProvider.CurrentStateCallback() {
             @Override
             public void currentState(ArrayMap<String, PackageSetting> settings,
-                    List<UserInfo> users) {
-                mShouldFilterCache = new SparseArray<>(users.size() * settings.size());
+                    UserInfo[] users) {
+                mShouldFilterCache = new SparseArray<>(users.length * settings.size());
             }
         });
         mFeatureConfig.onSystemReady();
@@ -632,7 +632,7 @@ public class AppsFilter {
 
     private void updateShouldFilterCacheForPackage(@Nullable String skipPackageName,
             PackageSetting subjectSetting, ArrayMap<String, PackageSetting> allSettings,
-            List<UserInfo> allUsers, int maxIndex) {
+            UserInfo[] allUsers, int maxIndex) {
         for (int i = Math.min(maxIndex, allSettings.size() - 1); i >= 0; i--) {
             PackageSetting otherSetting = allSettings.valueAt(i);
             if (subjectSetting.appId == otherSetting.appId) {
@@ -642,12 +642,12 @@ public class AppsFilter {
             if (subjectSetting.name == skipPackageName || otherSetting.name == skipPackageName) {
                 continue;
             }
-            final int userCount = allUsers.size();
+            final int userCount = allUsers.length;
             final int appxUidCount = userCount * allSettings.size();
             for (int su = 0; su < userCount; su++) {
-                int subjectUser = allUsers.get(su).id;
+                int subjectUser = allUsers[su].id;
                 for (int ou = su; ou < userCount; ou++) {
-                    int otherUser = allUsers.get(ou).id;
+                    int otherUser = allUsers[ou].id;
                     int subjectUid = UserHandle.getUid(subjectUser, subjectSetting.appId);
                     if (!mShouldFilterCache.contains(subjectUid)) {
                         mShouldFilterCache.put(subjectUid, new SparseBooleanArray(appxUidCount));
@@ -777,9 +777,9 @@ public class AppsFilter {
     public void removePackage(PackageSetting setting) {
         removeAppIdFromVisibilityCache(setting.appId);
         mStateProvider.runWithState((settings, users) -> {
-            final int userCount = users.size();
+            final int userCount = users.length;
             for (int u = 0; u < userCount; u++) {
-                final int userId = users.get(u).id;
+                final int userId = users[u].id;
                 final int removingUid = UserHandle.getUid(userId, setting.appId);
                 mImplicitlyQueryable.remove(removingUid);
                 for (int i = mImplicitlyQueryable.size() - 1; i >= 0; i--) {
