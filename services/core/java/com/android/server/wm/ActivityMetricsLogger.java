@@ -842,7 +842,8 @@ class ActivityMetricsLogger {
                 ? PackageOptimizationInfo.createWithNoInfo()
                 : artManagerInternal.getPackageOptimizationInfo(
                         info.applicationInfo,
-                        info.launchedActivityAppRecordRequiredAbi);
+                        info.launchedActivityAppRecordRequiredAbi,
+                        info.launchedActivityName);
         builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_REASON,
                 packageOptimizationInfo.getCompilationReason());
         builder.addTaggedData(PACKAGE_OPTIMIZATION_COMPILATION_FILTER,
