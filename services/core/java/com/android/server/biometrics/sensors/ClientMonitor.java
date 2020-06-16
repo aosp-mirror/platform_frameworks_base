@@ -26,8 +26,6 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 import android.util.Slog;
 
-import com.android.internal.logging.MetricsLogger;
-
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
@@ -37,6 +35,9 @@ import java.util.NoSuchElementException;
  * the biometric's HAL for the specific action (e.g. authenticate, enroll, enumerate, etc.).
  */
 public abstract class ClientMonitor extends LoggableMonitor implements IBinder.DeathRecipient {
+
+    private static final String TAG = "Biometrics/ClientMonitor";
+
     protected static final int ERROR_ESRCH = 3; // Likely HAL is dead. See errno.h.
     protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
     private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
@@ -62,9 +63,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     // is never 0.
     private final int mCookie;
 
-    protected final MetricsLogger mMetricsLogger;
-    protected final Constants mConstants;
-
     protected boolean mAlreadyCancelled;
     protected boolean mAlreadyDone;
 
@@ -79,14 +77,13 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * permission
      * @param owner name of the client that owns this
      */
-    public ClientMonitor(Context context, Constants constants,
+    public ClientMonitor(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int userId, int groupId,
             boolean restricted, String owner, int cookie, int sensorId, int statsModality,
             int statsAction, int statsClient) {
         super(statsModality, statsAction, statsClient);
         mContext = context;
-        mConstants = constants;
         mDaemon = daemon;
         mToken = token;
         mListener = listener;
@@ -98,18 +95,13 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
         mSensorId = sensorId;
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
         mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
-        mMetricsLogger = new MetricsLogger();
         try {
             if (token != null) {
                 token.linkToDeath(this, 0);
             }
         } catch (RemoteException e) {
-            Slog.w(getLogTag(), "caught remote exception in linkToDeath: ", e);
+            Slog.w(TAG, "caught remote exception in linkToDeath: ", e);
         }
-    }
-
-    protected String getLogTag() {
-        return mConstants.logTag();
     }
 
     public int getCookie() {
@@ -164,7 +156,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     protected final boolean onAcquiredInternal(int acquiredInfo, int vendorCode,
             boolean shouldSend) {
         super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
-        if (DEBUG) Slog.v(getLogTag(), "Acquired: " + acquiredInfo + " " + vendorCode
+        if (DEBUG) Slog.v(TAG, "Acquired: " + acquiredInfo + " " + vendorCode
                 + ", shouldSend: " + shouldSend);
         try {
             if (mListener != null && shouldSend) {
@@ -172,7 +164,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
             }
             return false; // acquisition continues...
         } catch (RemoteException e) {
-            Slog.w(getLogTag(), "Failed to invoke sendAcquired", e);
+            Slog.w(TAG, "Failed to invoke sendAcquired", e);
             return true;
         } finally {
             // Good scans will keep the device awake
@@ -195,7 +187,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
                 mListener.onError(getSensorId(), getCookie(), error, vendorCode);
             }
         } catch (RemoteException e) {
-            Slog.w(getLogTag(), "Failed to invoke sendError", e);
+            Slog.w(TAG, "Failed to invoke sendError", e);
         }
         return true; // errors always remove current client
     }
@@ -206,7 +198,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
                 mToken.unlinkToDeath(this, 0);
             } catch (NoSuchElementException e) {
                 // TODO: remove when duplicate call bug is found
-                Slog.e(getLogTag(), "destroy(): " + this + ":", new Exception("here"));
+                Slog.e(TAG, "destroy(): " + this + ":", new Exception("here"));
             }
             mToken = null;
         }
@@ -220,7 +212,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     void binderDiedInternal(boolean clearListener) {
         // If the current client dies we should cancel the current operation.
-        Slog.e(getLogTag(), "Binder died, cancelling client");
+        Slog.e(TAG, "Binder died, cancelling client");
         stop(false /* initiatedByClient */);
         mToken = null;
         if (clearListener) {
@@ -232,7 +224,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     protected void finalize() throws Throwable {
         try {
             if (mToken != null) {
-                if (DEBUG) Slog.w(getLogTag(), "removing leaked reference: " + mToken);
+                if (DEBUG) Slog.w(TAG, "removing leaked reference: " + mToken);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
                         0 /* vendorCode */);
             }

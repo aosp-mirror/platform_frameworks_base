@@ -55,7 +55,6 @@ import android.view.Surface;
 
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.SystemService;
@@ -87,7 +86,6 @@ public abstract class BiometricServiceBase extends SystemService
     protected final IActivityTaskManager mActivityTaskManager;
     public final PowerManager mPowerManager;
     private final UserManager mUserManager;
-    private final MetricsLogger mMetricsLogger;
     protected final BiometricTaskStackListener mTaskStackListener =
             new BiometricTaskStackListener();
     private final ResetClientStateRunnable mResetClientState = new ResetClientStateRunnable();
@@ -135,11 +133,6 @@ public abstract class BiometricServiceBase extends SystemService
      * @return the biometric utilities for a specific implementation.
      */
     protected abstract BiometricUtils getBiometricUtils();
-
-    /**
-     * @return the metrics constants for a biometric implementation.
-     */
-    protected abstract Constants getConstants();
 
     /**
      * @param userId
@@ -354,7 +347,6 @@ public abstract class BiometricServiceBase extends SystemService
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManager = UserManager.get(mContext);
         mPerformanceTracker = PerformanceTracker.getInstanceForSensorId(getSensorId());
-        mMetricsLogger = new MetricsLogger();
     }
 
     @Override
@@ -365,7 +357,6 @@ public abstract class BiometricServiceBase extends SystemService
     @Override
     public void serviceDied(long cookie) {
         Slog.e(getTag(), "HAL died");
-        mMetricsLogger.count(getConstants().tagHalDied(), 1);
         mPerformanceTracker.incrementHALDeathCount();
         mCurrentUserId = UserHandle.USER_NULL;
 
@@ -554,7 +545,6 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         mHandler.post(() -> {
-            mMetricsLogger.histogram(getConstants().tagAuthToken(), opId != 0L ? 1 : 0);
             startAuthentication(client, opPackageName);
         });
     }
@@ -931,7 +921,7 @@ public abstract class BiometricServiceBase extends SystemService
             final List<? extends BiometricAuthenticator.Identifier> enrolledList =
                     getEnrolledTemplates(userId);
 
-            InternalCleanupClient client = new InternalCleanupClient(getContext(), getConstants(),
+            InternalCleanupClient client = new InternalCleanupClient(getContext(),
                     getDaemonWrapper(), null /* serviceListener */, userId, userId,
                     restricted, getContext().getOpPackageName(), getSensorId(), statsModality(),
                     enrolledList, getBiometricUtils());

@@ -30,11 +30,14 @@ import java.util.ArrayList;
  * A class to keep track of the enumeration state for a given client.
  */
 public abstract class EnumerateClient extends ClientMonitor {
-    public EnumerateClient(Context context, Constants constants,
+
+    private static final String TAG = "Biometrics/EnumerateClient";
+
+    public EnumerateClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
         ClientMonitorCallbackConverter listener, int groupId, int userId,
             boolean restricted, String owner, int sensorId, int statsModality) {
-        super(context, constants, daemon, token, listener, userId, groupId, restricted,
+        super(context, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
@@ -49,14 +52,13 @@ public abstract class EnumerateClient extends ClientMonitor {
         try {
             final int result = getDaemonWrapper().enumerate();
             if (result != 0) {
-                Slog.w(getLogTag(), "start enumerate for user " + getTargetUserId()
+                Slog.w(TAG, "start enumerate for user " + getTargetUserId()
                     + " failed, result=" + result);
-                mMetricsLogger.histogram(mConstants.tagEnumerateStartError(), result);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "startEnumeration failed", e);
+            Slog.e(TAG, "startEnumeration failed", e);
         }
         return 0;
     }
@@ -64,18 +66,18 @@ public abstract class EnumerateClient extends ClientMonitor {
     @Override
     public int stop(boolean initiatedByClient) {
         if (mAlreadyCancelled) {
-            Slog.w(getLogTag(), "stopEnumerate: already cancelled!");
+            Slog.w(TAG, "stopEnumerate: already cancelled!");
             return 0;
         }
 
         try {
             final int result = getDaemonWrapper().cancel();
             if (result != 0) {
-                Slog.w(getLogTag(), "stop enumeration failed, result=" + result);
+                Slog.w(TAG, "stop enumeration failed, result=" + result);
                 return result;
             }
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "stopEnumeration failed", e);
+            Slog.e(TAG, "stopEnumeration failed", e);
             return ERROR_ESRCH;
         }
 
@@ -96,7 +98,7 @@ public abstract class EnumerateClient extends ClientMonitor {
                 getListener().onEnumerated(identifier, remaining);
             }
         } catch (RemoteException e) {
-            Slog.w(getLogTag(), "Failed to notify enumerated:", e);
+            Slog.w(TAG, "Failed to notify enumerated:", e);
         }
         return remaining == 0;
     }
@@ -104,19 +106,19 @@ public abstract class EnumerateClient extends ClientMonitor {
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
-        if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enumerate!");
+        if (DEBUG) Slog.w(TAG, "onAuthenticated() called for enumerate!");
         return true; // Invalid for Enumerate.
     }
 
     @Override
     public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int rem) {
-        if (DEBUG) Slog.w(getLogTag(), "onEnrollResult() called for enumerate!");
+        if (DEBUG) Slog.w(TAG, "onEnrollResult() called for enumerate!");
         return true; // Invalid for Enumerate.
     }
 
     @Override
     public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onRemoved() called for enumerate!");
+        if (DEBUG) Slog.w(TAG, "onRemoved() called for enumerate!");
         return true; // Invalid for Enumerate.
     }
 }

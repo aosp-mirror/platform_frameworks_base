@@ -36,7 +36,6 @@ import com.android.server.biometrics.Utils;
 import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
-import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
 import java.util.ArrayList;
@@ -61,13 +60,13 @@ class FaceAuthenticationClient extends AuthenticationClient {
     // but not started yet. The user shouldn't receive the error haptics in this case.
     private boolean mStarted;
 
-    FaceAuthenticationClient(Context context, Constants constants,
+    FaceAuthenticationClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int targetUserId, long opId,
             boolean restricted, String owner, int cookie, boolean requireConfirmation, int sensorId,
             boolean isStrongBiometric, int statsClient, TaskStackListener taskStackListener,
             LockoutTracker lockoutTracker, UsageStats usageStats) {
-        super(context, constants, daemon, token, listener, targetUserId, 0 /* groupId */, opId,
+        super(context, daemon, token, listener, targetUserId, 0 /* groupId */, opId,
                 restricted, owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FACE, statsClient, taskStackListener,
                 lockoutTracker, null /* surface */);

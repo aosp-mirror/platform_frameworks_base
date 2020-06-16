@@ -59,11 +59,6 @@ public class BiometricServiceBaseTest {
         }
 
         @Override
-        protected Constants getConstants() {
-            return null;
-        }
-
-        @Override
         protected boolean hasReachedEnrollmentLimit(int userId) {
             return false;
         }

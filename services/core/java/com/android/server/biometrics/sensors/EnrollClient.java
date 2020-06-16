@@ -34,6 +34,9 @@ import java.util.Arrays;
  * A class to keep track of the enrollment state for a given client.
  */
 public class EnrollClient extends ClientMonitor {
+
+    private static final String TAG = "Biometrics/EnrollClient";
+
     private final byte[] mCryptoToken;
     private final BiometricUtils mBiometricUtils;
     private final int[] mDisabledFeatures;
@@ -44,13 +47,13 @@ public class EnrollClient extends ClientMonitor {
 
     private long mEnrollmentStartTimeMs;
 
-    public EnrollClient(Context context, Constants constants,
+    public EnrollClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
             final int[] disabledFeatures, int timeoutSec, int statsModality,
             PowerManager powerManager, Surface surface, int sensorId, boolean shouldVibrate) {
-        super(context, constants, daemon, token, listener, userId, groupId, restricted,
+        super(context, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
@@ -89,7 +92,7 @@ public class EnrollClient extends ClientMonitor {
         if (mShouldVibrate) {
             vibrateSuccess();
         }
-        mMetricsLogger.action(mConstants.actionBiometricEnroll());
+
         try {
             final ClientMonitorCallbackConverter listener = getListener();
             if (listener != null) {
@@ -97,7 +100,7 @@ public class EnrollClient extends ClientMonitor {
             }
             return remaining == 0;
         } catch (RemoteException e) {
-            Slog.w(getLogTag(), "Failed to notify EnrollResult:", e);
+            Slog.w(TAG, "Failed to notify EnrollResult:", e);
             return true;
         }
     }
@@ -114,13 +117,12 @@ public class EnrollClient extends ClientMonitor {
             final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), mTimeoutSec,
                     disabledFeatures, mSurface);
             if (result != 0) {
-                Slog.w(getLogTag(), "startEnroll failed, result=" + result);
-                mMetricsLogger.histogram(mConstants.tagEnrollStartError(), result);
+                Slog.w(TAG, "startEnroll failed, result=" + result);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
                 return result;
             }
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "startEnroll failed", e);
+            Slog.e(TAG, "startEnroll failed", e);
         }
         return 0; // success
     }
@@ -128,18 +130,18 @@ public class EnrollClient extends ClientMonitor {
     @Override
     public int stop(boolean initiatedByClient) {
         if (mAlreadyCancelled) {
-            Slog.w(getLogTag(), "stopEnroll: already cancelled!");
+            Slog.w(TAG, "stopEnroll: already cancelled!");
             return 0;
         }
 
         try {
             final int result = getDaemonWrapper().cancel();
             if (result != 0) {
-                Slog.w(getLogTag(), "startEnrollCancel failed, result = " + result);
+                Slog.w(TAG, "startEnrollCancel failed, result = " + result);
                 return result;
             }
         } catch (RemoteException e) {
-            Slog.e(getLogTag(), "stopEnrollment failed", e);
+            Slog.e(TAG, "stopEnrollment failed", e);
         }
         mAlreadyCancelled = true;
         return 0;
@@ -147,21 +149,21 @@ public class EnrollClient extends ClientMonitor {
 
     @Override
     public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onRemoved() called for enroll!");
+        if (DEBUG) Slog.w(TAG, "onRemoved() called for enroll!");
         return true; // Invalid for EnrollClient
     }
 
     @Override
     public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
-        if (DEBUG) Slog.w(getLogTag(), "onEnumerationResult() called for enroll!");
+        if (DEBUG) Slog.w(TAG, "onEnumerationResult() called for enroll!");
         return true; // Invalid for EnrollClient
     }
 
     @Override
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
-        if (DEBUG) Slog.w(getLogTag(), "onAuthenticated() called for enroll!");
+        if (DEBUG) Slog.w(TAG, "onAuthenticated() called for enroll!");
         return true; // Invalid for EnrollClient
     }
 

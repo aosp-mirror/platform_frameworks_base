@@ -31,6 +31,9 @@ import java.util.List;
  * Internal class to help clean up unknown templates in the HAL and Framework
  */
 public class InternalEnumerateClient extends EnumerateClient {
+
+    private static final String TAG = "Biometrics/InternalEnumerateClient";
+
     private BiometricUtils mUtils;
     // List of templates that are known to the Framework. Remove from this list when enumerate
     // returns a template that contains a match.
@@ -38,13 +41,13 @@ public class InternalEnumerateClient extends EnumerateClient {
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    InternalEnumerateClient(Context context, Constants constants,
+    InternalEnumerateClient(Context context,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int groupId, int userId,
             boolean restricted, String owner,
             List<? extends BiometricAuthenticator.Identifier> enrolledList,
             BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, constants, daemon, token, listener, groupId, userId,
+        super(context, daemon, token, listener, groupId, userId,
                 restricted, owner, sensorId, statsModality);
         mEnrolledList = enrolledList;
         mUtils = utils;
@@ -54,7 +57,7 @@ public class InternalEnumerateClient extends EnumerateClient {
         if (identifier == null) {
             return;
         }
-        Slog.v(getLogTag(), "handleEnumeratedTemplate: " + identifier.getBiometricId());
+        Slog.v(TAG, "handleEnumeratedTemplate: " + identifier.getBiometricId());
         boolean matched = false;
         for (int i = 0; i < mEnrolledList.size(); i++) {
             if (mEnrolledList.get(i).getBiometricId() == identifier.getBiometricId()) {
@@ -68,7 +71,7 @@ public class InternalEnumerateClient extends EnumerateClient {
         if (!matched && identifier.getBiometricId() != 0) {
             mUnknownHALTemplates.add(identifier);
         }
-        Slog.v(getLogTag(), "Matched: " + matched);
+        Slog.v(TAG, "Matched: " + matched);
     }
 
     private void doTemplateCleanup() {
@@ -80,7 +83,7 @@ public class InternalEnumerateClient extends EnumerateClient {
         // not the HAL.
         for (int i = 0; i < mEnrolledList.size(); i++) {
             BiometricAuthenticator.Identifier identifier = mEnrolledList.get(i);
-            Slog.e(getLogTag(), "doTemplateCleanup(): Removing dangling template from framework: "
+            Slog.e(TAG, "doTemplateCleanup(): Removing dangling template from framework: "
                     + identifier.getBiometricId() + " "
                     + identifier.getName());
             mUtils.removeBiometricForUser(getContext(),
