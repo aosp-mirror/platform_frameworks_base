@@ -2232,23 +2232,42 @@ public final class ProcessStats implements Parcelable {
     }
 
     /** Similar to {@code #dumpDebug}, but with a reduced/aggregated subset of states. */
-    public void dumpAggregatedProtoForStatsd(ProtoOutputStream proto) {
-        dumpProtoPreamble(proto);
+    public void dumpAggregatedProtoForStatsd(ProtoOutputStream[] protoStreams,
+            long maxRawShardSizeBytes) {
+        int shardIndex = 0;
+        dumpProtoPreamble(protoStreams[shardIndex]);
+
         final ArrayMap<String, SparseArray<ProcessState>> procMap = mProcesses.getMap();
         final ProcessMap<ArraySet<PackageState>> procToPkgMap = new ProcessMap<>();
         final SparseArray<ArraySet<String>> uidToPkgMap = new SparseArray<>();
         collectProcessPackageMaps(null, false, procToPkgMap, uidToPkgMap);
+
         for (int ip = 0; ip < procMap.size(); ip++) {
             final String procName = procMap.keyAt(ip);
+            if (protoStreams[shardIndex].getRawSize() > maxRawShardSizeBytes) {
+                shardIndex++;
+                if (shardIndex >= protoStreams.length) {
+                    // We have run out of space; we'll drop the rest of the processes.
+                    Slog.d(TAG, String.format("Dropping process indices from %d to %d from "
+                            + "statsd proto (too large)", ip, procMap.size()));
+                    break;
+                }
+                dumpProtoPreamble(protoStreams[shardIndex]);
+            }
+
             final SparseArray<ProcessState> uids = procMap.valueAt(ip);
             for (int iu = 0; iu < uids.size(); iu++) {
                 final int uid = uids.keyAt(iu);
                 final ProcessState procState = uids.valueAt(iu);
-                procState.dumpAggregatedProtoForStatsd(proto,
+                procState.dumpAggregatedProtoForStatsd(protoStreams[shardIndex],
                         ProcessStatsSectionProto.PROCESS_STATS,
                         procName, uid, mTimePeriodEndRealtime,
                         procToPkgMap, uidToPkgMap);
             }
+        }
+
+        for (int i = 0; i <= shardIndex; i++) {
+            protoStreams[i].flush();
         }
     }
 
@@ -2403,10 +2422,11 @@ public final class ProcessStats implements Parcelable {
                 final SourceKey key = assocVals.keyAt(i);
                 final long[] vals = assocVals.valueAt(i);
                 final long token = proto.start(fieldId);
+                final int idx = uidToPkgMap.indexOfKey(key.mUid);
                 ProcessState.writeCompressedProcessName(proto,
                         ProcessStatsAssociationProto.ASSOC_PROCESS_NAME,
                         key.mProcess, key.mPackage,
-                        uidToPkgMap.get(key.mUid).size() > 1);
+                        idx >= 0 && uidToPkgMap.valueAt(idx).size() > 1);
                 proto.write(ProcessStatsAssociationProto.ASSOC_UID, key.mUid);
                 proto.write(ProcessStatsAssociationProto.TOTAL_COUNT, (int) vals[1]);
                 proto.write(ProcessStatsAssociationProto.TOTAL_DURATION_SECS,
