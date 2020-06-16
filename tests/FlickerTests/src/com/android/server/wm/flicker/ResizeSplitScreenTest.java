@@ -54,6 +54,8 @@ import org.junit.runners.MethodSorters;
 @LargeTest
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@FlakyTest(bugId = 159096424)
+@Ignore("Waiting bug feedback")
 public class ResizeSplitScreenTest extends FlickerTestBase {
 
     private static String sSimpleActivity = "SimpleActivity";
