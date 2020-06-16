@@ -384,7 +384,7 @@ class InsetsPolicy {
         InsetsPolicyAnimationControlCallbacks mControlCallbacks;
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
-            super(show, false /* hasCallbacks */, types);
+            super(show, false /* hasCallbacks */, types, false /* disable */);
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }
