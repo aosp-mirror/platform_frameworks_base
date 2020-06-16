@@ -116,10 +116,18 @@ final class DisplayDeviceInfo {
     /**
      * Flag: This flag identifies secondary displays that should show system decorations, such as
      * status bar, navigation bar, home activity or IME.
+     * <p>Note that this flag doesn't work without {@link #FLAG_TRUSTED}</p>
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 12;
+
+    /**
+     * Flag: The display is trusted to show system decorations and receive inputs without users'
+     * touch.
+     * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     */
+    public static final int FLAG_TRUSTED = 1 << 13;
 
     /**
      * Touch attachment: Display does not receive touch.
