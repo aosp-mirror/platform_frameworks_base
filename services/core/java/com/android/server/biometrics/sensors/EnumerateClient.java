@@ -24,26 +24,19 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
 
-import java.util.ArrayList;
-
 /**
  * A class to keep track of the enumeration state for a given client.
  */
-public abstract class EnumerateClient extends ClientMonitor {
+public abstract class EnumerateClient extends ClientMonitor implements EnumerateConsumer {
 
     private static final String TAG = "Biometrics/EnumerateClient";
 
-    public EnumerateClient(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-        ClientMonitorCallbackConverter listener, int groupId, int userId,
+    public EnumerateClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
+            IBinder token, ClientMonitorCallbackConverter listener, int groupId, int userId,
             boolean restricted, String owner, int sensorId, int statsModality) {
         super(context, daemon, token, listener, userId, groupId, restricted,
                 owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
-    }
-
-    @Override
-    public void notifyUserActivity() {
     }
 
     @Override
@@ -101,24 +94,5 @@ public abstract class EnumerateClient extends ClientMonitor {
             Slog.w(TAG, "Failed to notify enumerated:", e);
         }
         return remaining == 0;
-    }
-
-    @Override
-    public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated, ArrayList<Byte> token) {
-        if (DEBUG) Slog.w(TAG, "onAuthenticated() called for enumerate!");
-        return true; // Invalid for Enumerate.
-    }
-
-    @Override
-    public boolean onEnrollResult(BiometricAuthenticator.Identifier identifier, int rem) {
-        if (DEBUG) Slog.w(TAG, "onEnrollResult() called for enumerate!");
-        return true; // Invalid for Enumerate.
-    }
-
-    @Override
-    public boolean onRemoved(BiometricAuthenticator.Identifier identifier, int remaining) {
-        if (DEBUG) Slog.w(TAG, "onRemoved() called for enumerate!");
-        return true; // Invalid for Enumerate.
     }
 }

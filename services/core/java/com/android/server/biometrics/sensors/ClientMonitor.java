@@ -17,16 +17,11 @@
 package com.android.server.biometrics.sensors;
 
 import android.content.Context;
-import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
-import android.media.AudioAttributes;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
 import android.util.Slog;
 
-import java.util.ArrayList;
 import java.util.NoSuchElementException;
 
 /**
@@ -38,13 +33,8 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     private static final String TAG = "Biometrics/ClientMonitor";
 
-    protected static final int ERROR_ESRCH = 3; // Likely HAL is dead. See errno.h.
+    static final int ERROR_ESRCH = 3; // Likely HAL is dead. See errno.h.
     protected static final boolean DEBUG = BiometricServiceBase.DEBUG;
-    private static final AudioAttributes FINGERPRINT_SONFICATION_ATTRIBUTES =
-            new AudioAttributes.Builder()
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
-                    .build();
 
     private final Context mContext;
     private final int mTargetUserId;
@@ -52,8 +42,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     // True if client does not have MANAGE_FINGERPRINT permission
     private final boolean mIsRestricted;
     private final String mOwner;
-    private final VibrationEffect mSuccessVibrationEffect;
-    private final VibrationEffect mErrorVibrationEffect;
     private final BiometricServiceBase.DaemonWrapper mDaemon;
     private final int mSensorId; // sensorId as configured by the framework
 
@@ -63,8 +51,8 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     // is never 0.
     private final int mCookie;
 
-    protected boolean mAlreadyCancelled;
-    protected boolean mAlreadyDone;
+    boolean mAlreadyCancelled;
+    boolean mAlreadyDone;
 
     /**
      * @param context context of BiometricService
@@ -77,11 +65,10 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * permission
      * @param owner name of the client that owns this
      */
-    public ClientMonitor(Context context,
-            BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId,
-            boolean restricted, String owner, int cookie, int sensorId, int statsModality,
-            int statsAction, int statsClient) {
+    public ClientMonitor(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
+            ClientMonitorCallbackConverter listener, int userId, int groupId, boolean restricted,
+            String owner, int cookie, int sensorId, int statsModality, int statsAction,
+            int statsClient) {
         super(statsModality, statsAction, statsClient);
         mContext = context;
         mDaemon = daemon;
@@ -93,8 +80,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
         mOwner = owner;
         mCookie = cookie;
         mSensorId = sensorId;
-        mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
-        mErrorVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_DOUBLE_CLICK);
+
         try {
             if (token != null) {
                 token.linkToDeath(this, 0);
@@ -120,58 +106,8 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      */
     public abstract int stop(boolean initiatedByClient);
 
-    /**
-     * Method to explicitly poke powermanager on events
-     */
-    public abstract void notifyUserActivity();
-
-    // Event callbacks from driver. Inappropriate calls is flagged/logged by the
-    // respective client (e.g. enrolling shouldn't get authenticate events).
-    // All of these return 'true' if the operation is completed and it's ok to move
-    // to the next client (e.g. authentication accepts or rejects a biometric).
-    public abstract boolean onEnrollResult(BiometricAuthenticator.Identifier identifier,
-            int remaining);
-    public abstract boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
-            boolean authenticated, ArrayList<Byte> token);
-    public abstract boolean onRemoved(BiometricAuthenticator.Identifier identifier,
-            int remaining);
-    public abstract boolean onEnumerationResult(
-            BiometricAuthenticator.Identifier identifier, int remaining);
-
     public boolean isAlreadyDone() {
         return mAlreadyDone;
-    }
-
-    /**
-     * Called when we get notification from the biometric's HAL that an image has been acquired.
-     * Common to authenticate and enroll.
-     * @param acquiredInfo info about the current image acquisition
-     * @return true if client should be removed
-     */
-    public boolean onAcquired(int acquiredInfo, int vendorCode) {
-        // Default is to always send acquire messages to clients.
-        return onAcquiredInternal(acquiredInfo, vendorCode, true /* shouldSend */);
-    }
-
-    protected final boolean onAcquiredInternal(int acquiredInfo, int vendorCode,
-            boolean shouldSend) {
-        super.logOnAcquired(mContext, acquiredInfo, vendorCode, getTargetUserId());
-        if (DEBUG) Slog.v(TAG, "Acquired: " + acquiredInfo + " " + vendorCode
-                + ", shouldSend: " + shouldSend);
-        try {
-            if (mListener != null && shouldSend) {
-                mListener.onAcquired(mSensorId, acquiredInfo, vendorCode);
-            }
-            return false; // acquisition continues...
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Failed to invoke sendAcquired", e);
-            return true;
-        } finally {
-            // Good scans will keep the device awake
-            if (acquiredInfo == BiometricConstants.BIOMETRIC_ACQUIRED_GOOD) {
-                notifyUserActivity();
-            }
-        }
     }
 
     /**
@@ -180,7 +116,7 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @param error
      * @return true if client should be removed
      */
-    public boolean onError(int error, int vendorCode) {
+    public void onError(int error, int vendorCode) {
         super.logOnError(mContext, error, vendorCode, getTargetUserId());
         try {
             if (mListener != null) {
@@ -189,7 +125,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
         } catch (RemoteException e) {
             Slog.w(TAG, "Failed to invoke sendError", e);
         }
-        return true; // errors always remove current client
     }
 
     public void destroy() {
@@ -267,19 +202,5 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     public final int getSensorId() {
         return mSensorId;
-    }
-
-    public final void vibrateSuccess() {
-        Vibrator vibrator = mContext.getSystemService(Vibrator.class);
-        if (vibrator != null) {
-            vibrator.vibrate(mSuccessVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
-        }
-    }
-
-    public final void vibrateError() {
-        Vibrator vibrator = mContext.getSystemService(Vibrator.class);
-        if (vibrator != null) {
-            vibrator.vibrate(mErrorVibrationEffect, FINGERPRINT_SONFICATION_ATTRIBUTES);
-        }
     }
 }

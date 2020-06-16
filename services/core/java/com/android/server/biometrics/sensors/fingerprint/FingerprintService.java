@@ -127,8 +127,7 @@ public class FingerprintService extends BiometricServiceBase {
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, groupId, cryptoToken, restricted, opPackageName,
                     getBiometricUtils(), new int[0] /* disabledFeatures */, ENROLL_TIMEOUT_SEC,
-                    statsModality(), mPowerManager, surface, getSensorId(),
-                    true /* shouldVibrate */);
+                    statsModality(), surface, getSensorId(), true /* shouldVibrate */);
 
             enrollInternal(client, userId);
         }
