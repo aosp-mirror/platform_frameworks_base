@@ -310,12 +310,14 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
      */
     int mBaseDisplayWidth = 0;
     int mBaseDisplayHeight = 0;
+    boolean mIsSizeForced = false;
     /**
      * Overridden display density for current user. Initialized with {@link #mInitialDisplayDensity}
      * but can be set from Settings or via shell command "adb shell wm density".
      * @see WindowManagerService#setForcedDisplayDensityForUser(int, int, int)
      */
     int mBaseDisplayDensity = 0;
+    boolean mIsDensityForced = false;
 
     /**
      * Whether to disable display scaling. This can be set via shell command "adb shell wm scaling".
@@ -2376,15 +2378,10 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
                 || !Objects.equals(mInitialDisplayCutout, newCutout);
 
         if (displayMetricsChanged) {
-            // Check if display size or density is forced.
-            final boolean isDisplaySizeForced = mBaseDisplayWidth != mInitialDisplayWidth
-                    || mBaseDisplayHeight != mInitialDisplayHeight;
-            final boolean isDisplayDensityForced = mBaseDisplayDensity != mInitialDisplayDensity;
-
             // If there is an override set for base values - use it, otherwise use new values.
-            updateBaseDisplayMetrics(isDisplaySizeForced ? mBaseDisplayWidth : newWidth,
-                    isDisplaySizeForced ? mBaseDisplayHeight : newHeight,
-                    isDisplayDensityForced ? mBaseDisplayDensity : newDensity);
+            updateBaseDisplayMetrics(mIsSizeForced ? mBaseDisplayWidth : newWidth,
+                    mIsSizeForced ? mBaseDisplayHeight : newHeight,
+                    mIsDensityForced ? mBaseDisplayDensity : newDensity);
 
             // Real display metrics changed, so we should also update initial values.
             mInitialDisplayWidth = newWidth;
@@ -2440,6 +2437,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
      *               so only need to configure display.
      */
     void setForcedDensity(int density, int userId) {
+        mIsDensityForced = density != mInitialDisplayDensity;
         final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
         if (mWmService.mCurrentUserId == userId || updateCurrent) {
             mBaseDisplayDensity = density;
@@ -2471,8 +2469,8 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
 
     /** If the given width and height equal to initial size, the setting will be cleared. */
     void setForcedSize(int width, int height) {
-        final boolean clear = mInitialDisplayWidth == width && mInitialDisplayHeight == height;
-        if (!clear) {
+        mIsSizeForced = mInitialDisplayWidth != width || mInitialDisplayHeight != height;
+        if (mIsSizeForced) {
             // Set some sort of reasonable bounds on the size of the display that we will try
             // to emulate.
             final int minSize = 200;
@@ -2482,10 +2480,10 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
+        updateBaseDisplayMetrics(width, height, width * mBaseDisplayDensity / mBaseDisplayWidth);
         reconfigureDisplayLocked();
 
-        if (clear) {
+        if (!mIsSizeForced) {
             width = height = 0;
         }
         mWmService.mDisplayWindowSettings.setForcedSize(this, width, height);
@@ -5471,8 +5469,12 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
             }
 
             if (animatingRecents != null && animatingRecents == mFixedRotationLaunchingApp) {
-                // Because it won't affect display orientation, just finish the transform.
-                animatingRecents.finishFixedRotationTransform();
+                // The recents activity should be going to be invisible (switch to another app or
+                // return to original top). Only clear the top launching record without finishing
+                // the transform immediately because it won't affect display orientation. And before
+                // the visibility is committed, the recents activity may perform relayout which may
+                // cause unexpected configuration change if the rotated configuration is restored.
+                // The transform will be finished when the transition is done.
                 setFixedRotationLaunchingAppUnchecked(null);
             } else {
                 // If there is already a launching activity that is not the recents, before its
@@ -5495,7 +5497,11 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
             }
             if (mFixedRotationLaunchingApp != null
                     && mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
-                continueUpdateOrientationForDiffOrienLaunchingApp();
+                // Waiting until all of the associated activities have done animation, or the
+                // orientation would be updated too early and cause flickers.
+                if (!mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
+                    continueUpdateOrientationForDiffOrienLaunchingApp();
+                }
             } else {
                 r.finishFixedRotationTransform();
             }

@@ -1905,7 +1905,9 @@ public class BubbleStackView extends FrameLayout
                     updateOverflowVisibility();
 
                     afterExpandedViewAnimation();
-                    previouslySelected.setContentVisibility(false);
+                    if (previouslySelected != null) {
+                        previouslySelected.setContentVisibility(false);
+                    }
                 })
                 .start();
     }

@@ -33,8 +33,8 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.procstats.ProcessStats;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.StatLogger;
+import com.android.server.JobSchedulerBackgroundThread;
 import com.android.server.job.JobSchedulerService.Constants;
 import com.android.server.job.JobSchedulerService.MaxJobCountsPerMemoryTrimLevel;
 import com.android.server.job.controllers.JobStatus;
@@ -109,7 +109,7 @@ class JobConcurrencyManager {
         mConstants = service.mConstants;
         mContext = service.getContext();
 
-        mHandler = BackgroundThread.getHandler();
+        mHandler = JobSchedulerBackgroundThread.getHandler();
     }
 
     public void onSystemReady() {

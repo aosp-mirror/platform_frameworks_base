@@ -14,22 +14,11 @@
  * limitations under the License.
  */
 
-package com.android.systemui.util
+package android.app.timezonedetector;
 
-import android.view.ViewGroup
+import android.app.timezonedetector.TimeZoneConfiguration;
 
-/** [Sequence] that yields all of the direct children of this [ViewGroup] */
-val ViewGroup.children
-    get() = sequence {
-        for (i in 0 until childCount) yield(getChildAt(i))
-    }
-
-/** Inclusive version of [Iterable.takeWhile] */
-fun <T> Sequence<T>.takeUntil(pred: (T) -> Boolean): Sequence<T> = sequence {
-    for (x in this@takeUntil) {
-        yield(x)
-        if (pred(x)) {
-            break
-        }
-    }
+/** {@hide} */
+oneway interface ITimeZoneConfigurationListener {
+    void onChange(in TimeZoneConfiguration configuration);
 }

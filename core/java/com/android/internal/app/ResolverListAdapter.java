@@ -427,6 +427,8 @@ public class ResolverListAdapter extends BaseAdapter {
                 && dri.getResolveInfo().targetUserId == UserHandle.USER_CURRENT) {
             if (shouldAddResolveInfo(dri)) {
                 mDisplayList.add(dri);
+                Log.i(TAG, "Add DisplayResolveInfo component: " + dri.getResolvedComponentName()
+                        + ", intent component: " + dri.getResolvedIntent().getComponent());
             }
         }
     }

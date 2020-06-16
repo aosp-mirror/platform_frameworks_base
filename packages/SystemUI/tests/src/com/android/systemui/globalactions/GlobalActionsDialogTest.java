@@ -438,6 +438,9 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.VISIBLE);
+
+        // Dismiss the dialog so that it does not pollute other tests
+        mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
     }
 
     @Test
@@ -455,6 +458,9 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
+
+        // Dismiss the dialog so that it does not pollute other tests
+        mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
     }
 
     @Test
@@ -473,6 +479,9 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         GlobalActionsDialog.ActionsDialog dialog = mGlobalActionsDialog.mDialog;
         assertThat(dialog).isNotNull();
         assertThat(dialog.mLockMessageContainer.getVisibility()).isEqualTo(View.GONE);
+
+        // Dismiss the dialog so that it does not pollute other tests
+        mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
     }
 
     private void setupDefaultActions() {
