@@ -34,7 +34,7 @@ public abstract class LoggableMonitor {
     public static final String TAG = "BiometricStats";
     public static final boolean DEBUG = false;
 
-    private final int mStatsModality;
+    final int mStatsModality;
     private final int mStatsAction;
     private final int mStatsClient;
     private long mFirstAcquireTimeMs;
