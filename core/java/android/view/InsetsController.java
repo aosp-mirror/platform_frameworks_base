@@ -492,12 +492,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     /** Set of inset types for which an animation was started since last resetting this field */
     private @InsetsType int mLastStartedAnimTypes;
 
-    /** Set of inset types which cannot be controlled by the user animation */
-    private @InsetsType int mLastDisabledUserAnimationInsetsTypes;
-
-    private Runnable mInvokeControllableInsetsChangedListeners =
-            this::invokeControllableInsetsChangedListeners;
-
     public InsetsController(Host host) {
         this(host, (controller, type) -> {
             if (type == ITYPE_IME) {
@@ -612,23 +606,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void updateState(InsetsState newState) {
         mState.setDisplayFrame(newState.getDisplayFrame());
-        @InsetsType int disabledUserAnimationTypes = 0;
-        @InsetsType int[] cancelledUserAnimationTypes = {0};
         for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
             InsetsSource source = newState.sourceAt(i);
-            @InternalInsetsType int internalInsetsType = source.getType();
-            @AnimationType int animationType = getAnimationType(internalInsetsType);
-            if (source.isVisibleFrameEmpty()) {
-                @InsetsType int insetsType = toPublicType(internalInsetsType);
-                // The user animation is not allowed when visible frame is empty.
-                disabledUserAnimationTypes |= insetsType;
-                if (animationType == ANIMATION_TYPE_USER) {
-                    // Existing user animation needs to be cancelled.
-                    animationType = ANIMATION_TYPE_NONE;
-                    cancelledUserAnimationTypes[0] |= insetsType;
-                }
-            }
-            getSourceConsumer(internalInsetsType).updateSource(source, animationType);
+            getSourceConsumer(source.getType()).updateSource(source);
         }
         for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
             InsetsSource source = mState.sourceAt(i);
@@ -639,27 +619,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (mCaptionInsetsHeight != 0) {
             mState.getSource(ITYPE_CAPTION_BAR).setFrame(new Rect(mFrame.left, mFrame.top,
                     mFrame.right, mFrame.top + mCaptionInsetsHeight));
-        }
-
-        updateDisabledUserAnimationTypes(disabledUserAnimationTypes);
-
-        if (cancelledUserAnimationTypes[0] != 0) {
-            mHandler.post(() -> show(cancelledUserAnimationTypes[0]));
-        }
-    }
-
-    private void updateDisabledUserAnimationTypes(@InsetsType int disabledUserAnimationTypes) {
-        @InsetsType int diff = mLastDisabledUserAnimationInsetsTypes ^ disabledUserAnimationTypes;
-        if (diff != 0) {
-            for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
-                InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-                if (consumer.getControl() != null && (toPublicType(consumer.mType) & diff) != 0) {
-                    mHandler.removeCallbacks(mInvokeControllableInsetsChangedListeners);
-                    mHandler.post(mInvokeControllableInsetsChangedListeners);
-                    break;
-                }
-            }
-            mLastDisabledUserAnimationInsetsTypes = disabledUserAnimationTypes;
         }
     }
 
@@ -944,15 +903,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         boolean imeReady = true;
         for (int i = internalTypes.size() - 1; i >= 0; i--) {
             final InsetsSourceConsumer consumer = getSourceConsumer(internalTypes.valueAt(i));
-            if (animationType == ANIMATION_TYPE_USER) {
-                final InsetsSource source = mState.peekSource(consumer.getType());
-                if (source != null && source.isVisibleFrameEmpty()) {
-                    if (WARN) Log.w(TAG, String.format(
-                            "collectSourceControls can't run user animation for type: %s",
-                            InsetsState.typeToString(consumer.getType())));
-                    continue;
-                }
-            }
             boolean show = animationType == ANIMATION_TYPE_SHOW
                     || animationType == ANIMATION_TYPE_USER;
             boolean canRun = false;
@@ -1345,8 +1295,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         @InsetsType int result = 0;
         for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
             InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
-            InsetsSource source = mState.peekSource(consumer.mType);
-            if (consumer.getControl() != null && source != null && !source.isVisibleFrameEmpty()) {
+            if (consumer.getControl() != null) {
                 result |= toPublicType(consumer.mType);
             }
         }
@@ -1357,7 +1306,6 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
      * @return The types that are now animating due to a listener invoking control/show/hide
      */
     private @InsetsType int invokeControllableInsetsChangedListeners() {
-        mHandler.removeCallbacks(mInvokeControllableInsetsChangedListeners);
         mLastStartedAnimTypes = 0;
         @InsetsType int types = calculateControllableTypes();
         int size = mControllableInsetsChangedListeners.size();

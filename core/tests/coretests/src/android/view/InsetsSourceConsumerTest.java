@@ -26,11 +26,13 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.TestCase.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
+import static org.mockito.Mockito.when;
 
 import android.app.Instrumentation;
 import android.content.Context;
@@ -133,29 +135,37 @@ public class InsetsSourceConsumerTest {
         InsetsSourceConsumer consumer = new InsetsSourceConsumer(
                 ITYPE_IME, state, null, controller);
 
+        when(controller.getAnimationType(anyInt())).thenReturn(ANIMATION_TYPE_NONE);
+
         InsetsSource source = new InsetsSource(ITYPE_IME);
         source.setFrame(0, 1, 2, 3);
-        consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_NONE);
+        consumer.updateSource(new InsetsSource(source));
+
+        when(controller.getAnimationType(anyInt())).thenReturn(ANIMATION_TYPE_USER);
 
         // While we're animating, updates are delayed
         source.setFrame(4, 5, 6, 7);
-        consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
+        consumer.updateSource(new InsetsSource(source));
         assertEquals(new Rect(0, 1, 2, 3), state.peekSource(ITYPE_IME).getFrame());
 
         // Finish the animation, now the pending frame should be applied
+        when(controller.getAnimationType(anyInt())).thenReturn(ANIMATION_TYPE_NONE);
         assertTrue(consumer.notifyAnimationFinished());
         assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
 
+        when(controller.getAnimationType(anyInt())).thenReturn(ANIMATION_TYPE_USER);
+
         // Animating again, updates are delayed
         source.setFrame(8, 9, 10, 11);
-        consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
+        consumer.updateSource(new InsetsSource(source));
         assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
 
         // Updating with the current frame triggers a different code path, verify this clears
         // the pending 8, 9, 10, 11 frame:
         source.setFrame(4, 5, 6, 7);
-        consumer.updateSource(new InsetsSource(source), ANIMATION_TYPE_USER);
+        consumer.updateSource(new InsetsSource(source));
 
+        when(controller.getAnimationType(anyInt())).thenReturn(ANIMATION_TYPE_NONE);
         assertFalse(consumer.notifyAnimationFinished());
         assertEquals(new Rect(4, 5, 6, 7), state.peekSource(ITYPE_IME).getFrame());
     }
