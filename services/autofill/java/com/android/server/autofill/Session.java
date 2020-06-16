@@ -3702,6 +3702,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         unlinkClientVultureLocked();
         mUi.destroyAll(mPendingSaveUi, this, true);
         mUi.clearCallback(this);
+        if (mCurrentViewId != null) {
+            mInlineSessionController.destroyLocked(mCurrentViewId);
+        }
         mDestroyed = true;
 
         // Log metrics
