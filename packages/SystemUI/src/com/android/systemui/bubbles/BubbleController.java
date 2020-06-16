@@ -505,7 +505,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         addNotifCallback(new NotifCallback() {
             @Override
             public void removeNotification(NotificationEntry entry, int reason) {
-                mNotificationEntryManager.performRemoveNotification(entry.getSbn(), reason);
+                mNotificationEntryManager.performRemoveNotification(entry.getSbn(),
+                        reason);
             }
 
             @Override
@@ -636,13 +637,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mStackView.setExpandListener(mExpandListener);
             }
 
-            mStackView.setUnbubbleConversationCallback(key -> {
-                final NotificationEntry entry =
-                        mNotificationEntryManager.getPendingOrActiveNotif(key);
-                if (entry != null) {
-                    onUserChangedBubble(entry, false /* shouldBubble */);
-                }
-            });
+            mStackView.setUnbubbleConversationCallback(notificationEntry ->
+                    onUserChangedBubble(notificationEntry, false /* shouldBubble */));
         }
 
         addToWindowManagerMaybe();
@@ -1029,7 +1025,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param entry the notification to change bubble state for.
      * @param shouldBubble whether the notification should show as a bubble or not.
      */
-    public void onUserChangedBubble(@NonNull final NotificationEntry entry, boolean shouldBubble) {
+    public void onUserChangedBubble(@Nullable final NotificationEntry entry, boolean shouldBubble) {
+        if (entry == null) {
+            return;
+        }
         NotificationChannel channel = entry.getChannel();
         final String appPkg = entry.getSbn().getPackageName();
         final int appUid = entry.getSbn().getUid();
@@ -1105,8 +1104,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             mBubbleData.removeSuppressedSummary(groupKey);
 
             // Remove any associated bubble children with the summary
-            final List<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(
-                    groupKey, mNotificationEntryManager);
+            final List<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(groupKey);
             for (int i = 0; i < bubbleChildren.size(); i++) {
                 removeBubble(bubbleChildren.get(i).getKey(), DISMISS_GROUP_CANCELLED);
             }
@@ -1164,18 +1162,21 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
     private void setIsBubble(@NonNull final Bubble b, final boolean isBubble) {
         Objects.requireNonNull(b);
-        b.setIsBubble(isBubble);
-        final NotificationEntry entry = mNotificationEntryManager
-                .getPendingOrActiveNotif(b.getKey());
-        if (entry != null) {
+        if (isBubble) {
+            b.enable(FLAG_BUBBLE);
+        } else {
+            b.disable(FLAG_BUBBLE);
+        }
+        if (b.getEntry() != null) {
             // Updating the entry to be a bubble will trigger our normal update flow
-            setIsBubble(entry, isBubble, b.shouldAutoExpand());
+            setIsBubble(b.getEntry(), isBubble, b.shouldAutoExpand());
         } else if (isBubble) {
-            // If bubble doesn't exist, it's a persisted bubble so we need to add it to the
-            // stack ourselves
+            // If we have no entry to update, it's a persisted bubble so
+            // we need to add it to the stack ourselves
             Bubble bubble = mBubbleData.getOrCreateBubble(null, b /* persistedBubble */);
             inflateAndAdd(bubble, bubble.shouldAutoExpand() /* suppressFlyout */,
                     !bubble.shouldAutoExpand() /* showInShade */);
+
         }
     }
 
@@ -1214,8 +1215,6 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 if (reason == DISMISS_NOTIF_CANCEL) {
                     bubblesToBeRemovedFromRepository.add(bubble);
                 }
-                final NotificationEntry entry = mNotificationEntryManager.getPendingOrActiveNotif(
-                        bubble.getKey());
                 if (!mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                     if (!mBubbleData.hasOverflowBubbleWithKey(bubble.getKey())
                         && (!bubble.showInShade()
@@ -1224,27 +1223,26 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                         // The bubble is now gone & the notification is hidden from the shade, so
                         // time to actually remove it
                         for (NotifCallback cb : mCallbacks) {
-                            if (entry != null) {
-                                cb.removeNotification(entry, REASON_CANCEL);
+                            if (bubble.getEntry() != null) {
+                                cb.removeNotification(bubble.getEntry(), REASON_CANCEL);
                             }
                         }
                     } else {
                         if (bubble.isBubble()) {
                             setIsBubble(bubble, false /* isBubble */);
                         }
-                        if (entry != null && entry.getRow() != null) {
-                            entry.getRow().updateBubbleButton();
+                        if (bubble.getEntry() != null && bubble.getEntry().getRow() != null) {
+                            bubble.getEntry().getRow().updateBubbleButton();
                         }
                     }
 
                 }
-                if (entry != null) {
-                    final String groupKey = entry.getSbn().getGroupKey();
-                    if (mBubbleData.getBubblesInGroup(
-                            groupKey, mNotificationEntryManager).isEmpty()) {
+                if (bubble.getEntry() != null) {
+                    final String groupKey = bubble.getEntry().getSbn().getGroupKey();
+                    if (mBubbleData.getBubblesInGroup(groupKey).isEmpty()) {
                         // Time to potentially remove the summary
                         for (NotifCallback cb : mCallbacks) {
-                            cb.maybeCancelSummary(entry);
+                            cb.maybeCancelSummary(bubble.getEntry());
                         }
                     }
                 }
@@ -1269,12 +1267,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
 
             if (update.selectionChanged && mStackView != null) {
                 mStackView.setSelectedBubble(update.selectedBubble);
-                if (update.selectedBubble != null) {
-                    final NotificationEntry entry = mNotificationEntryManager
-                            .getPendingOrActiveNotif(update.selectedBubble.getKey());
-                    if (entry != null) {
-                        mNotificationGroupManager.updateSuppression(entry);
-                    }
+                if (update.selectedBubble != null && update.selectedBubble.getEntry() != null) {
+                    mNotificationGroupManager.updateSuppression(
+                            update.selectedBubble.getEntry());
                 }
             }
 
@@ -1347,8 +1342,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         }
 
         String groupKey = entry.getSbn().getGroupKey();
-        ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(
-                groupKey, mNotificationEntryManager);
+        ArrayList<Bubble> bubbleChildren = mBubbleData.getBubblesInGroup(groupKey);
         boolean isSuppressedSummary = (mBubbleData.isSummarySuppressed(groupKey)
                 && mBubbleData.getSummaryKey(groupKey).equals(entry.getKey()));
         boolean isSummary = entry.getSbn().getNotification().isGroupSummary();
@@ -1368,15 +1362,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                     // As far as group manager is concerned, once a child is no longer shown
                     // in the shade, it is essentially removed.
                     Bubble bubbleChild = mBubbleData.getAnyBubbleWithkey(child.getKey());
-                    if (bubbleChild != null) {
-                        final NotificationEntry entry = mNotificationEntryManager
-                                .getPendingOrActiveNotif(bubbleChild.getKey());
-                        if (entry != null) {
-                            mNotificationGroupManager.onEntryRemoved(entry);
-                        }
-                        bubbleChild.setSuppressNotification(true);
-                        bubbleChild.setShowDot(false /* show */);
-                    }
+                    mNotificationGroupManager.onEntryRemoved(bubbleChild.getEntry());
+                    bubbleChild.setSuppressNotification(true);
+                    bubbleChild.setShowDot(false /* show */);
                 } else {
                     // non-bubbled children can be removed
                     for (NotifCallback cb : mCallbacks) {
