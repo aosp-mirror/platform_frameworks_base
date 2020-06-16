@@ -417,7 +417,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
             for (String packageName : succeedingPackages) {
                 if (appsBackedUp.contains(packageName)) {
-                    Log.v(TAG, "Skipping package which was backed up this time :" + packageName);
+                    Log.v(TAG, "Skipping package which was backed up this time: " + packageName);
                     // Skip packages we backed up in this run.
                     continue;
                 }
