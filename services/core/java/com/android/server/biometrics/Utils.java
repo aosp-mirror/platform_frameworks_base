@@ -41,7 +41,7 @@ import android.provider.Settings;
 import android.util.Slog;
 
 public class Utils {
-    static boolean isDebugEnabled(Context context, int targetUserId) {
+    public static boolean isDebugEnabled(Context context, int targetUserId) {
         if (targetUserId == UserHandle.USER_NULL) {
             return false;
         }
@@ -136,7 +136,7 @@ public class Utils {
      * @param requestedStrength the strength that it must meet
      * @return true only if the sensor is at least as strong as the requested strength
      */
-    static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
+    public static boolean isAtLeastStrength(int sensorStrength, int requestedStrength) {
         // Clear out any bits that are not reserved for biometric
         sensorStrength &= Authenticators.BIOMETRIC_MIN_STRENGTH;
 
@@ -309,5 +309,14 @@ public class Utils {
 
     static int removeBiometricBits(@Authenticators.Types int authenticators) {
         return authenticators & ~Authenticators.BIOMETRIC_MIN_STRENGTH;
+    }
+
+    public static boolean listContains(int[] haystack, int needle) {
+        for (int i = 0; i < haystack.length; i++) {
+            if (haystack[i] == needle) {
+                return true;
+            }
+        }
+        return false;
     }
 }

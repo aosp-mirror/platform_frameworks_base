@@ -448,7 +448,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    @Override
     public void setActiveUser(int userId) {
         if (mService != null) {
             try {
@@ -522,7 +521,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @return true if a face is enrolled, false otherwise
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    @Override
     public boolean hasEnrolledTemplates() {
         if (mService != null) {
             try {
@@ -541,7 +539,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @RequiresPermission(allOf = {
             USE_BIOMETRIC_INTERNAL,
             INTERACT_ACROSS_USERS})
-    @Override
     public boolean hasEnrolledTemplates(int userId) {
         if (mService != null) {
             try {
@@ -559,7 +556,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @return true if hardware is present and functional, false otherwise.
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    @Override
     public boolean isHardwareDetected() {
         if (mService != null) {
             try {
@@ -609,14 +605,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
             }
         } else {
             Log.w(TAG, "addLockoutResetCallback(): Service not connected!");
-        }
-    }
-
-    private int getCurrentUserId() {
-        try {
-            return ActivityManager.getService().getCurrentUser().id;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
