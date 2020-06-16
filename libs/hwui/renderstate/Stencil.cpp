@@ -47,7 +47,7 @@ uint8_t Stencil::getStencilSize() {
  */
 GLenum Stencil::getLayerStencilFormat() {
 #if !DEBUG_STENCIL
-    const Extensions& extensions = DeviceInfo::get()->extensions();
+    const Extensions& extensions = Caches::getInstance().extensions();
     if (extensions.has4BitStencil()) {
         return GL_STENCIL_INDEX4_OES;
     }

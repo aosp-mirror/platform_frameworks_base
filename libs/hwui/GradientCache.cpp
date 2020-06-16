@@ -20,7 +20,6 @@
 #include "Debug.h"
 #include "GradientCache.h"
 #include "Properties.h"
-#include "DeviceInfo.h"
 
 #include <cutils/properties.h>
 
@@ -63,14 +62,14 @@ int GradientCacheEntry::compare(const GradientCacheEntry& lhs, const GradientCac
 // Constructors/destructor
 ///////////////////////////////////////////////////////////////////////////////
 
-GradientCache::GradientCache(const Extensions& extensions)
+GradientCache::GradientCache(Extensions& extensions)
         : mCache(LruCache<GradientCacheEntry, Texture*>::kUnlimitedCapacity)
         , mSize(0)
-        , mMaxSize(MB(1))
+        , mMaxSize(Properties::gradientCacheSize)
         , mUseFloatTexture(extensions.hasFloatTextures())
         , mHasNpot(extensions.hasNPot())
         , mHasLinearBlending(extensions.hasLinearBlending()) {
-    mMaxTextureSize = DeviceInfo::get()->maxTextureSize();
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &mMaxTextureSize);
 
     mCache.setOnEntryRemovedListener(this);
 }

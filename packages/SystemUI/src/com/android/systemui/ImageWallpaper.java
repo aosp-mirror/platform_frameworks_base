@@ -419,6 +419,24 @@ public class ImageWallpaper extends WallpaperService {
             }
         }
 
+        private Bitmap getResizedBitmap(Bitmap bm, int maxDim) {
+            Bitmap scaledBitmap;
+            int width, height;
+            int origWidth = bm.getWidth();
+            int origHeight = bm.getHeight();
+
+            if (origWidth > origHeight) {
+                width = maxDim;
+                height = Math.round(origHeight * (maxDim / (float)origWidth));
+            } else {
+                height = maxDim;
+                width = Math.round(origWidth * (maxDim / (float)origHeight));
+            }
+
+            scaledBitmap = Bitmap.createScaledBitmap(bm, width, height, false);
+            return scaledBitmap;
+        }
+
         /**
          * Loads the wallpaper on background thread and schedules updating the surface frame,
          * and if {@param needsDraw} is set also draws a frame.
@@ -485,6 +503,13 @@ public class ImageWallpaper extends WallpaperService {
 
                 @Override
                 protected void onPostExecute(Bitmap b) {
+                    int maximumTextureSize;
+                    try {
+                        maximumTextureSize = SystemProperties.getInt("sys.max_texture_size", 0);
+                    } catch (Exception e) {
+                        maximumTextureSize = 0;
+                    }
+
                     mBackground = null;
                     mBackgroundWidth = -1;
                     mBackgroundHeight = -1;
@@ -493,6 +518,17 @@ public class ImageWallpaper extends WallpaperService {
                         mBackground = b;
                         mBackgroundWidth = mBackground.getWidth();
                         mBackgroundHeight = mBackground.getHeight();
+
+                        if (maximumTextureSize > 0 &&
+                                (mBackgroundHeight > maximumTextureSize ||
+                                    mBackgroundWidth > maximumTextureSize)) {
+                            Bitmap scaledBackground = getResizedBitmap(mBackground, maximumTextureSize);
+                            mBackground.recycle();
+
+                            mBackground = scaledBackground;
+                            mBackgroundWidth = mBackground.getWidth();
+                            mBackgroundHeight = mBackground.getHeight();
+                        }
                     }
 
                     if (DEBUG) {

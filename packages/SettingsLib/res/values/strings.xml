@@ -445,6 +445,10 @@
     <string name="bugreport_in_power">Bug report shortcut</string>
     <!-- [CHAR LIMIT=NONE] Setting checkbox summary for Whether to include bug report item in power -->
     <string name="bugreport_in_power_summary">Show a button in the power menu for taking a bug report</string>
+    <!-- Setting Checkbox title whether to enable ARM NEON emulation -->
+    <string name="tcg_arm">ARM NEON Emulation</string>
+    <!-- setting Checkbox summary whether to enable ARM NEON emulation  -->
+    <string name="tcg_arm_summary">Emulate ARM NEON instruction set</string>
     <!-- Setting Checkbox title whether to keep the screen on when plugged in to a power source -->
     <string name="keep_screen_on">Stay awake</string>
     <!-- setting Checkbox summary whether to keep the screen on when plugged in  -->

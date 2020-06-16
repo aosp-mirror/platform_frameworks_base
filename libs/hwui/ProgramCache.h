@@ -40,7 +40,7 @@ namespace uirenderer {
  */
 class ProgramCache {
 public:
-    explicit ProgramCache(const Extensions& extensions);
+    explicit ProgramCache(Extensions& extensions);
     ~ProgramCache();
 
     Program* get(const ProgramDescription& description);
