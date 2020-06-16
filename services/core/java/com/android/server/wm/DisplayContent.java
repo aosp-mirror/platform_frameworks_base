@@ -2175,6 +2175,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return (mDisplay.getFlags() & FLAG_PRIVATE) != 0;
     }
 
+    boolean isTrusted() {
+        return mDisplay.isTrusted();
+    }
+
     /**
      * Returns the topmost stack on the display that is compatible with the input windowing mode and
      * activity type. Null is no compatible stack on the display.
@@ -3522,7 +3526,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean canShowIme() {
-        if (isUntrustedVirtualDisplay()) {
+        if (!isTrusted()) {
             return false;
         }
         return mWmService.mDisplayWindowSettings.shouldShowImeLocked(this)
@@ -4753,15 +4757,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // VR virtual display will be used to run and render 2D app within a VR experience.
                 && mDisplayId != mWmService.mVr2dDisplayId
                 // Do not show system decorations on untrusted virtual display.
-                && !isUntrustedVirtualDisplay();
-    }
-
-    /**
-     * @return {@code true} if the display is non-system created virtual display.
-     */
-    boolean isUntrustedVirtualDisplay() {
-        return mDisplay.getType() == Display.TYPE_VIRTUAL
-                && mDisplay.getOwnerUid() != Process.SYSTEM_UID;
+                && isTrusted();
     }
 
     /**

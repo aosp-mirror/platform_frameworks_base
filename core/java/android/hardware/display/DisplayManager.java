@@ -303,12 +303,24 @@ public final class DisplayManager {
     /**
      * Virtual display flag: Indicates that the display should support system decorations. Virtual
      * displays without this flag shouldn't show home, IME or any other system decorations.
+     * <p>This flag doesn't work without {@link #VIRTUAL_DISPLAY_FLAG_TRUSTED}</p>
      *
      * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_TRUSTED
      * @hide
      */
     // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 9;
+
+    /**
+     * Virtual display flags: Indicates that the display is trusted to show system decorations and
+     * receive inputs without users' touch.
+     *
+     * @see #createVirtualDisplay
+     * @see #VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     * @hide
+     */
+    public static final int VIRTUAL_DISPLAY_FLAG_TRUSTED = 1 << 10;
 
     /** @hide */
     public DisplayManager(Context context) {
