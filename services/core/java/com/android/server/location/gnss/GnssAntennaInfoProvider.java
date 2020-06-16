@@ -26,10 +26,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.util.Injector;
 
 import java.util.List;
 
@@ -41,17 +38,13 @@ public class GnssAntennaInfoProvider extends
 
     private final GnssAntennaInfoProviderNative mNative;
 
-    public GnssAntennaInfoProvider(UserInfoHelper userInfoHelper, SettingsHelper settingsHelper,
-            AppOpsHelper appOpsHelper, AppForegroundHelper appForegroundHelper) {
-        this(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper,
-                new GnssAntennaInfoProviderNative());
+    public GnssAntennaInfoProvider(Injector injector) {
+        this(injector, new GnssAntennaInfoProviderNative());
     }
 
     @VisibleForTesting
-    public GnssAntennaInfoProvider(UserInfoHelper userInfoHelper, SettingsHelper settingsHelper,
-            AppOpsHelper appOpsHelper, AppForegroundHelper appForegroundHelper,
-            GnssAntennaInfoProviderNative aNative) {
-        super(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper);
+    public GnssAntennaInfoProvider(Injector injector, GnssAntennaInfoProviderNative aNative) {
+        super(injector);
         mNative = aNative;
     }
 

@@ -27,10 +27,7 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.util.Injector;
 
 /**
  * An base implementation for GPS navigation messages provider.
@@ -44,18 +41,14 @@ public class GnssNavigationMessageProvider extends
 
     private final GnssNavigationMessageProviderNative mNative;
 
-    public GnssNavigationMessageProvider(UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper) {
-        this(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper,
-                new GnssNavigationMessageProviderNative());
+    public GnssNavigationMessageProvider(Injector injector) {
+        this(injector, new GnssNavigationMessageProviderNative());
     }
 
     @VisibleForTesting
-    public GnssNavigationMessageProvider(UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper, GnssNavigationMessageProviderNative aNative) {
-        super(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper);
+    public GnssNavigationMessageProvider(Injector injector,
+            GnssNavigationMessageProviderNative aNative) {
+        super(injector);
         mNative = aNative;
     }
 

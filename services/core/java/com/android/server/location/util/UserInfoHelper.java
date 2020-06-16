@@ -16,8 +16,6 @@
 
 package com.android.server.location.util;
 
-import static android.os.UserManager.DISALLOW_SHARE_LOCATION;
-
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 import static com.android.server.location.util.UserInfoHelper.UserListener.CURRENT_USER_CHANGED;
@@ -25,22 +23,9 @@ import static com.android.server.location.util.UserInfoHelper.UserListener.USER_
 import static com.android.server.location.util.UserInfoHelper.UserListener.USER_STOPPED;
 
 import android.annotation.IntDef;
-import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
-import android.app.ActivityManagerInternal;
-import android.app.IActivityManager;
-import android.content.Context;
-import android.os.Binder;
-import android.os.RemoteException;
-import android.os.UserHandle;
-import android.os.UserManager;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
-import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -72,52 +57,10 @@ public abstract class UserInfoHelper {
         void onUserChanged(@UserIdInt int userId, @UserChange int change);
     }
 
-    private final Context mContext;
     private final CopyOnWriteArrayList<UserListener> mListeners;
 
-    @GuardedBy("this")
-    @Nullable private ActivityManagerInternal mActivityManagerInternal;
-    @GuardedBy("this")
-    @Nullable private IActivityManager mActivityManager;
-    @GuardedBy("this")
-    @Nullable private UserManager mUserManager;
-
-    public UserInfoHelper(Context context) {
-        mContext = context;
+    public UserInfoHelper() {
         mListeners = new CopyOnWriteArrayList<>();
-    }
-
-    @Nullable
-    protected final ActivityManagerInternal getActivityManagerInternal() {
-        synchronized (this) {
-            if (mActivityManagerInternal == null) {
-                mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
-            }
-        }
-
-        return mActivityManagerInternal;
-    }
-
-    @Nullable
-    protected final IActivityManager getActivityManager() {
-        synchronized (this) {
-            if (mActivityManager == null) {
-                mActivityManager = ActivityManager.getService();
-            }
-        }
-
-        return mActivityManager;
-    }
-
-    @Nullable
-    protected final UserManager getUserManager() {
-        synchronized (this) {
-            if (mUserManager == null) {
-                mUserManager = mContext.getSystemService(UserManager.class);
-            }
-        }
-
-        return mUserManager;
     }
 
     /**
@@ -134,7 +77,7 @@ public abstract class UserInfoHelper {
         mListeners.remove(listener);
     }
 
-    protected void dispatchOnUserStarted(@UserIdInt int userId) {
+    protected final void dispatchOnUserStarted(@UserIdInt int userId) {
         if (D) {
             Log.d(TAG, "u" + userId + " started");
         }
@@ -144,7 +87,7 @@ public abstract class UserInfoHelper {
         }
     }
 
-    protected void dispatchOnUserStopped(@UserIdInt int userId) {
+    protected final void dispatchOnUserStopped(@UserIdInt int userId) {
         if (D) {
             Log.d(TAG, "u" + userId + " stopped");
         }
@@ -154,7 +97,7 @@ public abstract class UserInfoHelper {
         }
     }
 
-    protected void dispatchOnCurrentUserChanged(@UserIdInt int fromUserId,
+    protected final void dispatchOnCurrentUserChanged(@UserIdInt int fromUserId,
             @UserIdInt int toUserId) {
         int[] fromUserIds = getProfileIds(fromUserId);
         int[] toUserIds = getProfileIds(toUserId);
@@ -181,76 +124,18 @@ public abstract class UserInfoHelper {
      * include any profiles of the running users. The caller must never mutate the returned
      * array.
      */
-    public final int[] getRunningUserIds() {
-        IActivityManager activityManager = getActivityManager();
-        if (activityManager != null) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                return activityManager.getRunningUserIds();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        } else {
-            return new int[]{};
-        }
-    }
+    public abstract int[] getRunningUserIds();
 
     /**
      * Returns true if the given user id is either the current user or a profile of the current
      * user.
      */
-    public final boolean isCurrentUserId(@UserIdInt int userId) {
-        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
-        if (activityManagerInternal != null) {
-            long identity = Binder.clearCallingIdentity();
-            try {
-                return activityManagerInternal.isCurrentProfile(userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        } else {
-            return false;
-        }
-    }
+    public abstract boolean isCurrentUserId(@UserIdInt int userId);
 
-    private int[] getProfileIds(@UserIdInt int userId) {
-        UserManager userManager = getUserManager();
-
-        // if you're hitting this precondition then you are invoking this before the system is ready
-        Preconditions.checkState(userManager != null);
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return userManager.getEnabledProfileIds(userId);
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
+    protected abstract int[] getProfileIds(@UserIdInt int userId);
 
     /**
      * Dump info for debugging.
      */
-    public void dump(FileDescriptor fd, IndentingPrintWriter pw, String[] args) {
-        ActivityManagerInternal activityManagerInternal = getActivityManagerInternal();
-        if (activityManagerInternal == null) {
-            return;
-        }
-
-        int[] currentProfileIds = activityManagerInternal.getCurrentProfileIds();
-        pw.println("current users: u" + Arrays.toString(currentProfileIds));
-
-        UserManager userManager = getUserManager();
-        if (userManager != null) {
-            for (int userId : currentProfileIds) {
-                if (userManager.hasUserRestrictionForUser(DISALLOW_SHARE_LOCATION,
-                        UserHandle.of(userId))) {
-                    pw.increaseIndent();
-                    pw.println("u" + userId + " restricted");
-                    pw.decreaseIndent();
-                }
-            }
-        }
-    }
+    public abstract void dump(FileDescriptor fd, IndentingPrintWriter pw, String[] args);
 }

@@ -30,11 +30,9 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationUsageLogger;
 import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -52,20 +50,14 @@ public class GnssMeasurementsProvider extends
     private final LocationUsageLogger mLogger;
     private final GnssMeasurementProviderNative mNative;
 
-    public GnssMeasurementsProvider(UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper, LocationUsageLogger logger) {
-        this(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper, logger,
-                new GnssMeasurementProviderNative());
+    public GnssMeasurementsProvider(Injector injector) {
+        this(injector, new GnssMeasurementProviderNative());
     }
 
     @VisibleForTesting
-    public GnssMeasurementsProvider(UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper, LocationUsageLogger logger,
-            GnssMeasurementProviderNative aNative) {
-        super(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper);
-        mLogger = logger;
+    public GnssMeasurementsProvider(Injector injector, GnssMeasurementProviderNative aNative) {
+        super(injector);
+        mLogger = injector.getLocationUsageLogger();
         mNative = aNative;
     }
 

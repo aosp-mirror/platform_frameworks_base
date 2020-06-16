@@ -27,11 +27,8 @@ import android.os.IBinder;
 import android.stats.location.LocationStatsEnums;
 import android.util.Log;
 
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.Injector;
 import com.android.server.location.util.LocationUsageLogger;
-import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
 
 /**
  * Implementation of a handler for {@link IGnssStatusListener}.
@@ -40,11 +37,9 @@ public class GnssStatusProvider extends GnssListenerMultiplexer<Void, IGnssStatu
 
     private final LocationUsageLogger mLogger;
 
-    public GnssStatusProvider(UserInfoHelper userInfoHelper, SettingsHelper settingsHelper,
-            AppOpsHelper appOpsHelper, AppForegroundHelper appForegroundHelper,
-            LocationUsageLogger logger) {
-        super(userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper);
-        mLogger = logger;
+    public GnssStatusProvider(Injector injector) {
+        super(injector);
+        mLogger = injector.getLocationUsageLogger();
     }
 
     @Override

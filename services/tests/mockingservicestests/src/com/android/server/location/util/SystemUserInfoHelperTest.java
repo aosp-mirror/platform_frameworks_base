@@ -41,13 +41,7 @@ import org.mockito.Mock;
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class UserInfoHelperTest {
-
-    private static class TestUserInfoHelper extends UserInfoHelper {
-        TestUserInfoHelper(Context context) {
-            super(context);
-        }
-    }
+public class SystemUserInfoHelperTest {
 
     private static final int USER1_ID = 1;
     private static final int USER1_MANAGED_ID = 11;
@@ -59,7 +53,7 @@ public class UserInfoHelperTest {
     @Mock private Context mContext;
     @Mock private UserManager mUserManager;
 
-    private TestUserInfoHelper mHelper;
+    private SystemUserInfoHelper mHelper;
 
     @Before
     public void setUp() {
@@ -69,7 +63,7 @@ public class UserInfoHelperTest {
         doReturn(USER1_PROFILES).when(mUserManager).getEnabledProfileIds(USER1_ID);
         doReturn(USER2_PROFILES).when(mUserManager).getEnabledProfileIds(USER2_ID);
 
-        mHelper = new TestUserInfoHelper(mContext);
+        mHelper = new SystemUserInfoHelper(mContext);
     }
 
     @After

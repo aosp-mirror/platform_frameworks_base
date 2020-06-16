@@ -31,6 +31,7 @@ import com.android.server.location.listeners.BinderListenerRegistration;
 import com.android.server.location.listeners.ListenerMultiplexer;
 import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
+import com.android.server.location.util.Injector;
 import com.android.server.location.util.SettingsHelper;
 import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
@@ -157,12 +158,11 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
     private final AppForegroundHelper.AppForegroundListener mAppForegroundChangedListener =
             this::onAppForegroundChanged;
 
-    protected GnssListenerMultiplexer(UserInfoHelper userInfoHelper, SettingsHelper settingsHelper,
-            AppOpsHelper appOpsHelper, AppForegroundHelper appForegroundHelper) {
-        mUserInfoHelper = userInfoHelper;
-        mSettingsHelper = settingsHelper;
-        mAppOpsHelper = appOpsHelper;
-        mAppForegroundHelper = appForegroundHelper;
+    protected GnssListenerMultiplexer(Injector injector) {
+        mUserInfoHelper = injector.getUserInfoHelper();
+        mSettingsHelper = injector.getSettingsHelper();
+        mAppOpsHelper = injector.getAppOpsHelper();
+        mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationManagerInternal = Objects.requireNonNull(
                 LocalServices.getService(LocationManagerInternal.class));
     }

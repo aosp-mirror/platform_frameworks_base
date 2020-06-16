@@ -109,8 +109,13 @@ import com.android.server.location.gnss.GnssManagerService;
 import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
 import com.android.server.location.util.Injector;
+import com.android.server.location.util.LocationAttributionHelper;
 import com.android.server.location.util.LocationUsageLogger;
 import com.android.server.location.util.SettingsHelper;
+import com.android.server.location.util.SystemAppForegroundHelper;
+import com.android.server.location.util.SystemAppOpsHelper;
+import com.android.server.location.util.SystemSettingsHelper;
+import com.android.server.location.util.SystemUserInfoHelper;
 import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
@@ -141,14 +146,15 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     public static class Lifecycle extends SystemService {
 
-        private final SystemUserInfoHelper mUserInfoHelper;
+        private final LifecycleUserInfoHelper mUserInfoHelper;
+        private final SystemInjector mSystemInjector;
         private final LocationManagerService mService;
 
         public Lifecycle(Context context) {
             super(context);
-            context = context.createAttributionContext(ATTRIBUTION_TAG);
-            mUserInfoHelper = new SystemUserInfoHelper(context);
-            mService = new LocationManagerService(new SystemInjector(context, mUserInfoHelper));
+            mUserInfoHelper = new LifecycleUserInfoHelper(context);
+            mSystemInjector = new SystemInjector(context, mUserInfoHelper);
+            mService = new LocationManagerService(context, mSystemInjector);
         }
 
         @Override
@@ -166,6 +172,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         public void onBootPhase(int phase) {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
                 // the location service must be functioning after this boot phase
+                mSystemInjector.onSystemReady();
                 mService.onSystemReady();
             } else if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
                 // some providers rely on third party code, so we wait to initialize
@@ -176,39 +183,36 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         @Override
         public void onUserStarting(TargetUser user) {
-            mUserInfoHelper.dispatchOnUserStarted(user.getUserIdentifier());
+            mUserInfoHelper.onUserStarted(user.getUserIdentifier());
         }
 
         @Override
         public void onUserSwitching(TargetUser from, TargetUser to) {
-            mUserInfoHelper.dispatchOnCurrentUserChanged(from.getUserIdentifier(),
+            mUserInfoHelper.onCurrentUserChanged(from.getUserIdentifier(),
                     to.getUserIdentifier());
         }
 
         @Override
         public void onUserStopped(TargetUser user) {
-            mUserInfoHelper.dispatchOnUserStopped(user.getUserIdentifier());
+            mUserInfoHelper.onUserStopped(user.getUserIdentifier());
         }
 
-        private static class SystemUserInfoHelper extends UserInfoHelper {
+        private static class LifecycleUserInfoHelper extends SystemUserInfoHelper {
 
-            SystemUserInfoHelper(Context context) {
+            LifecycleUserInfoHelper(Context context) {
                 super(context);
             }
 
-            @Override
-            protected void dispatchOnUserStarted(int userId) {
-                super.dispatchOnUserStarted(userId);
+            void onUserStarted(int userId) {
+                dispatchOnUserStarted(userId);
             }
 
-            @Override
-            protected void dispatchOnUserStopped(int userId) {
-                super.dispatchOnUserStopped(userId);
+            void onUserStopped(int userId) {
+                dispatchOnUserStopped(userId);
             }
 
-            @Override
-            protected void dispatchOnCurrentUserChanged(int fromUserId, int toUserId) {
-                super.dispatchOnCurrentUserChanged(fromUserId, toUserId);
+            void onCurrentUserChanged(int fromUserId, int toUserId) {
+                dispatchOnCurrentUserChanged(fromUserId, toUserId);
             }
         }
     }
@@ -246,6 +250,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private final Handler mHandler;
     private final LocalService mLocalService;
+
+    private final Injector mInjector;
 
     private final Context mContext;
     private final AppOpsHelper mAppOpsHelper;
@@ -285,20 +291,22 @@ public class LocationManagerService extends ILocationManager.Stub {
     @PowerManager.LocationPowerSaveMode
     private int mBatterySaverMode;
 
-    LocationManagerService(Injector injector) {
+    LocationManagerService(Context context, Injector injector) {
         mHandler = FgThread.getHandler();
         mLocalService = new LocalService();
 
         LocalServices.addService(LocationManagerInternal.class, mLocalService);
 
-        mContext = injector.getContext();
+        mInjector = injector;
+
+        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mUserInfoHelper = injector.getUserInfoHelper();
         mAppOpsHelper = injector.getAppOpsHelper();
         mSettingsHelper = injector.getSettingsHelper();
         mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
 
-        mGeofenceManager = new GeofenceManager(injector);
+        mGeofenceManager = new GeofenceManager(mContext, injector);
 
         // set up passive provider - we do this early because it has no dependencies on system
         // services or external code that isn't ready yet, and because this allows the variable to
@@ -323,12 +331,6 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     void onSystemReady() {
-        mAppOpsHelper.onSystemReady();
-        mSettingsHelper.onSystemReady();
-        mAppForegroundHelper.onSystemReady();
-
-        mGeofenceManager.onSystemReady();
-
         synchronized (mLock) {
             mPowerManager = mContext.getSystemService(PowerManager.class);
 
@@ -635,8 +637,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     private void initializeGnss() {
         // Do not hold mLock when calling GnssManagerService#isGnssSupported() which calls into HAL.
         if (GnssManagerService.isGnssSupported()) {
-            mGnssManagerService = new GnssManagerService(mContext, mUserInfoHelper, mSettingsHelper,
-                    mAppOpsHelper, mAppForegroundHelper, mLocationUsageLogger);
+            mGnssManagerService = new GnssManagerService(mContext, mInjector);
             mGnssManagerService.onSystemReady();
 
             LocationProviderManager gnssManager = new LocationProviderManager(GPS_PROVIDER);
@@ -2881,37 +2882,26 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     private static class SystemInjector implements Injector {
 
-        private final Context mContext;
         private final UserInfoHelper mUserInfoHelper;
-        private final AppOpsHelper mAppOpsHelper;
-        private final SettingsHelper mSettingsHelper;
-        private final AppForegroundHelper mAppForegroundHelper;
+        private final SystemAppOpsHelper mAppOpsHelper;
+        private final SystemSettingsHelper mSettingsHelper;
+        private final SystemAppForegroundHelper mAppForegroundHelper;
         private final LocationUsageLogger mLocationUsageLogger;
+        private final LocationAttributionHelper mLocationAttributionHelper;
 
         SystemInjector(Context context, UserInfoHelper userInfoHelper) {
-            this(
-                    context,
-                    userInfoHelper,
-                    new AppOpsHelper(context),
-                    new SettingsHelper(context),
-                    new AppForegroundHelper(context),
-                    new LocationUsageLogger());
-        }
-
-        SystemInjector(Context context, UserInfoHelper userInfoHelper, AppOpsHelper appOpsHelper,
-                SettingsHelper settingsHelper, AppForegroundHelper appForegroundHelper,
-                LocationUsageLogger locationUsageLogger) {
-            mContext = context;
             mUserInfoHelper = userInfoHelper;
-            mAppOpsHelper = appOpsHelper;
-            mSettingsHelper = settingsHelper;
-            mAppForegroundHelper = appForegroundHelper;
-            mLocationUsageLogger = locationUsageLogger;
+            mAppOpsHelper = new SystemAppOpsHelper(context);
+            mSettingsHelper = new SystemSettingsHelper(context);
+            mAppForegroundHelper = new SystemAppForegroundHelper(context);
+            mLocationUsageLogger = new LocationUsageLogger();
+            mLocationAttributionHelper = new LocationAttributionHelper(mAppOpsHelper);
         }
 
-        @Override
-        public Context getContext() {
-            return mContext;
+        void onSystemReady() {
+            mAppOpsHelper.onSystemReady();
+            mSettingsHelper.onSystemReady();
+            mAppForegroundHelper.onSystemReady();
         }
 
         @Override
@@ -2937,6 +2927,11 @@ public class LocationManagerService extends ILocationManager.Stub {
         @Override
         public LocationUsageLogger getLocationUsageLogger() {
             return mLocationUsageLogger;
+        }
+
+        @Override
+        public LocationAttributionHelper getLocationAttributionHelper() {
+            return mLocationAttributionHelper;
         }
     }
 }

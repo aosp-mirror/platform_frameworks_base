@@ -40,7 +40,6 @@ import android.stats.location.LocationStatsEnums;
 import android.util.ArraySet;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 import com.android.server.PendingIntentUtils;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.listeners.ListenerMultiplexer;
@@ -53,6 +52,7 @@ import com.android.server.location.util.UserInfoHelper;
 import com.android.server.location.util.UserInfoHelper.UserListener;
 
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Manages all geofences.
@@ -99,12 +99,8 @@ public class GeofenceManager extends
             mCenter.setLatitude(geofence.getLatitude());
             mCenter.setLongitude(geofence.getLongitude());
 
-            synchronized (mLock) {
-                // don't register geofences before the system is ready
-                Preconditions.checkState(mPowerManager != null);
-            }
-
-            mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+            mWakeLock = Objects.requireNonNull(mContext.getSystemService(PowerManager.class))
+                    .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                     TAG + ":" + identity.getPackageName());
             mWakeLock.setReferenceCounted(true);
             mWakeLock.setWorkSource(identity.addToWorkSource(null));
@@ -236,32 +232,28 @@ public class GeofenceManager extends
     protected final SettingsHelper mSettingsHelper;
     protected final LocationUsageLogger mLocationUsageLogger;
 
-    protected PowerManager mPowerManager;
-    protected LocationManager mLocationManager;
+    @GuardedBy("mLock")
+    private LocationManager mLocationManager;
 
     @GuardedBy("mLock")
     private @Nullable Location mLastLocation;
 
-    public GeofenceManager(Injector injector) {
-        mContext = injector.getContext().createAttributionContext(ATTRIBUTION_TAG);
+    public GeofenceManager(Context context, Injector injector) {
+        mContext = context.createAttributionContext(ATTRIBUTION_TAG);
         mUserInfoHelper = injector.getUserInfoHelper();
         mSettingsHelper = injector.getSettingsHelper();
         mAppOpsHelper = injector.getAppOpsHelper();
         mLocationUsageLogger = injector.getLocationUsageLogger();
     }
 
-    /** Called when system is ready. */
-    public void onSystemReady() {
+    private LocationManager getLocationManager() {
         synchronized (mLock) {
-            if (mLocationManager != null) {
-                return;
+            if (mLocationManager == null) {
+                mLocationManager = Objects.requireNonNull(
+                        mContext.getSystemService(LocationManager.class));
             }
 
-            mSettingsHelper.onSystemReady();
-            mAppOpsHelper.onSystemReady();
-
-            mPowerManager = mContext.getSystemService(PowerManager.class);
-            mLocationManager = mContext.getSystemService(LocationManager.class);
+            return mLocationManager;
         }
     }
 
@@ -343,19 +335,14 @@ public class GeofenceManager extends
 
     @Override
     protected boolean registerWithService(LocationRequest locationRequest) {
-        synchronized (mLock) {
-            Preconditions.checkState(mLocationManager != null);
-        }
-
-        mLocationManager.requestLocationUpdates(locationRequest, DIRECT_EXECUTOR, this);
+        getLocationManager().requestLocationUpdates(locationRequest, DIRECT_EXECUTOR, this);
         return true;
     }
 
     @Override
     protected void unregisterWithService() {
         synchronized (mLock) {
-            Preconditions.checkState(mLocationManager != null);
-            mLocationManager.removeUpdates(this);
+            getLocationManager().removeUpdates(this);
             mLastLocation = null;
         }
     }
@@ -422,11 +409,7 @@ public class GeofenceManager extends
         }
 
         if (location == null) {
-            synchronized (mLock) {
-                Preconditions.checkState(mLocationManager != null);
-            }
-
-            location = mLocationManager.getLastLocation();
+            location = getLocationManager().getLastLocation();
         }
 
         if (location != null) {

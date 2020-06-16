@@ -49,7 +49,7 @@ import java.util.List;
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AppForegroundHelperTest {
+public class SystemAppForegroundHelperTest {
 
     private static final long TIMEOUT_MS = 5000;
 
@@ -58,7 +58,7 @@ public class AppForegroundHelperTest {
 
     private List<ActivityManager.OnUidImportanceListener> mListeners = new ArrayList<>();
 
-    private AppForegroundHelper mHelper;
+    private SystemAppForegroundHelper mHelper;
 
     @Before
     public void setUp() {
@@ -71,7 +71,7 @@ public class AppForegroundHelperTest {
         }).when(mActivityManager).addOnUidImportanceListener(any(
                 ActivityManager.OnUidImportanceListener.class), eq(IMPORTANCE_FOREGROUND_SERVICE));
 
-        mHelper = new AppForegroundHelper(mContext);
+        mHelper = new SystemAppForegroundHelper(mContext);
         mHelper.onSystemReady();
     }
 
