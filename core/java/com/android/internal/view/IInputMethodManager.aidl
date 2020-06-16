@@ -71,4 +71,6 @@ interface IInputMethodManager {
 
     void reportActivityView(in IInputMethodClient parentClient, int childDisplayId,
             in float[] matrixValues);
+
+    void removeImeSurface();
 }
