@@ -150,9 +150,9 @@ public class TaskDisplayAreaTests extends WindowTestsBase {
 
     @Test
     public void testDisplayPositionWithPinnedStack() {
-        // Make sure the display is system owned display which capable to move the stack to top.
+        // Make sure the display is trusted display which capable to move the stack to top.
         spyOn(mDisplayContent);
-        doReturn(false).when(mDisplayContent).isUntrustedVirtualDisplay();
+        doReturn(true).when(mDisplayContent).isTrusted();
 
         // The display contains pinned stack that was added in {@link #setUp}.
         final ActivityStack stack = createTaskStackOnDisplay(mDisplayContent);
