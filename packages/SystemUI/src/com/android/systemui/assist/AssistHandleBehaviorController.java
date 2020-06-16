@@ -164,7 +164,7 @@ public final class AssistHandleBehaviorController implements AssistHandleCallbac
         return Long.max(mShowAndGoEndsAt - SystemClock.elapsedRealtime(), 0);
     }
 
-    boolean areHandlesShowing() {
+    public boolean areHandlesShowing() {
         return mHandlesShowing;
     }
 
