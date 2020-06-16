@@ -210,7 +210,7 @@ public class FuseAppLoop implements Handler.Callback {
                         if (mInstance != 0) {
                             native_replySimple(mInstance, unique, FUSE_OK);
                         }
-                        mBytesMap.stopUsing(entry.getThreadId());
+                        mBytesMap.stopUsing(inode);
                         recycleLocked(args);
                     }
                     break;
@@ -270,7 +270,7 @@ public class FuseAppLoop implements Handler.Callback {
                 if (mInstance != 0) {
                     native_replyOpen(mInstance, unique, /* fh */ inode);
                     entry.opened = true;
-                    return mBytesMap.startUsing(entry.getThreadId());
+                    return mBytesMap.startUsing(inode);
                 }
             } catch (ErrnoException error) {
                 replySimpleLocked(unique, getError(error));
@@ -354,27 +354,27 @@ public class FuseAppLoop implements Handler.Callback {
     }
 
     /**
-     * Map between Thread ID and byte buffer.
+     * Map between inode and byte buffer.
      */
     private static class BytesMap {
         final Map<Long, BytesMapEntry> mEntries = new HashMap<>();
 
-        byte[] startUsing(long threadId) {
-            BytesMapEntry entry = mEntries.get(threadId);
+        byte[] startUsing(long inode) {
+            BytesMapEntry entry = mEntries.get(inode);
             if (entry == null) {
                 entry = new BytesMapEntry();
-                mEntries.put(threadId, entry);
+                mEntries.put(inode, entry);
             }
             entry.counter++;
             return entry.bytes;
         }
 
-        void stopUsing(long threadId) {
-            final BytesMapEntry entry = mEntries.get(threadId);
+        void stopUsing(long inode) {
+            final BytesMapEntry entry = mEntries.get(inode);
             Objects.requireNonNull(entry);
             entry.counter--;
             if (entry.counter <= 0) {
-                mEntries.remove(threadId);
+                mEntries.remove(inode);
             }
         }
 
