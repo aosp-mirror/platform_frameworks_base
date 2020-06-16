@@ -79,6 +79,7 @@ class ControlsFavoritingActivity @Inject constructor(
     private lateinit var structurePager: ViewPager2
     private lateinit var statusText: TextView
     private lateinit var titleView: TextView
+    private lateinit var subtitleView: TextView
     private lateinit var pageIndicator: ManagementPageIndicator
     private var mTooltipManager: TooltipManager? = null
     private lateinit var doneButton: View
@@ -165,7 +166,12 @@ class ControlsFavoritingActivity @Inject constructor(
                     structurePager.adapter = StructureAdapter(listOfStructures)
                     structurePager.setCurrentItem(structureIndex)
                     if (error) {
-                        statusText.text = resources.getText(R.string.controls_favorite_load_error)
+                        statusText.text = resources.getString(R.string.controls_favorite_load_error,
+                                appName ?: "")
+                        subtitleView.visibility = View.GONE
+                    } else if (listOfStructures.isEmpty()) {
+                        statusText.text = resources.getString(R.string.controls_favorite_load_none)
+                        subtitleView.visibility = View.GONE
                     } else {
                         statusText.visibility = View.GONE
                     }
@@ -266,8 +272,9 @@ class ControlsFavoritingActivity @Inject constructor(
         titleView = requireViewById<TextView>(R.id.title).apply {
             text = title
         }
-        requireViewById<TextView>(R.id.subtitle).text =
-                resources.getText(R.string.controls_favorite_subtitle)
+        subtitleView = requireViewById<TextView>(R.id.subtitle).apply {
+            text = resources.getText(R.string.controls_favorite_subtitle)
+        }
         structurePager = requireViewById<ViewPager2>(R.id.structure_pager)
         structurePager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
