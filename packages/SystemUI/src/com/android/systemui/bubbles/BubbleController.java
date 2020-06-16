@@ -948,6 +948,26 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
+     * When a notification is marked Priority, expand the stack if needed,
+     * then (maybe create and) select the given bubble.
+     *
+     * @param entry the notification for the bubble to show
+     */
+    public void onUserChangedImportance(NotificationEntry entry) {
+        try {
+            int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
+            mBarService.onNotificationBubbleChanged(entry.getKey(), true, flags);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        mShadeController.collapsePanel(true);
+        if (entry.getRow() != null) {
+            entry.getRow().updateBubbleButton();
+        }
+    }
+
+    /**
      * Directs a back gesture at the bubble stack. When opened, the current expanded bubble
      * is forwarded a back key down/up pair.
      */
