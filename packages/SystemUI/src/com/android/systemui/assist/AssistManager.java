@@ -40,11 +40,8 @@ import android.widget.ImageView;
 import com.android.internal.app.AssistUtils;
 import com.android.internal.app.IVoiceInteractionSessionListener;
 import com.android.internal.app.IVoiceInteractionSessionShowCallback;
-import com.android.internal.logging.InstanceId;
-import com.android.internal.logging.InstanceIdSequence;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.internal.util.FrameworkStatsLog;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.settingslib.applications.InterestingConfigChanges;
 import com.android.systemui.R;
@@ -124,7 +121,6 @@ public class AssistManager {
 
     private static final long TIMEOUT_SERVICE = 2500;
     private static final long TIMEOUT_ACTIVITY = 1000;
-    private static final int INSTANCE_ID_MAX = 1 << 20;
 
     protected final Context mContext;
     private final WindowManager mWindowManager;
@@ -134,8 +130,7 @@ public class AssistManager {
     private final AssistHandleBehaviorController mHandleController;
     private final UiController mUiController;
     protected final Lazy<SysUiState> mSysUiState;
-    protected final InstanceIdSequence mInstanceIdSequence =
-            new InstanceIdSequence(INSTANCE_ID_MAX);
+    protected final AssistLogger mAssistLogger;
 
     private AssistOrbContainer mView;
     private final DeviceProvisionedController mDeviceProvisionedController;
@@ -202,7 +197,9 @@ public class AssistManager {
             PhoneStateMonitor phoneStateMonitor,
             OverviewProxyService overviewProxyService,
             ConfigurationController configurationController,
-            Lazy<SysUiState> sysUiState) {
+            Lazy<SysUiState> sysUiState,
+            DefaultUiController defaultUiController,
+            AssistLogger assistLogger) {
         mContext = context;
         mDeviceProvisionedController = controller;
         mCommandQueue = commandQueue;
@@ -211,6 +208,7 @@ public class AssistManager {
         mAssistDisclosure = new AssistDisclosure(context, new Handler());
         mPhoneStateMonitor = phoneStateMonitor;
         mHandleController = handleController;
+        mAssistLogger = assistLogger;
 
         configurationController.addCallback(mConfigurationListener);
 
@@ -221,7 +219,7 @@ public class AssistManager {
         mConfigurationListener.onConfigChanged(context.getResources().getConfiguration());
         mShouldEnableOrb = !ActivityManager.isLowRamDeviceStatic();
 
-        mUiController = new DefaultUiController(mContext);
+        mUiController = defaultUiController;
 
         mSysUiState = sysUiState;
 
@@ -248,6 +246,8 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "Voice open");
                         }
+                        mAssistLogger.reportAssistantSessionEvent(
+                                AssistantSessionEvent.ASSISTANT_SESSION_UPDATE);
                     }
 
                     @Override
@@ -255,6 +255,8 @@ public class AssistManager {
                         if (VERBOSE) {
                             Log.v(TAG, "Voice closed");
                         }
+                        mAssistLogger.reportAssistantSessionEvent(
+                                AssistantSessionEvent.ASSISTANT_SESSION_CLOSE);
                     }
 
                     @Override
@@ -298,15 +300,19 @@ public class AssistManager {
         if (args == null) {
             args = new Bundle();
         }
-        int invocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
-        if (invocationType == INVOCATION_TYPE_GESTURE) {
+        int legacyInvocationType = args.getInt(INVOCATION_TYPE_KEY, 0);
+        if (legacyInvocationType == INVOCATION_TYPE_GESTURE) {
             mHandleController.onAssistantGesturePerformed();
         }
-        int phoneState = mPhoneStateMonitor.getPhoneState();
-        args.putInt(INVOCATION_PHONE_STATE_KEY, phoneState);
+        int legacyDeviceState = mPhoneStateMonitor.getPhoneState();
+        args.putInt(INVOCATION_PHONE_STATE_KEY, legacyDeviceState);
         args.putLong(INVOCATION_TIME_MS_KEY, SystemClock.elapsedRealtime());
-        logStartAssist(/* instanceId = */ null, invocationType, phoneState);
-        logStartAssistLegacy(invocationType, phoneState);
+        mAssistLogger.reportAssistantInvocationEventFromLegacy(
+                legacyInvocationType,
+                /* isInvocationComplete = */ true,
+                assistComponent,
+                legacyDeviceState);
+        logStartAssistLegacy(legacyInvocationType, legacyDeviceState);
         startAssistInternal(args, assistComponent, isService);
     }
 
@@ -504,34 +510,6 @@ public class AssistManager {
     /** Returns the logging flags for the given Assistant invocation type. */
     public int toLoggingSubType(int invocationType) {
         return toLoggingSubType(invocationType, mPhoneStateMonitor.getPhoneState());
-    }
-
-    protected void logStartAssist(
-            @Nullable InstanceId instanceId, int invocationType, int deviceState) {
-        InstanceId currentInstanceId =
-                instanceId == null ? mInstanceIdSequence.newInstanceId() : instanceId;
-        ComponentName assistantComponent =
-                mAssistUtils.getAssistComponentForUser(UserHandle.USER_CURRENT);
-        int assistantUid = 0;
-        try {
-            assistantUid =
-                    mContext.getPackageManager()
-                            .getApplicationInfo(
-                                    assistantComponent.getPackageName(),
-                                    /* flags = */ 0)
-                            .uid;
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Unable to find Assistant UID", e);
-        }
-
-        FrameworkStatsLog.write(
-                FrameworkStatsLog.ASSISTANT_INVOCATION_REPORTED,
-                AssistantInvocationEvent.Companion.eventIdFromLegacyInvocationType(invocationType),
-                assistantUid,
-                assistantComponent.flattenToString(),
-                currentInstanceId.getId(),
-                AssistantInvocationEvent.Companion.deviceStateFromLegacyDeviceState(deviceState),
-                mHandleController.areHandlesShowing());
     }
 
     protected void logStartAssistLegacy(int invocationType, int phoneState) {
