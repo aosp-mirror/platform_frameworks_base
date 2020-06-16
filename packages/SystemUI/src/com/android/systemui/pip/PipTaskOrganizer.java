@@ -202,14 +202,15 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @Nullable Divider divider,
-            @NonNull DisplayController displayController) {
+            @NonNull DisplayController displayController,
+            @NonNull PipAnimationController pipAnimationController) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
-        mPipAnimationController = new PipAnimationController(context, surfaceTransactionHelper);
+        mPipAnimationController = pipAnimationController;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitDivider = divider;
         displayController.addDisplayWindowListener(this);
