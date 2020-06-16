@@ -23,3 +23,13 @@ val ViewGroup.children
     get() = sequence {
         for (i in 0 until childCount) yield(getChildAt(i))
     }
+
+/** Inclusive version of [Iterable.takeWhile] */
+fun <T> Sequence<T>.takeUntil(pred: (T) -> Boolean): Sequence<T> = sequence {
+    for (x in this@takeUntil) {
+        yield(x)
+        if (pred(x)) {
+            break
+        }
+    }
+}
