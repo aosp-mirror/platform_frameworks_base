@@ -289,6 +289,7 @@ package android.net.wifi {
   public final class SoftApInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getBandwidth();
+    method @Nullable public android.net.MacAddress getBssid();
     method public int getFrequency();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CHANNEL_WIDTH_160MHZ = 6; // 0x6
