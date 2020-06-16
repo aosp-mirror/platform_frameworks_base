@@ -37,8 +37,8 @@ import java.util.ArrayList;
  */
 public abstract class AuthenticationClient extends ClientMonitor {
 
-    public abstract int handleFailedAttempt();
-    public void resetFailedAttempts() {}
+    public abstract int handleFailedAttempt(int userId);
+    public void resetFailedAttempts(int userId) {}
 
     public static final int LOCKOUT_NONE = 0;
     public static final int LOCKOUT_TIMED = 1;
@@ -179,7 +179,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
                 result = true;
                 if (mShouldFrameworkHandleLockout) {
-                    resetFailedAttempts();
+                    resetFailedAttempts(getTargetUserId());
                 }
                 onStop();
 
@@ -222,7 +222,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                 }
 
                 // Allow system-defined limit of number of attempts before giving up
-                final int lockoutMode = handleFailedAttempt();
+                final int lockoutMode = handleFailedAttempt(getTargetUserId());
                 if (lockoutMode != LOCKOUT_NONE && mShouldFrameworkHandleLockout) {
                     Slog.w(getLogTag(), "Forcing lockout (driver code should do this!), mode("
                             + lockoutMode + ")");

@@ -170,17 +170,6 @@ public abstract class BiometricServiceBase extends SystemService
     protected abstract void updateActiveGroup(int userId, String clientPackage);
 
     /**
-     * @return The protected intent to reset lockout for a specific biometric.
-     */
-    protected abstract String getLockoutResetIntent();
-
-    /**
-     * @return The permission the sender is required to have in order for the lockout reset intent
-     *         to be received by the BiometricService implementation.
-     */
-    protected abstract String getLockoutBroadcastPermission();
-
-    /**
      * @param userId
      * @return Returns true if the user has any enrolled biometrics.
      */
@@ -218,7 +207,7 @@ public abstract class BiometricServiceBase extends SystemService
     /**
      * @return one of the AuthenticationClient LOCKOUT constants
      */
-    protected abstract int getLockoutMode();
+    protected abstract int getLockoutMode(int userId);
 
     protected abstract class AuthenticationClientImpl extends AuthenticationClient {
 
@@ -235,8 +224,8 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         @Override
-        public int handleFailedAttempt() {
-            final int lockoutMode = getLockoutMode();
+        public int handleFailedAttempt(int userId) {
+            final int lockoutMode = getLockoutMode(userId);
             if (lockoutMode == AuthenticationClient.LOCKOUT_PERMANENT) {
                 mPerformanceStats.permanentLockout++;
             } else if (lockoutMode == AuthenticationClient.LOCKOUT_TIMED) {
@@ -407,8 +396,7 @@ public abstract class BiometricServiceBase extends SystemService
                 context.getResources().getString(R.string.config_keyguardComponent));
         mKeyguardPackage = keyguardComponent != null ? keyguardComponent.getPackageName() : null;
         mAppOps = context.getSystemService(AppOpsManager.class);
-        mActivityTaskManager = ((ActivityTaskManager) context.getSystemService(
-                Context.ACTIVITY_TASK_SERVICE)).getService();
+        mActivityTaskManager = ActivityTaskManager.getService();
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManager = UserManager.get(mContext);
         mMetricsLogger = new MetricsLogger();
@@ -476,7 +464,8 @@ public abstract class BiometricServiceBase extends SystemService
         if (client != null && client.onAcquired(acquiredInfo, vendorCode)) {
             removeClient(client);
         }
-        if (mPerformanceStats != null && getLockoutMode() == AuthenticationClient.LOCKOUT_NONE
+        if (mPerformanceStats != null
+                && getLockoutMode(client.getTargetUserId()) == AuthenticationClient.LOCKOUT_NONE
                 && client instanceof AuthenticationClient) {
             // ignore enrollment acquisitions or acquisitions when we're locked out
             mPerformanceStats.acquire++;
@@ -692,7 +681,7 @@ public abstract class BiometricServiceBase extends SystemService
     private void startAuthentication(AuthenticationClientImpl client, String opPackageName) {
         if (DEBUG) Slog.v(getTag(), "startAuthentication(" + opPackageName + ")");
 
-        int lockoutMode = getLockoutMode();
+        int lockoutMode = getLockoutMode(client.getTargetUserId());
         if (lockoutMode != AuthenticationClient.LOCKOUT_NONE) {
             Slog.v(getTag(), "In lockout mode(" + lockoutMode + ") ; disallowing authentication");
             int errorCode = lockoutMode == AuthenticationClient.LOCKOUT_TIMED ?
