@@ -1325,8 +1325,8 @@
     <dimen name="controls_management_editing_list_margin">48dp</dimen>
     <dimen name="controls_management_editing_divider_margin">24dp</dimen>
     <dimen name="controls_management_apps_extra_side_margin">8dp</dimen>
-    <dimen name="controls_management_apps_top_margin"></dimen>
     <dimen name="controls_management_zone_top_margin">32dp</dimen>
+    <dimen name="controls_management_status_side_margin">16dp</dimen>
     <dimen name="controls_management_page_indicator_height">24dp</dimen>
     <dimen name="controls_management_checkbox_size">25dp</dimen>
     <dimen name="controls_title_size">24sp</dimen>
