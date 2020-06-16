@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.database.ContentObserver;
@@ -356,6 +358,8 @@ final class OverlayDisplayAdapter extends DisplayAdapter {
                 mInfo.type = Display.TYPE_OVERLAY;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_VIRTUAL;
                 mInfo.state = mState;
+                // The display is trusted since it is created by system.
+                mInfo.flags |= FLAG_TRUSTED;
             }
             return mInfo;
         }
