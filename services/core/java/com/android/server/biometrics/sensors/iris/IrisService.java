@@ -23,10 +23,10 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.iris.IIrisService;
 
-import com.android.server.biometrics.sensors.AuthenticationClient;
 import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.Constants;
+import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 
 import java.util.List;
@@ -137,6 +137,6 @@ public class IrisService extends BiometricServiceBase {
 
     @Override
     protected int getLockoutMode(int userId) {
-        return AuthenticationClient.LOCKOUT_NONE;
+        return LockoutTracker.LOCKOUT_NONE;
     }
 }
