@@ -1641,7 +1641,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Jūs nepareizi norādījāt atbloķēšanas kombināciju <xliff:g id="NUMBER_0">%1$d</xliff:g> reizes. Pēc vēl <xliff:g id="NUMBER_1">%2$d</xliff:g> neveiksmīgiem mēģinājumiem tālrunis būs jāatbloķē, izmantojot e-pasta kontu.\n\nMēģiniet vēlreiz pēc <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundēm."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">"  — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Noņemt"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Fonā sāktam priekšplāna pakalpojumam no pakotnes <xliff:g id="PACKAGENAME">%1$s</xliff:g> nebūs atļaujas “while-in-use” turpmākajās R versijās. Lūdzu, skatiet vietni go/r-bg-fgs-restriction un iesniedziet kļūdas pārskatu."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vai palielināt skaļumu virs ieteicamā līmeņa?\n\nIlgstoši klausoties skaņu lielā skaļumā, var tikt bojāta dzirde."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vai izmantot pieejamības saīsni?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kad īsinājumtaustiņš ir ieslēgts, nospiežot abas skaļuma pogas un 3 sekundes turot tās, tiks aktivizēta pieejamības funkcija."</string>

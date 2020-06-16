@@ -1619,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"你的解鎖圖案已畫錯 <xliff:g id="NUMBER_0">%1$d</xliff:g> 次，如果再嘗試 <xliff:g id="NUMBER_1">%2$d</xliff:g> 次仍未成功，系統就會要求你透過電子郵件帳戶解除手機的鎖定狀態。\n\n請在 <xliff:g id="NUMBER_2">%3$d</xliff:g> 秒後再試一次。"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"移除"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"來自「<xliff:g id="PACKAGENAME">%1$s</xliff:g>」的背景啟動前景服務不會具備未來 R 版本的使用狀態權限。請前往 go/r-bg-fgs-restriction 並提交錯誤報告。"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"要調高音量，比建議的音量更大聲嗎？\n\n長時間聆聽高分貝音量可能會使你的聽力受損。"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"要使用無障礙捷徑嗎？"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"啟用捷徑功能，只要同時按下兩個音量按鈕 3 秒，就能啟動無障礙功能。"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"要開啟無障礙功能嗎？"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更所選功能。"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"同時按住音量調高鍵和調低鍵數秒，即可開啟無障礙功能。這麼做可能會改變裝置的運作方式。\n\n目前的功能：\n<xliff:g id="SERVICE">%1$s</xliff:g>\n你可以在 [設定] &gt; [無障礙設定] 中變更選取的功能。"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"要開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」嗎？"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"同時按住音量調高鍵和調低鍵數秒，即可開啟「<xliff:g id="SERVICE">%1$s</xliff:g>」無障礙功能。這麼做可能會改變裝置的運作方式。\n\n你可以在 [設定] &gt; [無障礙設定] 中變更這個快速鍵觸發的功能。"</string>
@@ -1919,7 +1918,7 @@
     <string name="app_category_social" msgid="2278269325488344054">"社交和通訊"</string>
     <string name="app_category_news" msgid="1172762719574964544">"新聞和雜誌"</string>
     <string name="app_category_maps" msgid="6395725487922533156">"地圖和導航"</string>
-    <string name="app_category_productivity" msgid="1844422703029557883">"生產應用"</string>
+    <string name="app_category_productivity" msgid="1844422703029557883">"工作效率"</string>
     <string name="device_storage_monitor_notification_channel" msgid="5164244565844470758">"裝置儲存空間"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="4764046459631031496">"USB 偵錯"</string>
     <string name="time_picker_hour_label" msgid="4208590187662336864">"點"</string>
