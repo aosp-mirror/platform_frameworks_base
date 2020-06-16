@@ -2796,17 +2796,7 @@ public class ChooserActivity extends ResolverActivity implements
                 || chooserListAdapter.mDisplayList.isEmpty()) {
             chooserListAdapter.notifyDataSetChanged();
         } else {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    chooserListAdapter.updateAlphabeticalList();
-                    return null;
-                }
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    chooserListAdapter.notifyDataSetChanged();
-                }
-            }.execute();
+            chooserListAdapter.updateAlphabeticalList();
         }
 
         // don't support direct share on low ram devices
