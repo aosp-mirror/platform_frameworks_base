@@ -64,6 +64,7 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import org.json.JSONArray;
@@ -763,6 +764,9 @@ public class FingerprintService extends BiometricServiceBase {
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);
 
     private void dumpInternal(PrintWriter pw) {
+        PerformanceTracker performanceTracker =
+                PerformanceTracker.getInstanceForSensorId(getSensorId());
+
         JSONObject dump = new JSONObject();
         try {
             dump.put("service", "Fingerprint Manager");
@@ -771,24 +775,19 @@ public class FingerprintService extends BiometricServiceBase {
             for (UserInfo user : UserManager.get(getContext()).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
                 final int N = getBiometricUtils().getBiometricsForUser(getContext(), userId).size();
-                PerformanceStats stats = mPerformanceMap.get(userId);
-                PerformanceStats cryptoStats = mCryptoPerformanceMap.get(userId);
                 JSONObject set = new JSONObject();
                 set.put("id", userId);
                 set.put("count", N);
-                set.put("accept", (stats != null) ? stats.accept : 0);
-                set.put("reject", (stats != null) ? stats.reject : 0);
-                set.put("acquire", (stats != null) ? stats.acquire : 0);
-                set.put("lockout", (stats != null) ? stats.lockout : 0);
-                set.put("permanentLockout", (stats != null) ? stats.permanentLockout : 0);
+                set.put("accept", performanceTracker.getAcceptForUser(userId));
+                set.put("reject", performanceTracker.getRejectForUser(userId));
+                set.put("acquire", performanceTracker.getAcquireForUser(userId));
+                set.put("lockout", performanceTracker.getTimedLockoutForUser(userId));
+                set.put("permanentLockout", performanceTracker.getPermanentLockoutForUser(userId));
                 // cryptoStats measures statistics about secure fingerprint transactions
                 // (e.g. to unlock password storage, make secure purchases, etc.)
-                set.put("acceptCrypto", (cryptoStats != null) ? cryptoStats.accept : 0);
-                set.put("rejectCrypto", (cryptoStats != null) ? cryptoStats.reject : 0);
-                set.put("acquireCrypto", (cryptoStats != null) ? cryptoStats.acquire : 0);
-                set.put("lockoutCrypto", (cryptoStats != null) ? cryptoStats.lockout : 0);
-                set.put("permanentLockoutCrypto",
-                    (cryptoStats != null) ? cryptoStats.permanentLockout : 0);
+                set.put("acceptCrypto", performanceTracker.getAcceptCryptoForUser(userId));
+                set.put("rejectCrypto", performanceTracker.getRejectCryptoForUser(userId));
+                set.put("acquireCrypto", performanceTracker.getAcquireCryptoForUser(userId));
                 sets.put(set);
             }
 
@@ -797,10 +796,13 @@ public class FingerprintService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
-        pw.println("HAL deaths since last reboot: " + mHALDeathCount);
+        pw.println("HAL deaths since last reboot: " + performanceTracker.getHALDeathCount());
     }
 
     private void dumpProto(FileDescriptor fd) {
+        PerformanceTracker tracker =
+                PerformanceTracker.getInstanceForSensorId(getSensorId());
+
         final ProtoOutputStream proto = new ProtoOutputStream(fd);
         for (UserInfo user : UserManager.get(getContext()).getUsers()) {
             final int userId = user.getUserHandle().getIdentifier();
@@ -812,34 +814,28 @@ public class FingerprintService extends BiometricServiceBase {
                     getBiometricUtils().getBiometricsForUser(getContext(), userId).size());
 
             // Normal fingerprint authentications (e.g. lockscreen)
-            final PerformanceStats normal = mPerformanceMap.get(userId);
-            if (normal != null) {
-                final long countsToken = proto.start(FingerprintUserStatsProto.NORMAL);
-                proto.write(PerformanceStatsProto.ACCEPT, normal.accept);
-                proto.write(PerformanceStatsProto.REJECT, normal.reject);
-                proto.write(PerformanceStatsProto.ACQUIRE, normal.acquire);
-                proto.write(PerformanceStatsProto.LOCKOUT, normal.lockout);
-                proto.write(PerformanceStatsProto.PERMANENT_LOCKOUT, normal.permanentLockout);
-                proto.end(countsToken);
-            }
+            long countsToken = proto.start(FingerprintUserStatsProto.NORMAL);
+            proto.write(PerformanceStatsProto.ACCEPT, tracker.getAcceptForUser(userId));
+            proto.write(PerformanceStatsProto.REJECT, tracker.getRejectForUser(userId));
+            proto.write(PerformanceStatsProto.ACQUIRE, tracker.getAcquireForUser(userId));
+            proto.write(PerformanceStatsProto.LOCKOUT, tracker.getTimedLockoutForUser(userId));
+            proto.write(PerformanceStatsProto.PERMANENT_LOCKOUT,
+                    tracker.getPermanentLockoutForUser(userId));
+            proto.end(countsToken);
 
             // Statistics about secure fingerprint transactions (e.g. to unlock password
             // storage, make secure purchases, etc.)
-            final PerformanceStats crypto = mCryptoPerformanceMap.get(userId);
-            if (crypto != null) {
-                final long countsToken = proto.start(FingerprintUserStatsProto.CRYPTO);
-                proto.write(PerformanceStatsProto.ACCEPT, crypto.accept);
-                proto.write(PerformanceStatsProto.REJECT, crypto.reject);
-                proto.write(PerformanceStatsProto.ACQUIRE, crypto.acquire);
-                proto.write(PerformanceStatsProto.LOCKOUT, crypto.lockout);
-                proto.write(PerformanceStatsProto.PERMANENT_LOCKOUT, crypto.permanentLockout);
-                proto.end(countsToken);
-            }
+            countsToken = proto.start(FingerprintUserStatsProto.CRYPTO);
+            proto.write(PerformanceStatsProto.ACCEPT, tracker.getAcceptCryptoForUser(userId));
+            proto.write(PerformanceStatsProto.REJECT, tracker.getRejectCryptoForUser(userId));
+            proto.write(PerformanceStatsProto.ACQUIRE, tracker.getAcquireCryptoForUser(userId));
+            proto.write(PerformanceStatsProto.LOCKOUT, 0); // meaningless for crypto
+            proto.write(PerformanceStatsProto.PERMANENT_LOCKOUT, 0); // meaningless for crypto
+            proto.end(countsToken);
 
             proto.end(userToken);
         }
         proto.flush();
-        mPerformanceMap.clear();
-        mCryptoPerformanceMap.clear();
+        tracker.clear();
     }
 }

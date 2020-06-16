@@ -68,6 +68,7 @@ import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.Constants;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
 
 import org.json.JSONArray;
@@ -1171,6 +1172,9 @@ public class FaceService extends BiometricServiceBase {
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);
 
     private void dumpInternal(PrintWriter pw) {
+        PerformanceTracker performanceTracker =
+                PerformanceTracker.getInstanceForSensorId(getSensorId());
+
         JSONObject dump = new JSONObject();
         try {
             dump.put("service", "Face Manager");
@@ -1179,24 +1183,19 @@ public class FaceService extends BiometricServiceBase {
             for (UserInfo user : UserManager.get(getContext()).getUsers()) {
                 final int userId = user.getUserHandle().getIdentifier();
                 final int N = getBiometricUtils().getBiometricsForUser(getContext(), userId).size();
-                PerformanceStats stats = mPerformanceMap.get(userId);
-                PerformanceStats cryptoStats = mCryptoPerformanceMap.get(userId);
                 JSONObject set = new JSONObject();
                 set.put("id", userId);
                 set.put("count", N);
-                set.put("accept", (stats != null) ? stats.accept : 0);
-                set.put("reject", (stats != null) ? stats.reject : 0);
-                set.put("acquire", (stats != null) ? stats.acquire : 0);
-                set.put("lockout", (stats != null) ? stats.lockout : 0);
-                set.put("permanentLockout", (stats != null) ? stats.permanentLockout : 0);
+                set.put("accept", performanceTracker.getAcceptForUser(userId));
+                set.put("reject", performanceTracker.getRejectForUser(userId));
+                set.put("acquire", performanceTracker.getAcquireForUser(userId));
+                set.put("lockout", performanceTracker.getTimedLockoutForUser(userId));
+                set.put("permanentLockout", performanceTracker.getPermanentLockoutForUser(userId));
                 // cryptoStats measures statistics about secure face transactions
                 // (e.g. to unlock password storage, make secure purchases, etc.)
-                set.put("acceptCrypto", (cryptoStats != null) ? cryptoStats.accept : 0);
-                set.put("rejectCrypto", (cryptoStats != null) ? cryptoStats.reject : 0);
-                set.put("acquireCrypto", (cryptoStats != null) ? cryptoStats.acquire : 0);
-                set.put("lockoutCrypto", (cryptoStats != null) ? cryptoStats.lockout : 0);
-                set.put("permanentLockoutCrypto",
-                        (cryptoStats != null) ? cryptoStats.permanentLockout : 0);
+                set.put("acceptCrypto", performanceTracker.getAcceptCryptoForUser(userId));
+                set.put("rejectCrypto", performanceTracker.getRejectCryptoForUser(userId));
+                set.put("acquireCrypto", performanceTracker.getAcquireCryptoForUser(userId));
                 sets.put(set);
             }
 
@@ -1205,7 +1204,7 @@ public class FaceService extends BiometricServiceBase {
             Slog.e(TAG, "dump formatting failure", e);
         }
         pw.println(dump);
-        pw.println("HAL deaths since last reboot: " + mHALDeathCount);
+        pw.println("HAL deaths since last reboot: " + performanceTracker.getHALDeathCount());
 
         mUsageStats.print(pw);
     }
