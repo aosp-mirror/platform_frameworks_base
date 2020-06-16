@@ -247,10 +247,6 @@ class WindowStateAnimator {
     private final SurfaceControl.Transaction mPostDrawTransaction =
             new SurfaceControl.Transaction();
 
-    // Used to track whether we have called detach children on the way to invisibility, in which
-    // case we need to give the client a new Surface if it lays back out to a visible state.
-    boolean mChildrenDetached = false;
-
     // Set to true after the first frame of the Pinned stack animation
     // and reset after the last to ensure we only reset mForceScaleUntilResize
     // once per animation.
@@ -425,7 +421,8 @@ class WindowStateAnimator {
         // transparent to the app.
         // If the children are detached, we don't want to reparent them to the new surface.
         // Instead let the children get removed when the old surface is deleted.
-        if (mSurfaceController != null && mPendingDestroySurface != null && !mChildrenDetached
+        if (mSurfaceController != null && mPendingDestroySurface != null
+                && !mPendingDestroySurface.mChildrenDetached
                 && (mWin.mActivityRecord == null || !mWin.mActivityRecord.isRelaunching())) {
             mPostDrawTransaction.reparentChildren(
                     mPendingDestroySurface.getClientViewRootSurface(),
@@ -461,7 +458,6 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             return mSurfaceController;
         }
-        mChildrenDetached = false;
 
         if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
             windowType = SurfaceControl.WINDOW_TYPE_DONT_SCREENSHOT;
@@ -1365,7 +1361,7 @@ class WindowStateAnimator {
             mPostDrawTransaction.reparent(pendingSurfaceControl, null);
             // If the children are detached, we don't want to reparent them to the new surface.
             // Instead let the children get removed when the old surface is deleted.
-            if (!mChildrenDetached) {
+            if (!mPendingDestroySurface.mChildrenDetached) {
                 mPostDrawTransaction.reparentChildren(
                         mPendingDestroySurface.getClientViewRootSurface(),
                         mSurfaceController.mSurfaceControl);
@@ -1596,7 +1592,6 @@ class WindowStateAnimator {
         if (mSurfaceController != null) {
             mSurfaceController.detachChildren();
         }
-        mChildrenDetached = true;
         // If the children are detached, it means the app is exiting. We don't want to tear the
         // content down too early, otherwise we could end up with a flicker. By preserving the
         // current surface, we ensure the content remains on screen until the window is completely
