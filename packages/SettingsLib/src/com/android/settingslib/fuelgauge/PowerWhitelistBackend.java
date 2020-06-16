@@ -48,7 +48,6 @@ public class PowerWhitelistBackend {
     private final IDeviceIdleController mDeviceIdleService;
     private final ArraySet<String> mWhitelistedApps = new ArraySet<>();
     private final ArraySet<String> mSysWhitelistedApps = new ArraySet<>();
-    private final ArraySet<String> mSysWhitelistedAppsExceptIdle = new ArraySet<>();
     private final ArraySet<String> mDefaultActiveApps = new ArraySet<>();
 
     public PowerWhitelistBackend(Context context) {
@@ -117,23 +116,6 @@ public class PowerWhitelistBackend {
         return false;
     }
 
-    public boolean isSysWhitelistedExceptIdle(String pkg) {
-        return mSysWhitelistedAppsExceptIdle.contains(pkg);
-    }
-
-    public boolean isSysWhitelistedExceptIdle(String[] pkgs) {
-        if (ArrayUtils.isEmpty(pkgs)) {
-            return false;
-        }
-        for (String pkg : pkgs) {
-            if (isSysWhitelistedExceptIdle(pkg)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public void addApp(String pkg) {
         try {
             mDeviceIdleService.addPowerSaveWhitelistApp(pkg);
@@ -155,7 +137,6 @@ public class PowerWhitelistBackend {
     @VisibleForTesting
     public void refreshList() {
         mSysWhitelistedApps.clear();
-        mSysWhitelistedAppsExceptIdle.clear();
         mWhitelistedApps.clear();
         mDefaultActiveApps.clear();
         if (mDeviceIdleService == null) {
@@ -169,11 +150,6 @@ public class PowerWhitelistBackend {
             final String[] sysWhitelistedApps = mDeviceIdleService.getSystemPowerWhitelist();
             for (String app : sysWhitelistedApps) {
                 mSysWhitelistedApps.add(app);
-            }
-            final String[] sysWhitelistedAppsExceptIdle =
-                    mDeviceIdleService.getSystemPowerWhitelistExceptIdle();
-            for (String app : sysWhitelistedAppsExceptIdle) {
-                mSysWhitelistedAppsExceptIdle.add(app);
             }
             final boolean hasTelephony = mAppContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TELEPHONY);
