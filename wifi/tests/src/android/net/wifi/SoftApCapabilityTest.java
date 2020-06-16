@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.os.Build;
 import android.os.Parcel;
 
 import static org.junit.Assert.assertEquals;
@@ -37,8 +38,12 @@ public class SoftApCapabilityTest {
     public void testCopyOperator() throws Exception {
         long testSoftApFeature = SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT
                 | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
+        int[] testSupported2Glist = {1, 2, 3, 4};
+        int[] testSupported5Glist = {36, 149};
         SoftApCapability capability = new SoftApCapability(testSoftApFeature);
         capability.setMaxSupportedClients(10);
+        capability.setSupportedChannelList(SoftApConfiguration.BAND_2GHZ, testSupported2Glist);
+        capability.setSupportedChannelList(SoftApConfiguration.BAND_5GHZ, testSupported5Glist);
 
         SoftApCapability copiedCapability = new SoftApCapability(capability);
 
@@ -55,6 +60,11 @@ public class SoftApCapabilityTest {
                 | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
         SoftApCapability capability = new SoftApCapability(testSoftApFeature);
         capability.setMaxSupportedClients(10);
+        int[] testSupported2Glist = {1, 2, 3, 4};
+        int[] testSupported5Glist = {36, 149};
+
+        capability.setSupportedChannelList(SoftApConfiguration.BAND_2GHZ, testSupported2Glist);
+        capability.setSupportedChannelList(SoftApConfiguration.BAND_5GHZ, testSupported5Glist);
 
         Parcel parcelW = Parcel.obtain();
         capability.writeToParcel(parcelW, 0);
@@ -70,4 +80,26 @@ public class SoftApCapabilityTest {
         assertEquals(capability.hashCode(), fromParcel.hashCode());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testSetSupportedChannelListWithInvalidBand() {
+        long testSoftApFeature = SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT
+                | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
+        SoftApCapability capability = new SoftApCapability(testSoftApFeature);
+        capability.setSupportedChannelList(
+                SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ, new int[0]);
+
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetSupportedChannelListWithInvalidBand() {
+        long testSoftApFeature = SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT
+                | SoftApCapability.SOFTAP_FEATURE_ACS_OFFLOAD;
+        SoftApCapability capability = new SoftApCapability(testSoftApFeature);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            capability.getSupportedChannelList(
+                    SoftApConfiguration.BAND_2GHZ | SoftApConfiguration.BAND_5GHZ);
+        } else {
+            throw new IllegalArgumentException("API doesn't support in current SDK version");
+        }
+    }
 }
