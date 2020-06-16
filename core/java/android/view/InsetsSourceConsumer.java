@@ -275,9 +275,9 @@ public class InsetsSourceConsumer {
     }
 
     @VisibleForTesting(visibility = PACKAGE)
-    public void updateSource(InsetsSource newSource) {
+    public void updateSource(InsetsSource newSource, @AnimationType int animationType) {
         InsetsSource source = mState.peekSource(mType);
-        if (source == null || mController.getAnimationType(mType) == ANIMATION_TYPE_NONE
+        if (source == null || animationType == ANIMATION_TYPE_NONE
                 || source.getFrame().equals(newSource.getFrame())) {
             mPendingFrame = null;
             mPendingVisibleFrame = null;
@@ -286,7 +286,7 @@ public class InsetsSourceConsumer {
         }
 
         // Frame is changing while animating. Keep note of the new frame but keep existing frame
-        // until animaition is finished.
+        // until animation is finished.
         newSource = new InsetsSource(newSource);
         mPendingFrame = new Rect(newSource.getFrame());
         mPendingVisibleFrame = newSource.getVisibleFrame() != null
