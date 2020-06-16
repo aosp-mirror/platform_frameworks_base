@@ -17,20 +17,22 @@
 package com.android.systemui.media
 
 import android.content.Context
+import android.graphics.PointF
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
+import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
 import com.android.systemui.util.animation.TransitionViewState
-import com.android.systemui.util.animation.MeasurementOutput
+import javax.inject.Inject
 
 /**
  * A class responsible for controlling a single instance of a media player handling interactions
  * with the view instance and keeping the media view states up to date.
  */
-class MediaViewController(
+class MediaViewController @Inject constructor(
     context: Context,
-    val mediaHostStatesManager: MediaHostStatesManager
+    private val mediaHostStatesManager: MediaHostStatesManager
 ) {
 
     private var firstRefresh: Boolean = true
@@ -44,7 +46,7 @@ class MediaViewController(
     /**
      * A map containing all viewStates for all locations of this mediaState
      */
-    private val mViewStates: MutableMap<MediaHostState, TransitionViewState?> = mutableMapOf()
+    private val viewStates: MutableMap<MediaHostState, TransitionViewState?> = mutableMapOf()
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
@@ -67,6 +69,11 @@ class MediaViewController(
      * A temporary state used to store intermediate measurements.
      */
     private val tmpState = TransitionViewState()
+
+    /**
+     * Temporary variable to avoid unnecessary allocations.
+     */
+    private val tmpPoint = PointF()
 
     /**
      * A callback for media state changes
@@ -125,7 +132,7 @@ class MediaViewController(
      * it's not available, it will recreate one by measuring, which may be expensive.
      */
     private fun obtainViewState(state: MediaHostState): TransitionViewState? {
-        val viewState = mViewStates[state]
+        val viewState = viewStates[state]
         if (viewState != null) {
             // we already have cached this measurement, let's continue
             return viewState
@@ -143,7 +150,7 @@ class MediaViewController(
                 // We don't want to cache interpolated or null states as this could quickly fill up
                 // our cache. We only cache the start and the end states since the interpolation
                 // is cheap
-                mViewStates[state.copy()] = result
+                viewStates[state.copy()] = result
             } else {
                 // This is an interpolated state
                 val startState = state.copy().also { it.expansion = 0.0f }
@@ -153,11 +160,13 @@ class MediaViewController(
                 val startViewState = obtainViewState(startState) as TransitionViewState
                 val endState = state.copy().also { it.expansion = 1.0f }
                 val endViewState = obtainViewState(endState) as TransitionViewState
+                tmpPoint.set(startState.getPivotX(), startState.getPivotY())
                 result = TransitionViewState()
                 layoutController.getInterpolatedState(
                         startViewState,
                         endViewState,
                         state.expansion,
+                        tmpPoint,
                         result)
             }
         } else {
@@ -213,11 +222,35 @@ class MediaViewController(
 
         val shouldAnimate = animateNextStateChange && !applyImmediately
 
+        var startHostState = mediaHostStatesManager.mediaHostStates[startLocation]
+        var endHostState = mediaHostStatesManager.mediaHostStates[endLocation]
+        var swappedStartState = false
+        var swappedEndState = false
+
+        // if we're going from or to a non visible state, let's grab the visible one and animate
+        // the view being clipped instead.
+        if (endHostState?.visible != true) {
+            endHostState = startHostState
+            swappedEndState = true
+        }
+        if (startHostState?.visible != true) {
+            startHostState = endHostState
+            swappedStartState = true
+        }
+        if (startHostState == null || endHostState == null) {
+            return
+        }
+
+        var endViewState = obtainViewState(endHostState) ?: return
+        if (swappedEndState) {
+            endViewState = endViewState.copy()
+            endViewState.height = 0
+        }
+
         // Obtain the view state that we'd want to be at the end
         // The view might not be bound yet or has never been measured and in that case will be
         // reset once the state is fully available
-        val endState = obtainViewStateForLocation(endLocation) ?: return
-        layoutController.setMeasureState(endState)
+        layoutController.setMeasureState(endViewState)
 
         // If the view isn't bound, we can drop the animation, otherwise we'll executute it
         animateNextStateChange = false
@@ -225,24 +258,43 @@ class MediaViewController(
             return
         }
 
-        val startState = obtainViewStateForLocation(startLocation)
+        var startViewState = obtainViewState(startHostState)
+        if (swappedStartState) {
+            startViewState = startViewState?.copy()
+            startViewState?.height = 0
+        }
+
         val result: TransitionViewState?
-        if (transitionProgress == 1.0f || startState == null) {
-            result = endState
+        result = if (transitionProgress == 1.0f || startViewState == null) {
+            endViewState
         } else if (transitionProgress == 0.0f) {
-            result = startState
+            startViewState
         } else {
-            layoutController.getInterpolatedState(startState, endState, transitionProgress,
-                    tmpState)
-            result = tmpState
+            if (swappedEndState || swappedStartState) {
+                tmpPoint.set(startHostState.getPivotX(), startHostState.getPivotY())
+            } else {
+                tmpPoint.set(0.0f, 0.0f)
+            }
+            layoutController.getInterpolatedState(startViewState, endViewState, transitionProgress,
+                    tmpPoint, tmpState)
+            tmpState
         }
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
     }
 
-    private fun obtainViewStateForLocation(location: Int): TransitionViewState? {
-        val mediaState = mediaHostStatesManager.mediaHostStates[location] ?: return null
-        return obtainViewState(mediaState)
+    /**
+     * Retrieves the [TransitionViewState] and [MediaHostState] of a [@MediaLocation].
+     * In the event of [location] not being visible, [locationWhenHidden] will be used instead.
+     *
+     * @param location Target
+     * @param locationWhenHidden Location that will be used when the target is not
+     * [MediaHost.visible]
+     * @return State require for executing a transition, and also the respective [MediaHost].
+     */
+    private fun obtainViewStateForLocation(@MediaLocation location: Int): TransitionViewState? {
+        val mediaHostState = mediaHostStatesManager.mediaHostStates[location] ?: return null
+        return obtainViewState(mediaHostState)
     }
 
     /**
@@ -250,8 +302,7 @@ class MediaViewController(
      * This updates the width the view will me measured with.
      */
     fun onLocationPreChange(@MediaLocation newLocation: Int) {
-        val viewState = obtainViewStateForLocation(newLocation)
-        viewState?.let {
+        obtainViewStateForLocation(newLocation)?.let {
             layoutController.setMeasureState(it)
         }
     }
@@ -271,7 +322,7 @@ class MediaViewController(
     fun refreshState() {
         if (!firstRefresh) {
             // Let's clear all of our measurements and recreate them!
-            mViewStates.clear()
+            viewStates.clear()
             setCurrentState(currentStartLocation, currentEndLocation, currentTransitionProgress,
                     applyImmediately = false)
         }
