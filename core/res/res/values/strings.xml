@@ -4363,9 +4363,6 @@
     <!-- The delete-widget drop target button text -->
     <string name="kg_reordering_delete_drop_target_text">Remove</string>
 
-    <!-- Toast message for background started foreground service while-in-use permission restriction feature -->
-    <string name="allow_while_in_use_permission_in_fgs">The background started foreground service from <xliff:g id="packageName" example="com.example">%1$s</xliff:g> will not have while-in-use permission in future R builds. Please see go/r-bg-fgs-restriction and file a bugreport.</string>
-
     <!-- Message shown in dialog when user is attempting to set the music volume above the
     recommended maximum level for headphones -->
     <string name="safe_media_volume_warning" product="default">

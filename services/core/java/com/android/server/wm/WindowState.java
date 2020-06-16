@@ -1529,6 +1529,29 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     /**
+     * This is a form of rectangle "difference". It cut off each dimension of rect by the amount
+     * that toRemove is "pushing into" it from the outside. Any dimension that fully contains
+     * toRemove won't change.
+     */
+    private void cutRect(Rect rect, Rect toRemove) {
+        if (toRemove.isEmpty()) return;
+        if (toRemove.top < rect.bottom && toRemove.bottom > rect.top) {
+            if (toRemove.right >= rect.right && toRemove.left >= rect.left) {
+                rect.right = toRemove.left;
+            } else if (toRemove.left <= rect.left && toRemove.right <= rect.right) {
+                rect.left = toRemove.right;
+            }
+        }
+        if (toRemove.left < rect.right && toRemove.right > rect.left) {
+            if (toRemove.bottom >= rect.bottom && toRemove.top >= rect.top) {
+                rect.bottom = toRemove.top;
+            } else if (toRemove.top <= rect.top && toRemove.bottom <= rect.bottom) {
+                rect.top = toRemove.bottom;
+            }
+        }
+    }
+
+    /**
      * Retrieves the visible bounds of the window.
      * @param bounds The rect which gets the bounds.
      */
@@ -1543,6 +1566,20 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 stack.getDimBounds(mTmpRect);
             } else {
                 intersectWithStackBounds = false;
+            }
+            if (inSplitScreenPrimaryWindowingMode()) {
+                // If this is in the primary split and the home stack is the top visible task in
+                // the secondary split, it means this is "minimized" and thus must prevent
+                // overlapping with home.
+                // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
+                final ActivityStack rootSecondary =
+                        task.getDisplayArea().getRootSplitScreenSecondaryTask();
+                if (rootSecondary.isActivityTypeHome() || rootSecondary.isActivityTypeRecents()) {
+                    final WindowContainer topTask = rootSecondary.getTopChild();
+                    if (topTask.isVisible()) {
+                        cutRect(mTmpRect, topTask.getBounds());
+                    }
+                }
             }
         }
 
@@ -3576,6 +3613,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     public void notifyInsetsControlChanged() {
         ProtoLog.d(WM_DEBUG_IME, "notifyInsetsControlChanged for %s ", this);
+        if (mAppDied || mRemoved) {
+            return;
+        }
         final InsetsStateController stateController =
                 getDisplayContent().getInsetsStateController();
         try {

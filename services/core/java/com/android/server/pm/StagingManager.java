@@ -53,6 +53,7 @@ import android.os.ParcelableException;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.storage.IStorageManager;
@@ -1155,6 +1156,11 @@ public class StagingManager {
     }
 
     private void checkStateAndResume(@NonNull PackageInstallerSession session) {
+        // Do not resume session if boot completed already
+        if (SystemProperties.getBoolean("sys.boot_completed", false)) {
+            return;
+        }
+
         if (!session.isCommitted()) {
             // Session hasn't been committed yet, ignore.
             return;
