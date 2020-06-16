@@ -63,6 +63,10 @@ import libcore.io.IoUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Objects;
 
 /**
@@ -557,6 +561,20 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK = 12;
     private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK = 13;
     private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK = 14;
+    // Filter with IORap
+    private static final int TRON_COMPILATION_FILTER_ASSUMED_VERIFIED_IORAP = 15;
+    private static final int TRON_COMPILATION_FILTER_EXTRACT_IORAP = 16;
+    private static final int TRON_COMPILATION_FILTER_VERIFY_IORAP = 17;
+    private static final int TRON_COMPILATION_FILTER_QUICKEN_IORAP = 18;
+    private static final int TRON_COMPILATION_FILTER_SPACE_PROFILE_IORAP = 19;
+    private static final int TRON_COMPILATION_FILTER_SPACE_IORAP = 20;
+    private static final int TRON_COMPILATION_FILTER_SPEED_PROFILE_IORAP = 21;
+    private static final int TRON_COMPILATION_FILTER_SPEED_IORAP = 22;
+    private static final int TRON_COMPILATION_FILTER_EVERYTHING_PROFILE_IORAP = 23;
+    private static final int TRON_COMPILATION_FILTER_EVERYTHING_IORAP = 24;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_IORAP = 25;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK_IORAP = 26;
+    private static final int TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK_IORAP = 27;
 
     // Constants used for logging compilation reason to TRON.
     // DO NOT CHANGE existing values.
@@ -623,6 +641,22 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK;
             case "run-from-vdex-fallback" :
                 return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK;
+            case "assume-verified-iorap" : return TRON_COMPILATION_FILTER_ASSUMED_VERIFIED_IORAP;
+            case "extract-iorap" : return TRON_COMPILATION_FILTER_EXTRACT_IORAP;
+            case "verify-iorap" : return TRON_COMPILATION_FILTER_VERIFY_IORAP;
+            case "quicken-iorap" : return TRON_COMPILATION_FILTER_QUICKEN_IORAP;
+            case "space-profile-iorap" : return TRON_COMPILATION_FILTER_SPACE_PROFILE_IORAP;
+            case "space-iorap" : return TRON_COMPILATION_FILTER_SPACE_IORAP;
+            case "speed-profile-iorap" : return TRON_COMPILATION_FILTER_SPEED_PROFILE_IORAP;
+            case "speed-iorap" : return TRON_COMPILATION_FILTER_SPEED_IORAP;
+            case "everything-profile-iorap" :
+                return TRON_COMPILATION_FILTER_EVERYTHING_PROFILE_IORAP;
+            case "everything-iorap" : return TRON_COMPILATION_FILTER_EVERYTHING_IORAP;
+            case "run-from-apk-iorap" : return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_IORAP;
+            case "run-from-apk-fallback-iorap" :
+                return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_APK_FALLBACK_IORAP;
+            case "run-from-vdex-fallback-iorap" :
+                return TRON_COMPILATION_FILTER_FAKE_RUN_FROM_VDEX_FALLBACK_IORAP;
             default: return TRON_COMPILATION_FILTER_UNKNOWN;
         }
     }
@@ -640,9 +674,12 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     }
 
     private class ArtManagerInternalImpl extends ArtManagerInternal {
+        private static final String IORAP_DIR = "/data/misc/iorapd";
+        private static final String TAG = "ArtManagerInternalImpl";
+
         @Override
         public PackageOptimizationInfo getPackageOptimizationInfo(
-                ApplicationInfo info, String abi) {
+                ApplicationInfo info, String abi, String activityName) {
             String compilationReason;
             String compilationFilter;
             try {
@@ -662,11 +699,45 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 compilationReason = "error";
             }
 
+            if (checkIorapCompiledTrace(info.packageName, activityName, info.longVersionCode)) {
+                compilationFilter = compilationFilter + "-iorap";
+            }
+
             int compilationFilterTronValue = getCompilationFilterTronValue(compilationFilter);
             int compilationReasonTronValue = getCompilationReasonTronValue(compilationReason);
 
             return new PackageOptimizationInfo(
                     compilationFilterTronValue, compilationReasonTronValue);
+        }
+
+        /*
+         * Checks the existence of IORap compiled trace for an app.
+         *
+         * @return true if the compiled trace exists and the size is greater than 1kb.
+         */
+        private boolean checkIorapCompiledTrace(
+                String packageName, String activityName, long version) {
+            // For example: /data/misc/iorapd/com.google.android.GoogleCamera/
+            // 60092239/com.android.camera.CameraLauncher/compiled_traces/compiled_trace.pb
+            Path tracePath = Paths.get(IORAP_DIR,
+                                       packageName,
+                                       Long.toString(version),
+                                       activityName,
+                                       "compiled_traces",
+                                       "compiled_trace.pb");
+            try {
+                boolean exists =  Files.exists(tracePath);
+                Log.d(TAG, tracePath.toString() + (exists? " exists" : " doesn't exist"));
+                if (exists) {
+                    long bytes = Files.size(tracePath);
+                    Log.d(TAG, tracePath.toString() + " size is " + Long.toString(bytes));
+                    return bytes > 0L;
+                }
+                return exists;
+            } catch (IOException e) {
+                Log.d(TAG, e.getMessage());
+                return false;
+            }
         }
     }
 }

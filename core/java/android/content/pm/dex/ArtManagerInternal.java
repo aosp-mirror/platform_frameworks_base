@@ -30,5 +30,5 @@ public abstract class ArtManagerInternal {
      * in executes using the specified {@code abi}.
      */
     public abstract PackageOptimizationInfo getPackageOptimizationInfo(
-            ApplicationInfo info, String abi);
+            ApplicationInfo info, String abi, String activityName);
 }
