@@ -751,13 +751,19 @@ public class UserManagerService extends IUserManager.Stub {
     }
 
     public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
-        return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */ true);
+        return getUsers(/*excludePartial= */ true, excludeDying, /* excludePreCreated= */
+                true);
     }
 
     @Override
     public @NonNull List<UserInfo> getUsers(boolean excludePartial, boolean excludeDying,
             boolean excludePreCreated) {
         checkManageOrCreateUsersPermission("query users");
+        return getUsersInternal(excludePartial, excludeDying, excludePreCreated);
+    }
+
+    private @NonNull List<UserInfo> getUsersInternal(boolean excludePartial, boolean excludeDying,
+            boolean excludePreCreated) {
         synchronized (mUsersLock) {
             ArrayList<UserInfo> users = new ArrayList<UserInfo>(mUsers.size());
             final int userSize = mUsers.size();
@@ -5039,6 +5045,12 @@ public class UserManagerService extends IUserManager.Stub {
         @Override
         public int[] getUserIds() {
             return UserManagerService.this.getUserIds();
+        }
+
+        @Override
+        public @NonNull List<UserInfo> getUsers(boolean excludeDying) {
+            return UserManagerService.this.getUsersInternal(/*excludePartial= */ true,
+                    excludeDying, /* excludePreCreated= */ true);
         }
 
         @Override
