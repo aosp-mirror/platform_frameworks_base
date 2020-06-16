@@ -3414,7 +3414,7 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private final class UpgradeController {
-            private static final int SETTINGS_VERSION = 190;
+            private static final int SETTINGS_VERSION = 191;
 
             private final int mUserId;
 
@@ -4766,6 +4766,21 @@ public class SettingsProvider extends ContentProvider {
                                 SettingsState.SYSTEM_PACKAGE_NAME);
                     }
                     currentVersion = 190;
+                }
+
+                if (currentVersion == 190) {
+                    // Version 190: get HDMI auto device off from overlay
+                    final SettingsState globalSettings = getGlobalSettingsLocked();
+                    final Setting currentSetting = globalSettings.getSettingLocked(
+                            Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED);
+                    if (currentSetting.isNull()) {
+                        globalSettings.insertSettingLocked(
+                                Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
+                                getContext().getResources().getBoolean(
+                                        R.bool.def_hdmiControlAutoDeviceOff) ? "1" : "0",
+                                null, true, SettingsState.SYSTEM_PACKAGE_NAME);
+                    }
+                    currentVersion = 191;
                 }
 
                 // vXXX: Add new settings above this point.

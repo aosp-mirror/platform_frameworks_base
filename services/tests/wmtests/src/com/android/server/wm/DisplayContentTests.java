@@ -1144,7 +1144,14 @@ public class DisplayContentTests extends WindowTestsBase {
         assertTrue(app.hasFixedRotationTransform(app2));
         assertTrue(mDisplayContent.isFixedRotationLaunchingApp(app2));
 
+        // The fixed rotation transform can only be finished when all animation finished.
+        doReturn(false).when(app2).isAnimating(anyInt(), anyInt());
+        mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app2.token);
+        assertTrue(app.hasFixedRotationTransform());
+        assertTrue(app2.hasFixedRotationTransform());
+
         // The display should be rotated after the launch is finished.
+        doReturn(false).when(app).isAnimating(anyInt(), anyInt());
         mDisplayContent.mAppTransition.notifyAppTransitionFinishedLocked(app.token);
 
         // The fixed rotation should be cleared and the new rotation is applied to display.

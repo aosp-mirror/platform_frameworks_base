@@ -77,8 +77,7 @@ private:
     void flush();
 
     void save();
-    void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, const SkImage*,
-                   const SkMatrix*, SkCanvas::SaveLayerFlags);
+    void saveLayer(const SkRect*, const SkPaint*, const SkImageFilter*, SkCanvas::SaveLayerFlags);
     void saveBehind(const SkRect*);
     void restore();
 

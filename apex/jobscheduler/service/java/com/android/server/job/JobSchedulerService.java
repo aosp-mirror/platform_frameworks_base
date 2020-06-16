@@ -87,7 +87,6 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.server.AppStateTracker;
 import com.android.server.DeviceIdleInternal;
-import com.android.server.FgThread;
 import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerServiceDumpProto.ActiveJob;
 import com.android.server.job.JobSchedulerServiceDumpProto.PendingJob;
@@ -1438,13 +1437,15 @@ public class JobSchedulerService extends com.android.server.SystemService
 
                     // And kick off the work to update the affected jobs, using a secondary
                     // thread instead of chugging away here on the main looper thread.
-                    FgThread.getHandler().post(mJobTimeUpdater);
+                    new Thread(mJobTimeUpdater, "JobSchedulerTimeSetReceiver").start();
                 }
             }
         }
     };
 
     private final Runnable mJobTimeUpdater = () -> {
+        Process.setThreadPriority(Process.THREAD_PRIORITY_FOREGROUND);
+
         final ArrayList<JobStatus> toRemove = new ArrayList<>();
         final ArrayList<JobStatus> toAdd = new ArrayList<>();
         synchronized (mLock) {
