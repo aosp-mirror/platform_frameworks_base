@@ -151,27 +151,4 @@ public class PowerWhitelistBackendTest {
         assertThat(mPowerWhitelistBackend.isSysWhitelisted(PACKAGE_TWO)).isFalse();
         assertThat(mPowerWhitelistBackend.isWhitelisted(PACKAGE_ONE)).isFalse();
     }
-
-    @Test
-    public void testIsSystemWhitelistedExceptIdle_onePackage() throws Exception {
-        doReturn(new String[] {PACKAGE_TWO}).when(
-                mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
-        mPowerWhitelistBackend.refreshList();
-
-        assertThat(mPowerWhitelistBackend.isSysWhitelistedExceptIdle(PACKAGE_ONE)).isFalse();
-        assertThat(mPowerWhitelistBackend.isSysWhitelistedExceptIdle(PACKAGE_TWO)).isTrue();
-    }
-
-    @Test
-    public void testIsSystemWhitelistedExceptIdle_packageArray() throws Exception {
-        doReturn(new String[] {PACKAGE_TWO}).when(
-                mDeviceIdleService).getSystemPowerWhitelistExceptIdle();
-        mPowerWhitelistBackend.refreshList();
-
-        final String[] idlePackages = {PACKAGE_ONE, PACKAGE_TWO};
-        final String[] normalPackages = {PACKAGE_ONE};
-
-        assertThat(mPowerWhitelistBackend.isSysWhitelistedExceptIdle(normalPackages)).isFalse();
-        assertThat(mPowerWhitelistBackend.isSysWhitelistedExceptIdle(idlePackages)).isTrue();
-    }
 }
