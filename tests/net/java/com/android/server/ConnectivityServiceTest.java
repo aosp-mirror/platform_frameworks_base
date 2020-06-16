@@ -100,6 +100,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.any;
@@ -164,6 +165,8 @@ import android.net.LinkAddress;
 import android.net.LinkProperties;
 import android.net.MatchAllNetworkSpecifier;
 import android.net.Network;
+import android.net.NetworkAgent;
+import android.net.NetworkAgentConfig;
 import android.net.NetworkCapabilities;
 import android.net.NetworkFactory;
 import android.net.NetworkInfo;
@@ -6798,6 +6801,30 @@ public class ConnectivityServiceTest {
         // ConnectivityService should have changed the WakeOnLanSupported to true
         wifiLp.setWakeOnLanSupported(true);
         assertEquals(wifiLp, mService.getActiveLinkProperties());
+    }
+
+    @Test
+    public void testLegacyExtraInfoSentToNetworkMonitor() throws Exception {
+        class TestNetworkAgent extends NetworkAgent {
+            TestNetworkAgent(Context context, Looper looper, NetworkAgentConfig config) {
+                super(context, looper, "MockAgent", new NetworkCapabilities(),
+                        new LinkProperties(), 40 , config, null /* provider */);
+            }
+        }
+        final NetworkAgent naNoExtraInfo = new TestNetworkAgent(
+                mServiceContext, mCsHandlerThread.getLooper(), new NetworkAgentConfig());
+        naNoExtraInfo.register();
+        verify(mNetworkStack).makeNetworkMonitor(any(), isNull(String.class), any());
+        naNoExtraInfo.unregister();
+
+        reset(mNetworkStack);
+        final NetworkAgentConfig config =
+                new NetworkAgentConfig.Builder().setLegacyExtraInfo("legacyinfo").build();
+        final NetworkAgent naExtraInfo = new TestNetworkAgent(
+                mServiceContext, mCsHandlerThread.getLooper(), config);
+        naExtraInfo.register();
+        verify(mNetworkStack).makeNetworkMonitor(any(), eq("legacyinfo"), any());
+        naExtraInfo.unregister();
     }
 
     private void setupLocationPermissions(
