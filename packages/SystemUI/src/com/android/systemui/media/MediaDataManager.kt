@@ -67,7 +67,7 @@ private const val LUMINOSITY_THRESHOLD = 0.05f
 private const val SATURATION_MULTIPLIER = 0.8f
 
 private val LOADING = MediaData(false, 0, null, null, null, null, null,
-        emptyList(), emptyList(), "INVALID", null, null, null, null)
+        emptyList(), emptyList(), "INVALID", null, null, null, true, null)
 
 fun isMediaNotification(sbn: StatusBarNotification): Boolean {
     if (!sbn.notification.hasMediaSession()) {
@@ -88,12 +88,12 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
 class MediaDataManager @Inject constructor(
     private val context: Context,
     private val mediaControllerFactory: MediaControllerFactory,
-    private val mediaTimeoutListener: MediaTimeoutListener,
     private val notificationEntryManager: NotificationEntryManager,
-    private val mediaResumeListener: MediaResumeListener,
     @Background private val backgroundExecutor: Executor,
     @Main private val foregroundExecutor: Executor,
-    private val broadcastDispatcher: BroadcastDispatcher
+    broadcastDispatcher: BroadcastDispatcher,
+    mediaTimeoutListener: MediaTimeoutListener,
+    mediaResumeListener: MediaResumeListener
 ) {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
@@ -131,7 +131,6 @@ class MediaDataManager @Inject constructor(
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
             setTimedOut(token, timedOut) }
         addListener(mediaTimeoutListener)
-
         if (useMediaResumption) {
             mediaResumeListener.addTrackToResumeCallback = { desc: MediaDescription,
                 resumeAction: Runnable, token: MediaSession.Token, appName: String,
@@ -215,7 +214,7 @@ class MediaDataManager @Inject constructor(
             mediaEntries.put(packageName, resumeData)
         }
         backgroundExecutor.execute {
-            loadMediaDataInBg(desc, action, token, appName, appIntent, packageName)
+            loadMediaDataInBgForResumption(desc, action, token, appName, appIntent, packageName)
         }
     }
 
@@ -255,16 +254,21 @@ class MediaDataManager @Inject constructor(
     fun removeListener(listener: Listener) = listeners.remove(listener)
 
     private fun setTimedOut(token: String, timedOut: Boolean) {
-        if (!timedOut) {
-            return
-        }
         mediaEntries[token]?.let {
-            notificationEntryManager.removeNotification(it.notificationKey, null /* ranking */,
-                    UNDEFINED_DISMISS_REASON)
+            if (Utils.useMediaResumption(context)) {
+                if (it.active == !timedOut) {
+                    return
+                }
+                it.active = !timedOut
+                onMediaDataLoaded(token, token, it)
+            } else {
+                notificationEntryManager.removeNotification(it.notificationKey, null /* ranking */,
+                        UNDEFINED_DISMISS_REASON)
+            }
         }
     }
 
-    private fun loadMediaDataInBg(
+    private fun loadMediaDataInBgForResumption(
         desc: MediaDescription,
         resumeAction: Runnable,
         token: MediaSession.Token,
@@ -272,11 +276,6 @@ class MediaDataManager @Inject constructor(
         appIntent: PendingIntent,
         packageName: String
     ) {
-        if (resumeAction == null) {
-            Log.e(TAG, "Resume action cannot be null")
-            return
-        }
-
         if (TextUtils.isEmpty(desc.title)) {
             Log.e(TAG, "Description incomplete")
             return
@@ -298,8 +297,9 @@ class MediaDataManager @Inject constructor(
         val mediaAction = getResumeMediaAction(resumeAction)
         foregroundExecutor.execute {
             onMediaDataLoaded(packageName, null, MediaData(true, Color.DKGRAY, appName,
-                null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
-                packageName, token, appIntent, null, resumeAction, packageName))
+                    null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
+                    packageName, token, appIntent, device = null, active = false,
+                    resumeAction = resumeAction))
         }
     }
 
@@ -430,7 +430,8 @@ class MediaDataManager @Inject constructor(
         foregroundExecutor.execute {
             onMediaDataLoaded(key, oldKey, MediaData(true, bgColor, app, smallIconDrawable, artist,
                     song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
-                    notif.contentIntent, null, resumeAction, key))
+                    notif.contentIntent, null, active = true, resumeAction = resumeAction,
+                    notificationKey = key))
         }
     }
 
@@ -528,13 +529,13 @@ class MediaDataManager @Inject constructor(
     /**
      * Are there any media notifications active?
      */
-    fun hasActiveMedia() = mediaEntries.any({ isActive(it.value) })
+    fun hasActiveMedia() = mediaEntries.any { it.value.active }
 
-    fun isActive(data: MediaData): Boolean {
-        if (data.token == null) {
+    fun isActive(token: MediaSession.Token?): Boolean {
+        if (token == null) {
             return false
         }
-        val controller = mediaControllerFactory.create(data.token)
+        val controller = mediaControllerFactory.create(token)
         val state = controller?.playbackState?.state
         return state != null && NotificationMediaManager.isActiveState(state)
     }
@@ -542,7 +543,7 @@ class MediaDataManager @Inject constructor(
     /**
      * Are there any media entries, including resume controls?
      */
-    fun hasAnyMedia() = mediaEntries.isNotEmpty()
+    fun hasAnyMedia() = if (useMediaResumption) mediaEntries.isNotEmpty() else hasActiveMedia()
 
     interface Listener {
 
