@@ -233,6 +233,7 @@ applications that come with the platform
         <!-- Permissions required for reading and logging compat changes -->
         <permission name="android.permission.LOG_COMPAT_CHANGE" />
         <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
+        <permission name="android.permission.REGISTER_STATS_PULL_ATOM" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.telephony">
