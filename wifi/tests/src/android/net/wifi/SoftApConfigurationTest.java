@@ -21,6 +21,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.junit.Assert.assertNull;
 
 import android.net.MacAddress;
+import android.os.Build;
 import android.os.Parcel;
 
 import androidx.test.filters.SmallTest;
@@ -78,6 +79,10 @@ public class SoftApConfigurationTest {
         assertThat(original.getChannel()).isEqualTo(0);
         assertThat(original.isHiddenSsid()).isEqualTo(false);
         assertThat(original.getMaxNumberOfClients()).isEqualTo(0);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            assertThat(original.getMacRandomizationSetting())
+                    .isEqualTo(SoftApConfiguration.RANDOMIZATION_PERSISTENT);
+        }
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
@@ -120,7 +125,7 @@ public class SoftApConfigurationTest {
         List<MacAddress> testAllowedClientList = new ArrayList<>();
         testBlockedClientList.add(MacAddress.fromString("11:22:33:44:55:66"));
         testAllowedClientList.add(MacAddress.fromString("aa:bb:cc:dd:ee:ff"));
-        SoftApConfiguration original = new SoftApConfiguration.Builder()
+        SoftApConfiguration.Builder originalBuilder = new SoftApConfiguration.Builder()
                 .setPassphrase("secretsecret", SoftApConfiguration.SECURITY_TYPE_WPA2_PSK)
                 .setChannel(149, SoftApConfiguration.BAND_5GHZ)
                 .setHiddenSsid(true)
@@ -129,8 +134,11 @@ public class SoftApConfigurationTest {
                 .setShutdownTimeoutMillis(500000)
                 .setClientControlByUserEnabled(true)
                 .setBlockedClientList(testBlockedClientList)
-                .setAllowedClientList(testAllowedClientList)
-                .build();
+                .setAllowedClientList(testAllowedClientList);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            originalBuilder.setMacRandomizationSetting(SoftApConfiguration.RANDOMIZATION_NONE);
+        }
+        SoftApConfiguration original = originalBuilder.build();
         assertThat(original.getPassphrase()).isEqualTo("secretsecret");
         assertThat(original.getSecurityType()).isEqualTo(
                 SoftApConfiguration.SECURITY_TYPE_WPA2_PSK);
@@ -143,6 +151,10 @@ public class SoftApConfigurationTest {
         assertThat(original.isClientControlByUserEnabled()).isEqualTo(true);
         assertThat(original.getBlockedClientList()).isEqualTo(testBlockedClientList);
         assertThat(original.getAllowedClientList()).isEqualTo(testAllowedClientList);
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.R) {
+            assertThat(original.getMacRandomizationSetting())
+                    .isEqualTo(SoftApConfiguration.RANDOMIZATION_NONE);
+        }
 
         SoftApConfiguration unparceled = parcelUnparcel(original);
         assertThat(unparceled).isNotSameAs(original);
