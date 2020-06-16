@@ -37,6 +37,7 @@ class TransitionLayout @JvmOverloads constructor(
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
     private val originalGoneChildrenSet: MutableSet<Int> = mutableSetOf()
+    private val originalViewAlphas: MutableMap<Int, Float> = mutableMapOf()
     private var measureAsConstraint: Boolean = false
     private var currentState: TransitionViewState = TransitionViewState()
     private var updateScheduled = false
@@ -67,6 +68,7 @@ class TransitionLayout @JvmOverloads constructor(
             if (child.visibility == GONE) {
                 originalGoneChildrenSet.add(child.id)
             }
+            originalViewAlphas[child.id] = child.alpha
         }
     }
 
@@ -198,6 +200,8 @@ class TransitionLayout @JvmOverloads constructor(
             if (originalGoneChildrenSet.contains(child.id)) {
                 child.visibility = View.GONE
             }
+            // Reset the alphas, to only have the alphas present from the constraintset
+            child.alpha = originalViewAlphas[child.id] ?: 1.0f
         }
         // Let's now apply the constraintSet to get the full state
         constraintSet.applyTo(this)

@@ -1772,6 +1772,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public void setPanelExpanded(boolean isExpanded) {
+        if (mPanelExpanded != isExpanded) {
+            mNotificationLogger.onPanelExpandedChanged(isExpanded);
+        }
         mPanelExpanded = isExpanded;
         updateHideIconsForBouncer(false /* animate */);
         mNotificationShadeWindowController.setPanelExpanded(isExpanded);
@@ -2090,7 +2093,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     /**
      * Called when another window is about to transfer it's input focus.
      */
-    public void onInputFocusTransfer(boolean start, float velocity) {
+    public void onInputFocusTransfer(boolean start, boolean cancel, float velocity) {
         if (!mCommandQueue.panelsEnabled()) {
             return;
         }
@@ -2098,7 +2101,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (start) {
             mNotificationPanelViewController.startWaitingForOpenPanelGesture();
         } else {
-            mNotificationPanelViewController.stopWaitingForOpenPanelGesture(velocity);
+            mNotificationPanelViewController.stopWaitingForOpenPanelGesture(cancel, velocity);
         }
     }
 
@@ -2878,7 +2881,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     // Visibility reporting
-
     protected void handleVisibleToUserChanged(boolean visibleToUser) {
         if (visibleToUser) {
             handleVisibleToUserChangedImpl(visibleToUser);
@@ -2900,12 +2902,12 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    /**
-     * The LEDs are turned off when the notification panel is shown, even just a little bit.
-     * See also StatusBar.setPanelExpanded for another place where we attempt to do this.
-     */
-    private void handleVisibleToUserChangedImpl(boolean visibleToUser) {
+    // Visibility reporting
+
+    void handleVisibleToUserChangedImpl(boolean visibleToUser) {
         if (visibleToUser) {
+            /* The LEDs are turned off when the notification panel is shown, even just a little bit.
+             * See also StatusBar.setPanelExpanded for another place where we attempt to do this. */
             boolean pinnedHeadsUp = mHeadsUpManager.hasPinnedHeadsUp();
             boolean clearNotificationEffects =
                     !mPresenter.isPresenterFullyCollapsed() &&
@@ -3982,7 +3984,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mIsKeyguard && !unlocking) {
             mScrimController.transitionTo(ScrimState.KEYGUARD);
         } else if (mBubbleController.isStackExpanded()) {
-            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED);
+            mScrimController.transitionTo(ScrimState.BUBBLE_EXPANDED, mUnlockScrimCallback);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }

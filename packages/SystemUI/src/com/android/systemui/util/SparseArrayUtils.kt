@@ -19,6 +19,22 @@ package com.android.systemui.util
 import android.util.SparseArray
 
 /**
+ * Transforms a sequence of Key/Value pairs into a SparseArray.
+ *
+ * See [kotlin.collections.toMap].
+ */
+fun <T> Sequence<Pair<Int, T>>.toSparseArray(size: Int = -1): SparseArray<T> {
+    val sparseArray = when {
+        size < 0 -> SparseArray<T>()
+        else -> SparseArray<T>(size)
+    }
+    for ((i, v) in this) {
+        sparseArray.put(i, v)
+    }
+    return sparseArray
+}
+
+/**
  * Transforms an [Array] into a [SparseArray], by applying each element to [keySelector] in order to
  * generate the index at which it will be placed. If two elements produce the same index, the latter
  * replaces the former in the final result.

@@ -2638,7 +2638,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     ActivityStack adjustFocusToNextFocusableTask(String reason) {
         return adjustFocusToNextFocusableTask(reason, false /* allowFocusSelf */,
-                true /* moveParentsToTop */);
+                true /* moveDisplayToTop */);
     }
 
     /** Return the next focusable task by looking from the siblings and parent tasks */
@@ -2661,11 +2661,11 @@ class Task extends WindowContainer<WindowContainer> {
      * Find next proper focusable task and make it focused.
      * @param reason The reason of making the adjustment.
      * @param allowFocusSelf Is the focus allowed to remain on the same task.
-     * @param moveParentsToTop Whether to move parents to top while making the task focused.
+     * @param moveDisplayToTop Whether to move display to top while making the task focused.
      * @return The root task that now got the focus, {@code null} if none found.
      */
     ActivityStack adjustFocusToNextFocusableTask(String reason, boolean allowFocusSelf,
-            boolean moveParentsToTop) {
+            boolean moveDisplayToTop) {
         ActivityStack focusableTask = (ActivityStack) getNextFocusableTask(allowFocusSelf);
         if (focusableTask == null) {
             focusableTask = mRootWindowContainer.getNextFocusableStack((ActivityStack) this,
@@ -2676,10 +2676,17 @@ class Task extends WindowContainer<WindowContainer> {
         }
 
         final ActivityStack rootTask = (ActivityStack) focusableTask.getRootTask();
-        if (!moveParentsToTop) {
-            // Only move the next stack to top in its task container.
+        if (!moveDisplayToTop) {
+            // There may be multiple task layers above this task, so when relocating the task to the
+            // top, we should move this task and each of its parent task that below display area to
+            // the top of each layer.
             WindowContainer parent = focusableTask.getParent();
-            parent.positionChildAt(POSITION_TOP, focusableTask, false /* includingParents */);
+            WindowContainer next = focusableTask;
+            do {
+                parent.positionChildAt(POSITION_TOP, next, false /* includingParents */);
+                next = parent;
+                parent = next.getParent();
+            } while (next.asTask() != null && parent != null);
             return rootTask;
         }
 
@@ -2917,7 +2924,12 @@ class Task extends WindowContainer<WindowContainer> {
     }
 
     boolean cropWindowsToStackBounds() {
-        return isResizeable();
+        // Don't crop HOME/RECENTS windows to stack bounds. This is because in split-screen
+        // they extend past their stack and sysui uses the stack surface to control cropping.
+        // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
+        final boolean isTopHomeOrRecents = (isActivityTypeHome() || isActivityTypeRecents())
+                && getRootTask().getTopMostTask() == this;
+        return isResizeable() && !isTopHomeOrRecents;
     }
 
     /**
