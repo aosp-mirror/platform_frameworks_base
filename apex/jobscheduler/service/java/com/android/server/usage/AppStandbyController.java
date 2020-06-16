@@ -82,10 +82,10 @@ import android.os.BatteryStats;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.IDeviceIdleController;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
-import android.os.PowerWhitelistManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -387,6 +387,7 @@ public class AppStandbyController implements AppStandbyInternal {
         DeviceStateReceiver deviceStateReceiver = new DeviceStateReceiver();
         IntentFilter deviceStates = new IntentFilter(BatteryManager.ACTION_CHARGING);
         deviceStates.addAction(BatteryManager.ACTION_DISCHARGING);
+        deviceStates.addAction(PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED);
         mContext.registerReceiver(deviceStateReceiver, deviceStates);
 
         synchronized (mAppIdleLock) {
@@ -441,6 +442,9 @@ public class AppStandbyController implements AppStandbyInternal {
             }
 
             mSystemServicesReady = true;
+
+            // Offload to handler thread to avoid boot time impact.
+            mHandler.post(mInjector::updatePowerWhitelistCache);
 
             boolean userFileExists;
             synchronized (mAppIdleLock) {
@@ -1080,15 +1084,11 @@ public class AppStandbyController implements AppStandbyInternal {
             return STANDBY_BUCKET_EXEMPTED;
         }
         if (mSystemServicesReady) {
-            try {
-                // We allow all whitelisted apps, including those that don't want to be whitelisted
-                // for idle mode, because app idle (aka app standby) is really not as big an issue
-                // for controlling who participates vs. doze mode.
-                if (mInjector.isNonIdleWhitelisted(packageName)) {
-                    return STANDBY_BUCKET_EXEMPTED;
-                }
-            } catch (RemoteException re) {
-                throw re.rethrowFromSystemServer();
+            // We allow all whitelisted apps, including those that don't want to be whitelisted
+            // for idle mode, because app idle (aka app standby) is really not as big an issue
+            // for controlling who participates vs. doze mode.
+            if (mInjector.isNonIdleWhitelisted(packageName)) {
+                return STANDBY_BUCKET_EXEMPTED;
             }
 
             if (isActiveDeviceAdmin(packageName, userId)) {
@@ -1754,7 +1754,7 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
-    /** Call on a system update to temporarily reset system app buckets. */
+    /** Call on system boot to get the initial set of headless system apps. */
     private void loadHeadlessSystemAppCache() {
         Slog.d(TAG, "Loading headless system app cache. appIdleEnabled=" + mAppIdleEnabled);
         final List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
@@ -1806,8 +1806,6 @@ public class AppStandbyController implements AppStandbyInternal {
             pw.println("Carrier privileged apps (have=" + mHaveCarrierPrivilegedApps
                     + "): " + mCarrierPrivilegedApps);
         }
-
-        final long now = System.currentTimeMillis();
 
         pw.println();
         pw.println("Settings:");
@@ -1874,6 +1872,8 @@ public class AppStandbyController implements AppStandbyInternal {
         }
         pw.println("]");
         pw.println();
+
+        mInjector.dump(pw);
     }
 
     /**
@@ -1890,7 +1890,7 @@ public class AppStandbyController implements AppStandbyInternal {
         private PackageManagerInternal mPackageManagerInternal;
         private DisplayManager mDisplayManager;
         private PowerManager mPowerManager;
-        private PowerWhitelistManager mPowerWhitelistManager;
+        private IDeviceIdleController mDeviceIdleController;
         private CrossProfileAppsInternal mCrossProfileAppsInternal;
         int mBootPhase;
         /**
@@ -1898,6 +1898,11 @@ public class AppStandbyController implements AppStandbyInternal {
          * automatically placed in the RESTRICTED bucket.
          */
         long mAutoRestrictedBucketDelayMs = ONE_DAY;
+        /**
+         * Cached set of apps that are power whitelisted, including those not whitelisted from idle.
+         */
+        @GuardedBy("mPowerWhitelistedApps")
+        private final ArraySet<String> mPowerWhitelistedApps = new ArraySet<>();
 
         Injector(Context context, Looper looper) {
             mContext = context;
@@ -1914,7 +1919,8 @@ public class AppStandbyController implements AppStandbyInternal {
 
         void onBootPhase(int phase) {
             if (phase == PHASE_SYSTEM_SERVICES_READY) {
-                mPowerWhitelistManager = mContext.getSystemService(PowerWhitelistManager.class);
+                mDeviceIdleController = IDeviceIdleController.Stub.asInterface(
+                        ServiceManager.getService(Context.DEVICE_IDLE_CONTROLLER));
                 mBatteryStats = IBatteryStats.Stub.asInterface(
                         ServiceManager.getService(BatteryStats.SERVICE_NAME));
                 mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
@@ -1965,8 +1971,34 @@ public class AppStandbyController implements AppStandbyInternal {
             return mBatteryManager.isCharging();
         }
 
-        boolean isNonIdleWhitelisted(String packageName) throws RemoteException {
-            return mPowerWhitelistManager.isWhitelisted(packageName, false);
+        boolean isNonIdleWhitelisted(String packageName) {
+            if (mBootPhase < PHASE_SYSTEM_SERVICES_READY) {
+                return false;
+            }
+            synchronized (mPowerWhitelistedApps) {
+                return mPowerWhitelistedApps.contains(packageName);
+            }
+        }
+
+        private void updatePowerWhitelistCache() {
+            if (mBootPhase < PHASE_SYSTEM_SERVICES_READY) {
+                return;
+            }
+            try {
+                // Don't call out to DeviceIdleController with the lock held.
+                final String[] whitelistedPkgs =
+                        mDeviceIdleController.getFullPowerWhitelistExceptIdle();
+                synchronized (mPowerWhitelistedApps) {
+                    mPowerWhitelistedApps.clear();
+                    final int len = whitelistedPkgs.length;
+                    for (int i = 0; i < len; ++i) {
+                        mPowerWhitelistedApps.add(whitelistedPkgs[i]);
+                    }
+                }
+            } catch (RemoteException e) {
+                // Should not happen.
+                Slog.wtf(TAG, "Failed to get power whitelist", e);
+            }
         }
 
         boolean isRestrictedBucketEnabled() {
@@ -2053,6 +2085,19 @@ public class AppStandbyController implements AppStandbyInternal {
             }
             return mCrossProfileAppsInternal.getTargetUserProfiles(pkg, userId);
         }
+
+        void dump(PrintWriter pw) {
+            pw.println("mPowerWhitelistedApps=[");
+            synchronized (mPowerWhitelistedApps) {
+                for (int i = mPowerWhitelistedApps.size() - 1; i >= 0; --i) {
+                    pw.print("  ");
+                    pw.print(mPowerWhitelistedApps.valueAt(i));
+                    pw.println(",");
+                }
+            }
+            pw.println("]");
+            pw.println();
+        }
     }
 
     class AppStandbyHandler extends Handler {
@@ -2137,6 +2182,11 @@ public class AppStandbyController implements AppStandbyInternal {
                     break;
                 case BatteryManager.ACTION_DISCHARGING:
                     setChargingState(false);
+                    break;
+                case PowerManager.ACTION_POWER_SAVE_WHITELIST_CHANGED:
+                    if (mSystemServicesReady) {
+                        mHandler.post(mInjector::updatePowerWhitelistCache);
+                    }
                     break;
             }
         }
