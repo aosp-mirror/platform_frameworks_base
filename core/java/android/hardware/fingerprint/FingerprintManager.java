@@ -551,7 +551,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    @Override
     public void setActiveUser(int userId) {
         if (mService != null) try {
             mService.setActiveUser(userId);
@@ -639,7 +638,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
-    @Override
     public boolean hasEnrolledTemplates() {
         return hasEnrolledFingerprints();
     }
@@ -647,7 +645,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     /**
      * @hide
      */
-    @Override
     public boolean hasEnrolledTemplates(int userId) {
         return hasEnrolledFingerprints(userId);
     }
@@ -695,7 +692,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      */
     @Deprecated
     @RequiresPermission(USE_FINGERPRINT)
-    @Override
     public boolean isHardwareDetected() {
         if (mService != null) {
             try {
