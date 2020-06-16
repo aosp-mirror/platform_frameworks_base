@@ -2852,7 +2852,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Do not allow untrusted virtual display to receive keys unless user intentionally
         // touches the display.
         return fromUserTouch || getDisplayContent().isOnTop()
-                || !getDisplayContent().isUntrustedVirtualDisplay();
+                || getDisplayContent().isTrusted();
     }
 
     @Override
