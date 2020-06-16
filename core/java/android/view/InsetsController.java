@@ -260,6 +260,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private final boolean mHasAnimationCallbacks;
         private final @InsetsType int mRequestedTypes;
         private final long mDurationMs;
+        private final boolean mDisable;
 
         private ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
                 new ThreadLocal<AnimationHandler>() {
@@ -272,11 +273,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         };
 
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
-                int requestedTypes) {
+                int requestedTypes, boolean disable) {
             mShow = show;
             mHasAnimationCallbacks = hasAnimationCallbacks;
             mRequestedTypes = requestedTypes;
             mDurationMs = calculateDurationMs();
+            mDisable = disable;
         }
 
         @Override
@@ -284,6 +286,10 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             mController = controller;
             if (DEBUG) Log.d(TAG, "default animation onReady types: " + types);
 
+            if (mDisable) {
+                onAnimationFinish();
+                return;
+            }
             mAnimator = ValueAnimator.ofFloat(0f, 1f);
             mAnimator.setDuration(mDurationMs);
             mAnimator.setInterpolator(new LinearInterpolator());
@@ -477,6 +483,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     private DisplayCutout mLastDisplayCutout;
     private boolean mStartingAnimation;
     private int mCaptionInsetsHeight = 0;
+    private boolean mAnimationsDisabled;
 
     private Runnable mPendingControlTimeout = this::abortPendingImeControlRequest;
     private final ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
@@ -1213,8 +1220,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         }
 
         boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
-        final InternalAnimationControlListener listener =
-                new InternalAnimationControlListener(show, hasAnimationCallbacks, types);
+        final InternalAnimationControlListener listener = new InternalAnimationControlListener(
+                show, hasAnimationCallbacks, types, mAnimationsDisabled);
 
         // Show/hide animations always need to be relative to the display frame, in order that shown
         // and hidden state insets are correct.
@@ -1327,6 +1334,11 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @Override
     public @Appearance int getSystemBarsBehavior() {
         return mHost.getSystemBarsBehavior();
+    }
+
+    @Override
+    public void setAnimationsDisabled(boolean disable) {
+        mAnimationsDisabled = disable;
     }
 
     private @InsetsType int calculateControllableTypes() {
