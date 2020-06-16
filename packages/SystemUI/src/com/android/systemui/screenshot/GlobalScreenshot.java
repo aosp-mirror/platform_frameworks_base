@@ -69,6 +69,7 @@ import android.util.Log;
 import android.util.MathUtils;
 import android.util.Slog;
 import android.view.Display;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceControl;
@@ -374,6 +375,20 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
 
         // Inflate the screenshot layout
         mScreenshotLayout = LayoutInflater.from(mContext).inflate(R.layout.global_screenshot, null);
+        mScreenshotLayout.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK) {
+                    dismissScreenshot("back pressed", true);
+                    return true;
+                }
+                return false;
+            }
+        });
+        // Get focus so that the key events go to the layout.
+        mScreenshotLayout.setFocusableInTouchMode(true);
+        mScreenshotLayout.requestFocus();
+
         mScreenshotAnimatedView =
                 mScreenshotLayout.findViewById(R.id.global_screenshot_animated_view);
         mScreenshotAnimatedView.setClipToOutline(true);
