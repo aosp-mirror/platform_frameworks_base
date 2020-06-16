@@ -34,6 +34,9 @@ public abstract class LoggableMonitor {
     public static final String TAG = "BiometricStats";
     public static final boolean DEBUG = false;
 
+    private final int mStatsModality;
+    private final int mStatsAction;
+    private final int mStatsClient;
     private long mFirstAcquireTimeMs;
 
     protected long getFirstAcquireTimeMs() {
@@ -49,31 +52,21 @@ public abstract class LoggableMonitor {
     }
 
     /**
-     * @return One of {@link BiometricsProtoEnums} MODALITY_* constants.
+     * @param statsModality One of {@link BiometricsProtoEnums} MODALITY_* constants.
+     * @param statsAction One of {@link BiometricsProtoEnums} ACTION_* constants.
+     * @param statsClient One of {@link BiometricsProtoEnums} CLIENT_* constants.
      */
-    protected abstract int statsModality();
-
-    /**
-     * Action == enroll, authenticate, remove, enumerate.
-     * @return One of {@link BiometricsProtoEnums} ACTION_* constants.
-     */
-    protected abstract int statsAction();
-
-    /**
-     * Only matters for AuthenticationClient. Should only be overridden in
-     * {@link BiometricServiceBase}, which determines if a client is for BiometricPrompt, Keyguard,
-     * etc.
-     * @return one of {@link BiometricsProtoEnums} CLIENT_* constants.
-     */
-    protected int statsClient() {
-        return BiometricsProtoEnums.CLIENT_UNKNOWN;
+    public LoggableMonitor(int statsModality, int statsAction, int statsClient) {
+        mStatsModality = statsModality;
+        mStatsAction = statsAction;
+        mStatsClient = statsClient;
     }
 
     protected final void logOnAcquired(Context context, int acquiredInfo, int vendorCode,
             int targetUserId) {
 
-        final boolean isFace = statsModality() == BiometricsProtoEnums.MODALITY_FACE;
-        final boolean isFingerprint = statsModality() == BiometricsProtoEnums.MODALITY_FINGERPRINT;
+        final boolean isFace = mStatsModality == BiometricsProtoEnums.MODALITY_FACE;
+        final boolean isFingerprint = mStatsModality == BiometricsProtoEnums.MODALITY_FINGERPRINT;
         if (isFace || isFingerprint) {
             if ((isFingerprint && acquiredInfo == FingerprintManager.FINGERPRINT_ACQUIRED_START)
                     || (isFace && acquiredInfo == FaceManager.FACE_ACQUIRED_START)) {
@@ -85,20 +78,20 @@ public abstract class LoggableMonitor {
             }
         }
         if (DEBUG) {
-            Slog.v(TAG, "Acquired! Modality: " + statsModality()
+            Slog.v(TAG, "Acquired! Modality: " + mStatsModality
                     + ", User: " + targetUserId
                     + ", IsCrypto: " + isCryptoOperation()
-                    + ", Action: " + statsAction()
-                    + ", Client: " + statsClient()
+                    + ", Action: " + mStatsAction
+                    + ", Client: " + mStatsClient
                     + ", AcquiredInfo: " + acquiredInfo
                     + ", VendorCode: " + vendorCode);
         }
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ACQUIRED,
-                statsModality(),
+                mStatsModality,
                 targetUserId,
                 isCryptoOperation(),
-                statsAction(),
-                statsClient(),
+                mStatsAction,
+                mStatsClient,
                 acquiredInfo,
                 vendorCode,
                 Utils.isDebugEnabled(context, targetUserId));
@@ -110,11 +103,11 @@ public abstract class LoggableMonitor {
                 ? (System.currentTimeMillis() - mFirstAcquireTimeMs) : -1;
 
         if (DEBUG) {
-            Slog.v(TAG, "Error! Modality: " + statsModality()
+            Slog.v(TAG, "Error! Modality: " + mStatsModality
                     + ", User: " + targetUserId
                     + ", IsCrypto: " + isCryptoOperation()
-                    + ", Action: " + statsAction()
-                    + ", Client: " + statsClient()
+                    + ", Action: " + mStatsAction
+                    + ", Client: " + mStatsClient
                     + ", Error: " + error
                     + ", VendorCode: " + vendorCode
                     + ", Latency: " + latency);
@@ -122,11 +115,11 @@ public abstract class LoggableMonitor {
             Slog.v(TAG, "Error latency: " + latency);
         }
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ERROR_OCCURRED,
-                statsModality(),
+                mStatsModality,
                 targetUserId,
                 isCryptoOperation(),
-                statsAction(),
-                statsClient(),
+                mStatsAction,
+                mStatsClient,
                 error,
                 vendorCode,
                 Utils.isDebugEnabled(context, targetUserId),
@@ -153,10 +146,10 @@ public abstract class LoggableMonitor {
                 : -1;
 
         if (DEBUG) {
-            Slog.v(TAG, "Authenticated! Modality: " + statsModality()
+            Slog.v(TAG, "Authenticated! Modality: " + mStatsModality
                     + ", User: " + targetUserId
                     + ", IsCrypto: " + isCryptoOperation()
-                    + ", Client: " + statsClient()
+                    + ", Client: " + mStatsClient
                     + ", RequireConfirmation: " + requireConfirmation
                     + ", State: " + authState
                     + ", Latency: " + latency);
@@ -165,10 +158,10 @@ public abstract class LoggableMonitor {
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_AUTHENTICATED,
-                statsModality(),
+                mStatsModality,
                 targetUserId,
                 isCryptoOperation(),
-                statsClient(),
+                mStatsClient,
                 requireConfirmation,
                 authState,
                 sanitizeLatency(latency),
@@ -177,9 +170,9 @@ public abstract class LoggableMonitor {
 
     protected final void logOnEnrolled(int targetUserId, long latency, boolean enrollSuccessful) {
         if (DEBUG) {
-            Slog.v(TAG, "Enrolled! Modality: " + statsModality()
+            Slog.v(TAG, "Enrolled! Modality: " + mStatsModality
                     + ", User: " + targetUserId
-                    + ", Client: " + statsClient()
+                    + ", Client: " + mStatsClient
                     + ", Latency: " + latency
                     + ", Success: " + enrollSuccessful);
         } else {
@@ -187,7 +180,7 @@ public abstract class LoggableMonitor {
         }
 
         FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_ENROLLED,
-                statsModality(),
+                mStatsModality,
                 targetUserId,
                 sanitizeLatency(latency),
                 enrollSuccessful);

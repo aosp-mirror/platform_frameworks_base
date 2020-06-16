@@ -62,13 +62,14 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
-import com.android.server.biometrics.AuthenticationClient;
-import com.android.server.biometrics.BiometricServiceBase;
-import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.ClientMonitor;
-import com.android.server.biometrics.Constants;
-import com.android.server.biometrics.RemovalClient;
+import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricServiceBase;
+import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
+import com.android.server.biometrics.sensors.Constants;
+import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.RemovalClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -215,20 +216,11 @@ public class FaceService extends BiometricServiceBase {
                 DaemonWrapper daemon, IBinder token,
                 ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie, boolean requireConfirmation,
-                Surface surface, int sensorId, boolean isStrongBiometric) {
+                int statsClient, Surface surface) {
             super(context, daemon, token, listener, targetUserId, groupId, opId,
-                    restricted, owner, cookie, requireConfirmation, surface, sensorId,
-                    isStrongBiometric);
-        }
-
-        @Override
-        protected int statsModality() {
-            return FaceService.this.statsModality();
-        }
-
-        @Override
-        public boolean shouldFrameworkHandleLockout() {
-            return false;
+                    false /* shouldFrameworkHandleLockout */, restricted, owner, cookie,
+                    requireConfirmation, FaceService.this.getSensorId(), isStrongBiometric(),
+                    statsModality(), statsClient, surface);
         }
 
         @Override
@@ -385,10 +377,11 @@ public class FaceService extends BiometricServiceBase {
             });
 
             final boolean restricted = isRestricted();
-            final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
-                    token, new ClientMonitorCallbackConverter(receiver), mCurrentUserId,
-                    0 /* groupId */, cryptoToken, restricted, opPackageName, disabledFeatures,
-                    ENROLL_TIMEOUT_SEC, surface, getSensorId()) {
+            final EnrollClient client = new EnrollClient(getContext(), getConstants(),
+                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
+                    mCurrentUserId, 0 /* groupId */, cryptoToken, restricted, opPackageName,
+                    getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
+                    mPowerManager, surface, getSensorId(), false /* shouldVibrate */) {
 
                 @Override
                 public int[] getAcquireIgnorelist() {
@@ -398,16 +391,6 @@ public class FaceService extends BiometricServiceBase {
                 @Override
                 public int[] getAcquireVendorIgnorelist() {
                     return mEnrollIgnoreListVendor;
-                }
-
-                @Override
-                public boolean shouldVibrate() {
-                    return false;
-                }
-
-                @Override
-                protected int statsModality() {
-                    return FaceService.this.statsModality();
                 }
             };
 
@@ -435,11 +418,13 @@ public class FaceService extends BiometricServiceBase {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             updateActiveGroup(userId, opPackageName);
             final boolean restricted = isRestricted();
+            final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
+                    : BiometricsProtoEnums.CLIENT_UNKNOWN;
             final AuthenticationClientImpl client = new FaceAuthClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName,
-                    0 /* cookie */, false /* requireConfirmation */, null /* surface */,
-                    getSensorId(), isStrongBiometric());
+                    0 /* cookie */, false /* requireConfirmation */, statsClient,
+                    null /* surface */);
             authenticateInternal(client, opId, opPackageName);
         }
 
@@ -455,7 +440,8 @@ public class FaceService extends BiometricServiceBase {
                     mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, 0 /* groupId */, opId, restricted, opPackageName, cookie,
-                    requireConfirmation, null /* surface */, getSensorId(), isStrongBiometric());
+                    requireConfirmation, BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
+                    null /* surface */);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -502,12 +488,7 @@ public class FaceService extends BiometricServiceBase {
             final RemovalClient client = new RemovalClient(getContext(), getConstants(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver), faceId,
                     0 /* groupId */, userId, restricted, token.toString(), getBiometricUtils(),
-                    getSensorId()) {
-                @Override
-                protected int statsModality() {
-                    return FaceService.this.statsModality();
-                }
-            };
+                    getSensorId(), statsModality());
             removeInternal(client);
         }
 

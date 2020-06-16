@@ -21,7 +21,9 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Slog;
 import android.view.Surface;
 
@@ -31,34 +33,33 @@ import java.util.Arrays;
 /**
  * A class to keep track of the enrollment state for a given client.
  */
-public abstract class EnrollClient extends ClientMonitor {
+public class EnrollClient extends ClientMonitor {
     private final byte[] mCryptoToken;
     private final BiometricUtils mBiometricUtils;
     private final int[] mDisabledFeatures;
     private final int mTimeoutSec;
+    private final PowerManager mPowerManager;
     private final Surface mSurface;
+    private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
-
-    public abstract boolean shouldVibrate();
 
     public EnrollClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int userId, int groupId,
             byte[] cryptoToken, boolean restricted, String owner, BiometricUtils utils,
-            final int[] disabledFeatures, int timeoutSec, Surface surface, int sensorId) {
+            final int[] disabledFeatures, int timeoutSec, int statsModality,
+            PowerManager powerManager, Surface surface, int sensorId, boolean shouldVibrate) {
         super(context, constants, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId);
+                owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
         mTimeoutSec = timeoutSec;
+        mPowerManager = powerManager;
         mSurface = surface;
-    }
-
-    @Override
-    protected int statsAction() {
-        return BiometricsProtoEnums.ACTION_ENROLL;
+        mShouldVibrate = shouldVibrate;
     }
 
     @Override
@@ -74,12 +75,18 @@ public abstract class EnrollClient extends ClientMonitor {
         return sendEnrollResult(identifier, remaining);
     }
 
+    @Override
+    public void notifyUserActivity() {
+        long now = SystemClock.uptimeMillis();
+        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
+    }
+
     /*
      * @return true if we're done.
      */
     private boolean sendEnrollResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
-        if (shouldVibrate()) {
+        if (mShouldVibrate) {
             vibrateSuccess();
         }
         mMetricsLogger.action(mConstants.actionBiometricEnroll());

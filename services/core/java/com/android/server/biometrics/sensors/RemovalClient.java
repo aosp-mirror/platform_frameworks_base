@@ -29,27 +29,24 @@ import java.util.ArrayList;
 /**
  * A class to keep track of the remove state for a given client.
  */
-public abstract class RemovalClient extends ClientMonitor {
+public class RemovalClient extends ClientMonitor {
     private final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
     public RemovalClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int biometricId, int groupId, int userId,
-            boolean restricted, String owner, BiometricUtils utils, int sensorId) {
+            boolean restricted, String owner, BiometricUtils utils, int sensorId,
+            int statsModality) {
         super(context, constants, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId);
+                owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
+                BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
         mBiometricUtils = utils;
     }
 
     @Override
     public void notifyUserActivity() {
-    }
-
-    @Override
-    protected int statsAction() {
-        return BiometricsProtoEnums.ACTION_REMOVE;
     }
 
     @Override

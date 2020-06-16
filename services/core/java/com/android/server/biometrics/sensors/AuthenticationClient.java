@@ -16,12 +16,16 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.app.IActivityTaskManager;
+import android.app.TaskStackListener;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.security.KeyStore;
 import android.util.Slog;
 import android.view.Surface;
@@ -32,7 +36,6 @@ import java.util.ArrayList;
  * A class to keep track of the authentication state for a given client.
  */
 public abstract class AuthenticationClient extends ClientMonitor {
-    private long mOpId;
 
     public abstract int handleFailedAttempt();
     public void resetFailedAttempts() {}
@@ -42,7 +45,12 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public static final int LOCKOUT_PERMANENT = 2;
 
     private final boolean mIsStrongBiometric;
+    private final long mOpId;
+    private final boolean mShouldFrameworkHandleLockout;
     private final boolean mRequireConfirmation;
+    private final IActivityTaskManager mActivityTaskManager;
+    private final TaskStackListener mTaskStackListener;
+    private final PowerManager mPowerManager;
     private final Surface mSurface;
 
     // We need to track this state since it's possible for applications to request for
@@ -54,31 +62,45 @@ public abstract class AuthenticationClient extends ClientMonitor {
     /**
      * This method is called when authentication starts.
      */
-    public abstract void onStart();
+    private void onStart() {
+        try {
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Slog.e(getLogTag(), "Could not register task stack listener", e);
+        }
+    }
 
     /**
      * This method is called when a biometric is authenticated or authentication is stopped
      * (cancelled by the user, or an error such as lockout has occurred).
      */
-    public abstract void onStop();
-
-    /**
-     * @return true if the framework should handle lockout.
-     */
-    public abstract boolean shouldFrameworkHandleLockout();
+    private void onStop() {
+        try {
+            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Slog.e(getLogTag(), "Could not unregister task stack listener", e);
+        }
+    }
 
     public abstract boolean wasUserDetected();
 
     public AuthenticationClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
-            boolean restricted, String owner, int cookie, boolean requireConfirmation,
-            Surface surface, int sensorId, boolean isStrongBiometric) {
+            boolean shouldFrameworkHandleLockout, boolean restricted, String owner, int cookie,
+            boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsModality,
+            int statsClient, IActivityTaskManager activityTaskManager,
+            TaskStackListener taskStackListener, PowerManager powerManager, Surface surface) {
         super(context, constants, daemon, token, listener, targetUserId, groupId,
-                restricted, owner, cookie, sensorId);
-        mOpId = opId;
+                restricted, owner, cookie, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
+        mOpId = opId;
+        mShouldFrameworkHandleLockout = shouldFrameworkHandleLockout;
         mRequireConfirmation = requireConfirmation;
+        mActivityTaskManager = activityTaskManager;
+        mTaskStackListener = taskStackListener;
+        mPowerManager = powerManager;
         mSurface = surface;
     }
 
@@ -87,14 +109,15 @@ public abstract class AuthenticationClient extends ClientMonitor {
     }
 
     @Override
-    public void binderDied() {
-        final boolean clearListener = !isBiometricPrompt();
-        binderDiedInternal(clearListener);
+    public void notifyUserActivity() {
+        long now = SystemClock.uptimeMillis();
+        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
     @Override
-    protected int statsAction() {
-        return BiometricsProtoEnums.ACTION_AUTHENTICATE;
+    public void binderDied() {
+        final boolean clearListener = !isBiometricPrompt();
+        binderDiedInternal(clearListener);
     }
 
     public boolean isBiometricPrompt() {
@@ -108,7 +131,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
     @Override
     public boolean onError(int error, int vendorCode) {
-        if (!shouldFrameworkHandleLockout()) {
+        if (!mShouldFrameworkHandleLockout) {
             switch (error) {
                 case BiometricConstants.BIOMETRIC_ERROR_TIMEOUT:
                     if (!wasUserDetected() && !isBiometricPrompt()) {
@@ -155,7 +178,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
                     vibrateSuccess();
                 }
                 result = true;
-                if (shouldFrameworkHandleLockout()) {
+                if (mShouldFrameworkHandleLockout) {
                     resetFailedAttempts();
                 }
                 onStop();
@@ -200,7 +223,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
 
                 // Allow system-defined limit of number of attempts before giving up
                 final int lockoutMode = handleFailedAttempt();
-                if (lockoutMode != LOCKOUT_NONE && shouldFrameworkHandleLockout()) {
+                if (lockoutMode != LOCKOUT_NONE && mShouldFrameworkHandleLockout) {
                     Slog.w(getLogTag(), "Forcing lockout (driver code should do this!), mode("
                             + lockoutMode + ")");
                     stop(false);

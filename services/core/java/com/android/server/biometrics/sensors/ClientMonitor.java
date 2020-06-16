@@ -82,7 +82,9 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
     public ClientMonitor(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
             ClientMonitorCallbackConverter listener, int userId, int groupId,
-            boolean restricted, String owner, int cookie, int sensorId) {
+            boolean restricted, String owner, int cookie, int sensorId, int statsModality,
+            int statsAction, int statsClient) {
+        super(statsModality, statsAction, statsClient);
         mContext = context;
         mConstants = constants;
         mDaemon = daemon;

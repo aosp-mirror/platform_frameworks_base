@@ -48,7 +48,6 @@ import android.os.PowerManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.util.Slog;
@@ -87,7 +86,7 @@ public abstract class BiometricServiceBase extends SystemService
     private final Context mContext;
     private final String mKeyguardPackage;
     private final IActivityTaskManager mActivityTaskManager;
-    private final PowerManager mPowerManager;
+    public final PowerManager mPowerManager;
     private final UserManager mUserManager;
     private final MetricsLogger mMetricsLogger;
     private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
@@ -227,56 +226,16 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected abstract class AuthenticationClientImpl extends AuthenticationClient {
 
-        // Used to check if the public API that was invoked was from FingerprintManager. Only
-        // to be overridden by FingerprintService.
-        protected boolean isFingerprint() {
-            return false;
-        }
-
         public AuthenticationClientImpl(Context context, DaemonWrapper daemon,
                 IBinder token, ClientMonitorCallbackConverter listener, int targetUserId,
-                int groupId, long opId, boolean restricted, String owner, int cookie,
-                boolean requireConfirmation, Surface surface, int sensorId,
-                boolean isStrongBiometric) {
+                int groupId, long opId, boolean shouldFrameworkHandleLockout, boolean restricted,
+                String owner, int cookie, boolean requireConfirmation, int sensorId,
+                boolean isStrongBiometric, int statsModality, int statsClient, Surface surface) {
             super(context, getConstants(), daemon, token, listener, targetUserId,
-                    groupId, opId, restricted, owner, cookie, requireConfirmation, surface,
-                    sensorId, isStrongBiometric);
-        }
-
-        @Override
-        protected int statsClient() {
-            if (isKeyguard(getOwnerString())) {
-                return BiometricsProtoEnums.CLIENT_KEYGUARD;
-            } else if (isBiometricPrompt()) {
-                return BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT;
-            } else if (isFingerprint()) {
-                return BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
-            } else {
-                return BiometricsProtoEnums.CLIENT_UNKNOWN;
-            }
-        }
-
-        @Override
-        public void onStart() {
-            try {
-                mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Could not register task stack listener", e);
-            }
-        }
-
-        @Override
-        public void onStop() {
-            try {
-                mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-            } catch (RemoteException e) {
-                Slog.e(getTag(), "Could not unregister task stack listener", e);
-            }
-        }
-
-        @Override
-        public void notifyUserActivity() {
-            userActivity();
+                    groupId, opId, shouldFrameworkHandleLockout, restricted, owner, cookie,
+                    requireConfirmation, sensorId, isStrongBiometric,
+                    statsModality, statsClient, mActivityTaskManager, mTaskStackListener,
+                    mPowerManager, surface);
         }
 
         @Override
@@ -293,41 +252,6 @@ public abstract class BiometricServiceBase extends SystemService
                 return lockoutMode;
             }
             return AuthenticationClient.LOCKOUT_NONE;
-        }
-    }
-
-    protected abstract class EnrollClientImpl extends EnrollClient {
-
-        public EnrollClientImpl(Context context, DaemonWrapper daemon,
-                IBinder token, ClientMonitorCallbackConverter listener, int userId, int groupId,
-                byte[] cryptoToken, boolean restricted, String owner,
-                final int[] disabledFeatures, int timeoutSec, Surface surface, int sensorId) {
-            super(context, getConstants(), daemon, token, listener,
-                    userId, groupId, cryptoToken, restricted, owner, getBiometricUtils(),
-                    disabledFeatures, timeoutSec, surface, sensorId);
-        }
-
-        @Override
-        public void notifyUserActivity() {
-            userActivity();
-        }
-    }
-
-    /**
-     * An internal class to help clean up unknown templates in HAL and Framework
-     */
-    private final class InternalRemovalClient extends RemovalClient {
-        InternalRemovalClient(Context context,
-                DaemonWrapper daemon, IBinder token,
-                ClientMonitorCallbackConverter listener, int templateId, int groupId, int userId,
-                boolean restricted, String owner, int sensorId) {
-            super(context, getConstants(), daemon, token, listener, templateId, groupId,
-                    userId, restricted, owner, getBiometricUtils(), sensorId);
-        }
-
-        @Override
-        protected int statsModality() {
-            return BiometricServiceBase.this.statsModality();
         }
     }
 
@@ -350,7 +274,7 @@ public abstract class BiometricServiceBase extends SystemService
                 List<? extends BiometricAuthenticator.Identifier> enrolledList,
                 BiometricUtils utils, int sensorId) {
             super(context, getConstants(), daemon, token, listener, groupId, userId,
-                    restricted, owner, sensorId);
+                    restricted, owner, sensorId, statsModality());
             mEnrolledList = enrolledList;
             mUtils = utils;
         }
@@ -409,11 +333,6 @@ public abstract class BiometricServiceBase extends SystemService
                 doTemplateCleanup();
             }
             return remaining == 0;
-        }
-
-        @Override
-        protected int statsModality() {
-            return BiometricServiceBase.this.statsModality();
         }
     }
 
@@ -774,7 +693,7 @@ public abstract class BiometricServiceBase extends SystemService
      * Calls from the Manager. These are still on the calling binder's thread.
      */
 
-    protected void enrollInternal(EnrollClientImpl client, int userId) {
+    protected void enrollInternal(EnrollClient client, int userId) {
         if (hasReachedEnrollmentLimit(userId)) {
             return;
         }
@@ -978,7 +897,7 @@ public abstract class BiometricServiceBase extends SystemService
     /**
      * @return true if this is keyguard package
      */
-    private boolean isKeyguard(String clientPackage) {
+    public boolean isKeyguard(String clientPackage) {
         return mKeyguardPackage.equals(clientPackage);
     }
 
@@ -1217,9 +1136,10 @@ public abstract class BiometricServiceBase extends SystemService
             mUnknownHALTemplates.remove(template);
             boolean restricted = !hasPermission(getManageBiometricPermission());
             InternalRemovalClient client = new InternalRemovalClient(getContext(),
-                    getDaemonWrapper(), mToken, null /* listener */,
+                    getConstants(), getDaemonWrapper(), mToken, null /* listener */,
                     template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
-                    restricted, getContext().getPackageName(), getSensorId());
+                    restricted, getContext().getPackageName(), getBiometricUtils(),
+                    getSensorId(), statsModality());
             removeInternal(client);
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,
                     statsModality(),
@@ -1265,11 +1185,6 @@ public abstract class BiometricServiceBase extends SystemService
         for (int i = 0; i < mLockoutMonitors.size(); i++) {
             mLockoutMonitors.get(i).sendLockoutReset();
         }
-    }
-
-    private void userActivity() {
-        long now = SystemClock.uptimeMillis();
-        mPowerManager.userActivity(now, PowerManager.USER_ACTIVITY_EVENT_TOUCH, 0);
     }
 
     /**

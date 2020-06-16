@@ -32,19 +32,15 @@ import java.util.ArrayList;
 public abstract class EnumerateClient extends ClientMonitor {
     public EnumerateClient(Context context, Constants constants,
             BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int groupId, int userId,
-            boolean restricted, String owner, int sensorId) {
+        ClientMonitorCallbackConverter listener, int groupId, int userId,
+            boolean restricted, String owner, int sensorId, int statsModality) {
         super(context, constants, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId);
+                owner, 0 /* cookie */, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 
     @Override
     public void notifyUserActivity() {
-    }
-
-    @Override
-    protected int statsAction() {
-        return BiometricsProtoEnums.ACTION_ENUMERATE;
     }
 
     @Override

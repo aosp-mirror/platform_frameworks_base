@@ -64,11 +64,12 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemServerInitThreadPool;
-import com.android.server.biometrics.AuthenticationClient;
-import com.android.server.biometrics.BiometricServiceBase;
-import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.Constants;
-import com.android.server.biometrics.RemovalClient;
+import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricServiceBase;
+import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.Constants;
+import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.RemovalClient;
 import com.android.server.biometrics.fingerprint.FingerprintServiceDumpProto;
 import com.android.server.biometrics.fingerprint.FingerprintUserStatsProto;
 import com.android.server.biometrics.fingerprint.PerformanceStatsProto;
@@ -125,36 +126,22 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     private final class FingerprintAuthClient extends AuthenticationClientImpl {
-        @Override
-        protected boolean isFingerprint() {
-            return true;
-        }
-
         public FingerprintAuthClient(Context context,
                 DaemonWrapper daemon, IBinder token,
                 ClientMonitorCallbackConverter listener, int targetUserId, int groupId, long opId,
                 boolean restricted, String owner, int cookie,
-                boolean requireConfirmation, Surface surface, int sensorId,
-                boolean isStrongBiometric) {
+                boolean requireConfirmation, Surface surface, int statsClient) {
             super(context, daemon, token, listener, targetUserId, groupId, opId,
-                    restricted, owner, cookie, requireConfirmation, surface, sensorId,
-                    isStrongBiometric);
-        }
-
-        @Override
-        protected int statsModality() {
-            return FingerprintService.this.statsModality();
+                    true /* shouldFrameworkHandleLockout */,
+                    restricted, owner, cookie, requireConfirmation,
+                    FingerprintService.this.getSensorId(), isStrongBiometric(), statsModality(),
+                    statsClient, surface);
         }
 
         @Override
         public void resetFailedAttempts() {
             resetFailedAttemptsForUser(true /* clearAttemptCounter */,
                     ActivityManager.getCurrentUser());
-        }
-
-        @Override
-        public boolean shouldFrameworkHandleLockout() {
-            return true;
         }
 
         @Override
@@ -207,20 +194,12 @@ public class FingerprintService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final int groupId = userId; // default group for fingerprint enrollment
-            final EnrollClientImpl client = new EnrollClientImpl(getContext(), mDaemonWrapper,
-                    token, new ClientMonitorCallbackConverter(receiver), mCurrentUserId, groupId,
-                    cryptoToken, restricted, opPackageName, new int[0] /* disabledFeatures */,
-                    ENROLL_TIMEOUT_SEC, surface, getSensorId()) {
-                @Override
-                public boolean shouldVibrate() {
-                    return true;
-                }
-
-                @Override
-                protected int statsModality() {
-                    return FingerprintService.this.statsModality();
-                }
-            };
+            final EnrollClient client = new EnrollClient(getContext(), getConstants(),
+                    mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
+                    mCurrentUserId, groupId, cryptoToken, restricted, opPackageName,
+                    getBiometricUtils(), new int[0] /* disabledFeatures */, ENROLL_TIMEOUT_SEC,
+                    statsModality(), mPowerManager, surface, getSensorId(),
+                    true /* shouldVibrate */);
 
             enrollInternal(client, userId);
         }
@@ -237,11 +216,14 @@ public class FingerprintService extends BiometricServiceBase {
                 final String opPackageName, Surface surface) {
             updateActiveGroup(groupId, opPackageName);
             final boolean restricted = isRestricted();
+            final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
+                    : BiometricsProtoEnums.CLIENT_FINGERPRINT_MANAGER;
+
             final AuthenticationClientImpl client = new FingerprintAuthClient(getContext(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName,
                     0 /* cookie */, false /* requireConfirmation */,
-                    surface, getSensorId(), isStrongBiometric());
+                    surface, statsClient);
             authenticateInternal(client, opId, opPackageName);
         }
 
@@ -257,8 +239,8 @@ public class FingerprintService extends BiometricServiceBase {
                     mDaemonWrapper, token,
                     new ClientMonitorCallbackConverter(sensorReceiver),
                     mCurrentUserId, groupId, opId, restricted, opPackageName, cookie,
-                    false /* requireConfirmation */,
-                    surface, getSensorId(), isStrongBiometric());
+                    false /* requireConfirmation */, surface,
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT);
             authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -304,12 +286,7 @@ public class FingerprintService extends BiometricServiceBase {
             final RemovalClient client = new RemovalClient(getContext(), getConstants(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     fingerId, groupId, userId, restricted, token.toString(), getBiometricUtils(),
-                    getSensorId()) {
-                @Override
-                protected int statsModality() {
-                    return FingerprintService.this.statsModality();
-                }
-            };
+                    getSensorId(), statsModality());
             removeInternal(client);
         }
 
