@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics;
+package com.android.server.biometrics.sensors;
 
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.IBiometricSensorReceiver;
@@ -27,7 +27,7 @@ import android.os.RemoteException;
 /**
  * Class that allows ClientMonitor send results without caring about who the client is. These are
  * currently one of the below:
- *  1) {@link BiometricService}
+ *  1) {@link com.android.server.biometrics.BiometricService}
  *  2) {@link android.hardware.fingerprint.FingerprintManager}
  *  3) {@link android.hardware.face.FaceManager}
  *

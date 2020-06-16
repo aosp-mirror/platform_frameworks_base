@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics;
+package com.android.server.biometrics.sensors;
 
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
@@ -37,7 +37,8 @@ import java.util.List;
 @Presubmit
 @SmallTest
 public class BiometricServiceBaseTest {
-    private static class TestableBiometricServiceBase extends BiometricServiceBase {
+    private static class TestableBiometricServiceBase extends
+            com.android.server.biometrics.sensors.BiometricServiceBase {
         TestableBiometricServiceBase(Context context) {
             super(context);
         }

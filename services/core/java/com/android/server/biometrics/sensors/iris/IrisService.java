@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,10 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.server.biometrics.iris;
+package com.android.server.biometrics.sensors.iris;
 
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
@@ -23,10 +23,11 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.hardware.iris.IIrisService;
 
-import com.android.server.biometrics.AuthenticationClient;
-import com.android.server.biometrics.BiometricServiceBase;
-import com.android.server.biometrics.BiometricUtils;
-import com.android.server.biometrics.Constants;
+import com.android.server.biometrics.sensors.AuthenticationClient;
+import com.android.server.biometrics.sensors.BiometricServiceBase;
+import com.android.server.biometrics.sensors.BiometricUtils;
+import com.android.server.biometrics.sensors.Constants;
+import com.android.server.biometrics.sensors.fingerprint.FingerprintService;
 
 import java.util.List;
 
@@ -36,7 +37,7 @@ import java.util.List;
  * iris-related events.
  *
  * TODO: The vendor is expected to fill in the service. See
- * {@link com.android.server.biometrics.fingerprint.FingerprintService}
+ * {@link FingerprintService}
  *
  * @hide
  */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.biometrics.face;
+package com.android.server.biometrics.sensors.face;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.MANAGE_BIOMETRIC;
@@ -66,9 +66,9 @@ import com.android.server.biometrics.AuthenticationClient;
 import com.android.server.biometrics.BiometricServiceBase;
 import com.android.server.biometrics.BiometricUtils;
 import com.android.server.biometrics.ClientMonitor;
-import com.android.server.biometrics.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.Constants;
 import com.android.server.biometrics.RemovalClient;
+import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
