@@ -17,6 +17,7 @@
 package com.android.systemui.util.animation
 
 import android.content.Context
+import android.graphics.PointF
 import android.graphics.Rect
 import android.util.AttributeSet
 import android.view.View
@@ -151,6 +152,11 @@ class TransitionLayout @JvmOverloads constructor(
         val layoutTop = top
         setLeftTopRightBottom(layoutLeft, layoutTop, layoutLeft + currentState.width,
                 layoutTop + currentState.height)
+        val bounds = clipBounds ?: Rect()
+        bounds.set(left, top, right, bottom)
+        clipBounds = bounds
+        translationX = currentState.translation.x
+        translationY = currentState.translation.y
     }
 
     /**
@@ -234,11 +240,13 @@ class TransitionViewState {
     var widgetStates: MutableMap<Int, WidgetState> = mutableMapOf()
     var width: Int = 0
     var height: Int = 0
+    val translation = PointF()
     fun copy(reusedState: TransitionViewState? = null): TransitionViewState {
         // we need a deep copy of this, so we can't use a data class
         val copy = reusedState ?: TransitionViewState()
         copy.width = width
         copy.height = height
+        copy.translation.set(translation.x, translation.y)
         for (entry in widgetStates) {
             copy.widgetStates[entry.key] = entry.value.copy()
         }
@@ -256,6 +264,7 @@ class TransitionViewState {
         }
         width = transitionLayout.measuredWidth
         height = transitionLayout.measuredHeight
+        translation.set(0.0f, 0.0f)
     }
 }
 
