@@ -851,6 +851,7 @@ public class AppsFilter {
         try {
             int callingAppId = UserHandle.getAppId(callingUid);
             if (callingAppId < Process.FIRST_APPLICATION_UID
+                    || targetPkgSetting.appId < Process.FIRST_APPLICATION_UID
                     || callingAppId == targetPkgSetting.appId) {
                 return false;
             }
