@@ -38,6 +38,7 @@ import android.service.notification.ZenModeConfig;
 import android.telecom.TelecomManager;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.View;
 
 import androidx.lifecycle.Observer;
 
@@ -677,12 +678,18 @@ public class PhoneStatusBarPolicy
         }
         mIconController.setIcon(mSlotScreenRecord, resourceId, description);
         mIconController.setIconVisibility(mSlotScreenRecord, true);
+        // Set as assertive so talkback will announce the countdown
+        mIconController.setIconAccessibilityLiveRegion(mSlotScreenRecord,
+                View.ACCESSIBILITY_LIVE_REGION_ASSERTIVE);
     }
 
     @Override
     public void onCountdownEnd() {
         if (DEBUG) Log.d(TAG, "screenrecord: hiding icon during countdown");
         mHandler.post(() -> mIconController.setIconVisibility(mSlotScreenRecord, false));
+        // Reset talkback priority
+        mIconController.setIconAccessibilityLiveRegion(mSlotScreenRecord,
+                View.ACCESSIBILITY_LIVE_REGION_NONE);
     }
 
     @Override

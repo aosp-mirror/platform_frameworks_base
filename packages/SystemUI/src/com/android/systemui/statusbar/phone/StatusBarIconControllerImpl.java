@@ -265,6 +265,22 @@ public class StatusBarIconControllerImpl extends StatusBarIconList implements Tu
         handleSet(index, holder);
     }
 
+    @Override
+    public void setIconAccessibilityLiveRegion(String slotName, int accessibilityLiveRegion) {
+        Slot slot = getSlot(slotName);
+        if (!slot.hasIconsInSlot()) {
+            return;
+        }
+
+        int slotIndex = getSlotIndex(slotName);
+        List<StatusBarIconHolder> iconsToUpdate = slot.getHolderListInViewOrder();
+        for (StatusBarIconHolder holder : iconsToUpdate) {
+            int viewIndex = getViewIndex(slotIndex, holder.getTag());
+            mIconGroups.forEach(l -> l.mGroup.getChildAt(viewIndex)
+                    .setAccessibilityLiveRegion(accessibilityLiveRegion));
+        }
+    }
+
     public void removeIcon(String slot) {
         removeAllIconsForSlot(slot);
     }
