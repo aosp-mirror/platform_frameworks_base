@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.pm.FeatureInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.os.CarrierAssociatedAppEntry;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Process;
@@ -198,8 +199,8 @@ public class SystemConfig {
 
     // These are the packages of carrier-associated apps which should be disabled until used until
     // a SIM is inserted which grants carrier privileges to that carrier app.
-    final ArrayMap<String, List<String>> mDisabledUntilUsedPreinstalledCarrierAssociatedApps =
-            new ArrayMap<>();
+    final ArrayMap<String, List<CarrierAssociatedAppEntry>>
+            mDisabledUntilUsedPreinstalledCarrierAssociatedApps = new ArrayMap<>();
 
     final ArrayMap<String, ArraySet<String>> mPrivAppPermissions = new ArrayMap<>();
     final ArrayMap<String, ArraySet<String>> mPrivAppDenyPermissions = new ArrayMap<>();
@@ -331,7 +332,8 @@ public class SystemConfig {
         return mDisabledUntilUsedPreinstalledCarrierApps;
     }
 
-    public ArrayMap<String, List<String>> getDisabledUntilUsedPreinstalledCarrierAssociatedApps() {
+    public ArrayMap<String, List<CarrierAssociatedAppEntry>>
+            getDisabledUntilUsedPreinstalledCarrierAssociatedApps() {
         return mDisabledUntilUsedPreinstalledCarrierAssociatedApps;
     }
 
@@ -954,7 +956,23 @@ public class SystemConfig {
                                         + "> without package or carrierAppPackage in " + permFile
                                         + " at " + parser.getPositionDescription());
                             } else {
-                                List<String> associatedPkgs =
+                                // APKs added to system images via OTA should specify the addedInSdk
+                                // attribute, otherwise they may be enabled-by-default in too many
+                                // cases. See CarrierAppUtils for more info.
+                                int addedInSdk = CarrierAssociatedAppEntry.SDK_UNSPECIFIED;
+                                String addedInSdkStr = parser.getAttributeValue(null, "addedInSdk");
+                                if (!TextUtils.isEmpty(addedInSdkStr)) {
+                                    try {
+                                        addedInSdk = Integer.parseInt(addedInSdkStr);
+                                    } catch (NumberFormatException e) {
+                                        Slog.w(TAG, "<" + name + "> addedInSdk not an integer in "
+                                                + permFile + " at "
+                                                + parser.getPositionDescription());
+                                        XmlUtils.skipCurrentTag(parser);
+                                        break;
+                                    }
+                                }
+                                List<CarrierAssociatedAppEntry> associatedPkgs =
                                         mDisabledUntilUsedPreinstalledCarrierAssociatedApps.get(
                                                 carrierPkgname);
                                 if (associatedPkgs == null) {
@@ -962,7 +980,8 @@ public class SystemConfig {
                                     mDisabledUntilUsedPreinstalledCarrierAssociatedApps.put(
                                             carrierPkgname, associatedPkgs);
                                 }
-                                associatedPkgs.add(pkgname);
+                                associatedPkgs.add(
+                                        new CarrierAssociatedAppEntry(pkgname, addedInSdk));
                             }
                         } else {
                             logNotAllowedInPartition(name, permFile, parser);

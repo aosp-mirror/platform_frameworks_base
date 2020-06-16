@@ -16,23 +16,4 @@
 
 package android.os;
 
-/**
-  * Binder interface to query SystemConfig in the system server.
-  * {@hide}
-  */
-interface ISystemConfig {
-    /**
-     * @see SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierApps
-     */
-    List<String> getDisabledUntilUsedPreinstalledCarrierApps();
-
-    /**
-     * @see SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierAssociatedApps
-     */
-    Map getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
-
-    /**
-     * @see SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries
-     */
-    Map getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries();
-}
+parcelable CarrierAssociatedAppEntry;

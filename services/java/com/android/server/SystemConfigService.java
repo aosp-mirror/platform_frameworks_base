@@ -15,6 +15,9 @@
  */
 package com.android.server;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+
 import android.Manifest;
 import android.content.Context;
 import android.os.ISystemConfig;
@@ -44,6 +47,19 @@ public class SystemConfigService extends SystemService {
         public Map getDisabledUntilUsedPreinstalledCarrierAssociatedApps() {
             mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_CARRIER_APP_INFO,
                     "getDisabledUntilUsedPreInstalledCarrierAssociatedApps requires"
+                            + " READ_CARRIER_APP_INFO");
+            return SystemConfig.getInstance()
+                    .getDisabledUntilUsedPreinstalledCarrierAssociatedApps().entrySet().stream()
+                    .collect(toMap(
+                            Map.Entry::getKey,
+                            e -> e.getValue().stream().map(app -> app.packageName)
+                                    .collect(toList())));
+        }
+
+        @Override
+        public Map getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries() {
+            mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_CARRIER_APP_INFO,
+                    "getDisabledUntilUsedPreInstalledCarrierAssociatedAppEntries requires"
                             + " READ_CARRIER_APP_INFO");
             return SystemConfig.getInstance()
                     .getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
