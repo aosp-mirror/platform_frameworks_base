@@ -90,6 +90,9 @@ class WindowSurfaceController {
 
     private final SurfaceControl.Transaction mTmpTransaction;
 
+    // Used to track whether we have called detach children on the way to invisibility.
+    boolean mChildrenDetached;
+
     WindowSurfaceController(String name, int w, int h, int format,
             int flags, WindowStateAnimator animator, int windowType, int ownerUid) {
         mAnimator = animator;
@@ -144,6 +147,7 @@ class WindowSurfaceController {
 
     void detachChildren() {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SEVER CHILDREN");
+        mChildrenDetached = true;
         if (mSurfaceControl != null) {
             mSurfaceControl.detachChildren();
         }
