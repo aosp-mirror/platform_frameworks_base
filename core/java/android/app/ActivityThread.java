@@ -6520,7 +6520,8 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         // Allow binder tracing, and application-generated systrace messages if we're profileable.
-        boolean isAppProfileable = data.appInfo.isProfileableByShell();
+        boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        boolean isAppProfileable = isAppDebuggable || data.appInfo.isProfileableByShell();
         Trace.setAppTracingAllowed(isAppProfileable);
         if ((isAppProfileable || Build.IS_DEBUGGABLE) && data.enableBinderTracking) {
             Binder.enableTracing();
@@ -6532,7 +6533,6 @@ public final class ActivityThread extends ClientTransactionHandler {
         }
 
         // Allow renderer debugging features if we're debuggable.
-        boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
         HardwareRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
         HardwareRenderer.setPackageName(data.appInfo.packageName);
 

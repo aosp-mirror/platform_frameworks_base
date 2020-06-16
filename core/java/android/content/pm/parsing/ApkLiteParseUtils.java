@@ -380,10 +380,6 @@ public class ApkLiteParseUtils {
                     switch (attr) {
                         case "debuggable":
                             debuggable = attrs.getAttributeBooleanValue(i, false);
-                            if (debuggable) {
-                                // Debuggable implies profileable
-                                profilableByShell = true;
-                            }
                             break;
                         case "multiArch":
                             multiArch = attrs.getAttributeBooleanValue(i, false);
