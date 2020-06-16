@@ -92,6 +92,10 @@ public class InsetsSource implements Parcelable {
         return mVisible;
     }
 
+    public boolean isVisibleFrameEmpty() {
+        return mVisibleFrame != null && mVisibleFrame.isEmpty();
+    }
+
     /**
      * Calculates the insets this source will cause to a client window.
      *
