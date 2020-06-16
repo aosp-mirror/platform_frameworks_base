@@ -38,6 +38,7 @@ public class PendingInsetsController implements WindowInsetsController {
     private @Appearance int mAppearance;
     private @Appearance int mAppearanceMask;
     private @Behavior int mBehavior = KEEP_BEHAVIOR;
+    private boolean mAnimationsDisabled;
     private final InsetsState mDummyState = new InsetsState();
     private InsetsController mReplayedInsetsController;
     private ArrayList<OnControllableInsetsChangedListener> mControllableInsetsChangedListeners
@@ -103,6 +104,15 @@ public class PendingInsetsController implements WindowInsetsController {
     }
 
     @Override
+    public void setAnimationsDisabled(boolean disable) {
+        if (mReplayedInsetsController != null) {
+            mReplayedInsetsController.setAnimationsDisabled(disable);
+        } else {
+            mAnimationsDisabled = disable;
+        }
+    }
+
+    @Override
     public InsetsState getState() {
         return mDummyState;
     }
@@ -151,6 +161,9 @@ public class PendingInsetsController implements WindowInsetsController {
         if (mCaptionInsetsHeight != 0) {
             controller.setCaptionInsetsHeight(mCaptionInsetsHeight);
         }
+        if (mAnimationsDisabled) {
+            controller.setAnimationsDisabled(true);
+        }
         int size = mRequests.size();
         for (int i = 0; i < size; i++) {
             mRequests.get(i).replay(controller);
@@ -167,6 +180,7 @@ public class PendingInsetsController implements WindowInsetsController {
         mBehavior = KEEP_BEHAVIOR;
         mAppearance = 0;
         mAppearanceMask = 0;
+        mAnimationsDisabled = false;
 
         // After replaying, we forward everything directly to the replayed instance.
         mReplayedInsetsController = controller;
