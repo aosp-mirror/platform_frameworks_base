@@ -66,9 +66,4 @@ public class FaceConstants implements Constants {
     public int actionBiometricEnroll() {
         return MetricsProto.MetricsEvent.ACTION_FACE_ENROLL;
     }
-
-    @Override
-    public int acquireVendorCode() {
-        return FaceManager.FACE_ACQUIRED_VENDOR;
-    }
 }

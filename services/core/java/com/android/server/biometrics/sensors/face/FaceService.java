@@ -145,22 +145,11 @@ public class FaceService extends BiometricServiceBase {
             });
 
             final boolean restricted = isRestricted();
-            final EnrollClient client = new EnrollClient(getContext(), getConstants(),
+            final EnrollClient client = new FaceEnrollClient(getContext(), getConstants(),
                     mDaemonWrapper, token, new ClientMonitorCallbackConverter(receiver),
                     mCurrentUserId, 0 /* groupId */, cryptoToken, restricted, opPackageName,
                     getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
-                    mPowerManager, surface, getSensorId(), false /* shouldVibrate */) {
-
-                @Override
-                public int[] getAcquireIgnorelist() {
-                    return mEnrollIgnoreList;
-                }
-
-                @Override
-                public int[] getAcquireVendorIgnorelist() {
-                    return mEnrollIgnoreListVendor;
-                }
-            };
+                    mPowerManager, surface, getSensorId(), false /* shouldVibrate */);
 
             enrollInternal(client, mCurrentUserId);
         }
@@ -483,9 +472,6 @@ public class FaceService extends BiometricServiceBase {
 
     private NotificationManager mNotificationManager;
 
-    private int[] mEnrollIgnoreList;
-    private int[] mEnrollIgnoreListVendor;
-
     /**
      * Receives callbacks from the HAL.
      */
@@ -700,10 +686,6 @@ public class FaceService extends BiometricServiceBase {
         mLockoutTracker = new LockoutHalImpl();
         mUsageStats = new UsageStats(context);
         mNotificationManager = getContext().getSystemService(NotificationManager.class);
-        mEnrollIgnoreList = getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_enroll_ignorelist);
-        mEnrollIgnoreListVendor = getContext().getResources()
-                .getIntArray(R.array.config_face_acquire_vendor_enroll_ignorelist);
     }
 
     @Override
