@@ -42,6 +42,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RemoteViews;
+import android.widget.TextView;
 
 import com.android.internal.R;
 
@@ -612,7 +613,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
         return 0;
     }
 
-    public View getSenderView() {
+    public TextView getSenderView() {
         return mSenderView;
     }
 
@@ -668,6 +669,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                     singleLine ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mSenderView.getLayoutParams();
             layoutParams.setMarginEnd(singleLine ? mSenderTextPaddingSingleLine : 0);
+            mSenderView.setSingleLine(singleLine);
             updateMaxDisplayedLines();
             updateClipRect();
             updateSenderVisibility();
