@@ -62,22 +62,38 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
+ * Suite of tools to periodically inspect the System UI heap and possibly prompt the user to
+ * capture heap dumps and report them. Includes the implementation of the "Dump SysUI Heap"
+ * quick settings tile.
  */
 @Singleton
 public class GarbageMonitor implements Dumpable {
-    private static final boolean LEAK_REPORTING_ENABLED =
-            Build.IS_DEBUGGABLE
-                    && SystemProperties.getBoolean("debug.enable_leak_reporting", false);
-    private static final String FORCE_ENABLE_LEAK_REPORTING = "sysui_force_enable_leak_reporting";
+    // Feature switches
+    // ================
 
-    private static final boolean HEAP_TRACKING_ENABLED = Build.IS_DEBUGGABLE;
+    // Whether to use TrackedGarbage to trigger LeakReporter. Off by default unless you set the
+    // appropriate sysprop on a userdebug device.
+    public static final boolean LEAK_REPORTING_ENABLED = Build.IS_DEBUGGABLE
+            && SystemProperties.getBoolean("debug.enable_leak_reporting", false);
+    public static final String FORCE_ENABLE_LEAK_REPORTING = "sysui_force_enable_leak_reporting";
 
-    // whether to use ActivityManager.setHeapLimit
-    private static final boolean ENABLE_AM_HEAP_LIMIT = Build.IS_DEBUGGABLE;
-    // heap limit value, in KB (overrides R.integer.watch_heap_limit)
+    // Heap tracking: watch the current memory levels and update the MemoryTile if available.
+    // On for all userdebug devices.
+    public static final boolean HEAP_TRACKING_ENABLED = Build.IS_DEBUGGABLE;
+
+    // Tell QSTileHost.java to toss this into the default tileset?
+    public static final boolean ADD_MEMORY_TILE_TO_DEFAULT_ON_DEBUGGABLE_BUILDS = true;
+
+    // whether to use ActivityManager.setHeapLimit (and post a notification to the user asking
+    // to dump the heap). Off by default unless you set the appropriate sysprop on userdebug
+    private static final boolean ENABLE_AM_HEAP_LIMIT = Build.IS_DEBUGGABLE
+            && SystemProperties.getBoolean("debug.enable_sysui_heap_limit", false);
+
+    // Tuning params
+    // =============
+
+    // threshold for setHeapLimit(), in KB (overrides R.integer.watch_heap_limit)
     private static final String SETTINGS_KEY_AM_HEAP_LIMIT = "systemui_am_heap_limit";
-
-    private static final String TAG = "GarbageMonitor";
 
     private static final long GARBAGE_INSPECTION_INTERVAL =
             15 * DateUtils.MINUTE_IN_MILLIS; // 15 min
@@ -89,6 +105,7 @@ public class GarbageMonitor implements Dumpable {
 
     private static final int GARBAGE_ALLOWANCE = 5;
 
+    private static final String TAG = "GarbageMonitor";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Handler mHandler;
@@ -377,9 +394,6 @@ public class GarbageMonitor implements Dumpable {
 
     public static class MemoryTile extends QSTileImpl<QSTile.State> {
         public static final String TILE_SPEC = "dbg:mem";
-
-        // Tell QSTileHost.java to toss this into the default tileset?
-        public static final boolean ADD_TO_DEFAULT_ON_DEBUGGABLE_BUILDS = true;
 
         private final GarbageMonitor gm;
         private final ActivityStarter mActivityStarter;
