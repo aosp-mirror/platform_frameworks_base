@@ -74,11 +74,15 @@ internal class BubbleDataRepository @Inject constructor(
 
     private fun transform(userId: Int, bubbles: List<Bubble>): List<BubbleEntity> {
         return bubbles.mapNotNull { b ->
-            var shortcutId = b.shortcutInfo?.id
-            if (shortcutId == null) shortcutId = b.entry?.bubbleMetadata?.shortcutId
-            if (shortcutId == null) return@mapNotNull null
-            BubbleEntity(userId, b.packageName, shortcutId, b.key, b.rawDesiredHeight,
-                    b.rawDesiredHeightResId)
+            BubbleEntity(
+                    userId,
+                    b.packageName,
+                    b.shortcutInfo?.id ?: return@mapNotNull null,
+                    b.key,
+                    b.rawDesiredHeight,
+                    b.rawDesiredHeightResId,
+                    b.title
+            )
         }
     }
 
@@ -159,8 +163,13 @@ internal class BubbleDataRepository @Inject constructor(
         val bubbles = entities.mapNotNull { entity ->
             shortcutMap[ShortcutKey(entity.userId, entity.packageName)]
                     ?.first { shortcutInfo -> entity.shortcutId == shortcutInfo.id }
-                    ?.let { shortcutInfo -> Bubble(entity.key, shortcutInfo, entity.desiredHeight,
-                            entity.desiredHeightResId) }
+                    ?.let { shortcutInfo -> Bubble(
+                            entity.key,
+                            shortcutInfo,
+                            entity.desiredHeight,
+                            entity.desiredHeightResId,
+                            entity.title
+                    ) }
         }
         uiScope.launch { cb(bubbles) }
     }
