@@ -339,8 +339,7 @@ public class Tethering {
 
                     @NonNull
                     public NetworkStatsManager getNetworkStatsManager() {
-                        return (NetworkStatsManager) mContext.getSystemService(
-                            Context.NETWORK_STATS_SERVICE);
+                        return mContext.getSystemService(NetworkStatsManager.class);
                     }
 
                     @NonNull
@@ -2386,7 +2385,7 @@ public class Tethering {
         final TetherState tetherState = new TetherState(
                 new IpServer(iface, mLooper, interfaceType, mLog, mNetd, mBpfCoordinator,
                              makeControlCallback(), mConfig.enableLegacyDhcpServer,
-                             mConfig.enableBpfOffload, mPrivateAddressCoordinator,
+                             mConfig.isBpfOffloadEnabled(), mPrivateAddressCoordinator,
                              mDeps.getIpServerDependencies()));
         mTetherStates.put(iface, tetherState);
         tetherState.ipServer.start();
