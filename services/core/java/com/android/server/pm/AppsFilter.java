@@ -964,12 +964,14 @@ public class AppsFilter {
             try {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "requestsQueryAllPackages");
                 if (callingPkgSetting != null) {
-                    if (requestsQueryAllPackages(callingPkgSetting)) {
-                        return false;
-                    }
+                        if (callingPkgSetting.pkg != null
+                                && requestsQueryAllPackages(callingPkgSetting.pkg)) {
+                            return false;
+                        }
                 } else {
                     for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
-                        if (requestsQueryAllPackages(callingSharedPkgSettings.valueAt(i))) {
+                        AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).pkg;
+                        if (pkg != null && requestsQueryAllPackages(pkg)) {
                             return false;
                         }
                     }
@@ -1058,10 +1060,10 @@ public class AppsFilter {
     }
 
 
-    private static boolean requestsQueryAllPackages(PackageSetting pkgSetting) {
+    private static boolean requestsQueryAllPackages(@NonNull AndroidPackage pkg) {
         // we're not guaranteed to have permissions yet analyzed at package add, so we inspect the
         // package directly
-        return pkgSetting.pkg.getRequestedPermissions().contains(
+        return pkg.getRequestedPermissions().contains(
                 Manifest.permission.QUERY_ALL_PACKAGES);
     }
 
