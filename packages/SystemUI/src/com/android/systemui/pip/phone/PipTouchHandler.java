@@ -688,11 +688,11 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
-                mHideMenuAfterShown = true;
                 // If Touch Exploration is enabled, some a11y services (e.g. Talkback) is probably
                 // on and changing MotionEvents into HoverEvents.
                 // Let's not enable menu show/hide for a11y services.
                 if (!mAccessibilityManager.isTouchExplorationEnabled()) {
+                    mHideMenuAfterShown = true;
                     mMenuController.hideMenu();
                 }
                 if (!shouldDeliverToMenu && mSendingHoverAccessibilityEvents) {
