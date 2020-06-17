@@ -17,6 +17,6 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="enabled_by_admin" msgid="6630472777476410137">"నిర్వాహకులు ప్రారంభించారు"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"నిర్వాహకులు నిలిపివేసారు"</string>
+    <string name="enabled_by_admin" msgid="6630472777476410137">"అడ్మిన్ ఎనేబుల్ చేశారు"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"అడ్మిన్ డిజేబుల్ చేశారు"</string>
 </resources>
