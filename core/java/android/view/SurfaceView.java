@@ -1620,9 +1620,14 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void updateRelativeZ(Transaction t) {
-        SurfaceControl viewRoot = getViewRootImpl().getSurfaceControl();
-        t.setRelativeLayer(mBackgroundControl, viewRoot, Integer.MIN_VALUE);
-        t.setRelativeLayer(mSurfaceControl, viewRoot, mSubLayer);
+        final ViewRootImpl viewRoot = getViewRootImpl();
+        if (viewRoot == null) {
+            // We were just detached.
+            return;
+        }
+        final SurfaceControl viewRootControl = viewRoot.getSurfaceControl();
+        t.setRelativeLayer(mBackgroundControl, viewRootControl, Integer.MIN_VALUE);
+        t.setRelativeLayer(mSurfaceControl, viewRootControl, mSubLayer);
     }
 
     /**
