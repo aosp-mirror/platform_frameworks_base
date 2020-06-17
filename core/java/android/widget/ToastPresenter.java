@@ -27,7 +27,6 @@ import android.content.res.Resources;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -90,7 +89,7 @@ public class ToastPresenter {
         //      context to it. This is problematic for multi-user because callers can pass a context
         //      created via Context.createContextAsUser().
         mAccessibilityManager = new AccessibilityManager(context, accessibilityManager,
-                UserHandle.getCallingUserId());
+                context.getUserId());
 
         mParams = createLayoutParams();
     }
