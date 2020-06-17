@@ -261,7 +261,7 @@ class MediaDataManager @Inject constructor(
                 }
                 it.active = !timedOut
                 onMediaDataLoaded(token, token, it)
-            } else {
+            } else if (timedOut) {
                 notificationEntryManager.removeNotification(it.notificationKey, null /* ranking */,
                         UNDEFINED_DISMISS_REASON)
             }
