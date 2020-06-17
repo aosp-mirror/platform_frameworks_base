@@ -709,7 +709,7 @@ public interface ServiceConnector<I extends IInterface> {
                 if (DEBUG) {
                     return mDebugName;
                 }
-                return mDelegate.toString() + " wrapped into " + super.toString();
+                return mDelegate + " wrapped into " + super.toString();
             }
 
             @Override
