@@ -63,6 +63,7 @@ import static android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
 import static com.android.networkstack.tethering.TetheringNotificationUpdater.DOWNSTREAM_NONE;
 
+import android.app.usage.NetworkStatsManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothProfile;
@@ -286,8 +287,6 @@ public class Tethering {
         mUpstreamNetworkMonitor = mDeps.getUpstreamNetworkMonitor(mContext, mTetherMasterSM, mLog,
                 TetherMasterSM.EVENT_UPSTREAM_CALLBACK);
         mForwardedDownstreams = new LinkedHashSet<>();
-        mBpfCoordinator = mDeps.getBpfCoordinator(
-                mHandler, mNetd, mLog, new BpfCoordinator.Dependencies());
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_CARRIER_CONFIG_CHANGED);
@@ -324,6 +323,37 @@ public class Tethering {
 
         // Load tethering configuration.
         updateConfiguration();
+
+        // Must be initialized after tethering configuration is loaded because BpfCoordinator
+        // constructor needs to use the configuration.
+        mBpfCoordinator = mDeps.getBpfCoordinator(
+                new BpfCoordinator.Dependencies() {
+                    @NonNull
+                    public Handler getHandler() {
+                        return mHandler;
+                    }
+
+                    @NonNull
+                    public INetd getNetd() {
+                        return mNetd;
+                    }
+
+                    @NonNull
+                    public NetworkStatsManager getNetworkStatsManager() {
+                        return (NetworkStatsManager) mContext.getSystemService(
+                            Context.NETWORK_STATS_SERVICE);
+                    }
+
+                    @NonNull
+                    public SharedLog getSharedLog() {
+                        return mLog;
+                    }
+
+                    @Nullable
+                    public TetheringConfiguration getTetherConfig() {
+                        return mConfig;
+                    }
+                });
 
         startStateMachineUpdaters();
     }
