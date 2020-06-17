@@ -82,6 +82,7 @@ class MediaTimeoutListener @Inject constructor(
 
         init {
             mediaController?.registerCallback(this)
+            onPlaybackStateChanged(mediaController?.playbackState)
         }
 
         fun destroy() {
