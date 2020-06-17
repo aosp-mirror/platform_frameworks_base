@@ -59,7 +59,7 @@ import java.util.Objects;
  * #getProcessCpuUsageDiffed()} result.
  *
  * <p>Thresholding is done in this class, instead of {@link KernelCpuThreadReader}, and instead of
- * WestWorld, because the thresholding should be done after diffing, not before. This is because of
+ * statsd, because the thresholding should be done after diffing, not before. This is because of
  * two issues with thresholding before diffing:
  *
  * <ul>
