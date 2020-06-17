@@ -2217,6 +2217,11 @@ public class Tethering {
         mOffloadController.dump(pw);
         pw.decreaseIndent();
 
+        pw.println("BPF offload:");
+        pw.increaseIndent();
+        mBpfCoordinator.dump(pw);
+        pw.decreaseIndent();
+
         pw.println("Private address coordinator:");
         pw.increaseIndent();
         mPrivateAddressCoordinator.dump(pw);
