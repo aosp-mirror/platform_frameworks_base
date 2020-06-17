@@ -100,6 +100,7 @@ public class BadgedImageView extends ImageView {
         mDotRenderer = new DotRenderer(mBubbleBitmapSize, iconPath, DEFAULT_PATH_SIZE);
 
         setFocusable(true);
+        setClickable(true);
     }
 
     /**
