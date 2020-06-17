@@ -3535,6 +3535,13 @@ class StorageManagerService extends IStorageManager.Stub
         // point
         final boolean systemUserUnlocked = isSystemUnlocked(UserHandle.USER_SYSTEM);
 
+        // When the caller is the app actually hosting external storage, we
+        // should never attempt to augment the actual storage volume state,
+        // otherwise we risk confusing it with race conditions as users go
+        // through various unlocked states
+        final boolean callerIsMediaStore = UserHandle.isSameApp(Binder.getCallingUid(),
+                mMediaStoreAuthorityAppId);
+
         final boolean userIsDemo;
         final boolean userKeyUnlocked;
         final boolean storagePermission;
@@ -3554,6 +3561,7 @@ class StorageManagerService extends IStorageManager.Stub
         final ArraySet<String> resUuids = new ArraySet<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
+                final String volId = mVolumes.keyAt(i);
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 switch (vol.getType()) {
                     case VolumeInfo.TYPE_PUBLIC:
@@ -3578,11 +3586,19 @@ class StorageManagerService extends IStorageManager.Stub
                 if (!match) continue;
 
                 boolean reportUnmounted = false;
-                if (!systemUserUnlocked) {
+                if (callerIsMediaStore) {
+                    // When the caller is the app actually hosting external storage, we
+                    // should never attempt to augment the actual storage volume state,
+                    // otherwise we risk confusing it with race conditions as users go
+                    // through various unlocked states
+                } else if (!systemUserUnlocked) {
                     reportUnmounted = true;
+                    Slog.w(TAG, "Reporting " + volId + " unmounted due to system locked");
                 } else if ((vol.getType() == VolumeInfo.TYPE_EMULATED) && !userKeyUnlocked) {
                     reportUnmounted = true;
+                    Slog.w(TAG, "Reporting " + volId + "unmounted due to " + userId + " locked");
                 } else if (!storagePermission && !realState) {
+                    Slog.w(TAG, "Reporting " + volId + "unmounted due to missing permissions");
                     reportUnmounted = true;
                 }
 
