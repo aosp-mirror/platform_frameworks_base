@@ -41,16 +41,16 @@ public final class ZoneInfoDb {
     public static ZoneInfoDb getInstance() {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new ZoneInfoDb(libcore.timezone.ZoneInfoDb.getInstance());
+                sInstance = new ZoneInfoDb(com.android.i18n.timezone.ZoneInfoDb.getInstance());
             }
         }
         return sInstance;
     }
 
     @NonNull
-    private final libcore.timezone.ZoneInfoDb mDelegate;
+    private final com.android.i18n.timezone.ZoneInfoDb mDelegate;
 
-    private ZoneInfoDb(libcore.timezone.ZoneInfoDb delegate) {
+    private ZoneInfoDb(com.android.i18n.timezone.ZoneInfoDb delegate) {
         mDelegate = Objects.requireNonNull(delegate);
     }
 
