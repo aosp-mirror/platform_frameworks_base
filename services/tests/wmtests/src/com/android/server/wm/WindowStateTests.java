@@ -692,4 +692,14 @@ public class WindowStateTests extends WindowTestsBase {
         sameTokenWindow.removeImmediately();
         assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
     }
+
+    @Test
+    public void testNeedsRelativeLayeringToIme_startingWindow() {
+        WindowState sameTokenWindow = createWindow(null, TYPE_APPLICATION_STARTING,
+                mAppWindow.mToken, "SameTokenWindow");
+        mDisplayContent.mInputMethodTarget = mAppWindow;
+        sameTokenWindow.mActivityRecord.getStack().setWindowingMode(
+                WINDOWING_MODE_SPLIT_SCREEN_PRIMARY);
+        assertFalse(sameTokenWindow.needsRelativeLayeringToIme());
+    }
 }

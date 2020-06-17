@@ -313,18 +313,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final AssistDataReceiverImpl mAssistReceiver = new AssistDataReceiverImpl();
 
     void onSwitchInputMethodLocked() {
+        // One caveat is that for the case where the focus is on a field for which regular autofill
+        // returns null, and augmented autofill is triggered,  and then the user switches the input
+        // method. Tapping on the field again will not trigger a new augmented autofill request.
+        // This may be fixed by adding more checks such as whether mCurrentViewId is null.
         if (mExpiredResponse) {
             return;
         }
-
-        if (shouldExpireResponseOnInputMethodSwitch()) {
+        if (shouldResetSessionStateOnInputMethodSwitch()) {
             // Set the old response expired, so the next action (ACTION_VIEW_ENTERED) can trigger
             // a new fill request.
             mExpiredResponse = true;
+            // Clear the augmented autofillable ids so augmented autofill will trigger again.
+            mAugmentedAutofillableIds = null;
+            // In case the field is augmented autofill only, we clear the current view id, so that
+            // we won't skip view entered due to same view entered, for the augmented autofill.
+            if (mForAugmentedAutofillOnly) {
+                mCurrentViewId = null;
+            }
         }
     }
 
-    private boolean shouldExpireResponseOnInputMethodSwitch() {
+    private boolean shouldResetSessionStateOnInputMethodSwitch() {
         // One of below cases will need a new fill request to update the inline spec for the new
         // input method.
         // 1. The autofill provider supports inline suggestion and the render service is available.
@@ -2588,15 +2598,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             id)) {
                         // Regular autofill handled the view and returned null response, but it
                         // triggered augmented autofill
-                        if (!isSameViewEntered || mExpiredResponse) {
+                        if (!isSameViewEntered) {
                             if (sDebug) Slog.d(TAG, "trigger augmented autofill.");
                             triggerAugmentedAutofillLocked(flags);
                         } else {
                             if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
                         }
                         return;
-                    } else if (mForAugmentedAutofillOnly && isSameViewEntered
-                            && !mExpiredResponse) {
+                    } else if (mForAugmentedAutofillOnly && isSameViewEntered) {
                         // Regular autofill is disabled.
                         if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
                         return;
@@ -3702,6 +3711,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         unlinkClientVultureLocked();
         mUi.destroyAll(mPendingSaveUi, this, true);
         mUi.clearCallback(this);
+        if (mCurrentViewId != null) {
+            mInlineSessionController.destroyLocked(mCurrentViewId);
+        }
         mDestroyed = true;
 
         // Log metrics

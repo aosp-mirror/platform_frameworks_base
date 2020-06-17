@@ -18,8 +18,8 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
-import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsState.getDefaultVisibility;
+import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsState.toPublicType;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;

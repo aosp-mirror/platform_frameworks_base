@@ -22,6 +22,10 @@ import android.media.session.MediaController
 import com.android.settingslib.media.LocalMediaManager
 import com.android.settingslib.media.MediaDevice
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.Dumpable
+import com.android.systemui.dump.DumpManager
+import java.io.FileDescriptor
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,13 +39,15 @@ class MediaDeviceManager @Inject constructor(
     private val localMediaManagerFactory: LocalMediaManagerFactory,
     private val mr2manager: MediaRouter2Manager,
     @Main private val fgExecutor: Executor,
-    private val mediaDataManager: MediaDataManager
-) : MediaDataManager.Listener {
+    private val mediaDataManager: MediaDataManager,
+    private val dumpManager: DumpManager
+) : MediaDataManager.Listener, Dumpable {
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val entries: MutableMap<String, Token> = mutableMapOf()
 
     init {
         mediaDataManager.addListener(this)
+        dumpManager.registerDumpable(javaClass.name, this)
     }
 
     /**
@@ -77,6 +83,17 @@ class MediaDeviceManager @Inject constructor(
         token?.let {
             listeners.forEach {
                 it.onKeyRemoved(key)
+            }
+        }
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+        with(pw) {
+            println("MediaDeviceManager state:")
+            entries.forEach {
+                key, entry ->
+                println("  key=$key")
+                entry.dump(fd, pw, args)
             }
         }
     }
@@ -121,6 +138,17 @@ class MediaDeviceManager @Inject constructor(
             started = false
             localMediaManager.stopScan()
             localMediaManager.unregisterCallback(this)
+        }
+        fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<String>) {
+            val route = controller?.let {
+                mr2manager.getRoutingSessionForMediaController(it)
+            }
+            with(pw) {
+                println("    current device is ${current?.name}")
+                val type = controller?.playbackInfo?.playbackType
+                println("    PlaybackType=$type (1 for local, 2 for remote)")
+                println("    route=$route")
+            }
         }
         override fun onDeviceListUpdate(devices: List<MediaDevice>?) = fgExecutor.execute {
             updateCurrent()

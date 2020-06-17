@@ -339,7 +339,7 @@
     <string name="permdesc_install_shortcut" msgid="4476328467240212503">"Mengizinkan aplikasi menambahkan pintasan Layar Utama tanpa tindakan dari pengguna."</string>
     <string name="permlab_uninstall_shortcut" msgid="295263654781900390">"meng-uninstal pintasan"</string>
     <string name="permdesc_uninstall_shortcut" msgid="1924735350988629188">"Mengizinkan aplikasi menghapus pintasan Layar Utama tanpa tindakan dari pengguna."</string>
-    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"ubah rute panggilan keluar"</string>
+    <string name="permlab_processOutgoingCalls" msgid="4075056020714266558">"alihkan panggilan keluar"</string>
     <string name="permdesc_processOutgoingCalls" msgid="7833149750590606334">"Memungkinkan aplikasi melihat nomor yang dihubungi saat melakukan panggilan keluar dengan opsi untuk mengalihkan panggilan ke nomor lain atau membatalkan panggilan sepenuhnya."</string>
     <string name="permlab_answerPhoneCalls" msgid="4131324833663725855">"jawab panggilan telepon"</string>
     <string name="permdesc_answerPhoneCalls" msgid="894386681983116838">"Mengizinkan aplikasi menjawab panggilan telepon masuk."</string>

@@ -717,6 +717,15 @@ public final class DisplayInfo implements Parcelable {
         if ((flags & Display.FLAG_ROUND) != 0) {
             result.append(", FLAG_ROUND");
         }
+        if ((flags & Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
+            result.append(", FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD");
+        }
+        if ((flags & Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+            result.append(", FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS");
+        }
+        if ((flags & Display.FLAG_TRUSTED) != 0) {
+            result.append(", FLAG_TRUSTED");
+        }
         return result.toString();
     }
 }

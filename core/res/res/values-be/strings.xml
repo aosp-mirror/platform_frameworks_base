@@ -1687,7 +1687,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Адмовіць"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Каб пачаць выкарыстоўваць функцыю, націсніце на яе:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Выберыце функцыі, якія будзеце выкарыстоўваць з кнопкай спецыяльных магчымасцей"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберыце функцыі, якія будзеце выкарыстоўваць са спалучэннем клавішы гучнасці"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Выберыце функцыі для выкарыстання з клавішай гучнасці"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Сэрвіс \"<xliff:g id="SERVICE_NAME">%s</xliff:g>\" выключаны"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Змяніць ярлыкі"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Гатова"</string>
