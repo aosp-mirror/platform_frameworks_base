@@ -819,9 +819,15 @@ public class AppsFilter {
             mOverlayReferenceMapper.removePkg(setting.name);
             mFeatureConfig.updatePackageState(setting, true /*removed*/);
 
-            if (mShouldFilterCache != null) {
-                updateShouldFilterCacheForPackage(
-                        setting.name, setting, settings, users, settings.size());
+            if (mShouldFilterCache != null && setting.sharedUser != null) {
+                for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
+                    PackageSetting siblingSetting = setting.sharedUser.packages.valueAt(i);
+                    if (siblingSetting == setting) {
+                        continue;
+                    }
+                    updateShouldFilterCacheForPackage(
+                            setting.name, siblingSetting, settings, users, settings.size());
+                }
             }
         });
         mForceQueryable.remove(setting.appId);
