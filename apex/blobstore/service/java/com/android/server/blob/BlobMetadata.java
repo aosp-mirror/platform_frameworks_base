@@ -29,6 +29,8 @@ import static android.app.blob.XmlTags.TAG_COMMITTER;
 import static android.app.blob.XmlTags.TAG_LEASEE;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.O_RDONLY;
+import static android.text.format.Formatter.FLAG_IEC_UNITS;
+import static android.text.format.Formatter.formatFileSize;
 
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_COMMIT_TIME;
@@ -335,7 +337,9 @@ class BlobMetadata {
     }
 
     void forEachLeasee(Consumer<Leasee> consumer) {
-        mLeasees.forEach(consumer);
+        synchronized (mMetadataLock) {
+            mLeasees.forEach(consumer);
+        }
     }
 
     File getBlobFile() {
@@ -460,54 +464,57 @@ class BlobMetadata {
     }
 
     void dump(IndentingPrintWriter fout, DumpArgs dumpArgs) {
-        fout.println("blobHandle:");
-        fout.increaseIndent();
-        mBlobHandle.dump(fout, dumpArgs.shouldDumpFull());
-        fout.decreaseIndent();
+        synchronized (mMetadataLock) {
+            fout.println("blobHandle:");
+            fout.increaseIndent();
+            mBlobHandle.dump(fout, dumpArgs.shouldDumpFull());
+            fout.decreaseIndent();
+            fout.println("size: " + formatFileSize(mContext, getSize(), FLAG_IEC_UNITS));
 
-        fout.println("Committers:");
-        fout.increaseIndent();
-        if (mCommitters.isEmpty()) {
-            fout.println("<empty>");
-        } else {
-            for (int i = 0, count = mCommitters.size(); i < count; ++i) {
-                final Committer committer = mCommitters.valueAt(i);
-                fout.println("committer " + committer.toString());
-                fout.increaseIndent();
-                committer.dump(fout);
-                fout.decreaseIndent();
+            fout.println("Committers:");
+            fout.increaseIndent();
+            if (mCommitters.isEmpty()) {
+                fout.println("<empty>");
+            } else {
+                for (int i = 0, count = mCommitters.size(); i < count; ++i) {
+                    final Committer committer = mCommitters.valueAt(i);
+                    fout.println("committer " + committer.toString());
+                    fout.increaseIndent();
+                    committer.dump(fout);
+                    fout.decreaseIndent();
+                }
             }
-        }
-        fout.decreaseIndent();
+            fout.decreaseIndent();
 
-        fout.println("Leasees:");
-        fout.increaseIndent();
-        if (mLeasees.isEmpty()) {
-            fout.println("<empty>");
-        } else {
-            for (int i = 0, count = mLeasees.size(); i < count; ++i) {
-                final Leasee leasee = mLeasees.valueAt(i);
-                fout.println("leasee " + leasee.toString());
-                fout.increaseIndent();
-                leasee.dump(mContext, fout);
-                fout.decreaseIndent();
+            fout.println("Leasees:");
+            fout.increaseIndent();
+            if (mLeasees.isEmpty()) {
+                fout.println("<empty>");
+            } else {
+                for (int i = 0, count = mLeasees.size(); i < count; ++i) {
+                    final Leasee leasee = mLeasees.valueAt(i);
+                    fout.println("leasee " + leasee.toString());
+                    fout.increaseIndent();
+                    leasee.dump(mContext, fout);
+                    fout.decreaseIndent();
+                }
             }
-        }
-        fout.decreaseIndent();
+            fout.decreaseIndent();
 
-        fout.println("Open fds:");
-        fout.increaseIndent();
-        if (mRevocableFds.isEmpty()) {
-            fout.println("<empty>");
-        } else {
-            for (int i = 0, count = mRevocableFds.size(); i < count; ++i) {
-                final String packageName = mRevocableFds.keyAt(i);
-                final ArraySet<RevocableFileDescriptor> packageFds =
-                        mRevocableFds.valueAt(i);
-                fout.println(packageName + "#" + packageFds.size());
+            fout.println("Open fds:");
+            fout.increaseIndent();
+            if (mRevocableFds.isEmpty()) {
+                fout.println("<empty>");
+            } else {
+                for (int i = 0, count = mRevocableFds.size(); i < count; ++i) {
+                    final String packageName = mRevocableFds.keyAt(i);
+                    final ArraySet<RevocableFileDescriptor> packageFds =
+                            mRevocableFds.valueAt(i);
+                    fout.println(packageName + "#" + packageFds.size());
+                }
             }
+            fout.decreaseIndent();
         }
-        fout.decreaseIndent();
     }
 
     void writeToXml(XmlSerializer out) throws IOException {
