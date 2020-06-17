@@ -213,7 +213,7 @@ public class AppStandbyControllerTests {
         }
 
         @Override
-        boolean isNonIdleWhitelisted(String packageName) throws RemoteException {
+        boolean isNonIdleWhitelisted(String packageName) {
             return mNonIdleWhitelistApps.contains(packageName);
         }
 
