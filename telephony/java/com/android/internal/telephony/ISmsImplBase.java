@@ -212,4 +212,9 @@ public class ISmsImplBase extends ISms.Stub {
     public int getSmsCapacityOnIccForSubscriber(int subId) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public boolean resetAllCellBroadcastRanges(int subId) {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -2978,4 +2978,29 @@ public final class SmsManager {
             Log.e(TAG, "setPremiumSmsPermission() RemoteException", e);
         }
     }
+
+    /**
+     * Reset all cell broadcast ranges. Previously enabled ranges will become invalid after this.
+     *
+     * @return {@code true} if succeeded, otherwise {@code false}.
+     *
+     * // TODO: Unhide the API in S.
+     * @hide
+     */
+    public boolean resetAllCellBroadcastRanges() {
+        boolean success = false;
+
+        try {
+            ISms iSms = getISmsService();
+            if (iSms != null) {
+                // If getSubscriptionId() returns INVALID or an inactive subscription, we will use
+                // the default phone internally.
+                success = iSms.resetAllCellBroadcastRanges(getSubscriptionId());
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return success;
+    }
 }
