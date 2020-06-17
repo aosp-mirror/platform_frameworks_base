@@ -46,6 +46,9 @@ open class TransitionLayoutController {
     private var state = TransitionViewState()
     private var pivot = PointF()
     private var animator: ValueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f)
+    private var currentHeight: Int = 0
+    private var currentWidth: Int = 0
+    var sizeChangedListener: ((Int, Int) -> Unit)? = null
 
     init {
         animator.apply {
@@ -67,7 +70,16 @@ open class TransitionLayoutController {
                 progress = animator.animatedFraction,
                 pivot = pivot,
                 resultState = currentState)
-        view.setState(currentState)
+        applyStateToLayout(currentState)
+    }
+
+    private fun applyStateToLayout(state: TransitionViewState) {
+        transitionLayout?.setState(state)
+        if (currentHeight != state.height || currentWidth != state.width) {
+            currentHeight = state.height
+            currentWidth = state.width
+            sizeChangedListener?.invoke(currentWidth, currentHeight)
+        }
     }
 
     /**
@@ -213,7 +225,7 @@ open class TransitionLayoutController {
         this.state = state.copy()
         if (applyImmediately || transitionLayout == null) {
             animator.cancel()
-            transitionLayout?.setState(this.state)
+            applyStateToLayout(this.state)
             currentState = state.copy(reusedState = currentState)
         } else if (animated) {
             animationStartState = currentState.copy()
@@ -221,7 +233,7 @@ open class TransitionLayoutController {
             animator.startDelay = delay
             animator.start()
         } else if (!animator.isRunning) {
-            transitionLayout?.setState(this.state)
+            applyStateToLayout(this.state)
             currentState = state.copy(reusedState = currentState)
         }
         // otherwise the desired state was updated and the animation will go to the new target

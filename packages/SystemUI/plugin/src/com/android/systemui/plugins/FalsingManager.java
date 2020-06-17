@@ -30,7 +30,7 @@ import java.io.PrintWriter;
  */
 @ProvidesInterface(version = FalsingManager.VERSION)
 public interface FalsingManager {
-    int VERSION = 3;
+    int VERSION = 4;
 
     void onSuccessfulUnlock();
 
@@ -88,11 +88,11 @@ public interface FalsingManager {
 
     void onScreenOff();
 
-    void onNotificatonStopDismissing();
+    void onNotificationStopDismissing();
 
     void onNotificationDismissed();
 
-    void onNotificatonStartDismissing();
+    void onNotificationStartDismissing();
 
     void onNotificationDoubleTap(boolean accepted, float dx, float dy);
 
