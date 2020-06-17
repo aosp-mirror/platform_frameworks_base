@@ -71,6 +71,7 @@ import android.view.inputmethod.InputMethodSubtype;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.IMultiClientInputMethod;
 import com.android.internal.inputmethod.IMultiClientInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.IMultiClientInputMethodSession;
@@ -1154,6 +1155,7 @@ public final class MultiClientInputMethodManagerService {
     private static InputMethodInfo queryInputMethod(Context context, @UserIdInt int userId,
             @Nullable ComponentName componentName) {
         if (componentName == null) {
+            Slog.w(TAG, "queryInputMethod invoked with null componentName");
             return null;
         }
 
@@ -1163,17 +1165,31 @@ public final class MultiClientInputMethodManagerService {
                 new Intent(MultiClientInputMethodServiceDelegate.SERVICE_INTERFACE)
                         .setComponent(componentName),
                 PackageManager.GET_META_DATA, userId);
+        try {
+            return new InputMethodInfo(context, resolveMultiClientImeService(services));
+        } catch (Exception e) {
+            Slog.wtf(TAG, "Unable to load input method from services (" + services + ")", e);
+        }
+        return null;
+    }
 
+    /**
+     * Determines the multi-client IME from the specified {@link List<ResolveInfo>}.
+     *
+     * @return {@link ResolveInfo} when an appropriate multi-client IME is found.
+     *         Otherwise {@code null}.
+     */
+    @Nullable
+    @VisibleForTesting
+    static ResolveInfo resolveMultiClientImeService(@NonNull List<ResolveInfo> services) {
         if (services.isEmpty()) {
             Slog.e(TAG, "No IME found");
             return null;
         }
-
         if (services.size() > 1) {
             Slog.e(TAG, "Only one IME service is supported.");
             return null;
         }
-
         final ResolveInfo ri = services.get(0);
         ServiceInfo si = ri.serviceInfo;
         final String imeId = InputMethodInfo.computeId(ri);
@@ -1182,18 +1198,11 @@ public final class MultiClientInputMethodManagerService {
                     + android.Manifest.permission.BIND_INPUT_METHOD);
             return null;
         }
-
         if (!Build.IS_DEBUGGABLE && (si.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
             Slog.e(TAG, imeId + " must be pre-installed when Build.IS_DEBUGGABLE is false");
             return null;
         }
-
-        try {
-            return new InputMethodInfo(context, ri);
-        } catch (Exception e) {
-            Slog.wtf(TAG, "Unable to load input method " + imeId, e);
-        }
-        return null;
+        return ri;
     }
 
     /**
