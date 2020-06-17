@@ -74,12 +74,16 @@ public class ResolverViewPager extends ViewPager {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 
+    /**
+     * Sets whether swiping sideways should happen.
+     * <p>Note that swiping is always disabled for RTL layouts (b/159110029 for context).
+     */
     void setSwipingEnabled(boolean swipingEnabled) {
         mSwipingEnabled = swipingEnabled;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return mSwipingEnabled && super.onInterceptTouchEvent(ev);
+        return !isLayoutRtl() && mSwipingEnabled && super.onInterceptTouchEvent(ev);
     }
 }
