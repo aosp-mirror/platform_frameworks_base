@@ -144,6 +144,7 @@ public class IpServerTest {
     @Mock private IpServer.Dependencies mDependencies;
     @Mock private PrivateAddressCoordinator mAddressCoordinator;
     @Mock private NetworkStatsManager mStatsManager;
+    @Mock private TetheringConfiguration mTetherConfig;
 
     @Captor private ArgumentCaptor<DhcpServingParamsParcel> mDhcpParamsCaptor;
 
@@ -227,6 +228,7 @@ public class IpServerTest {
         MockitoAnnotations.initMocks(this);
         when(mSharedLog.forSubComponent(anyString())).thenReturn(mSharedLog);
         when(mAddressCoordinator.requestDownstreamAddress(any())).thenReturn(mTestAddress);
+        when(mTetherConfig.isBpfOffloadEnabled()).thenReturn(true /* default value */);
 
         mBpfCoordinator = spy(new BpfCoordinator(
                 new BpfCoordinator.Dependencies() {
@@ -252,10 +254,7 @@ public class IpServerTest {
 
                     @Nullable
                     public TetheringConfiguration getTetherConfig() {
-                        // Returning null configuration object is a hack to enable BPF offload.
-                        // See BpfCoordinator#isOffloadEnabled.
-                        // TODO: Mock TetheringConfiguration to test.
-                        return null;
+                        return mTetherConfig;
                     }
                 }));
     }
