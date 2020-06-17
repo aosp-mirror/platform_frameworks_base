@@ -36,6 +36,7 @@ import android.net.ip.IpServer;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.net.util.SharedLog;
 import android.net.util.TetheringUtils.ForwardedStats;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -47,11 +48,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -65,6 +68,7 @@ import java.util.Objects;
  */
 public class BpfCoordinator {
     private static final String TAG = BpfCoordinator.class.getSimpleName();
+    private static final int DUMP_TIMEOUT_MS = 10_000;
     @VisibleForTesting
     static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000; // TODO: Make it customizable.
 
@@ -341,6 +345,75 @@ public class BpfCoordinator {
             Log.wtf(TAG, "The upstream interface name " + upstreamIface
                     + " is different from the existing interface name "
                     + iface + " for index " + upstreamIfindex);
+        }
+    }
+
+    /**
+     * Dump information.
+     * Block the function until all the data are dumped on the handler thread or timed-out. The
+     * reason is that dumpsys invokes this function on the thread of caller and the data may only
+     * be allowed to be accessed on the handler thread.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        final ConditionVariable dumpDone = new ConditionVariable();
+        mHandler.post(() -> {
+            pw.println("Polling " + (mPollingStarted ? "started" : "not started"));
+            pw.println("Stats provider " + (mStatsProvider != null
+                    ? "registered" : "not registered"));
+            pw.println("Upstream quota: " + mInterfaceQuotas.toString());
+
+            pw.println("Forwarding stats:");
+            pw.increaseIndent();
+            if (mStats.size() == 0) {
+                pw.println("<empty>");
+            } else {
+                dumpStats(pw);
+            }
+            pw.decreaseIndent();
+
+            pw.println("Forwarding rules:");
+            pw.increaseIndent();
+            if (mIpv6ForwardingRules.size() == 0) {
+                pw.println("<empty>");
+            } else {
+                dumpIpv6ForwardingRules(pw);
+            }
+            pw.decreaseIndent();
+
+            dumpDone.open();
+        });
+        if (!dumpDone.block(DUMP_TIMEOUT_MS)) {
+            pw.println("... dump timed-out after " + DUMP_TIMEOUT_MS + "ms");
+        }
+    }
+
+    private void dumpStats(@NonNull IndentingPrintWriter pw) {
+        for (int i = 0; i < mStats.size(); i++) {
+            final int upstreamIfindex = mStats.keyAt(i);
+            final ForwardedStats stats = mStats.get(upstreamIfindex);
+            pw.println(String.format("%d(%s) - %s", upstreamIfindex, mInterfaceNames.get(
+                    upstreamIfindex), stats.toString()));
+        }
+    }
+
+    private void dumpIpv6ForwardingRules(@NonNull IndentingPrintWriter pw) {
+        for (Map.Entry<IpServer, LinkedHashMap<Inet6Address, Ipv6ForwardingRule>> entry :
+                mIpv6ForwardingRules.entrySet()) {
+            IpServer ipServer = entry.getKey();
+            // The rule downstream interface index is paired with the interface name from
+            // IpServer#interfaceName. See #startIPv6, #updateIpv6ForwardingRules in IpServer.
+            final String downstreamIface = ipServer.interfaceName();
+            pw.println("[" + downstreamIface + "]: iif(iface) oif(iface) v6addr srcmac dstmac");
+
+            pw.increaseIndent();
+            LinkedHashMap<Inet6Address, Ipv6ForwardingRule> rules = entry.getValue();
+            for (Ipv6ForwardingRule rule : rules.values()) {
+                final int upstreamIfindex = rule.upstreamIfindex;
+                pw.println(String.format("%d(%s) %d(%s) %s %s %s", upstreamIfindex,
+                        mInterfaceNames.get(upstreamIfindex), rule.downstreamIfindex,
+                        downstreamIface, rule.address, rule.srcMac, rule.dstMac));
+            }
+            pw.decreaseIndent();
         }
     }
 
