@@ -29,6 +29,7 @@ import android.media.MediaCodec.LinearBlock;
 @SystemApi
 public class MediaEvent extends FilterEvent {
     private long mNativeContext;
+    private boolean mReleased = false;
     private final Object mLock = new Object();
 
     private native Long nativeGetAudioHandle();
@@ -181,7 +182,21 @@ public class MediaEvent extends FilterEvent {
      */
     @Override
     protected void finalize() {
-        nativeFinalize();
-        mNativeContext = 0;
+        release();
+    }
+
+    /**
+     * Releases the MediaEvent object.
+     * @hide
+     */
+    public void release() {
+        synchronized (mLock) {
+            if (mReleased) {
+                return;
+            }
+            nativeFinalize();
+            mNativeContext = 0;
+            mReleased = true;
+        }
     }
 }
