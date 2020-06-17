@@ -57,7 +57,7 @@
     <string name="osu_sign_up_complete" msgid="7640183358878916847">"Anmeldung abgeschlossen. Verbindung wird hergestellt…"</string>
     <string name="speed_label_very_slow" msgid="8526005255731597666">"Sehr langsam"</string>
     <string name="speed_label_slow" msgid="6069917670665664161">"Langsam"</string>
-    <string name="speed_label_okay" msgid="1253594383880810424">"Ok"</string>
+    <string name="speed_label_okay" msgid="1253594383880810424">"Mittel"</string>
     <string name="speed_label_medium" msgid="9078405312828606976">"Mittel"</string>
     <string name="speed_label_fast" msgid="2677719134596044051">"Schnell"</string>
     <string name="speed_label_very_fast" msgid="8215718029533182439">"Sehr schnell"</string>
