@@ -150,7 +150,7 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
 
     // The list of all rollbacks, including available and committed rollbacks.
     // Accessed on the handler thread only.
-    private final List<Rollback> mRollbacks;
+    private final List<Rollback> mRollbacks = new ArrayList<>();
 
     // Apk sessions from a staged session with no matching rollback.
     // Accessed on the handler thread only.
@@ -189,26 +189,28 @@ class RollbackManagerServiceImpl extends IRollbackManager.Stub implements Rollba
         mPackageHealthObserver = new RollbackPackageHealthObserver(mContext);
         mAppDataRollbackHelper = new AppDataRollbackHelper(mInstaller);
 
-        // Load rollback data from device storage.
-        mRollbacks = mRollbackStore.loadRollbacks();
-        if (!context.getPackageManager().isDeviceUpgrading()) {
-            for (Rollback rollback : mRollbacks) {
-                mAllocatedRollbackIds.put(rollback.info.getRollbackId(), true);
-            }
-        } else {
-            // Delete rollbacks when build fingerprint has changed.
-            for (Rollback rollback : mRollbacks) {
-                rollback.delete(mAppDataRollbackHelper);
-            }
-            mRollbacks.clear();
-        }
-
         // Kick off and start monitoring the handler thread.
         HandlerThread handlerThread = new HandlerThread("RollbackManagerServiceHandler");
         handlerThread.start();
         mHandler = new Handler(handlerThread.getLooper());
         Watchdog.getInstance().addThread(getHandler(), HANDLER_THREAD_TIMEOUT_DURATION_MILLIS);
         mExecutor = new HandlerExecutor(getHandler());
+
+        // Load rollback data from device storage.
+        getHandler().post(() -> {
+            mRollbacks.addAll(mRollbackStore.loadRollbacks());
+            if (!context.getPackageManager().isDeviceUpgrading()) {
+                for (Rollback rollback : mRollbacks) {
+                    mAllocatedRollbackIds.put(rollback.info.getRollbackId(), true);
+                }
+            } else {
+                // Delete rollbacks when build fingerprint has changed.
+                for (Rollback rollback : mRollbacks) {
+                    rollback.delete(mAppDataRollbackHelper);
+                }
+                mRollbacks.clear();
+            }
+        });
 
         UserManager userManager = mContext.getSystemService(UserManager.class);
         for (UserHandle user : userManager.getUserHandles(true)) {

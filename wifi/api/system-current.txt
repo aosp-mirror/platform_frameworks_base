@@ -253,6 +253,7 @@ package android.net.wifi {
     method public int getBand();
     method @NonNull public java.util.List<android.net.MacAddress> getBlockedClientList();
     method public int getChannel();
+    method public int getMacRandomizationSetting();
     method public int getMaxNumberOfClients();
     method public long getShutdownTimeoutMillis();
     method public boolean isAutoShutdownEnabled();
@@ -262,6 +263,8 @@ package android.net.wifi {
     field public static final int BAND_5GHZ = 2; // 0x2
     field public static final int BAND_6GHZ = 4; // 0x4
     field public static final int BAND_ANY = 7; // 0x7
+    field public static final int RANDOMIZATION_NONE = 0; // 0x0
+    field public static final int RANDOMIZATION_PERSISTENT = 1; // 0x1
   }
 
   public static final class SoftApConfiguration.Builder {
@@ -276,6 +279,7 @@ package android.net.wifi {
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setChannel(int, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setClientControlByUserEnabled(boolean);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setHiddenSsid(boolean);
+    method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMacRandomizationSetting(int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setMaxNumberOfClients(@IntRange(from=0) int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setPassphrase(@Nullable String, int);
     method @NonNull public android.net.wifi.SoftApConfiguration.Builder setShutdownTimeoutMillis(@IntRange(from=0) long);
@@ -285,6 +289,7 @@ package android.net.wifi {
   public final class SoftApInfo implements android.os.Parcelable {
     method public int describeContents();
     method public int getBandwidth();
+    method @Nullable public android.net.MacAddress getBssid();
     method public int getFrequency();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CHANNEL_WIDTH_160MHZ = 6; // 0x6

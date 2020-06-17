@@ -75,7 +75,6 @@ public class MediaTranscodeManagerWithMockServiceTest
     private MediaTranscodeManager mMediaTranscodeManager = null;
     private Uri mSourceHEVCVideoUri = null;
     private Uri mDestinationUri = null;
-
     // Use mock transcoding service for testing the api.
     private MockTranscodingService mTranscodingService = null;
 
@@ -223,7 +222,6 @@ public class MediaTranscodeManagerWithMockServiceTest
     public MediaTranscodeManagerWithMockServiceTest() {
         super("com.android.MediaTranscodeManagerWithMockServiceTest", MediaTranscodingTest.class);
     }
-
 
     private static Uri resourceToUri(Context context, int resId) {
         Uri uri = new Uri.Builder()
@@ -374,6 +372,50 @@ public class MediaTranscodeManagerWithMockServiceTest
         });
     }
 
+    void testTranscodingWithExpectResult(Uri srcUri, Uri dstUri, int expectedResult)
+            throws Exception {
+        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
+        TranscodingTestConfig testConfig = new TranscodingTestConfig();
+        testConfig.passThroughMode = true;
+        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
+
+        TranscodingRequest request =
+                new TranscodingRequest.Builder()
+                        .setSourceUri(srcUri)
+                        .setDestinationUri(dstUri)
+                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
+                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
+                        .setVideoTrackFormat(createMediaFormat())
+                        .setTestConfig(testConfig)
+                        .build();
+        Executor listenerExecutor = Executors.newSingleThreadExecutor();
+
+        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
+                transcodingJob -> {
+                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
+                    assertTrue("Transcoding should failed.",
+                            transcodingJob.getResult() == expectedResult);
+                    transcodeCompleteSemaphore.release();
+                });
+        assertNotNull(job);
+
+        if (job != null) {
+            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
+            boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
+                    TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+            assertTrue("Transcode failed to complete in time.", finishedOnTime);
+        }
+
+        if (expectedResult == TranscodingJob.RESULT_SUCCESS) {
+            // Checks the destination file get generated.
+            File file = new File(dstUri.getPath());
+            assertTrue("Failed to create destination file", file.exists());
+
+            // Removes the file.
+            file.delete();
+        }
+    }
+
     // Tests transcoding from invalid a invalid  and expects failure.
     @Test
     public void testTranscodingInvalidSrcUri() throws Exception {
@@ -390,39 +432,8 @@ public class MediaTranscodeManagerWithMockServiceTest
                 + mContext.getPackageName() + "/temp.mp4");
         Log.d(TAG, "Transcoding to destination: " + destinationUri);
 
-        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
-        TranscodingTestConfig testConfig = new TranscodingTestConfig();
-        testConfig.passThroughMode = true;
-        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
-
-        TranscodingRequest request =
-                new TranscodingRequest.Builder()
-                        .setSourceUri(invalidSrcUri)
-                        .setDestinationUri(destinationUri)
-                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
-                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
-                        .setVideoTrackFormat(createMediaFormat())
-                        .setTestConfig(testConfig)
-                        .build();
-        Executor listenerExecutor = Executors.newSingleThreadExecutor();
-
-        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
-                transcodingJob -> {
-                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
-                    assertTrue("Transcoding should failed.",
-                            transcodingJob.getResult() == TranscodingJob.RESULT_ERROR);
-                    transcodeCompleteSemaphore.release();
-                });
-        assertNotNull(job);
-
-        if (job != null) {
-            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
-            boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
-                    TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertTrue("Transcode failed to complete in time.", finishedOnTime);
-        }
+        testTranscodingWithExpectResult(invalidSrcUri, destinationUri, TranscodingJob.RESULT_ERROR);
     }
-
 
     // Tests transcoding to a uri in res folder and expects failure as we could not write to res
     // folder.
@@ -437,37 +448,8 @@ public class MediaTranscodeManagerWithMockServiceTest
                 + mContext.getPackageName() + "/temp.mp4");
         Log.d(TAG, "Transcoding to destination: " + destinationUri);
 
-        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
-        TranscodingTestConfig testConfig = new TranscodingTestConfig();
-        testConfig.passThroughMode = true;
-        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
-
-        TranscodingRequest request =
-                new TranscodingRequest.Builder()
-                        .setSourceUri(mSourceHEVCVideoUri)
-                        .setDestinationUri(destinationUri)
-                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
-                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
-                        .setVideoTrackFormat(createMediaFormat())
-                        .setTestConfig(testConfig)
-                        .build();
-        Executor listenerExecutor = Executors.newSingleThreadExecutor();
-
-        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
-                transcodingJob -> {
-                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
-                    assertTrue("Transcoding should failed.",
-                            transcodingJob.getResult() == TranscodingJob.RESULT_ERROR);
-                    transcodeCompleteSemaphore.release();
-                });
-        assertNotNull(job);
-
-        if (job != null) {
-            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
-            boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
-                    TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertTrue("Transcode failed to complete in time.", finishedOnTime);
-        }
+        testTranscodingWithExpectResult(mSourceHEVCVideoUri, destinationUri,
+                TranscodingJob.RESULT_ERROR);
     }
 
     // Tests transcoding to a uri in internal storage folder and expects success.
@@ -481,79 +463,41 @@ public class MediaTranscodeManagerWithMockServiceTest
         Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
                 + mContext.getCacheDir().getAbsolutePath() + "/temp.mp4");
 
-        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
-        TranscodingTestConfig testConfig = new TranscodingTestConfig();
-        testConfig.passThroughMode = true;
-        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
-
-        TranscodingRequest request =
-                new TranscodingRequest.Builder()
-                        .setSourceUri(mSourceHEVCVideoUri)
-                        .setDestinationUri(destinationUri)
-                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
-                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
-                        .setVideoTrackFormat(createMediaFormat())
-                        .setTestConfig(testConfig)
-                        .build();
-        Executor listenerExecutor = Executors.newSingleThreadExecutor();
-
-        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
-                transcodingJob -> {
-                    Log.d(TAG, "Transcoding completed with result: " + transcodingJob.getResult());
-                    assertTrue("Transcoding failed.",
-                            transcodingJob.getResult() == TranscodingJob.RESULT_SUCCESS);
-                    transcodeCompleteSemaphore.release();
-                });
-        assertNotNull(job);
-
-        if (job != null) {
-            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
-            boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
-                    TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertTrue("Transcode failed to complete in time.", finishedOnTime);
-        }
-
-        // Checks the destination file get generated.
-        File file = new File(destinationUri.getPath());
-        assertTrue("Failed to create destination file", file.exists());
-
-        // Removes the file.
-        file.delete();
+        testTranscodingWithExpectResult(mSourceHEVCVideoUri, destinationUri,
+                TranscodingJob.RESULT_SUCCESS);
     }
 
+    // Tests transcoding to a uri in internal files directory and expects success.
+    @Test
+    public void testTranscodingToInternalFilesDir() throws Exception {
+        Log.d(TAG, "Starting: testMediaTranscodeManager");
+
+        // Create a file Uri:
+        // file:///storage/emulated/0/Android/data/com.android.mediatranscodingtest/files/temp.mp4
+        Uri destinationUri = Uri.fromFile(new File(mContext.getFilesDir(), "temp.mp4"));
+        Log.i(TAG, "Transcoding to files dir: " + destinationUri);
+
+        testTranscodingWithExpectResult(mSourceHEVCVideoUri, destinationUri,
+                TranscodingJob.RESULT_SUCCESS);
+    }
+
+    // Tests transcoding to a uri in external files directory and expects success.
+    @Test
+    public void testTranscodingToExternalFilesDir() throws Exception {
+        Log.d(TAG, "Starting: testMediaTranscodeManager");
+
+        // Create a file Uri: file:///data/user/0/com.android.mediatranscodingtest/files/temp.mp4
+        Uri destinationUri = Uri.fromFile(new File(mContext.getExternalFilesDir(null), "temp.mp4"));
+        Log.i(TAG, "Transcoding to files dir: " + destinationUri);
+
+        testTranscodingWithExpectResult(mSourceHEVCVideoUri, destinationUri,
+                TranscodingJob.RESULT_SUCCESS);
+    }
 
     @Test
     public void testTranscodingOneVideo() throws Exception {
         Log.d(TAG, "Starting: testMediaTranscodeManager");
-
-        Semaphore transcodeCompleteSemaphore = new Semaphore(0);
-        TranscodingTestConfig testConfig = new TranscodingTestConfig();
-        testConfig.passThroughMode = true;
-        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
-
-        TranscodingRequest request =
-                new TranscodingRequest.Builder()
-                        .setSourceUri(mSourceHEVCVideoUri)
-                        .setDestinationUri(mDestinationUri)
-                        .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
-                        .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
-                        .setVideoTrackFormat(createMediaFormat())
-                        .setTestConfig(testConfig)
-                        .build();
-        Executor listenerExecutor = Executors.newSingleThreadExecutor();
-
-        TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
-                transcodingJob -> {
-                    Log.d(TAG, "Transcoding completed with result: ");
-                    transcodeCompleteSemaphore.release();
-                });
-        assertNotNull(job);
-
-        if (job != null) {
-            Log.d(TAG, "testMediaTranscodeManager - Waiting for transcode to complete.");
-            boolean finishedOnTime = transcodeCompleteSemaphore.tryAcquire(
-                    TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
-            assertTrue("Transcode failed to complete in time.", finishedOnTime);
-        }
+        testTranscodingWithExpectResult(mSourceHEVCVideoUri, mDestinationUri,
+                TranscodingJob.RESULT_SUCCESS);
     }
 }

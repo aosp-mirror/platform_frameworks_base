@@ -169,7 +169,7 @@ public class BubbleExpandedView extends LinearLayout {
                             return;
                         }
                         try {
-                            if (!mIsOverflow && mBubble.getShortcutInfo() != null) {
+                            if (!mIsOverflow && mBubble.usingShortcutInfo()) {
                                 options.setApplyActivityFlagsForBubbles(true);
                                 mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
                                         options, null /* sourceBounds */);
@@ -747,11 +747,7 @@ public class BubbleExpandedView extends LinearLayout {
         if (mActivityView == null) {
             return;
         }
-        switch (mActivityViewStatus) {
-            case INITIALIZED:
-            case ACTIVITY_STARTED:
-                mActivityView.release();
-        }
+        mActivityView.release();
         if (mTaskId != -1) {
             try {
                 ActivityTaskManager.getService().removeTask(mTaskId);

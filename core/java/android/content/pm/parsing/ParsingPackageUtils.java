@@ -1720,8 +1720,7 @@ public class ParsingPackageUtils {
 
             // TODO(b/135203078): Should parsing code be responsible for this? Maybe move to a
             //  util or just have PackageImpl return true if either flag is set
-            // Debuggable implies profileable
-            pkg.setProfileableByShell(pkg.isProfileableByShell() || pkg.isDebuggable());
+            pkg.setProfileableByShell(pkg.isProfileableByShell());
 
             if (sa.hasValueOrEmpty(R.styleable.AndroidManifestApplication_resizeableActivity)) {
                 pkg.setResizeableActivity(sa.getBoolean(

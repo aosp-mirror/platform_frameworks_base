@@ -16,6 +16,7 @@
 
 package android.net.wifi;
 
+import android.net.MacAddress;
 import android.os.Parcel;
 
 import static org.junit.Assert.assertEquals;
@@ -38,6 +39,8 @@ public class SoftApInfoTest {
         SoftApInfo info = new SoftApInfo();
         info.setFrequency(2412);
         info.setBandwidth(SoftApInfo.CHANNEL_WIDTH_20MHZ);
+        info.setBssid(MacAddress.fromString("aa:bb:cc:dd:ee:ff"));
+
 
         SoftApInfo copiedInfo = new SoftApInfo(info);
 
@@ -53,6 +56,7 @@ public class SoftApInfoTest {
         SoftApInfo info = new SoftApInfo();
         info.setFrequency(2412);
         info.setBandwidth(SoftApInfo.CHANNEL_WIDTH_20MHZ);
+        info.setBssid(MacAddress.fromString("aa:bb:cc:dd:ee:ff"));
 
         Parcel parcelW = Parcel.obtain();
         info.writeToParcel(parcelW, 0);

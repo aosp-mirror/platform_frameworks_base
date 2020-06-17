@@ -19,11 +19,13 @@ package com.android.systemui.wm;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.view.IDisplayWindowInsetsController;
@@ -36,6 +38,7 @@ import android.view.WindowInsets;
 import android.view.animation.Interpolator;
 import android.view.animation.PathInterpolator;
 
+import com.android.internal.view.IInputMethodManager;
 import com.android.systemui.TransactionPool;
 import com.android.systemui.dagger.qualifiers.Main;
 
@@ -352,6 +355,16 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {
                         t.hide(mImeSourceControl.getLeash());
+                        final IInputMethodManager imms = getImms();
+                        if (imms != null) {
+                            try {
+                                // Remove the IME surface to make the insets invisible for
+                                // non-client controlled insets.
+                                imms.removeImeSurface();
+                            } catch (RemoteException e) {
+                                Slog.e(TAG, "Failed to remove IME surface.", e);
+                            }
+                        }
                     }
                     t.apply();
                     mTransactionPool.release(t);
@@ -382,9 +395,9 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          * Called when the IME position is starting to animate.
          *
          * @param hiddenTop The y position of the top of the IME surface when it is hidden.
-         * @param shownTop The y position of the top of the IME surface when it is shown.
-         * @param showing {@code true} when we are animating from hidden to shown, {@code false}
-         *                            when animating from shown to hidden.
+         * @param shownTop  The y position of the top of the IME surface when it is shown.
+         * @param showing   {@code true} when we are animating from hidden to shown, {@code false}
+         *                  when animating from shown to hidden.
          */
         default void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
                 boolean showing, SurfaceControl.Transaction t) {}
@@ -405,5 +418,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
          */
         default void onImeEndPositioning(int displayId, boolean cancel,
                 SurfaceControl.Transaction t) {}
+    }
+
+    public IInputMethodManager getImms() {
+        return IInputMethodManager.Stub.asInterface(
+                ServiceManager.getService(Context.INPUT_METHOD_SERVICE));
     }
 }

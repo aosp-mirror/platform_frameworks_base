@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -99,6 +100,9 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     private ActivityStack mRootPinnedTask;
     private ActivityStack mRootSplitScreenPrimaryTask;
 
+    // TODO(b/159029784): Remove when getStack() behavior is cleaned-up
+    private ActivityStack mRootRecentsTask;
+
     private final ArrayList<ActivityStack> mTmpAlwaysOnTopStacks = new ArrayList<>();
     private final ArrayList<ActivityStack> mTmpNormalStacks = new ArrayList<>();
     private final ArrayList<ActivityStack> mTmpHomeStacks = new ArrayList<>();
@@ -163,6 +167,8 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     ActivityStack getStack(int windowingMode, int activityType) {
         if (activityType == ACTIVITY_TYPE_HOME) {
             return mRootHomeTask;
+        } else if (activityType == ACTIVITY_TYPE_RECENTS) {
+            return mRootRecentsTask;
         }
         if (windowingMode == WINDOWING_MODE_PINNED) {
             return mRootPinnedTask;
@@ -197,6 +203,10 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
 
     @Nullable ActivityStack getRootHomeTask() {
         return mRootHomeTask;
+    }
+
+    @Nullable ActivityStack getRootRecentsTask() {
+        return mRootRecentsTask;
     }
 
     ActivityStack getRootPinnedTask() {
@@ -246,6 +256,16 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             } else {
                 mRootHomeTask = stack;
             }
+        } else if (stack.isActivityTypeRecents()) {
+            if (mRootRecentsTask != null) {
+                if (!stack.isDescendantOf(mRootRecentsTask)) {
+                    throw new IllegalArgumentException("addStackReferenceIfNeeded: recents stack="
+                            + mRootRecentsTask + " already exist on display=" + this
+                            + " stack=" + stack);
+                }
+            } else {
+                mRootRecentsTask = stack;
+            }
         }
 
         if (!stack.isRootTask()) {
@@ -273,6 +293,8 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     void removeStackReferenceIfNeeded(ActivityStack stack) {
         if (stack == mRootHomeTask) {
             mRootHomeTask = null;
+        } else if (stack == mRootRecentsTask) {
+            mRootRecentsTask = null;
         } else if (stack == mRootPinnedTask) {
             mRootPinnedTask = null;
         } else if (stack == mRootSplitScreenPrimaryTask) {
@@ -331,7 +353,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         }
         // We don't allow untrusted display to top when task stack moves to top,
         // until user tapping this display to change display position as top intentionally.
-        if (mDisplayContent.isUntrustedVirtualDisplay() && !getParent().isOnTop()) {
+        if (!mDisplayContent.isTrusted() && !getParent().isOnTop()) {
             includingParents = false;
         }
         final int targetPosition = findPositionForStack(position, child, false /* adding */);
@@ -1507,8 +1529,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     @Nullable
     ActivityStack getOrCreateRootHomeTask(boolean onTop) {
         ActivityStack homeTask = getRootHomeTask();
-        if (homeTask == null && mDisplayContent.supportsSystemDecorations()
-                && !mDisplayContent.isUntrustedVirtualDisplay()) {
+        if (homeTask == null && mDisplayContent.supportsSystemDecorations()) {
             homeTask = createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, onTop);
         }
         return homeTask;
