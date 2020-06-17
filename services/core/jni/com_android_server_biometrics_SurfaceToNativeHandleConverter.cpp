@@ -80,12 +80,12 @@ static const JNINativeMethod method_table[] = {
 
 int register_android_server_FingerprintService(JNIEnv* env) {
     return jniRegisterNativeMethods(env,
-                                    "com/android/server/biometrics/fingerprint/FingerprintService",
+                                    "com/android/server/biometrics/sensors/fingerprint/FingerprintService",
                                     method_table, NELEM(method_table));
 }
 
 int register_android_server_FaceService(JNIEnv* env) {
-    return jniRegisterNativeMethods(env, "com/android/server/biometrics/face/FaceService",
+    return jniRegisterNativeMethods(env, "com/android/server/biometrics/sensors/face/FaceService",
                                     method_table, NELEM(method_table));
 }
 

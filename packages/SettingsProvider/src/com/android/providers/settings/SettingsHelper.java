@@ -219,7 +219,9 @@ public class SettingsHelper {
      */
     @VisibleForTesting
     public String getRealValueForSystemSetting(String setting) {
-        return Settings.System.getString(mContext.getContentResolver(),
+        // The real value irrespectively of the original setting's namespace is stored in
+        // Settings.Secure.
+        return Settings.Secure.getString(mContext.getContentResolver(),
                 setting + SETTING_ORIGINAL_KEY_SUFFIX);
     }
 

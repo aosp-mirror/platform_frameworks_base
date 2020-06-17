@@ -1648,10 +1648,6 @@ public class PackageParser {
                     final String attr = attrs.getAttributeName(i);
                     if ("debuggable".equals(attr)) {
                         debuggable = attrs.getAttributeBooleanValue(i, false);
-                        if (debuggable) {
-                            // Debuggable implies profileable
-                            profilableByShell = true;
-                        }
                     }
                     if ("multiArch".equals(attr)) {
                         multiArch = attrs.getAttributeBooleanValue(i, false);
@@ -3471,8 +3467,6 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_debuggable,
                 false)) {
             ai.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
-            // Debuggable implies profileable
-            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL;
         }
 
         if (sa.getBoolean(

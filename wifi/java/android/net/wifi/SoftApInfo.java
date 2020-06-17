@@ -19,8 +19,12 @@ package android.net.wifi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
+import android.net.MacAddress;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.android.internal.util.Preconditions;
 
 import java.util.Objects;
 
@@ -90,6 +94,10 @@ public final class SoftApInfo implements Parcelable {
     @WifiAnnotations.Bandwidth
     private int mBandwidth = CHANNEL_WIDTH_INVALID;
 
+    /** The MAC Address which AP resides on. */
+    @Nullable
+    private MacAddress mBssid;
+
     /**
      * Get the frequency which AP resides on.
      */
@@ -126,12 +134,42 @@ public final class SoftApInfo implements Parcelable {
     }
 
     /**
+     * Get the MAC address (BSSID) of the AP. Null when AP disabled.
+     */
+    @Nullable
+    public MacAddress getBssid() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
+            throw new UnsupportedOperationException();
+        }
+        return mBssid;
+    }
+
+    /**
+      * Set the MAC address which AP resides on.
+      * <p>
+      * <li>If not set, defaults to null.</li>
+      * @param bssid BSSID, The caller is responsible for avoiding collisions.
+      * @throws IllegalArgumentException when the given BSSID is the all-zero or broadcast MAC
+      *                                  address.
+      *
+      * @hide
+      */
+    public void setBssid(@Nullable MacAddress bssid) {
+        if (bssid != null) {
+            Preconditions.checkArgument(!bssid.equals(WifiManager.ALL_ZEROS_MAC_ADDRESS));
+            Preconditions.checkArgument(!bssid.equals(MacAddress.BROADCAST_ADDRESS));
+        }
+        mBssid = bssid;
+    }
+
+    /**
      * @hide
      */
     public SoftApInfo(@Nullable SoftApInfo source) {
         if (source != null) {
             mFrequency = source.mFrequency;
             mBandwidth = source.mBandwidth;
+            mBssid = source.mBssid;
         }
     }
 
@@ -152,6 +190,7 @@ public final class SoftApInfo implements Parcelable {
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mFrequency);
         dest.writeInt(mBandwidth);
+        dest.writeParcelable(mBssid, flags);
     }
 
     @NonNull
@@ -161,6 +200,7 @@ public final class SoftApInfo implements Parcelable {
             SoftApInfo info = new SoftApInfo();
             info.mFrequency = in.readInt();
             info.mBandwidth = in.readInt();
+            info.mBssid = in.readParcelable(MacAddress.class.getClassLoader());
             return info;
         }
 
@@ -172,10 +212,13 @@ public final class SoftApInfo implements Parcelable {
     @NonNull
     @Override
     public String toString() {
-        return "SoftApInfo{"
-                + "bandwidth= " + mBandwidth
-                + ",frequency= " + mFrequency
-                + '}';
+        StringBuilder sbuf = new StringBuilder();
+        sbuf.append("SoftApInfo{");
+        sbuf.append("bandwidth= ").append(mBandwidth);
+        sbuf.append(",frequency= ").append(mFrequency);
+        if (mBssid != null) sbuf.append(",bssid=").append(mBssid.toString());
+        sbuf.append("}");
+        return sbuf.toString();
     }
 
     @Override
@@ -184,11 +227,12 @@ public final class SoftApInfo implements Parcelable {
         if (!(o instanceof SoftApInfo)) return false;
         SoftApInfo softApInfo = (SoftApInfo) o;
         return mFrequency == softApInfo.mFrequency
-                && mBandwidth == softApInfo.mBandwidth;
+                && mBandwidth == softApInfo.mBandwidth
+                && Objects.equals(mBssid, softApInfo.mBssid);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mFrequency, mBandwidth);
+        return Objects.hash(mFrequency, mBandwidth, mBssid);
     }
 }

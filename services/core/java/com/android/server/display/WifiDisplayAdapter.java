@@ -651,6 +651,8 @@ final class WifiDisplayAdapter extends DisplayAdapter {
                 mInfo.address = mAddress;
                 mInfo.touch = DisplayDeviceInfo.TOUCH_EXTERNAL;
                 mInfo.setAssumedDensityForExternalDisplay(mWidth, mHeight);
+                // The display is trusted since it is created by system.
+                mInfo.flags |= DisplayDeviceInfo.FLAG_TRUSTED;
             }
             return mInfo;
         }
