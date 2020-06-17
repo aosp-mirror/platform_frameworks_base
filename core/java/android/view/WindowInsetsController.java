@@ -222,6 +222,13 @@ public interface WindowInsetsController {
     @Behavior int getSystemBarsBehavior();
 
     /**
+     * Disables or enables the animations.
+     *
+     * @hide
+     */
+    void setAnimationsDisabled(boolean disable);
+
+    /**
      * @hide
      */
     InsetsState getState();

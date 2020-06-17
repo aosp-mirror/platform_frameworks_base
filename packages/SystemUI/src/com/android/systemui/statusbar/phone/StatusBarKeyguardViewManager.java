@@ -460,6 +460,18 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     @Override
+    public void onStartedWakingUp() {
+        mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
+                .setAnimationsDisabled(false);
+    }
+
+    @Override
+    public void onStartedGoingToSleep() {
+        mStatusBar.getNotificationShadeWindowView().getWindowInsetsController()
+                .setAnimationsDisabled(true);
+    }
+
+    @Override
     public void onFinishedGoingToSleep() {
         mBouncer.onScreenTurnedOff();
     }

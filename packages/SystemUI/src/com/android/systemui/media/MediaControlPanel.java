@@ -96,13 +96,13 @@ public class MediaControlPanel {
      */
     @Inject
     public MediaControlPanel(Context context, @Background Executor backgroundExecutor,
-            ActivityStarter activityStarter, MediaHostStatesManager mediaHostStatesManager,
+            ActivityStarter activityStarter, MediaViewController mediaViewController,
             SeekBarViewModel seekBarViewModel) {
         mContext = context;
         mBackgroundExecutor = backgroundExecutor;
         mActivityStarter = activityStarter;
         mSeekBarViewModel = seekBarViewModel;
-        mMediaViewController = new MediaViewController(context, mediaHostStatesManager);
+        mMediaViewController = mediaViewController;
         loadDimens();
     }
 
@@ -366,38 +366,11 @@ public class MediaControlPanel {
     }
 
     /**
-     * Return the token for the current media session
-     * @return the token
-     */
-    public MediaSession.Token getMediaSessionToken() {
-        return mToken;
-    }
-
-    /**
      * Get the current media controller
      * @return the controller
      */
     public MediaController getController() {
         return mController;
-    }
-
-    /**
-     * Get the name of the package associated with the current media controller
-     * @return the package name, or null if no controller
-     */
-    public String getMediaPlayerPackage() {
-        if (mController == null) {
-            return null;
-        }
-        return mController.getPackageName();
-    }
-
-    /**
-     * Check whether this player has an attached media session.
-     * @return whether there is a controller with a current media session.
-     */
-    public boolean hasMediaSession() {
-        return mController != null && mController.getPlaybackState() != null;
     }
 
     /**

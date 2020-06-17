@@ -25,6 +25,9 @@ import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTAT
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_TRUSTED;
+
+import static com.android.server.display.DisplayDeviceInfo.FLAG_TRUSTED;
 
 import android.content.Context;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -411,6 +414,9 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
                 }
                 if ((mFlags & VIRTUAL_DISPLAY_FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
                     mInfo.flags |= DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
+                }
+                if ((mFlags & VIRTUAL_DISPLAY_FLAG_TRUSTED) != 0) {
+                    mInfo.flags |= FLAG_TRUSTED;
                 }
 
                 mInfo.type = Display.TYPE_VIRTUAL;

@@ -31,6 +31,7 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.lifecycle.LiveData
 import androidx.test.filters.SmallTest
 import com.android.systemui.R
@@ -75,9 +76,9 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Mock private lateinit var holder: PlayerViewHolder
     @Mock private lateinit var view: TransitionLayout
-    @Mock private lateinit var mediaHostStatesManager: MediaHostStatesManager
     @Mock private lateinit var seekBarViewModel: SeekBarViewModel
     @Mock private lateinit var seekBarData: LiveData<SeekBarViewModel.Progress>
+    @Mock private lateinit var mediaViewController: MediaViewController
     private lateinit var appIcon: ImageView
     private lateinit var appName: TextView
     private lateinit var albumView: ImageView
@@ -104,8 +105,10 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         bgExecutor = FakeExecutor(FakeSystemClock())
+        whenever(mediaViewController.expandedLayout).thenReturn(mock(ConstraintSet::class.java))
+        whenever(mediaViewController.collapsedLayout).thenReturn(mock(ConstraintSet::class.java))
 
-        player = MediaControlPanel(context, bgExecutor, activityStarter, mediaHostStatesManager,
+        player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
                 seekBarViewModel)
         whenever(seekBarViewModel.progress).thenReturn(seekBarData)
 
@@ -172,7 +175,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Test
     fun bindWhenUnattached() {
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, null, null, device, null)
+                emptyList(), PACKAGE, null, null, device, true, null)
         player.bind(state)
         assertThat(player.isPlaying()).isFalse()
     }
@@ -181,7 +184,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindText() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, null)
+                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
         player.bind(state)
         assertThat(appName.getText()).isEqualTo(APP)
         assertThat(titleText.getText()).isEqualTo(TITLE)
@@ -192,7 +195,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindBackgroundColor() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, null)
+                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
         player.bind(state)
         val list = ArgumentCaptor.forClass(ColorStateList::class.java)
         verify(view).setBackgroundTintList(list.capture())
@@ -203,7 +206,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindDevice() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, device, null)
+                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null)
         player.bind(state)
         assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
         assertThat(seamless.isEnabled()).isTrue()
@@ -213,7 +216,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindDisabledDevice() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, disabledDevice, null)
+                emptyList(), PACKAGE, session.getSessionToken(), null, disabledDevice, true, null)
         player.bind(state)
         assertThat(seamless.isEnabled()).isFalse()
         assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(
@@ -224,7 +227,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     fun bindNullDevice() {
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
-                emptyList(), PACKAGE, session.getSessionToken(), null, null, null)
+                emptyList(), PACKAGE, session.getSessionToken(), null, null, true, null)
         player.bind(state)
         assertThat(seamless.isEnabled()).isTrue()
         assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(

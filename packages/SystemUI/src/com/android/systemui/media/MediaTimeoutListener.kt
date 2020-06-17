@@ -43,6 +43,11 @@ class MediaTimeoutListener @Inject constructor(
 
     private val mediaListeners: MutableMap<String, PlaybackStateListener> = mutableMapOf()
 
+    /**
+     * Callback representing that a media object is now expired:
+     * @param token Media session unique identifier
+     * @param pauseTimeuot True when expired for {@code PAUSED_MEDIA_TIMEOUT}
+     */
     lateinit var timeoutCallback: (String, Boolean) -> Unit
 
     override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
@@ -112,11 +117,11 @@ class MediaTimeoutListener @Inject constructor(
             }
         }
 
-        private fun expireMediaTimeout(mediaNotificationKey: String, reason: String) {
+        private fun expireMediaTimeout(mediaKey: String, reason: String) {
             cancellation?.apply {
                 if (DEBUG) {
                     Log.v(TAG,
-                            "media timeout cancelled for  $mediaNotificationKey, reason: $reason")
+                            "media timeout cancelled for  $mediaKey, reason: $reason")
                 }
                 run()
             }
