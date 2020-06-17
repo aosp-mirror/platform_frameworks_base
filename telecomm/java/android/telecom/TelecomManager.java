@@ -1645,6 +1645,7 @@ public class TelecomManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(anyOf = {
             READ_PRIVILEGED_PHONE_STATE,
             android.Manifest.permission.READ_PHONE_STATE
