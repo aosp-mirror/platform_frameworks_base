@@ -27,6 +27,7 @@ import android.view.SurfaceControlViewHost;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver.OnPreDrawListener;
 
 import java.util.function.Consumer;
 
@@ -130,6 +131,16 @@ public class InlineContentView extends ViewGroup {
     @Nullable
     private SurfacePackageUpdater mSurfacePackageUpdater;
 
+    @NonNull
+    private final OnPreDrawListener mDrawListener = new OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            int visibility = InlineContentView.this.isShown() ? VISIBLE : GONE;
+            mSurfaceView.setVisibility(visibility);
+            return true;
+        }
+    };
+
     /**
      * @inheritDoc
      * @hide
@@ -202,6 +213,8 @@ public class InlineContentView extends ViewGroup {
                         }
                     });
         }
+        mSurfaceView.setVisibility(VISIBLE);
+        getViewTreeObserver().addOnPreDrawListener(mDrawListener);
     }
 
     @Override
@@ -211,6 +224,7 @@ public class InlineContentView extends ViewGroup {
         if (mSurfacePackageUpdater != null) {
             mSurfacePackageUpdater.onSurfacePackageReleased();
         }
+        getViewTreeObserver().removeOnPreDrawListener(mDrawListener);
     }
 
     @Override
