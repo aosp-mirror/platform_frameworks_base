@@ -563,4 +563,14 @@ interface ISms {
      * @return capacity of ICC
      */
     int getSmsCapacityOnIccForSubscriber(int subId);
+
+    /**
+     * Reset all cell broadcast ranges. Previously enabled ranges will become invalid after this.
+     *
+     * @param subId Subscription index
+     * @return {@code true} if succeeded, otherwise {@code false}.
+     *
+     * @hide
+     */
+    boolean resetAllCellBroadcastRanges(int subId);
 }
