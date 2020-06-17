@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -79,6 +80,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doCallRealMethod;
 
 import android.annotation.SuppressLint;
 import android.app.ActivityTaskManager;
@@ -1231,11 +1233,29 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRecentsNotRotatingWithFixedRotation() {
+        final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
+        doCallRealMethod().when(displayRotation).updateRotationUnchecked(anyBoolean());
+        doCallRealMethod().when(displayRotation).updateOrientation(anyInt(), anyBoolean());
+
+        final ActivityRecord recentsActivity = createActivityRecord(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS);
+        recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
+
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
+        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
+        assertFalse(displayRotation.updateRotationUnchecked(false));
+
+        mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation(false);
+        assertTrue(displayRotation.updateRotationUnchecked(false));
+    }
+
+    @Test
     public void testRemoteRotation() {
         DisplayContent dc = createNewDisplay();
 
         final DisplayRotation dr = dc.getDisplayRotation();
-        Mockito.doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
+        doCallRealMethod().when(dr).updateRotationUnchecked(anyBoolean());
         Mockito.doReturn(ROTATION_90).when(dr).rotationForOrientation(anyInt(), anyInt());
         final boolean[] continued = new boolean[1];
         // TODO(display-merge): Remove cast
