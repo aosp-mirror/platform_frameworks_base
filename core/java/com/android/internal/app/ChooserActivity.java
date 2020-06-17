@@ -1063,6 +1063,10 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+        ViewPager viewPager = findViewById(R.id.profile_pager);
+        if (shouldShowTabs() && viewPager.isLayoutRtl()) {
+            mMultiProfilePagerAdapter.setupViewPager(viewPager);
+        }
 
         mShouldDisplayLandscape = shouldDisplayLandscape(newConfig.orientation);
         adjustPreviewWidth(newConfig.orientation, null);
