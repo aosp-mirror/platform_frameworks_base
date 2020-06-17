@@ -27,7 +27,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
-import android.os.Handler;
 import android.os.IVold;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -238,7 +237,7 @@ public final class StorageSessionController {
      *
      * Does nothing if {@link #shouldHandle} is {@code false}
      **/
-    public void onReset(IVold vold, Handler handler) {
+    public void onReset(IVold vold, Runnable resetHandlerRunnable) {
         if (!shouldHandle(null)) {
             return;
         }
@@ -280,7 +279,7 @@ public final class StorageSessionController {
             connection.close();
         }
 
-        handler.removeCallbacksAndMessages(null);
+        resetHandlerRunnable.run();
         synchronized (mLock) {
             mConnections.clear();
             mIsResetting = false;
