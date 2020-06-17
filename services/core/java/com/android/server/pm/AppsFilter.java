@@ -646,7 +646,7 @@ public class AppsFilter {
             final int appxUidCount = userCount * allSettings.size();
             for (int su = 0; su < userCount; su++) {
                 int subjectUser = allUsers[su].id;
-                for (int ou = su; ou < userCount; ou++) {
+                for (int ou = 0; ou < userCount; ou++) {
                     int otherUser = allUsers[ou].id;
                     int subjectUid = UserHandle.getUid(subjectUser, subjectSetting.appId);
                     if (!mShouldFilterCache.contains(subjectUid)) {
