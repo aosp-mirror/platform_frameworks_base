@@ -19,6 +19,7 @@ package com.android.server.pm.test
 import com.android.internal.util.test.SystemPreparer
 import com.android.tradefed.device.ITestDevice
 import java.io.File
+import java.io.FileOutputStream
 
 internal fun SystemPreparer.pushApk(file: String, partition: Partition) =
         pushResourceFile(file, HostUtils.makePathForApk(file, partition))
@@ -43,4 +44,13 @@ internal object HostUtils {
                     .resolve(file.nameWithoutExtension)
                     .resolve(file.name)
                     .toString()
+
+    fun copyResourceToHostFile(javaResourceName: String, file: File): File {
+        javaClass.classLoader!!.getResource(javaResourceName).openStream().use { input ->
+            FileOutputStream(file).use { output ->
+                input.copyTo(output)
+            }
+        }
+        return file
+    }
 }
