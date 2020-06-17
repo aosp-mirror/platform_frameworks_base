@@ -29,7 +29,6 @@
 
 #include <nativehelper/ScopedUtfChars.h>
 #include <powermanager/PowerHalController.h>
-#include <powermanager/PowerHalLoader.h>
 
 #include <limits.h>
 
@@ -70,7 +69,7 @@ static struct {
 // ----------------------------------------------------------------------------
 
 static jobject gPowerManagerServiceObj;
-static PowerHalController gPowerHalController;
+static power::PowerHalController gPowerHalController;
 static nsecs_t gLastEventTime[USER_ACTIVITY_EVENT_LAST + 1];
 
 // Throttling interval for user activity calls.
@@ -100,7 +99,7 @@ static bool setPowerMode(Mode mode, bool enabled) {
         ALOGD("Excessive delay in setting interactive mode to %s while turning screen %s",
               enabled ? "true" : "false", enabled ? "on" : "off");
     }
-    return result == PowerHalResult::SUCCESSFUL;
+    return result == power::HalResult::SUCCESSFUL;
 }
 
 void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t eventType) {

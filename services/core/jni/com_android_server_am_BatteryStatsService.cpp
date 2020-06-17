@@ -261,7 +261,7 @@ static bool checkPowerStatsHalResultLocked(const Return<void>& ret, const char* 
 static bool checkPowerHalResult(const Return<void>& ret, const char* function) {
     if (!ret.isOk()) {
         ALOGE("%s failed: requested HAL service not available.", function);
-        PowerHalLoader::unloadAll();
+        power::PowerHalLoader::unloadAll();
         return false;
     }
     return true;
@@ -605,7 +605,7 @@ static void getPowerStatsHalRailEnergyDataLocked(JNIEnv* env, jobject jrailStats
 }
 
 static void getPowerHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
-    sp<IPowerV1_0> powerHalV1_0 = PowerHalLoader::loadHidlV1_0();
+    sp<IPowerV1_0> powerHalV1_0 = power::PowerHalLoader::loadHidlV1_0();
     if (powerHalV1_0 == nullptr) {
         ALOGE("Power Hal not loaded");
         return;
@@ -643,7 +643,7 @@ static void getPowerHalLowPowerData(JNIEnv* env, jobject jrpmStats) {
     }
 
     // Trying to get IPower 1.1, this will succeed only for devices supporting 1.1
-    sp<IPowerV1_1> powerHal_1_1 = PowerHalLoader::loadHidlV1_1();
+    sp<IPowerV1_1> powerHal_1_1 = power::PowerHalLoader::loadHidlV1_1();
     if (powerHal_1_1 == nullptr) {
         // This device does not support IPower@1.1, exiting gracefully
         return;
@@ -684,7 +684,7 @@ static jint getPowerHalPlatformData(JNIEnv* env, jobject outBuf) {
     int total_added = -1;
 
     {
-        sp<IPowerV1_0> powerHalV1_0 = PowerHalLoader::loadHidlV1_0();
+        sp<IPowerV1_0> powerHalV1_0 = power::PowerHalLoader::loadHidlV1_0();
         if (powerHalV1_0 == nullptr) {
             ALOGE("Power Hal not loaded");
             return -1;
@@ -762,7 +762,7 @@ static jint getPowerHalSubsystemData(JNIEnv* env, jobject outBuf) {
 
     {
         // Trying to get 1.1, this will succeed only for devices supporting 1.1
-        powerHal_1_1 = PowerHalLoader::loadHidlV1_1();
+        powerHal_1_1 = power::PowerHalLoader::loadHidlV1_1();
         if (powerHal_1_1 == nullptr) {
             //This device does not support IPower@1.1, exiting gracefully
             return 0;
