@@ -16,6 +16,8 @@
 
 package android.net;
 
+import static android.net.RouteInfo.RTN_THROW;
+import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.RouteInfo.RTN_UNREACHABLE;
 
 import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
@@ -1281,5 +1283,21 @@ public class LinkPropertiesTest {
         lp.addRoute(new RouteInfo(new IpPrefix(Inet6Address.ANY, 0), RTN_UNREACHABLE));
         assertTrue(lp.hasIpv6UnreachableDefaultRoute());
         assertFalse(lp.hasIpv4UnreachableDefaultRoute());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testRouteAddWithSameKey() throws Exception {
+        LinkProperties lp = new LinkProperties();
+        lp.setInterfaceName("wlan0");
+        final IpPrefix v6 = new IpPrefix("64:ff9b::/96");
+        lp.addRoute(new RouteInfo(v6, address("fe80::1"), "wlan0", RTN_UNICAST, 1280));
+        assertEquals(1, lp.getRoutes().size());
+        lp.addRoute(new RouteInfo(v6, address("fe80::1"), "wlan0", RTN_UNICAST, 1500));
+        assertEquals(1, lp.getRoutes().size());
+        final IpPrefix v4 = new IpPrefix("192.0.2.128/25");
+        lp.addRoute(new RouteInfo(v4, address("192.0.2.1"), "wlan0", RTN_UNICAST, 1460));
+        assertEquals(2, lp.getRoutes().size());
+        lp.addRoute(new RouteInfo(v4, address("192.0.2.1"), "wlan0", RTN_THROW, 1460));
+        assertEquals(2, lp.getRoutes().size());
     }
 }
