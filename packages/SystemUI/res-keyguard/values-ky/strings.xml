@@ -45,7 +45,7 @@
     <string name="keyguard_missing_sim_instructions" msgid="1162120926141335918">"SIM-карта салыңыз."</string>
     <string name="keyguard_missing_sim_instructions_long" msgid="2712623293749378570">"SIM-карта жок же ал окулбай калган. SIM-карта салыңыз."</string>
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="5842745213110966962">"Жараксыз SIM-карта."</string>
-    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"SIM-картаңыз биротоло өчүрүлдү.\n Башка SIM-карта алыш үчүн зымсыз кызмат көрсөтүүчүгө кайрылыңыз."</string>
+    <string name="keyguard_permanent_disabled_sim_instructions" msgid="2490584154727897806">"SIM картаңыз биротоло өчүрүлдү.\n Башка SIM-карта алыш үчүн зымсыз кызмат көрсөтүүчүгө кайрылыңыз."</string>
     <string name="keyguard_sim_locked_message" msgid="4343544458476911044">"SIM-карта кулпуланган."</string>
     <string name="keyguard_sim_puk_locked_message" msgid="6253830777745450550">"SIM-карта PUK-код менен кулпуланган."</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="2394023844117630429">"SIM-карта бөгөттөн чыгарылууда…"</string>
