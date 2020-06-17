@@ -1070,10 +1070,8 @@ public class BlobStoreManagerService extends SystemService {
                 return shouldRemove;
             });
         }
-        if (LOGV) {
-            Slog.v(TAG, "Completed idle maintenance; deleted "
-                    + Arrays.toString(deletedBlobIds.toArray()));
-        }
+        Slog.d(TAG, "Completed idle maintenance; deleted "
+                + Arrays.toString(deletedBlobIds.toArray()));
         writeBlobSessionsAsync();
     }
 
