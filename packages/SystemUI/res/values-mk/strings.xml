@@ -479,7 +479,7 @@
     <string name="guest_exit_guest_dialog_title" msgid="5015697561580641422">"Да се отстрани гостинот?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Сите апликации и податоци во сесијата ќе се избришат."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7505817591242703757">"Отстрани"</string>
-    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добредојде назад, гостине!"</string>
+    <string name="guest_wipe_session_title" msgid="7147965814683990944">"Добре дојде пак, гостине!"</string>
     <string name="guest_wipe_session_message" msgid="3393823610257065457">"Дали сакате да продолжите со сесијата?"</string>
     <string name="guest_wipe_session_wipe" msgid="8056836584445473309">"Почни одново"</string>
     <string name="guest_wipe_session_dontwipe" msgid="3211052048269304205">"Да, продолжи"</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Избриши сѐ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управувајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Дојдовни"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Нов"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Безгласно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Известувања"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговори"</string>
@@ -592,20 +592,20 @@
     <string name="volume_odi_captions_hint_enable" msgid="2073091194012843195">"овозможи"</string>
     <string name="volume_odi_captions_hint_disable" msgid="2518846326748183407">"оневозможи"</string>
     <string name="accessibility_output_chooser" msgid="7807898688967194183">"Префрлете го излезниот уред"</string>
-    <string name="screen_pinning_title" msgid="9058007390337841305">"Апликацијата е прикачена"</string>
+    <string name="screen_pinning_title" msgid="9058007390337841305">"Апликацијата е закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ќе се гледа сѐ додека не го откачите. Допрете и држете „Назад“ и „Краток преглед“ за откачување."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ќе се гледа сѐ додека не го откачите. Допрете и задржете „Назад“ и „Почетен екран“ за откачување."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ќе се гледа сѐ додека не го откачите. Лизгајте нагоре и задржете за откачување."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ќе се гледа сѐ додека не ја откачите. Повлечете нагоре и задржете за откачување."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ќе се гледа сѐ додека не го откачите. Допрете и држете „Краток преглед“ за откачување."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ќе се гледа сѐ додека не го откачите. Допрете и задржете „Почетен екран“ за откачување."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Личните податоци може да се пристапни (како контакти и содржини од е-пошта)."</string>
-    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Прикачените апликации може да отворат други апликации."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Може да бидат достапни лични податоци (како контакти и содржини од е-пошта)."</string>
+    <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Закачената апликација може да отвора други апликации."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"За откачување на апликацијава, допрете и држете на копчињата „Назад“ и „Преглед“"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"За откачување на апликацијава, допрете и држете на копчињата „Назад“ и „Почетен екран“"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"За откачување на апликацијава, повлечете нагоре и држете"</string>
     <string name="screen_pinning_positive" msgid="3285785989665266984">"Сфатив"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"Не, фала"</string>
-    <string name="screen_pinning_start" msgid="7483998671383371313">"Апликацијата е прикачена"</string>
+    <string name="screen_pinning_start" msgid="7483998671383371313">"Апликацијата е закачена"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"Апликацијата е откачена"</string>
     <string name="quick_settings_reset_confirmation_title" msgid="463533331480997595">"Сокриј <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2320586180785674186">"Ќе се појави повторно следниот пат кога ќе го вклучите во поставки."</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Премести горе десно"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Премести долу лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Премести долу десно"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Отфрли"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Отфрли балонче"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не прикажувај го разговорот во балончиња"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Разговор во балончиња"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Новите разговори ќе се појавуваат како лебдечки икони или балончиња. Допрете за отворање на балончето. Повлечете за да го преместите."</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не можеше да се вчита списокот со сите контроли."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Продолжи"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивна, провери апликација"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Грешка, повторен обид…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Не е најдено"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е достапна"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Не може да се пристапи до <xliff:g id="DEVICE">%1$s</xliff:g>. Проверете ја апликацијата <xliff:g id="APPLICATION">%2$s</xliff:g> за да се осигурите дека контролата е сè уште достапна и дека поставките за апликацијата не се сменети."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отвори ја апликација"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Не може да се вчита статусот"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка, обидете се повторно"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Во тек"</string>

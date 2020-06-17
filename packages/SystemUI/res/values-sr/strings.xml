@@ -513,7 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Долазно"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Ново"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Нечујно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Обавештења"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
@@ -598,7 +598,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Апликација је закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"На овај начин се стално приказује док га не откачите. Превуците нагоре и задржите да бисте га откачили."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Стално ће се приказивати док је не откачите. Превуците нагоре и задржите да бисте је откачили."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Почетна да бисте га откачили."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Могу да буду доступни лични подаци (као што су контакти и садржај имејлова)."</string>
@@ -1007,9 +1007,9 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Премести горе десно"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Премести доле лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Премести доле десно"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Одбаци"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Одбаци облачић"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не користи облачиће за конверзацију"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Ћаскајте помоћу облачића"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Ћаскајте у облачићима"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Нове конверзације се приказују као плутајуће иконе или облачићи. Додирните да бисте отворили облачић. Превуците да бисте га преместили."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Контролишите облачиће у било ком тренутку"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Додирните Управљајте да бисте искључили облачиће из ове апликације"</string>
@@ -1019,9 +1019,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Конверзација је подешена на приоритетну"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације ће:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Приказује се у врху одељка за конверзације"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Приказује слику профила на закључаном екрану"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"се приказују у врху одељка за конверзације"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"приказују слику профила на закључаном екрану"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Приказују се плутајући облачићи преко апликација"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Омета подешавање Не узнемиравај"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Важи"</string>
@@ -1051,7 +1051,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржите и превуците да бисте променили распоред контрола"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Учитавање листе свих контрола није успело."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте у контроле уређаја"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>
@@ -1071,14 +1074,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Настави"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно. Видите апликацију"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Грешка, покушава се поново…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Није пронађено"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Контрола није доступна"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Приступање уређају <xliff:g id="DEVICE">%1$s</xliff:g> није успело. Погледајте апликацију <xliff:g id="APPLICATION">%2$s</xliff:g> да бисте се уверили да је контрола још увек доступна и да се подешавања апликације нису променила."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отвори апликацију"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Учитавање статуса није успело"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка. Пробајте поново"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"У току"</string>

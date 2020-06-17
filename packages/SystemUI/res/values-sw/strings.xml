@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Inachakata rekodi ya skrini"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Arifa inayoendelea ya kipindi cha kurekodi skrini"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Ungependa kuanza kurekodi?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Wakati wa kurekodi, Mfumo wa Android unaweza kusana maelezo yoyote nyeti yanayoonekana kwenye skrini au yanayochezwa kwenye kifaa chako. Hii ni pamoja na manenosiri, maelezo ya malipo, picha, ujumbe na sauti."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Wakati wa kurekodi, Mfumo wa Android unaweza kunasa maelezo yoyote nyeti yanayoonekana kwenye skrini au yanayochezwa kwenye kifaa chako. Hii ni pamoja na manenosiri, maelezo ya malipo, picha, ujumbe na sauti."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Rekodi sauti"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Sauti ya kifaa"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Sauti kutoka kwenye kifaa chako, kama vile muziki, simu na milio ya simu"</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Futa zote"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Dhibiti"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historia"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Simu inayoingia"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Mpya"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Kimya"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Arifa"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Mazungumzo"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Sogeza juu kulia"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sogeza chini kushoto"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sogeza chini kulia"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Ondoa"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Ondoa kiputo"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Usiweke viputo kwenye mazungumzo"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Piga gumzo ukitumia viputo"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Mazungumzo mapya huonekena kama aikoni au viputo vinavyoelea. Gusa ili ufungue kiputo. Buruta ili ukisogeze."</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange vidhibiti upya"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Umeondoa vidhibiti vyote"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Mabadiliko hayajahifadhiwa"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Imeshindwa kupakia orodha ya vidhibiti vyote."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Nyingine"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Weka kwenye vidhibiti vya vifaa"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Weka"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Endelea"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Haitumiki, angalia programu"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hitilafu, inajaribu tena…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Hakipatikani"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kidhibiti hakipatikani"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Imeshindwa kufikia <xliff:g id="DEVICE">%1$s</xliff:g>. Angalia programu ya <xliff:g id="APPLICATION">%2$s</xliff:g> ili uhakikishe kuwa bado kidhibiti kipo na kuwa mipangilio ya programu haijabadilika."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Fungua programu"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Imeshindwa kupakia hali"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hitilafu, jaribu tena"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Inaendelea"</string>

@@ -57,12 +57,12 @@
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
     <string name="always_use_device" msgid="210535878779644679">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem uređaja spojenog na USB nije dozvoljeno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka koristeći USB. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem USB-a nije dozvoljeno"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka putem USB-a. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Dozvoliti bežično otklanjanje grešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa WiFi mreže (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvijek dozvoli na ovoj mreži"</string>
@@ -92,13 +92,13 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Obrađivanje snimka ekrana"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Obavještenje za sesiju snimanja ekrana je u toku"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Započeti snimanje?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Prilikom snimanja, sistem Android može snimiti sve osjetljive informacije koje su vidljive na vašem ekranu ili koje reproducirate na uređaju. To uključuje lozinke, informacije za plaćanje, fotografije, poruke i zvuk."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Prilikom snimanja, Android sistem može snimiti sve osjetljive informacije koje su vidljive na vašem ekranu ili koje reproducirate na uređaju. To uključuje lozinke, informacije za plaćanje, fotografije, poruke i zvuk."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Snimi zvučni zapis"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk uređaja"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk s vašeg uređaja, naprimjer muzika, pozivi i melodije zvona"</string>
     <string name="screenrecord_mic_label" msgid="2111264835791332350">"Mikrofon"</string>
     <string name="screenrecord_device_audio_and_mic_label" msgid="1831323771978646841">"Zvuk i mikrofon uređaja"</string>
-    <string name="screenrecord_start" msgid="330991441575775004">"Počni"</string>
+    <string name="screenrecord_start" msgid="330991441575775004">"Započni"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Snimanje ekrana"</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Snimanje ekrana i zvuka"</string>
     <string name="screenrecord_taps_label" msgid="1595690528298857649">"Prikaži dodire na ekranu"</string>
@@ -513,7 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Očisti sve"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historija"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Dolazno"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Novo"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Nečujno"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obavještenja"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Razgovori"</string>
@@ -601,7 +601,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Prevucite prema gore i držite da otkačite."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ekran ostaje prikazan ovako dok ga ne otkačite. Da ga otkačite, dodirnite i držite dugme Pregled."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Na ovaj način ekran ostaje prikazan dok ga ne otkačite. Da okačite ekran, dodirnite ili držite dugme Početna."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Lični podaci mogu biti dostupni (kao što su kontakti i sadržaj e-pošte)."</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Lični podaci mogu biti dostupni (naprimjer kontakti i sadržaj e-pošte)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"Zakačena aplikacija može otvoriti druge aplikacije."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"Dodirnite i držite dugmad Nazad i Pregled da otkačite ovu aplikaciju"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"Dodirnite i držite dugmad Nazad i Početni ekran da otkačite ovu aplikaciju"</string>
@@ -1009,7 +1009,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Pomjerite gore desno"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Pomjeri dolje lijevo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Pomjerite dolje desno"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Odbaci"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Odbaci oblačić"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nemoj prikazivati razgovor u oblačićima"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatajte koristeći oblačiće"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novi razgovori se prikazuju kao plutajuće ikone ili oblačići. Dodirnite da otvorite oblačić. Prevucite da ga premjestite."</string>
@@ -1053,7 +1053,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Učitavanje liste svih kontrola nije uspjelo."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
@@ -1073,14 +1076,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, vidite aplikaciju"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Greška, ponovni pokušaj…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Pristup uređaju <xliff:g id="DEVICE">%1$s</xliff:g> nije uspio. Provjerite aplikaciju <xliff:g id="APPLICATION">%2$s</xliff:g> da se uvjerite da je kontrola i dalje dostupna i da se postavke aplikacije nisu promijenile."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Otvori aplikaciju"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Nije moguće učitati status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Greška, pokušajte ponovo"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"U toku"</string>

@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ገቢ"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"አዲስ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ጸጥ ያለ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ማሳወቂያዎች"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ውይይቶች"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ወደ ላይኛው ቀኝ አንቀሳቅስ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"የግርጌውን ግራ አንቀሳቅስ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ታችኛውን ቀኝ ያንቀሳቅሱ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"አሰናብት"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"አረፋን አሰናብት"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ውይይቶችን በአረፋ አታሳይ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"አረፋዎችን በመጠቀም ይወያዩ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"አዲስ ውይይቶች እንደ ተንሳፋፊ አዶዎች ወይም አረፋዎች ሆነው ይታያሉ። አረፋን ለመክፈት መታ ያድርጉ። ለመውሰድ ይጎትቱት።"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"መቆጣጠሪያዎችን ዳግም ለማስተካከል ይያዙ እና ይጎትቱ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ሁሉም መቆጣጠሪያዎች ተወግደዋል"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ለውጦች አልተቀመጡም"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"የሁሉም መቆጣጠሪያዎች ዝርዝር ሊጫን አልተቻለም።"</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ሌላ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ወደ የመሣሪያ መቆጣጠሪያዎች ያክሉ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"አክል"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"ከቆመበት ቀጥል"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ስህተት፣ እንደገና በመሞከር ላይ…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"አልተገኘም"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"መቆጣጠሪያ አይገኝም"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ን መድረስ አልተቻለም። አሁንም ድረስ መቆጣጠሪያው ሊገኝ እንደሚችል እና የመተግበሪያ ቅንብሮቹ እንዳልተለወጡ ለማረጋገጥ <xliff:g id="APPLICATION">%2$s</xliff:g> መተግበሪያን ይፈትሹ።"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"መተግበሪያ ክፈት"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ሁኔታን መጫን አልተቻልም"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ስህተት፣ እንደገና ይሞክሩ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"በሂደት ላይ"</string>

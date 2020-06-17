@@ -146,7 +146,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"உங்கள் முகத்தை அங்கீகரிக்கிறது"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்து\' என்பதை தட்டவும்"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
@@ -168,7 +168,7 @@
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"அடுத்த முறை தவறான கடவுச்சொல்லை உள்ளிட்டால் உங்கள் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தச் சாதனத்தின் தரவு நீக்கப்படும்."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தப் பயனர் நீக்கப்படுவார்."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தப் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"பலமுறை தவறாக முயன்றதால், இந்தப் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"நிராகரி"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"கைரேகை ஐகான்"</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"வரலாறு"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"உள்வருவது"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"புதிது"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"நிசப்தம்"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"அறிவிப்புகள்"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"கீழே வலதுபுறமாக நகர்த்து"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"மூடுக"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"குமிழை அகற்று"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"உரையாடலைக் குமிழாக்காதே"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"குமிழ்களைப் பயன்படுத்தி அரட்டையடியுங்கள்"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"புதிய உரையாடல்கள் மிதக்கும் ஐகான்களாகவோ குமிழ்களாகவோ தோன்றும். குமிழைத் திறக்க தட்டவும். நகர்த்த இழுக்கவும்."</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"கட்டுப்பாடுகளை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"கட்டுப்பாடுகள் அனைத்தும் அகற்றப்பட்டன"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"மாற்றங்கள் சேமிக்கப்படவில்லை"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"எல்லா கட்டுப்பாடுகளின் பட்டியலை ஏற்ற முடியவில்லை."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"பிற"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"சாதனக் கட்டுப்பாடுகளில் சேர்த்தல்"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"சேர்"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"பிழை, மீண்டும் முயல்கிறது…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"கட்டுப்பாடு இல்லை"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தை அணுக இயலவில்லை. இப்போதும் கட்டுப்பாடு உள்ளது என்பதையும் ஆப்ஸ் அமைப்புகள் மாறவில்லை என்பதையும் உறுதிப்படுத்த <xliff:g id="APPLICATION">%2$s</xliff:g> ஆப்ஸைப் பார்க்கவும்."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ஆப்ஸைத் திற"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"செயல்பாட்டிலுள்ளது"</string>

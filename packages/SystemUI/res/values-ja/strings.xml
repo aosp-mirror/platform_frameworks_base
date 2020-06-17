@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"管理"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"履歴"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"新着"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"新着"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"サイレント"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
@@ -603,7 +603,7 @@
     <string name="screen_pinning_toast" msgid="8177286912533744328">"このアプリの固定を解除するには [戻る] ボタンと [最近] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"このアプリの固定を解除するには [戻る] ボタンと [ホーム] ボタンを長押しします"</string>
     <string name="screen_pinning_toast_gesture_nav" msgid="170699893395336705">"このアプリの固定を解除するには、上にスワイプして長押しします"</string>
-    <string name="screen_pinning_positive" msgid="3285785989665266984">"はい"</string>
+    <string name="screen_pinning_positive" msgid="3285785989665266984">"OK"</string>
     <string name="screen_pinning_negative" msgid="6882816864569211666">"いいえ"</string>
     <string name="screen_pinning_start" msgid="7483998671383371313">"固定したアプリ"</string>
     <string name="screen_pinning_exit" msgid="4553787518387346893">"固定を解除したアプリ"</string>
@@ -1002,9 +1002,9 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"右上に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"左下に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"右下に移動"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"閉じる"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ふきだしを閉じる"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をバブルで表示しない"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでのバブルの使用"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでバブルを使う"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"いつでもバブルを管理"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"このアプリからのバブルをオフにするには、[管理] をタップしてください"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"全コントロールの一覧を読み込めませんでした。"</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"その他"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"デバイス コントロールに追加"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"追加"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"コントロールを使用できません"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"「<xliff:g id="DEVICE">%1$s</xliff:g>」にアクセスできませんでした<xliff:g id="APPLICATION">%2$s</xliff:g> アプリで、コントロールが使用可能な状態でアプリの設定が変更されていないことをご確認ください。"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"アプリを開く"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ステータスを読み込めません"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"エラー: もう一度お試しください"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"処理中"</string>

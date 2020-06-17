@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थापित करा"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"आलेल्या"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"नवीन"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"सायलंट"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचना"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"संभाषणे"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"वर उजवीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"तळाशी डावीकडे हलवा"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"तळाशी उजवीकडे हलवा"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"डिसमिस करा"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"बबल डिसमिस करा"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"संभाषणाला बबल करू नका"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबल वापरून चॅट करा"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"नवीन संभाषणे फ्लोटिंग आयकन किंवा बबल म्हणून दिसतात. बबल उघडण्यासाठी टॅप करा. हे हलवण्यासाठी ड्रॅग करा."</string>
@@ -1013,17 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेव्हिगेशन अपडेट केले. बदल करण्यासाठी, सेटिंग्जवर जा."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेव्हिगेशन अपडेट करण्यासाठी सेटिंग्जवर जा"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टँडबाय"</string>
-    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
-    <skip />
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"संभाषणाला प्राधान्य म्हणून सेट केले आहे"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"प्राधान्य दिलेली संभाषणे:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"संभाषण विभागाच्या सर्वात वरती दाखवा"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लॉक स्‍क्रीनवर प्रोफाइल फोटो दाखवा"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ॲप्सच्या सर्वात वरती फ्लोटिंग बबल म्हणून दिसतील"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"व्यत्यय आणू नका मध्ये अडथळा आणतील"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"समजले"</string>
-    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
-    <skip />
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"सेटिंग्ज"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"मॅग्निफिकेशन ओव्हरले विंडो"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"मॅग्निफिकेशन विंडो"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"मॅग्निफिकेशन विंडो नियंत्रणे"</string>
@@ -1048,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सर्व नियंत्रणे काढून टाकली आहेत"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदल सेव्ह केले गेले नाहीत"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"इतर"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिव्हाइस नियंत्रणांमध्ये जोडा"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"जोडा"</string>
