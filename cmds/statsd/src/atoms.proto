@@ -481,6 +481,7 @@ message Atom {
         BlobCommitted blob_committed = 298 [(module) = "framework"];
         BlobLeased blob_leased = 299 [(module) = "framework"];
         BlobOpened blob_opened = 300 [(module) = "framework"];
+        ContactsProviderStatusReported contacts_provider_status_reported = 301;
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -9917,6 +9918,48 @@ message TvCasSessionOpenStatus {
     optional int32 cas_system_id = 2;
     // State of the session
     optional State state = 3;
+}
+
+/**
+ * Logs for ContactsProvider general usage.
+ * This is atom ID 301.
+ *
+ * Logged from:
+ *   packages/providers/ContactsProvider/src/com/android/providers/contacts/ContactsProvider2.java
+ */
+message ContactsProviderStatusReported {
+    enum ApiType {
+        UNKNOWN_API = 0;
+        QUERY = 1;
+        // INSERT includes insert and bulkInsert, and inserts triggered by applyBatch.
+        INSERT = 2;
+        // UPDATE and DELETE includes update/delete and the ones triggered by applyBatch.
+        UPDATE = 3;
+        DELETE = 4;
+    }
+
+    enum ResultType {
+        UNKNOWN_RESULT = 0;
+        SUCCESS = 1;
+        FAIL = 2;
+        ILLEGAL_ARGUMENT = 3;
+        UNSUPPORTED_OPERATION = 4;
+    }
+
+    enum CallerType {
+        UNSPECIFIED_CALLER_TYPE = 0;
+        CALLER_IS_SYNC_ADAPTER = 1;
+        CALLER_IS_NOT_SYNC_ADAPTER = 2;
+    }
+
+    optional ApiType api_type = 1;
+    // Defined in
+    // packages/providers/ContactsProvider/src/com/android/providers/contacts/ContactsProvider2.java
+    optional int32 uri_type = 2;
+    optional CallerType caller_type = 3;
+    optional ResultType result_type = 4;
+    optional int32 result_count = 5;
+    optional int64 latency_micros = 6;
 }
 
 /**
