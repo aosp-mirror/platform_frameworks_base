@@ -3439,6 +3439,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private void setTouchableRegionCropIfNeeded(InputWindowHandle handle) {
         final Task task = getTask();
         if (task == null || !task.cropWindowsToStackBounds()) {
+            handle.setTouchableRegionCrop(null);
             return;
         }
 
