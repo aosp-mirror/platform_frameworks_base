@@ -1414,13 +1414,15 @@ public final class InputMethodManager {
     }
 
     /**
-     * Return true if the currently served view is accepting full text edits.
-     * If false, it has no input connection, so can only handle raw key events.
+     * Return {@code true} if the currently served view is accepting full text edits.
+     * If {@code false}, it has no input connection, so it can only handle raw key events.
      */
     public boolean isAcceptingText() {
         checkFocus();
-        return mServedInputConnectionWrapper != null &&
-                mServedInputConnectionWrapper.getInputConnection() != null;
+        synchronized (mH) {
+            return mServedInputConnectionWrapper != null
+                    && mServedInputConnectionWrapper.getInputConnection() != null;
+        }
     }
 
     /**
