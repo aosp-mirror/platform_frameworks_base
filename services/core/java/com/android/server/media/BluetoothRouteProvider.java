@@ -52,6 +52,7 @@ class BluetoothRouteProvider {
     private static BluetoothRouteProvider sInstance;
 
     @SuppressWarnings("WeakerAccess") /* synthetic access */
+    // Maps hardware address to BluetoothRouteInfo
     final Map<String, BluetoothRouteInfo> mBluetoothRoutes = new HashMap<>();
     @SuppressWarnings("WeakerAccess") /* synthetic access */
     BluetoothRouteInfo mSelectedRoute = null;
@@ -127,9 +128,10 @@ class BluetoothRouteProvider {
             return;
         }
 
-        BluetoothRouteInfo btRouteInfo = mBluetoothRoutes.get(routeId);
+        BluetoothRouteInfo btRouteInfo = findBluetoothRouteWithRouteId(routeId);
+
         if (btRouteInfo == null) {
-            Slog.w(TAG, "transferTo: unknown route id=" + routeId);
+            Slog.w(TAG, "transferTo: Unknown route. ID=" + routeId);
             return;
         }
 
@@ -192,6 +194,18 @@ class BluetoothRouteProvider {
             routeIds.add(btRoute.route.getId());
         }
         return routes;
+    }
+
+    BluetoothRouteInfo findBluetoothRouteWithRouteId(String routeId) {
+        if (routeId == null) {
+            return null;
+        }
+        for (BluetoothRouteInfo btRouteInfo : mBluetoothRoutes.values()) {
+            if (TextUtils.equals(btRouteInfo.route.getId(), routeId)) {
+                return btRouteInfo;
+            }
+        }
+        return null;
     }
 
     /**
