@@ -219,6 +219,9 @@ public class PhoneStateListener {
     /**
      * Listen for changes to observed cell info.
      *
+     * Listening to this event requires the {@link Manifest.permission#ACCESS_FINE_LOCATION}
+     * permission.
+     *
      * @see #onCellInfoChanged
      */
     public static final int LISTEN_CELL_INFO = 0x00000400;
@@ -461,6 +464,9 @@ public class PhoneStateListener {
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
      * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
      *
+     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
+     * of whether the calling app has carrier privileges.
+     *
      * @see #onRegistrationFailed
      */
     @RequiresPermission(Manifest.permission.READ_PRECISE_PHONE_STATE)
@@ -471,6 +477,9 @@ public class PhoneStateListener {
      *
      * <p>Requires permission {@link android.Manifest.permission#READ_PRECISE_PHONE_STATE} or
      * the calling app has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * <p>Also requires the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission, regardless
+     * of whether the calling app has carrier privileges.
      *
      * @see #onBarringInfoChanged
      */
@@ -568,6 +577,11 @@ public class PhoneStateListener {
      * {@link TelephonyManager#createForSubscriptionId(int)}, then the callback applies to the
      * subId. Otherwise, this callback applies to
      * {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * The instance of {@link ServiceState} passed as an argument here will have various levels of
+     * location information stripped from it depending on the location permissions that your app
+     * holds. Only apps holding the {@link Manifest.permission#ACCESS_FINE_LOCATION} permission will
+     * receive all the information in {@link ServiceState}.
      *
      * @see ServiceState#STATE_EMERGENCY_ONLY
      * @see ServiceState#STATE_IN_SERVICE

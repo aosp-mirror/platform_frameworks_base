@@ -17,6 +17,7 @@
 package com.android.systemui.util.animation
 
 import android.animation.ValueAnimator
+import android.graphics.PointF
 import android.util.MathUtils
 import com.android.systemui.Interpolators
 
@@ -43,6 +44,7 @@ open class TransitionLayoutController {
     private var currentState = TransitionViewState()
     private var animationStartState: TransitionViewState? = null
     private var state = TransitionViewState()
+    private var pivot = PointF()
     private var animator: ValueAnimator = ValueAnimator.ofFloat(0.0f, 1.0f)
 
     init {
@@ -63,6 +65,7 @@ open class TransitionLayoutController {
                 startState = animationStartState!!,
                 endState = state,
                 progress = animator.animatedFraction,
+                pivot = pivot,
                 resultState = currentState)
         view.setState(currentState)
     }
@@ -75,8 +78,10 @@ open class TransitionLayoutController {
         startState: TransitionViewState,
         endState: TransitionViewState,
         progress: Float,
+        pivot: PointF,
         resultState: TransitionViewState
     ) {
+        this.pivot.set(pivot)
         val view = transitionLayout ?: return
         val childCount = view.childCount
         for (i in 0 until childCount) {
@@ -178,6 +183,8 @@ open class TransitionLayoutController {
                     progress).toInt()
             height = MathUtils.lerp(startState.height.toFloat(), endState.height.toFloat(),
                     progress).toInt()
+            translation.x = (endState.width - width) * pivot.x
+            translation.y = (endState.height - height) * pivot.y
         }
     }
 

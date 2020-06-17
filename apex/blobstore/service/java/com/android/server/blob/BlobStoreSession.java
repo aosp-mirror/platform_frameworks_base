@@ -100,7 +100,7 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
     private File mSessionFile;
 
     @GuardedBy("mRevocableFds")
-    private ArrayList<RevocableFileDescriptor> mRevocableFds = new ArrayList<>();
+    private final ArrayList<RevocableFileDescriptor> mRevocableFds = new ArrayList<>();
 
     // This will be accessed from only one thread at any point of time, so no need to grab
     // a lock for this.

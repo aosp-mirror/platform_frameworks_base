@@ -227,7 +227,8 @@ public class BlobStoreManagerService extends SystemService {
         int n = 0;
         long sessionId;
         do {
-            sessionId = Math.abs(mRandom.nextLong());
+            final long randomLong = mRandom.nextLong();
+            sessionId = (randomLong == Long.MIN_VALUE) ? INVALID_BLOB_ID : Math.abs(randomLong);
             if (mKnownBlobIds.indexOf(sessionId) < 0 && sessionId != INVALID_BLOB_ID) {
                 return sessionId;
             }
@@ -647,6 +648,17 @@ public class BlobStoreManagerService extends SystemService {
                                 session.getOwnerUid(), blob.getBlobId(), blob.getSize(),
                                 FrameworkStatsLog.BLOB_COMMITTED__RESULT__ERROR_DURING_COMMIT);
                         session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
+                        // If the commit fails and this blob data didn't exist before, delete it.
+                        // But if it is a recommit, just leave it as is.
+                        if (session.getSessionId() == blob.getBlobId()) {
+                            deleteBlobLocked(blob);
+                            userBlobs.remove(blob.getBlobHandle());
+                        }
+                    }
+                    // Delete redundant data from recommits.
+                    if (session.getSessionId() != blob.getBlobId()) {
+                        session.getSessionFile().delete();
+                        mActiveBlobIds.remove(session.getSessionId());
                     }
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
@@ -1543,7 +1555,7 @@ public class BlobStoreManagerService extends SystemService {
         public int handleShellCommand(@NonNull ParcelFileDescriptor in,
                 @NonNull ParcelFileDescriptor out, @NonNull ParcelFileDescriptor err,
                 @NonNull String[] args) {
-            return (new BlobStoreManagerShellCommand(BlobStoreManagerService.this)).exec(this,
+            return new BlobStoreManagerShellCommand(BlobStoreManagerService.this).exec(this,
                     in.getFileDescriptor(), out.getFileDescriptor(), err.getFileDescriptor(), args);
         }
     }

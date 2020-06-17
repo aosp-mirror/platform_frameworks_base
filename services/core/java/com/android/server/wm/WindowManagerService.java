@@ -7150,9 +7150,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         + "not exist: %d", displayId);
                 return false;
             }
-            if (displayContent.isUntrustedVirtualDisplay()) {
-                return false;
-            }
             return displayContent.supportsSystemDecorations();
         }
     }
@@ -7171,7 +7168,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "does not exist: %d", displayId);
                     return;
                 }
-                if (displayContent.isUntrustedVirtualDisplay()) {
+                if (!displayContent.isTrusted()) {
                     throw new SecurityException("Attempted to set system decors flag to an "
                             + "untrusted virtual display: " + displayId);
                 }
@@ -7219,7 +7216,7 @@ public class WindowManagerService extends IWindowManager.Stub
                             + "exist: %d", displayId);
                     return;
                 }
-                if (displayContent.isUntrustedVirtualDisplay()) {
+                if (!displayContent.isTrusted()) {
                     throw new SecurityException("Attempted to set IME flag to an untrusted "
                             + "virtual display: " + displayId);
                 }
