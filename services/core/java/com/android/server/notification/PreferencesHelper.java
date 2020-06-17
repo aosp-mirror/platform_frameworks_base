@@ -1654,6 +1654,7 @@ public class PreferencesHelper implements RankingConfig {
         }
         setImportance(packageName, uid,
                 enabled ? DEFAULT_IMPORTANCE : IMPORTANCE_NONE);
+        mNotificationChannelLogger.logAppNotificationsAllowed(uid, packageName, enabled);
     }
 
     /**
