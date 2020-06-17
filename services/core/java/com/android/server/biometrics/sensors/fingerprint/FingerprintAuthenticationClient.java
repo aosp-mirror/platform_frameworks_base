@@ -16,17 +16,20 @@
 
 package com.android.server.biometrics.sensors.fingerprint;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.TaskStackListener;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Slog;
 import android.view.Surface;
 
 import com.android.server.biometrics.sensors.AuthenticationClient;
-import com.android.server.biometrics.sensors.BiometricServiceBase;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.LockoutTracker;
 
@@ -41,18 +44,22 @@ class FingerprintAuthenticationClient extends AuthenticationClient {
 
     private static final String TAG = "Biometrics/FingerprintAuthClient";
 
+    private final IBiometricsFingerprint mDaemon;
     private final LockoutFrameworkImpl mLockoutFrameworkImpl;
 
-    FingerprintAuthenticationClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
-            IBinder token, ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
-            long opId, boolean restricted, String owner, int cookie, boolean requireConfirmation,
-            int sensorId, boolean isStrongBiometric, Surface surface, int statsClient,
-            TaskStackListener taskStackListener, LockoutFrameworkImpl lockoutTracker) {
-        super(context, daemon, token, listener, targetUserId, groupId, opId,
-                restricted, owner, cookie, requireConfirmation, sensorId, isStrongBiometric,
+    FingerprintAuthenticationClient(@NonNull Context context,
+            @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
+            long operationId, boolean restricted, @NonNull String owner, int cookie,
+            boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
+            @Nullable Surface surface, int statsClient,
+            @NonNull TaskStackListener taskStackListener,
+            @NonNull LockoutFrameworkImpl lockoutTracker) {
+        super(context, token, listener, targetUserId, groupId, operationId, restricted, owner,
+                cookie, requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
-                lockoutTracker, surface);
-
+                lockoutTracker);
+        mDaemon = daemon;
         mLockoutFrameworkImpl = lockoutTracker;
     }
 
@@ -91,5 +98,15 @@ class FingerprintAuthenticationClient extends AuthenticationClient {
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
         mLockoutFrameworkImpl.addFailedAttemptForUser(userId);
         return super.handleFailedAttempt(userId);
+    }
+
+    @Override
+    protected int startHalOperation() throws RemoteException {
+        return mDaemon.authenticate(mOperationId, getGroupId());
+    }
+
+    @Override
+    protected int stopHalOperation() throws RemoteException {
+        return mDaemon.cancel();
     }
 }

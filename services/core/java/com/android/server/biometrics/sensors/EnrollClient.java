@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -23,40 +24,34 @@ import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Slog;
-import android.view.Surface;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 
 /**
  * A class to keep track of the enrollment state for a given client.
  */
-public class EnrollClient extends AcquisitionClient {
+public abstract class EnrollClient extends AcquisitionClient {
 
     private static final String TAG = "Biometrics/EnrollClient";
 
-    private final byte[] mCryptoToken;
+    protected final byte[] mHardwareAuthToken;
+    protected final int mTimeoutSec;
     private final BiometricUtils mBiometricUtils;
-    private final int[] mDisabledFeatures;
-    private final int mTimeoutSec;
-    private final Surface mSurface;
     private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
 
-    public EnrollClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, byte[] cryptoToken,
-            boolean restricted, String owner, BiometricUtils utils, final int[] disabledFeatures,
-            int timeoutSec, int statsModality, Surface surface, int sensorId,
+    public EnrollClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int userId, int groupId,
+            @NonNull byte[] hardwareAuthToken, boolean restricted, String owner,
+            @NonNull BiometricUtils utils, int timeoutSec, int statsModality, int sensorId,
             boolean shouldVibrate) {
-        super(context, daemon, token, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+        super(context, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
+                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
-        mCryptoToken = Arrays.copyOf(cryptoToken, cryptoToken.length);
-        mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);
+        mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
         mTimeoutSec = timeoutSec;
-        mSurface = surface;
         mShouldVibrate = shouldVibrate;
     }
 
@@ -96,13 +91,7 @@ public class EnrollClient extends AcquisitionClient {
     public int start() {
         mEnrollmentStartTimeMs = System.currentTimeMillis();
         try {
-            final ArrayList<Integer> disabledFeatures = new ArrayList<>();
-            for (int i = 0; i < mDisabledFeatures.length; i++) {
-                disabledFeatures.add(mDisabledFeatures[i]);
-            }
-
-            final int result = getDaemonWrapper().enroll(mCryptoToken, getGroupId(), mTimeoutSec,
-                    disabledFeatures, mSurface);
+            final int result = startHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "startEnroll failed, result=" + result);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
@@ -122,7 +111,7 @@ public class EnrollClient extends AcquisitionClient {
         }
 
         try {
-            final int result = getDaemonWrapper().cancel();
+            final int result = stopHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "startEnrollCancel failed, result = " + result);
                 return result;

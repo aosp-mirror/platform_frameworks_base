@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskStackListener;
@@ -27,7 +28,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.security.KeyStore;
 import android.util.Slog;
-import android.view.Surface;
 
 import java.util.ArrayList;
 
@@ -39,53 +39,29 @@ public abstract class AuthenticationClient extends AcquisitionClient {
     private static final String TAG = "Biometrics/AuthenticationClient";
 
     private final boolean mIsStrongBiometric;
-    private final long mOpId;
     private final boolean mRequireConfirmation;
     private final IActivityTaskManager mActivityTaskManager;
     private final TaskStackListener mTaskStackListener;
     private final LockoutTracker mLockoutTracker;
-    private final Surface mSurface;
+
+    protected final long mOperationId;
 
     private long mStartTimeMs;
 
-    /**
-     * This method is called when authentication starts.
-     */
-    protected void onStart() {
-        try {
-            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not register task stack listener", e);
-        }
-    }
-
-    /**
-     * This method is called when a biometric is authenticated or authentication is stopped
-     * (cancelled by the user, or an error such as lockout has occurred).
-     */
-    protected void onStop() {
-        try {
-            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
-        } catch (RemoteException e) {
-            Slog.e(TAG, "Could not unregister task stack listener", e);
-        }
-    }
-
-    public AuthenticationClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
-            IBinder token, ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
-            long opId, boolean restricted, String owner, int cookie, boolean requireConfirmation,
-            int sensorId, boolean isStrongBiometric, int statsModality, int statsClient,
-            TaskStackListener taskStackListener, LockoutTracker lockoutTracker, Surface surface) {
-        super(context, daemon, token, listener, targetUserId, groupId,
-                restricted, owner, cookie, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
+    public AuthenticationClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
+            long operationId, boolean restricted, @NonNull String owner, int cookie,
+            boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsModality,
+            int statsClient, @NonNull TaskStackListener taskStackListener,
+            @NonNull LockoutTracker lockoutTracker) {
+        super(context, token, listener, targetUserId, groupId, restricted, owner, cookie, sensorId,
+                statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
-        mOpId = opId;
+        mOperationId = operationId;
         mRequireConfirmation = requireConfirmation;
         mActivityTaskManager = ActivityTaskManager.getService();
         mTaskStackListener = taskStackListener;
         mLockoutTracker = lockoutTracker;
-        mSurface = surface;
     }
 
     public @LockoutTracker.LockoutMode int handleFailedAttempt(int userId) {
@@ -119,7 +95,7 @@ public abstract class AuthenticationClient extends AcquisitionClient {
 
     @Override
     protected boolean isCryptoOperation() {
-        return mOpId != 0;
+        return mOperationId != 0;
     }
 
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
@@ -147,7 +123,12 @@ public abstract class AuthenticationClient extends AcquisitionClient {
                     vibrateSuccess();
                 }
                 result = true;
-                onStop();
+
+                try {
+                    mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Could not unregister task stack listener", e);
+                }
 
                 final byte[] byteToken = new byte[token.size()];
                 for (int i = 0; i < token.size(); i++) {
@@ -212,10 +193,15 @@ public abstract class AuthenticationClient extends AcquisitionClient {
      */
     @Override
     public int start() {
-        onStart();
+        try {
+            mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not register task stack listener", e);
+        }
+
         try {
             mStartTimeMs = System.currentTimeMillis();
-            final int result = getDaemonWrapper().authenticate(mOpId, getGroupId(), mSurface);
+            final int result = startHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "startAuthentication failed, result=" + result);
                 onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
@@ -224,7 +210,7 @@ public abstract class AuthenticationClient extends AcquisitionClient {
             if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is authenticating...");
         } catch (RemoteException e) {
             Slog.e(TAG, "startAuthentication failed", e);
-            return ERROR_ESRCH;
+            return BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS;
         }
         return 0; // success
     }
@@ -236,10 +222,14 @@ public abstract class AuthenticationClient extends AcquisitionClient {
             return 0;
         }
 
-        onStop();
+        try {
+            mActivityTaskManager.unregisterTaskStackListener(mTaskStackListener);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Could not unregister task stack listener", e);
+        }
 
         try {
-            final int result = getDaemonWrapper().cancel();
+            final int result = stopHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "stopAuthentication failed, result=" + result);
                 return result;
@@ -248,7 +238,7 @@ public abstract class AuthenticationClient extends AcquisitionClient {
                     " is no longer authenticating");
         } catch (RemoteException e) {
             Slog.e(TAG, "stopAuthentication failed", e);
-            return ERROR_ESRCH;
+            return BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS;
         }
 
         mAlreadyCancelled = true;

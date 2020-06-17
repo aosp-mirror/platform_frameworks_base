@@ -16,9 +16,11 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricsProtoEnums;
+import android.os.IBinder;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -35,7 +37,7 @@ import java.util.List;
  * 2) The HAL and Framework are not in sync, and
  * {@link #onRemoved(BiometricAuthenticator.Identifier, int)} returns true/
  */
-public class InternalCleanupClient extends ClientMonitor implements EnumerateConsumer,
+public abstract class InternalCleanupClient extends ClientMonitor implements EnumerateConsumer,
         RemovalConsumer {
 
     private static final String TAG = "Biometrics/InternalCleanupClient";
@@ -55,27 +57,32 @@ public class InternalCleanupClient extends ClientMonitor implements EnumerateCon
 
     private final ArrayList<UserTemplate> mUnknownHALTemplates = new ArrayList<>();
     private final BiometricUtils mBiometricUtils;
+    private final List<? extends BiometricAuthenticator.Identifier> mEnrolledList;
     private ClientMonitor mCurrentTask;
 
-    InternalCleanupClient(Context context, BiometricServiceBase.DaemonWrapper daemon,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, boolean restricted,
-            String owner, int sensorId, int statsModality,
-            List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils) {
-        super(context, daemon, null /* token */, listener, userId, groupId, restricted,
-                owner, 0 /* cookie */, sensorId, statsModality,
-                BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
+    protected abstract InternalEnumerateClient getEnumerateClient(Context context, IBinder token,
+            int groupId, int userId, boolean restricted, String owner,
+            List<? extends BiometricAuthenticator.Identifier> enrolledList, BiometricUtils utils,
+            int sensorId, int statsModality);
+    protected abstract RemovalClient getRemovalClient(Context context, IBinder token,
+            int biometricId, int groupId, int userId, boolean restricted, String owner,
+            BiometricUtils utils, int sensorId, int statsModality);
 
+    protected InternalCleanupClient(@NonNull Context context, int userId, int groupId,
+            boolean restricted, @NonNull String owner, int sensorId, int statsModality,
+            @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
+            @NonNull BiometricUtils utils) {
+        super(context, null /* token */, null /* ClientMonitorCallbackConverter */, userId, groupId,
+                restricted, owner, 0 /* cookie */, sensorId, statsModality,
+                BiometricsProtoEnums.ACTION_ENUMERATE, BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
-        mCurrentTask = new InternalEnumerateClient(context, daemon, getToken(),
-                listener, userId, groupId, restricted, owner, enrolledList, utils, sensorId,
-                statsModality);
+        mEnrolledList = enrolledList;
     }
 
     private void startCleanupUnknownHalTemplates() {
         UserTemplate template = mUnknownHALTemplates.get(0);
         mUnknownHALTemplates.remove(template);
-        mCurrentTask = new RemovalClient(getContext(),
-                getDaemonWrapper(), getToken(), null /* listener */,
+        mCurrentTask = getRemovalClient(getContext(), getToken(),
                 template.mIdentifier.getBiometricId(), 0 /* groupId */, template.mUserId,
                 getIsRestricted(), getContext().getPackageName(), mBiometricUtils,
                 getSensorId(), mStatsModality);
@@ -88,11 +95,27 @@ public class InternalCleanupClient extends ClientMonitor implements EnumerateCon
     @Override
     public int start() {
         // Start enumeration. Removal will start if necessary, when enumeration is completed.
+        mCurrentTask = getEnumerateClient(getContext(), getToken(), getTargetUserId(), getGroupId(),
+                getIsRestricted(), getOwnerString(), mEnrolledList, mBiometricUtils, getSensorId(),
+                mStatsModality);
         return mCurrentTask.start();
     }
 
     @Override
     public int stop(boolean initiatedByClient) {
+        return 0;
+    }
+
+    @Override
+    protected int startHalOperation() {
+        // Internal cleanup's start method does not require a HAL operation, but rather
+        // relies on its subtask's ClientMonitor to start the proper HAL operation.
+        return 0;
+    }
+
+    @Override
+    protected int stopHalOperation() {
+        // Internal cleanup's cannot be stopped.
         return 0;
     }
 

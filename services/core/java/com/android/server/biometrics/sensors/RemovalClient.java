@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -27,18 +28,18 @@ import android.util.Slog;
 /**
  * A class to keep track of the remove state for a given client.
  */
-public class RemovalClient extends ClientMonitor implements RemovalConsumer {
+public abstract class RemovalClient extends ClientMonitor implements RemovalConsumer {
 
     private static final String TAG = "Biometrics/RemovalClient";
 
-    private final int mBiometricId;
+    protected final int mBiometricId;
     private final BiometricUtils mBiometricUtils;
 
-    public RemovalClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int biometricId, int groupId, int userId,
-            boolean restricted, String owner, BiometricUtils utils, int sensorId,
-            int statsModality) {
-        super(context, daemon, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
+    public RemovalClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int groupId,
+            int userId, boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils,
+            int sensorId, int statsModality) {
+        super(context, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
                 sensorId, statsModality, BiometricsProtoEnums.ACTION_REMOVE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricId = biometricId;
@@ -49,7 +50,7 @@ public class RemovalClient extends ClientMonitor implements RemovalConsumer {
     public int start() {
         // The biometric template ids will be removed when we get confirmation from the HAL
         try {
-            final int result = getDaemonWrapper().remove(getGroupId(), mBiometricId);
+            final int result = startHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "startRemove with id = " + mBiometricId + " failed, result=" +
                         result);
@@ -70,7 +71,7 @@ public class RemovalClient extends ClientMonitor implements RemovalConsumer {
         }
 
         try {
-            final int result = getDaemonWrapper().cancel();
+            final int result = stopHalOperation();
             if (result != 0) {
                 Slog.w(TAG, "stopRemoval failed, result=" + result);
                 return result;
@@ -78,7 +79,7 @@ public class RemovalClient extends ClientMonitor implements RemovalConsumer {
             if (DEBUG) Slog.w(TAG, "client " + getOwnerString() + " is no longer removing");
         } catch (RemoteException e) {
             Slog.e(TAG, "stopRemoval failed", e);
-            return ERROR_ESRCH;
+            return BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS;
         }
         mAlreadyCancelled = true;
         return 0; // success

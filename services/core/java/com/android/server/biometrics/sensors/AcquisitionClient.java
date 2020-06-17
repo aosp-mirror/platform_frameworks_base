@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics.sensors;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricConstants;
 import android.media.AudioAttributes;
@@ -45,12 +46,11 @@ public abstract class AcquisitionClient extends ClientMonitor {
     private final VibrationEffect mSuccessVibrationEffect;
     private final VibrationEffect mErrorVibrationEffect;
 
-    AcquisitionClient(Context context, BiometricServiceBase.DaemonWrapper daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, boolean restricted,
-            String owner, int cookie, int sensorId, int statsModality, int statsAction,
-            int statsClient) {
-        super(context, daemon, token, listener, userId, groupId, restricted, owner, cookie,
-                sensorId,
+    AcquisitionClient(@NonNull Context context, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int userId, int groupId,
+            boolean restricted, @NonNull String owner, int cookie, int sensorId, int statsModality,
+            int statsAction, int statsClient) {
+        super(context, token, listener, userId, groupId, restricted, owner, cookie, sensorId,
                 statsModality, statsAction, statsClient);
         mPowerManager = context.getSystemService(PowerManager.class);
         mSuccessVibrationEffect = VibrationEffect.get(VibrationEffect.EFFECT_CLICK);
