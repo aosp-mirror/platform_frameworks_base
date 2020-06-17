@@ -2515,6 +2515,10 @@ public class BubbleStackView extends FrameLayout
                     .spring(DynamicAnimation.SCALE_Y, 1f)
                     .spring(DynamicAnimation.TRANSLATION_X, targetX)
                     .spring(DynamicAnimation.TRANSLATION_Y, targetY)
+                    .withEndActions(() -> {
+                        View child = mManageMenu.getChildAt(0);
+                        child.requestAccessibilityFocus();
+                    })
                     .start();
 
             mManageMenu.setVisibility(View.VISIBLE);
