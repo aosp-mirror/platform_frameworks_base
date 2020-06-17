@@ -30,11 +30,11 @@
     <string name="install_failed_blocked" msgid="8512284352994752094">"यो प्याकेज स्थापना गर्ने क्रममा अवरोध गरियो।"</string>
     <string name="install_failed_conflict" msgid="3493184212162521426">"प्याकेजका रूपमा स्थापना नगरिएको एप विद्यमान प्याकेजसँग मेल खाँदैन।"</string>
     <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"एपका रूपमा स्थापना नगरिएको एप तपाईंको ट्याब्लेटसँग मिल्दो छैन।"</string>
-    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"यो एप तपाईंको TV सँग मिल्दो छैन।"</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"यो एप तपाईंको टिभी सँग मिल्दो छैन।"</string>
     <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"एपका रूपमा स्थापना नगरिएको एप तपाईंको फोनसँग मिल्दो छैन।"</string>
     <string name="install_failed_invalid_apk" msgid="8581007676422623930">"प्याकेजका रूपमा स्थापना नगरिएको एप अमान्य जस्तो देखिन्छ।"</string>
     <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"तपाईंको ट्याब्लेटमा <xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन।"</string>
-    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"तपाईंको TV मा <xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन।"</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"तपाईंको टिभी मा <xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन।"</string>
     <string name="install_failed_msg" product="default" msgid="6484461562647915707">"तपाईंको फोनमा <xliff:g id="APP_NAME">%1$s</xliff:g> स्थापना गर्न सकिएन।"</string>
     <string name="launch" msgid="3952550563999890101">"खोल्नुहोस्"</string>
     <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"तपाईंका प्रशासकले अज्ञात स्रोतहरूबाट प्राप्त अनुप्रयोगहरूलाई स्थापना गर्ने अनुमति दिनुहुन्न"</string>
@@ -81,11 +81,11 @@
     <string name="message_staging" msgid="8032722385658438567">"एप स्थापना गर्न तयारी गर्दै…"</string>
     <string name="app_name_unknown" msgid="6881210203354323926">"अज्ञात"</string>
     <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"तपाईंको सुरक्षाका लागि, तपाईंको ट्याब्लेटलाई यो स्रोतबाट प्राप्त हुने अज्ञात एपहरू स्थापना गर्ने अनुमति छैन।"</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"तपाईंको सुरक्षाका लागि, तपाईंको TV लाई यस स्रोतबाट प्राप्त हुने अज्ञात एपहरू स्थापना गर्ने अनुमति छैन।"</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"तपाईंको सुरक्षाका लागि, तपाईंको टिभी लाई यस स्रोतबाट प्राप्त हुने अज्ञात एपहरू स्थापना गर्ने अनुमति छैन।"</string>
     <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"तपाईंको सुरक्षाका लागि, तपाईंको फोनलाई यो स्रोतबाट प्राप्त हुने अज्ञात एपहरू स्थापना गर्ने अनुमति छैन।"</string>
     <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"तपाईंको फोन तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको फोनमा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
     <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"तपाईंको ट्याब्लेट तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको ट्याब्लेटमा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
-    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"तपाईंको TV तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको TV मा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"तपाईंको टिभी तथा व्यक्तिगत डेटा अज्ञात एपहरूबाट हुने आक्रमणको चपेटामा पर्ने बढी जोखिममा हुन्छन्। यो एप स्थापना गरेर तपाईं यसको प्रयोगबाट तपाईंको टिभी मा हुन सक्ने क्षति वा डेटाको नोक्सानीका लागि स्वयं जिम्मेवार हुने कुरामा सहमत हुनुहुन्छ।"</string>
     <string name="anonymous_source_continue" msgid="4375745439457209366">"जारी राख्नुहोस्"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"सेटिङहरू"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"वेयर एपहरूको स्थापना/स्थापना रद्द गर्दै"</string>
