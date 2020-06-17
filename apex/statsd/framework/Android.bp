@@ -90,26 +90,3 @@ java_sdk_library {
         "test_com.android.os.statsd",
     ],
 }
-
-android_test {
-    name: "FrameworkStatsdTest",
-    platform_apis: true,
-    srcs: [
-        // TODO(b/147705194): Use framework-statsd as a lib dependency instead.
-        ":framework-statsd-sources",
-        "test/**/*.java",
-    ],
-    manifest: "test/AndroidManifest.xml",
-    static_libs: [
-        "androidx.test.rules",
-        "truth-prebuilt",
-    ],
-    libs: [
-        "android.test.runner.stubs",
-        "android.test.base.stubs",
-    ],
-    test_suites: [
-        "device-tests",
-    ],
-}
-
