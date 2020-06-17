@@ -353,7 +353,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         }
         // We don't allow untrusted display to top when task stack moves to top,
         // until user tapping this display to change display position as top intentionally.
-        if (mDisplayContent.isUntrustedVirtualDisplay() && !getParent().isOnTop()) {
+        if (!mDisplayContent.isTrusted() && !getParent().isOnTop()) {
             includingParents = false;
         }
         final int targetPosition = findPositionForStack(position, child, false /* adding */);
@@ -1529,8 +1529,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     @Nullable
     ActivityStack getOrCreateRootHomeTask(boolean onTop) {
         ActivityStack homeTask = getRootHomeTask();
-        if (homeTask == null && mDisplayContent.supportsSystemDecorations()
-                && !mDisplayContent.isUntrustedVirtualDisplay()) {
+        if (homeTask == null && mDisplayContent.supportsSystemDecorations()) {
             homeTask = createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_HOME, onTop);
         }
         return homeTask;

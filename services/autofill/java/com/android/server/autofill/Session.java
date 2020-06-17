@@ -144,7 +144,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
-    private static AtomicInteger sIdCounter = new AtomicInteger();
+    static final int AUGMENTED_AUTOFILL_REQUEST_ID = 1;
+
+    private static AtomicInteger sIdCounter = new AtomicInteger(2);
 
     /**
      * ID of the session.
@@ -313,18 +315,28 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     private final AssistDataReceiverImpl mAssistReceiver = new AssistDataReceiverImpl();
 
     void onSwitchInputMethodLocked() {
+        // One caveat is that for the case where the focus is on a field for which regular autofill
+        // returns null, and augmented autofill is triggered,  and then the user switches the input
+        // method. Tapping on the field again will not trigger a new augmented autofill request.
+        // This may be fixed by adding more checks such as whether mCurrentViewId is null.
         if (mExpiredResponse) {
             return;
         }
-
-        if (shouldExpireResponseOnInputMethodSwitch()) {
+        if (shouldResetSessionStateOnInputMethodSwitch()) {
             // Set the old response expired, so the next action (ACTION_VIEW_ENTERED) can trigger
             // a new fill request.
             mExpiredResponse = true;
+            // Clear the augmented autofillable ids so augmented autofill will trigger again.
+            mAugmentedAutofillableIds = null;
+            // In case the field is augmented autofill only, we clear the current view id, so that
+            // we won't skip view entered due to same view entered, for the augmented autofill.
+            if (mForAugmentedAutofillOnly) {
+                mCurrentViewId = null;
+            }
         }
     }
 
-    private boolean shouldExpireResponseOnInputMethodSwitch() {
+    private boolean shouldResetSessionStateOnInputMethodSwitch() {
         // One of below cases will need a new fill request to update the inline spec for the new
         // input method.
         // 1. The autofill provider supports inline suggestion and the render service is available.
@@ -726,7 +738,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         viewState.setState(newState);
 
         int requestId;
-
+        // TODO(b/158623971): Update this to prevent possible overflow
         do {
             requestId = sIdCounter.getAndIncrement();
         } while (requestId == INVALID_REQUEST_ID);
@@ -1334,6 +1346,11 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + id + " destroyed");
             return;
         }
+        final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
+        if (requestId == AUGMENTED_AUTOFILL_REQUEST_ID) {
+            setAuthenticationResultForAugmentedAutofillLocked(data, authenticationId);
+            return;
+        }
         if (mResponses == null) {
             // Typically happens when app explicitly called cancel() while the service was showing
             // the auth UI.
@@ -1341,7 +1358,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             removeSelf();
             return;
         }
-        final int requestId = AutofillManager.getRequestIdFromAuthenticationId(authenticationId);
         final FillResponse authenticatedResponse = mResponses.get(requestId);
         if (authenticatedResponse == null || data == null) {
             Slog.w(TAG, "no authenticated response");
@@ -1398,6 +1414,58 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     MetricsEvent.AUTOFILL_INVALID_AUTHENTICATION);
             processNullResponseLocked(requestId, 0);
         }
+    }
+
+    @GuardedBy("mLock")
+    void setAuthenticationResultForAugmentedAutofillLocked(Bundle data, int authId) {
+        final Dataset dataset = (data == null) ? null :
+                data.getParcelable(AutofillManager.EXTRA_AUTHENTICATION_RESULT);
+        if (sDebug) {
+            Slog.d(TAG, "Auth result for augmented autofill: sessionId=" + id
+                    + ", authId=" + authId + ", dataset=" + dataset);
+        }
+        if (dataset == null
+                || dataset.getFieldIds().size() != 1
+                || dataset.getFieldIds().get(0) == null
+                || dataset.getFieldValues().size() != 1
+                || dataset.getFieldValues().get(0) == null) {
+            if (sDebug) {
+                Slog.d(TAG, "Rejecting empty/invalid auth result");
+            }
+            mService.resetLastAugmentedAutofillResponse();
+            removeSelfLocked();
+            return;
+        }
+        final List<AutofillId> fieldIds = dataset.getFieldIds();
+        final List<AutofillValue> autofillValues = dataset.getFieldValues();
+        final AutofillId fieldId = fieldIds.get(0);
+        final AutofillValue value = autofillValues.get(0);
+
+        // Update state to ensure that after filling the field here we don't end up firing another
+        // autofill request that will end up showing the same suggestions to the user again. When
+        // the auth activity came up, the field for which the suggestions were shown lost focus and
+        // mCurrentViewId was cleared. We need to set mCurrentViewId back to the id of the field
+        // that we are filling.
+        fieldId.setSessionId(id);
+        mCurrentViewId = fieldId;
+
+        // Notify the Augmented Autofill provider of the dataset that was selected.
+        final Bundle clientState = data.getBundle(AutofillManager.EXTRA_CLIENT_STATE);
+        mService.logAugmentedAutofillSelected(id, dataset.getId(), clientState);
+
+        // Fill the value into the field.
+        if (sDebug) {
+            Slog.d(TAG, "Filling after auth: fieldId=" + fieldId + ", value=" + value);
+        }
+        try {
+            mClient.autofill(id, fieldIds, autofillValues, true);
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Error filling after auth: fieldId=" + fieldId + ", value=" + value
+                    + ", error=" + e);
+        }
+
+        // Clear the suggestions since the user already accepted one of them.
+        mInlineSessionController.setInlineFillUiLocked(InlineFillUi.emptyUi(fieldId));
     }
 
     @GuardedBy("mLock")
@@ -2496,6 +2564,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     + actionAsString(action) + ", flags=" + flags);
         }
         ViewState viewState = mViewStates.get(id);
+        if (sVerbose) {
+            Slog.v(TAG, "updateLocked(" + this.id + "): mCurrentViewId=" + mCurrentViewId
+                    + ", mExpiredResponse=" + mExpiredResponse + ", viewState=" + viewState);
+        }
 
         if (viewState == null) {
             if (action == ACTION_START_SESSION || action == ACTION_VALUE_CHANGED
@@ -2588,15 +2660,14 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                             id)) {
                         // Regular autofill handled the view and returned null response, but it
                         // triggered augmented autofill
-                        if (!isSameViewEntered || mExpiredResponse) {
+                        if (!isSameViewEntered) {
                             if (sDebug) Slog.d(TAG, "trigger augmented autofill.");
                             triggerAugmentedAutofillLocked(flags);
                         } else {
                             if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
                         }
                         return;
-                    } else if (mForAugmentedAutofillOnly && isSameViewEntered
-                            && !mExpiredResponse) {
+                    } else if (mForAugmentedAutofillOnly && isSameViewEntered) {
                         // Regular autofill is disabled.
                         if (sDebug) Slog.d(TAG, "skip augmented autofill for same view.");
                         return;
