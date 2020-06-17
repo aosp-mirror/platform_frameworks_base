@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Az összes törlése"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Kezelés"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Előzmények"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Bejövő"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Új"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Néma"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Értesítések"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Beszélgetések"</string>
@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Az alkalmazás ki van tűzve"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Vissza és a Kezdőképernyő elemet."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz csúsztasson fel, és tartsa ujját a képernyőn."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz csúsztassa fel és tartsa ujját a képernyőn."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva az Áttekintés lehetőséget."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Megjelenítve tartja addig, amíg Ön fel nem oldja a rögzítést. A feloldáshoz tartsa lenyomva a Kezdőképernyő elemet."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Bizonyos személyes adatok (például a névjegyek és az e-mailek tartalma) hozzáférhetők lehetnek."</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Áthelyezés fel és jobbra"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Áthelyezés le és balra"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Áthelyezés le és jobbra"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Elvetés"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Buborék elvetése"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Ne jelenjen meg a beszélgetés buborékban"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Buborékokat használó csevegés"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Az új beszélgetések lebegő ikonként, vagyis buborékként jelennek meg. A buborék megnyitásához koppintson rá. Áthelyezéshez húzza a kívánt helyre."</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tartsa lenyomva, és húzza a vezérlők átrendezéséhez"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Minden vezérlő eltávolítva"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"A rendszer nem mentette a módosításokat"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nem sikerült betölteni az összes vezérlő listáját."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Más"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Hozzáadás az eszközvezérlőkhöz"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Hozzáadás"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Folytatás"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inaktív, ellenőrizze az appot"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hiba, újrapróbálkozás…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nem található"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Nem hozzáférhető vezérlő"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nem lehet hozzáférni a következőhöz: <xliff:g id="DEVICE">%1$s</xliff:g>. Ellenőrizze a(z) <xliff:g id="APPLICATION">%2$s</xliff:g> alkalmazást, és győződjön meg arról, hogy a vezérlő továbbra is rendelkezésre áll, illetve nem változtak az alkalmazás beállításai."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"App megnyitása"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Állapot betöltése sikertelen"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hiba történt. Próbálja újra."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Folyamatban"</string>

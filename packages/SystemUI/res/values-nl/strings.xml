@@ -259,10 +259,10 @@
     <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Bubbel gesloten."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Meldingenpaneel."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Snelle instellingen."</string>
-    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Vergrendelingsscherm."</string>
+    <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Vergrendelscherm."</string>
     <string name="accessibility_desc_settings" msgid="6728577365389151969">"Instellingen"</string>
     <string name="accessibility_desc_recent_apps" msgid="1748675199348914194">"Overzicht."</string>
-    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Vergrendelingsscherm voor werk"</string>
+    <string name="accessibility_desc_work_lock" msgid="4355620395354680575">"Vergrendelscherm voor werk"</string>
     <string name="accessibility_desc_close" msgid="8293708213442107755">"Sluiten"</string>
     <string name="accessibility_quick_settings_wifi" msgid="167707325133803052">"<xliff:g id="SIGNAL">%1$s</xliff:g>."</string>
     <string name="accessibility_quick_settings_wifi_changed_off" msgid="2230487165558877262">"Wifi uitgeschakeld."</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Alles wissen"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Beheren"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Geschiedenis"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Inkomend"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Nieuw"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Stil"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Meldingen"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Gesprekken"</string>
@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"App is vastgezet"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Overzicht en houd deze vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Terug en Home en houd deze vast om het scherm los te maken."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Veeg omhoog en houd vast om los te maken."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Zo blijft het scherm zichtbaar totdat je dit losmaakt. Swipe omhoog en houd vast om los te maken."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Overzicht en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Het scherm blijft zichtbaar totdat je het losmaakt. Tik op Home en houd dit vast om het scherm los te maken."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Persoonlijke informatie kan toegankelijk zijn (zoals contacten en e-mailcontent)."</string>
@@ -687,7 +687,7 @@
     <string name="tuner_full_importance_settings" msgid="1388025816553459059">"Beheeropties voor meldingen met betrekking tot stroomverbruik"</string>
     <string name="tuner_full_importance_settings_on" msgid="917981436602311547">"Aan"</string>
     <string name="tuner_full_importance_settings_off" msgid="5580102038749680829">"Uit"</string>
-    <string name="power_notification_controls_description" msgid="1334963837572708952">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelingsscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
+    <string name="power_notification_controls_description" msgid="1334963837572708952">"Met beheeropties voor meldingen met betrekking tot stroomverbruik kun je een belangrijkheidsniveau van 0 tot 5 instellen voor de meldingen van een app. \n\n"<b>"Niveau 5"</b>" \n- Boven aan de lijst met meldingen weergeven \n- Onderbreking op volledig scherm toestaan \n- Altijd korte weergave \n\n"<b>"Niveau 4"</b>" \n- Geen onderbreking op volledig scherm \n- Altijd korte weergave \n\n"<b>"Niveau 3"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n\n"<b>"Niveau 2"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n\n"<b>"Niveau 1"</b>" \n- Geen onderbreking op volledig scherm \n- Nooit korte weergave \n- Nooit geluid laten horen of trillen \n- Verbergen op vergrendelscherm en statusbalk \n- Onder aan de lijst met meldingen weergeven \n\n"<b>"Niveau 0"</b>" \n- Alle meldingen van de app blokkeren"</string>
     <string name="notification_header_default_channel" msgid="225454696914642444">"Meldingen"</string>
     <string name="notification_channel_disabled" msgid="928065923928416337">"Meldingen worden niet meer weergegeven"</string>
     <string name="notification_channel_minimized" msgid="6892672757877552959">"Deze meldingen worden geminimaliseerd"</string>
@@ -716,7 +716,7 @@
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Kan overgaan of trillen op basis van de telefooninstellingen"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Kan overgaan of trillen op basis van de telefooninstellingen. Gesprekken uit <xliff:g id="APP_NAME">%1$s</xliff:g> worden standaard als bubbels weergegeven."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Trekt de aandacht met een zwevende snelkoppeling naar deze content."</string>
-    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gedeelte met gesprekken weergegeven, verschijnt als zwevende bubbel, geeft de profielfoto weer op het vergrendelingsscherm"</string>
+    <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Wordt bovenaan het gedeelte met gesprekken weergegeven, verschijnt als zwevende bubbel, geeft de profielfoto weer op het vergrendelscherm"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Instellingen"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Prioriteit"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> ondersteunt geen gespreksfuncties"</string>
@@ -907,7 +907,7 @@
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g>-instellingen openen."</string>
     <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Volgorde van instellingen bewerken."</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Pagina <xliff:g id="ID_1">%1$d</xliff:g> van <xliff:g id="ID_2">%2$d</xliff:g>"</string>
-    <string name="tuner_lock_screen" msgid="2267383813241144544">"Vergrendelingsscherm"</string>
+    <string name="tuner_lock_screen" msgid="2267383813241144544">"Vergrendelscherm"</string>
     <string name="pip_phone_expand" msgid="1424988917240616212">"Uitvouwen"</string>
     <string name="pip_phone_minimize" msgid="9057117033655996059">"Minimaliseren"</string>
     <string name="pip_phone_close" msgid="8801864042095341824">"Sluiten"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Naar rechtsboven verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Naar linksonder verplaatsen"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Naar rechtsonder verplaatsen"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Sluiten"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Bubbel sluiten"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Gesprekken niet in bubbels weergeven"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatten met bubbels"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Nieuwe gesprekken worden weergegeven als zwevende iconen of \'bubbels\'. Tik om een bubbel te openen. Sleep om de bubbel te verplaatsen."</string>
@@ -1016,7 +1016,7 @@
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Gesprek ingesteld als prioriteit"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Bij prioriteitsgesprekken gebeurt het volgende:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Worden bovenaan het gespreksgedeelte weergegeven"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tonen profielafbeelding op vergrendelingsscherm"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Tonen profielafbeelding op vergrendelscherm"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Worden als zwevende ballon weergegeven vóór apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Onderbreken \'Niet storen\'"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kan lijst met alle bedieningselementen niet laden."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Overig"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Toevoegen aan apparaatbediening"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Toevoegen"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Hervatten"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inactief, check de app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Fout. Opnieuw proberen…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Niet gevonden"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Beheeroptie niet beschikbaar"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Kan geen toegang krijgen tot <xliff:g id="DEVICE">%1$s</xliff:g>. Check de <xliff:g id="APPLICATION">%2$s</xliff:g>-app om na te gaan of de beheeroptie nog steeds beschikbaar is en of de app-instellingen niet zijn gewijzigd."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"App openen"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Kan status niet laden"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Fout, probeer het opnieuw"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Bezig"</string>

@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Limpar tudo"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Gerenciar"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Histórico"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Recebidas"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Novas"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Silenciosas"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Notificações"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Conversas"</string>
@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"O app está fixado"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Visão geral e mantenha essas opções pressionadas para liberar."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Ela é mantida à vista até que seja liberada. Toque em Voltar e em Início e mantenha essas opções pressionadas para liberar."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ela é mantida à vista até que seja liberada. Deslize para cima e a mantenha pressionada para liberar."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Ele é mantido à vista até que seja liberado. Deslize para cima e mantenha pressionado para liberar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Ela é mantida à vista até que seja liberada. Toque em Visão geral e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Ela é mantida à vista até que seja liberada. Toque em Início e mantenha essa opção pressionada para liberar."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Dados pessoais podem ficar acessíveis (como contatos e conteúdo de e-mail)."</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Mover para canto superior direito"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Mover para canto inferior esquerdo"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Mover para canto inferior direito"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Dispensar"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Dispensar balão"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Não criar balões de conversa"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Converse usando balões"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novas conversas aparecerão como ícones flutuantes, ou balões. Toque para abrir o balão. Arraste para movê-lo."</string>
@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Em espera"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"A conversa foi definida como prioritária"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"As conversas prioritárias:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aparecer na parte superior da seção de conversa"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostrar foto do perfil na tela de bloqueio"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Aparecem na parte superior da seção de conversa"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostram a foto do perfil na tela de bloqueio"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Aparecer como balões flutuantes sobre outros apps"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromper o \"Não perturbe\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Ok"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque no controle, mantenha-o pressionado e arraste para reorganizar as posições."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controles foram removidos"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"As mudanças não foram salvas"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Não foi possível carregar a lista de controles."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Adicionar aos controles do dispositivo"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Adicionar"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Retomar"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Inativo, verifique o app"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Erro. Tentando novamente…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Não encontrado"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"O controle está indisponível"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Não foi possível acessar <xliff:g id="DEVICE">%1$s</xliff:g>. Verifique o app <xliff:g id="APPLICATION">%2$s</xliff:g> para garantir que o controle ainda esteja disponível e as configurações não tenham sido modificadas."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Abrir app"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Falha ao carregar o status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Erro. Tente novamente"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Em andamento"</string>
