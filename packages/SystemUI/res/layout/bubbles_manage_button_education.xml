@@ -41,7 +41,8 @@
             android:paddingStart="16dp"
             android:paddingBottom="16dp"
             android:fontFamily="@*android:string/config_bodyFontFamilyMedium"
-            android:maxLines="1"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:text="@string/bubbles_user_education_manage_title"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Headline"/>
 
@@ -52,6 +53,8 @@
             android:paddingStart="16dp"
             android:paddingBottom="24dp"
             android:text="@string/bubbles_user_education_manage"
+            android:maxLines="2"
+            android:ellipsize="end"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textAppearance="@*android:style/TextAppearance.DeviceDefault.Body2"/>
 
