@@ -708,6 +708,12 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             Log.w(TAG, "Abort animation, invalid leash");
             return;
         }
+
+        if (startBounds.isEmpty() || destinationBounds.isEmpty()) {
+            Log.w(TAG, "Attempted to user resize PIP to or from empty bounds, aborting.");
+            return;
+        }
+
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper.scale(tx, mLeash, startBounds, destinationBounds);
         tx.apply();
