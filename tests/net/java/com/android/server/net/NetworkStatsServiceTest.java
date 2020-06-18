@@ -245,7 +245,7 @@ public class NetworkStatsServiceTest extends NetworkStatsBaseTest {
 
             @Override
             public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(
-                    @NonNull Context context, @NonNull Executor executor,
+                    @NonNull Context context, @NonNull Looper looper, @NonNull Executor executor,
                     @NonNull NetworkStatsService service) {
 
                 return mNetworkStatsSubscriptionsMonitor;
