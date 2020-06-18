@@ -115,7 +115,6 @@ public class SyncRtSurfaceTransactionApplierCompat {
                     t.deferTransactionUntil(surfaceParams.surface, mBarrierSurfaceControl, frame);
                     surfaceParams.applyTo(t);
                 }
-                t.setEarlyWakeup();
                 t.apply();
                 Trace.traceEnd(Trace.TRACE_TAG_VIEW);
                 Message.obtain(mApplyHandler, MSG_UPDATE_SEQUENCE_NUMBER, toApplySeqNo, 0)

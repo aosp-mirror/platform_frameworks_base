@@ -293,7 +293,7 @@ public class ActivityLaunchAnimator {
                     .withCornerRadius(mCornerRadius)
                     .withVisibility(true)
                     .build();
-            mSyncRtTransactionApplier.scheduleApply(true /* earlyWakeup */, params);
+            mSyncRtTransactionApplier.scheduleApply(params);
         }
 
         @Override
