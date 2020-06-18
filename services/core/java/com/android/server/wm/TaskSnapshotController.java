@@ -28,6 +28,7 @@ import android.app.ActivityManager.TaskSnapshot;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.GraphicBuffer;
+import android.graphics.Insets;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.RecordingCanvas;
@@ -37,8 +38,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.ArraySet;
 import android.util.Slog;
+import android.view.InsetsSource;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.ThreadedRenderer;
+import android.view.WindowInsets;
 import android.view.WindowManager.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -475,9 +479,12 @@ class TaskSnapshotController {
         final int color = ColorUtils.setAlphaComponent(
                 task.getTaskDescription().getBackgroundColor(), 255);
         final LayoutParams attrs = mainWindow.getAttrs();
+        final InsetsPolicy insetsPolicy = mainWindow.getDisplayContent().getInsetsPolicy();
+        final InsetsState insetsState = insetsPolicy.getInsetsForDispatch(mainWindow);
+        final Rect systemBarInsets = getSystemBarInsets(mainWindow.getFrameLw(), insetsState);
         final SystemBarBackgroundPainter decorPainter = new SystemBarBackgroundPainter(attrs.flags,
                 attrs.privateFlags, attrs.systemUiVisibility, task.getTaskDescription(),
-                mHighResTaskSnapshotScale, mainWindow.getRequestedInsetsState());
+                mHighResTaskSnapshotScale, insetsState);
         final int taskWidth = task.getBounds().width();
         final int taskHeight = task.getBounds().height();
         final int width = (int) (taskWidth * mHighResTaskSnapshotScale);
@@ -488,7 +495,7 @@ class TaskSnapshotController {
         node.setClipToBounds(false);
         final RecordingCanvas c = node.start(width, height);
         c.drawColor(color);
-        decorPainter.setInsets(mainWindow.getContentInsets(), mainWindow.getStableInsets());
+        decorPainter.setInsets(systemBarInsets);
         decorPainter.drawDecors(c, null /* statusBarExcludeFrame */);
         node.end(c);
         final Bitmap hwBitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
@@ -591,6 +598,13 @@ class TaskSnapshotController {
             return topFullscreenOpaqueWindow.getSystemUiVisibility();
         }
         return 0;
+    }
+
+    static Rect getSystemBarInsets(Rect frame, InsetsState state) {
+        return state.calculateInsets(frame, null /* ignoringVisibilityState */,
+                false /* isScreenRound */, false /* alwaysConsumeSystemBars */,
+                null /* displayCutout */, 0 /* legacySoftInputMode */, 0 /* legacySystemUiFlags */,
+                null /* typeSideMap */).getInsets(WindowInsets.Type.systemBars()).toRect();
     }
 
     void dump(PrintWriter pw, String prefix) {
