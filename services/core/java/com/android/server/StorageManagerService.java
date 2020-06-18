@@ -52,7 +52,6 @@ import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-import static com.android.server.storage.StorageUserConnection.REMOTE_TIMEOUT_SECONDS;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -224,6 +223,9 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
 
+    // How long we wait to reset storage, if we failed to call onMount on the
+    // external storage service.
+    public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
     /**
      * If {@code 1}, enables the isolated storage feature. If {@code -1},
      * disables the isolated storage feature. If {@code 0}, uses the default
@@ -2202,7 +2204,7 @@ class StorageManagerService extends IStorageManager.Stub
                     } catch (ExternalStorageServiceException e) {
                         Slog.e(TAG, "Failed to mount volume " + vol, e);
 
-                        int nextResetSeconds = REMOTE_TIMEOUT_SECONDS * 2;
+                        int nextResetSeconds = FAILED_MOUNT_RESET_TIMEOUT_SECONDS;
                         Slog.i(TAG, "Scheduling reset in " + nextResetSeconds + "s");
                         mHandler.removeMessages(H_RESET);
                         mHandler.sendMessageDelayed(mHandler.obtainMessage(H_RESET),
