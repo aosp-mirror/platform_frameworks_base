@@ -65,6 +65,7 @@ public class NotificationHistoryDatabase {
     private static final int HISTORY_RETENTION_DAYS = 1;
     private static final int HISTORY_RETENTION_MS = 24 * 60 * 60 * 1000;
     private static final long WRITE_BUFFER_INTERVAL_MS = 1000 * 60 * 20;
+    private static final long INVALID_FILE_TIME_MS = -1;
 
     private static final String ACTION_HISTORY_DELETION =
             NotificationHistoryDatabase.class.getSimpleName() + ".CLEANUP";
@@ -130,8 +131,8 @@ public class NotificationHistoryDatabase {
         }
 
         // Sort with newest files first
-        Arrays.sort(files, (lhs, rhs) -> Long.compare(Long.parseLong(rhs.getName()),
-                Long.parseLong(lhs.getName())));
+        Arrays.sort(files, (lhs, rhs) -> Long.compare(safeParseLong(rhs.getName()),
+                safeParseLong(lhs.getName())));
 
         for (File file : files) {
             mHistoryFiles.addLast(new AtomicFile(file));
@@ -252,22 +253,19 @@ public class NotificationHistoryDatabase {
 
             for (int i = mHistoryFiles.size() - 1; i >= 0; i--) {
                 final AtomicFile currentOldestFile = mHistoryFiles.get(i);
-                try {
-                    final long creationTime = Long.parseLong(
-                            currentOldestFile.getBaseFile().getName());
-                    if (DEBUG) {
-                        Slog.d(TAG, "File " + currentOldestFile.getBaseFile().getName()
-                                + " created on " + creationTime);
-                    }
-                    if (creationTime <= retentionBoundary.getTimeInMillis()) {
-                        deleteFile(currentOldestFile);
-                    } else {
-                        // all remaining files are newer than the cut off; schedule jobs to delete
-                        scheduleDeletion(
-                                currentOldestFile.getBaseFile(), creationTime, retentionDays);
-                    }
-                } catch (NumberFormatException e) {
+                final long creationTime = safeParseLong(
+                        currentOldestFile.getBaseFile().getName());
+                if (DEBUG) {
+                    Slog.d(TAG, "File " + currentOldestFile.getBaseFile().getName()
+                            + " created on " + creationTime);
+                }
+
+                if (creationTime <= retentionBoundary.getTimeInMillis()) {
                     deleteFile(currentOldestFile);
+                } else {
+                    // all remaining files are newer than the cut off; schedule jobs to delete
+                    scheduleDeletion(
+                            currentOldestFile.getBaseFile(), creationTime, retentionDays);
                 }
             }
         }
@@ -328,6 +326,17 @@ public class NotificationHistoryDatabase {
             if (in != null) {
                 in.close();
             }
+        }
+    }
+
+    private static long safeParseLong(String fileName) {
+        // AtomicFile will create copies of the numeric files with ".new" and ".bak"
+        // over the course of its processing. If these files still exist on boot we need to clean
+        // them up
+        try {
+            return Long.parseLong(fileName);
+        } catch (NumberFormatException e) {
+            return INVALID_FILE_TIME_MS;
         }
     }
 
