@@ -294,7 +294,7 @@ public class TetheringConfigurationTest {
         initializeBpfOffloadConfiguration(true, null /* unset */);
         final TetheringConfiguration enableByRes =
                 new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
-        assertTrue(enableByRes.enableBpfOffload);
+        assertTrue(enableByRes.isBpfOffloadEnabled());
     }
 
     @Test
@@ -303,7 +303,7 @@ public class TetheringConfigurationTest {
             initializeBpfOffloadConfiguration(res, "true");
             final TetheringConfiguration enableByDevConOverride =
                     new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
-            assertTrue(enableByDevConOverride.enableBpfOffload);
+            assertTrue(enableByDevConOverride.isBpfOffloadEnabled());
         }
     }
 
@@ -312,7 +312,7 @@ public class TetheringConfigurationTest {
         initializeBpfOffloadConfiguration(false, null /* unset */);
         final TetheringConfiguration disableByRes =
                 new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
-        assertFalse(disableByRes.enableBpfOffload);
+        assertFalse(disableByRes.isBpfOffloadEnabled());
     }
 
     @Test
@@ -321,7 +321,7 @@ public class TetheringConfigurationTest {
             initializeBpfOffloadConfiguration(res, "false");
             final TetheringConfiguration disableByDevConOverride =
                     new TetheringConfiguration(mMockContext, mLog, INVALID_SUBSCRIPTION_ID);
-            assertFalse(disableByDevConOverride.enableBpfOffload);
+            assertFalse(disableByDevConOverride.isBpfOffloadEnabled());
         }
     }
 
