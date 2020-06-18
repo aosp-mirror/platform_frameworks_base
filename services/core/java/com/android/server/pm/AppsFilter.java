@@ -646,7 +646,7 @@ public class AppsFilter {
             final int appxUidCount = userCount * allSettings.size();
             for (int su = 0; su < userCount; su++) {
                 int subjectUser = allUsers[su].id;
-                for (int ou = su; ou < userCount; ou++) {
+                for (int ou = 0; ou < userCount; ou++) {
                     int otherUser = allUsers[ou].id;
                     int subjectUid = UserHandle.getUid(subjectUser, subjectSetting.appId);
                     if (!mShouldFilterCache.contains(subjectUid)) {
@@ -819,9 +819,15 @@ public class AppsFilter {
             mOverlayReferenceMapper.removePkg(setting.name);
             mFeatureConfig.updatePackageState(setting, true /*removed*/);
 
-            if (mShouldFilterCache != null) {
-                updateShouldFilterCacheForPackage(
-                        setting.name, setting, settings, users, settings.size());
+            if (mShouldFilterCache != null && setting.sharedUser != null) {
+                for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
+                    PackageSetting siblingSetting = setting.sharedUser.packages.valueAt(i);
+                    if (siblingSetting == setting) {
+                        continue;
+                    }
+                    updateShouldFilterCacheForPackage(
+                            setting.name, siblingSetting, settings, users, settings.size());
+                }
             }
         });
         mForceQueryable.remove(setting.appId);
@@ -843,8 +849,10 @@ public class AppsFilter {
             PackageSetting targetPkgSetting, int userId) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
         try {
-            if (callingUid < Process.FIRST_APPLICATION_UID
-                    || UserHandle.getAppId(callingUid) == targetPkgSetting.appId) {
+            int callingAppId = UserHandle.getAppId(callingUid);
+            if (callingAppId < Process.FIRST_APPLICATION_UID
+                    || targetPkgSetting.appId < Process.FIRST_APPLICATION_UID
+                    || callingAppId == targetPkgSetting.appId) {
                 return false;
             }
             if (mShouldFilterCache != null) { // use cache
@@ -869,7 +877,7 @@ public class AppsFilter {
                     return false;
                 }
             }
-            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(UserHandle.getAppId(callingUid))) {
+            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(callingAppId)) {
                 log(callingSetting, targetPkgSetting, "BLOCKED");
             }
             return !DEBUG_ALLOW_ALL;

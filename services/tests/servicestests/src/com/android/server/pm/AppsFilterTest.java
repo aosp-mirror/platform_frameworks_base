@@ -513,6 +513,22 @@ public class AppsFilterTest {
     }
 
     @Test
+    public void testSystemUidSecondaryUser_DoesntFilter() throws Exception {
+        final AppsFilter appsFilter =
+                new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
+        simulateAddBasicAndroid(appsFilter);
+        appsFilter.onSystemReady();
+
+        PackageSetting target = simulateAddPackage(appsFilter,
+                pkg("com.some.package"), DUMMY_TARGET_APPID);
+
+        assertFalse(appsFilter.shouldFilterApplication(0, null, target, SECONDARY_USER));
+        assertFalse(appsFilter.shouldFilterApplication(
+                UserHandle.getUid(SECONDARY_USER, Process.FIRST_APPLICATION_UID - 1),
+                null, target, SECONDARY_USER));
+    }
+
+    @Test
     public void testNonSystemUid_NoCallingSetting_Filters() throws Exception {
         final AppsFilter appsFilter =
                 new AppsFilter(mStateProvider, mFeatureConfigMock, new String[]{}, false, null);
@@ -790,7 +806,8 @@ public class AppsFilterTest {
 
         final SparseArray<int[]> systemFilter =
                 appsFilter.getVisibilityWhitelist(system, USER_ARRAY, mExisting);
-        assertThat(toList(systemFilter.get(SYSTEM_USER)), empty());
+        assertThat(toList(systemFilter.get(SYSTEM_USER)),
+                contains(seesNothingAppId, hasProviderAppId, queriesProviderAppId));
 
         final SparseArray<int[]> seesNothingFilter =
                 appsFilter.getVisibilityWhitelist(seesNothing, USER_ARRAY, mExisting);
