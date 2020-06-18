@@ -640,7 +640,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
                 mTmpRect.set(0, 0, mSurfaceWidth, mSurfaceHeight);
             }
             SyncRtSurfaceTransactionApplier applier = new SyncRtSurfaceTransactionApplier(this);
-            applier.scheduleApply(false /* earlyWakeup */,
+            applier.scheduleApply(
                     new SyncRtSurfaceTransactionApplier.SurfaceParams.Builder(mSurfaceControl)
                             .withWindowCrop(mTmpRect)
                             .build());

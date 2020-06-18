@@ -17,6 +17,10 @@
 package com.android.server.wm;
 
 import static com.android.server.wm.ProtoLogGroup.WM_SHOW_TRANSACTIONS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_ALL;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_APP_TRANSITION;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_RECENTS;
+import static com.android.server.wm.SurfaceAnimator.ANIMATION_TYPE_SCREEN_ROTATION;
 import static com.android.server.wm.WindowContainer.AnimationFlags.CHILDREN;
 import static com.android.server.wm.WindowContainer.AnimationFlags.TRANSITION;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
@@ -51,6 +55,9 @@ public class WindowAnimator {
 
     /** Is any window animating? */
     private boolean mLastRootAnimating;
+
+    /** True if we are running any animations that require expensive composition. */
+    private boolean mRunningExpensiveAnimations;
 
     final Choreographer.FrameCallback mAnimationFrameCallback;
 
@@ -165,12 +172,8 @@ public class WindowAnimator {
                 mService.mWatermark.drawIfNeeded();
             }
 
-            SurfaceControl.mergeToGlobalTransaction(mTransaction);
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
-        } finally {
-            mService.closeSurfaceTransaction("WindowAnimator");
-            ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
         }
 
         final boolean hasPendingLayoutChanges = mService.mRoot.hasPendingLayoutChanges(this);
@@ -179,20 +182,35 @@ public class WindowAnimator {
             mService.mWindowPlacerLocked.requestTraversal();
         }
 
-        final boolean rootAnimating = mService.mRoot.isAnimating(TRANSITION | CHILDREN);
+        final boolean rootAnimating = mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
+                ANIMATION_TYPE_ALL /* typesToCheck */);
         if (rootAnimating && !mLastRootAnimating) {
-            // Usually app transitions but quite a load onto the system already (with all the things
-            // happening in app), so pause task snapshot persisting to not increase the load.
-            mService.mTaskSnapshotController.setPersisterPaused(true);
             Trace.asyncTraceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
         }
         if (!rootAnimating && mLastRootAnimating) {
             mService.mWindowPlacerLocked.requestTraversal();
-            mService.mTaskSnapshotController.setPersisterPaused(false);
             Trace.asyncTraceEnd(Trace.TRACE_TAG_WINDOW_MANAGER, "animating", 0);
         }
-
         mLastRootAnimating = rootAnimating;
+
+        final boolean runningExpensiveAnimations =
+                mService.mRoot.isAnimating(TRANSITION | CHILDREN /* flags */,
+                        ANIMATION_TYPE_APP_TRANSITION | ANIMATION_TYPE_SCREEN_ROTATION
+                                | ANIMATION_TYPE_RECENTS /* typesToCheck */);
+        if (runningExpensiveAnimations && !mRunningExpensiveAnimations) {
+            // Usually app transitions put quite a load onto the system already (with all the things
+            // happening in app), so pause task snapshot persisting to not increase the load.
+            mService.mTaskSnapshotController.setPersisterPaused(true);
+            mTransaction.setEarlyWakeupStart();
+        } else if (!runningExpensiveAnimations && mRunningExpensiveAnimations) {
+            mService.mTaskSnapshotController.setPersisterPaused(false);
+            mTransaction.setEarlyWakeupEnd();
+        }
+        mRunningExpensiveAnimations = runningExpensiveAnimations;
+
+        SurfaceControl.mergeToGlobalTransaction(mTransaction);
+        mService.closeSurfaceTransaction("WindowAnimator");
+        ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 
         if (mRemoveReplacedWindows) {
             mService.mRoot.removeReplacedWindows();
