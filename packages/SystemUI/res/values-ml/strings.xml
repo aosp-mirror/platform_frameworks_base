@@ -510,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"എല്ലാം മായ്‌ക്കുക"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"മാനേജ് ചെയ്യുക"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ചരിത്രം"</string>
-    <!-- no translation found for notification_section_header_incoming (850925217908095197) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"പുതിയത്"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"നിശബ്‌ദം"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"അറിയിപ്പുകൾ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"സംഭാഷണങ്ങൾ"</string>
@@ -1009,7 +1008,7 @@
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"പുതിയ സംഭാഷണങ്ങൾ ഫ്ലോട്ടിംഗ് ഐക്കണുകളോ ബബിളുകളോ ആയി ദൃശ്യമാവുന്നു. ബബിൾ തുറക്കാൻ ടാപ്പ് ചെയ്യൂ. ഇത് നീക്കാൻ വലിച്ചിടുക."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"ബബിളുകൾ ഏതുസമയത്തും നിയന്ത്രിക്കുക"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"ഈ ആപ്പിൽ നിന്നുള്ള ബബിളുകൾ ഓഫാക്കാൻ മാനേജ് ചെയ്യുക ടാപ്പ് ചെയ്യുക"</string>
-    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ലഭിച്ചു"</string>
+    <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"മനസ്സിലായി"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> ക്രമീകരണം"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്‌തു. മാറ്റങ്ങൾ വരുത്താൻ ക്രമീകരണത്തിലേക്ക് പോവുക."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"സിസ്‌റ്റം നാവിഗേഷൻ അപ്‌ഡേറ്റ് ചെയ്യാൻ ക്രമീകരണത്തിലേക്ക് പോവുക"</string>
@@ -1026,7 +1025,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"മാഗ്നിഫിക്കേഷൻ വിൻഡോ നിയന്ത്രണങ്ങൾ"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"ഉപകരണ നിയന്ത്രണങ്ങൾ"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"നിങ്ങളുടെ കണക്റ്റ് ചെയ്ത ഉപകരണങ്ങൾക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"കണക്റ്റ് ചെയ്ത ഉപകരണങ്ങൾക്ക് നിയന്ത്രണങ്ങൾ ചേർക്കുക"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"ഉപകരണ നിയന്ത്രണങ്ങൾ സജ്ജീകരിക്കുക"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"നിങ്ങളുടെ നിയന്ത്രണങ്ങൾ ആക്‌സസ് ചെയ്യാൻ പവർ ബട്ടണിൽ പിടിക്കുക"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"നിയന്ത്രണങ്ങൾ ചേർക്കാൻ ആപ്പ് തിരഞ്ഞെടുക്കുക"</string>
@@ -1046,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"നിയന്ത്രണങ്ങൾ പുനഃക്രമീകരിക്കാൻ അമർത്തിപ്പിടിച്ച് വലിച്ചിടുക"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"എല്ലാ നിയന്ത്രണങ്ങളും നീക്കം ചെയ്തു"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"മാറ്റങ്ങൾ സംരക്ഷിച്ചിട്ടില്ല"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"എല്ലാ നിയന്ത്രണങ്ങളുടെയും ലിസ്റ്റ് ലോഡ് ചെയ്യാനായില്ല."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"മറ്റുള്ളവ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ഉപകരണ നിയന്ത്രണങ്ങളിലേക്ക് ചേർക്കുക"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ചേർക്കുക"</string>

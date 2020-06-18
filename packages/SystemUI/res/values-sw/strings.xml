@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Hali tuli"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Mazungumzo yamepewa kipaumbele"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Mazungumzo yaliyopewa kipaumbele:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Onyesha kwenye sehemu ya juu ya mazungumzo"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Onyesha picha ya wasifu kwenye skrini iliyofungwa"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Huonyeshwa kwenye sehemu ya juu ya mazungumzo"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Huonyesha picha ya wasifu kwenye skrini iliyofungwa"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Yataonekana kama kiputo kinachoelea juu ya programu"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Katiza kipengele cha Usinisumbue"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Nimeelewa"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Shikilia na uburute ili upange vidhibiti upya"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Umeondoa vidhibiti vyote"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Mabadiliko hayajahifadhiwa"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Imeshindwa kupakia orodha ya vidhibiti vyote."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Imeshindwa kupakia vidhibiti. Angalia programu ya <xliff:g id="APP">%s</xliff:g> ili uhakikishe kuwa mipangilio ya programu haijabadilika."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Vidhibiti vinavyooana havipatikani"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Nyingine"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Weka kwenye vidhibiti vya vifaa"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Weka"</string>

@@ -1013,7 +1013,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"系統操作機制已更新。如要進行變更，請前往「設定」。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"請前往「設定」更新系統操作機制"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"待機"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"將對話設為優先"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"對話已設為優先"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先對話會："</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"顯示在對話部分的頂端"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"在螢幕鎖定畫面上顯示個人資料相片"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"按住並拖曳即可重新排列控制項"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"所有控制項都已移除"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"未儲存變更"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"無法載入完整的控制項清單。"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"無法載入控制項。請查看「<xliff:g id="APP">%s</xliff:g>」應用程式，確認應用程式設定沒有任何異動。"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"找不到相容的控制項"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"其他"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"新增至裝置控制"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"新增"</string>

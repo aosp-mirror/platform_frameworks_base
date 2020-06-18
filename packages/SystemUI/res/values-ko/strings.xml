@@ -1003,7 +1003,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"왼쪽 하단으로 이동"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"오른쪽 하단으로 이동"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"대화창 닫기"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"대화를 대화창으로 표시하지 않음"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"대화를 대화창으로 표시하지 않기"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"대화창으로 채팅하기"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"새로운 대화가 플로팅 아이콘인 대화창으로 표시됩니다. 대화창을 열려면 탭하세요. 드래그하여 이동할 수 있습니다."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"언제든지 대화창을 제어하세요"</string>
@@ -1014,7 +1014,7 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"설정으로 이동하여 시스템 탐색을 업데이트하세요."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"대기"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"대화가 우선순위 대화로 설정됨"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"우선순위 대화에서 다음과 같은 동작을 합니다."</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"우선순위 대화는 다음과 같이 표시됩니다."</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"대화 섹션의 상단에 표시"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"잠금 화면에서 프로필 사진 표시"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"앱 상단에서 플로팅 대화창으로 표시"</string>
@@ -1025,7 +1025,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"확대 창"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"확대 창 컨트롤"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"기기 컨트롤"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"연결된 기기의 컨트롤을 추가합니다."</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"연결된 기기의 컨트롤을 추가하세요."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"기기 컨트롤 설정"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"전원 버튼을 길게 눌러 컨트롤에 액세스하세요."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"컨트롤을 추가할 앱을 선택하세요"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"길게 누르고 드래그하여 컨트롤 재정렬"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"모든 컨트롤 삭제됨"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"변경사항이 저장되지 않음"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"전체 컨트롤 목록을 로드할 수 없습니다."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"컨트롤을 로드할 수 없습니다. <xliff:g id="APP">%s</xliff:g> 앱에서 설정이 변경되지 않았는지 확인하세요."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"호환 컨트롤을 사용할 수 없습니다."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"기타"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"기기 컨트롤에 추가"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"추가"</string>
@@ -1067,7 +1068,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"오류 발생, 다시 시도 중…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"찾을 수 없음"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"컨트롤을 사용할 수 없음"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>에 액세스할 수 없습니다. <xliff:g id="APPLICATION">%2$s</xliff:g> 앱에서 컨트롤을 계속 사용할 수 있는지와 앱 설정이 변경되지 않았는지 확인하세요."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>에 액세스할 수 없습니다. <xliff:g id="APPLICATION">%2$s</xliff:g> 앱에서 컨트롤을 계속 사용할 수 있는지, 앱 설정이 변경되지는 않았는지 확인하세요."</string>
     <string name="controls_open_app" msgid="483650971094300141">"앱 열기"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"통계를 로드할 수 없음"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"오류. 다시 시도하세요."</string>

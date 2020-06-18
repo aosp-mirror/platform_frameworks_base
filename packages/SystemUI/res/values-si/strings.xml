@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"පාලන නැවත පිළියෙළ කිරීමට අල්ලාගෙන සිට අදින්න"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"සියලු පාලන ඉවත් කර ඇත"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"වෙනස් කිරීම් නොසුරැකිණි"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"සියලු පාලනවල ලැයිස්තුව පූරණය කළ නොහැකි විය."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"පාලන පූරණය කළ නොහැකි විය. යෙදුම් සැකසීම් වෙනස් වී නැති බව සහතික කර ගැනීමට <xliff:g id="APP">%s</xliff:g> යෙදුම පරීක්ෂා කරන්න."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"ගැළපෙන පාලන ලබා ගත නොහැකිය"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"වෙනත්"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"උපාංග පාලන වෙත එක් කරන්න"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"එක් කරන්න"</string>

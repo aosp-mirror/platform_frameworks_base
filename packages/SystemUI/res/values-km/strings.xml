@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ចុច​ឱ្យ​ជាប់ រួចអូស​ដើម្បី​រៀបចំ​ផ្ទាំងគ្រប់គ្រង​ឡើងវិញ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"បាន​ដកផ្ទាំងគ្រប់គ្រងទាំងអស់ហើយ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"មិនបាន​រក្សាទុក​ការផ្លាស់ប្ដូរទេ"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"មិនអាច​ផ្ទុក​បញ្ជី​នៃការគ្រប់គ្រង​ទាំងអស់​បានទេ។"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"មិនអាចផ្ទុក​ការគ្រប់គ្រង​បានទេ។ សូមពិនិត្យមើល​កម្មវិធី <xliff:g id="APP">%s</xliff:g> ដើម្បីធ្វើឱ្យប្រាកដថា​ការកំណត់កម្មវិធី​មិនបានផ្លាស់ប្ដូរ។"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"មិនអាចប្រើ​ការគ្រប់គ្រង​ដែលត្រូវគ្នា​បានទេ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ផ្សេងៗ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"បញ្ចូល​ទៅក្នុងផ្ទាំងគ្រប់គ្រងឧបករណ៍"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"បញ្ចូល"</string>

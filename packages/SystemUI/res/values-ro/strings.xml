@@ -1051,7 +1051,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Țineți apăsat și trageți pentru a rearanja comenzile"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Au fost șterse toate comenzile"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Modificările nu au fost salvate"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Lista cu toate comenzile nu a putut fi încărcată."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Comenzile nu au putut fi încărcate. Accesați aplicația <xliff:g id="APP">%s</xliff:g> pentru a vă asigura că setările aplicației nu s-au schimbat."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Nu sunt disponibile comenzi compatibile"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altul"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Adăugați la comenzile dispozitivelor"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Adăugați"</string>

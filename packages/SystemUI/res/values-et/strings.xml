@@ -1007,7 +1007,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Vestelge mullide abil"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Uued vestlused kuvatakse hõljuvate ikoonidena ehk mullidena. Puudutage mulli avamiseks. Lohistage mulli, et seda liigutada."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Juhtige mulle igal ajal"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Selle rakenduse puhul mullide väljalülitamiseks puudutage valikut Haldamine"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Selle rakenduse puhul mullide väljalülitamiseks puudutage valikut Halda"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Selge"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Rakenduse <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> seaded"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Süsteemis navigeerimine on värskendatud. Muutmiseks avage jaotis Seaded."</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Juhtelementide ümberpaigutamiseks hoidke neid all ja lohistage"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kõik juhtelemendid eemaldati"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Muudatusi ei salvestatud"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Kõikide juhtelementide loendit ei saanud laadida."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Juhtelemente ei õnnestunud laadida. Kontrollige rakendust <xliff:g id="APP">%s</xliff:g> ja veenduge, et rakenduse seaded poleks muutunud."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Ühilduvaid juhtelemente pole saadaval"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Seadmete juhtimisvidinate hulka lisamine"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Lisa"</string>

@@ -1014,7 +1014,7 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Μεταβείτε στις Ρυθμίσεις για να ενημερώσετε την πλοήγηση συστήματος"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Κατάσταση αναμονής"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Ορίστηκε ως συζήτηση προτεραιότητας"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Οι συζητήσεις προτεραιότητας θα:"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Οι συζητήσεις προτεραιότητας θα έχουν τα εξής χαρακτηριστικά:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Εμφάνιση στο επάνω μέρος της ενότητας συνομιλιών"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Εμφάνιση εικόνας προφίλ στην οθόνη κλειδώματος"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Κινούμενο συννεφάκι στο επάνω μέρος των εφαρμογών"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Κρατήστε και σύρετε για αναδιάταξη των στοιχείων ελέγχου"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Όλα τα στοιχεία ελέγχου καταργήθηκαν"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Οι αλλαγές δεν αποθηκεύτηκαν"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ανεπιτυχής φόρτωση λίστας όλων των στοιχ. ελέγχου."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Προσθήκη στα στοιχεία ελέγχου συσκευής"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Προσθήκη"</string>

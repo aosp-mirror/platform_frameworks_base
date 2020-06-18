@@ -1002,11 +1002,11 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Yuqori oʻngga surish"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Quyi chapga surish"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Quyi oʻngga surish"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Pufakni yopish"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Bulutchani yopish"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Suhbatlar bulutchalar shaklida chiqmasin"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bulutchalar yordamida subhatlashish"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yangi xabarlar qalqib chiquvchi belgilar yoki bulutchalar kabi chiqadi. Xabarni ochish uchun bildirishnoma ustiga bosing. Xabarni qayta joylash uchun bildirishnomani suring."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Bulutcha shaklidagi bildirishnomalarni sozlash"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Bulutchalardagi bildirishnomalar"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bu ilova bulutchalarini faolsizlantirish uchun Boshqarish tugmasini bosing"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> sozlamalari"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Boshqaruv elementlarini qayta tartiblash uchun ushlab torting"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Barcha boshqaruv elementlari olib tashlandi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Oʻzgarishlar saqlanmadi"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Boshqaruv elementlarining barchasi yuklanmadi."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Boshqa"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Qurilma boshqaruv elementlariga kiritish"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Kiritish"</string>

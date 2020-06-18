@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Преместване горе вдясно"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Преместване долу вляво"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Преместване долу вдясно"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Балонче: Отхвърляне"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Отхвърляне на балончетата"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Без балончета за разговора"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Чат с балончета"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Новите разговори се показват като плаващи икони, или балончета. Докоснете балонче, за да го отворите, или го плъзнете, за да го преместите."</string>
@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Режим на готовност"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговорът е зададен като приоритетен"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетните разговори ще:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Показване върху секцията с разговори"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Показване на снимката на потр. профил на закл. екран"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"се показват върху секцията с разговори;"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"показват снимката на потребителския профил на заключения екран."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Показва се като плаващо балонче върху приложенията"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Прекъсване на режима „Не безпокойте“"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Разбрах"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задръжте и плъзнете, за да пренаредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Всички контроли са премахнати"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не са запазени"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Списъкът с всички контроли не бе зареден."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Добавяне към контролите за устройството"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Добавяне"</string>
