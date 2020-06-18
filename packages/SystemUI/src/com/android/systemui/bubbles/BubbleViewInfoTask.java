@@ -176,7 +176,8 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 bubbleDrawable = appIcon;
             }
 
-            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon);
+            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
+                    b.isImportantConversation());
             info.badgedAppIcon = badgedIcon;
             info.badgedBubbleImage = iconFactory.getBubbleBitmap(bubbleDrawable,
                     badgeBitmapInfo).icon;
