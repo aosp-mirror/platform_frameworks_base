@@ -13,6 +13,7 @@ import androidx.core.view.GestureDetectorCompat
 import com.android.systemui.R
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.VisualStabilityManager
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import javax.inject.Inject
@@ -31,7 +32,8 @@ class MediaViewManager @Inject constructor(
     private val mediaControlPanelFactory: Provider<MediaControlPanel>,
     private val visualStabilityManager: VisualStabilityManager,
     private val mediaHostStatesManager: MediaHostStatesManager,
-    mediaManager: MediaDataCombineLatest
+    mediaManager: MediaDataCombineLatest,
+    configurationController: ConfigurationController
 ) {
 
     /**
@@ -74,6 +76,7 @@ class MediaViewManager @Inject constructor(
     private val mediaCarousel: HorizontalScrollView
     val mediaFrame: ViewGroup
     val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
+    private val mediaData: MutableMap<String, MediaData> = mutableMapOf()
     private val mediaContent: ViewGroup
     private val pageIndicator: PageIndicator
     private val gestureDetector: GestureDetectorCompat
@@ -120,6 +123,11 @@ class MediaViewManager @Inject constructor(
             return this@MediaViewManager.onTouch(view, motionEvent)
         }
     }
+    private val configListener = object : ConfigurationController.ConfigurationListener {
+        override fun onDensityOrFontScaleChanged() {
+            recreatePlayers()
+        }
+    }
 
     init {
         gestureDetector = GestureDetectorCompat(context, gestureListener)
@@ -130,6 +138,7 @@ class MediaViewManager @Inject constructor(
         mediaCarousel.setOnTouchListener(touchListener)
         mediaCarousel.setOverScrollMode(View.OVER_SCROLL_NEVER)
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
+        configurationController.addCallback(configListener)
         visualStabilityCallback = VisualStabilityManager.Callback {
             if (needsReordering) {
                 needsReordering = false
@@ -142,29 +151,14 @@ class MediaViewManager @Inject constructor(
                 true /* persistent */)
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
-                updateView(key, oldKey, data)
-                updatePlayerVisibilities()
-                mediaCarousel.requiresRemeasuring = true
+                oldKey?.let { mediaData.remove(it) }
+                mediaData.put(key, data)
+                addOrUpdatePlayer(key, oldKey, data)
             }
 
             override fun onMediaDataRemoved(key: String) {
-                val removed = mediaPlayers.remove(key)
-                removed?.apply {
-                    val beforeActive = mediaContent.indexOfChild(removed.view?.player) <=
-                            activeMediaIndex
-                    mediaContent.removeView(removed.view?.player)
-                    removed.onDestroy()
-                    updateMediaPaddings()
-                    if (beforeActive) {
-                        // also update the index here since the scroll below might not always lead
-                        // to a scrolling changed
-                        activeMediaIndex = Math.max(0, activeMediaIndex - 1)
-                        mediaCarousel.scrollX = Math.max(mediaCarousel.scrollX -
-                                playerWidthPlusPadding, 0)
-                    }
-                    updatePlayerVisibilities()
-                    updatePageIndicator()
-                }
+                mediaData.remove(key)
+                removePlayer(key)
             }
         })
         mediaHostStatesManager.addCallback(object : MediaHostStatesManager.Callback {
@@ -253,7 +247,7 @@ class MediaViewManager @Inject constructor(
         }
     }
 
-    private fun updateView(key: String, oldKey: String?, data: MediaData) {
+    private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
         // If the key was changed, update entry
         val oldData = mediaPlayers[oldKey]
         if (oldData != null) {
@@ -288,6 +282,39 @@ class MediaViewManager @Inject constructor(
         existingPlayer?.bind(data)
         updateMediaPaddings()
         updatePageIndicator()
+        updatePlayerVisibilities()
+        mediaCarousel.requiresRemeasuring = true
+    }
+
+    private fun removePlayer(key: String) {
+        val removed = mediaPlayers.remove(key)
+        removed?.apply {
+            val beforeActive = mediaContent.indexOfChild(removed.view?.player) <=
+                    activeMediaIndex
+            mediaContent.removeView(removed.view?.player)
+            removed.onDestroy()
+            updateMediaPaddings()
+            if (beforeActive) {
+                // also update the index here since the scroll below might not always lead
+                // to a scrolling changed
+                activeMediaIndex = Math.max(0, activeMediaIndex - 1)
+                mediaCarousel.scrollX = Math.max(mediaCarousel.scrollX -
+                        playerWidthPlusPadding, 0)
+            }
+            updatePlayerVisibilities()
+            updatePageIndicator()
+        }
+    }
+
+    private fun recreatePlayers() {
+        // Note that this will scramble the order of players. Actively playing sessions will, at
+        // least, still be put in the front. If we want to maintain order, then more work is
+        // needed.
+        mediaData.forEach {
+            key, data ->
+            removePlayer(key)
+            addOrUpdatePlayer(key = key, oldKey = null, data = data)
+        }
     }
 
     private fun updateMediaPaddings() {

@@ -19,6 +19,10 @@ package com.android.networkstack.tethering;
 import static android.net.TetheringConstants.EXTRA_ADD_TETHER_TYPE;
 import static android.net.TetheringConstants.EXTRA_PROVISION_CALLBACK;
 import static android.net.TetheringConstants.EXTRA_RUN_PROVISION;
+import static android.net.TetheringConstants.EXTRA_TETHER_PROVISIONING_RESPONSE;
+import static android.net.TetheringConstants.EXTRA_TETHER_SILENT_PROVISIONING_ACTION;
+import static android.net.TetheringConstants.EXTRA_TETHER_SUBID;
+import static android.net.TetheringConstants.EXTRA_TETHER_UI_PROVISIONING_APP_NAME;
 import static android.net.TetheringManager.TETHERING_BLUETOOTH;
 import static android.net.TetheringManager.TETHERING_ETHERNET;
 import static android.net.TetheringManager.TETHERING_INVALID;
@@ -69,7 +73,6 @@ public class EntitlementManager {
     protected static final String DISABLE_PROVISIONING_SYSPROP_KEY = "net.tethering.noprovisioning";
     private static final String ACTION_PROVISIONING_ALARM =
             "com.android.networkstack.tethering.PROVISIONING_RECHECK_ALARM";
-    private static final String EXTRA_SUBID = "subId";
 
     private final ComponentName mSilentProvisioningService;
     private static final int MS_PER_HOUR = 60 * 60 * 1000;
@@ -197,9 +200,9 @@ public class EntitlementManager {
         // till upstream change to cellular.
         if (mUsingCellularAsUpstream) {
             if (showProvisioningUi) {
-                runUiTetherProvisioning(downstreamType, config.activeDataSubId);
+                runUiTetherProvisioning(downstreamType, config);
             } else {
-                runSilentTetherProvisioning(downstreamType, config.activeDataSubId);
+                runSilentTetherProvisioning(downstreamType, config);
             }
             mNeedReRunProvisioningUi = false;
         } else {
@@ -262,9 +265,9 @@ public class EntitlementManager {
             if (mCurrentEntitlementResults.indexOfKey(downstream) < 0) {
                 if (mNeedReRunProvisioningUi) {
                     mNeedReRunProvisioningUi = false;
-                    runUiTetherProvisioning(downstream, config.activeDataSubId);
+                    runUiTetherProvisioning(downstream, config);
                 } else {
-                    runSilentTetherProvisioning(downstream, config.activeDataSubId);
+                    runSilentTetherProvisioning(downstream, config);
                 }
             }
         }
@@ -361,7 +364,7 @@ public class EntitlementManager {
      * @param subId default data subscription ID.
      */
     @VisibleForTesting
-    protected void runSilentTetherProvisioning(int type, int subId) {
+    protected Intent runSilentTetherProvisioning(int type, final TetheringConfiguration config) {
         if (DBG) mLog.i("runSilentTetherProvisioning: " + type);
         // For silent provisioning, settings would stop tethering when entitlement fail.
         ResultReceiver receiver = buildProxyReceiver(type, false/* notifyFail */, null);
@@ -369,17 +372,20 @@ public class EntitlementManager {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
         intent.putExtra(EXTRA_RUN_PROVISION, true);
+        intent.putExtra(EXTRA_TETHER_SILENT_PROVISIONING_ACTION, config.provisioningAppNoUi);
+        intent.putExtra(EXTRA_TETHER_PROVISIONING_RESPONSE, config.provisioningResponse);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
-        intent.putExtra(EXTRA_SUBID, subId);
+        intent.putExtra(EXTRA_TETHER_SUBID, config.activeDataSubId);
         intent.setComponent(mSilentProvisioningService);
         // Only admin user can change tethering and SilentTetherProvisioning don't need to
         // show UI, it is fine to always start setting's background service as system user.
         mContext.startService(intent);
+        return intent;
     }
 
-    private void runUiTetherProvisioning(int type, int subId) {
+    private void runUiTetherProvisioning(int type, final TetheringConfiguration config) {
         ResultReceiver receiver = buildProxyReceiver(type, true/* notifyFail */, null);
-        runUiTetherProvisioning(type, subId, receiver);
+        runUiTetherProvisioning(type, config, receiver);
     }
 
     /**
@@ -389,17 +395,20 @@ public class EntitlementManager {
      * @param receiver to receive entitlement check result.
      */
     @VisibleForTesting
-    protected void runUiTetherProvisioning(int type, int subId, ResultReceiver receiver) {
+    protected Intent runUiTetherProvisioning(int type, final TetheringConfiguration config,
+            ResultReceiver receiver) {
         if (DBG) mLog.i("runUiTetherProvisioning: " + type);
 
         Intent intent = new Intent(Settings.ACTION_TETHER_PROVISIONING_UI);
         intent.putExtra(EXTRA_ADD_TETHER_TYPE, type);
+        intent.putExtra(EXTRA_TETHER_UI_PROVISIONING_APP_NAME, config.provisioningApp);
         intent.putExtra(EXTRA_PROVISION_CALLBACK, receiver);
-        intent.putExtra(EXTRA_SUBID, subId);
+        intent.putExtra(EXTRA_TETHER_SUBID, config.activeDataSubId);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         // Only launch entitlement UI for system user. Entitlement UI should not appear for other
         // user because only admin user is allowed to change tethering.
         mContext.startActivity(intent);
+        return intent;
     }
 
     // Not needed to check if this don't run on the handler thread because it's private.
@@ -631,7 +640,7 @@ public class EntitlementManager {
             receiver.send(cacheValue, null);
         } else {
             ResultReceiver proxy = buildProxyReceiver(downstream, false/* notifyFail */, receiver);
-            runUiTetherProvisioning(downstream, config.activeDataSubId, proxy);
+            runUiTetherProvisioning(downstream, config, proxy);
         }
     }
 }

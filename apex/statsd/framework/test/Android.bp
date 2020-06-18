@@ -12,27 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-android_test_helper_app {
-    name: "PackageManagerDummyAppVersion1",
-    manifest: "AndroidManifestVersion1.xml"
-}
-
-android_test_helper_app {
-    name: "PackageManagerDummyAppVersion2",
-    manifest: "AndroidManifestVersion2.xml"
-}
-
-android_test_helper_app {
-    name: "PackageManagerDummyAppVersion3",
-    manifest: "AndroidManifestVersion3.xml"
-}
-
-android_test_helper_app {
-    name: "PackageManagerDummyAppVersion4",
-    manifest: "AndroidManifestVersion4.xml"
-}
-
-android_test_helper_app {
-    name: "PackageManagerDummyAppOriginalOverride",
-    manifest: "AndroidManifestOriginalOverride.xml"
+android_test {
+    name: "FrameworkStatsdTest",
+    platform_apis: true,
+    srcs: [
+        // TODO(b/147705194): Use framework-statsd as a lib dependency instead.
+        ":framework-statsd-sources",
+        "**/*.java",
+    ],
+    manifest: "AndroidManifest.xml",
+    static_libs: [
+        "androidx.test.rules",
+        "truth-prebuilt",
+    ],
+    libs: [
+        "android.test.runner.stubs",
+        "android.test.base.stubs",
+    ],
+    test_suites: [
+        "device-tests",
+        "mts",
+    ],
 }

@@ -36,6 +36,8 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.security.identity.IdentityCredential;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -371,6 +373,14 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * button on the prompt, making it an error to also call
          * {@link #setNegativeButton(CharSequence, Executor, DialogInterface.OnClickListener)}.
          *
+         * <p>If unlocking cryptographic operation(s), it is the application's responsibility to
+         * request authentication with the proper set of authenticators (e.g. match the
+         * authenticators specified during key generation).
+         *
+         * @see KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)
+         * @see KeyProperties#AUTH_BIOMETRIC_STRONG
+         * @see KeyProperties#AUTH_DEVICE_CREDENTIAL
+         *
          * @param authenticators A bit field representing all valid authenticator types that may be
          *                       invoked by the prompt.
          * @return This builder.
@@ -606,8 +616,24 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * A wrapper class for the crypto objects supported by BiometricPrompt. Currently the framework
-     * supports {@link Signature}, {@link Cipher} and {@link Mac} objects.
+     * A wrapper class for the cryptographic operations supported by BiometricPrompt.
+     *
+     * <p>Currently the framework supports {@link Signature}, {@link Cipher}, {@link Mac}, and
+     * {@link IdentityCredential}.
+     *
+     * <p>Cryptographic operations in Android can be split into two categories: auth-per-use and
+     * time-based. This is specified during key creation via the timeout parameter of the
+     * {@link KeyGenParameterSpec.Builder#setUserAuthenticationParameters(int, int)} API.
+     *
+     * <p>CryptoObjects are used to unlock auth-per-use keys via
+     * {@link BiometricPrompt#authenticate(CryptoObject, CancellationSignal, Executor,
+     * AuthenticationCallback)}, whereas time-based keys are unlocked for their specified duration
+     * any time the user authenticates with the specified authenticators (e.g. unlocking keyguard).
+     * If a time-based key is not available for use (i.e. none of the allowed authenticators have
+     * been unlocked recently), applications can prompt the user to authenticate via
+     * {@link BiometricPrompt#authenticate(CancellationSignal, Executor, AuthenticationCallback)}
+     *
+     * @see Builder#setAllowedAuthenticators(int)
      */
     public static final class CryptoObject extends android.hardware.biometrics.CryptoObject {
         public CryptoObject(@NonNull Signature signature) {
