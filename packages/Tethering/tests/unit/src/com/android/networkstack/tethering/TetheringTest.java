@@ -346,8 +346,8 @@ public class TetheringTest {
         }
 
         @Override
-        public BpfCoordinator getBpfCoordinator(Handler handler, INetd netd,
-                SharedLog log, BpfCoordinator.Dependencies deps) {
+        public BpfCoordinator getBpfCoordinator(
+                BpfCoordinator.Dependencies deps) {
             return mBpfCoordinator;
         }
 
