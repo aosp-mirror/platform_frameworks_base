@@ -513,7 +513,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Izbriši sve"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Upravljajte"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Povijest"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Dolazno"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Novo"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Bešumno"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Obavijesti"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Razgovori"</string>
@@ -1007,9 +1007,9 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Premjesti u gornji desni kut"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Premjesti u donji lijevi kut"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Premjestite u donji desni kut"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Odbaci"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Odbaci oblačić"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Zaustavi razgovor u oblačićima"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatanje pomoću oblačića"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Oblačići u chatu"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novi razgovori pojavljuju se kao pomične ikone ili oblačići. Dodirnite za otvaranje oblačića. Povucite da biste ga premjestili."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljanje oblačićima u svakom trenutku"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Dodirnite Upravljanje da biste isključili oblačiće iz ove aplikacije"</string>
@@ -1051,7 +1051,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve su kontrole uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu spremljene"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Popis svih kontrola nije se učitao."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodavanje kontrolama uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
@@ -1071,14 +1074,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Nastavi"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Neaktivno, provjerite aplik."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Pogreška, pokušavamo ponovo…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nije moguće pristupiti uređaju: <xliff:g id="DEVICE">%1$s</xliff:g>. U aplikaciji <xliff:g id="APPLICATION">%2$s</xliff:g> provjerite je li kontrola i dalje dostupna te potvrdite da se postavke aplikacije nisu promijenile."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Otvori apl."</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Status se ne može učitati"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Pogreška, pokušajte ponovo"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"U tijeku"</string>

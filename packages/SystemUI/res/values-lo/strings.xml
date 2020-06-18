@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ລຶບລ້າງທັງໝົດ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ຈັດການ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ປະຫວັດ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ຂາເຂົ້າ"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"ໃໝ່"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ປິດສຽງ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ການແຈ້ງເຕືອນ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ການສົນທະນາ"</string>
@@ -598,7 +598,7 @@
     <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ນີ້ຈະເຮັດໃຫ້ມັນຢູ່ໃນມຸມມອງຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ປັດຂຶ້ນຄ້າງໄວ້ເພື່ອເຊົາປັກໝຸດ."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກມຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກມຸດ."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ນີ້ຈະສະແດງມັນໃນໜ້າຈໍຈົນກວ່າທ່ານຈະເຊົາປັກໝຸດ. ໃຫ້ແຕະປຸ່ມພາບຮວມຄ້າງໄວ້ເພື່ອຍົກເລີກການປັກໝຸດ."</string>
-    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ອາດສາມາດເຂົ້າເຖິງຂໍ້ມູນສ່ວນຕົວໄດ້ (ເຊັ່ນ: ລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ເນື້ອຫາອີເມວ)"</string>
+    <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ອາດສາມາດເຂົ້າເຖິງຂໍ້ມູນສ່ວນຕົວໄດ້ (ເຊັ່ນ: ລາຍຊື່ຜູ້ຕິດຕໍ່ ແລະ ເນື້ອຫາອີເມວ)."</string>
     <string name="screen_pinning_can_open_other_apps" msgid="7529756813231421455">"ແອັບທີ່ປັກໝຸດໄວ້ອາດເປີດແອັບອື່ນ."</string>
     <string name="screen_pinning_toast" msgid="8177286912533744328">"ເພື່ອຍົກເລີກການປັກໝຸດແອັບນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
     <string name="screen_pinning_toast_recents_invisible" msgid="6850978077443052594">"ເພື່ອຍົກເລີກການປັກໝຸດແອັບນີ້, ໃຫ້ແຕະປຸ່ມກັບຄືນ ແລະ ປຸ່ມພາບຮວມຄ້າງໄວ້"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ຍ້າຍຂວາເທິງ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ຍ້າຍຊ້າຍລຸ່ມ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ຍ້າຍຂວາລຸ່ມ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ປິດໄວ້"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ປິດ bubble ໄວ້"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ຢ່າໃຊ້ຟອງໃນການສົນທະນາ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ສົນທະນາໂດຍໃຊ້ຟອງ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ການສົນທະນາໃໝ່ຈະປາກົດເປັນໄອຄອນ ຫຼື ຟອງແບບລອຍ. ແຕະເພື່ອເປີດຟອງ. ລາກເພື່ອຍ້າຍມັນ."</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ລຶບການຄວບຄຸມທັງໝົດອອກແລ້ວ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງໄວ້"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"ບໍ່ສາມາດໂຫຼດລາຍຊື່ການຄວບຄຸມທັງໝົດໄດ້."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ອື່ນໆ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ເພີ່ມໃສ່ການຄວບຄຸມອຸປະກອນ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ເພີ່ມ"</string>

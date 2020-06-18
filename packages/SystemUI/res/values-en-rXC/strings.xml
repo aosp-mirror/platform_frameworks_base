@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‏‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‎‎‎‏‎‎‎‎‎‏‎‏‎‏‏‏‏‎‏‏‎‎‏‎‎‏‏‎‎‏‎‎‎‏‏‏‏‏‎‎‏‎‎Clear all‎‏‎‎‏‎"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‎‎‎‏‏‏‎‏‎‏‏‏‎‎‏‏‏‏‏‎‏‎‏‏‎‎‏‎‎‎‏‎‎‎‎‏‏‎‎‏‏‎‏‏‏‏‏‎‏‏‏‏‏‎‎‎Manage‎‏‎‎‏‎"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‏‎‏‏‎‏‎‎‎‎‎‏‏‏‎‏‏‏‎‎‏‏‎‏‏‏‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‎‏‏‎‎History‎‏‎‎‏‎"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‏‏‏‏‏‎‎‏‎‏‏‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‏‏‏‏‎‏‏‎‎‎‏‏‎‏‏‏‎‏‎‎‎‎‎‎‎‏‏‏‎Incoming‎‏‎‎‏‎"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‎‎‏‏‏‏‎‎‎‏‎‏‏‏‏‏‏‏‏‎‏‎‎‎‏‎‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‏‏‎‎‎‏‏‎‏‏‏‎‏‎New‎‏‎‎‏‎"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‎‎‏‏‎‏‏‎‏‎‎‎‎‎‏‎‎‎‏‏‏‏‎‎‎‎‏‏‎‏‏‏‏‎‏‎‎‏‎‎‏‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‎Silent‎‏‎‎‏‎"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‎‏‏‏‎‏‎‎‎‏‎‏‎‎‎‏‎‎‎‏‏‏‏‏‎‏‏‎‏‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‏‏‎‏‏‏‎‏‎‎‏‏‎Notifications‎‏‎‎‏‎"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‏‏‎‎‏‏‏‏‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‏‎‎‎‏‏‎‎‎‏‎‎‏‎‎‎‎‎‏‏‎‎‎‎‏‎‏‏‏‏‎‏‎Conversations‎‏‎‎‏‎"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‏‏‏‏‎‎‏‎‎‏‎‏‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‏‏‏‎‏‏‏‎‎‏‏‎‎‎‏‎Move top right‎‏‎‎‏‎"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‏‏‏‏‏‏‏‏‎‎‎‏‎‏‏‎‏‎‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‏‎‏‏‏‏‏‏‏‎‎‏‎‏‎‎‏‎‏‏‎Move bottom left‎‏‎‎‏‎"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‏‏‏‏‎‏‏‎‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‎‎‎‎‎‎‏‎‏‎‎‏‏‏‎‏‎‎‎‎‎‏‎‏‎‏‎‏‎‏‏‎‎‏‎‎‎Move bottom right‎‏‎‎‏‎"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‎‏‎‎‎‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‎‎‎‏‎‏‏‎‎‏‏‎‏‎‏‏‏‏‎‏‏‏‏‎‎‎‎‎‎‏‎‏‏‏‏‎Dismiss‎‏‎‎‏‎"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‏‎‎‎‏‏‏‏‎‎‏‎‎‎‏‏‏‎‏‏‏‏‏‏‎‏‏‎‎‎‏‎‎‏‎‏‏‎‏‏‏‎‎‏‏‏‎‏‏‎‎‎‎‏‎‎‏‎‎Dismiss bubble‎‏‎‎‏‎"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‎‎‏‎‏‎‏‏‎‎‎‎‏‏‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‏‎‏‎‎‏‏‏‏‎‎‎‏‎‎‏‎‎‎‎‏‎‏‎‏‏‎‎Don’t bubble conversation‎‏‎‎‏‎"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‎‏‏‏‏‏‎‏‎‏‏‏‏‎‏‏‎‏‎‏‎‎‏‏‏‎‏‎‎‎‎‎‏‎‎‎‎‏‎‏‏‏‎‏‏‏‎‎‏‎‎‏‎‎‏‎‏‎Chat using bubbles‎‏‎‎‏‎"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‎‎‎‎‎‎‎‏‏‎‏‎‎‎‏‎‎‏‏‎‎‎‎‏‎‎‏‏‏‎‎‏‎‏‏‎‏‎‏‏‏‏‏‏‏‏‎‏‏‏‏‏‏‏‎‎‏‎‏‏‎New conversations appear as floating icons, or bubbles. Tap to open bubble. Drag to move it.‎‏‎‎‏‎"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‏‎‏‏‏‏‏‎‎‏‏‎‏‏‎‏‏‎‎‎‏‏‏‎‎‏‎‎‎‏‏‎‏‎‏‏‎‏‎‎‎‏‎‏‎‏‎‎‏‎‎‏‏‎‏‏‏‏‏‎Hold &amp; drag to rearrange controls‎‏‎‎‏‎"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‎‏‎‎‏‎‎‏‏‏‎‏‏‏‎‎‏‎‏‏‏‏‏‏‎‎‏‏‏‎‏‏‎‎‏‏‏‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‎‏‏‏‏‏‎‎‎‎All controls removed‎‏‎‎‏‎"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‏‏‎‏‎‎‏‎‏‏‎‏‎‎‏‏‏‎‎‏‎‏‏‎‎‎‎‎‏‎‎‎‏‏‏‏‎‎‎‏‎‏‏‎‏‏‎‏‏‎‏‎‏‏‎Changes not saved‎‏‎‎‏‎"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‏‏‎‎‏‎‎‏‏‏‏‏‎‎‏‎‎‏‏‏‎‎‎‎‏‏‎‎‏‏‏‏‎‏‎‏‎‏‏‏‎‎‎‏‎‎‎‎‎‏‏‎‏‏‎‏‎‎‎The list of all controls could not be loaded.‎‏‎‎‏‎"</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‏‏‏‏‎‎‎‏‎‎‏‎‎‏‏‎‎‏‎‏‏‎‎‎‏‏‎‏‏‎‏‏‎‏‎‏‏‏‏‏‎‏‎‎‏‏‎‎‎‎‏‎‏‏‎‎‎‎‏‎‎‎Other‎‏‎‎‏‎"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‎‎‎‏‎‎‎‎‏‏‎‎‎‎‎‎‏‎‎‎‎‏‏‎‎‎‏‏‎‏‎‏‎‎‎‏‏‎‎‎‏‏‎‎‏‏‎‏‎‏‎‏‎‏‏‏‎‏‎‎Add to device controls‎‏‎‎‏‎"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‎‏‏‎‎‏‏‏‎‎‎‏‏‏‎‏‎‏‎‏‏‎‎‎‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‏‎‎‎‏‎‏‎‎‏‏‎‏‏‏‏‎‎Add‎‏‎‎‏‎"</string>

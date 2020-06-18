@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ಎಲ್ಲವನ್ನೂ ತೆರವುಗೊಳಿಸಿ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ನಿರ್ವಹಿಸಿ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ಇತಿಹಾಸ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ಒಳಬರುವ"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"ಹೊಸತು"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ನಿಶ್ಶಬ್ದ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ಸಂಭಾಷಣೆಗಳು"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ಬಲ ಮೇಲ್ಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ಸ್ಕ್ರೀನ್‌ನ ಎಡ ಕೆಳಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ಕೆಳಗಿನ ಬಲಭಾಗಕ್ಕೆ ಸರಿಸಿ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ವಜಾಗೊಳಿಸಿ"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ಬಬಲ್ ವಜಾಗೊಳಿಸಿ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ಸಂಭಾಷಣೆಯನ್ನು ಬಬಲ್ ಮಾಡಬೇಡಿ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ಬಬಲ್ಸ್ ಬಳಸಿ ಚಾಟ್ ಮಾಡಿ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ಹೊಸ ಸಂಭಾಷಣೆಗಳು ತೇಲುವ ಐಕಾನ್‌ಗಳು ಅಥವಾ ಬಬಲ್ಸ್ ಆಗಿ ಗೋಚರಿಸುತ್ತವೆ. ಬಬಲ್ ತೆರೆಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ. ಅದನ್ನು ಡ್ರ್ಯಾಗ್ ಮಾಡಲು ಎಳೆಯಿರಿ."</string>
@@ -1013,17 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ ಬದಲಾವಣೆಗಳನ್ನು ಮಾಡಲು, ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ಸಿಸ್ಟಂ ನ್ಯಾವಿಗೇಷನ್ ಅಪ್‌ಡೇಟ್ ಮಾಡಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಗೆ ಹೋಗಿ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ಸ್ಟ್ಯಾಂಡ್‌ಬೈ"</string>
-    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
-    <skip />
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"ಸಂವಾದವನ್ನು ಆದ್ಯತೆಯಾಗಿ ಹೊಂದಿಸಲಾಗಿದೆ"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ಆದ್ಯತೆಯ ಸಂವಾದಗಳು:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ಸಂಭಾಷಣೆ ವಿಭಾಗದ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೋರಿಸಿ"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ಲಾಕ್ ಸ್ಕ್ರೀನ್‌ ಮೇಲೆ ಪ್ರೊಫೈಲ್ ಚಿತ್ರವನ್ನು ತೋರಿಸಿ"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ಆ್ಯಪ್‌ಗಳ ಮೇಲ್ಭಾಗದಲ್ಲಿ ತೇಲುವ ಬಬಲ್‌ನಂತೆ ಗೋಚರಿಸಲಿ"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ಅಡಚಣೆ ಮಾಡಬೇಡ ಅನ್ನು ಅಡ್ಡಿಪಡಿಸಿ"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ಅರ್ಥವಾಯಿತು"</string>
-    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
-    <skip />
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ವರ್ಧನೆಯ ಓವರ್‌ಲೇ ವಿಂಡೋ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ವರ್ಧನೆಯ ವಿಂಡೋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ವರ್ಧನೆಯ ವಿಂಡೋ ನಿಯಂತ್ರಣಗಳು"</string>
@@ -1048,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ನಿಯಂತ್ರಣಗಳನ್ನು ಮರುಹೊಂದಿಸಲು ಹೋಲ್ಡ್ ಮಾಡಿ ಮತ್ತು ಡ್ರ್ಯಾಗ್‌ ಮಾಡಿ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳನ್ನು ತೆಗೆದುಹಾಕಲಾಗಿದೆ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ಬದಲಾವಣೆಗಳನ್ನು ಉಳಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"ಎಲ್ಲಾ ನಿಯಂತ್ರಣಗಳ ಪಟ್ಟಿಯನ್ನು ಲೋಡ್ ಮಾಡಲು ಆಗಲಿಲ್ಲ."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ಇತರ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ಸಾಧನ ನಿಯಂತ್ರಣಗಳಿಗೆ ಸೇರಿಸಿ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ಸೇರಿಸಿ"</string>
@@ -1070,7 +1070,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"ದೋಷ, ಮರುಪ್ರಯತ್ನಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"ಕಂಡುಬಂದಿಲ್ಲ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ನಿಯಂತ್ರಣ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ನಿಯಂತ್ರಣ ಈಗಲೂ ಲಭ್ಯವಿದೆಯೇ ಮತ್ತು <xliff:g id="APPLICATION">%2$s</xliff:g> ಆ್ಯಪ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲಾಗಿಲ್ಲ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು ಆ್ಯಪ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ಪ್ರವೇಶಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ನಿಯಂತ್ರಣ ಈಗಲೂ ಲಭ್ಯವಿದೆ ಮತ್ತು ಆ್ಯಪ್ ಸೆಟ್ಟಿಂಗ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲಾಗಿಲ್ಲ ಎಂಬುದನ್ನು ಖಚಿತಪಡಿಸಿಕೊಳ್ಳಲು <xliff:g id="APPLICATION">%2$s</xliff:g> ಆ್ಯಪ್ ಅನ್ನು ಪರಿಶೀಲಿಸಿ."</string>
     <string name="controls_open_app" msgid="483650971094300141">"ಆ್ಯಪ್ ತೆರೆಯಿರಿ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ಸ್ಥಿತಿ ಲೋಡ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ದೋಷ, ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ"</string>

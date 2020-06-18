@@ -522,7 +522,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"محو الكل"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"إدارة"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"السجلّ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"الإشعارات الواردة"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"الإشعارات الجديدة"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"صامت"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"الإشعارات"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"المحادثات"</string>
@@ -607,7 +607,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"تم تثبيت الشاشة على التطبيق"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار الزرين \"رجوع\" و\"الشاشة الرئيسية\" لإزالة التثبيت."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. مرّر الشاشة بسرعة للأعلى مع الاستمرار لإزالة تثبيت الشاشة."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"يؤدي هذا الإجراء إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. لإلغاء تثبيت الشاشة على هذا التطبيق، اسحب بسرعة للأعلى مع إبقاء الإصبع على الشاشة."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"نظرة عامة\" لإزالة التثبيت."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"يؤدي هذا إلى استمرار عرض الشاشة المُختارة إلى أن تتم إزالة تثبيتها. المس مع الاستمرار زر \"الشاشة الرئيسية\" لإزالة التثبيت."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"يمكن الوصول إلى البيانات الشخصية (مثلاً جهات الاتصال ومحتوى الرسائل الإلكترونية)"</string>
@@ -1022,7 +1022,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"الانتقال إلى أعلى اليسار"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نقل إلى أسفل يمين الشاشة"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نقل إلى أسفل اليسار"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"تجاهل"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"إغلاق فقاعة المحادثة"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"عدم عرض المحادثة كفقاعة محادثة"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"الدردشة باستخدام فقاعات المحادثات"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"تظهر المحادثات الجديدة كرموز عائمة أو كفقاعات. انقر لفتح فقاعة المحادثة، واسحبها لتحريكها."</string>
@@ -1069,7 +1069,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"اضغط مع الاستمرار واسحب لإعادة ترتيب عناصر التحكّم."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"تمت إزالة كل عناصر التحكّم."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"لم يتم حفظ التغييرات."</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"تعذّر تحميل قائمة كل عناصر التحكّم."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"غير ذلك"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"إضافة إلى أدوات التحكم بالجهاز"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"إضافة"</string>
@@ -1089,14 +1092,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"حدث خطأ، جارٍ إعادة المحاولة…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"عنصر التحكّم غير متوفّر"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"تعذّر الوصول إلى <xliff:g id="DEVICE">%1$s</xliff:g>. تحقّق من تطبيق <xliff:g id="APPLICATION">%2$s</xliff:g> للتأكّد من أن عنصر التحكّم لا يزال متوفّرًا وأنه لم يتم تغيير إعدادات التطبيق."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"فتح التطبيق"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"يتعذّر تحميل الحالة."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"حدث خطأ، يُرجى إعادة المحاولة."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"قيد التقدم"</string>

@@ -256,7 +256,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"Η ειδοποίηση έχει απορριφθεί."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Η φούσκα παραβλέφθηκε."</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"Το συννεφάκι παραβλέφθηκε."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"Πλαίσιο σκίασης ειδοποιήσεων."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"Γρήγορες ρυθμίσεις."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"Οθόνη κλειδώματος"</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Διαγραφή όλων"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Διαχείριση"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ιστορικό"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Εισερχόμενες"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Νέα"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Σίγαση"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Ειδοποιήσεις"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Συζητήσεις"</string>
@@ -710,7 +710,7 @@
     <string name="inline_keep_showing_app" msgid="4393429060390649757">"Να συνεχίσουν να εμφανίζονται ειδοποιήσεις από αυτήν την εφαρμογή;"</string>
     <string name="notification_silence_title" msgid="8608090968400832335">"Σίγαση"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Προεπιλογή"</string>
-    <string name="notification_bubble_title" msgid="8330481035191903164">"Φούσκα"</string>
+    <string name="notification_bubble_title" msgid="8330481035191903164">"Συννεφάκι"</string>
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Χωρίς ήχο ή δόνηση"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Χωρίς ήχο ή δόνηση και εμφανίζεται χαμηλά στην ενότητα συζητήσεων"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Ενδέχεται να κουδουνίζει ή να δονείται βάσει των ρυθμίσεων του τηλεφώνου"</string>
@@ -1002,10 +1002,10 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Μετακίνηση επάνω δεξιά"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Μετακίνηση κάτω αριστερά"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Μετακίνηση κάτω δεξιά"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Παράβλεψη"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Παράβλ. για συννεφ."</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Να μην γίνει προβολή της συζήτησης σε συννεφάκια."</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Συζητήστε χρησιμοποιώντας συννεφάκια."</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Οι νέες συζητήσεις εμφανίζονται ως κινούμενα εικονίδια ή φούσκες. Πατήστε για να ανοίξετε τη φούσκα. Σύρετε για να το μετακινήσετε."</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"Οι νέες συζητήσεις εμφανίζονται ως κινούμενα εικονίδια ή συννεφάκια. Πατήστε για να ανοίξετε το συννεφάκι. Σύρετε για να το μετακινήσετε."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Ελέγξτε τα συννεφάκια ανά πάσα στιγμή."</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Πατήστε Διαχείριση για να απενεργοποιήσετε τα συννεφάκια από αυτήν την εφαρμογή."</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Το κατάλαβα."</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Κρατήστε και σύρετε για αναδιάταξη των στοιχείων ελέγχου"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Όλα τα στοιχεία ελέγχου καταργήθηκαν"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Οι αλλαγές δεν αποθηκεύτηκαν"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ανεπιτυχής φόρτωση λίστας όλων των στοιχ. ελέγχου."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Άλλο"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Προσθήκη στα στοιχεία ελέγχου συσκευής"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Προσθήκη"</string>
@@ -1065,14 +1068,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Συνέχιση"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Ανενεργό, έλεγχος εφαρμογής"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Προέκυψε σφάλμα. Επανάληψη…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Δεν βρέθηκε."</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Μη διαθέσιμο στοιχείο ελέγχου"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Δεν ήταν δυνατή η πρόσβαση στη συσκευή <xliff:g id="DEVICE">%1$s</xliff:g>. Ελέγξτε την εφαρμογή <xliff:g id="APPLICATION">%2$s</xliff:g> για να βεβαιωθείτε ότι το στοιχείο ελέγχου εξακολουθεί να είναι διαθέσιμο και ότι οι ρυθμίσεις της εφαρμογής δεν έχουν αλλάξει."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Άνοιγμα εφαρμογής"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Αδυναμία φόρτωσης κατάστασης"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Σφάλμα, προσπαθήστε ξανά."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Σε εξέλιξη"</string>

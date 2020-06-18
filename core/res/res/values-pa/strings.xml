@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"ਤੁਸੀਂ <xliff:g id="NUMBER_0">%1$d</xliff:g> ਵਾਰ ਆਪਣਾ ਅਣਲਾਕ ਪੈਟਰਨ ਗਲਤ ਢੰਗ ਨਾਲ ਡ੍ਰਾ ਕੀਤਾ ਹੈ। <xliff:g id="NUMBER_1">%2$d</xliff:g> ਹੋਰ ਅਸਫਲ ਕੋਸ਼ਿਸ਼ਾਂ ਤੋਂ ਬਾਅਦ, ਤੁਹਾਨੂੰ ਇੱਕ ਈਮੇਲ ਖਾਤਾ ਵਰਤਦੇ ਹੋਏ ਆਪਣਾ ਫ਼ੋਨ ਅਣਲਾਕ ਕਰਨ ਲਈ ਕਿਹਾ ਜਾਏਗਾ।\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> ਸਕਿੰਟਾਂ ਵਿੱਚ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ਹਟਾਓ"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> ਤੋਂ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਸ਼ੁਰੂ ਕੀਤੀ ਗਈ ਫੋਰਗ੍ਰਾਊਂਡ ਸੇਵਾ ਲਈ ਭਵਿੱਖੀ R ਬਿਲਡ ਵਿੱਚ \'ਵਰਤੋਂ ਵਿੱਚ ਹੋਣ \'ਤੇ ਇਜਾਜ਼ਤ\' ਵਿਸ਼ੇਸ਼ਤਾ ਨਹੀਂ ਹੋਵੇਗੀ। ਕਿਰਪਾ ਕਰਕੇ go/r-bg-fgs-restriction ਦੇਖੋ ਅਤੇ ਬੱਗ ਰਿਪੋਰਟ ਫ਼ਾਈਲ ਕਰੋ।"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"ਕੀ ਵੌਲਿਊਮ  ਸਿਫ਼ਾਰਸ਼  ਕੀਤੇ ਪੱਧਰ ਤੋਂ ਵਧਾਉਣੀ ਹੈ?\n\nਲੰਮੇ ਸਮੇਂ ਤੱਕ ਉੱਚ ਵੌਲਿਊਮ ਤੇ ਸੁਣਨ ਨਾਲ ਤੁਹਾਡੀ ਸੁਣਨ ਸ਼ਕਤੀ ਨੂੰ ਨੁਕਸਾਨ ਪਹੁੰਚ ਸਕਦਾ ਹੈ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ਕੀ ਪਹੁੰਚਯੋਗਤਾ ਸ਼ਾਰਟਕੱਟ ਵਰਤਣਾ ਹੈ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"ਸ਼ਾਰਟਕੱਟ ਚਾਲੂ ਹੋਣ \'ਤੇ, ਕਿਸੇ ਪਹੁੰਚਯੋਗਤਾ ਵਿਸ਼ੇਸ਼ਤਾ ਨੂੰ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਦੋਵੇਂ ਅਵਾਜ਼ ਬਟਨਾਂ ਨੂੰ 3 ਸਕਿੰਟ ਲਈ ਦਬਾ ਕੇ ਰੱਖੋ।"</string>

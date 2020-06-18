@@ -273,7 +273,7 @@
     <string name="accessibility_quick_settings_airplane_on" msgid="8106176561295294255">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌ ଅନ୍ ଅଛି।"</string>
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"ଏୟାର୍‌ପ୍ଲେନ୍‌ ମୋଡ୍‌କୁ ଚାଲୁ କରାଯାଇଛି।"</string>
-    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ସମ୍ପୂର୍ଣ୍ଣ ନିରବ"</string>
+    <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ।"</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\"କୁ ବନ୍ଦ କରାଯାଇଛି।"</string>
@@ -345,7 +345,7 @@
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"କେବଳ ଆଲାର୍ମ"</string>
-    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
+    <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"ବ୍ଲୁଟୁଥ"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"ବ୍ଲୁଟୂଥ୍‍‌ (<xliff:g id="NUMBER">%d</xliff:g>ଟି ଡିଭାଇସ୍‌)"</string>
     <string name="quick_settings_bluetooth_off_label" msgid="6375098046500790870">"ବ୍ଲୁଟୂଥ୍‍‌ ଅଫ୍"</string>
@@ -460,7 +460,7 @@
     <string name="voice_hint" msgid="7476017460191291417">"ଭଏସ୍‍ ସହାୟକ ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"କ୍ୟାମେରା ପାଇଁ ଆଇକନରୁ ସ୍ୱାଇପ୍‍ କରନ୍ତୁ"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ। ଏହାଦ୍ୱାରା ସ୍କ୍ରୀନ୍‍ ରିଡର୍‍ ମଧ୍ୟ ନୀରବ ହୋଇଯିବ।"</string>
-    <string name="interruption_level_none" msgid="219484038314193379">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବ"</string>
+    <string name="interruption_level_none" msgid="219484038314193379">"ସମ୍ପୂର୍ଣ୍ଣ ନୀରବତା"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"କେବଳ ପ୍ରାଥମିକତା"</string>
     <string name="interruption_level_alarms" msgid="2457850481335846959">"କେବଳ ଆଲାର୍ମ"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"ସମ୍ପୂର୍ଣ୍ଣ\nନୀରବ"</string>
@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ସମସ୍ତ ଖାଲି କରନ୍ତୁ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ପରିଚାଳନା କରନ୍ତୁ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ଇତିହାସ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ଇନକମିଂ"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"ନୂଆ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ନୀରବ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ"</string>
@@ -595,7 +595,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"ଆପକୁ ପିନ୍ କରାଯାଇଛି"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରି ଧରିରଖନ୍ତୁ ଓ ଦେଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପାଇଁ ହୋମ୍ ଓ ବ୍ୟାକ୍ ବଟନ୍‌କୁ ଧରିରଖନ୍ତୁ।"</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ"</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"ଆପଣ ଅନ୍‌ପିନ୍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଯାଉଥିବ। ଅନ୍‌ପିନ୍ କରିବା ପାଇଁ ଉପରକୁ ସ୍ୱାଇପ୍‌ କରି ଧରି ରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବାକୁ ସ୍ପର୍ଶ କରନ୍ତୁ ଏବଂ ଓଭରଭ୍ୟୁକୁ ଧରିରଖନ୍ତୁ।"</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"ଆପଣ ଅନପିନ୍‍ ନକରିବା ପର୍ଯ୍ୟନ୍ତ ଏହା ଦେଖାଉଥିବ। ଅନପିନ୍‍ କରିବା ପର୍ଯ୍ୟନ୍ତ ହୋମ୍‌କୁ ଦାବିଧରନ୍ତୁ।"</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"ବ୍ୟକ୍ତିଗତ ଡାଟାକୁ ଆକ୍ସେସ୍ କରାଯାଇପାରେ (ଯେପରିକି ଯୋଗାଯୋଗଗୁଡ଼ିକ ଏବଂ ଇମେଲ୍ ବିଷୟବସ୍ତୁ)।"</string>
@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ଉପର-ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ତଳ ବାମକୁ ନିଅନ୍ତୁ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ତଳ ଡାହାଣକୁ ନିଅନ୍ତୁ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"ଖାରଜ କରନ୍ତୁ"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ବବଲ୍ ଖାରଜ କରନ୍ତୁ"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ବାର୍ତ୍ତାଳାପକୁ ବବଲ୍ କରନ୍ତୁ ନାହିଁ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ବବଲଗୁଡ଼ିକୁ ବ୍ୟବହାର କରି ଚାଟ୍ କରନ୍ତୁ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ନୂଆ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଫ୍ଲୋଟିଂ ଆଇକନ୍ କିମ୍ବା ବବଲ୍ ଭାବେ ଦେଖାଯିବ। ବବଲ୍ ଖୋଲିବାକୁ ଟାପ୍ କରନ୍ତୁ। ଏହାକୁ ମୁଭ୍ କରିବାକୁ ଟାଣନ୍ତୁ।"</string>
@@ -1013,17 +1013,14 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ ହୋଇଛି। ପରିବର୍ତ୍ତନ କରିବା ପାଇଁ, ସେଟିଂସ୍‌କୁ ଯାଆନ୍ତୁ।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ସିଷ୍ଟମ୍ ନାଭିଗେସନ୍ ଅପ୍‌ଡେଟ୍ କରିବା ପାଇଁ ସେଟିଂସ୍‍କୁ ଯାଆନ୍ତୁ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ଷ୍ଟାଣ୍ଡବାଏ"</string>
-    <!-- no translation found for priority_onboarding_title (2893070698479227616) -->
-    <skip />
-    <!-- no translation found for priority_onboarding_behavior (5342816047020432929) -->
-    <skip />
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"ବାର୍ତ୍ତାଳାପ ପ୍ରାଥମିକରେ ସେଟ୍ କରାଯାଇଛି"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ପ୍ରାଥମିକ ବାର୍ତ୍ତାଳାପଗୁଡ଼ିକ ଏଠାରେ ଦେଖାଯିବ:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ବାର୍ତ୍ତାଳାପ ବିଭାଗର ଶୀର୍ଷରେ ଦେଖାନ୍ତୁ"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ଲକ୍ ସ୍କ୍ରିନରେ ପ୍ରୋଫାଇଲ୍ ଛବି ଦେଖାନ୍ତୁ"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ଆପଗୁଡ଼ିକ ଉପରେ ଫ୍ଲୋଟିଂ ବବଲ୍ ପରି ଦେଖାଯିବ"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\'ବିରକ୍ତ କରନ୍ତୁ ନାହିଁ\' ମୋଡରେ ବାଧା"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ବୁଝିଗଲି"</string>
-    <!-- no translation found for priority_onboarding_settings_button_title (6663601574303585927) -->
-    <skip />
+    <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"ସେଟିଂସ୍"</string>
     <string name="magnification_overlay_title" msgid="6584179429612427958">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ଓଭର୍‌ଲେ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"ମ୍ୟାଗ୍ନିଫିକେସନ୍ ୱିଣ୍ଡୋ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ"</string>
@@ -1048,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକ ପୁଣି ସଜାଇବାକୁ ସେଗୁଡ଼ିକୁ ଧରି ଟାଣନ୍ତୁ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ସମସ୍ତ ନିୟନ୍ତ୍ରଣ କାଢ଼ି ଦିଆଯାଇଛି"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ପରିବର୍ତ୍ତନଗୁଡ଼ିକ ସେଭ୍ କରାଯାଇନାହିଁ"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"ସବୁ ନିୟନ୍ତ୍ରଣର ତାଲିକା ଲୋଡ୍ କରିପାରିଲା ନାହିଁ।"</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ଅନ୍ୟ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ଡିଭାଇସ୍ ନିୟନ୍ତ୍ରଣଗୁଡ଼ିକରେ ଯୋଗ କରନ୍ତୁ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ଯୋଗ କରନ୍ତୁ"</string>
@@ -1068,9 +1068,9 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"ପୁଣି ଆରମ୍ଭ କରନ୍ତୁ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ନିଷ୍କ୍ରିୟ ଅଛି, ଆପ ଯାଞ୍ଚ କରନ୍ତୁ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ତ୍ରୁଟି, ପୁଣି ଚେଷ୍ଟା କରୁଛି…"</string>
-    <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳୁ ନାହିଁ"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"ମିଳିଲା ନାହିଁ"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"ନିୟନ୍ତ୍ରଣ ଉପଲବ୍ଧ ନାହିଁ"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>କୁ ଆକ୍ସେସ୍ କରିହେଲା ନାହିଁ। ନିୟନ୍ତ୍ରଣ ଏବେ ବି ଉପଲବ୍ଧ ଅଛି ଏବଂ ଆପ୍ ସେଟିଂସ୍ ବଦଳାଯାଇ ନାହିଁ ବୋଲି ସୁନିଶ୍ଚିତ କରିବାକୁ <xliff:g id="APPLICATION">%2$s</xliff:g> ଆପ୍ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>କୁ ଆକ୍ସେସ୍ କରିହେଲା ନାହିଁ। ନିୟନ୍ତ୍ରଣ ଏବେ ବି ଉପଲବ୍ଧ ଅଛି ଏବଂ ଆପ୍ ସେଟିଂସ୍ ବଦଳାଯାଇ ନାହିଁ ବୋଲି ସୁନିଶ୍ଚିତ କରିବାକୁ <xliff:g id="APPLICATION">%2$s</xliff:g> ଆପକୁ ଯାଞ୍ଚ କରନ୍ତୁ।"</string>
     <string name="controls_open_app" msgid="483650971094300141">"ଆପ୍ ଖୋଲନ୍ତୁ"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ସ୍ଥିତି ଲୋଡ୍ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ତ୍ରୁଟି ହୋଇଛି, ପୁଣି ଚେଷ୍ଟା କର"</string>

@@ -1309,7 +1309,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"เชื่อมต่อการแก้ไขข้อบกพร่อง USB แล้ว"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"แตะเพื่อปิดการแก้ไขข้อบกพร่อง USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"เลือกเพื่อปิดใช้งานการแก้ไขข้อบกพร่อง USB"</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"เชื่อมต่อการแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"เชื่อมต่อการแก้ไขข้อบกพร่องผ่าน Wi-Fi แล้ว"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"แตะเพื่อปิดการแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"เลือกเพื่อปิดใช้การแก้ไขข้อบกพร่องผ่าน Wi-Fi"</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"โหมดโปรแกรมทดสอบอัตโนมัติเปิดใช้อยู่"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"คุณวาดรูปแบบการปลดล็อกไม่ถูกต้อง <xliff:g id="NUMBER_0">%1$d</xliff:g> ครั้งแล้ว หากทำไม่สำเร็จอีก <xliff:g id="NUMBER_1">%2$d</xliff:g> ครั้ง ระบบจะขอให้คุณปลดล็อกโทรศัพท์โดยใช้ับัญชีอีเมล\n\n โปรดลองอีกครั้งในอีก <xliff:g id="NUMBER_2">%3$d</xliff:g> วินาที"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"ลบ"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"บริการที่ทำงานอยู่เบื้องหน้าซึ่งเริ่มขึ้นในเบื้องหลังจาก <xliff:g id="PACKAGENAME">%1$s</xliff:g> จะไม่มีสิทธิ์ขณะใช้งานใน R บิลด์ต่อๆ ไป โปรดดู go/r-bg-fgs-restriction และส่งรายงานข้อบกพร่อง"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"นี่เป็นการเพิ่มระดับเสียงเกินระดับที่แนะนำ\n\nการฟังเสียงดังเป็นเวลานานอาจทำให้การได้ยินของคุณบกพร่องได้"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ใช้ทางลัดการช่วยเหลือพิเศษไหม"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"เมื่อทางลัดเปิดอยู่ การกดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มนาน 3 วินาทีจะเริ่มฟีเจอร์การช่วยเหลือพิเศษ"</string>
@@ -1650,7 +1649,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"ปิดทางลัด"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"ใช้ทางลัด"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"การกลับสี"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"การปรับแก้สี"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"การแก้สี"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้ 3 วินาทีเพื่อใช้ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
