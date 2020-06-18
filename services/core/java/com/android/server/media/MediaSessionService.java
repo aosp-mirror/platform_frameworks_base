@@ -2572,6 +2572,9 @@ public class MediaSessionService extends SystemService implements Monitor {
                     }
                 } else {
                     if (mKeyType == KEY_TYPE_VOLUME) {
+                        if (isFirstLongPressKeyEvent(keyEvent)) {
+                            dispatchVolumeKeyLongPressLocked(mTrackingFirstDownKeyEvent);
+                        }
                         dispatchVolumeKeyLongPressLocked(keyEvent);
                     } else if (isFirstLongPressKeyEvent(keyEvent)
                             && isVoiceKey(keyEvent.getKeyCode())) {
