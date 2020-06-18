@@ -859,8 +859,9 @@ public class AppsFilter {
             PackageSetting targetPkgSetting, int userId) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
         try {
-            if (callingUid < Process.FIRST_APPLICATION_UID
-                    || UserHandle.getAppId(callingUid) == targetPkgSetting.appId) {
+            int callingAppId = UserHandle.getAppId(callingUid);
+            if (callingAppId < Process.FIRST_APPLICATION_UID
+                    || callingAppId == targetPkgSetting.appId) {
                 return false;
             }
             if (mShouldFilterCache != null) { // use cache
@@ -885,7 +886,7 @@ public class AppsFilter {
                     return false;
                 }
             }
-            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(UserHandle.getAppId(callingUid))) {
+            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(callingAppId)) {
                 log(callingSetting, targetPkgSetting, "BLOCKED");
             }
             return !DEBUG_ALLOW_ALL;
