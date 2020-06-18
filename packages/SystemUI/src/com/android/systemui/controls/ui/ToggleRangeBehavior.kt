@@ -163,8 +163,10 @@ class ToggleRangeBehavior : Behavior {
                     AccessibilityNodeInfo.RangeInfo.RANGE_TYPE_FLOAT
                 }
 
-                val rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(type, min, max, current)
-                info.setRangeInfo(rangeInfo)
+                if (isChecked) {
+                    val rangeInfo = AccessibilityNodeInfo.RangeInfo.obtain(type, min, max, current)
+                    info.setRangeInfo(rangeInfo)
+                }
                 info.addAction(AccessibilityNodeInfo.AccessibilityAction.ACTION_SET_PROGRESS)
             }
 
