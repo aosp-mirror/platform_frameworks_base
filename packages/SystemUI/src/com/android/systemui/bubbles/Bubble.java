@@ -144,6 +144,7 @@ class Bubble implements BubbleViewProvider {
         mDesiredHeight = desiredHeight;
         mDesiredHeightResId = desiredHeightResId;
         mTitle = title;
+        mShowBubbleUpdateDot = false;
     }
 
     /** Used in tests when no UI is required. */
