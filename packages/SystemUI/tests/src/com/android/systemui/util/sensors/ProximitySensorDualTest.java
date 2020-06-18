@@ -153,6 +153,32 @@ public class ProximitySensorDualTest extends SysuiTestCase {
     }
 
     @Test
+    public void testUnregisterDuringCallback() {
+        ThresholdSensor.Listener listenerA = event -> mProximitySensor.pause();
+        TestableListener listenerB = new TestableListener();
+
+        assertFalse(mProximitySensor.isRegistered());
+        mProximitySensor.register(listenerA);
+        mProximitySensor.register(listenerB);
+        assertTrue(mProximitySensor.isRegistered());
+        assertFalse(mThresholdSensorPrimary.isPaused());
+        assertTrue(mThresholdSensorSecondary.isPaused());
+        assertNull(listenerB.mLastEvent);
+
+        // listenerA will pause the proximity sensor, unregistering it.
+        mThresholdSensorPrimary.triggerEvent(true, 0);
+        mThresholdSensorSecondary.triggerEvent(true, 0);
+        assertTrue(listenerB.mLastEvent.getBelow());
+        assertEquals(1, listenerB.mCallCount);
+
+
+        // A second call to trigger it should be ignored.
+        mThresholdSensorSecondary.triggerEvent(false, 0);
+        assertTrue(listenerB.mLastEvent.getBelow());
+        assertEquals(1, listenerB.mCallCount);
+    }
+
+    @Test
     public void testPauseAndResume() {
         TestableListener listener = new TestableListener();
 
