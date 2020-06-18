@@ -18,12 +18,17 @@ package com.android.systemui.shared.recents.model;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
+import static android.graphics.Bitmap.Config.ARGB_8888;
 
 import static com.android.systemui.shared.system.WindowManagerWrapper.WINDOWING_MODE_UNDEFINED;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
+import android.hardware.HardwareBuffer;
+import android.util.Log;
 
 /**
  * Data for a single thumbnail.
@@ -57,7 +62,15 @@ public class ThumbnailData {
     }
 
     public ThumbnailData(TaskSnapshot snapshot) {
-        thumbnail = Bitmap.wrapHardwareBuffer(snapshot.getSnapshot(), snapshot.getColorSpace());
+        final GraphicBuffer buffer = snapshot.getSnapshot();
+        if (buffer != null && (buffer.getUsage() & HardwareBuffer.USAGE_GPU_SAMPLED_IMAGE) == 0) {
+            // TODO(b/157562905): Workaround for a crash when we get a snapshot without this state
+            Log.e("ThumbnailData", "Unexpected snapshot without USAGE_GPU_SAMPLED_IMAGE");
+            thumbnail = Bitmap.createBitmap(buffer.getWidth(), buffer.getHeight(), ARGB_8888);
+            thumbnail.eraseColor(Color.BLACK);
+        } else {
+            thumbnail = Bitmap.wrapHardwareBuffer(buffer, snapshot.getColorSpace());
+        }
         insets = new Rect(snapshot.getContentInsets());
         orientation = snapshot.getOrientation();
         rotation = snapshot.getRotation();
