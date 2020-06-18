@@ -93,7 +93,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
-import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.KeyValueListParser;
@@ -204,6 +203,10 @@ public class AppStandbyController implements AppStandbyInternal {
      */
     private static final long WAIT_FOR_ADMIN_DATA_TIMEOUT_MS = 10_000;
 
+    private static final int HEADLESS_APP_CHECK_FLAGS =
+            PackageManager.MATCH_DIRECT_BOOT_AWARE | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
+                    | PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS;
+
     // To name the lock for stack traces
     static class Lock {}
 
@@ -233,7 +236,7 @@ public class AppStandbyController implements AppStandbyInternal {
      * disabled). Presence in this map indicates that the app is a headless system app.
      */
     @GuardedBy("mHeadlessSystemApps")
-    private final ArrayMap<String, Boolean> mHeadlessSystemApps = new ArrayMap<>();
+    private final ArraySet<String> mHeadlessSystemApps = new ArraySet<>();
 
     private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
 
@@ -1154,7 +1157,7 @@ public class AppStandbyController implements AppStandbyInternal {
 
     private boolean isHeadlessSystemApp(String packageName) {
         synchronized (mHeadlessSystemApps) {
-            return mHeadlessSystemApps.containsKey(packageName);
+            return mHeadlessSystemApps.contains(packageName);
         }
     }
 
@@ -1726,9 +1729,8 @@ public class AppStandbyController implements AppStandbyInternal {
             return;
         }
         try {
-            PackageInfo pi = mPackageManager.getPackageInfoAsUser(packageName,
-                    PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS,
-                    userId);
+            PackageInfo pi = mPackageManager.getPackageInfoAsUser(
+                    packageName, HEADLESS_APP_CHECK_FLAGS, userId);
             evaluateSystemAppException(pi);
         } catch (PackageManager.NameNotFoundException e) {
             synchronized (mHeadlessSystemApps) {
@@ -1740,15 +1742,16 @@ public class AppStandbyController implements AppStandbyInternal {
     /** Returns true if the exception status changed. */
     private boolean evaluateSystemAppException(@Nullable PackageInfo pkgInfo) {
         if (pkgInfo == null || pkgInfo.applicationInfo == null
-                || !pkgInfo.applicationInfo.isSystemApp()) {
+                || (!pkgInfo.applicationInfo.isSystemApp()
+                        && !pkgInfo.applicationInfo.isUpdatedSystemApp())) {
             return false;
         }
         synchronized (mHeadlessSystemApps) {
             if (pkgInfo.activities == null || pkgInfo.activities.length == 0) {
                 // Headless system app.
-                return mHeadlessSystemApps.put(pkgInfo.packageName, true) == null;
+                return mHeadlessSystemApps.add(pkgInfo.packageName);
             } else {
-                return mHeadlessSystemApps.remove(pkgInfo.packageName) != null;
+                return mHeadlessSystemApps.remove(pkgInfo.packageName);
             }
         }
     }
@@ -1789,8 +1792,7 @@ public class AppStandbyController implements AppStandbyInternal {
     private void loadHeadlessSystemAppCache() {
         Slog.d(TAG, "Loading headless system app cache. appIdleEnabled=" + mAppIdleEnabled);
         final List<PackageInfo> packages = mPackageManager.getInstalledPackagesAsUser(
-                PackageManager.GET_ACTIVITIES | PackageManager.MATCH_DISABLED_COMPONENTS,
-                UserHandle.USER_SYSTEM);
+                HEADLESS_APP_CHECK_FLAGS, UserHandle.USER_SYSTEM);
         final int packageCount = packages.size();
         for (int i = 0; i < packageCount; i++) {
             PackageInfo pkgInfo = packages.get(i);
@@ -1897,7 +1899,7 @@ public class AppStandbyController implements AppStandbyInternal {
         synchronized (mHeadlessSystemApps) {
             for (int i = mHeadlessSystemApps.size() - 1; i >= 0; --i) {
                 pw.print("  ");
-                pw.print(mHeadlessSystemApps.keyAt(i));
+                pw.print(mHeadlessSystemApps.valueAt(i));
                 pw.println(",");
             }
         }
