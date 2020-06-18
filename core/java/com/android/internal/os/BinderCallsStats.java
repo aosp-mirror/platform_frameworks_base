@@ -74,6 +74,10 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     // Whether to collect all the data: cpu + exceptions + reply/request sizes.
     private boolean mDetailedTracking = DETAILED_TRACKING_DEFAULT;
+    // If set to true, indicates that all transactions for specific UIDs are being
+    // recorded, ignoring sampling. The UidEntry.recordAllTransactions flag is also set
+    // for the UIDs being tracked.
+    private boolean mRecordingAllTransactionsForUid;
     // Sampling period to control how often to track CPU usage. 1 means all calls, 100 means ~1 out
     // of 100 requests.
     private int mPeriodicSamplingInterval = PERIODIC_SAMPLING_INTERVAL_DEFAULT;
@@ -178,7 +182,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
     @Override
     @Nullable
     public CallSession callStarted(Binder binder, int code, int workSourceUid) {
-        if (mDeviceState == null || mDeviceState.isCharging()) {
+        if (!mRecordingAllTransactionsForUid
+                && (mDeviceState == null || mDeviceState.isCharging())) {
             return null;
         }
 
@@ -190,7 +195,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         s.exceptionThrown = false;
         s.cpuTimeStarted = -1;
         s.timeStarted = -1;
-        if (shouldRecordDetailedData()) {
+        s.recordedCall = shouldRecordDetailedData();
+
+        if (mRecordingAllTransactionsForUid || s.recordedCall) {
             s.cpuTimeStarted = getThreadTimeMicro();
             s.timeStarted = getElapsedRealtimeMicro();
         }
@@ -218,8 +225,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     private void processCallEnded(CallSession s,
             int parcelRequestSize, int parcelReplySize, int workSourceUid) {
-        // Non-negative time signals we need to record data for this call.
-        final boolean recordCall = s.cpuTimeStarted >= 0;
+        UidEntry uidEntry = null;
+        final boolean recordCall;
+        if (s.recordedCall) {
+            recordCall = true;
+        } else if (mRecordingAllTransactionsForUid) {
+            uidEntry = getUidEntry(workSourceUid);
+            recordCall = uidEntry.recordAllTransactions;
+        } else {
+            recordCall = false;
+        }
+
         final long duration;
         final long latencyDuration;
         if (recordCall) {
@@ -238,14 +254,17 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
         synchronized (mLock) {
             // This was already checked in #callStart but check again while synchronized.
-            if (mDeviceState == null || mDeviceState.isCharging()) {
+            if (!mRecordingAllTransactionsForUid
+                    && (mDeviceState == null || mDeviceState.isCharging())) {
                 return;
             }
 
-            final UidEntry uidEntry = getUidEntry(workSourceUid);
+            if (uidEntry == null) {
+                uidEntry = getUidEntry(workSourceUid);
+            }
+
             uidEntry.callCount++;
             uidEntry.incrementalCallCount++;
-
             if (recordCall) {
                 uidEntry.cpuTimeMicros += duration;
                 uidEntry.recordedCallCount++;
@@ -357,27 +376,66 @@ public class BinderCallsStats implements BinderInternal.Observer {
             for (int entryIdx = 0; entryIdx < uidEntriesSize; entryIdx++) {
                 final UidEntry entry = mUidEntries.valueAt(entryIdx);
                 for (CallStat stat : entry.getCallStatsList()) {
-                    ExportedCallStat exported = new ExportedCallStat();
-                    exported.workSourceUid = entry.workSourceUid;
-                    exported.callingUid = stat.callingUid;
-                    exported.className = stat.binderClass.getName();
-                    exported.binderClass = stat.binderClass;
-                    exported.transactionCode = stat.transactionCode;
-                    exported.screenInteractive = stat.screenInteractive;
-                    exported.cpuTimeMicros = stat.cpuTimeMicros;
-                    exported.maxCpuTimeMicros = stat.maxCpuTimeMicros;
-                    exported.latencyMicros = stat.latencyMicros;
-                    exported.maxLatencyMicros = stat.maxLatencyMicros;
-                    exported.recordedCallCount = stat.recordedCallCount;
-                    exported.callCount = stat.callCount;
-                    exported.maxRequestSizeBytes = stat.maxRequestSizeBytes;
-                    exported.maxReplySizeBytes = stat.maxReplySizeBytes;
-                    exported.exceptionCount = stat.exceptionCount;
-                    resultCallStats.add(exported);
+                    resultCallStats.add(getExportedCallStat(entry.workSourceUid, stat));
                 }
             }
         }
 
+        // Resolve codes outside of the lock since it can be slow.
+        resolveBinderMethodNames(resultCallStats);
+
+        // Debug entries added to help validate the data.
+        if (mAddDebugEntries && mBatteryStopwatch != null) {
+            resultCallStats.add(createDebugEntry("start_time_millis", mStartElapsedTime));
+            resultCallStats.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
+            resultCallStats.add(
+                    createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
+            resultCallStats.add(createDebugEntry("sampling_interval", mPeriodicSamplingInterval));
+        }
+
+        return resultCallStats;
+    }
+
+    /**
+     * This method is expensive to call.
+     */
+    public ArrayList<ExportedCallStat> getExportedCallStats(int workSourceUid) {
+        ArrayList<ExportedCallStat> resultCallStats = new ArrayList<>();
+        synchronized (mLock) {
+            final UidEntry entry = getUidEntry(workSourceUid);
+            for (CallStat stat : entry.getCallStatsList()) {
+                resultCallStats.add(getExportedCallStat(workSourceUid, stat));
+            }
+        }
+
+        // Resolve codes outside of the lock since it can be slow.
+        resolveBinderMethodNames(resultCallStats);
+
+        return resultCallStats;
+    }
+
+    private ExportedCallStat getExportedCallStat(int workSourceUid, CallStat stat) {
+        ExportedCallStat exported = new ExportedCallStat();
+        exported.workSourceUid = workSourceUid;
+        exported.callingUid = stat.callingUid;
+        exported.className = stat.binderClass.getName();
+        exported.binderClass = stat.binderClass;
+        exported.transactionCode = stat.transactionCode;
+        exported.screenInteractive = stat.screenInteractive;
+        exported.cpuTimeMicros = stat.cpuTimeMicros;
+        exported.maxCpuTimeMicros = stat.maxCpuTimeMicros;
+        exported.latencyMicros = stat.latencyMicros;
+        exported.maxLatencyMicros = stat.maxLatencyMicros;
+        exported.recordedCallCount = stat.recordedCallCount;
+        exported.callCount = stat.callCount;
+        exported.maxRequestSizeBytes = stat.maxRequestSizeBytes;
+        exported.maxReplySizeBytes = stat.maxReplySizeBytes;
+        exported.exceptionCount = stat.exceptionCount;
+        return exported;
+    }
+
+    private void resolveBinderMethodNames(
+            ArrayList<ExportedCallStat> resultCallStats) {
         // Resolve codes outside of the lock since it can be slow.
         ExportedCallStat previous = null;
         String previousMethodName = null;
@@ -398,17 +456,6 @@ public class BinderCallsStats implements BinderInternal.Observer {
             exported.methodName = methodName;
             previous = exported;
         }
-
-        // Debug entries added to help validate the data.
-        if (mAddDebugEntries && mBatteryStopwatch != null) {
-            resultCallStats.add(createDebugEntry("start_time_millis", mStartElapsedTime));
-            resultCallStats.add(createDebugEntry("end_time_millis", SystemClock.elapsedRealtime()));
-            resultCallStats.add(
-                    createDebugEntry("battery_time_millis", mBatteryStopwatch.getMillis()));
-            resultCallStats.add(createDebugEntry("sampling_interval", mPeriodicSamplingInterval));
-        }
-
-        return resultCallStats;
     }
 
     private ExportedCallStat createDebugEntry(String variableName, long value) {
@@ -432,33 +479,24 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     /** Writes the collected statistics to the supplied {@link PrintWriter}.*/
-    public void dump(PrintWriter pw, AppIdToPackageMap packageMap, boolean verbose) {
+    public void dump(PrintWriter pw, AppIdToPackageMap packageMap, int workSourceUid,
+            boolean verbose) {
         synchronized (mLock) {
-            dumpLocked(pw, packageMap, verbose);
+            dumpLocked(pw, packageMap, workSourceUid, verbose);
         }
     }
 
-    private void dumpLocked(PrintWriter pw, AppIdToPackageMap packageMap, boolean verbose) {
-        long totalCallsCount = 0;
-        long totalRecordedCallsCount = 0;
-        long totalCpuTime = 0;
+    private void dumpLocked(PrintWriter pw, AppIdToPackageMap packageMap, int workSourceUid,
+            boolean verbose) {
+        if (workSourceUid != Process.INVALID_UID) {
+            verbose = true;
+        }
         pw.print("Start time: ");
         pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStartCurrentTime));
         pw.print("On battery time (ms): ");
         pw.println(mBatteryStopwatch != null ? mBatteryStopwatch.getMillis() : 0);
         pw.println("Sampling interval period: " + mPeriodicSamplingInterval);
-        final List<UidEntry> entries = new ArrayList<>();
 
-        final int uidEntriesSize = mUidEntries.size();
-        for (int i = 0; i < uidEntriesSize; i++) {
-            UidEntry e = mUidEntries.valueAt(i);
-            entries.add(e);
-            totalCpuTime += e.cpuTimeMicros;
-            totalRecordedCallsCount += e.recordedCallCount;
-            totalCallsCount += e.callCount;
-        }
-
-        entries.sort(Comparator.<UidEntry>comparingDouble(value -> value.cpuTimeMicros).reversed());
         final String datasetSizeDesc = verbose ? "" : "(top 90% by cpu time) ";
         final StringBuilder sb = new StringBuilder();
         pw.println("Per-UID raw data " + datasetSizeDesc
@@ -467,10 +505,15 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 + "latency_time_micros, max_latency_time_micros, exception_count, "
                 + "max_request_size_bytes, max_reply_size_bytes, recorded_call_count, "
                 + "call_count):");
-        final List<ExportedCallStat> exportedCallStats = getExportedCallStats();
+        final List<ExportedCallStat> exportedCallStats;
+        if (workSourceUid != Process.INVALID_UID) {
+            exportedCallStats = getExportedCallStats(workSourceUid);
+        } else {
+            exportedCallStats = getExportedCallStats();
+        }
         exportedCallStats.sort(BinderCallsStats::compareByCpuDesc);
         for (ExportedCallStat e : exportedCallStats) {
-            if (e.methodName.startsWith(DEBUG_ENTRY_PREFIX)) {
+            if (e.methodName != null && e.methodName.startsWith(DEBUG_ENTRY_PREFIX)) {
                 // Do not dump debug entries.
                 continue;
             }
@@ -494,6 +537,30 @@ public class BinderCallsStats implements BinderInternal.Observer {
             pw.println(sb);
         }
         pw.println();
+        final List<UidEntry> entries = new ArrayList<>();
+        long totalCallsCount = 0;
+        long totalRecordedCallsCount = 0;
+        long totalCpuTime = 0;
+
+        if (workSourceUid != Process.INVALID_UID) {
+            UidEntry e = getUidEntry(workSourceUid);
+            entries.add(e);
+            totalCpuTime += e.cpuTimeMicros;
+            totalRecordedCallsCount += e.recordedCallCount;
+            totalCallsCount += e.callCount;
+        } else {
+            final int uidEntriesSize = mUidEntries.size();
+            for (int i = 0; i < uidEntriesSize; i++) {
+                UidEntry e = mUidEntries.valueAt(i);
+                entries.add(e);
+                totalCpuTime += e.cpuTimeMicros;
+                totalRecordedCallsCount += e.recordedCallCount;
+                totalCallsCount += e.callCount;
+            }
+            entries.sort(
+                    Comparator.<UidEntry>comparingDouble(value -> value.cpuTimeMicros).reversed());
+        }
+
         pw.println("Per-UID Summary " + datasetSizeDesc
                 + "(cpu_time, % of total cpu_time, recorded_call_count, call_count, package/uid):");
         final List<UidEntry> summaryEntries = verbose ? entries
@@ -505,10 +572,13 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     entry.recordedCallCount, entry.callCount, uidStr));
         }
         pw.println();
-        pw.println(String.format("  Summary: total_cpu_time=%d, "
-                        + "calls_count=%d, avg_call_cpu_time=%.0f",
-                totalCpuTime, totalCallsCount, (double) totalCpuTime / totalRecordedCallsCount));
-        pw.println();
+        if (workSourceUid == Process.INVALID_UID) {
+            pw.println(String.format("  Summary: total_cpu_time=%d, "
+                            + "calls_count=%d, avg_call_cpu_time=%.0f",
+                    totalCpuTime, totalCallsCount,
+                    (double) totalCpuTime / totalRecordedCallsCount));
+            pw.println();
+        }
 
         pw.println("Exceptions thrown (exception_count, class_name):");
         final List<Pair<String, Integer>> exceptionEntries = new ArrayList<>();
@@ -590,6 +660,22 @@ public class BinderCallsStats implements BinderInternal.Observer {
         }
     }
 
+    /**
+     * Marks the specified work source UID for total binder call tracking: detailed information
+     * will be recorded for all calls from this source ID.
+     *
+     * This is expensive and can cause memory pressure, therefore this mode should only be used
+     * for debugging.
+     */
+    public void recordAllCallsForWorkSourceUid(int workSourceUid) {
+        setDetailedTracking(true);
+
+        Slog.i(TAG, "Recording all Binder calls for UID: "  + workSourceUid);
+        UidEntry uidEntry = getUidEntry(workSourceUid);
+        uidEntry.recordAllTransactions = true;
+        mRecordingAllTransactionsForUid = true;
+    }
+
     public void setAddDebugEntries(boolean addDebugEntries) {
         mAddDebugEntries = addDebugEntries;
     }
@@ -637,6 +723,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
             if (mBatteryStopwatch != null) {
                 mBatteryStopwatch.reset();
             }
+            mRecordingAllTransactionsForUid = false;
         }
     }
 
@@ -767,6 +854,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public long cpuTimeMicros;
         // Call count that gets reset after delivery to BatteryStats
         public long incrementalCallCount;
+        // Indicates that all transactions for the UID must be tracked
+        public boolean recordAllTransactions;
 
         UidEntry(int uid) {
             this.workSourceUid = uid;
