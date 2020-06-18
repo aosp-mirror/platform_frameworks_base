@@ -10520,7 +10520,7 @@ message DisplayWakeReported {
  * Logs app usage events.
  */
 message AppUsageEventOccurred {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional string package_name = 2;
     optional string class_name = 3;
 
