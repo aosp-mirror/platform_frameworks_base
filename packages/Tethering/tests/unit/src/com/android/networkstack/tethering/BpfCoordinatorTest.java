@@ -45,7 +45,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
 import android.app.usage.NetworkStatsManager;
 import android.net.INetd;
 import android.net.InetAddresses;
@@ -58,6 +57,8 @@ import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.test.TestLooper;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -101,8 +102,36 @@ public class BpfCoordinatorTest {
     private BpfCoordinator.Dependencies mDeps =
             new BpfCoordinator.Dependencies() {
             @Override
-            int getPerformPollInterval() {
+            public int getPerformPollInterval() {
                 return DEFAULT_PERFORM_POLL_INTERVAL_MS;
+            }
+
+            @NonNull
+            public Handler getHandler() {
+                return new Handler(mTestLooper.getLooper());
+            }
+
+            @NonNull
+            public INetd getNetd() {
+                return mNetd;
+            }
+
+            @NonNull
+            public NetworkStatsManager getNetworkStatsManager() {
+                return mStatsManager;
+            }
+
+            @NonNull
+            public SharedLog getSharedLog() {
+                return new SharedLog("test");
+            }
+
+            @Nullable
+            public TetheringConfiguration getTetherConfig() {
+                // Returning null configuration object is a hack to enable BPF offload.
+                // See BpfCoordinator#isOffloadEnabled.
+                // TODO: Mock TetheringConfiguration to test.
+                return null;
             }
     };
 
@@ -120,9 +149,7 @@ public class BpfCoordinatorTest {
 
     @NonNull
     private BpfCoordinator makeBpfCoordinator() throws Exception {
-        BpfCoordinator coordinator = new BpfCoordinator(
-                new Handler(mTestLooper.getLooper()), mNetd, mStatsManager, new SharedLog("test"),
-                mDeps);
+        final BpfCoordinator coordinator = new BpfCoordinator(mDeps);
         final ArgumentCaptor<BpfCoordinator.BpfTetherStatsProvider>
                 tetherStatsProviderCaptor =
                 ArgumentCaptor.forClass(BpfCoordinator.BpfTetherStatsProvider.class);
@@ -335,8 +362,8 @@ public class BpfCoordinatorTest {
         inOrder.verifyNoMoreInteractions();
 
         // [2] Specific limit.
-        // Applying the data limit boundary {min, max, infinity} on current upstream.
-        for (final long quota : new long[] {0, Long.MAX_VALUE, QUOTA_UNLIMITED}) {
+        // Applying the data limit boundary {min, 1gb, max, infinity} on current upstream.
+        for (final long quota : new long[] {0, 1048576000, Long.MAX_VALUE, QUOTA_UNLIMITED}) {
             mTetherStatsProvider.onSetLimit(mobileIface, quota);
             waitForIdle();
             inOrder.verify(mNetd).tetherOffloadSetInterfaceQuota(mobileIfIndex, quota);
