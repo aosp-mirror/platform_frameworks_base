@@ -28,6 +28,11 @@ android_test_helper_app {
 }
 
 android_test_helper_app {
+    name: "PackageManagerDummyAppVersion4",
+    manifest: "AndroidManifestVersion4.xml"
+}
+
+android_test_helper_app {
     name: "PackageManagerDummyAppOriginalOverride",
     manifest: "AndroidManifestOriginalOverride.xml"
 }
