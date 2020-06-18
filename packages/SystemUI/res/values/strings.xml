@@ -2392,6 +2392,9 @@
     <!-- Button to skip to the prev media on picture-in-picture (PIP) [CHAR LIMIT=30] -->
     <string name="pip_skip_to_prev">Skip to previous</string>
 
+    <!-- Accessibility action for resizing PIP [CHAR LIMIT=NONE] -->
+    <string name="accessibility_action_pip_resize">Resize</string>
+
     <!-- Tuner string -->
     <string name="change_theme_reboot" translatable="false">Changing the theme requires a restart.</string>
     <!-- Tuner string -->
