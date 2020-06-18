@@ -1903,12 +1903,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean shouldListenForFingerprint() {
         final boolean allowedOnBouncer =
                 !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
-        final int user = getCurrentUser();
-        final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
-        final boolean isLockDown =
-                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
-                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
-        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -1917,7 +1911,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
                 && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser
-                && allowedOnBouncer && !isLockDown && !isEncrypted;
+                && allowedOnBouncer;
         return shouldListen;
     }
 
@@ -1934,10 +1928,9 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         final boolean isLockDown =
                 containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
                         || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
-        final boolean isEncrypted =
-                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
-        final boolean isTimedOut =
-                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
+        final boolean isEncryptedOrTimedOut =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
 
         boolean canBypass = mKeyguardBypassController != null
                 && mKeyguardBypassController.canBypass();
@@ -1946,9 +1939,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // TrustAgents or biometrics are keeping the device unlocked.
         boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
 
-        // Scan even when timeout to show a preemptive bouncer when bypassing.
+        // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
         // Lock-down mode shouldn't scan, since it is more explicit.
-        boolean strongAuthAllowsScanning = (!isTimedOut || canBypass && !mBouncer);
+        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer)
+                && !isLockDown;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -1958,7 +1952,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
-                && !mSecureCameraLaunched && !isLockDown && !isEncrypted;
+                && !mSecureCameraLaunched;
 
         // Aggregate relevant fields for debug logging.
         if (DEBUG_FACE || DEBUG_SPEW) {
