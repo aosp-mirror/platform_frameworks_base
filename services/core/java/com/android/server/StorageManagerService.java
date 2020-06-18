@@ -2260,8 +2260,15 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
+        final String fsUuid = vol.fsUuid;
         try {
             mVold.format(vol.id, "auto");
+
+            // After a successful format above, we should forget about any
+            // records for the old partition, since it'll never appear again
+            if (!TextUtils.isEmpty(fsUuid)) {
+                forgetVolume(fsUuid);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
