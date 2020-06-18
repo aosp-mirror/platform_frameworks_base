@@ -2417,13 +2417,11 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
 
         if (mMaxUiWidth > 0 && mBaseDisplayWidth > mMaxUiWidth) {
             mBaseDisplayHeight = (mMaxUiWidth * mBaseDisplayHeight) / mBaseDisplayWidth;
-            mBaseDisplayDensity = (mMaxUiWidth * mBaseDisplayDensity) / mBaseDisplayWidth;
             mBaseDisplayWidth = mMaxUiWidth;
 
             if (DEBUG_DISPLAY) {
                 Slog.v(TAG_WM, "Applying config restraints:" + mBaseDisplayWidth + "x"
-                        + mBaseDisplayHeight + " at density:" + mBaseDisplayDensity
-                        + " on display:" + getDisplayId());
+                        + mBaseDisplayHeight + " on display:" + getDisplayId());
             }
         }
 
