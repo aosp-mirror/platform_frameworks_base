@@ -985,6 +985,7 @@ class MediaRouter2ServiceImpl {
         if (userRecord == null) {
             userRecord = new UserRecord(userId);
             mUserRecords.put(userId, userRecord);
+            userRecord.init();
             if (userId == mCurrentUserId) {
                 userRecord.mHandler.sendMessage(
                         obtainMessage(UserHandler::start, userRecord.mHandler));
@@ -1032,6 +1033,10 @@ class MediaRouter2ServiceImpl {
         UserRecord(int userId) {
             mUserId = userId;
             mHandler = new UserHandler(MediaRouter2ServiceImpl.this, this);
+        }
+
+        void init() {
+            mHandler.init();
         }
 
         // TODO: This assumes that only one router exists in a package.
@@ -1141,14 +1146,19 @@ class MediaRouter2ServiceImpl {
 
         private boolean mRunning;
 
+        // TODO: (In Android S+) Pull out SystemMediaRoute2Provider out of UserHandler.
         UserHandler(@NonNull MediaRouter2ServiceImpl service, @NonNull UserRecord userRecord) {
             super(Looper.getMainLooper(), null, true);
             mServiceRef = new WeakReference<>(service);
             mUserRecord = userRecord;
-            mSystemProvider = new SystemMediaRoute2Provider(service.mContext, this);
+            mSystemProvider = new SystemMediaRoute2Provider(service.mContext);
             mRouteProviders.add(mSystemProvider);
             mWatcher = new MediaRoute2ProviderWatcher(service.mContext, this,
                     this, mUserRecord.mUserId);
+        }
+
+        void init() {
+            mSystemProvider.setCallback(this);
         }
 
         private void start() {
