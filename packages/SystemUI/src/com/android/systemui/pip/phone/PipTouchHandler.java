@@ -627,6 +627,7 @@ public class PipTouchHandler {
                 && !mMotionHelper.isAnimating()
                 && mPipResizeGestureHandler.isWithinTouchRegion(
                         (int) ev.getRawX(), (int) ev.getRawY())) {
+            mTouchState.onTouchEvent(ev);
             return true;
         }
 
