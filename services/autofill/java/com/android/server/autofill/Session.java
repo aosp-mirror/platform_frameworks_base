@@ -843,7 +843,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         setClientLocked(client);
 
         mInlineSessionController = new AutofillInlineSessionController(inputMethodManagerInternal,
-                userId, componentName, handler, mLock);
+                userId, componentName, handler, mLock,
+                new InlineFillUi.InlineUiEventCallback() {
+                    @Override
+                    public void notifyInlineUiShown(AutofillId autofillId) {
+                        notifyFillUiShown(autofillId);
+                    }
+
+                    @Override
+                    public void notifyInlineUiHidden(AutofillId autofillId) {
+                        notifyFillUiHidden(autofillId);
+                    }
+                });
 
         mMetricsLogger.write(newLogMaker(MetricsEvent.AUTOFILL_SESSION_STARTED)
                 .addTaggedData(MetricsEvent.FIELD_AUTOFILL_FLAGS, flags));
@@ -1327,6 +1338,26 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         mHandler.sendMessage(obtainMessage(
                 Session::doStartIntentSender,
                 this, intentSender, intent));
+    }
+
+    private void notifyFillUiHidden(@NonNull AutofillId autofillId) {
+        synchronized (mLock) {
+            try {
+                mClient.notifyFillUiHidden(this.id, autofillId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error sending fill UI hidden notification", e);
+            }
+        }
+    }
+
+    private void notifyFillUiShown(@NonNull AutofillId autofillId) {
+        synchronized (mLock) {
+            try {
+                mClient.notifyFillUiShown(this.id, autofillId);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Error sending fill UI shown notification", e);
+            }
+        }
     }
 
     private void doStartIntentSender(IntentSender intentSender, Intent intent) {
@@ -2769,11 +2800,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // TODO(b/156099633): remove this once framework gets out of business of resending
                 // inline suggestions when IME visibility changes.
                 mInlineSessionController.hideInlineSuggestionsUiLocked(viewState.id);
-                try {
-                    mClient.notifyFillUiHidden(this.id, viewState.id);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error requesting to hide fill UI", e);
-                }
                 viewState.resetState(ViewState.STATE_CHANGED);
                 return;
             } else if ((viewState.id.equals(this.mCurrentViewId))
@@ -2800,11 +2826,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 // TODO: we should be able to replace this with controller#filterInlineFillUiLocked
                 // to accomplish filtering for augmented autofill.
                 mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
-                try {
-                    mClient.notifyFillUiHidden(this.id, mCurrentViewId);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Error sending fill UI hidden notification", e);
-                }
             }
         }
 
@@ -2890,11 +2911,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 if (requestShowInlineSuggestionsLocked(response, filterText)) {
                     final ViewState currentView = mViewStates.get(mCurrentViewId);
                     currentView.setState(ViewState.STATE_INLINE_SHOWN);
-                    try {
-                        mClient.notifyFillUiShown(this.id, mCurrentViewId);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error sending fill UI shown notification", e);
-                    }
                     //TODO(b/137800469): Fix it to log showed only when IME asks for inflation,
                     // rather than here where framework sends back the response.
                     mService.logDatasetShown(id, mClientState);
@@ -2965,11 +2981,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     synchronized (mLock) {
                         mInlineSessionController.hideInlineSuggestionsUiLocked(
                                 focusedId);
-                        try {
-                            mClient.notifyFillUiHidden(this.id, focusedId);
-                        } catch (RemoteException e) {
-                            Slog.e(TAG, "Error sending fill UI hidden notification", e);
-                        }
                     }
                 }, remoteRenderService);
         return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
@@ -3484,11 +3495,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 }
                 if (mCurrentViewId != null) {
                     mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
-                    try {
-                        mClient.notifyFillUiHidden(this.id, mCurrentViewId);
-                    } catch (RemoteException e) {
-                        Slog.e(TAG, "Error sending fill UI hidden notification", e);
-                    }
                 }
                 autoFillApp(dataset);
                 return;
