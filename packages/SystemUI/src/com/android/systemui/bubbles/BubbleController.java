@@ -67,6 +67,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.SparseSetArray;
 import android.view.Display;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
@@ -394,6 +395,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 : statusBarService;
 
         mBubbleScrim = new ScrimView(mContext);
+        mBubbleScrim.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
 
         mSavedBubbleKeysPerUser = new SparseSetArray<>();
         mCurrentUserId = mNotifUserManager.getCurrentUserId();

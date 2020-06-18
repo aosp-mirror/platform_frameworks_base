@@ -145,6 +145,12 @@ public class BubbleStackView extends FrameLayout
     @VisibleForTesting
     static final int FLYOUT_HIDE_AFTER = 5000;
 
+    /**
+     * How long to wait to animate the stack temporarily invisible after a drag/flyout hide
+     * animation ends, if we are in fact temporarily invisible.
+     */
+    private static final int ANIMATE_TEMPORARILY_INVISIBLE_DELAY = 1000;
+
     private static final PhysicsAnimator.SpringConfig FLYOUT_IME_ANIMATION_SPRING_CONFIG =
             new PhysicsAnimator.SpringConfig(
                     StackAnimationController.IME_ANIMATION_STIFFNESS,
@@ -280,6 +286,9 @@ public class BubbleStackView extends FrameLayout
 
     /** Whether or not the stack is temporarily invisible off the side of the screen. */
     private boolean mTemporarilyInvisible = false;
+
+    /** Whether we're in the middle of dragging the stack around by touch. */
+    private boolean mIsDraggingStack = false;
 
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -478,6 +487,8 @@ public class BubbleStackView extends FrameLayout
     private OnClickListener mBubbleClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
+            mIsDraggingStack = false; // If the touch ended in a click, we're no longer dragging.
+
             // Bubble clicks either trigger expansion/collapse or a bubble switch, both of which we
             // shouldn't interrupt. These are quick transitions, so it's not worth trying to adjust
             // the animations inflight.
@@ -563,6 +574,12 @@ public class BubbleStackView extends FrameLayout
                 // Also, save the magnetized stack so we can dispatch touch events to it.
                 mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
                 mMagnetizedObject.setMagnetListener(mStackMagnetListener);
+
+                mIsDraggingStack = true;
+
+                // Cancel animations to make the stack temporarily invisible, since we're now
+                // dragging it.
+                updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
             }
 
             passEventToMagnetizedObject(ev);
@@ -624,6 +641,11 @@ public class BubbleStackView extends FrameLayout
 
                 hideDismissTarget();
             }
+
+            mIsDraggingStack = false;
+
+            // Hide the stack after a delay, if needed.
+            updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
         }
     };
 
@@ -967,14 +989,35 @@ public class BubbleStackView extends FrameLayout
      */
     public void setTemporarilyInvisible(boolean invisible) {
         mTemporarilyInvisible = invisible;
-        animateTemporarilyInvisible();
+
+        // If we are animating out, hide immediately if possible so we animate out with the status
+        // bar.
+        updateTemporarilyInvisibleAnimation(invisible /* hideImmediately */);
     }
 
     /**
-     * Animates onto or off the screen depending on whether we're temporarily invisible, and whether
-     * a flyout is visible.
+     * Animates the stack to be temporarily invisible, if needed.
+     *
+     * If we're currently dragging the stack, or a flyout is visible, the stack will remain visible.
+     * regardless of the value of {@link #mTemporarilyInvisible}. This method is called on ACTION_UP
+     * as well as whenever a flyout hides, so we will animate invisible at that point if needed.
      */
-    private void animateTemporarilyInvisible() {
+    private void updateTemporarilyInvisibleAnimation(boolean hideImmediately) {
+        removeCallbacks(mAnimateTemporarilyInvisibleImmediate);
+
+        if (mIsDraggingStack) {
+            // If we're dragging the stack, don't animate it invisible.
+            return;
+        }
+
+        final boolean shouldHide =
+                mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE;
+
+        postDelayed(mAnimateTemporarilyInvisibleImmediate,
+                shouldHide && !hideImmediately ? ANIMATE_TEMPORARILY_INVISIBLE_DELAY : 0);
+    }
+
+    private final Runnable mAnimateTemporarilyInvisibleImmediate = () -> {
         if (mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE) {
             if (mStackAnimationController.isStackOnLeftSide()) {
                 animate().translationX(-mBubbleSize).start();
@@ -984,7 +1027,7 @@ public class BubbleStackView extends FrameLayout
         } else {
             animate().translationX(0).start();
         }
-    }
+    };
 
     private void setUpManageMenu() {
         if (mManageMenu != null) {
@@ -2303,7 +2346,9 @@ public class BubbleStackView extends FrameLayout
                     BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
 
             mFlyout.setVisibility(INVISIBLE);
-            animateTemporarilyInvisible();
+
+            // Hide the stack after a delay, if needed.
+            updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
         };
         mFlyout.setVisibility(INVISIBLE);
 
@@ -2321,7 +2366,7 @@ public class BubbleStackView extends FrameLayout
             final Runnable expandFlyoutAfterDelay = () -> {
                 mAnimateInFlyout = () -> {
                     mFlyout.setVisibility(VISIBLE);
-                    animateTemporarilyInvisible();
+                    updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
                     mFlyoutDragDeltaX =
                             mStackAnimationController.isStackOnLeftSide()
                                     ? -mFlyout.getWidth()
@@ -2470,6 +2515,10 @@ public class BubbleStackView extends FrameLayout
                     .spring(DynamicAnimation.SCALE_Y, 1f)
                     .spring(DynamicAnimation.TRANSLATION_X, targetX)
                     .spring(DynamicAnimation.TRANSLATION_Y, targetY)
+                    .withEndActions(() -> {
+                        View child = mManageMenu.getChildAt(0);
+                        child.requestAccessibilityFocus();
+                    })
                     .start();
 
             mManageMenu.setVisibility(View.VISIBLE);

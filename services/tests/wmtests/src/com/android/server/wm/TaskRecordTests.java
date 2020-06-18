@@ -38,6 +38,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.eq;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.reset;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.policy.WindowManagerPolicy.USER_ROTATION_FREE;
@@ -955,6 +956,23 @@ public class TaskRecordTests extends ActivityTestsBase {
         task.setWindowingMode(WINDOWING_MODE_PINNED);
 
         assertEquals(SCREEN_ORIENTATION_UNSET, taskDisplayArea.getOrientation());
+    }
+
+    @Test
+    public void testNotifyOrientationChangeCausedByConfigurationChange() {
+        final Task task = getTestTask();
+        final ActivityRecord activity = task.getTopMostActivity();
+        final DisplayContent display = task.getDisplayContent();
+        display.setWindowingMode(WINDOWING_MODE_FREEFORM);
+
+        activity.setRequestedOrientation(SCREEN_ORIENTATION_LANDSCAPE);
+        assertEquals(SCREEN_ORIENTATION_UNSET, task.getOrientation());
+        verify(display).onDescendantOrientationChanged(any(), same(task));
+        reset(display);
+
+        display.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertEquals(SCREEN_ORIENTATION_LANDSCAPE, task.getOrientation());
+        verify(display).onDescendantOrientationChanged(any(), same(task));
     }
 
     private Task getTestTask() {

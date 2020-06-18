@@ -2509,6 +2509,9 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                 for (String permissionName : requestedPermissions) {
                     BasePermission permission = mSettings.getPermission(permissionName);
+                    if (permission == null) {
+                        continue;
+                    }
                     if (Objects.equals(permission.getSourcePackageName(), PLATFORM_PACKAGE_NAME)
                             && permission.isRuntime() && !permission.isRemoved()) {
                         if (permission.isHardOrSoftRestricted()

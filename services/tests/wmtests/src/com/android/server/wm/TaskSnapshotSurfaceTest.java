@@ -189,7 +189,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     public void testCalculateSnapshotFrame() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 0, 10);
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         assertEquals(new Rect(0, 0, 100, 80),
                 mSurface.calculateSnapshotFrame(new Rect(0, 10, 100, 90)));
     }
@@ -198,7 +198,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     public void testCalculateSnapshotFrame_navBarLeft() {
         setupSurface(100, 100);
         final Rect insets = new Rect(10, 10, 0, 0);
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         assertEquals(new Rect(10, 0, 100, 90),
                 mSurface.calculateSnapshotFrame(new Rect(10, 10, 100, 100)));
     }
@@ -207,7 +207,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     public void testCalculateSnapshotFrame_waterfall() {
         setupSurface(100, 100, new Rect(5, 10, 5, 10), 0, 0, new Rect(0, 0, 100, 100));
         final Rect insets = new Rect(0, 10, 0, 10);
-        mSurface.setFrames(new Rect(5, 0, 95, 100), insets, insets);
+        mSurface.setFrames(new Rect(5, 0, 95, 100), insets);
         assertEquals(new Rect(0, 0, 90, 90),
                 mSurface.calculateSnapshotFrame(new Rect(5, 0, 95, 90)));
     }
@@ -216,7 +216,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     public void testDrawStatusBarBackground() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 10, 0);
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
@@ -229,7 +229,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     public void testDrawStatusBarBackground_nullFrame() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 10, 0);
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
@@ -242,7 +242,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
     public void testDrawStatusBarBackground_nope() {
         setupSurface(100, 100);
         final Rect insets = new Rect(0, 10, 10, 0);
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
@@ -256,7 +256,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Rect insets = new Rect(0, 10, 0, 10);
         setupSurface(100, 100, insets, 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, 100, 100));
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
@@ -269,7 +269,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Rect insets = new Rect(10, 10, 0, 0);
         setupSurface(100, 100, insets, 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, 100, 100));
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);
@@ -282,7 +282,7 @@ public class TaskSnapshotSurfaceTest extends WindowTestsBase {
         final Rect insets = new Rect(0, 10, 10, 0);
         setupSurface(100, 100, insets, 0, FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 new Rect(0, 0, 100, 100));
-        mSurface.setFrames(new Rect(0, 0, 100, 100), insets, insets);
+        mSurface.setFrames(new Rect(0, 0, 100, 100), insets);
         final Canvas mockCanvas = mock(Canvas.class);
         when(mockCanvas.getWidth()).thenReturn(100);
         when(mockCanvas.getHeight()).thenReturn(100);

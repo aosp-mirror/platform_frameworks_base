@@ -101,16 +101,17 @@ public class TetheringConfiguration {
     public final String[] legacyDhcpRanges;
     public final String[] defaultIPv4DNS;
     public final boolean enableLegacyDhcpServer;
-    // TODO: Add to TetheringConfigurationParcel if required.
-    public final boolean enableBpfOffload;
 
     public final String[] provisioningApp;
     public final String provisioningAppNoUi;
     public final int provisioningCheckPeriod;
+    public final String provisioningResponse;
 
     public final int activeDataSubId;
 
     private final int mOffloadPollInterval;
+    // TODO: Add to TetheringConfigurationParcel if required.
+    private final boolean mEnableBpfOffload;
 
     public TetheringConfiguration(Context ctx, SharedLog log, int id) {
         final SharedLog configLog = log.forSubComponent("config");
@@ -137,14 +138,17 @@ public class TetheringConfiguration {
 
         legacyDhcpRanges = getLegacyDhcpRanges(res);
         defaultIPv4DNS = copy(DEFAULT_IPV4_DNS);
-        enableBpfOffload = getEnableBpfOffload(res);
+        mEnableBpfOffload = getEnableBpfOffload(res);
         enableLegacyDhcpServer = getEnableLegacyDhcpServer(res);
 
         provisioningApp = getResourceStringArray(res, R.array.config_mobile_hotspot_provision_app);
-        provisioningAppNoUi = getProvisioningAppNoUi(res);
+        provisioningAppNoUi = getResourceString(res,
+                R.string.config_mobile_hotspot_provision_app_no_ui);
         provisioningCheckPeriod = getResourceInteger(res,
                 R.integer.config_mobile_hotspot_provision_check_period,
                 0 /* No periodic re-check */);
+        provisioningResponse = getResourceString(res,
+                R.string.config_mobile_hotspot_provision_response);
 
         mOffloadPollInterval = getResourceInteger(res,
                 R.integer.config_tether_offload_poll_interval,
@@ -218,7 +222,7 @@ public class TetheringConfiguration {
         pw.println(provisioningAppNoUi);
 
         pw.print("enableBpfOffload: ");
-        pw.println(enableBpfOffload);
+        pw.println(mEnableBpfOffload);
 
         pw.print("enableLegacyDhcpServer: ");
         pw.println(enableLegacyDhcpServer);
@@ -240,7 +244,7 @@ public class TetheringConfiguration {
                 toIntArray(preferredUpstreamIfaceTypes)));
         sj.add(String.format("provisioningApp:%s", makeString(provisioningApp)));
         sj.add(String.format("provisioningAppNoUi:%s", provisioningAppNoUi));
-        sj.add(String.format("enableBpfOffload:%s", enableBpfOffload));
+        sj.add(String.format("enableBpfOffload:%s", mEnableBpfOffload));
         sj.add(String.format("enableLegacyDhcpServer:%s", enableLegacyDhcpServer));
         return String.format("TetheringConfiguration{%s}", sj.toString());
     }
@@ -277,6 +281,10 @@ public class TetheringConfiguration {
 
     public int getOffloadPollInterval() {
         return mOffloadPollInterval;
+    }
+
+    public boolean isBpfOffloadEnabled() {
+        return mEnableBpfOffload;
     }
 
     private static Collection<Integer> getUpstreamIfaceTypes(Resources res, boolean dunRequired) {
@@ -337,9 +345,9 @@ public class TetheringConfiguration {
         return copy(LEGACY_DHCP_DEFAULT_RANGE);
     }
 
-    private static String getProvisioningAppNoUi(Resources res) {
+    private static String getResourceString(Resources res, final int resId) {
         try {
-            return res.getString(R.string.config_mobile_hotspot_provision_app_no_ui);
+            return res.getString(resId);
         } catch (Resources.NotFoundException e) {
             return "";
         }
