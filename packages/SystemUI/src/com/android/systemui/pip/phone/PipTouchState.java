@@ -31,7 +31,7 @@ import java.io.PrintWriter;
  * This keeps track of the touch state throughout the current touch gesture.
  */
 public class PipTouchState {
-    private static final String TAG = "PipTouchHandler";
+    private static final String TAG = "PipTouchState";
     private static final boolean DEBUG = false;
 
     @VisibleForTesting
