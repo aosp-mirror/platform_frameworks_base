@@ -354,7 +354,11 @@ class BlobMetadata {
             throw e.rethrowAsIOException();
         }
         try {
-            return createRevocableFd(fd, callingPackage);
+            if (BlobStoreConfig.shouldUseRevocableFdForReads()) {
+                return createRevocableFd(fd, callingPackage);
+            } else {
+                return new ParcelFileDescriptor(fd);
+            }
         } catch (IOException e) {
             IoUtils.closeQuietly(fd);
             throw e;
