@@ -1894,9 +1894,10 @@ public class WifiManager {
      * for a detailed explanation of the parameters.
      * When the device decides to connect to one of the provided network suggestions, platform sends
      * a directed broadcast {@link #ACTION_WIFI_NETWORK_SUGGESTION_POST_CONNECTION} to the app if
-     * the network was created with {@link WifiNetworkSuggestion.Builder
-     * #setIsAppInteractionRequired()} flag set and the app holds
-     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
+     * the network was created with
+     * {@link WifiNetworkSuggestion.Builder#setIsAppInteractionRequired(boolean)} flag set and the
+     * app holds {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION}
+     * permission.
      *<p>
      * NOTE:
      * <li> These networks are just a suggestion to the platform. The platform will ultimately
