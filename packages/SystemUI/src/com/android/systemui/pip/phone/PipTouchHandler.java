@@ -124,7 +124,7 @@ public class PipTouchHandler {
     /** Default configuration to use for springing the dismiss target in/out. */
     private final PhysicsAnimator.SpringConfig mTargetSpringConfig =
             new PhysicsAnimator.SpringConfig(
-                    SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+                    SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -324,7 +324,9 @@ public class PipTouchHandler {
         final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(targetSize, targetSize);
-        newParams.gravity = Gravity.CENTER;
+        newParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        newParams.bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 
         // Set the magnetic field radius equal to twice the size of the target.
