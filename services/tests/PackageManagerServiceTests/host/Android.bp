@@ -28,6 +28,14 @@ java_test_host {
         ":PackageManagerDummyAppVersion1",
         ":PackageManagerDummyAppVersion2",
         ":PackageManagerDummyAppVersion3",
+        ":PackageManagerDummyAppVersion4",
         ":PackageManagerDummyAppOriginalOverride",
+        ":PackageManagerServiceHostTestsResources",
     ]
+}
+
+filegroup {
+    name: "PackageManagerServiceHostTestsResources",
+    srcs: [ "resources/*" ],
+    path: "resources/"
 }

@@ -3167,6 +3167,10 @@ public class PackageManagerService extends IPackageManager.Stub
                         psit.remove();
                         logCriticalInfo(Log.WARN, "System package " + ps.name
                                 + " no longer exists; it's data will be wiped");
+
+                        // Assume package is truly gone and wipe residual permissions.
+                        mPermissionManager.updatePermissions(ps.name, null);
+
                         // Actual deletion of code and data will be handled by later
                         // reconciliation step
                     } else {
