@@ -705,6 +705,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
+    private final WindowProcessController mWpcForDisplayConfigChanges;
+
     /**
      * @return The insets state as requested by the client, i.e. the dispatched insets state
      *         for which the visibilities are overridden with what the client requested.
@@ -873,6 +875,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mSubLayer = 0;
             mInputWindowHandle = null;
             mWinAnimator = null;
+            mWpcForDisplayConfigChanges = null;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -928,6 +931,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
+
+        // System process or invalid process cannot register to display config change.
+        mWpcForDisplayConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
+                ? null
+                : service.mAtmService.getProcessController(s.mPid, s.mUid);
     }
 
     void attach() {
@@ -3501,13 +3509,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return {@code true} if the process registered to a display as a config listener. */
     private boolean registeredForDisplayConfigChanges() {
         final WindowState parentWindow = getParentWindow();
-        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
-        // System process or invalid process cannot register to display config change.
-        if (session.mPid == MY_PID || session.mPid < 0) return false;
-        WindowProcessController app =
-                mWmService.mAtmService.getProcessController(session.mPid, session.mUid);
-        if (app == null || !app.registeredForDisplayConfigChanges()) return false;
-        return true;
+        final WindowProcessController wpc = parentWindow != null
+                ? parentWindow.mWpcForDisplayConfigChanges
+                : mWpcForDisplayConfigChanges;
+        return wpc != null && wpc.registeredForDisplayConfigChanges();
     }
 
     void reportResized() {
@@ -5090,13 +5095,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.updateLastInsetValues();
     }
 
-    @Nullable
     @Override
-    WindowContainer<WindowState> getAnimatingContainer(int flags, int typesToCheck) {
+    protected boolean isSelfAnimating(int flags, int typesToCheck) {
         if (mControllableInsetProvider != null) {
-            return null;
+            return false;
         }
-        return super.getAnimatingContainer(flags, typesToCheck);
+        return super.isSelfAnimating(flags, typesToCheck);
     }
 
     void startAnimation(Animation anim) {
