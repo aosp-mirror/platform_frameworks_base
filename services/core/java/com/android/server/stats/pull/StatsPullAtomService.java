@@ -236,6 +236,17 @@ public class StatsPullAtomService extends SystemService {
     private static final String DANGEROUS_PERMISSION_STATE_SAMPLE_RATE =
             "dangerous_permission_state_sample_rate";
 
+    /** Parameters relating to ProcStats data upload. */
+    // Maximum shards to use when generating StatsEvent objects from ProcStats.
+    private static final int MAX_PROCSTATS_SHARDS = 5;
+    // Should match MAX_PAYLOAD_SIZE in StatsEvent, minus a small amount for overhead/metadata.
+    private static final int MAX_PROCSTATS_SHARD_SIZE = 48 * 1024; // 48 KB
+    // In ProcessStats, we measure the size of a raw ProtoOutputStream, before compaction. This
+    // typically runs 35-45% larger than the compacted size that will be written to StatsEvent.
+    // Hence, we can allow a little more room in each shard before moving to the next. Make this
+    // 20% as a conservative estimate.
+    private static final int MAX_PROCSTATS_RAW_SHARD_SIZE = (int) (MAX_PROCSTATS_SHARD_SIZE * 1.20);
+
     private final Object mThermalLock = new Object();
     @GuardedBy("mThermalLock")
     private IThermalService mThermalService;
@@ -2554,19 +2565,26 @@ public class StatsPullAtomService extends SystemService {
             long lastHighWaterMark = readProcStatsHighWaterMark(section);
             List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
 
+            ProtoOutputStream[] protoStreams = new ProtoOutputStream[MAX_PROCSTATS_SHARDS];
+            for (int i = 0; i < protoStreams.length; i++) {
+                protoStreams[i] = new ProtoOutputStream();
+            }
+
             ProcessStats procStats = new ProcessStats(false);
+            // Force processStatsService to aggregate all in-storage and in-memory data.
             long highWaterMark = processStatsService.getCommittedStatsMerged(
                     lastHighWaterMark, section, true, statsFiles, procStats);
+            procStats.dumpAggregatedProtoForStatsd(protoStreams, MAX_PROCSTATS_RAW_SHARD_SIZE);
 
-            // aggregate the data together for westworld consumption
-            ProtoOutputStream proto = new ProtoOutputStream();
-            procStats.dumpAggregatedProtoForStatsd(proto);
-
-            StatsEvent e = StatsEvent.newBuilder()
-                    .setAtomId(atomTag)
-                    .writeByteArray(proto.getBytes())
-                    .build();
-            pulledData.add(e);
+            for (ProtoOutputStream proto : protoStreams) {
+                if (proto.getBytes().length > 0) {
+                    StatsEvent e = StatsEvent.newBuilder()
+                            .setAtomId(atomTag)
+                            .writeByteArray(proto.getBytes())
+                            .build();
+                    pulledData.add(e);
+                }
+            }
 
             new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark)
                     .delete();
