@@ -22,3 +22,17 @@ java_library_static {
     ],
     sdk_version: "system_29",
 }
+
+java_library_static {
+    name: "tetheringprotos",
+    proto: {
+        type: "lite",
+    },
+    srcs: [
+        "tethering.proto",
+    ],
+    apex_available: [
+        "com.android.tethering",
+    ],
+    sdk_version: "system_current",
+}
