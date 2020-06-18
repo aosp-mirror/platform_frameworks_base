@@ -218,7 +218,6 @@ import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
 import android.sysprop.DisplayProperties;
 import android.telecom.TelecomManager;
-import android.text.TextUtils;
 import android.text.format.TimeMigrationUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -4007,8 +4006,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             ActivityRecord record = ActivityRecord.isInStackLocked(token);
             if (record == null) {
-                throw new IllegalArgumentException("reportSizeConfigurations: ActivityRecord not "
-                        + "found for: " + token);
+                return;
             }
             record.setSizeConfigurations(horizontalSizeConfiguration,
                     verticalSizeConfigurations, smallestSizeConfigurations);
