@@ -16,9 +16,23 @@
 
 package android.net;
 
+import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+import static android.system.OsConstants.AF_UNIX;
+import static android.system.OsConstants.EPERM;
+import static android.system.OsConstants.SOCK_DGRAM;
+import static android.system.OsConstants.SOCK_STREAM;
+
 import static junit.framework.Assert.assertEquals;
 
+import static org.junit.Assert.fail;
+
+import android.system.ErrnoException;
+import android.system.Os;
+
 import androidx.test.runner.AndroidJUnit4;
+
+import libcore.io.IoUtils;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -124,5 +138,51 @@ public class NetworkUtilsTest {
         set.add(new IpPrefix("f00b:a33::/112"));
         assertEquals(BigInteger.valueOf(7l - 4 + 4 + 16 + 65536),
                 NetworkUtils.routedIPv6AddressCount(set));
+    }
+
+    private static void expectSocketSuccess(String msg, int domain, int type) {
+        try {
+            IoUtils.closeQuietly(Os.socket(domain, type, 0));
+        } catch (ErrnoException e) {
+            fail(msg + e.getMessage());
+        }
+    }
+
+    private static void expectSocketPemissionError(String msg, int domain, int type) {
+        try {
+            IoUtils.closeQuietly(Os.socket(domain, type, 0));
+            fail(msg);
+        } catch (ErrnoException e) {
+            assertEquals(msg, e.errno, EPERM);
+        }
+    }
+
+    private static void expectHasNetworking() {
+        expectSocketSuccess("Creating a UNIX socket should not have thrown ErrnoException",
+                AF_UNIX, SOCK_STREAM);
+        expectSocketSuccess("Creating a AF_INET socket shouldn't have thrown ErrnoException",
+                AF_INET, SOCK_DGRAM);
+        expectSocketSuccess("Creating a AF_INET6 socket shouldn't have thrown ErrnoException",
+                AF_INET6, SOCK_DGRAM);
+    }
+
+    private static void expectNoNetworking() {
+        expectSocketSuccess("Creating a UNIX socket should not have thrown ErrnoException",
+                AF_UNIX, SOCK_STREAM);
+        expectSocketPemissionError(
+                "Creating a AF_INET socket should have thrown ErrnoException(EPERM)",
+                AF_INET, SOCK_DGRAM);
+        expectSocketPemissionError(
+                "Creating a AF_INET6 socket should have thrown ErrnoException(EPERM)",
+                AF_INET6, SOCK_DGRAM);
+    }
+
+    @Test
+    public void testSetAllowNetworkingForProcess() {
+        expectHasNetworking();
+        NetworkUtils.setAllowNetworkingForProcess(false);
+        expectNoNetworking();
+        NetworkUtils.setAllowNetworkingForProcess(true);
+        expectHasNetworking();
     }
 }
