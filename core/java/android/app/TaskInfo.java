@@ -16,8 +16,6 @@
 
 package android.app;
 
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
@@ -170,6 +168,14 @@ public class TaskInfo {
     @Nullable
     public ActivityInfo topActivityInfo;
 
+    /**
+     * Whether this task is resizable. Unlike {@link #resizeMode} (which is what the top activity
+     * supports), this is what the system actually uses for resizability based on other policy and
+     * developer options.
+     * @hide
+     */
+    public boolean isResizeable;
+
     TaskInfo() {
         // Do nothing
     }
@@ -190,11 +196,6 @@ public class TaskInfo {
             Log.e(TAG, "Failed to get task snapshot, taskId=" + taskId, e);
             return null;
         }
-    }
-
-    /** @hide */
-    public boolean isResizable() {
-        return resizeMode != RESIZE_MODE_UNRESIZEABLE;
     }
 
     /** @hide */
@@ -245,6 +246,7 @@ public class TaskInfo {
         topActivityInfo = source.readInt() != 0
                 ? ActivityInfo.CREATOR.createFromParcel(source)
                 : null;
+        isResizeable = source.readBoolean();
     }
 
     /**
@@ -294,6 +296,7 @@ public class TaskInfo {
             dest.writeInt(1);
             topActivityInfo.writeToParcel(dest, flags);
         }
+        dest.writeBoolean(isResizeable);
     }
 
     @Override
@@ -308,6 +311,7 @@ public class TaskInfo {
                 + " lastActiveTime=" + lastActiveTime
                 + " supportsSplitScreenMultiWindow=" + supportsSplitScreenMultiWindow
                 + " resizeMode=" + resizeMode
+                + " isResizeable=" + isResizeable
                 + " token=" + token
                 + " topActivityType=" + topActivityType
                 + " pictureInPictureParams=" + pictureInPictureParams
