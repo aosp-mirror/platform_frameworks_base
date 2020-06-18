@@ -18,54 +18,80 @@
 
 ## Concepts
 
-### User
+### Users and profiles
 
-A user of a device e.g. usually a human being. Each user has its own home screen.
+#### User
 
-#### User Profile
+A user is a representation of a person using a device, with their own distinct application data
+and some unique settings. Throughout this document, the word 'user' will be used in this technical
+sense, i.e. for this virtual environment, whereas the word 'person' will be used to denote an actual
+human interacting with the device.
 
-A user can have multiple profiles. E.g. one for the private life and one for work. Each profile
-has a different set of apps and accounts but they share one home screen. All profiles of a
-profile group can be active at the same time.
-
-Each profile has a separate [`userId`](#int-userid). Unless needed user profiles are treated as
-completely separate users.
+Each user has a separate [`userId`](#int-userid).
 
 #### Profile Group
 
-All user profiles that share a home screen. You can list the profiles of a user via
-`UserManager#getEnabledProfiles` (you usually don't deal with disabled profiles)
+Often, there is a 1-to-1 mapping of people who use a device to 'users'; e.g. there may be two users
+on a device - the owner and a guest, each with their own separate home screen.
 
-#### Foreground user vs background user
+However, Android also supports multiple profiles for a single person, e.g. one for their private
+life and one for work, both sharing a single home screen.
+Each profile in a profile group is a distinct user, with a unique [`userId`](#int-userid), and have
+a different set of apps and accounts,
+but they share a single UI, single launcher, and single wallpaper.
+All profiles of a profile group can be active at the same time.
 
-Only a single user profile group can be in the foreground. This is the user profile the user
-currently interacts with.
+You can list the profiles of a user via `UserManager#getEnabledProfiles` (you usually don't deal 
+with disabled profiles)
 
-#### Parent user (profile)
+#### Parent user
 
-The main profile of a profile group, usually the personal (as opposed to work) profile. Get this via
-`UserManager#getProfileParent` (returns `null` if the user does not have profiles)
+The main user of a profile group, to which the other profiles of the group 'belong'.
+This is usually the personal (as opposed to work) profile. Get this via
+`UserManager#getProfileParent` (returns `null` if the user does not have profiles).
 
-#### Managed user (profile)
+#### Profile (Managed profile)
 
-The other profiles of a profile group. The name comes from the fact that these profiles are usually
+A profile of the parent user, i.e. a profile belonging to the same profile group as a parent user,
+with whom they share a single home screen.
+Currently, the only type of profile supported in AOSP is a 'Managed Profile'.
+The name comes from the fact that these profiles are usually
 managed by a device policy controller app. You can create a managed profile from within the device
 policy controller app on your phone.
 
+Note that, as a member of the profile group, the parent user may sometimes also be considered a
+'profile', but generally speaking, the word 'profile' denotes a user that is subordinate to a
+parent.
+
+#### Foreground user vs background user
+
+Only a single user can be in the foreground.
+This is the user with whom the person using the device is currently interacting, or, in the case
+of profiles, the parent profile of this user.
+All other running users are background users.
+Some users may not be running at all, neither in the foreground nor the background.
+
 #### Account
 
-An account of a user profile with a (usually internet based) service. E.g. aname@gmail.com or
-aname@yahoo.com. Each profile can have multiple accounts. A profile does not have to have a
+An account of a user with a (usually internet based) service. E.g. aname@gmail.com or
+aname@yahoo.com. Each user can have multiple accounts. A user does not have to have a
 account.
+
+#### System User
+
+The user with [`userId`](#int-userid) 0 denotes the system user, which is always required to be
+running.
+
+On most devices, the system user is also used by the primary person using the device; however,
+on certain types of devices, the system user may be a stand-alone user, not intended for direct
+human interaction.
 
 ## Data types
 
 ### int userId
 
-... usually marked as `@UserIdInt`
-
-The id of a user profile. List all users via `adb shell dumpsys user`. There is no data type for a
-user, all you can do is using the user id of the parent profile as a proxy for the user.
+The id of a user. List all users via `adb shell dumpsys user`.
+In code, these are sometimes marked as `@UserIdInt`.
 
 ### int uid
 
@@ -97,10 +123,10 @@ mechanism should be access controlled by permissions.
 A system service should deal with users being started and stopped by overriding
 `SystemService.onSwitchUser` and `SystemService.onStopUser`.
 
-If users profiles become inactive the system should stop all apps of this profile from interacting
+If a user become inactive the system should stop all apps of this user from interacting
 with other apps or the system.
 
-Another important lifecycle event is `onUnlockUser`. Only for unlocked user profiles you can access
+Another important lifecycle event is `onUnlockUser`. Only for an unlocked user can you access
 all data, e.g. which packages are installed.
 
 You only want to deal with user profiles that
