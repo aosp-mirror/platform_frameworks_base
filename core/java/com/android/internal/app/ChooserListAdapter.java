@@ -838,6 +838,12 @@ public class ChooserListAdapter extends ResolverListAdapter {
         return mServiceTargets.get(value).getChooserTarget();
     }
 
+    protected boolean alwaysShowSubLabel() {
+        // Always show a subLabel for visual consistency across list items. Show an empty
+        // subLabel if the subLabel is the same as the label
+        return true;
+    }
+
     /**
      * Rather than fully sorting the input list, this sorting task will put the top k elements
      * in the head of input list and fill the tail with other elements in undetermined order.
