@@ -3292,11 +3292,13 @@ public class UserManagerService extends IUserManager.Stub {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("createUser-" + flags);
         final long sessionId = logUserCreateJourneyBegin(nextProbableUserId, userType, flags);
+        UserInfo newUser = null;
         try {
-            return createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
-                    preCreate, disallowedPackages, t);
+            newUser = createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
+                        preCreate, disallowedPackages, t);
+            return newUser;
         } finally {
-            logUserCreateJourneyFinish(sessionId, nextProbableUserId);
+            logUserCreateJourneyFinish(sessionId, nextProbableUserId, newUser != null);
             t.traceEnd();
         }
     }
@@ -3315,10 +3317,11 @@ public class UserManagerService extends IUserManager.Stub {
         return sessionId;
     }
 
-    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId) {
+    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
         FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH);
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                       : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
     }
 
     private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,
