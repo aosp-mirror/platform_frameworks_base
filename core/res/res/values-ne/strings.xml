@@ -1623,12 +1623,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"तपाईँले आफ्नो अनलक ढाँचा गलत रूपमा <xliff:g id="NUMBER_0">%1$d</xliff:g> पटक तान्नु भएको छ। <xliff:g id="NUMBER_1">%2$d</xliff:g> धेरै असफल प्रयासहरूपछि, तपाईँलाई एउटा इमेल खाताको प्रयोग गरेर तपाईँको फोन अनलक गर्न सोधिने छ।\n\n फेरि <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकेन्डमा प्रयास गर्नुहोस्।"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"हटाउनुहोस्"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> को पृष्ठभूमिबाट सुरु गरिने अग्रभूमि सेवाका भविष्यमा आउने R बिल्डहरूमा चलाउँदै गर्दा प्रयोग गर्ने अनुमतिको दिइने छैन। कृपया go/r-bg-fgs-restriction हेर्नुहोस् र कुनै बगसम्बन्धी रिपोर्ट फाइल गर्नुहोस्।"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"सिफारिस तहभन्दा आवाज ठुलो गर्नुहुन्छ?\n\nलामो समय सम्म उच्च आवाजमा सुन्दा तपाईँको सुन्ने शक्तिलाई हानी गर्न सक्छ।"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"पहुँच सम्बन्धी सर्टकट प्रयोग गर्ने हो?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"यो सर्टकट सक्रिय हुँदा, ३ सेकेन्डसम्म दुवै भोल्युम बटन थिच्नुले पहुँचसम्बन्धी कुनै सुविधा सुरु गर्ने छ।"</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"पहुँचसम्बन्धी सुविधाहरू सक्रिय गर्ने हो?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुले पहुँचसम्बन्धी सुविधाहरू सक्रिय गर्छ। यसले तपाईंको यन्त्रले काम गर्ने तरिका परिवर्तन गर्न सक्छ।\n\nहालका सुविधाहरू:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतपाईं सेटिङ &gt; पहुँचमा गएर चयन गरिएका सुविधाहरू परिवर्तन गर्न सक्नुहुन्छ।"</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुभयो भने पहुँचसम्बन्धी सुविधाहरू सक्रिय हुन्छ। यसले तपाईंको यन्त्रले काम गर्ने तरिका परिवर्तन गर्न सक्छ।\n\nहालका सुविधाहरू:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nतपाईं सेटिङ &gt; पहुँचमा गएर चयन गरिएका सुविधाहरू परिवर्तन गर्न सक्नुहुन्छ।"</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> सक्रिय गर्ने हो?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"केही सेकेन्डसम्म दुवै भोल्युम बटन थिचिराख्नुले <xliff:g id="SERVICE">%1$s</xliff:g> नामक पहुँचसम्बन्धी सुविधा  सक्रिय गर्छ। यसले तपाईंको यन्त्रले काम गर्ने तरिका परिवर्तन गर्न सक्छ।\n\nतपाईं सेटिङ &gt; पहुँचमा गई यो सर्टकटमार्फत अर्को सुविधा खुल्ने बनाउन सक्नुहुन्छ।"</string>
@@ -1655,13 +1654,13 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"सर्टकट प्रयोग गर्नुहोस्"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"रङ्ग उल्टाउने सुविधा"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"रङ्ग सच्याउने सुविधा"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सक्रिय पारियो।"</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> निष्क्रिय पारियो।"</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अन भयो।"</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"तपाईंले भोल्युम बटनहरू थिचिराख्नुभयो। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> अफ भयो।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"<xliff:g id="SERVICE_NAME">%1$s</xliff:g> प्रयोग गर्न दुवै भोल्युम कुञ्जीहरूलाई तीन सेकेन्डसम्म थिचिराख्नुहोस्"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"तपाईंले पहुँचको बटन ट्याप गर्दा प्रयोग गर्न चाहनुभएको सुविधा छनौट गर्नुहोस्:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"तपाईंले पहुँचको इसारामार्फत प्रयोग गर्न चाहनुभएको सुविधा छनौट गर्नुहोस् (दुईवटा औँलाले स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्):"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"तपाईंले पहुँचको इसारामार्फत प्रयोग गर्न चाहनुभएको सुविधा छनौट गर्नुहोस् (तीनवटा औँलाले स्क्रिनको फेदबाट माथितिर स्वाइप गर्नुहोस्):"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एउटा सुविधाबाट अर्को सुविधामा जान पहुँचको बटनमा छोइराख्नुहोस्।"</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"एउटा सुविधाबाट अर्को सुविधामा जान पहुँच बटन छोइराख्नुहोस्।"</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"एउटा सुविधाबाट अर्को सुविधामा जान दुईवटा औँलाले माथितिर स्वाइप गरी स्क्रिनमा छोइराख्नुहोस्।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"एउटा सुविधाबाट अर्को सुविधामा जान तीनवटा औँलाले माथितिर स्वाइप गरी स्क्रिनमा छोइराख्नुहोस्।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"म्याग्निफिकेसन"</string>

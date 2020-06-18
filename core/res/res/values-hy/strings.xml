@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Դուք <xliff:g id="NUMBER_0">%1$d</xliff:g> անգամ սխալ եք հավաքել ձեր ապակողպման նմուշը: <xliff:g id="NUMBER_1">%2$d</xliff:g> անգամից ավել անհաջող փորձերից հետո ձեզ կառաջարկվի ապակողպել ձեր հեռախոսը` օգտագործելով էլփոստի հաշիվ:\n\n Փորձեք կրկին <xliff:g id="NUMBER_2">%3$d</xliff:g> վայրկյանից:"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Հեռացնել"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Ֆոնային ռեժիմում <xliff:g id="PACKAGENAME">%1$s</xliff:g>-ից գործարկված առաջին պլանի ծառայությունը հետագա R կառուցումներում թույլտվություն չի ունենա օգտագործման ընթացքում։ Անցեք go/r-bg-fgs-restriction էջ և հաղորդեք վրիպակի մասին։"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Ձայնը բարձրացնե՞լ խորհուրդ տրվող մակարդակից ավել:\n\nԵրկարատև բարձրաձայն լսելը կարող է վնասել ձեր լսողությունը:"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Օգտագործե՞լ Մատչելիության դյուրանցումը։"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Հատուկ գործառույթն օգտագործելու համար սեղմեք և 3 վայրկյան սեղմած պահեք ձայնի ուժգնության երկու կոճակները, երբ գործառույթը միացված է:"</string>

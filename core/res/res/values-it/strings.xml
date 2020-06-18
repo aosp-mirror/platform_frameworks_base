@@ -1619,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Rimuovi"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Il servizio in primo piano avviato in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> non avrà l\'autorizzazione \"durante l\'uso\" nelle future build R. Visita la pagina go/r-bg-fgs-restriction e invia una segnalazione di bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Attivare le funzioni di accessibilità?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Se tieni premuti entrambi i tasti del volume per qualche secondo, le funzioni di accessibilità vengono attivate. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nFunzionalità correnti:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuoi modificare le funzionalità selezionate in Impostazioni &gt; Accessibilità."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Se tieni premuti entrambi i tasti del volume per qualche secondo, vengono attivate le funzioni di accessibilità. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nFunzioni correnti:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuoi modificare le funzioni selezionate in Impostazioni &gt; Accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Attivare <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Se tieni premuti entrambi i tasti del volume per qualche secondo verrà attivata la funzione di accessibilità <xliff:g id="SERVICE">%1$s</xliff:g>. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nPuoi associare questa scorciatoia a un\'altra funzionalità in Impostazioni &gt; Accessibilità."</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rifiuta"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tocca una funzionalità per iniziare a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Scegli le funzionalità da usare con il pulsante Accessibilità"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Scegli le funzionalità da usare con la scorciatoia per i tasti del volume"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Scegli le funzionalità da usare con la scorciatoia dei tasti del volume"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Il servizio <xliff:g id="SERVICE_NAME">%s</xliff:g> è stato disattivato"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifica scorciatoie"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fine"</string>
