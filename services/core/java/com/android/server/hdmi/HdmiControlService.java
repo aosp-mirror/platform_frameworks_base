@@ -3142,7 +3142,7 @@ public class HdmiControlService extends SystemService {
             return;
         }
 
-        setHdmiCecVolumeControlEnabled(false);
+        mHdmiCecVolumeControlEnabled = false;
         // Call the vendor handler before the service is disabled.
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING);
