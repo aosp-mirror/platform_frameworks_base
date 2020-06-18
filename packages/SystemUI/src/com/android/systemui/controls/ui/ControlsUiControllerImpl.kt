@@ -103,6 +103,22 @@ class ControlsUiControllerImpl @Inject constructor (
     private lateinit var dismissGlobalActions: Runnable
     private val popupThemedContext = ContextThemeWrapper(context, R.style.Control_ListPopupWindow)
 
+    private val collator = Collator.getInstance(context.resources.configuration.locales[0])
+    private val localeComparator = compareBy<SelectionItem, CharSequence>(collator) {
+        it.getTitle()
+    }
+
+    private val onSeedingComplete = Consumer<Boolean> {
+        accepted ->
+            if (accepted) {
+                selectedStructure = controlsController.get().getFavorites().maxBy {
+                    it.controls.size
+                } ?: EMPTY_STRUCTURE
+                updatePreferences(selectedStructure)
+            }
+            reload(parent)
+    }
+
     override val available: Boolean
         get() = controlsController.get().available
 
@@ -113,22 +129,13 @@ class ControlsUiControllerImpl @Inject constructor (
     ): ControlsListingController.ControlsListingCallback {
         return object : ControlsListingController.ControlsListingCallback {
             override fun onServicesUpdated(serviceInfos: List<ControlsServiceInfo>) {
-                bgExecutor.execute {
-                    val collator = Collator.getInstance(context.resources.configuration.locales[0])
-                    val localeComparator = compareBy<ControlsServiceInfo, CharSequence>(collator) {
-                        it.loadLabel()
-                    }
-
-                    val mList = serviceInfos.toMutableList()
-                    mList.sortWith(localeComparator)
-                    lastItems = mList.map {
-                        SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
-                    }
-                    uiExecutor.execute {
-                        parent.removeAllViews()
-                        if (lastItems.size > 0) {
-                            onResult(lastItems)
-                        }
+                val lastItems = serviceInfos.map {
+                    SelectionItem(it.loadLabel(), "", it.loadIcon(), it.componentName)
+                }
+                uiExecutor.execute {
+                    parent.removeAllViews()
+                    if (lastItems.size > 0) {
+                        onResult(lastItems)
                     }
                 }
             }
@@ -144,8 +151,7 @@ class ControlsUiControllerImpl @Inject constructor (
         allStructures = controlsController.get().getFavorites()
         selectedStructure = loadPreference(allStructures)
 
-        val cb = Consumer<Boolean> { _ -> reload(parent) }
-        if (controlsController.get().addSeedingFavoritesCallback(cb)) {
+        if (controlsController.get().addSeedingFavoritesCallback(onSeedingComplete)) {
             listingCallback = createCallback(::showSeedingView)
         } else if (selectedStructure.controls.isEmpty() && allStructures.size <= 1) {
             // only show initial view if there are really no favorites across any structure
@@ -309,9 +315,12 @@ class ControlsUiControllerImpl @Inject constructor (
         }
 
         val itemsByComponent = items.associateBy { it.componentName }
-        val itemsWithStructure = allStructures.mapNotNull {
+        val itemsWithStructure = mutableListOf<SelectionItem>()
+        allStructures.mapNotNullTo(itemsWithStructure) {
             itemsByComponent.get(it.componentName)?.copy(structure = it.structure)
         }
+        itemsWithStructure.sortWith(localeComparator)
+
         val selectionItem = findSelectionItem(selectedStructure, itemsWithStructure) ?: items[0]
 
         var adapter = ItemAdapter(context, R.layout.controls_spinner_item).apply {
@@ -441,6 +450,7 @@ class ControlsUiControllerImpl @Inject constructor (
     }
 
     private fun updatePreferences(si: StructureInfo) {
+        if (si == EMPTY_STRUCTURE) return
         sharedPreferences.edit()
             .putString(PREF_COMPONENT, si.componentName.flattenToString())
             .putString(PREF_STRUCTURE, si.structure.toString())
