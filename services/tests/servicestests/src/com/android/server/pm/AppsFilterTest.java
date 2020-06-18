@@ -806,7 +806,8 @@ public class AppsFilterTest {
 
         final SparseArray<int[]> systemFilter =
                 appsFilter.getVisibilityWhitelist(system, USER_ARRAY, mExisting);
-        assertThat(toList(systemFilter.get(SYSTEM_USER)), empty());
+        assertThat(toList(systemFilter.get(SYSTEM_USER)),
+                contains(seesNothingAppId, hasProviderAppId, queriesProviderAppId));
 
         final SparseArray<int[]> seesNothingFilter =
                 appsFilter.getVisibilityWhitelist(seesNothing, USER_ARRAY, mExisting);
