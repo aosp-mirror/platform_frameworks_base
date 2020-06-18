@@ -22,27 +22,19 @@ import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static com.android.server.location.LocationManagerService.D;
 import static com.android.server.location.LocationManagerService.TAG;
 
-import android.annotation.Nullable;
 import android.app.AppOpsManager;
-import android.content.Context;
 import android.location.util.identity.CallerIdentity;
-import android.os.Binder;
 import android.util.Log;
 
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.pooled.PooledLambda;
-import com.android.server.FgThread;
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationPermissions.PermissionLevel;
 
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Provides helpers and listeners for appops.
  */
-public class AppOpsHelper {
+public abstract class AppOpsHelper {
 
     /**
      * Listener for current user changes.
@@ -55,40 +47,13 @@ public class AppOpsHelper {
         void onAppOpsChanged(String packageName);
     }
 
-    private final Context mContext;
     private final CopyOnWriteArrayList<LocationAppOpListener> mListeners;
 
-    @GuardedBy("this")
-    @Nullable
-    private AppOpsManager mAppOps;
-
-    public AppOpsHelper(Context context) {
-        mContext = context;
+    public AppOpsHelper() {
         mListeners = new CopyOnWriteArrayList<>();
     }
 
-    /** Called when system is ready. */
-    public synchronized void onSystemReady() {
-        if (mAppOps != null) {
-            return;
-        }
-
-        mAppOps = Objects.requireNonNull(mContext.getSystemService(AppOpsManager.class));
-        mAppOps.startWatchingMode(
-                AppOpsManager.OP_COARSE_LOCATION,
-                null,
-                AppOpsManager.WATCH_FOREGROUND_CHANGES,
-                new AppOpsManager.OnOpChangedInternalListener() {
-                    public void onOpChanged(int op, String packageName) {
-                        // invoked on ui thread, move to fg thread so ui thread isn't blocked
-                        FgThread.getHandler().sendMessage(
-                                PooledLambda.obtainMessage(AppOpsHelper::onAppOpChanged,
-                                        AppOpsHelper.this, packageName));
-                    }
-                });
-    }
-
-    void onAppOpChanged(String packageName) {
+    protected final void notifyAppOpChanged(String packageName) {
         if (D) {
             Log.v(TAG, "location appop changed for " + packageName);
         }
@@ -101,14 +66,14 @@ public class AppOpsHelper {
     /**
      * Adds a listener for app ops events. Callbacks occur on an unspecified thread.
      */
-    public void addListener(LocationAppOpListener listener) {
+    public final void addListener(LocationAppOpListener listener) {
         mListeners.add(listener);
     }
 
     /**
      * Removes a listener for app ops events.
      */
-    public void removeListener(LocationAppOpListener listener) {
+    public final void removeListener(LocationAppOpListener listener) {
         mListeners.remove(listener);
     }
 
@@ -121,25 +86,13 @@ public class AppOpsHelper {
      *
      * @see AppOpsManager#checkOpNoThrow(int, int, String)
      */
-    public boolean checkLocationAccess(CallerIdentity callerIdentity,
+    public final boolean checkLocationAccess(CallerIdentity callerIdentity,
             @PermissionLevel int permissionLevel) {
-        synchronized (this) {
-            Preconditions.checkState(mAppOps != null);
-        }
-
         if (permissionLevel == LocationPermissions.PERMISSION_NONE) {
             return false;
         }
 
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return mAppOps.checkOpNoThrow(
-                    LocationPermissions.asAppOp(permissionLevel),
-                    callerIdentity.getUid(),
-                    callerIdentity.getPackageName()) == AppOpsManager.MODE_ALLOWED;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+        return checkOpNoThrow(LocationPermissions.asAppOp(permissionLevel), callerIdentity);
     }
 
     /**
@@ -147,7 +100,7 @@ public class AppOpsHelper {
      * called right before a location is delivered, and if it returns false, the location should not
      * be delivered.
      */
-    public boolean noteLocationAccess(CallerIdentity identity,
+    public final boolean noteLocationAccess(CallerIdentity identity,
             @PermissionLevel int permissionLevel) {
         if (permissionLevel == LocationPermissions.PERMISSION_NONE) {
             return false;
@@ -161,107 +114,48 @@ public class AppOpsHelper {
      * this function returns false, do not later call
      * {@link #stopLocationMonitoring(CallerIdentity)}.
      */
-    public boolean startLocationMonitoring(CallerIdentity identity) {
-        return startLocationMonitoring(OP_MONITOR_LOCATION, identity);
+    public final boolean startLocationMonitoring(CallerIdentity identity) {
+        return startOpNoThrow(OP_MONITOR_LOCATION, identity);
     }
 
     /**
      * Notifies app ops that the given identity is no longer using location at normal/low power
      * levels.
      */
-    public void stopLocationMonitoring(CallerIdentity identity) {
-        stopLocationMonitoring(OP_MONITOR_LOCATION, identity);
+    public final void stopLocationMonitoring(CallerIdentity identity) {
+        finishOp(OP_MONITOR_LOCATION, identity);
     }
 
     /**
      * Notifies app ops that the given identity is using location at high levels. If this function
      * returns false, do not later call {@link #stopLocationMonitoring(CallerIdentity)}.
      */
-    public boolean startHighPowerLocationMonitoring(CallerIdentity identity) {
-        return startLocationMonitoring(OP_MONITOR_HIGH_POWER_LOCATION, identity);
+    public final boolean startHighPowerLocationMonitoring(CallerIdentity identity) {
+        return startOpNoThrow(OP_MONITOR_HIGH_POWER_LOCATION, identity);
     }
 
     /**
      * Notifies app ops that the given identity is no longer using location at high power levels.
      */
-    public void stopHighPowerLocationMonitoring(CallerIdentity identity) {
-        stopLocationMonitoring(OP_MONITOR_HIGH_POWER_LOCATION, identity);
+    public final void stopHighPowerLocationMonitoring(CallerIdentity identity) {
+        finishOp(OP_MONITOR_HIGH_POWER_LOCATION, identity);
     }
 
     /**
      * Notes access to any mock location APIs. If this call returns false, access to the APIs should
      * silently fail.
      */
-    public boolean noteMockLocationAccess(CallerIdentity callerIdentity) {
-        synchronized (this) {
-            Preconditions.checkState(mAppOps != null);
-        }
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            // note that this is not the no throw version of noteOp, this call may throw exceptions
-            return mAppOps.noteOp(
-                    AppOpsManager.OP_MOCK_LOCATION,
-                    callerIdentity.getUid(),
-                    callerIdentity.getPackageName(),
-                    callerIdentity.getAttributionTag(),
-                    callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
+    public final boolean noteMockLocationAccess(CallerIdentity callerIdentity) {
+        return noteOp(AppOpsManager.OP_MOCK_LOCATION, callerIdentity);
     }
 
-    private boolean startLocationMonitoring(int appOp, CallerIdentity callerIdentity) {
-        synchronized (this) {
-            Preconditions.checkState(mAppOps != null);
-        }
+    protected abstract boolean startOpNoThrow(int appOp, CallerIdentity callerIdentity);
 
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return mAppOps.startOpNoThrow(
-                    appOp,
-                    callerIdentity.getUid(),
-                    callerIdentity.getPackageName(),
-                    false,
-                    callerIdentity.getAttributionTag(),
-                    callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
+    protected abstract void finishOp(int appOp, CallerIdentity callerIdentity);
 
-    private void stopLocationMonitoring(int appOp, CallerIdentity callerIdentity) {
-        synchronized (this) {
-            Preconditions.checkState(mAppOps != null);
-        }
+    protected abstract boolean checkOpNoThrow(int appOp, CallerIdentity callerIdentity);
 
-        long identity = Binder.clearCallingIdentity();
-        try {
-            mAppOps.finishOp(
-                    appOp,
-                    callerIdentity.getUid(),
-                    callerIdentity.getPackageName(),
-                    callerIdentity.getAttributionTag());
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
+    protected abstract boolean noteOp(int appOp, CallerIdentity callerIdentity);
 
-    private boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity) {
-        synchronized (this) {
-            Preconditions.checkState(mAppOps != null);
-        }
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return mAppOps.noteOpNoThrow(
-                    appOp,
-                    callerIdentity.getUid(),
-                    callerIdentity.getPackageName(),
-                    callerIdentity.getAttributionTag(),
-                    callerIdentity.getListenerId()) == AppOpsManager.MODE_ALLOWED;
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
+    protected abstract boolean noteOpNoThrow(int appOp, CallerIdentity callerIdentity);
 }
