@@ -250,8 +250,9 @@ public class PipTouchHandler {
 
         mPipBoundsHandler = pipBoundsHandler;
         mFloatingContentCoordinator = floatingContentCoordinator;
-        mConnection = new PipAccessibilityInteractionConnection(mMotionHelper,
-                this::onAccessibilityShowMenu, mHandler);
+        mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
+                pipTaskOrganizer, pipSnapAlgorithm, this::onAccessibilityShowMenu,
+                this::updateMovementBounds, mHandler);
 
         mTargetView = new DismissCircleView(context);
         mTargetViewContainer = new FrameLayout(context);
@@ -499,6 +500,8 @@ public class PipTouchHandler {
         mInsetBounds.set(insetBounds);
         updateMovementBounds();
         mMovementBoundsExtraOffsets = extraOffset;
+        mConnection.onMovementBoundsChanged(mNormalBounds, mExpandedBounds, mNormalMovementBounds,
+                mExpandedMovementBounds);
 
         // If we have a deferred resize, apply it now
         if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
