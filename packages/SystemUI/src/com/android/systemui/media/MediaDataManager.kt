@@ -38,18 +38,20 @@ import android.service.notification.StatusBarNotification
 import android.text.TextUtils
 import android.util.Log
 import com.android.internal.graphics.ColorUtils
+import com.android.systemui.Dumpable
 import com.android.systemui.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
-import com.android.systemui.statusbar.notification.NotificationEntryManager
-import com.android.systemui.statusbar.notification.NotificationEntryManager.UNDEFINED_DISMISS_REASON
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
+import java.io.FileDescriptor
 import java.io.IOException
+import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -85,20 +87,35 @@ fun isMediaNotification(sbn: StatusBarNotification): Boolean {
  * A class that facilitates management and loading of Media Data, ready for binding.
  */
 @Singleton
-class MediaDataManager @Inject constructor(
+class MediaDataManager(
     private val context: Context,
-    private val mediaControllerFactory: MediaControllerFactory,
-    private val notificationEntryManager: NotificationEntryManager,
     @Background private val backgroundExecutor: Executor,
     @Main private val foregroundExecutor: Executor,
-    broadcastDispatcher: BroadcastDispatcher,
+    private val mediaControllerFactory: MediaControllerFactory,
+    private val broadcastDispatcher: BroadcastDispatcher,
+    dumpManager: DumpManager,
     mediaTimeoutListener: MediaTimeoutListener,
-    mediaResumeListener: MediaResumeListener
-) {
+    mediaResumeListener: MediaResumeListener,
+    private val useMediaResumption: Boolean,
+    private val useQsMediaPlayer: Boolean
+) : Dumpable {
 
     private val listeners: MutableSet<Listener> = mutableSetOf()
     private val mediaEntries: LinkedHashMap<String, MediaData> = LinkedHashMap()
-    private val useMediaResumption: Boolean = Utils.useMediaResumption(context)
+
+    @Inject
+    constructor(
+        context: Context,
+        @Background backgroundExecutor: Executor,
+        @Main foregroundExecutor: Executor,
+        mediaControllerFactory: MediaControllerFactory,
+        dumpManager: DumpManager,
+        broadcastDispatcher: BroadcastDispatcher,
+        mediaTimeoutListener: MediaTimeoutListener,
+        mediaResumeListener: MediaResumeListener
+    ) : this(context, backgroundExecutor, foregroundExecutor, mediaControllerFactory,
+            broadcastDispatcher, dumpManager, mediaTimeoutListener, mediaResumeListener,
+            Utils.useMediaResumption(context), Utils.useQsMediaPlayer(context))
 
     private val userChangeReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
@@ -128,6 +145,7 @@ class MediaDataManager @Inject constructor(
     }
 
     init {
+        dumpManager.registerDumpable(TAG, this)
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
             setTimedOut(token, timedOut) }
         addListener(mediaTimeoutListener)
@@ -159,8 +177,13 @@ class MediaDataManager @Inject constructor(
         context.registerReceiver(appChangeReceiver, uninstallFilter)
     }
 
+    fun destroy() {
+        context.unregisterReceiver(appChangeReceiver)
+        broadcastDispatcher.unregisterReceiver(userChangeReceiver)
+    }
+
     fun onNotificationAdded(key: String, sbn: StatusBarNotification) {
-        if (Utils.useQsMediaPlayer(context) && isMediaNotification(sbn)) {
+        if (useQsMediaPlayer && isMediaNotification(sbn)) {
             Assert.isMainThread()
             val oldKey = findExistingEntry(key, sbn.packageName)
             if (oldKey == null) {
@@ -253,18 +276,18 @@ class MediaDataManager @Inject constructor(
      */
     fun removeListener(listener: Listener) = listeners.remove(listener)
 
+    /**
+     * Called whenever the player has been paused or stopped for a while.
+     * This will make the player not active anymore, hiding it from QQS and Keyguard.
+     * @see MediaData.active
+     */
     private fun setTimedOut(token: String, timedOut: Boolean) {
         mediaEntries[token]?.let {
-            if (Utils.useMediaResumption(context)) {
-                if (it.active == !timedOut) {
-                    return
-                }
-                it.active = !timedOut
-                onMediaDataLoaded(token, token, it)
-            } else if (timedOut) {
-                notificationEntryManager.removeNotification(it.notificationKey, null /* ranking */,
-                        UNDEFINED_DISMISS_REASON)
+            if (it.active == !timedOut) {
+                return
             }
+            it.active = !timedOut
+            onMediaDataLoaded(token, token, it)
         }
     }
 
@@ -569,5 +592,13 @@ class MediaDataManager @Inject constructor(
          * Called whenever a previously existing Media notification was removed
          */
         fun onMediaDataRemoved(key: String) {}
+    }
+
+    override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
+        pw.apply {
+            println("listeners: $listeners")
+            println("mediaEntries: $mediaEntries")
+            println("useMediaResumption: $useMediaResumption")
+        }
     }
 }
