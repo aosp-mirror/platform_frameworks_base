@@ -64,7 +64,7 @@ public abstract class InlineSuggestionRenderService extends Service {
     public static final String SERVICE_INTERFACE =
             "android.service.autofill.InlineSuggestionRenderService";
 
-    private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
+    private final Handler mMainHandler = new Handler(Looper.getMainLooper(), null, true);
 
     private IInlineSuggestionUiCallback mCallback;
 
@@ -192,15 +192,22 @@ public abstract class InlineSuggestionRenderService extends Service {
                 }
                 return true;
             });
+            final InlineSuggestionUiImpl uiImpl = new InlineSuggestionUiImpl(host, mMainHandler);
+            mActiveInlineSuggestions.put(uiImpl, true);
 
-            try {
-                InlineSuggestionUiImpl uiImpl = new InlineSuggestionUiImpl(host, mHandler);
-                mActiveInlineSuggestions.put(uiImpl, true);
-                callback.onContent(new InlineSuggestionUiWrapper(uiImpl), host.getSurfacePackage(),
-                        measuredSize.getWidth(), measuredSize.getHeight());
-            } catch (RemoteException e) {
-                Log.w(TAG, "RemoteException calling onContent()");
-            }
+            // We post the callback invocation to the end of the main thread handler queue, to make
+            // sure the callback happens after the views are drawn. This is needed because calling
+            // {@link SurfaceControlViewHost#setView()} will post a task to the main thread
+            // to draw the view asynchronously.
+            mMainHandler.post(() -> {
+                try {
+                    callback.onContent(new InlineSuggestionUiWrapper(uiImpl),
+                            host.getSurfacePackage(),
+                            measuredSize.getWidth(), measuredSize.getHeight());
+                } catch (RemoteException e) {
+                    Log.w(TAG, "RemoteException calling onContent()");
+                }
+            });
         } finally {
             updateDisplay(Display.DEFAULT_DISPLAY);
         }
@@ -305,7 +312,7 @@ public abstract class InlineSuggestionRenderService extends Service {
                 public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
                         @NonNull InlinePresentation presentation, int width, int height,
                         @Nullable IBinder hostInputToken, int displayId) {
-                    mHandler.sendMessage(
+                    mMainHandler.sendMessage(
                             obtainMessage(InlineSuggestionRenderService::handleRenderSuggestion,
                                     InlineSuggestionRenderService.this, callback, presentation,
                                     width, height, hostInputToken, displayId));
@@ -313,7 +320,7 @@ public abstract class InlineSuggestionRenderService extends Service {
 
                 @Override
                 public void getInlineSuggestionsRendererInfo(@NonNull RemoteCallback callback) {
-                    mHandler.sendMessage(obtainMessage(
+                    mMainHandler.sendMessage(obtainMessage(
                             InlineSuggestionRenderService::handleGetInlineSuggestionsRendererInfo,
                             InlineSuggestionRenderService.this, callback));
                 }
