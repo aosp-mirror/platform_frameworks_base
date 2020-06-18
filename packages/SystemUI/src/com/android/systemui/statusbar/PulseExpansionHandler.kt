@@ -27,7 +27,6 @@ import android.os.SystemClock
 import android.view.MotionEvent
 import android.view.VelocityTracker
 import android.view.ViewConfiguration
-
 import com.android.systemui.Gefingerpoken
 import com.android.systemui.Interpolators
 import com.android.systemui.R
@@ -41,7 +40,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationStackScroll
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.ShadeController
-
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.max
@@ -162,10 +160,12 @@ constructor(
 
             MotionEvent.ACTION_UP -> {
                 recycleVelocityTracker()
+                isExpanding = false
             }
 
             MotionEvent.ACTION_CANCEL -> {
                 recycleVelocityTracker()
+                isExpanding = false
             }
         }
         return false
@@ -181,7 +181,8 @@ constructor(
             return false
         }
 
-        if (!isExpanding || event.actionMasked == MotionEvent.ACTION_DOWN) {
+        if (velocityTracker == null || !isExpanding ||
+                event.actionMasked == MotionEvent.ACTION_DOWN) {
             return startExpansion(event)
         }
         velocityTracker!!.addMovement(event)
