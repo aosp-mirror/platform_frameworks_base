@@ -5664,10 +5664,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          * Return {@code true} if there is an ongoing animation to the "Recents" activity and this
          * activity as a fixed orientation so shouldn't be rotated.
          */
-        boolean isFixedOrientationRecentsAnimating() {
+        boolean isTopFixedOrientationRecentsAnimating() {
             return mAnimatingRecents != null
                     && mAnimatingRecents.getRequestedConfigurationOrientation()
-                    != ORIENTATION_UNDEFINED;
+                    != ORIENTATION_UNDEFINED && !hasTopFixedRotationLaunchingApp();
         }
 
         @Override
