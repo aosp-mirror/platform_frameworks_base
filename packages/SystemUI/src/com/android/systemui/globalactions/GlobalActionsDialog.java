@@ -1425,16 +1425,26 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Log.w(TAG, "No power options action found at position: " + position);
                 return null;
             }
-            int viewLayoutResource = com.android.systemui.R.layout.controls_more_item;
+            int viewLayoutResource = com.android.systemui.R.layout.global_actions_power_item;
             View view = convertView != null ? convertView
                     : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
-            TextView textView = (TextView) view;
-            if (action.getMessageResId() != 0) {
-                textView.setText(action.getMessageResId());
-            } else {
-                textView.setText(action.getMessage());
+            view.setOnClickListener(v -> onClickItem(position));
+            if (action instanceof LongPressAction) {
+                view.setOnLongClickListener(v -> onLongClickItem(position));
             }
-            return textView;
+            ImageView icon = view.findViewById(R.id.icon);
+            TextView messageView = view.findViewById(R.id.message);
+            messageView.setSelected(true); // necessary for marquee to work
+
+            icon.setImageDrawable(action.getIcon(mContext));
+            icon.setScaleType(ScaleType.CENTER_CROP);
+
+            if (action.getMessage() != null) {
+                messageView.setText(action.getMessage());
+            } else {
+                messageView.setText(action.getMessageResId());
+            }
+            return view;
         }
 
         private boolean onLongClickItem(int position) {
@@ -1570,6 +1580,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         int getMessageResId();
 
         /**
+         * Return the icon drawable for this action.
+         */
+        Drawable getIcon(Context context);
+
+        /**
          * Return the message associated with this action, or null if it doesn't have one.
          * @return
          */
@@ -1633,6 +1648,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return mMessage;
         }
 
+        @Override
+        public Drawable getIcon(Context context) {
+            if (mIcon != null) {
+                return mIcon;
+            } else {
+                return context.getDrawable(mIconResId);
+            }
+        }
+
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
             View v = inflater.inflate(com.android.systemui.R.layout.global_actions_grid_item_v2,
@@ -1642,12 +1666,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             TextView messageView = v.findViewById(R.id.message);
             messageView.setSelected(true); // necessary for marquee to work
 
-            if (mIcon != null) {
-                icon.setImageDrawable(mIcon);
-                icon.setScaleType(ScaleType.CENTER_CROP);
-            } else if (mIconResId != 0) {
-                icon.setImageDrawable(context.getDrawable(mIconResId));
-            }
+            icon.setImageDrawable(getIcon(context));
+            icon.setScaleType(ScaleType.CENTER_CROP);
+
             if (mMessage != null) {
                 messageView.setText(mMessage);
             } else {
@@ -1736,6 +1757,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private int getIconResId() {
             return isOn() ? mEnabledIconResId : mDisabledIconResid;
+        }
+
+        @Override
+        public Drawable getIcon(Context context) {
+            return context.getDrawable(getIconResId());
         }
 
         public View create(Context context, View convertView, ViewGroup parent,
@@ -1903,6 +1929,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public CharSequence getMessage() {
             return null;
         }
+
+        @Override
+        public Drawable getIcon(Context context) {
+            return null;
+        }
+
 
         public View create(Context context, View convertView, ViewGroup parent,
                 LayoutInflater inflater) {
@@ -2075,7 +2107,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final NotificationShadeDepthController mDepthController;
         private final SysUiState mSysUiState;
         private ListPopupWindow mOverflowPopup;
-        private ListPopupWindow mPowerOptionsPopup;
+        private Dialog mPowerOptionsDialog;
         private final Runnable mOnRotateCallback;
         private final boolean mControlsAvailable;
 
@@ -2211,21 +2243,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
-        private ListPopupWindow createPowerOptionsPopup() {
-            GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
-                    new ContextThemeWrapper(
-                            mContext,
-                            com.android.systemui.R.style.Control_ListPopupWindow
-                    ), false /* isDropDownMode */);
-            popup.setOnItemClickListener(
-                    (parent, view, position, id) -> mPowerOptionsAdapter.onClickItem(position));
-            popup.setOnItemLongClickListener(
-                    (parent, view, position, id) -> mPowerOptionsAdapter.onLongClickItem(position));
-            popup.setAnchorView(mGlobalActionsLayout);
-            popup.setAdapter(mPowerOptionsAdapter);
-            return popup;
-        }
-
         private ListPopupWindow createPowerOverflowPopup() {
             GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
                     new ContextThemeWrapper(
@@ -2244,8 +2261,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         public void showPowerOptionsMenu() {
-            mPowerOptionsPopup = createPowerOptionsPopup();
-            mPowerOptionsPopup.show();
+            mPowerOptionsDialog = GlobalActionsPowerDialog.create(mContext, mPowerOptionsAdapter);
+            mPowerOptionsDialog.show();
         }
 
         private void showPowerOverflowMenu() {
@@ -2479,11 +2496,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private void dismissPowerOptions(boolean immediate) {
-            if (mPowerOptionsPopup != null) {
+            if (mPowerOptionsDialog != null) {
                 if (immediate) {
-                    mPowerOptionsPopup.dismissImmediate();
+                    mPowerOptionsDialog.dismiss();
                 } else {
-                    mPowerOptionsPopup.dismiss();
+                    mPowerOptionsDialog.dismiss();
                 }
             }
         }
