@@ -195,6 +195,7 @@ public class ChooserActivity extends ResolverActivity implements
     private boolean mIsAppPredictorComponentAvailable;
     private Map<ChooserTarget, AppTarget> mDirectShareAppTargetCache;
     private Map<ChooserTarget, ShortcutInfo> mDirectShareShortcutInfoCache;
+    private Map<ComponentName, ComponentName> mChooserTargetComponentNameCache;
 
     public static final int TARGET_TYPE_DEFAULT = 0;
     public static final int TARGET_TYPE_CHOOSER_TARGET = 1;
@@ -511,6 +512,11 @@ public class ChooserActivity extends ResolverActivity implements
                             adapterForUserHandle.addServiceResults(sri.originalTarget,
                                     sri.resultTargets, TARGET_TYPE_CHOOSER_TARGET,
                                     /* directShareShortcutInfoCache */ null, mServiceConnections);
+                            if (!sri.resultTargets.isEmpty() && sri.originalTarget != null) {
+                                mChooserTargetComponentNameCache.put(
+                                        sri.resultTargets.get(0).getComponentName(),
+                                        sri.originalTarget.getResolvedComponentName());
+                            }
                         }
                     }
                     unbindService(sri.connection);
@@ -772,6 +778,7 @@ public class ChooserActivity extends ResolverActivity implements
                 target.getAction()
         );
         mDirectShareShortcutInfoCache = new HashMap<>();
+        mChooserTargetComponentNameCache = new HashMap<>();
     }
 
     @Override
@@ -2242,15 +2249,18 @@ public class ChooserActivity extends ResolverActivity implements
         List<AppTargetId> targetIds = new ArrayList<>();
         for (ChooserTargetInfo chooserTargetInfo : surfacedTargetInfo) {
             ChooserTarget chooserTarget = chooserTargetInfo.getChooserTarget();
-            String componentName = chooserTarget.getComponentName().flattenToString();
+            ComponentName componentName = mChooserTargetComponentNameCache.getOrDefault(
+                    chooserTarget.getComponentName(), chooserTarget.getComponentName());
             if (mDirectShareShortcutInfoCache.containsKey(chooserTarget)) {
                 String shortcutId = mDirectShareShortcutInfoCache.get(chooserTarget).getId();
                 targetIds.add(new AppTargetId(
-                        String.format("%s/%s/%s", shortcutId, componentName, SHORTCUT_TARGET)));
+                        String.format("%s/%s/%s", shortcutId, componentName.flattenToString(),
+                                SHORTCUT_TARGET)));
             } else {
                 String titleHash = ChooserUtil.md5(chooserTarget.getTitle().toString());
                 targetIds.add(new AppTargetId(
-                        String.format("%s/%s/%s", titleHash, componentName, CHOOSER_TARGET)));
+                        String.format("%s/%s/%s", titleHash, componentName.flattenToString(),
+                                CHOOSER_TARGET)));
             }
         }
         directShareAppPredictor.notifyLaunchLocationShown(LAUNCH_LOCATION_DIRECT_SHARE, targetIds);
@@ -2272,7 +2282,8 @@ public class ChooserActivity extends ResolverActivity implements
         }
         if (mChooserTargetRankingEnabled && appTarget == null) {
             // Send ChooserTarget sharing info to AppPredictor.
-            ComponentName componentName = chooserTarget.getComponentName();
+            ComponentName componentName = mChooserTargetComponentNameCache.getOrDefault(
+                    chooserTarget.getComponentName(), chooserTarget.getComponentName());
             try {
                 appTarget = new AppTarget.Builder(
                         new AppTargetId(componentName.flattenToString()),
@@ -2800,17 +2811,7 @@ public class ChooserActivity extends ResolverActivity implements
                 || chooserListAdapter.mDisplayList.isEmpty()) {
             chooserListAdapter.notifyDataSetChanged();
         } else {
-            new AsyncTask<Void, Void, Void>() {
-                @Override
-                protected Void doInBackground(Void... voids) {
-                    chooserListAdapter.updateAlphabeticalList();
-                    return null;
-                }
-                @Override
-                protected void onPostExecute(Void aVoid) {
-                    chooserListAdapter.notifyDataSetChanged();
-                }
-            }.execute();
+            chooserListAdapter.updateAlphabeticalList();
         }
 
         // don't support direct share on low ram devices

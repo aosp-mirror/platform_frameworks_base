@@ -89,12 +89,14 @@ import android.os.test.TestLooper;
 import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.networkstack.tethering.BpfCoordinator;
 import com.android.networkstack.tethering.BpfCoordinator.Ipv6ForwardingRule;
 import com.android.networkstack.tethering.PrivateAddressCoordinator;
+import com.android.networkstack.tethering.TetheringConfiguration;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -142,6 +144,7 @@ public class IpServerTest {
     @Mock private IpServer.Dependencies mDependencies;
     @Mock private PrivateAddressCoordinator mAddressCoordinator;
     @Mock private NetworkStatsManager mStatsManager;
+    @Mock private TetheringConfiguration mTetherConfig;
 
     @Captor private ArgumentCaptor<DhcpServingParamsParcel> mDhcpParamsCaptor;
 
@@ -225,10 +228,35 @@ public class IpServerTest {
         MockitoAnnotations.initMocks(this);
         when(mSharedLog.forSubComponent(anyString())).thenReturn(mSharedLog);
         when(mAddressCoordinator.requestDownstreamAddress(any())).thenReturn(mTestAddress);
+        when(mTetherConfig.isBpfOffloadEnabled()).thenReturn(true /* default value */);
 
-        BpfCoordinator bc = new BpfCoordinator(new Handler(mLooper.getLooper()), mNetd,
-                mStatsManager, mSharedLog, new BpfCoordinator.Dependencies());
-        mBpfCoordinator = spy(bc);
+        mBpfCoordinator = spy(new BpfCoordinator(
+                new BpfCoordinator.Dependencies() {
+                    @NonNull
+                    public Handler getHandler() {
+                        return new Handler(mLooper.getLooper());
+                    }
+
+                    @NonNull
+                    public INetd getNetd() {
+                        return mNetd;
+                    }
+
+                    @NonNull
+                    public NetworkStatsManager getNetworkStatsManager() {
+                        return mStatsManager;
+                    }
+
+                    @NonNull
+                    public SharedLog getSharedLog() {
+                        return mSharedLog;
+                    }
+
+                    @Nullable
+                    public TetheringConfiguration getTetherConfig() {
+                        return mTetherConfig;
+                    }
+                }));
     }
 
     @Test
@@ -671,18 +699,21 @@ public class IpServerTest {
         }
     }
 
-    private TetherOffloadRuleParcel matches(
+    @NonNull
+    private static TetherOffloadRuleParcel matches(
             int upstreamIfindex, InetAddress dst, MacAddress dstMac) {
         return argThat(new TetherOffloadRuleParcelMatcher(upstreamIfindex, dst, dstMac));
     }
 
+    @NonNull
     private static Ipv6ForwardingRule makeForwardingRule(
             int upstreamIfindex, @NonNull InetAddress dst, @NonNull MacAddress dstMac) {
         return new Ipv6ForwardingRule(upstreamIfindex, TEST_IFACE_PARAMS.index,
                 (Inet6Address) dst, TEST_IFACE_PARAMS.macAddr, dstMac);
     }
 
-    private TetherStatsParcel buildEmptyTetherStatsParcel(int ifIndex) {
+    @NonNull
+    private static TetherStatsParcel buildEmptyTetherStatsParcel(int ifIndex) {
         TetherStatsParcel parcel = new TetherStatsParcel();
         parcel.ifIndex = ifIndex;
         return parcel;

@@ -171,7 +171,7 @@ public class BubbleExpandedView extends LinearLayout {
                             return;
                         }
                         try {
-                            if (!mIsOverflow && mBubble.usingShortcutInfo()) {
+                            if (!mIsOverflow && mBubble.getShortcutInfo() != null) {
                                 options.setApplyActivityFlagsForBubbles(true);
                                 mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
                                         options, null /* sourceBounds */);
@@ -668,7 +668,7 @@ public class BubbleExpandedView extends LinearLayout {
                 desiredHeight = Math.max(mBubble.getDesiredHeight(mContext), mMinHeight);
             }
             float height = Math.min(desiredHeight, getMaxExpandedHeight());
-            height = Math.max(height, mIsOverflow? mOverflowHeight : mMinHeight);
+            height = Math.max(height, mMinHeight);
             ViewGroup.LayoutParams lp = mActivityView.getLayoutParams();
             mNeedsNewHeight = lp.height != height;
             if (!mKeyboardVisible) {

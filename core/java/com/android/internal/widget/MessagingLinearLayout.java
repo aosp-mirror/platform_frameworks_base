@@ -300,6 +300,27 @@ public class MessagingLinearLayout extends ViewGroup {
         return mMessagingLayout;
     }
 
+    @Override
+    public int getBaseline() {
+        // When placed in a horizontal linear layout (as is the case in a single-line MessageGroup),
+        // align with the last visible child (which is the one that will be displayed in the single-
+        // line group.
+        int childCount = getChildCount();
+        for (int i = childCount - 1; i >= 0; i--) {
+            final View child = getChildAt(i);
+            if (isGone(child)) {
+                continue;
+            }
+            final int childBaseline = child.getBaseline();
+            if (childBaseline == -1) {
+                return -1;
+            }
+            MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+            return lp.topMargin + childBaseline;
+        }
+        return super.getBaseline();
+    }
+
     public interface MessagingChild {
         int MEASURED_NORMAL = 0;
         int MEASURED_SHORTENED = 1;
