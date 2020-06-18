@@ -719,8 +719,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateRequestedInsetsState(InsetsState state) {
 
         // Only update the sources the client is actually controlling.
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            final InsetsSource source = state.peekSource(i);
+            if (source == null) continue;
             mRequestedInsetsState.addSource(source);
         }
     }
@@ -5285,10 +5286,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWillReplaceWindow;
     }
 
-    private void applyDims(Dimmer dimmer) {
+    private void applyDims() {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
-            dimmer.dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
+            getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow() && !mHidden) {
             // Only show a dim behind when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND
@@ -5296,7 +5297,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
             mIsDimming = true;
-            dimmer.dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
+            getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
         }
     }
 
@@ -5320,11 +5321,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void prepareSurfaces() {
-        final Dimmer dimmer = getDimmer();
         mIsDimming = false;
-        if (dimmer != null) {
-            applyDims(dimmer);
-        }
+        applyDims();
         updateSurfacePosition();
         // Send information to SufaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();

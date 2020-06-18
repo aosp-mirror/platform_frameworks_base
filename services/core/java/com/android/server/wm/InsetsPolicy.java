@@ -111,15 +111,20 @@ class InsetsPolicy {
             abortTransient();
         }
         mFocusedWin = focusedWin;
-        mStateController.onBarControlTargetChanged(getStatusControlTarget(focusedWin),
-                getFakeStatusControlTarget(focusedWin),
-                getNavControlTarget(focusedWin),
-                getFakeNavControlTarget(focusedWin));
+        boolean forceShowsSystemBarsForWindowingMode = forceShowsSystemBarsForWindowingMode();
+        InsetsControlTarget statusControlTarget = getStatusControlTarget(focusedWin,
+                forceShowsSystemBarsForWindowingMode);
+        InsetsControlTarget navControlTarget = getNavControlTarget(focusedWin,
+                forceShowsSystemBarsForWindowingMode);
+        mStateController.onBarControlTargetChanged(statusControlTarget,
+                getFakeControlTarget(focusedWin, statusControlTarget),
+                navControlTarget,
+                getFakeControlTarget(focusedWin, navControlTarget));
         if (ViewRootImpl.sNewInsetsMode != ViewRootImpl.NEW_INSETS_MODE_FULL) {
             return;
         }
-        mStatusBar.updateVisibility(getStatusControlTarget(focusedWin), ITYPE_STATUS_BAR);
-        mNavBar.updateVisibility(getNavControlTarget(focusedWin), ITYPE_NAVIGATION_BAR);
+        mStatusBar.updateVisibility(statusControlTarget, ITYPE_STATUS_BAR);
+        mNavBar.updateVisibility(navControlTarget, ITYPE_NAVIGATION_BAR);
         mPolicy.updateHideNavInputEventReceiver();
     }
 
@@ -237,16 +242,13 @@ class InsetsPolicy {
         updateBarControlTarget(mFocusedWin);
     }
 
-    private @Nullable InsetsControlTarget getFakeStatusControlTarget(
-            @Nullable WindowState focused) {
-        return getStatusControlTarget(focused) == mDummyControlTarget ? focused : null;
+    private @Nullable InsetsControlTarget getFakeControlTarget(@Nullable WindowState focused,
+            InsetsControlTarget realControlTarget) {
+        return realControlTarget == mDummyControlTarget ? focused : null;
     }
 
-    private @Nullable InsetsControlTarget getFakeNavControlTarget(@Nullable WindowState focused) {
-        return getNavControlTarget(focused) == mDummyControlTarget ? focused : null;
-    }
-
-    private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin) {
+    private @Nullable InsetsControlTarget getStatusControlTarget(@Nullable WindowState focusedWin,
+            boolean forceShowsSystemBarsForWindowingMode) {
         if (mShowingTransientTypes.indexOf(ITYPE_STATUS_BAR) != -1) {
             return mDummyControlTarget;
         }
@@ -254,7 +256,7 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (forceShowsSystemBarsForWindowingMode()) {
+        if (forceShowsSystemBarsForWindowingMode) {
             // Status bar is forcibly shown for the windowing mode which is a steady state.
             // We don't want the client to control the status bar, and we will dispatch the real
             // visibility of status bar to the client.
@@ -274,7 +276,8 @@ class InsetsPolicy {
         return focusedWin;
     }
 
-    private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin) {
+    private @Nullable InsetsControlTarget getNavControlTarget(@Nullable WindowState focusedWin,
+            boolean forceShowsSystemBarsForWindowingMode) {
         if (mShowingTransientTypes.indexOf(ITYPE_NAVIGATION_BAR) != -1) {
             return mDummyControlTarget;
         }
@@ -282,7 +285,7 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
-        if (forceShowsSystemBarsForWindowingMode()) {
+        if (forceShowsSystemBarsForWindowingMode) {
             // Navigation bar is forcibly shown for the windowing mode which is a steady state.
             // We don't want the client to control the navigation bar, and we will dispatch the real
             // visibility of navigation bar to the client.
