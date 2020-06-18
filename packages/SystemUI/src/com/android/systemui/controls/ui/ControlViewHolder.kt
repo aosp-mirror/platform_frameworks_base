@@ -128,6 +128,8 @@ class ControlViewHolder(
     val controlTemplate: ControlTemplate
         get() = cws.control?.let { it.controlTemplate } ?: ControlTemplate.NO_TEMPLATE
 
+    var userInteractionInProgress = false
+
     init {
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
@@ -139,6 +141,11 @@ class ControlViewHolder(
     }
 
     fun bindData(cws: ControlWithState) {
+        // If an interaction is in progress, the update may visually interfere with the action the
+        // action the user wants to make. Don't apply the update, and instead assume a new update
+        // will coming from when the user interaction is complete.
+        if (userInteractionInProgress) return
+
         this.cws = cws
 
         cancelUpdate?.run()
