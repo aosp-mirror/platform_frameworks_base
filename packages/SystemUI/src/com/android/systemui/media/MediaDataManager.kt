@@ -293,10 +293,11 @@ class MediaDataManager @Inject constructor(
         } else {
             null
         }
+        val bgColor = artworkBitmap?.let { computeBackgroundColor(it) } ?: Color.DKGRAY
 
         val mediaAction = getResumeMediaAction(resumeAction)
         foregroundExecutor.execute {
-            onMediaDataLoaded(packageName, null, MediaData(true, Color.DKGRAY, appName,
+            onMediaDataLoaded(packageName, null, MediaData(true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
                     resumeAction = resumeAction))
@@ -319,7 +320,6 @@ class MediaDataManager @Inject constructor(
 
         // Foreground and Background colors computed from album art
         val notif: Notification = sbn.notification
-        var bgColor = Color.WHITE
         var artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ART)
         if (artworkBitmap == null) {
             artworkBitmap = metadata.getBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART)
@@ -349,26 +349,8 @@ class MediaDataManager @Inject constructor(
                     drawable.draw(canvas)
                 }
             }
-            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
-                    .generate()
-            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
-            bgColor = swatch.rgb
         }
-        // Adapt background color, so it's always subdued and text is legible
-        val tmpHsl = floatArrayOf(0f, 0f, 0f)
-        ColorUtils.colorToHSL(bgColor, tmpHsl)
-
-        val l = tmpHsl[2]
-        // Colors with very low luminosity can have any saturation. This means that changing the
-        // luminosity can make a black become red. Let's remove the saturation of very light or
-        // very dark colors to avoid this issue.
-        if (l < LUMINOSITY_THRESHOLD || l > 1f - LUMINOSITY_THRESHOLD) {
-            tmpHsl[1] = 0f
-        }
-        tmpHsl[1] *= SATURATION_MULTIPLIER
-        tmpHsl[2] = DEFAULT_LUMINOSITY
-
-        bgColor = ColorUtils.HSLToColor(tmpHsl)
+        val bgColor = computeBackgroundColor(artworkBitmap)
 
         // App name
         val builder = Notification.Builder.recoverBuilder(context, notif)
@@ -478,6 +460,33 @@ class MediaDataManager @Inject constructor(
             e.printStackTrace()
             null
         }
+    }
+
+    private fun computeBackgroundColor(artworkBitmap: Bitmap?): Int {
+        var color = Color.WHITE
+        if (artworkBitmap != null) {
+            // If we have art, get colors from that
+            val p = MediaNotificationProcessor.generateArtworkPaletteBuilder(artworkBitmap)
+                    .generate()
+            val swatch = MediaNotificationProcessor.findBackgroundSwatch(p)
+            color = swatch.rgb
+        }
+        // Adapt background color, so it's always subdued and text is legible
+        val tmpHsl = floatArrayOf(0f, 0f, 0f)
+        ColorUtils.colorToHSL(color, tmpHsl)
+
+        val l = tmpHsl[2]
+        // Colors with very low luminosity can have any saturation. This means that changing the
+        // luminosity can make a black become red. Let's remove the saturation of very light or
+        // very dark colors to avoid this issue.
+        if (l < LUMINOSITY_THRESHOLD || l > 1f - LUMINOSITY_THRESHOLD) {
+            tmpHsl[1] = 0f
+        }
+        tmpHsl[1] *= SATURATION_MULTIPLIER
+        tmpHsl[2] = DEFAULT_LUMINOSITY
+
+        color = ColorUtils.HSLToColor(tmpHsl)
+        return color
     }
 
     private fun getResumeMediaAction(action: Runnable): MediaAction {
