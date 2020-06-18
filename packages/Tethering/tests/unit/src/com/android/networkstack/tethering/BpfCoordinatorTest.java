@@ -25,11 +25,10 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStats.UID_TETHERING;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 
-import static com.android.networkstack.tethering.BpfCoordinator
-        .DEFAULT_PERFORM_POLL_INTERVAL_MS;
 import static com.android.networkstack.tethering.BpfCoordinator.StatsType;
 import static com.android.networkstack.tethering.BpfCoordinator.StatsType.STATS_PER_IFACE;
 import static com.android.networkstack.tethering.BpfCoordinator.StatsType.STATS_PER_UID;
+import static com.android.networkstack.tethering.TetheringConfiguration.DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -104,11 +103,6 @@ public class BpfCoordinatorTest {
     private final TestLooper mTestLooper = new TestLooper();
     private BpfCoordinator.Dependencies mDeps =
             new BpfCoordinator.Dependencies() {
-            @Override
-            public int getPerformPollInterval() {
-                return DEFAULT_PERFORM_POLL_INTERVAL_MS;
-            }
-
             @NonNull
             public Handler getHandler() {
                 return new Handler(mTestLooper.getLooper());
@@ -183,9 +177,11 @@ public class BpfCoordinatorTest {
         return parcel;
     }
 
+    // Set up specific tether stats list and wait for the stats cache is updated by polling thread
+    // in the coordinator. Beware of that it is only used for the default polling interval.
     private void setTetherOffloadStatsList(TetherStatsParcel[] tetherStatsList) throws Exception {
         when(mNetd.tetherOffloadGetStats()).thenReturn(tetherStatsList);
-        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        mTestLooper.moveTimeForward(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         waitForIdle();
     }
 
@@ -254,7 +250,7 @@ public class BpfCoordinatorTest {
         clearInvocations(mNetd);
 
         // Verify the polling update thread stopped.
-        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        mTestLooper.moveTimeForward(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         waitForIdle();
         verify(mNetd, never()).tetherOffloadGetStats();
     }
@@ -279,20 +275,20 @@ public class BpfCoordinatorTest {
         when(mNetd.tetherOffloadGetStats()).thenReturn(
                 new TetherStatsParcel[] {buildTestTetherStatsParcel(mobileIfIndex, 0, 0, 0, 0)});
         mTetherStatsProvider.onSetAlert(100);
-        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        mTestLooper.moveTimeForward(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         waitForIdle();
         mTetherStatsProviderCb.assertNoCallback();
 
         // Verify that notifyAlertReached fired when quota is reached.
         when(mNetd.tetherOffloadGetStats()).thenReturn(
                 new TetherStatsParcel[] {buildTestTetherStatsParcel(mobileIfIndex, 50, 0, 50, 0)});
-        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        mTestLooper.moveTimeForward(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         waitForIdle();
         mTetherStatsProviderCb.expectNotifyAlertReached();
 
         // Verify that set quota with UNLIMITED won't trigger any callback.
         mTetherStatsProvider.onSetAlert(QUOTA_UNLIMITED);
-        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        mTestLooper.moveTimeForward(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         waitForIdle();
         mTetherStatsProviderCb.assertNoCallback();
     }
@@ -512,7 +508,7 @@ public class BpfCoordinatorTest {
         coordinator.startPolling();
 
         // The tether stats polling task should not be scheduled.
-        mTestLooper.moveTimeForward(DEFAULT_PERFORM_POLL_INTERVAL_MS);
+        mTestLooper.moveTimeForward(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS);
         waitForIdle();
         verify(mNetd, never()).tetherOffloadGetStats();
 
@@ -558,5 +554,54 @@ public class BpfCoordinatorTest {
         rules = coordinator.getForwardingRulesForTesting().get(mIpServer);
         assertNotNull(rules);
         assertEquals(1, rules.size());
+    }
+
+    @Test
+    public void testTetheringConfigSetPollingInterval() throws Exception {
+        setupFunctioningNetdInterface();
+
+        final BpfCoordinator coordinator = makeBpfCoordinator();
+
+        // [1] The default polling interval.
+        coordinator.startPolling();
+        assertEquals(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS, coordinator.getPollingInterval());
+        coordinator.stopPolling();
+
+        // [2] Expect the invalid polling interval isn't applied. The valid range of interval is
+        // DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS..max_long.
+        for (final int interval
+                : new int[] {0, 100, DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS - 1}) {
+            when(mTetherConfig.getOffloadPollInterval()).thenReturn(interval);
+            coordinator.startPolling();
+            assertEquals(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS, coordinator.getPollingInterval());
+            coordinator.stopPolling();
+        }
+
+        // [3] Set a specific polling interval which is larger than default value.
+        // Use a large polling interval to avoid flaky test because the time forwarding
+        // approximation is used to verify the scheduled time of the polling thread.
+        final int pollingInterval = 100_000;
+        when(mTetherConfig.getOffloadPollInterval()).thenReturn(pollingInterval);
+        coordinator.startPolling();
+
+        // Expect the specific polling interval to be applied.
+        assertEquals(pollingInterval, coordinator.getPollingInterval());
+
+        // Start on a new polling time slot.
+        mTestLooper.moveTimeForward(pollingInterval);
+        waitForIdle();
+        clearInvocations(mNetd);
+
+        // Move time forward to 90% polling interval time. Expect that the polling thread has not
+        // scheduled yet.
+        mTestLooper.moveTimeForward((long) (pollingInterval * 0.9));
+        waitForIdle();
+        verify(mNetd, never()).tetherOffloadGetStats();
+
+        // Move time forward to the remaining 10% polling interval time. Expect that the polling
+        // thread has scheduled.
+        mTestLooper.moveTimeForward((long) (pollingInterval * 0.1));
+        waitForIdle();
+        verify(mNetd).tetherOffloadGetStats();
     }
 }
