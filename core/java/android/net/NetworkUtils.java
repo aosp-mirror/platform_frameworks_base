@@ -155,6 +155,14 @@ public class NetworkUtils {
     public static native Network getDnsNetwork() throws ErrnoException;
 
     /**
+     * Allow/Disallow creating AF_INET/AF_INET6 sockets and DNS lookups for current process.
+     *
+     * @param allowNetworking whether to allow or disallow creating AF_INET/AF_INET6 sockets
+     *                        and DNS lookups.
+     */
+    public static native void setAllowNetworkingForProcess(boolean allowNetworking);
+
+    /**
      * Get the tcp repair window associated with the {@code fd}.
      *
      * @param fd the tcp socket's {@link FileDescriptor}.
