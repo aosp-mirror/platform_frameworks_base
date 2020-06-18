@@ -218,13 +218,11 @@ class ControlViewHolder(
         cancelUpdate = uiExecutor.executeDelayed({
             animateStatusChange(/* animated */ true, {
                 setStatusText(previousText, /* immediately */ true)
-                updateContentDescription()
             })
         }, UPDATE_DELAY_IN_MILLIS)
 
         animateStatusChange(/* animated */ true, {
             setStatusText(tempStatus, /* immediately */ true)
-            updateContentDescription()
         })
     }
 
@@ -296,6 +294,7 @@ class ControlViewHolder(
         if (immediately) {
             status.alpha = STATUS_ALPHA_ENABLED
             status.text = text
+            updateContentDescription()
         }
         nextStatusText = text
     }
@@ -412,6 +411,8 @@ class ControlViewHolder(
         setEnabled(enabled)
 
         status.text = text
+        updateContentDescription()
+
         status.setTextColor(color)
 
         control?.getCustomIcon()?.let {
