@@ -1184,7 +1184,8 @@ public abstract class WallpaperService extends Service {
                         // may have been destroyed so now we need to make
                         // sure it is re-created.
                         doOffsetsChanged(false);
-                        updateSurface(false, false, false);
+                        // force relayout to get new surface
+                        updateSurface(true, false, false);
                     }
                     onVisibilityChanged(visible);
                 }
