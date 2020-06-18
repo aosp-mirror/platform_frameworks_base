@@ -2927,9 +2927,17 @@ class Task extends WindowContainer<WindowContainer> {
         // Don't crop HOME/RECENTS windows to stack bounds. This is because in split-screen
         // they extend past their stack and sysui uses the stack surface to control cropping.
         // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
-        final boolean isTopHomeOrRecents = (isActivityTypeHome() || isActivityTypeRecents())
-                && getRootTask().getTopMostTask() == this;
-        return isResizeable() && !isTopHomeOrRecents;
+        if (isActivityTypeHome() || isActivityTypeRecents()) {
+            // Make sure this is the top-most non-organizer root task (if not top-most, it means
+            // another translucent task could be above this, so this needs to stay cropped.
+            final Task rootTask = getRootTask();
+            final Task topNonOrgTask =
+                    rootTask.mCreatedByOrganizer ? rootTask.getTopMostTask() : rootTask;
+            if (isDescendantOf(topNonOrgTask)) {
+                return false;
+            }
+        }
+        return isResizeable();
     }
 
     /**
