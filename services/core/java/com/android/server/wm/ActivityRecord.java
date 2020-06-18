@@ -2208,7 +2208,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     }
 
     boolean isResizeable() {
-        return ActivityInfo.isResizeableMode(info.resizeMode) || info.supportsPictureInPicture();
+        return mAtmService.mForceResizableActivities
+                || ActivityInfo.isResizeableMode(info.resizeMode)
+                || info.supportsPictureInPicture();
     }
 
     /** @return whether this activity is non-resizeable or forced to be resizeable */
