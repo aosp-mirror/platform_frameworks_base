@@ -189,12 +189,12 @@ class ControlViewHolder(
             }
             ControlAction.RESPONSE_CHALLENGE_PIN -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
-                    this, false, failedAttempt, onDialogCancel)
+                    this, false /* useAlphanumeric */, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
-                    this, false, failedAttempt, onDialogCancel)
+                    this, true /* useAlphanumeric */, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_ACK -> {
