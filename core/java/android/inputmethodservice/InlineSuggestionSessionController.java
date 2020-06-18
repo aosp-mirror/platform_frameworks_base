@@ -213,6 +213,7 @@ class InlineSuggestionSessionController {
         mImeInputViewStarted = false;
         mImeInputStarted = false;
         if (mSession != null && mSession.shouldSendImeStatus()) {
+            mSession.consumeInlineSuggestionsResponse(InlineSuggestionSession.EMPTY_RESPONSE);
             try {
                 mSession.getRequestCallback().onInputMethodFinishInput();
             } catch (RemoteException e) {
