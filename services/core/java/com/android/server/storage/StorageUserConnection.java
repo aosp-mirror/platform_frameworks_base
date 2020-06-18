@@ -62,7 +62,7 @@ import java.util.concurrent.TimeoutException;
 public final class StorageUserConnection {
     private static final String TAG = "StorageUserConnection";
 
-    public static final int REMOTE_TIMEOUT_SECONDS = 5;
+    public static final int REMOTE_TIMEOUT_SECONDS = 20;
 
     private final Object mLock = new Object();
     private final Context mContext;
@@ -202,6 +202,7 @@ public final class StorageUserConnection {
         try {
             if (!latch.await(REMOTE_TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
                 // TODO(b/140025078): Call ActivityManager ANR API?
+                Slog.wtf(TAG, "Failed to bind to the ExternalStorageService for user " + mUserId);
                 throw new TimeoutException("Latch wait for " + reason + " elapsed");
             }
         } catch (InterruptedException e) {
