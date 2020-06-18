@@ -53,11 +53,10 @@ public class SyncRtSurfaceTransactionApplier {
     /**
      * Schedules applying surface parameters on the next frame.
      *
-     * @param earlyWakeup Whether to set {@link Transaction#setEarlyWakeup()} on transaction.
      * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
      *               this method to avoid synchronization issues.
      */
-    public void scheduleApply(boolean earlyWakeup, final SurfaceParams... params) {
+    public void scheduleApply(final SurfaceParams... params) {
         if (mTargetViewRootImpl == null) {
             return;
         }
@@ -67,7 +66,7 @@ public class SyncRtSurfaceTransactionApplier {
                 return;
             }
             Transaction t = new Transaction();
-            applyParams(t, frame, earlyWakeup, params);
+            applyParams(t, frame, params);
         });
 
         // Make sure a frame gets scheduled.
@@ -78,12 +77,10 @@ public class SyncRtSurfaceTransactionApplier {
      * Applies surface parameters on the next frame.
      * @param t transaction to apply all parameters in.
      * @param frame frame to synchronize to. Set -1 when sync is not required.
-     * @param earlyWakeup Whether to set {@link Transaction#setEarlyWakeup()} on transaction.
      * @param params The surface parameters to apply. DO NOT MODIFY the list after passing into
      *               this method to avoid synchronization issues.
      */
-     void applyParams(Transaction t, long frame, boolean earlyWakeup,
-            final SurfaceParams... params) {
+     void applyParams(Transaction t, long frame, final SurfaceParams... params) {
         for (int i = params.length - 1; i >= 0; i--) {
             SurfaceParams surfaceParams = params[i];
             SurfaceControl surface = surfaceParams.surface;
@@ -91,9 +88,6 @@ public class SyncRtSurfaceTransactionApplier {
                 t.deferTransactionUntil(surface, mTargetSc, frame);
             }
             applyParams(t, surfaceParams, mTmpFloat9);
-        }
-        if (earlyWakeup) {
-            t.setEarlyWakeup();
         }
         t.apply();
     }
