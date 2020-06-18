@@ -16,6 +16,8 @@
 
 package com.android.systemui.globalactions;
 
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -34,11 +36,13 @@ import android.app.IActivityManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.ContentResolver;
+import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.os.Handler;
+import android.os.RemoteException;
 import android.os.UserManager;
 import android.service.dreams.IDreamManager;
 import android.telephony.TelephonyManager;
@@ -424,10 +428,12 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldShowLockScreenMessage() {
+    public void testShouldShowLockScreenMessage() throws RemoteException {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         mGlobalActionsDialog.mDialog = null;
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+        when(mActivityManager.getCurrentUser()).thenReturn(newUserInfo());
+        when(mLockPatternUtils.getStrongAuthForUser(anyInt())).thenReturn(STRONG_AUTH_NOT_REQUIRED);
         mGlobalActionsDialog.mShowLockScreenCardsAndControls = false;
         setupDefaultActions();
         when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
@@ -444,10 +450,13 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotShowLockScreenMessage_whenWalletOrControlsShownOnLockScreen() {
+    public void testShouldNotShowLockScreenMessage_whenWalletOrControlsShownOnLockScreen()
+            throws RemoteException {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         mGlobalActionsDialog.mDialog = null;
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+        when(mActivityManager.getCurrentUser()).thenReturn(newUserInfo());
+        when(mLockPatternUtils.getStrongAuthForUser(anyInt())).thenReturn(STRONG_AUTH_NOT_REQUIRED);
         mGlobalActionsDialog.mShowLockScreenCardsAndControls = true;
         setupDefaultActions();
         when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
@@ -464,10 +473,14 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShouldNotShowLockScreenMessage_whenControlsAndWalletBothDisabled() {
+    public void testShouldNotShowLockScreenMessage_whenControlsAndWalletBothDisabled()
+            throws RemoteException {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         mGlobalActionsDialog.mDialog = null;
         when(mKeyguardStateController.isUnlocked()).thenReturn(false);
+
+        when(mActivityManager.getCurrentUser()).thenReturn(newUserInfo());
+        when(mLockPatternUtils.getStrongAuthForUser(anyInt())).thenReturn(STRONG_AUTH_NOT_REQUIRED);
         mGlobalActionsDialog.mShowLockScreenCardsAndControls = true;
         setupDefaultActions();
         when(mWalletPlugin.onPanelShown(any(), anyBoolean())).thenReturn(mWalletController);
@@ -482,6 +495,10 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
         // Dismiss the dialog so that it does not pollute other tests
         mGlobalActionsDialog.showOrHideDialog(false, true, mWalletPlugin);
+    }
+
+    private UserInfo newUserInfo() {
+        return new UserInfo(0, null, null, UserInfo.FLAG_PRIMARY, null);
     }
 
     private void setupDefaultActions() {
