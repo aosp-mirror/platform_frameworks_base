@@ -33,6 +33,12 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// These constants must be kept in sync with those in StatsDimensionsValue.java.
+const static int STATS_DIMENSIONS_VALUE_STRING_TYPE = 2;
+const static int STATS_DIMENSIONS_VALUE_INT_TYPE = 3;
+const static int STATS_DIMENSIONS_VALUE_FLOAT_TYPE = 6;
+const static int STATS_DIMENSIONS_VALUE_TUPLE_TYPE = 7;
+
 namespace {
 void makeLogEvent(LogEvent* logEvent, const int32_t atomId, const int64_t timestamp,
                   const vector<int>& attributionUids, const vector<string>& attributionTags,
@@ -291,34 +297,76 @@ TEST(AtomMatcherTest, TestWriteDimensionPath) {
     }
 }
 
-//TODO(b/149050405) Update this test for StatsDimensionValueParcel
-//TEST(AtomMatcherTest, TestSubscriberDimensionWrite) {
-//    HashableDimensionKey dim;
-//
-//    int pos1[] = {1, 1, 1};
-//    int pos2[] = {1, 1, 2};
-//    int pos3[] = {1, 1, 3};
-//    int pos4[] = {2, 0, 0};
-//
-//    Field field1(10, pos1, 2);
-//    Field field2(10, pos2, 2);
-//    Field field3(10, pos3, 2);
-//    Field field4(10, pos4, 0);
-//
-//    Value value1((int32_t)10025);
-//    Value value2("tag");
-//    Value value3((int32_t)987654);
-//    Value value4((int32_t)99999);
-//
-//    dim.addValue(FieldValue(field1, value1));
-//    dim.addValue(FieldValue(field2, value2));
-//    dim.addValue(FieldValue(field3, value3));
-//    dim.addValue(FieldValue(field4, value4));
-//
-//    SubscriberReporter::getStatsDimensionsValue(dim);
-//    // TODO(b/110562792): can't test anything here because StatsDimensionsValue class doesn't
-//    // have any read api.
-//}
+void checkAttributionNodeInDimensionsValueParcel(StatsDimensionsValueParcel& attributionNodeParcel,
+                                                 int32_t nodeDepthInAttributionChain,
+                                                 int32_t uid, string tag) {
+    EXPECT_EQ(attributionNodeParcel.field, nodeDepthInAttributionChain /*position at depth 1*/);
+    ASSERT_EQ(attributionNodeParcel.valueType, STATS_DIMENSIONS_VALUE_TUPLE_TYPE);
+    ASSERT_EQ(attributionNodeParcel.tupleValue.size(), 2);
+
+    StatsDimensionsValueParcel uidParcel = attributionNodeParcel.tupleValue[0];
+    EXPECT_EQ(uidParcel.field, 1 /*position at depth 2*/);
+    EXPECT_EQ(uidParcel.valueType, STATS_DIMENSIONS_VALUE_INT_TYPE);
+    EXPECT_EQ(uidParcel.intValue, uid);
+
+    StatsDimensionsValueParcel tagParcel = attributionNodeParcel.tupleValue[1];
+    EXPECT_EQ(tagParcel.field, 2 /*position at depth 2*/);
+    EXPECT_EQ(tagParcel.valueType, STATS_DIMENSIONS_VALUE_STRING_TYPE);
+    EXPECT_EQ(tagParcel.stringValue, tag);
+}
+
+// Test conversion of a HashableDimensionKey into a StatsDimensionValueParcel
+TEST(AtomMatcherTest, TestSubscriberDimensionWrite) {
+    int atomId = 10;
+    // First four fields form an attribution chain
+    int pos1[] = {1, 1, 1};
+    int pos2[] = {1, 1, 2};
+    int pos3[] = {1, 2, 1};
+    int pos4[] = {1, 2, 2};
+    int pos5[] = {2, 1, 1};
+
+    Field field1(atomId, pos1, /*depth=*/2);
+    Field field2(atomId, pos2, /*depth=*/2);
+    Field field3(atomId, pos3, /*depth=*/2);
+    Field field4(atomId, pos4, /*depth=*/2);
+    Field field5(atomId, pos5, /*depth=*/0);
+
+    Value value1((int32_t)1);
+    Value value2("string2");
+    Value value3((int32_t)3);
+    Value value4("string4");
+    Value value5((float)5.0);
+
+    HashableDimensionKey dimensionKey;
+    dimensionKey.addValue(FieldValue(field1, value1));
+    dimensionKey.addValue(FieldValue(field2, value2));
+    dimensionKey.addValue(FieldValue(field3, value3));
+    dimensionKey.addValue(FieldValue(field4, value4));
+    dimensionKey.addValue(FieldValue(field5, value5));
+
+    StatsDimensionsValueParcel rootParcel = dimensionKey.toStatsDimensionsValueParcel();
+    EXPECT_EQ(rootParcel.field, atomId);
+    ASSERT_EQ(rootParcel.valueType, STATS_DIMENSIONS_VALUE_TUPLE_TYPE);
+    ASSERT_EQ(rootParcel.tupleValue.size(), 2);
+
+    // Check that attribution chain is populated correctly
+    StatsDimensionsValueParcel attributionChainParcel = rootParcel.tupleValue[0];
+    EXPECT_EQ(attributionChainParcel.field, 1 /*position at depth 0*/);
+    ASSERT_EQ(attributionChainParcel.valueType, STATS_DIMENSIONS_VALUE_TUPLE_TYPE);
+    ASSERT_EQ(attributionChainParcel.tupleValue.size(), 2);
+    checkAttributionNodeInDimensionsValueParcel(attributionChainParcel.tupleValue[0],
+                                                /*nodeDepthInAttributionChain=*/1,
+                                                value1.int_value, value2.str_value);
+    checkAttributionNodeInDimensionsValueParcel(attributionChainParcel.tupleValue[1],
+                                                /*nodeDepthInAttributionChain=*/2,
+                                                value3.int_value, value4.str_value);
+
+    // Check that the float is populated correctly
+    StatsDimensionsValueParcel floatParcel = rootParcel.tupleValue[1];
+    EXPECT_EQ(floatParcel.field, 2 /*position at depth 0*/);
+    EXPECT_EQ(floatParcel.valueType, STATS_DIMENSIONS_VALUE_FLOAT_TYPE);
+    EXPECT_EQ(floatParcel.floatValue, value5.float_value);
+}
 
 TEST(AtomMatcherTest, TestWriteDimensionToProto) {
     HashableDimensionKey dim;
