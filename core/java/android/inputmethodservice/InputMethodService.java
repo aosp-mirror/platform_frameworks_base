@@ -471,6 +471,10 @@ public class InputMethodService extends AbstractInputMethodService {
 
     final ViewTreeObserver.OnComputeInternalInsetsListener mInsetsComputer = info -> {
         onComputeInsets(mTmpInsets);
+        if (!mViewsCreated) {
+            // The IME views are not ready, keep visible insets untouched.
+            mTmpInsets.visibleTopInsets = 0;
+        }
         if (isExtractViewShown()) {
             // In true fullscreen mode, we just say the window isn't covering
             // any content so we don't impact whatever is behind.
