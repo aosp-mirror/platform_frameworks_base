@@ -29,6 +29,7 @@ import android.view.SurfaceControl;
 import android.window.TaskOrganizer;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
+import android.window.WindowOrganizer;
 
 import androidx.annotation.Nullable;
 
@@ -173,46 +174,50 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     }
 
     private void updateImeAdjustState() {
-        // Reposition the server's secondary split position so that it evaluates
-        // insets properly.
-        WindowContainerTransaction wct = new WindowContainerTransaction();
-        final SplitDisplayLayout splitLayout = getLayout();
-        if (mTargetAdjusted) {
-            splitLayout.updateAdjustedBounds(mShownTop, mHiddenTop, mShownTop);
-            wct.setBounds(mSplits.mSecondary.token, splitLayout.mAdjustedSecondary);
-            // "Freeze" the configuration size so that the app doesn't get a config
-            // or relaunch. This is required because normally nav-bar contributes
-            // to configuration bounds (via nondecorframe).
-            Rect adjustAppBounds = new Rect(mSplits.mSecondary.configuration
-                    .windowConfiguration.getAppBounds());
-            adjustAppBounds.offset(0, splitLayout.mAdjustedSecondary.top
-                    - splitLayout.mSecondary.top);
-            wct.setAppBounds(mSplits.mSecondary.token, adjustAppBounds);
-            wct.setScreenSizeDp(mSplits.mSecondary.token,
-                    mSplits.mSecondary.configuration.screenWidthDp,
-                    mSplits.mSecondary.configuration.screenHeightDp);
+        if (mAdjusted != mTargetAdjusted) {
+            // Reposition the server's secondary split position so that it evaluates
+            // insets properly.
+            WindowContainerTransaction wct = new WindowContainerTransaction();
+            final SplitDisplayLayout splitLayout = getLayout();
+            if (mTargetAdjusted) {
+                splitLayout.updateAdjustedBounds(mShownTop, mHiddenTop, mShownTop);
+                wct.setBounds(mSplits.mSecondary.token, splitLayout.mAdjustedSecondary);
+                // "Freeze" the configuration size so that the app doesn't get a config
+                // or relaunch. This is required because normally nav-bar contributes
+                // to configuration bounds (via nondecorframe).
+                Rect adjustAppBounds = new Rect(mSplits.mSecondary.configuration
+                        .windowConfiguration.getAppBounds());
+                adjustAppBounds.offset(0, splitLayout.mAdjustedSecondary.top
+                        - splitLayout.mSecondary.top);
+                wct.setAppBounds(mSplits.mSecondary.token, adjustAppBounds);
+                wct.setScreenSizeDp(mSplits.mSecondary.token,
+                        mSplits.mSecondary.configuration.screenWidthDp,
+                        mSplits.mSecondary.configuration.screenHeightDp);
 
-            wct.setBounds(mSplits.mPrimary.token, splitLayout.mAdjustedPrimary);
-            adjustAppBounds = new Rect(mSplits.mPrimary.configuration
-                    .windowConfiguration.getAppBounds());
-            adjustAppBounds.offset(0, splitLayout.mAdjustedPrimary.top
-                    - splitLayout.mPrimary.top);
-            wct.setAppBounds(mSplits.mPrimary.token, adjustAppBounds);
-            wct.setScreenSizeDp(mSplits.mPrimary.token,
-                    mSplits.mPrimary.configuration.screenWidthDp,
-                    mSplits.mPrimary.configuration.screenHeightDp);
-        } else {
-            wct.setBounds(mSplits.mSecondary.token, splitLayout.mSecondary);
-            wct.setAppBounds(mSplits.mSecondary.token, null);
-            wct.setScreenSizeDp(mSplits.mSecondary.token,
-                    SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
-            wct.setBounds(mSplits.mPrimary.token, splitLayout.mPrimary);
-            wct.setAppBounds(mSplits.mPrimary.token, null);
-            wct.setScreenSizeDp(mSplits.mPrimary.token,
-                    SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+                wct.setBounds(mSplits.mPrimary.token, splitLayout.mAdjustedPrimary);
+                adjustAppBounds = new Rect(mSplits.mPrimary.configuration
+                        .windowConfiguration.getAppBounds());
+                adjustAppBounds.offset(0, splitLayout.mAdjustedPrimary.top
+                        - splitLayout.mPrimary.top);
+                wct.setAppBounds(mSplits.mPrimary.token, adjustAppBounds);
+                wct.setScreenSizeDp(mSplits.mPrimary.token,
+                        mSplits.mPrimary.configuration.screenWidthDp,
+                        mSplits.mPrimary.configuration.screenHeightDp);
+            } else {
+                wct.setBounds(mSplits.mSecondary.token, splitLayout.mSecondary);
+                wct.setAppBounds(mSplits.mSecondary.token, null);
+                wct.setScreenSizeDp(mSplits.mSecondary.token,
+                        SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+                wct.setBounds(mSplits.mPrimary.token, splitLayout.mPrimary);
+                wct.setAppBounds(mSplits.mPrimary.token, null);
+                wct.setScreenSizeDp(mSplits.mPrimary.token,
+                        SCREEN_WIDTH_DP_UNDEFINED, SCREEN_HEIGHT_DP_UNDEFINED);
+            }
+
+            if (!mSplits.mDivider.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
+                WindowOrganizer.applyTransaction(wct);
+            }
         }
-
-        mSplits.mDivider.getWmProxy().applySyncTransaction(wct);
 
         // Update all the adjusted-for-ime states
         if (!mPaused) {
