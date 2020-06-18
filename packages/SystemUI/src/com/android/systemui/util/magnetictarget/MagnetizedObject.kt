@@ -241,7 +241,7 @@ abstract class MagnetizedObject<T : Any>(
      * to the target. If this velocity is reached, the object will be freed even if it wasn't moved
      * outside the magnetic field radius.
      */
-    var flingUnstuckFromTargetMinVelocity = 1000f
+    var flingUnstuckFromTargetMinVelocity = 4000f
 
     /**
      * Sets the maximum X velocity above which the object will not stick to the target. Even if the
@@ -414,9 +414,10 @@ abstract class MagnetizedObject<T : Any>(
             cancelAnimations()
 
             if (objectStuckToTarget) {
-                if (hypot(velX, velY) > flingUnstuckFromTargetMinVelocity) {
-                    // If the object is stuck, but it was forcefully flung away from the target,
-                    // tell the listener so the object can be animated out of the target.
+                if (-velY > flingUnstuckFromTargetMinVelocity) {
+                    // If the object is stuck, but it was forcefully flung away from the target in
+                    // the upward direction, tell the listener so the object can be animated out of
+                    // the target.
                     magnetListener.onUnstuckFromTarget(
                             targetObjectIsStuckTo!!, velX, velY, wasFlungOut = true)
                 } else {
