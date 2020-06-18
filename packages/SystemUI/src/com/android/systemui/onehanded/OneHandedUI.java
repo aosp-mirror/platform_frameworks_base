@@ -169,6 +169,8 @@ public class OneHandedUI extends SystemUI implements CommandQueue.Callbacks, Dum
 
         OverlayInfo info = null;
         try {
+            // TODO(b/157958539) migrate new RRO config file after S+
+            mOverlayManager.setHighestPriority(ONE_HANDED_MODE_GESTURAL_OVERLAY, USER_CURRENT);
             info = mOverlayManager.getOverlayInfo(ONE_HANDED_MODE_GESTURAL_OVERLAY, USER_CURRENT);
         } catch (RemoteException e) { /* Do nothing */ }
 
