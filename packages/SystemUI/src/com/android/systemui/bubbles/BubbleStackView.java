@@ -51,6 +51,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
@@ -1065,10 +1066,8 @@ public class BubbleStackView extends FrameLayout
                     if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                         final Intent intent = bubble.getSettingsIntent(mContext);
                         collapseStack(() -> {
-
                             mContext.startActivityAsUser(intent, bubble.getUser());
-                            logBubbleClickEvent(
-                                    bubble,
+                            logBubbleEvent(bubble,
                                     SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
                         });
                     }
@@ -2759,16 +2758,28 @@ public class BubbleStackView extends FrameLayout
     /**
      * Logs the bubble UI event.
      *
-     * @param bubble the bubble that is being interacted on. Null value indicates that
-     *               the user interaction is not specific to one bubble.
+     * @param provider the bubble view provider that is being interacted on. Null value indicates
+     *               that the user interaction is not specific to one bubble.
      * @param action the user interaction enum.
      */
-    private void logBubbleEvent(@Nullable BubbleViewProvider bubble, int action) {
-        if (bubble == null) {
+    private void logBubbleEvent(@Nullable BubbleViewProvider provider, int action) {
+        if (provider == null || provider.getKey().equals(BubbleOverflow.KEY)) {
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    mContext.getApplicationInfo().packageName,
+                    provider == null ? null : BubbleOverflow.KEY /* notification channel */,
+                    0 /* notification ID */,
+                    0 /* bubble position */,
+                    getBubbleCount(),
+                    action,
+                    getNormalizedXPosition(),
+                    getNormalizedYPosition(),
+                    false /* unread bubble */,
+                    false /* on-going bubble */,
+                    false /* isAppForeground (unused) */);
             return;
         }
-        bubble.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
-                getNormalizedYPosition(), getBubbleIndex(bubble));
+        provider.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
+                getNormalizedYPosition(), getBubbleIndex(provider));
     }
 
     /**
@@ -2806,21 +2817,5 @@ public class BubbleStackView extends FrameLayout
             }
         }
         return bubbles;
-    }
-
-    /**
-     * Logs bubble UI click event.
-     *
-     * @param bubble the bubble notification entry that user is interacting with.
-     * @param action the user interaction enum.
-     */
-    private void logBubbleClickEvent(Bubble bubble, int action) {
-        bubble.logUIEvent(
-                getBubbleCount(),
-                action,
-                getNormalizedXPosition(),
-                getNormalizedYPosition(),
-                getBubbleIndex(getExpandedBubble())
-        );
     }
 }
