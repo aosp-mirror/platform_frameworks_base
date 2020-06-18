@@ -689,17 +689,17 @@ public class ResolverListAdapter extends BaseAdapter {
         }
 
         public void bindLabel(CharSequence label, CharSequence subLabel, boolean showSubLabel) {
-            if (!TextUtils.equals(text.getText(), label)) {
-                text.setText(label);
-            }
+            text.setText(label);
 
             if (TextUtils.equals(label, subLabel)) {
-                subLabel = "";
+                subLabel = null;
             }
 
-            if (showSubLabel || !TextUtils.equals(text2.getText(), subLabel)) {
+            text2.setText(subLabel);
+            if (showSubLabel || subLabel != null) {
                 text2.setVisibility(View.VISIBLE);
-                text2.setText(subLabel);
+            } else {
+                text2.setVisibility(View.GONE);
             }
 
             itemView.setContentDescription(null);
