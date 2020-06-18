@@ -352,7 +352,7 @@ public class SystemSettingsHelper extends SettingsHelper {
 
         List<String> locationPackageBlacklist = mLocationPackageBlacklist.getValueForUser(userId);
         if (!locationPackageBlacklist.isEmpty()) {
-            ipw.println("Location Blacklisted Packages:");
+            ipw.println("Location Deny Packages:");
             ipw.increaseIndent();
             for (String packageName : locationPackageBlacklist) {
                 ipw.println(packageName);
@@ -362,7 +362,7 @@ public class SystemSettingsHelper extends SettingsHelper {
             List<String> locationPackageWhitelist = mLocationPackageWhitelist.getValueForUser(
                     userId);
             if (!locationPackageWhitelist.isEmpty()) {
-                ipw.println("Location Whitelisted Packages:");
+                ipw.println("Location Allow Packages:");
                 ipw.increaseIndent();
                 for (String packageName : locationPackageWhitelist) {
                     ipw.println(packageName);
@@ -374,7 +374,7 @@ public class SystemSettingsHelper extends SettingsHelper {
         Set<String> backgroundThrottlePackageWhitelist =
                 mBackgroundThrottlePackageWhitelist.getValue();
         if (!backgroundThrottlePackageWhitelist.isEmpty()) {
-            ipw.println("Throttling Whitelisted Packages:");
+            ipw.println("Throttling Allow Packages:");
             ipw.increaseIndent();
             for (String packageName : backgroundThrottlePackageWhitelist) {
                 ipw.println(packageName);
@@ -384,7 +384,7 @@ public class SystemSettingsHelper extends SettingsHelper {
 
         Set<String> ignoreSettingsPackageWhitelist = mIgnoreSettingsPackageWhitelist.getValue();
         if (!ignoreSettingsPackageWhitelist.isEmpty()) {
-            ipw.println("Bypass Whitelisted Packages:");
+            ipw.println("Bypass Allow Packages:");
             ipw.increaseIndent();
             for (String packageName : ignoreSettingsPackageWhitelist) {
                 ipw.println(packageName);
