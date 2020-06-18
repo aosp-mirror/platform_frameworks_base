@@ -98,12 +98,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         }
     };
 
-    SystemMediaRoute2Provider(Context context, Callback callback) {
+    SystemMediaRoute2Provider(Context context) {
         super(sComponentName);
-        setCallback(callback);
 
         mIsSystemRouteProvider = true;
-
         mContext = context;
         mHandler = new Handler(Looper.getMainLooper());
 
@@ -140,6 +138,13 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
             });
         }
         updateVolume();
+    }
+
+    @Override
+    public void setCallback(Callback callback) {
+        super.setCallback(callback);
+        notifyProviderState();
+        notifySessionInfoUpdated();
     }
 
     @Override
@@ -354,6 +359,10 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
     }
 
     void notifySessionInfoUpdated() {
+        if (mCallback == null) {
+            return;
+        }
+
         RoutingSessionInfo sessionInfo;
         synchronized (mLock) {
             sessionInfo = mSessionInfos.get(0);
