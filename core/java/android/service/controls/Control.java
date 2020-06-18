@@ -789,6 +789,13 @@ public final class Control implements Parcelable {
         }
 
         /**
+         * Set the {@link ControlTemplate} to define the primary user interaction
+         *
+         * Devices may support a variety of user interactions, and all interactions cannot be
+         * represented with a single {@link ControlTemplate}. Therefore, the selected template
+         * should be most closely aligned with what the expected primary device action will be.
+         * Any secondary interactions can be done via the {@link #setAppIntent(PendingIntent)}.
+         *
          * @param controlTemplate instance of {@link ControlTemplate}, that defines how the
          *                        {@link Control} will behave and what interactions are
          *                        available to the user
