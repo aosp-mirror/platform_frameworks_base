@@ -102,6 +102,19 @@ class BubbleVolatileRepositoryTest : SysuiTestCase() {
                 eq(listOf("alice and bob")), eq(user10),
                 eq(LauncherApps.FLAG_CACHE_BUBBLE_SHORTCUTS))
     }
+
+    @Test
+    fun testAddBubbleMatchesByKey() {
+        val bubble = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0, "title")
+        repository.addBubbles(listOf(bubble))
+        assertEquals(bubble, repository.bubbles.get(0))
+
+        // Same key as first bubble but different entry
+        val bubbleModified = BubbleEntity(0, "com.example.pkg", "shortcut-id", "key", 120, 0,
+                "different title")
+        repository.addBubbles(listOf(bubbleModified))
+        assertEquals(bubbleModified, repository.bubbles.get(0))
+    }
 }
 
 private const val PKG_MESSENGER = "com.example.messenger"
