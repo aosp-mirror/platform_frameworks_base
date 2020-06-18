@@ -540,7 +540,7 @@ public class ResolverListAdapter extends BaseAdapter {
                 && !((DisplayResolveInfo) info).hasDisplayLabel()) {
             getLoadLabelTask((DisplayResolveInfo) info, holder).execute();
         } else {
-            holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo());
+            holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
             if (info instanceof SelectableTargetInfo) {
                 // direct share targets should append the application name for a better readout
                 DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
@@ -642,6 +642,10 @@ public class ResolverListAdapter extends BaseAdapter {
         mIsTabLoaded = true;
     }
 
+    protected boolean alwaysShowSubLabel() {
+        return false;
+    }
+
     /**
      * Necessary methods to communicate between {@link ResolverListAdapter}
      * and {@link ResolverActivity}.
@@ -684,18 +688,16 @@ public class ResolverListAdapter extends BaseAdapter {
             icon = (ImageView) view.findViewById(R.id.icon);
         }
 
-        public void bindLabel(CharSequence label, CharSequence subLabel) {
+        public void bindLabel(CharSequence label, CharSequence subLabel, boolean showSubLabel) {
             if (!TextUtils.equals(text.getText(), label)) {
                 text.setText(label);
             }
 
-            // Always show a subLabel for visual consistency across list items. Show an empty
-            // subLabel if the subLabel is the same as the label
             if (TextUtils.equals(label, subLabel)) {
-                subLabel = null;
+                subLabel = "";
             }
 
-            if (!TextUtils.equals(text2.getText(), subLabel)) {
+            if (showSubLabel || !TextUtils.equals(text2.getText(), subLabel)) {
                 text2.setVisibility(View.VISIBLE);
                 text2.setText(subLabel);
             }
@@ -754,7 +756,7 @@ public class ResolverListAdapter extends BaseAdapter {
         protected void onPostExecute(CharSequence[] result) {
             mDisplayResolveInfo.setDisplayLabel(result[0]);
             mDisplayResolveInfo.setExtendedInfo(result[1]);
-            mHolder.bindLabel(result[0], result[1]);
+            mHolder.bindLabel(result[0], result[1], alwaysShowSubLabel());
         }
     }
 
