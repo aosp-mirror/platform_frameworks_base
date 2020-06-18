@@ -22,6 +22,7 @@ import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 
@@ -395,11 +396,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             controlsComponent.getControlsListingController().get()
                     .addCallback(list -> {
                         mControlsServiceInfos = list;
-                        // This callback may occur after the dialog has been shown.
-                        // If so, add controls into the already visible space
-                        if (mDialog != null && !mDialog.isShowingControls()
-                                && shouldShowControls()) {
-                            mDialog.showControls(mControlsUiControllerOptional.get());
+                        // This callback may occur after the dialog has been shown. If so, add
+                        // controls into the already visible space or show the lock msg if needed.
+                        if (mDialog != null) {
+                            if (!mDialog.isShowingControls() && shouldShowControls()) {
+                                mDialog.showControls(mControlsUiControllerOptional.get());
+                            } else if (shouldShowLockMessage()) {
+                                mDialog.showLockMessage();
+                            }
                         }
                     });
         }
@@ -700,9 +704,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mStatusBarService, mNotificationShadeWindowController,
                 controlsAvailable(), uiController,
                 mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter);
-        boolean walletViewAvailable = walletViewController != null
-                && walletViewController.getPanelContent() != null;
-        if (shouldShowLockMessage(walletViewAvailable)) {
+
+        if (shouldShowLockMessage()) {
             dialog.showLockMessage();
         }
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
@@ -2591,7 +2594,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private boolean shouldShowControls() {
         return (mKeyguardStateController.isUnlocked() || mShowLockScreenCardsAndControls)
-                && controlsAvailable();
+                && controlsAvailable()
+                && mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
+                    != STRONG_AUTH_REQUIRED_AFTER_BOOT;
     }
 
     private boolean controlsAvailable() {
@@ -2601,10 +2606,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 && !mControlsServiceInfos.isEmpty();
     }
 
-    private boolean shouldShowLockMessage(boolean walletViewAvailable) {
+    private boolean walletViewAvailable() {
+        GlobalActionsPanelPlugin.PanelViewController walletViewController =
+                getWalletViewController();
+        return walletViewController != null && walletViewController.getPanelContent() != null;
+    }
+
+    private boolean shouldShowLockMessage() {
+        boolean isLockedAfterBoot = mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
+                == STRONG_AUTH_REQUIRED_AFTER_BOOT;
         return !mKeyguardStateController.isUnlocked()
-                && !mShowLockScreenCardsAndControls
-                && (controlsAvailable() || walletViewAvailable);
+                && (!mShowLockScreenCardsAndControls || isLockedAfterBoot)
+                && (controlsAvailable() || walletViewAvailable());
     }
 
     private void onPowerMenuLockScreenSettingsChanged() {
