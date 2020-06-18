@@ -176,10 +176,7 @@ public class BubbleViewInfoTask extends AsyncTask<Void, Void, BubbleViewInfoTask
                 bubbleDrawable = appIcon;
             }
 
-            boolean isImportantConversation = (entry == null || entry.getChannel() == null) ? false
-                    : entry.getChannel().isImportantConversation();
-            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon,
-                    isImportantConversation);
+            BitmapInfo badgeBitmapInfo = iconFactory.getBadgeBitmap(badgedIcon);
             info.badgedAppIcon = badgedIcon;
             info.badgedBubbleImage = iconFactory.getBubbleBitmap(bubbleDrawable,
                     badgeBitmapInfo).icon;
