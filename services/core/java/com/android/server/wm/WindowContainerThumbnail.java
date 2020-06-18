@@ -103,6 +103,7 @@ class WindowContainerThumbnail implements Animatable {
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setMetadata(METADATA_WINDOW_TYPE, mWindowContainer.getWindowingMode())
                 .setMetadata(METADATA_OWNER_UID, Process.myUid())
+                .setCallsite("WindowContainerThumbnail")
                 .build();
 
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "  THUMBNAIL %s: CREATE", mSurfaceControl);
