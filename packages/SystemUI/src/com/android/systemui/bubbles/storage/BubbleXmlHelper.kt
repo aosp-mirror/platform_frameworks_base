@@ -25,7 +25,11 @@ import java.io.InputStream
 import java.io.OutputStream
 import java.nio.charset.StandardCharsets
 
+// TODO: handle version changes gracefully
+private const val CURRENT_VERSION = 1
+
 private const val TAG_BUBBLES = "bs"
+private const val ATTR_VERSION = "v"
 private const val TAG_BUBBLE = "bb"
 private const val ATTR_USER_ID = "uid"
 private const val ATTR_PACKAGE = "pkg"
@@ -44,6 +48,7 @@ fun writeXml(stream: OutputStream, bubbles: List<BubbleEntity>) {
     serializer.setOutput(stream, StandardCharsets.UTF_8.name())
     serializer.startDocument(null, true)
     serializer.startTag(null, TAG_BUBBLES)
+    serializer.attribute(null, ATTR_VERSION, CURRENT_VERSION.toString())
     bubbles.forEach { b -> writeXmlEntry(serializer, b) }
     serializer.endTag(null, TAG_BUBBLES)
     serializer.endDocument()
@@ -79,9 +84,12 @@ fun readXml(stream: InputStream): List<BubbleEntity> {
     val parser: XmlPullParser = Xml.newPullParser()
     parser.setInput(stream, StandardCharsets.UTF_8.name())
     XmlUtils.beginDocument(parser, TAG_BUBBLES)
-    val outerDepth = parser.depth
-    while (XmlUtils.nextElementWithin(parser, outerDepth)) {
-        bubbles.add(readXmlEntry(parser) ?: continue)
+    val version = parser.getAttributeWithName(ATTR_VERSION)?.toInt()
+    if (version != null && version == CURRENT_VERSION) {
+        val outerDepth = parser.depth
+        while (XmlUtils.nextElementWithin(parser, outerDepth)) {
+            bubbles.add(readXmlEntry(parser) ?: continue)
+        }
     }
     return bubbles
 }
