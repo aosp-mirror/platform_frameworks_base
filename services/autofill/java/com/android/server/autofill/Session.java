@@ -3279,16 +3279,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 };
 
         // When the inline suggestion render service is available and the view is focused, there
-        // are 2 cases when augmented autofill should ask IME for inline suggestion request,
+        // are 3 cases when augmented autofill should ask IME for inline suggestion request,
         // because standard autofill flow didn't:
         // 1. the field is augmented autofill only (when standard autofill provider is None or
         // when it returns null response)
         // 2. standard autofill provider doesn't support inline suggestion
+        // 3. we re-entered the autofill session and standard autofill was not re-triggered, this is
+        //    recognized by seeing mExpiredResponse == true
         final RemoteInlineSuggestionRenderService remoteRenderService =
                 mService.getRemoteInlineSuggestionRenderServiceLocked();
         if (remoteRenderService != null
                 && (mForAugmentedAutofillOnly
-                || !isInlineSuggestionsEnabledByAutofillProviderLocked())
+                || !isInlineSuggestionsEnabledByAutofillProviderLocked()
+                || mExpiredResponse)
                 && isViewFocusedLocked(flags)) {
             if (sDebug) Slog.d(TAG, "Create inline request for augmented autofill");
             remoteRenderService.getInlineSuggestionsRendererInfo(new RemoteCallback(
