@@ -226,6 +226,11 @@ static jobject android_net_utils_getDnsNetwork(JNIEnv *env, jobject thiz) {
             class_Network, ctor, dnsNetId & ~NETID_USE_LOCAL_NAMESERVERS, privateDnsBypass);
 }
 
+static void android_net_utils_setAllowNetworkingForProcess(JNIEnv *env, jobject thiz,
+                                                           jboolean hasConnectivity) {
+    setAllowNetworkingForProcess(hasConnectivity == JNI_TRUE);
+}
+
 static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, jobject javaFd) {
     if (javaFd == NULL) {
         jniThrowNullPointerException(env, NULL);
@@ -266,6 +271,7 @@ static jobject android_net_utils_getTcpRepairWindow(JNIEnv *env, jobject thiz, j
 /*
  * JNI registration.
  */
+// clang-format off
 static const JNINativeMethod gNetworkUtilMethods[] = {
     /* name, signature, funcPtr */
     { "bindProcessToNetwork", "(I)Z", (void*) android_net_utils_bindProcessToNetwork },
@@ -282,7 +288,9 @@ static const JNINativeMethod gNetworkUtilMethods[] = {
     { "resNetworkResult", "(Ljava/io/FileDescriptor;)Landroid/net/DnsResolver$DnsResponse;", (void*) android_net_utils_resNetworkResult },
     { "resNetworkCancel", "(Ljava/io/FileDescriptor;)V", (void*) android_net_utils_resNetworkCancel },
     { "getDnsNetwork", "()Landroid/net/Network;", (void*) android_net_utils_getDnsNetwork },
+    { "setAllowNetworkingForProcess", "(Z)V", (void *)android_net_utils_setAllowNetworkingForProcess },
 };
+// clang-format on
 
 int register_android_net_NetworkUtils(JNIEnv* env)
 {
