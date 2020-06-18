@@ -167,14 +167,16 @@ final class RemoteAugmentedAutofillService
                             new IFillCallback.Stub() {
                                 @Override
                                 public void onSuccess(@Nullable List<Dataset> inlineSuggestionsData,
-                                        @Nullable Bundle clientState) {
+                                        @Nullable Bundle clientState, boolean showingFillWindow) {
                                     mCallbacks.resetLastResponse();
                                     maybeRequestShowInlineSuggestions(sessionId,
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             clientState, focusedId, focusedValue,
                                             inlineSuggestionsCallback,
                                             client, onErrorCallback, remoteRenderService);
-                                    requestAutofill.complete(null);
+                                    if (!showingFillWindow) {
+                                        requestAutofill.complete(null);
+                                    }
                                 }
 
                                 @Override
@@ -263,7 +265,28 @@ final class RemoteAugmentedAutofillService
                         request, inlineSuggestionsData, focusedId, filterText,
                         new InlineFillUi.InlineSuggestionUiCallback() {
                             @Override
-                            public void autofill(Dataset dataset) {
+                            public void autofill(Dataset dataset, int datasetIndex) {
+                                if (dataset.getAuthentication() != null) {
+                                    mCallbacks.logAugmentedAutofillAuthenticationSelected(sessionId,
+                                            dataset.getId(), clientState);
+                                    final IntentSender action = dataset.getAuthentication();
+                                    final int authenticationId =
+                                            AutofillManager.makeAuthenticationId(
+                                                    Session.AUGMENTED_AUTOFILL_REQUEST_ID,
+                                                    datasetIndex);
+                                    final Intent fillInIntent = new Intent();
+                                    fillInIntent.putExtra(AutofillManager.EXTRA_CLIENT_STATE,
+                                            clientState);
+                                    try {
+                                        client.authenticate(sessionId, authenticationId, action,
+                                                fillInIntent, false);
+                                    } catch (RemoteException e) {
+                                        Slog.w(TAG, "Error starting auth flow");
+                                        inlineSuggestionsCallback.apply(
+                                                InlineFillUi.emptyUi(focusedId));
+                                    }
+                                    return;
+                                }
                                 mCallbacks.logAugmentedAutofillSelected(sessionId,
                                         dataset.getId(), clientState);
                                 try {
@@ -319,5 +342,8 @@ final class RemoteAugmentedAutofillService
 
         void logAugmentedAutofillSelected(int sessionId, @Nullable String suggestionId,
                 @Nullable Bundle clientState);
+
+        void logAugmentedAutofillAuthenticationSelected(int sessionId,
+                @Nullable String suggestionId, @Nullable Bundle clientState);
     }
 }

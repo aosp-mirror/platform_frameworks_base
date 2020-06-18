@@ -32,7 +32,7 @@ class BubblePersistentRepositoryTest : SysuiTestCase() {
 
     private val bubbles = listOf(
             BubbleEntity(0, "com.example.messenger", "shortcut-1", "key-1", 120, 0),
-            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428),
+            BubbleEntity(10, "com.example.chat", "alice and bob", "key-2", 0, 16537428, "title"),
             BubbleEntity(0, "com.example.messenger", "shortcut-2", "key-3", 120, 0)
     )
     private lateinit var repository: BubblePersistentRepository

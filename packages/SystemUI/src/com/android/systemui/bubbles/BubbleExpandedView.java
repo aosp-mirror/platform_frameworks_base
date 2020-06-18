@@ -35,6 +35,7 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.ActivityView;
@@ -126,6 +127,7 @@ public class BubbleExpandedView extends LinearLayout {
 
     private BubbleController mBubbleController = Dependency.get(BubbleController.class);
     private WindowManager mWindowManager;
+    private ActivityManager mActivityManager;
 
     private BubbleStackView mStackView;
     private View mVirtualImeView;
@@ -169,7 +171,7 @@ public class BubbleExpandedView extends LinearLayout {
                             return;
                         }
                         try {
-                            if (!mIsOverflow && mBubble.usingShortcutInfo()) {
+                            if (!mIsOverflow && mBubble.getShortcutInfo() != null) {
                                 options.setApplyActivityFlagsForBubbles(true);
                                 mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
                                         options, null /* sourceBounds */);
@@ -191,6 +193,10 @@ public class BubbleExpandedView extends LinearLayout {
                         }
                     });
                     mActivityViewStatus = ActivityViewStatus.ACTIVITY_STARTED;
+                    break;
+                case ACTIVITY_STARTED:
+                    post(() -> mActivityManager.moveTaskToFront(mTaskId, 0));
+                    break;
             }
         }
 
@@ -252,6 +258,7 @@ public class BubbleExpandedView extends LinearLayout {
             int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         updateDimensions();
+        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
     }
 
     void updateDimensions() {
@@ -661,7 +668,7 @@ public class BubbleExpandedView extends LinearLayout {
                 desiredHeight = Math.max(mBubble.getDesiredHeight(mContext), mMinHeight);
             }
             float height = Math.min(desiredHeight, getMaxExpandedHeight());
-            height = Math.max(height, mIsOverflow? mOverflowHeight : mMinHeight);
+            height = Math.max(height, mMinHeight);
             ViewGroup.LayoutParams lp = mActivityView.getLayoutParams();
             mNeedsNewHeight = lp.height != height;
             if (!mKeyboardVisible) {

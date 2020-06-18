@@ -17,7 +17,11 @@ package com.android.systemui.statusbar.phone;
 
 import static android.view.Display.INVALID_DISPLAY;
 
+import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.database.ContentObserver;
 import android.graphics.PixelFormat;
@@ -75,6 +79,8 @@ import com.android.systemui.tracing.nano.EdgeBackGestureHandlerProto;
 import com.android.systemui.tracing.nano.SystemUiTraceProto;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 /**
@@ -121,9 +127,18 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         }
     };
 
+    private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
+        @Override
+        public void onTaskStackChanged() {
+            mGestureBlockingActivityRunning = isGestureBlockingActivityRunning();
+        }
+    };
+
     private final Context mContext;
     private final OverviewProxyService mOverviewProxyService;
-    private PluginManager mPluginManager;
+    private final PluginManager mPluginManager;
+    // Activities which should not trigger Back gesture.
+    private final List<ComponentName> mGestureBlockingActivities = new ArrayList<>();
 
     private final Point mDisplaySize = new Point();
     private final int mDisplayId;
@@ -162,6 +177,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private boolean mIsEnabled;
     private boolean mIsNavBarShownTransiently;
     private boolean mIsBackGestureAllowed;
+    private boolean mGestureBlockingActivityRunning;
 
     private InputMonitor mInputMonitor;
     private InputEventReceiver mInputEventReceiver;
@@ -203,6 +219,29 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         mMainExecutor = context.getMainExecutor();
         mOverviewProxyService = overviewProxyService;
         mPluginManager = pluginManager;
+        ComponentName recentsComponentName = ComponentName.unflattenFromString(
+                context.getString(com.android.internal.R.string.config_recentsComponentName));
+        if (recentsComponentName != null) {
+            String recentsPackageName = recentsComponentName.getPackageName();
+            PackageManager manager = context.getPackageManager();
+            try {
+                Resources resources = manager.getResourcesForApplication(recentsPackageName);
+                int resId = resources.getIdentifier(
+                        "gesture_blocking_activities", "array", recentsPackageName);
+
+                if (resId == 0) {
+                    Log.e(TAG, "No resource found for gesture-blocking activities");
+                } else {
+                    String[] gestureBlockingActivities = resources.getStringArray(resId);
+                    for (String gestureBlockingActivity : gestureBlockingActivities) {
+                        mGestureBlockingActivities.add(
+                                ComponentName.unflattenFromString(gestureBlockingActivity));
+                    }
+                }
+            } catch (NameNotFoundException e) {
+                Log.e(TAG, "Failed to add gesture blocking activities", e);
+            }
+        }
         Dependency.get(ProtoTracer.class).add(this);
 
         mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
@@ -324,6 +363,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mGestureNavigationSettingsObserver.unregister();
             mContext.getSystemService(DisplayManager.class).unregisterDisplayListener(this);
             mPluginManager.removePluginListener(this);
+            ActivityManagerWrapper.getInstance().unregisterTaskStackListener(mTaskStackListener);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -338,6 +378,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             updateDisplaySize();
             mContext.getSystemService(DisplayManager.class).registerDisplayListener(this,
                     mContext.getMainThreadHandler());
+            ActivityManagerWrapper.getInstance().registerTaskStackListener(mTaskStackListener);
 
             try {
                 WindowManagerGlobal.getWindowManagerService()
@@ -491,6 +532,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             mLogGesture = false;
             mInRejectedExclusion = false;
             mAllowGesture = !mDisabledForQuickstep && mIsBackGestureAllowed
+                    && !mGestureBlockingActivityRunning
                     && !QuickStepContract.isBackGestureDisabled(mSysUiFlags)
                     && isWithinTouchRegion((int) ev.getX(), (int) ev.getY());
             if (mAllowGesture) {
@@ -631,6 +673,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         pw.println("  mIsAttached=" + mIsAttached);
         pw.println("  mEdgeWidthLeft=" + mEdgeWidthLeft);
         pw.println("  mEdgeWidthRight=" + mEdgeWidthRight);
+    }
+
+    private boolean isGestureBlockingActivityRunning() {
+        ActivityManager.RunningTaskInfo runningTask =
+                ActivityManagerWrapper.getInstance().getRunningTask();
+        ComponentName topActivity = runningTask == null ? null : runningTask.topActivity;
+        return topActivity != null && mGestureBlockingActivities.contains(topActivity);
     }
 
     @Override

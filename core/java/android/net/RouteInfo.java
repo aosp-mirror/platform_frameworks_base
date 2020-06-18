@@ -26,7 +26,6 @@ import android.net.util.NetUtils;
 import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Pair;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -554,15 +553,45 @@ public final class RouteInfo implements Parcelable {
     }
 
     /**
-     * A helper class that contains the destination and the gateway in a {@code RouteInfo},
-     * used by {@link ConnectivityService#updateRoutes} or
+     * A helper class that contains the destination, the gateway and the interface in a
+     * {@code RouteInfo}, used by {@link ConnectivityService#updateRoutes} or
      * {@link LinkProperties#addRoute} to calculate the list to be updated.
+     * {@code RouteInfo} objects with different interfaces are treated as different routes because
+     * *usually* on Android different interfaces use different routing tables, and moving a route
+     * to a new routing table never constitutes an update, but is always a remove and an add.
      *
      * @hide
      */
-    public static class RouteKey extends Pair<IpPrefix, InetAddress> {
-        RouteKey(@NonNull IpPrefix destination, @Nullable InetAddress gateway) {
-            super(destination, gateway);
+    public static class RouteKey {
+        @NonNull private final IpPrefix mDestination;
+        @Nullable private final InetAddress mGateway;
+        @Nullable private final String mInterface;
+
+        RouteKey(@NonNull IpPrefix destination, @Nullable InetAddress gateway,
+                @Nullable String iface) {
+            mDestination = destination;
+            mGateway = gateway;
+            mInterface = iface;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (!(o instanceof RouteKey)) {
+                return false;
+            }
+            RouteKey p = (RouteKey) o;
+            // No need to do anything special for scoped addresses. Inet6Address#equals does not
+            // consider the scope ID, but the netd route IPCs (e.g., INetd#networkAddRouteParcel)
+            // and the kernel ignore scoped addresses both in the prefix and in the nexthop and only
+            // look at RTA_OIF.
+            return Objects.equals(p.mDestination, mDestination)
+                    && Objects.equals(p.mGateway, mGateway)
+                    && Objects.equals(p.mInterface, mInterface);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mDestination, mGateway, mInterface);
         }
     }
 
@@ -574,7 +603,7 @@ public final class RouteInfo implements Parcelable {
      */
     @NonNull
     public RouteKey getRouteKey() {
-        return new RouteKey(mDestination, mGateway);
+        return new RouteKey(mDestination, mGateway, mInterface);
     }
 
     /**
