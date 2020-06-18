@@ -1902,12 +1902,14 @@ class Task extends WindowContainer<WindowContainer> {
         mTmpPrevBounds.set(getBounds());
         final boolean wasInMultiWindowMode = inMultiWindowMode();
         final boolean wasInPictureInPicture = inPinnedWindowingMode();
+        final int oldOrientation = getOrientation();
         super.onConfigurationChanged(newParentConfig);
         // Only need to update surface size here since the super method will handle updating
         // surface position.
         updateSurfaceSize(getSyncTransaction());
 
-        if (wasInPictureInPicture != inPinnedWindowingMode()) {
+        final boolean pipChanging = wasInPictureInPicture != inPinnedWindowingMode();
+        if (pipChanging) {
             mStackSupervisor.scheduleUpdatePictureInPictureModeIfNeeded(this, getStack());
         } else if (wasInMultiWindowMode != inMultiWindowMode()) {
             mStackSupervisor.scheduleUpdateMultiWindowMode(this);
@@ -1925,6 +1927,26 @@ class Task extends WindowContainer<WindowContainer> {
             final Rect currentBounds = getRequestedOverrideBounds();
             if (!currentBounds.isEmpty()) {
                 setLastNonFullscreenBounds(currentBounds);
+            }
+        }
+
+        if (pipChanging) {
+            mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(true);
+        }
+        try {
+            // We have 2 reasons why we need to report orientation change here.
+            // 1. In some cases (e.g. freeform -> fullscreen) we don't have other ways of reporting.
+            // 2. Report orientation as soon as possible so that the display can freeze earlier if
+            // the display orientation will be changed. Because the surface bounds of activity
+            // may have been set to fullscreen but the activity hasn't redrawn its content yet,
+            // the rotation animation needs to capture snapshot earlier to avoid animating from
+            // an intermediate state.
+            if (oldOrientation != getOrientation()) {
+                onDescendantOrientationChanged(null, this);
+            }
+        } finally {
+            if (pipChanging) {
+                mDisplayContent.getPinnedStackController().setPipWindowingModeChanging(false);
             }
         }
 
@@ -2518,20 +2540,7 @@ class Task extends WindowContainer<WindowContainer> {
             return;
         }
 
-        if (inStack.inFreeformWindowingMode()) {
-            if (!isResizeable()) {
-                throw new IllegalArgumentException("Can not position non-resizeable task="
-                        + this + " in stack=" + inStack);
-            }
-            if (!matchParentBounds()) {
-                return;
-            }
-            if (mLastNonFullscreenBounds != null) {
-                setBounds(mLastNonFullscreenBounds);
-            } else {
-                mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
-            }
-        } else {
+        if (!inStack.inFreeformWindowingMode()) {
             setBounds(inStack.getRequestedOverrideBounds());
         }
     }
@@ -2919,9 +2928,17 @@ class Task extends WindowContainer<WindowContainer> {
         // Don't crop HOME/RECENTS windows to stack bounds. This is because in split-screen
         // they extend past their stack and sysui uses the stack surface to control cropping.
         // TODO(b/158242495): get rid of this when drag/drop can use surface bounds.
-        final boolean isTopHomeOrRecents = (isActivityTypeHome() || isActivityTypeRecents())
-                && getRootTask().getTopMostTask() == this;
-        return isResizeable() && !isTopHomeOrRecents;
+        if (isActivityTypeHome() || isActivityTypeRecents()) {
+            // Make sure this is the top-most non-organizer root task (if not top-most, it means
+            // another translucent task could be above this, so this needs to stay cropped.
+            final Task rootTask = getRootTask();
+            final Task topNonOrgTask =
+                    rootTask.mCreatedByOrganizer ? rootTask.getTopMostTask() : rootTask;
+            if (isDescendantOf(topNonOrgTask)) {
+                return false;
+            }
+        }
+        return isResizeable();
     }
 
     /**
@@ -3036,10 +3053,7 @@ class Task extends WindowContainer<WindowContainer> {
         if (displayContent == null) {
             return;
         }
-        if (matchParentBounds()) {
-            // TODO: Yeah...not sure if this works with WindowConfiguration, but shouldn't be a
-            // problem once we move mBounds into WindowConfiguration.
-            setBounds(null);
+        if (getRequestedOverrideBounds().isEmpty()) {
             return;
         }
         final int displayId = displayContent.getDisplayId();

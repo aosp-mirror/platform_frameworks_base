@@ -203,15 +203,16 @@ public abstract class ConfigurationContainer<E extends ConfigurationContainer> {
     }
 
     /**
-     * Indicates whether this container has not requested any bounds different from its parent. In
-     * this case, it will inherit the bounds of the first ancestor which specifies a bounds subject
-     * to policy constraints.
+     * Indicates whether this container chooses not to override any bounds from its parent, either
+     * because it doesn't request to override them or the request is dropped during configuration
+     * resolution. In this case, it will inherit the bounds of the first ancestor which specifies a
+     * bounds subject to policy constraints.
      *
-     * @return {@code true} if no explicit bounds have been requested at this container level.
-     *         {@code false} otherwise.
+     * @return {@code true} if this container level uses bounds from parent level. {@code false}
+     *         otherwise.
      */
     public boolean matchParentBounds() {
-        return getRequestedOverrideBounds().isEmpty();
+        return getResolvedOverrideBounds().isEmpty();
     }
 
     /**

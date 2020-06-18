@@ -290,7 +290,7 @@ public final class InlineFillUi {
         /**
          * Callback to autofill a dataset to the client app.
          */
-        void autofill(@NonNull Dataset dataset);
+        void autofill(@NonNull Dataset dataset, int datasetIndex);
 
         /**
          * Callback to start Intent in client app.

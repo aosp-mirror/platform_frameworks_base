@@ -26,6 +26,8 @@ import android.net.util.SharedLog;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.SystemProperties;
+import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -44,11 +46,8 @@ public abstract class TetheringDependencies {
      * Get a reference to the BpfCoordinator to be used by tethering.
      */
     public @NonNull BpfCoordinator getBpfCoordinator(
-            @NonNull Handler handler, @NonNull INetd netd, @NonNull SharedLog log,
             @NonNull BpfCoordinator.Dependencies deps) {
-        final NetworkStatsManager statsManager =
-                (NetworkStatsManager) getContext().getSystemService(Context.NETWORK_STATS_SERVICE);
-        return new BpfCoordinator(handler, netd, statsManager, log, deps);
+        return new BpfCoordinator(deps);
     }
 
     /**
@@ -150,4 +149,11 @@ public abstract class TetheringDependencies {
      * Get a reference to BluetoothAdapter to be used by tethering.
      */
     public abstract BluetoothAdapter getBluetoothAdapter();
+
+    /**
+     * Get SystemProperties which indicate whether tethering is denied.
+     */
+    public boolean isTetheringDenied() {
+        return TextUtils.equals(SystemProperties.get("ro.tether.denied"), "true");
+    }
 }

@@ -25,6 +25,8 @@ import static android.net.NetworkStats.UID_ALL;
 import static android.net.NetworkStats.UID_TETHERING;
 import static android.net.netstats.provider.NetworkStatsProvider.QUOTA_UNLIMITED;
 
+import static com.android.networkstack.tethering.TetheringConfiguration.DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS;
+
 import android.app.usage.NetworkStatsManager;
 import android.net.INetd;
 import android.net.MacAddress;
@@ -36,6 +38,7 @@ import android.net.ip.IpServer;
 import android.net.netstats.provider.NetworkStatsProvider;
 import android.net.util.SharedLog;
 import android.net.util.TetheringUtils.ForwardedStats;
+import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -47,11 +50,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 
 import java.net.Inet6Address;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -65,8 +70,7 @@ import java.util.Objects;
  */
 public class BpfCoordinator {
     private static final String TAG = BpfCoordinator.class.getSimpleName();
-    @VisibleForTesting
-    static final int DEFAULT_PERFORM_POLL_INTERVAL_MS = 5000; // TODO: Make it customizable.
+    private static final int DUMP_TIMEOUT_MS = 10_000;
 
     @VisibleForTesting
     enum StatsType {
@@ -84,6 +88,13 @@ public class BpfCoordinator {
     private final Dependencies mDeps;
     @Nullable
     private final BpfTetherStatsProvider mStatsProvider;
+
+    // True if BPF offload is supported, false otherwise. The BPF offload could be disabled by
+    // a runtime resource overlay package or device configuration. This flag is only initialized
+    // in the constructor because it is hard to unwind all existing change once device
+    // configuration is changed. Especially the forwarding rules. Keep the same setting
+    // to make it simpler. See also TetheringConfiguration.
+    private final boolean mIsBpfEnabled;
 
     // Tracks whether BPF tethering is started or not. This is set by tethering before it
     // starts the first IpServer and is cleared by tethering shortly before the last IpServer
@@ -142,22 +153,34 @@ public class BpfCoordinator {
     };
 
     @VisibleForTesting
-    public static class Dependencies {
-        int getPerformPollInterval() {
-            // TODO: Consider make this configurable.
-            return DEFAULT_PERFORM_POLL_INTERVAL_MS;
-        }
+    public abstract static class Dependencies {
+        /** Get handler. */
+        @NonNull public abstract Handler getHandler();
+
+        /** Get netd. */
+        @NonNull public abstract INetd getNetd();
+
+        /** Get network stats manager. */
+        @NonNull public abstract NetworkStatsManager getNetworkStatsManager();
+
+        /** Get shared log. */
+        @NonNull public abstract SharedLog getSharedLog();
+
+        /** Get tethering configuration. */
+        @Nullable public abstract TetheringConfiguration getTetherConfig();
     }
 
     @VisibleForTesting
-    public BpfCoordinator(@NonNull Handler handler, @NonNull INetd netd,
-            @NonNull NetworkStatsManager nsm, @NonNull SharedLog log, @NonNull Dependencies deps) {
-        mHandler = handler;
-        mNetd = netd;
-        mLog = log.forSubComponent(TAG);
+    public BpfCoordinator(@NonNull Dependencies deps) {
+        mDeps = deps;
+        mHandler = mDeps.getHandler();
+        mNetd = mDeps.getNetd();
+        mLog = mDeps.getSharedLog().forSubComponent(TAG);
+        mIsBpfEnabled = isBpfEnabled();
         BpfTetherStatsProvider provider = new BpfTetherStatsProvider();
         try {
-            nsm.registerNetworkStatsProvider(getClass().getSimpleName(), provider);
+            mDeps.getNetworkStatsManager().registerNetworkStatsProvider(
+                    getClass().getSimpleName(), provider);
         } catch (RuntimeException e) {
             // TODO: Perhaps not allow to use BPF offload because the reregistration failure
             // implied that no data limit could be applies on a metered upstream if any.
@@ -165,7 +188,6 @@ public class BpfCoordinator {
             provider = null;
         }
         mStatsProvider = provider;
-        mDeps = deps;
     }
 
     /**
@@ -176,6 +198,11 @@ public class BpfCoordinator {
      */
     public void startPolling() {
         if (mPollingStarted) return;
+
+        if (!mIsBpfEnabled) {
+            mLog.i("Offload disabled");
+            return;
+        }
 
         mPollingStarted = true;
         maybeSchedulePollingStats();
@@ -211,6 +238,8 @@ public class BpfCoordinator {
      */
     public void tetherOffloadRuleAdd(
             @NonNull final IpServer ipServer, @NonNull final Ipv6ForwardingRule rule) {
+        if (!mIsBpfEnabled) return;
+
         try {
             // TODO: Perhaps avoid to add a duplicate rule.
             mNetd.tetherOffloadRuleAdd(rule.toTetherOffloadRuleParcel());
@@ -250,6 +279,8 @@ public class BpfCoordinator {
      */
     public void tetherOffloadRuleRemove(
             @NonNull final IpServer ipServer, @NonNull final Ipv6ForwardingRule rule) {
+        if (!mIsBpfEnabled) return;
+
         try {
             // TODO: Perhaps avoid to remove a non-existent rule.
             mNetd.tetherOffloadRuleRemove(rule.toTetherOffloadRuleParcel());
@@ -293,6 +324,8 @@ public class BpfCoordinator {
      * Note that this can be only called on handler thread.
      */
     public void tetherOffloadRuleClear(@NonNull final IpServer ipServer) {
+        if (!mIsBpfEnabled) return;
+
         final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> rules = mIpv6ForwardingRules.get(
                 ipServer);
         if (rules == null) return;
@@ -308,6 +341,8 @@ public class BpfCoordinator {
      * Note that this can be only called on handler thread.
      */
     public void tetherOffloadRuleUpdate(@NonNull final IpServer ipServer, int newUpstreamIfindex) {
+        if (!mIsBpfEnabled) return;
+
         final LinkedHashMap<Inet6Address, Ipv6ForwardingRule> rules = mIpv6ForwardingRules.get(
                 ipServer);
         if (rules == null) return;
@@ -330,6 +365,8 @@ public class BpfCoordinator {
      * Note that this can be only called on handler thread.
      */
     public void addUpstreamNameToLookupTable(int upstreamIfindex, @NonNull String upstreamIface) {
+        if (!mIsBpfEnabled) return;
+
         if (upstreamIfindex == 0 || TextUtils.isEmpty(upstreamIface)) return;
 
         // The same interface index to name mapping may be added by different IpServer objects or
@@ -341,6 +378,77 @@ public class BpfCoordinator {
             Log.wtf(TAG, "The upstream interface name " + upstreamIface
                     + " is different from the existing interface name "
                     + iface + " for index " + upstreamIfindex);
+        }
+    }
+
+    /**
+     * Dump information.
+     * Block the function until all the data are dumped on the handler thread or timed-out. The
+     * reason is that dumpsys invokes this function on the thread of caller and the data may only
+     * be allowed to be accessed on the handler thread.
+     */
+    public void dump(@NonNull IndentingPrintWriter pw) {
+        final ConditionVariable dumpDone = new ConditionVariable();
+        mHandler.post(() -> {
+            pw.println("mIsBpfEnabled: " + mIsBpfEnabled);
+            pw.println("Polling " + (mPollingStarted ? "started" : "not started"));
+            pw.println("Stats provider " + (mStatsProvider != null
+                    ? "registered" : "not registered"));
+            pw.println("Upstream quota: " + mInterfaceQuotas.toString());
+            pw.println("Polling interval: " + getPollingInterval() + " ms");
+
+            pw.println("Forwarding stats:");
+            pw.increaseIndent();
+            if (mStats.size() == 0) {
+                pw.println("<empty>");
+            } else {
+                dumpStats(pw);
+            }
+            pw.decreaseIndent();
+
+            pw.println("Forwarding rules:");
+            pw.increaseIndent();
+            if (mIpv6ForwardingRules.size() == 0) {
+                pw.println("<empty>");
+            } else {
+                dumpIpv6ForwardingRules(pw);
+            }
+            pw.decreaseIndent();
+
+            dumpDone.open();
+        });
+        if (!dumpDone.block(DUMP_TIMEOUT_MS)) {
+            pw.println("... dump timed-out after " + DUMP_TIMEOUT_MS + "ms");
+        }
+    }
+
+    private void dumpStats(@NonNull IndentingPrintWriter pw) {
+        for (int i = 0; i < mStats.size(); i++) {
+            final int upstreamIfindex = mStats.keyAt(i);
+            final ForwardedStats stats = mStats.get(upstreamIfindex);
+            pw.println(String.format("%d(%s) - %s", upstreamIfindex, mInterfaceNames.get(
+                    upstreamIfindex), stats.toString()));
+        }
+    }
+
+    private void dumpIpv6ForwardingRules(@NonNull IndentingPrintWriter pw) {
+        for (Map.Entry<IpServer, LinkedHashMap<Inet6Address, Ipv6ForwardingRule>> entry :
+                mIpv6ForwardingRules.entrySet()) {
+            IpServer ipServer = entry.getKey();
+            // The rule downstream interface index is paired with the interface name from
+            // IpServer#interfaceName. See #startIPv6, #updateIpv6ForwardingRules in IpServer.
+            final String downstreamIface = ipServer.interfaceName();
+            pw.println("[" + downstreamIface + "]: iif(iface) oif(iface) v6addr srcmac dstmac");
+
+            pw.increaseIndent();
+            LinkedHashMap<Inet6Address, Ipv6ForwardingRule> rules = entry.getValue();
+            for (Ipv6ForwardingRule rule : rules.values()) {
+                final int upstreamIfindex = rule.upstreamIfindex;
+                pw.println(String.format("%d(%s) %d(%s) %s %s %s", upstreamIfindex,
+                        mInterfaceNames.get(upstreamIfindex), rule.downstreamIfindex,
+                        downstreamIface, rule.address, rule.srcMac, rule.dstMac));
+            }
+            pw.decreaseIndent();
         }
     }
 
@@ -472,6 +580,11 @@ public class BpfCoordinator {
             mIfaceStats = mIfaceStats.add(ifaceDiff);
             mUidStats = mUidStats.add(uidDiff);
         }
+    }
+
+    private boolean isBpfEnabled() {
+        final TetheringConfiguration config = mDeps.getTetherConfig();
+        return (config != null) ? config.isBpfOffloadEnabled() : true /* default value */;
     }
 
     private int getInterfaceIndexFromRules(@NonNull String ifName) {
@@ -625,6 +738,17 @@ public class BpfCoordinator {
         updateQuotaAndStatsFromSnapshot(tetherStatsList);
     }
 
+    @VisibleForTesting
+    int getPollingInterval() {
+        // The valid range of interval is DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS..max_long.
+        // Ignore the config value is less than the minimum polling interval. Note that the
+        // minimum interval definition is invoked as OffloadController#isPollingStatsNeeded does.
+        // TODO: Perhaps define a minimum polling interval constant.
+        final TetheringConfiguration config = mDeps.getTetherConfig();
+        final int configInterval = (config != null) ? config.getOffloadPollInterval() : 0;
+        return Math.max(DEFAULT_TETHER_OFFLOAD_POLL_INTERVAL_MS, configInterval);
+    }
+
     private void maybeSchedulePollingStats() {
         if (!mPollingStarted) return;
 
@@ -632,6 +756,23 @@ public class BpfCoordinator {
             mHandler.removeCallbacks(mScheduledPollingTask);
         }
 
-        mHandler.postDelayed(mScheduledPollingTask, mDeps.getPerformPollInterval());
+        mHandler.postDelayed(mScheduledPollingTask, getPollingInterval());
+    }
+
+    // Return forwarding rule map. This is used for testing only.
+    // Note that this can be only called on handler thread.
+    @NonNull
+    @VisibleForTesting
+    final HashMap<IpServer, LinkedHashMap<Inet6Address, Ipv6ForwardingRule>>
+            getForwardingRulesForTesting() {
+        return mIpv6ForwardingRules;
+    }
+
+    // Return upstream interface name map. This is used for testing only.
+    // Note that this can be only called on handler thread.
+    @NonNull
+    @VisibleForTesting
+    final SparseArray<String> getInterfaceNamesForTesting() {
+        return mInterfaceNames;
     }
 }

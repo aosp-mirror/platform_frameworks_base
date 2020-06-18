@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-  ~ Copyright (C) 2020 The Android Open Source Project
+  ~ Copyright (C) 2019 The Android Open Source Project
   ~
   ~ Licensed under the Apache License, Version 2.0 (the "License");
   ~ you may not use this file except in compliance with the License.
@@ -12,17 +12,13 @@
   ~ distributed under the License is distributed on an "AS IS" BASIS,
   ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
   ~ See the License for the specific language governing permissions and
-  ~ limitations under the License.
+  ~ limitations under the License
   -->
-<manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.android.server.pm.test.dummy_app"
-    android:versionCode="2"
-    >
-
-    <permission
-        android:name="com.android.server.pm.test.dummy_app.TEST_PERMISSION"
-        android:protectionLevel="normal"
-        />
-
-</manifest>
+<permissions>
+    <privapp-permissions package="com.android.car.companiondevicesupport">
+      <permission name="android.permission.INTERACT_ACROSS_USERS"/>
+      <permission name="android.permission.MANAGE_USERS"/>
+      <permission name="android.permission.PROVIDE_TRUST_AGENT"/>
+      <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
+    </privapp-permissions>
+</permissions>

@@ -843,8 +843,9 @@ public class AppsFilter {
             PackageSetting targetPkgSetting, int userId) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "shouldFilterApplication");
         try {
-            if (callingUid < Process.FIRST_APPLICATION_UID
-                    || UserHandle.getAppId(callingUid) == targetPkgSetting.appId) {
+            int callingAppId = UserHandle.getAppId(callingUid);
+            if (callingAppId < Process.FIRST_APPLICATION_UID
+                    || callingAppId == targetPkgSetting.appId) {
                 return false;
             }
             if (mShouldFilterCache != null) { // use cache
@@ -869,7 +870,7 @@ public class AppsFilter {
                     return false;
                 }
             }
-            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(UserHandle.getAppId(callingUid))) {
+            if (DEBUG_LOGGING || mFeatureConfig.isLoggingEnabled(callingAppId)) {
                 log(callingSetting, targetPkgSetting, "BLOCKED");
             }
             return !DEBUG_ALLOW_ALL;
@@ -964,12 +965,14 @@ public class AppsFilter {
             try {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "requestsQueryAllPackages");
                 if (callingPkgSetting != null) {
-                    if (requestsQueryAllPackages(callingPkgSetting)) {
-                        return false;
-                    }
+                        if (callingPkgSetting.pkg != null
+                                && requestsQueryAllPackages(callingPkgSetting.pkg)) {
+                            return false;
+                        }
                 } else {
                     for (int i = callingSharedPkgSettings.size() - 1; i >= 0; i--) {
-                        if (requestsQueryAllPackages(callingSharedPkgSettings.valueAt(i))) {
+                        AndroidPackage pkg = callingSharedPkgSettings.valueAt(i).pkg;
+                        if (pkg != null && requestsQueryAllPackages(pkg)) {
                             return false;
                         }
                     }
@@ -1058,10 +1061,10 @@ public class AppsFilter {
     }
 
 
-    private static boolean requestsQueryAllPackages(PackageSetting pkgSetting) {
+    private static boolean requestsQueryAllPackages(@NonNull AndroidPackage pkg) {
         // we're not guaranteed to have permissions yet analyzed at package add, so we inspect the
         // package directly
-        return pkgSetting.pkg.getRequestedPermissions().contains(
+        return pkg.getRequestedPermissions().contains(
                 Manifest.permission.QUERY_ALL_PACKAGES);
     }
 

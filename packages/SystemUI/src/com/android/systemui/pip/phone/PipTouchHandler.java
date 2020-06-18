@@ -70,6 +70,8 @@ import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import java.io.PrintWriter;
 
+import kotlin.Unit;
+
 /**
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
@@ -262,12 +264,14 @@ public class PipTouchHandler {
         mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
         updateMagneticTargetSize();
 
-        mMagnetizedPip.setPhysicsAnimatorUpdateListener(mMotionHelper.mResizePipUpdateListener);
+        mMagnetizedPip.setAnimateStuckToTarget(
+                (target, velX, velY, flung, after) -> {
+                    mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung, after);
+                    return Unit.INSTANCE;
+                });
         mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
             public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                mMotionHelper.prepareForAnimation();
-
                 // Show the dismiss target, in case the initial touch event occurred within the
                 // magnetic field radius.
                 showDismissTargetMaybe();
@@ -286,11 +290,12 @@ public class PipTouchHandler {
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                mMotionHelper.notifyDismissalPending();
+
                 mHandler.post(() -> {
                     mMotionHelper.animateDismiss();
                     hideDismissTarget();
                 });
-
 
                 MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
                         PipUtils.getTopPipActivity(mContext, mActivityManager));
@@ -617,11 +622,16 @@ public class PipTouchHandler {
         }
 
         MotionEvent ev = (MotionEvent) inputEvent;
-
-        if (mPipResizeGestureHandler.isWithinTouchRegion((int) ev.getRawX(), (int) ev.getRawY())) {
+        if (!mTouchState.isDragging()
+                && !mMagnetizedPip.getObjectStuckToTarget()
+                && !mMotionHelper.isAnimating()
+                && mPipResizeGestureHandler.isWithinTouchRegion(
+                        (int) ev.getRawX(), (int) ev.getRawY())) {
             return true;
         }
-        if (mMagnetizedPip.maybeConsumeMotionEvent(ev)) {
+
+        if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
+                && mMagnetizedPip.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
             // to the touch state. Touch state needs a DOWN event in order to later process MOVE
             // events it'll receive if the object is dragged out of the magnetic field.
@@ -643,7 +653,6 @@ public class PipTouchHandler {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                mMotionHelper.synchronizePinnedStackBoundsForTouchGesture();
                 mGesture.onDown(mTouchState);
                 break;
             }
@@ -688,11 +697,11 @@ public class PipTouchHandler {
                 break;
             }
             case MotionEvent.ACTION_HOVER_EXIT: {
-                mHideMenuAfterShown = true;
                 // If Touch Exploration is enabled, some a11y services (e.g. Talkback) is probably
                 // on and changing MotionEvents into HoverEvents.
                 // Let's not enable menu show/hide for a11y services.
                 if (!mAccessibilityManager.isTouchExplorationEnabled()) {
+                    mHideMenuAfterShown = true;
                     mMenuController.hideMenu();
                 }
                 if (!shouldDeliverToMenu && mSendingHoverAccessibilityEvents) {
@@ -872,7 +881,7 @@ public class PipTouchHandler {
                 return;
             }
 
-            Rect bounds = mMotionHelper.getBounds();
+            Rect bounds = mMotionHelper.getPossiblyAnimatingBounds();
             mDelta.set(0f, 0f);
             mStartPosition.set(bounds.left, bounds.top);
             mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
@@ -914,7 +923,7 @@ public class PipTouchHandler {
                 mDelta.x += left - lastX;
                 mDelta.y += top - lastY;
 
-                mTmpBounds.set(mMotionHelper.getBounds());
+                mTmpBounds.set(mMotionHelper.getPossiblyAnimatingBounds());
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds, true /* isDragging */);
 

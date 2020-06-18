@@ -251,6 +251,13 @@ public class SizeCompatTests extends ActivityTestsBase {
         mActivity.mDisplayContent.mInputMethodTarget = addWindowToActivity(mActivity);
         // Make sure IME cannot attach to the app, otherwise IME window will also be shifted.
         assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
+
+        // Recompute the natural configuration without resolving size compat configuration.
+        mActivity.clearSizeCompatMode();
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // It should keep non-attachable because the resolved bounds will be computed according to
+        // the aspect ratio that won't match its parent bounds.
+        assertFalse(mActivity.mDisplayContent.isImeAttachedToApp());
     }
 
     @Test

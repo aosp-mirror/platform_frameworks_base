@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
 import static android.view.InsetsState.ITYPE_STATUS_BAR;
@@ -243,6 +244,12 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(appWindow.canBeImeTarget());
         appWindow.mAttrs.flags &= ~FLAG_NOT_FOCUSABLE;
         assertTrue(appWindow.canBeImeTarget());
+
+        // Verify PINNED windows can't be IME target.
+        int initialMode = appWindow.mActivityRecord.getWindowingMode();
+        appWindow.mActivityRecord.setWindowingMode(WINDOWING_MODE_PINNED);
+        assertFalse(appWindow.canBeImeTarget());
+        appWindow.mActivityRecord.setWindowingMode(initialMode);
 
         // Make windows invisible
         appWindow.hideLw(false /* doAnimation */);
@@ -646,6 +653,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState win1 = createWindow(null, TYPE_APPLICATION, dc, "win1");
         win1.mHasSurface = true;
         win1.mSurfaceControl = mock(SurfaceControl.class);
+        win1.mAttrs.surfaceInsets.set(1, 2, 3, 4);
         win1.getFrameLw().offsetTo(WINDOW_OFFSET, 0);
         win1.updateSurfacePosition(t);
         win1.getTransformationMatrix(values, matrix);

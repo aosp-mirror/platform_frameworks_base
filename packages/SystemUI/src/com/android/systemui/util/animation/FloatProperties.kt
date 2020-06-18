@@ -67,6 +67,40 @@ class FloatProperties {
         }
 
         /**
+         * Represents the width of a [Rect]. Typically used to animate resizing a Rect horizontally.
+         *
+         * This property's getter returns [Rect.width], and its setter changes the value of
+         * [Rect.right] by adding the animated width value to [Rect.left].
+         */
+        @JvmField
+        val RECT_WIDTH = object : FloatPropertyCompat<Rect>("RectWidth") {
+            override fun getValue(rect: Rect): Float {
+                return rect.width().toFloat()
+            }
+
+            override fun setValue(rect: Rect, value: Float) {
+                rect.right = rect.left + value.toInt()
+            }
+        }
+
+        /**
+         * Represents the height of a [Rect]. Typically used to animate resizing a Rect vertically.
+         *
+         * This property's getter returns [Rect.height], and its setter changes the value of
+         * [Rect.bottom] by adding the animated height value to [Rect.top].
+         */
+        @JvmField
+        val RECT_HEIGHT = object : FloatPropertyCompat<Rect>("RectHeight") {
+            override fun getValue(rect: Rect): Float {
+                return rect.height().toFloat()
+            }
+
+            override fun setValue(rect: Rect, value: Float) {
+                rect.bottom = rect.top + value.toInt()
+            }
+        }
+
+        /**
          * Represents the x-coordinate of a [RectF]. Typically used to animate moving a RectF
          * horizontally.
          *
