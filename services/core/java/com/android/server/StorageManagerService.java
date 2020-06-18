@@ -1085,7 +1085,12 @@ class StorageManagerService extends IStorageManager.Stub
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
 
             if (mIsFuseEnabled) {
-                mStorageSessionController.onReset(mVold, mHandler);
+                mStorageSessionController.onReset(mVold, () -> {
+                    mHandler.removeMessages(H_RESET);
+                    mHandler.removeMessages(H_VOLUME_BROADCAST);
+                    mHandler.removeMessages(H_VOLUME_MOUNT);
+                    mHandler.removeMessages(H_VOLUME_UNMOUNT);
+                });
             } else {
                 killMediaProvider(users);
             }
