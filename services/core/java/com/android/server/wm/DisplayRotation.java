@@ -432,7 +432,7 @@ public class DisplayRotation {
             }
 
             if (mDisplayContent.mFixedRotationTransitionListener
-                    .isFixedOrientationRecentsAnimating()) {
+                    .isTopFixedOrientationRecentsAnimating()) {
                 // During the recents animation, the closing app might still be considered on top.
                 // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
                 // user rotating the device while the recents animation is running), we ignore
