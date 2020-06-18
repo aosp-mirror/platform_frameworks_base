@@ -5323,6 +5323,10 @@
     <!-- Content description of the overlay icon in the notification. [CHAR LIMIT=NONE] -->
     <string name="notification_appops_overlay_active">displaying over other apps on your screen</string>
 
+    <!-- Feedback Indicator -->
+    <!-- Content description of the feedback icon in the notification. [CHAR LIMIT=NONE] -->
+    <string name="notification_feedback_indicator">Provide Feedback</string>
+
     <!-- Dynamic mode battery saver strings -->
     <!-- The user visible name of the notification channel for the routine mode battery saver fyi notification [CHAR_LIMIT=80]-->
     <string name="dynamic_mode_notification_channel_name">Routine Mode info notification</string>

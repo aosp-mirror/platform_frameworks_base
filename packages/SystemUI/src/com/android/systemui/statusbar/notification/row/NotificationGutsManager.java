@@ -56,6 +56,7 @@ import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateControllerImpl;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
@@ -97,6 +98,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             Dependency.get(StatusBarStateController.class);
     private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
+    private final AssistantFeedbackController mAssistantFeedbackController;
 
     // which notification is currently being longpress-examined by the user
     private NotificationGuts mNotificationGutsExposed;
@@ -132,7 +134,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
-            Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
+            AssistantFeedbackController assistantFeedbackController
+    ) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
@@ -146,6 +150,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mContextTracker = contextTracker;
         mBuilderProvider = builderProvider;
         mChannelEditorDialogController = channelEditorDialogController;
+        mAssistantFeedbackController = assistantFeedbackController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -266,6 +271,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             } else if (gutsView instanceof PartialConversationInfo) {
                 initializePartialConversationNotificationInfo(row,
                         (PartialConversationInfo) gutsView);
+            } else if (gutsView instanceof FeedbackInfo) {
+                initializeFeedbackInfo(row, (FeedbackInfo) gutsView);
             }
             return true;
         } catch (Exception e) {
@@ -321,6 +328,25 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     /**
+     * Sets up the {@link FeedbackInfo} inside the notification row's guts.
+     *
+     * @param row view to set up the guts for
+     * @param feedbackInfo view to set up/bind within {@code row}
+     */
+    private void initializeFeedbackInfo(
+            final ExpandableNotificationRow row,
+            FeedbackInfo feedbackInfo) {
+        StatusBarNotification sbn = row.getEntry().getSbn();
+        UserHandle userHandle = sbn.getUser();
+        PackageManager pmUser = StatusBar.getPackageManagerForUser(mContext,
+                userHandle.getIdentifier());
+
+        if (mAssistantFeedbackController.showFeedbackIndicator(row.getEntry())) {
+            feedbackInfo.bindGuts(pmUser, sbn, row.getEntry(), mAssistantFeedbackController);
+        }
+    }
+
+    /**
      * Sets up the {@link NotificationInfo} inside the notification row's guts.
      * @param row view to set up the guts for
      * @param notificationInfoView view to set up/bind within {@code row}
@@ -368,7 +394,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 onAppSettingsClick,
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
-                mHighPriorityProvider.isHighPriority(row.getEntry()));
+                mHighPriorityProvider.isHighPriority(row.getEntry()),
+                mAssistantFeedbackController.isFeedbackEnabled());
     }
 
     /**

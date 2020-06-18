@@ -240,6 +240,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private ExpandableNotificationRow mNotificationParent;
     private OnExpandClickListener mOnExpandClickListener;
     private View.OnClickListener mOnAppOpsClickListener;
+    private View.OnClickListener mOnFeedbackClickListener;
 
     // Listener will be called when receiving a long click event.
     // Use #setLongPressPosition to optionally assign positional data with the long press.
@@ -1609,7 +1610,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             RowContentBindStage rowContentBindStage,
             OnExpandClickListener onExpandClickListener,
             NotificationMediaManager notificationMediaManager,
-            OnAppOpsClickListener onAppOpsClickListener,
+            CoordinateOnClickListener onAppOpsClickListener,
+            CoordinateOnClickListener onFeedbackClickListener,
             FalsingManager falsingManager,
             StatusBarStateController statusBarStateController,
             PeopleNotificationIdentifier peopleNotificationIdentifier) {
@@ -1630,6 +1632,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mOnExpandClickListener = onExpandClickListener;
         mMediaManager = notificationMediaManager;
         setAppOpsOnClickListener(onAppOpsClickListener);
+        setOnFeedbackClickListener(onFeedbackClickListener);
         mFalsingManager = falsingManager;
         mStatusbarStateController = statusBarStateController;
         mPeopleNotificationIdentifier = peopleNotificationIdentifier;
@@ -1694,6 +1697,14 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         mPublicLayout.showAppOpsIcons(activeOps);
     }
 
+    public void showFeedbackIcon(boolean show) {
+        if (mIsSummaryWithChildren) {
+            mChildrenContainer.showFeedbackIcon(show);
+        }
+        mPrivateLayout.showFeedbackIcon(show);
+        mPublicLayout.showFeedbackIcon(show);
+    }
+
     /** Sets the last time the notification being displayed audibly alerted the user. */
     public void setLastAudiblyAlertedMs(long lastAudiblyAlertedMs) {
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
@@ -1726,7 +1737,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mOnAppOpsClickListener;
     }
 
-    void setAppOpsOnClickListener(ExpandableNotificationRow.OnAppOpsClickListener l) {
+    void setAppOpsOnClickListener(CoordinateOnClickListener l) {
         mOnAppOpsClickListener = v -> {
             createMenu();
             NotificationMenuRowPlugin provider = getProvider();
@@ -1734,6 +1745,24 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 return;
             }
             MenuItem menuItem = provider.getAppOpsMenuItem(mContext);
+            if (menuItem != null) {
+                l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
+            }
+        };
+    }
+
+    public View.OnClickListener getFeedbackOnClickListener() {
+        return mOnFeedbackClickListener;
+    }
+
+    void setOnFeedbackClickListener(CoordinateOnClickListener l) {
+        mOnFeedbackClickListener = v -> {
+            createMenu();
+            NotificationMenuRowPlugin provider = getProvider();
+            if (provider == null) {
+                return;
+            }
+            MenuItem menuItem = provider.getFeedbackMenuItem(mContext);
             if (menuItem != null) {
                 l.onClick(this, v.getWidth() / 2, v.getHeight() / 2, menuItem);
             }
@@ -3235,7 +3264,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * Equivalent to View.OnClickListener with coordinates
      */
-    public interface OnAppOpsClickListener {
+    public interface CoordinateOnClickListener {
         /**
          * Equivalent to {@link View.OnClickListener#onClick(View)} with coordinates
          * @return whether the click was handled
