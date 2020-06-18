@@ -120,13 +120,12 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
             mApplier = new SyncRtSurfaceTransactionApplier(mViewRoot.mView);
         }
         if (mViewRoot.mView.isHardwareAccelerated()) {
-            mApplier.scheduleApply(false /* earlyWakeup */, params);
+            mApplier.scheduleApply(params);
         } else {
             // Window doesn't support hardware acceleration, no synchronization for now.
             // TODO(b/149342281): use mViewRoot.mSurface.getNextFrameNumber() to sync on every
             //  frame instead.
-            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */,
-                    false /* earlyWakeup */, params);
+            mApplier.applyParams(new SurfaceControl.Transaction(), -1 /* frame */, params);
         }
     }
 
