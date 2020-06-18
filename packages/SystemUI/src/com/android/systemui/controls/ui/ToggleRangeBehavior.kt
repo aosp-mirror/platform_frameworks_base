@@ -216,6 +216,7 @@ class ToggleRangeBehavior : Behavior {
     }
 
     fun beginUpdateRange() {
+        cvh.userInteractionInProgress = true
         cvh.setStatusTextSize(context.getResources()
                 .getDimensionPixelSize(R.dimen.control_status_expanded).toFloat())
     }
@@ -296,6 +297,7 @@ class ToggleRangeBehavior : Behavior {
         cvh.setStatusText("$currentStatusText $currentRangeValue", /* immediately */ true)
         cvh.controlActionCoordinator.setValue(cvh, rangeTemplate.getTemplateId(),
             findNearestStep(levelToRangeValue(clipLayer.getLevel())))
+        cvh.userInteractionInProgress = false
     }
 
     fun findNearestStep(value: Float): Float {
