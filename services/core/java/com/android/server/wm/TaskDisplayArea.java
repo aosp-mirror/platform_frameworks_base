@@ -682,15 +682,19 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             super.onParentChanged(newParent, oldParent, () -> {
                 mAppAnimationLayer = makeChildSurface(null)
                         .setName("animationLayer")
+                        .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
                 mBoostedAppAnimationLayer = makeChildSurface(null)
                         .setName("boostedAnimationLayer")
+                        .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
                 mHomeAppAnimationLayer = makeChildSurface(null)
                         .setName("homeAnimationLayer")
+                        .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
                 mSplitScreenDividerAnchor = makeChildSurface(null)
                         .setName("splitScreenDividerAnchor")
+                        .setCallsite("TaskDisplayArea.onParentChanged")
                         .build();
                 getSyncTransaction()
                         .show(mAppAnimationLayer)

@@ -459,6 +459,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 .setBufferSize(bounds.width(), bounds.height())
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setParent(wc.getParentSurfaceControl())
+                .setCallsite("WindowOrganizerController.takeScreenshot")
                 .build();
 
         Surface surface = new Surface();
@@ -466,7 +467,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         surface.attachAndQueueBufferWithColorSpace(buffer.getGraphicBuffer(), null);
         surface.release();
 
-        outSurfaceControl.copyFrom(screenshot);
+        outSurfaceControl.copyFrom(screenshot, "WindowOrganizerController.takeScreenshot");
         return true;
     }
 

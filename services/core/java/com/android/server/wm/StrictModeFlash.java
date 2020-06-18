@@ -48,6 +48,7 @@ class StrictModeFlash {
                     .setName("StrictModeFlash")
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
+                    .setCallsite("StrictModeFlash")
                     .build();
 
             // one more than Watermark? arbitrary.

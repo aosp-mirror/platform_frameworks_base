@@ -1780,6 +1780,7 @@ public final class ViewRootImpl implements ViewParent,
                     .setContainerLayer()
                     .setName("Bounds for - " + getTitle().toString())
                     .setParent(getRenderSurfaceControl())
+                    .setCallsite("ViewRootImpl.getBoundsLayer")
                     .build();
             setBoundsLayerCrop();
             mTransaction.show(mBoundsLayer).apply();
