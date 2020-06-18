@@ -994,7 +994,7 @@
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"<xliff:g id="APP_NAME">%1$s</xliff:g> বাবলের জন্য সেটিংস"</string>
     <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"ওভারফ্লো"</string>
     <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"স্ট্যাকে আবার যোগ করুন"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"ম্যানেজ করা"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"ম্যানেজ করুন"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="APP_NAME">%2$s</xliff:g> অ্যাপ থেকে <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="APP_NAME">%2$s</xliff:g> অ্যাপ এবং আরও <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>টি থেকে <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"সরান"</string>
@@ -1007,7 +1007,7 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"বাবল ব্যবহার করে চ্যাট করুন"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"নতুন কথোপকথন ভেসে থাকা আইকন বা বাবল হিসেবে দেখানো হয়। বাবল খুলতে ট্যাপ করুন। সেটি সরাতে ধরে টেনে আনুন।"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"যেকোনও সময় বাবল নিয়ন্ত্রণ করুন"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"এই অ্যাপ থেকে বাবল বন্ধ করতে ম্যানেজ করুন বিকল্প ট্যাপ করুন"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"এই অ্যাপ থেকে বাবল বন্ধ করতে \'ম্যানেজ করুন\' বিকল্প ট্যাপ করুন"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"বুঝেছি"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> সেটিংস"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"সিস্টেম নেভিগেশন আপডেট হয়েছে। পরিবর্তন করার জন্য সেটিংসে যান।"</string>
@@ -1015,7 +1015,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"স্ট্যান্ডবাই"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"কথোপকথনকে \'গুরুত্বপূর্ণ\' হিসেবে সেট করা হয়েছে"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"গুরুত্বপূর্ণ কথোপকথন:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"কথোপকথনের বিভাগের উপরে দেখান"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"কথোপকথন বিভাগের একদম উপরে দেখুন"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"লক স্ক্রিনে প্রোফাইল ছবি দেখান"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"অ্যাপের উপরে একটি ভাসমান বুদবুদ হিসেবে দেখা যাবে"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"বিরক্ত করবে না মোডে ব্যাঘাত ঘটাতে পারে"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"কন্ট্রোলগুলিকে আবার সাজানোর জন্য ধরে রেখে টেনে আনুন"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"সমস্ত কন্ট্রোল সরানো হয়েছে"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"পরিবর্তন সেভ করা হয়নি"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"সব কন্ট্রোলের তালিকা লোড করা যায়নি।"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"কন্ট্রোল লোড করা যায়নি। অ্যাপ সেটিংসে কোনও পরিবর্তন করা হয়েছে কিনা তা ভাল করে দেখে নিতে <xliff:g id="APP">%s</xliff:g> অ্যাপ চেক করুন।"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"মানানসই কন্ট্রোল উপলভ্য নেই"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"অন্য"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ডিভাইস কন্ট্রোলে যোগ করুন"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"যোগ করুন"</string>

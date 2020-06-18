@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Egonean"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Lehentasunezko gisa ezarritako elkarrizketa"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Hau gertatuko da lehentasunezko elkarrizketekin:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Erakutsi elkarrizketen atalaren goialdean"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Erakutsi profileko argazkia pantaila blokeatuan"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Elkarrizketen atalaren goialdean erakutsiko dira."</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profileko argazkia pantaila blokeatuan erakutsiko da."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Burbuila gainerakor gisa agertuko da aplikazioen gainean"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Eten ez molestatzeko modua"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Ados"</string>
@@ -1025,7 +1025,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Lupa-leihoa"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Lupa-leihoaren aukerak"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Gailuak kontrolatzeko widgetak"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Gehitu kontrolatzeko aukerak konektatutako gailuetan"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Gehitu konektatutako gailuak kontrolatzeko widgetak"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Konfiguratu gailuak kontrolatzeko widgetak"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Kontrol-aukerak atzitzeko, eduki sakatuta etengailua"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Aukeratu aplikazio bat kontrolatzeko aukerak gehitzeko"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolatzeko aukerak antolatzeko, eduki itzazu sakatuta, eta arrastatu"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kendu dira kontrolatzeko aukera guztiak"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ez dira gorde aldaketak"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ezin izan da kargatu kontrol guztien zerrenda."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Beste bat"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Gehitu gailuak kontrolatzeko widgetetan"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Gehitu"</string>

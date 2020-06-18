@@ -1007,7 +1007,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Премести горе десно"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Премести доле лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Премести доле десно"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Одбацивање облачића"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Одбаци облачић"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не користи облачиће за конверзацију"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Ћаскајте у облачићима"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Нове конверзације се приказују као плутајуће иконе или облачићи. Додирните да бисте отворили облачић. Превуците да бисте га преместили."</string>
@@ -1019,9 +1019,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Конверзација је подешена на приоритетну"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације ће:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Приказује се у врху одељка за конверзације"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Приказује слику профила на закључаном екрану"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"се приказују у врху одељка за конверзације"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"приказују слику профила на закључаном екрану"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Приказују се плутајући облачићи преко апликација"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Омета подешавање Не узнемиравај"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Важи"</string>
@@ -1051,7 +1051,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржите и превуците да бисте променили распоред контрола"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Учитавање листе свих контрола није успело."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Учитавање контрола није успело. Погледајте апликацију <xliff:g id="APP">%s</xliff:g> да бисте се уверили да се подешавања апликације нису променила."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Компатибилне контроле нису доступне"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте у контроле уређаја"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>

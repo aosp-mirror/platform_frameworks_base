@@ -1015,7 +1015,7 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Biðstaða"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Samtal sett í forgang"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Forgangssamtöl munu:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Sýna yfir samtalshluta"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Birtast efst í samtalshluta"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Sýna prófílmynd á lásskjá"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Birta sem fljótandi blöðru yfir forritum"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Stöðva „Ónáðið ekki“"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Haltu og dragðu til að endurraða stýringum"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Allar stýringar fjarlægðar"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Breytingar ekki vistaðar"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Ekki tókst að hlaða lista yfir allar stýringar."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Annað"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Bæta við tækjastjórnun"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Bæta við"</string>

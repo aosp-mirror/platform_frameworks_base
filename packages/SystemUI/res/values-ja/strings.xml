@@ -1002,19 +1002,19 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"右上に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"左下に移動"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"右下に移動"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ふきだしを閉じる"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"バブルを閉じる"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"会話をバブルで表示しない"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"チャットでバブルを使う"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"新しい会話はフローティング アイコン（バブル）として表示されます。タップするとバブルが開きます。ドラッグしてバブルを移動できます。"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"いつでもバブルを管理"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"このアプリからのバブルをオフにするには、[管理] をタップしてください"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"このアプリからのバブルを OFF にするには、[管理] をタップしてください"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"OK"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> の設定"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"システム ナビゲーションを更新しました。変更するには [設定] に移動してください。"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"システム ナビゲーションを更新するには [設定] に移動してください"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"スタンバイ"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"優先度を高く設定された会話"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先度の高い会話では、次のようになります。"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"優先度の高い会話は、次のように表示されます。"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"会話セクションの一番上にバブルで表示"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ロック画面にプロフィール写真を表示"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"他のアプリに重ねてフローティング バブルとして表示"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"コントロールを並べ替えるには長押ししてドラッグします"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"すべてのコントロールを削除しました"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"変更が保存されていません"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"全コントロールの一覧を読み込めませんでした。"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"コントロールを読み込めませんでした。<xliff:g id="APP">%s</xliff:g> アプリで、アプリの設定が変更されていないことをご確認ください。"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"互換性のあるコントロールがありません"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"その他"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"デバイス コントロールに追加"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"追加"</string>
@@ -1067,7 +1068,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"コントロールを使用できません"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"「<xliff:g id="DEVICE">%1$s</xliff:g>」にアクセスできませんでした<xliff:g id="APPLICATION">%2$s</xliff:g> アプリで、コントロールが使用可能な状態でアプリの設定が変更されていないことをご確認ください。"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"「<xliff:g id="DEVICE">%1$s</xliff:g>」にアクセスできませんでした。<xliff:g id="APPLICATION">%2$s</xliff:g> アプリで、コントロールが使用可能な状態でアプリの設定が変更されていないことをご確認ください。"</string>
     <string name="controls_open_app" msgid="483650971094300141">"アプリを開く"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ステータスを読み込めません"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"エラー: もう一度お試しください"</string>

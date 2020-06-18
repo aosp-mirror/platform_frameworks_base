@@ -1057,7 +1057,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Przytrzymaj i przeciągnij, aby przestawić elementy sterujące"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Usunięto wszystkie elementy sterujące"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmiany nie zostały zapisane"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Nie udało się wczytać listy elementów sterujących."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nie udało się wczytać elementów sterujących. Sprawdź aplikację <xliff:g id="APP">%s</xliff:g>, aby upewnić się, że jej ustawienia się nie zmieniły."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Zgodne elementy sterujące niedostępne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Inne"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodaj do sterowania urządzeniami"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
@@ -1079,7 +1080,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"Błąd, próbuję jeszcze raz…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nie znaleziono"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Element jest niedostępny"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nie udało się połączyć z urządzeniem: <xliff:g id="DEVICE">%1$s</xliff:g>. Sprawdź aplikację <xliff:g id="APPLICATION">%2$s</xliff:g>, aby upewnić się, że element sterujący jest wciąż dostępny i ustawienia aplikacji się nie zmieniły."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Nie udało się połączyć z urządzeniem <xliff:g id="DEVICE">%1$s</xliff:g>. Sprawdź aplikację <xliff:g id="APPLICATION">%2$s</xliff:g>, aby upewnić się, że element sterujący jest wciąż dostępny i ustawienia aplikacji się nie zmieniły."</string>
     <string name="controls_open_app" msgid="483650971094300141">"Otwórz aplikację"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Nie udało się wczytać stanu"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Błąd, spróbuj ponownie"</string>

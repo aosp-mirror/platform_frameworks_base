@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Хяналтуудыг дахин засварлахын тулд дараад чирнэ үү"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Бүх хяналтыг хассан"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өөрчлөлтийг хадгалаагүй"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Бүх хяналтын жагсаалтыг ачаалж чадсангүй."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Хяналтыг ачаалж чадсангүй. Аппын тохиргоог өөрчлөөгүй эсэхийг нягтлахын тулд <xliff:g id="APP">%s</xliff:g> аппыг шалгана уу."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Тохирох хяналт байхгүй"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Бусад"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Төхөөрөмжийн хяналт руу нэмэх"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Нэмэх"</string>

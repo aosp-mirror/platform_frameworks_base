@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"En espera"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"La conversa s\'ha definit com a prioritària"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Les converses prioritàries:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Mostra a la part superior de la secció de converses"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostra la foto de perfil a la pantalla de bloqueig"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Es mostraran a la part superior de la secció de converses"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Mostraran la foto de perfil a la pantalla de bloqueig"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Es mostra com a bombolla flotant en primer pla"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interromp el mode No molestis"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Entesos"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mantén premut i arrossega per reorganitzar els controls"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"S\'han suprimit tots els controls"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Els canvis no s\'han desat"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"No s\'ha pogut carregar la llista completa de controls."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Altres"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Afegeix als controls de dispositius"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Afegeix"</string>

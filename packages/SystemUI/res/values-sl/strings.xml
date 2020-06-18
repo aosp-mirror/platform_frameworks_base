@@ -1016,7 +1016,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Pogovora ne prikaži v oblačku"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Klepet z oblački"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novi pogovori so prikazani kot lebdeče ikone ali oblački. Če želite odpreti oblaček, se ga dotaknite. Če ga želite premakniti, ga povlecite."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljanje oblačkov kadar koli"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljanje oblačkov"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Dotaknite se »Upravljanje«, da izklopite oblačke iz te aplikacije"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Razumem"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Nastavitve za <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -1025,8 +1025,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje pripravljenosti"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Pogovor je nastavljen kot prednosten"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prednostni pogovori bodo:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazano na vrhu razdelka s pogovorom"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikaz profilne slike na zaklenjenem zaslonu"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazani na vrhu razdelka s pogovorom"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazali profilno sliko na zaklenjenem zaslonu"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Prikazano kot lebdeč oblaček čez druge aplikacije"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Preglasi način »ne moti«"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"V redu"</string>
@@ -1057,7 +1057,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite in povlecite, da prerazporedite kontrolnike"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Vsi kontrolniki so bili odstranjeni"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Spremembe niso shranjene"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Seznama vseh kontrolnikov ni bilo mogoče naložiti."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrolnikov ni bilo mogoče naložiti. Odprite aplikacijo <xliff:g id="APP">%s</xliff:g> in se prepričajte, da se njene nastavitve niso spremenile."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Združljivi kontrolniki niso na voljo"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajanje med kontrolnike naprave"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
