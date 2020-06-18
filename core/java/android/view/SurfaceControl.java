@@ -63,8 +63,10 @@ import dalvik.system.CloseGuard;
 import libcore.util.NativeAllocationRegistry;
 
 import java.io.Closeable;
+import java.lang.ref.WeakReference;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Objects;
 
 /**
@@ -226,23 +228,85 @@ public final class SurfaceControl implements Parcelable {
     private static native void nativeSetFixedTransformHint(long transactionObj, long nativeObject,
             int transformHint);
 
+    @Nullable
+    @GuardedBy("sLock")
+    private ArrayList<OnReparentListener> mReparentListeners;
+
+    /**
+     * Listener to observe surface reparenting.
+     *
+     * @hide
+     */
+    public interface OnReparentListener {
+
+        /**
+         * Callback for reparenting surfaces.
+         *
+         * Important: You should only interact with the provided surface control
+         * only if you have a contract with its owner to avoid them closing it
+         * under you or vise versa.
+         *
+         * @param transaction The transaction that would commit reparenting.
+         * @param parent The future parent surface.
+         */
+        void onReparent(@NonNull Transaction transaction, @Nullable SurfaceControl parent);
+    }
+
     private final CloseGuard mCloseGuard = CloseGuard.get();
     private String mName;
-    /**
+
+     /**
      * @hide
      */
     public long mNativeObject;
     private long mNativeHandle;
 
-    // TODO: Move this to native.
-    private final Object mSizeLock = new Object();
-    @GuardedBy("mSizeLock")
+    // TODO: Move width/height to native and fix locking through out.
+    private final Object mLock = new Object();
+    @GuardedBy("mLock")
     private int mWidth;
-    @GuardedBy("mSizeLock")
+    @GuardedBy("mLock")
     private int mHeight;
+
+    private WeakReference<View> mLocalOwnerView;
 
     static Transaction sGlobalTransaction;
     static long sTransactionNestCount = 0;
+
+    /**
+     * Adds a reparenting listener.
+     *
+     * @param listener The listener.
+     * @return Whether listener was added.
+     *
+     * @hide
+     */
+    public boolean addOnReparentListener(@NonNull OnReparentListener listener) {
+        synchronized (mLock) {
+            if (mReparentListeners == null) {
+                mReparentListeners = new ArrayList<>(1);
+            }
+            return mReparentListeners.add(listener);
+        }
+    }
+
+    /**
+     * Removes a reparenting listener.
+     *
+     * @param listener The listener.
+     * @return Whether listener was removed.
+     *
+     * @hide
+     */
+    public boolean removeOnReparentListener(@NonNull OnReparentListener listener) {
+        synchronized (mLock) {
+            final boolean removed = mReparentListeners.remove(listener);
+            if (mReparentListeners.isEmpty()) {
+                mReparentListeners = null;
+            }
+            return removed;
+        }
+    }
 
     /* flags used in constructor (keep in sync with ISurfaceComposerClient.h) */
 
@@ -455,6 +519,7 @@ public final class SurfaceControl implements Parcelable {
         mName = other.mName;
         mWidth = other.mWidth;
         mHeight = other.mHeight;
+        mLocalOwnerView = other.mLocalOwnerView;
         assignNativeObject(nativeCopyFromSurfaceControl(other.mNativeObject));
     }
 
@@ -553,6 +618,7 @@ public final class SurfaceControl implements Parcelable {
         private int mHeight;
         private int mFormat = PixelFormat.OPAQUE;
         private String mName;
+        private WeakReference<View> mLocalOwnerView;
         private SurfaceControl mParent;
         private SparseIntArray mMetadata;
 
@@ -587,7 +653,8 @@ public final class SurfaceControl implements Parcelable {
                         "Only buffer layers can set a valid buffer size.");
             }
             return new SurfaceControl(
-                    mSession, mName, mWidth, mHeight, mFormat, mFlags, mParent, mMetadata);
+                    mSession, mName, mWidth, mHeight, mFormat, mFlags, mParent, mMetadata,
+                    mLocalOwnerView);
         }
 
         /**
@@ -598,6 +665,27 @@ public final class SurfaceControl implements Parcelable {
         @NonNull
         public Builder setName(@NonNull String name) {
             mName = name;
+            return this;
+        }
+
+        /**
+         * Set the local owner view for the surface. This view is only
+         * valid in the same process and is not transferred in an IPC.
+         *
+         * Note: This is used for cases where we want to know the view
+         * that manages the surface control while intercepting reparenting.
+         * A specific example is InlineContentView which exposes is surface
+         * control for reparenting as a way to implement clipping of several
+         * InlineContentView instances within a certain area.
+         *
+         * @param view The owner view.
+         * @return This builder.
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setLocalOwnerView(@NonNull View view) {
+            mLocalOwnerView = new WeakReference<>(view);
             return this;
         }
 
@@ -858,7 +946,7 @@ public final class SurfaceControl implements Parcelable {
      * @throws throws OutOfResourcesException If the SurfaceControl cannot be created.
      */
     private SurfaceControl(SurfaceSession session, String name, int w, int h, int format, int flags,
-            SurfaceControl parent, SparseIntArray metadata)
+            SurfaceControl parent, SparseIntArray metadata, WeakReference<View> localOwnerView)
                     throws OutOfResourcesException, IllegalArgumentException {
         if (name == null) {
             throw new IllegalArgumentException("name must not be null");
@@ -867,6 +955,7 @@ public final class SurfaceControl implements Parcelable {
         mName = name;
         mWidth = w;
         mHeight = h;
+        mLocalOwnerView = localOwnerView;
         Parcel metaParcel = Parcel.obtain();
         try {
             if (metadata != null && metadata.size() > 0) {
@@ -1307,7 +1396,7 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public int getWidth() {
-        synchronized (mSizeLock) {
+        synchronized (mLock) {
             return mWidth;
         }
     }
@@ -1316,9 +1405,20 @@ public final class SurfaceControl implements Parcelable {
      * @hide
      */
     public int getHeight() {
-        synchronized (mSizeLock) {
+        synchronized (mLock) {
             return mHeight;
         }
+    }
+
+    /**
+     * Gets the local view that owns this surface.
+     *
+     * @return The owner view.
+     *
+     * @hide
+     */
+    public @Nullable View getLocalOwnerView() {
+        return (mLocalOwnerView != null) ? mLocalOwnerView.get() : null;
     }
 
     @Override
@@ -2165,6 +2265,9 @@ public final class SurfaceControl implements Parcelable {
         public long mNativeObject;
 
         private final ArrayMap<SurfaceControl, Point> mResizedSurfaces = new ArrayMap<>();
+        private final ArrayMap<SurfaceControl, SurfaceControl> mReparentedSurfaces =
+                 new ArrayMap<>();
+
         Runnable mFreeNativeResources;
         private static final float[] INVALID_COLOR = {-1, -1, -1};
 
@@ -2205,6 +2308,8 @@ public final class SurfaceControl implements Parcelable {
          */
         @Override
         public void close() {
+            mResizedSurfaces.clear();
+            mReparentedSurfaces.clear();
             mFreeNativeResources.run();
             mNativeObject = 0;
         }
@@ -2215,6 +2320,7 @@ public final class SurfaceControl implements Parcelable {
          */
         public void apply(boolean sync) {
             applyResizedSurfaces();
+            notifyReparentedSurfaces();
             nativeApplyTransaction(mNativeObject, sync);
         }
 
@@ -2222,12 +2328,28 @@ public final class SurfaceControl implements Parcelable {
             for (int i = mResizedSurfaces.size() - 1; i >= 0; i--) {
                 final Point size = mResizedSurfaces.valueAt(i);
                 final SurfaceControl surfaceControl = mResizedSurfaces.keyAt(i);
-                synchronized (surfaceControl.mSizeLock) {
+                synchronized (surfaceControl.mLock) {
                     surfaceControl.mWidth = size.x;
                     surfaceControl.mHeight = size.y;
                 }
             }
             mResizedSurfaces.clear();
+        }
+
+        private void notifyReparentedSurfaces() {
+            final int reparentCount = mReparentedSurfaces.size();
+            for (int i = reparentCount - 1; i >= 0; i--) {
+                final SurfaceControl child = mReparentedSurfaces.keyAt(i);
+                synchronized (child.mLock) {
+                    final int listenerCount = (child.mReparentListeners != null)
+                            ? child.mReparentListeners.size() : 0;
+                    for (int j = 0; j < listenerCount; j++) {
+                        final OnReparentListener listener = child.mReparentListeners.get(j);
+                        listener.onReparent(this, mReparentedSurfaces.valueAt(i));
+                    }
+                    mReparentedSurfaces.removeAt(i);
+                }
+            }
         }
 
         /**
@@ -2632,6 +2754,7 @@ public final class SurfaceControl implements Parcelable {
                 otherObject = newParent.mNativeObject;
             }
             nativeReparent(mNativeObject, sc.mNativeObject, otherObject);
+            mReparentedSurfaces.put(sc, newParent);
             return this;
         }
 
@@ -2912,6 +3035,8 @@ public final class SurfaceControl implements Parcelable {
             }
             mResizedSurfaces.putAll(other.mResizedSurfaces);
             other.mResizedSurfaces.clear();
+            mReparentedSurfaces.putAll(other.mReparentedSurfaces);
+            other.mReparentedSurfaces.clear();
             nativeMergeTransaction(mNativeObject, other.mNativeObject);
             return this;
         }
