@@ -62,6 +62,8 @@ import com.android.systemui.statusbar.policy.DataSaverController;
 import com.android.systemui.statusbar.policy.NetworkController;
 import com.android.systemui.util.leak.LeakDetector;
 
+import java.util.concurrent.Executor;
+
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -195,11 +197,12 @@ public class DependencyProvider {
     public BroadcastDispatcher providesBroadcastDispatcher(
             Context context,
             @Background Looper backgroundLooper,
+            @Background Executor backgroundExecutor,
             DumpManager dumpManager,
             BroadcastDispatcherLogger logger
     ) {
-        BroadcastDispatcher bD =
-                new BroadcastDispatcher(context, backgroundLooper, dumpManager, logger);
+        BroadcastDispatcher bD = new BroadcastDispatcher(context, backgroundLooper,
+                backgroundExecutor, dumpManager, logger);
         bD.initialize();
         return bD;
     }

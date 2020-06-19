@@ -31,9 +31,10 @@ import java.util.concurrent.Executor
 class FakeBroadcastDispatcher(
     context: SysuiTestableContext,
     looper: Looper,
+    executor: Executor,
     dumpManager: DumpManager,
     logger: BroadcastDispatcherLogger
-) : BroadcastDispatcher(context, looper, dumpManager, logger) {
+) : BroadcastDispatcher(context, looper, executor, dumpManager, logger) {
 
     private val registeredReceivers = ArraySet<BroadcastReceiver>()
 
