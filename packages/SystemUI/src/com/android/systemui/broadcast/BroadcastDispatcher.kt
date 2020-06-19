@@ -29,6 +29,7 @@ import android.os.UserHandle
 import android.text.TextUtils
 import android.util.SparseArray
 import com.android.internal.annotations.VisibleForTesting
+import com.android.internal.util.IndentingPrintWriter
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
 import com.android.systemui.dump.DumpManager
@@ -65,6 +66,7 @@ private const val DEBUG = true
 open class BroadcastDispatcher constructor (
     private val context: Context,
     private val bgLooper: Looper,
+    private val bgExecutor: Executor,
     private val dumpManager: DumpManager,
     private val logger: BroadcastDispatcherLogger
 ) : Dumpable, BroadcastReceiver() {
@@ -173,15 +175,18 @@ open class BroadcastDispatcher constructor (
 
     @VisibleForTesting
     protected open fun createUBRForUser(userId: Int) =
-            UserBroadcastDispatcher(context, userId, bgLooper, logger)
+            UserBroadcastDispatcher(context, userId, bgLooper, bgExecutor, logger)
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
         pw.println("Broadcast dispatcher:")
-        pw.println("  Current user: ${handler.currentUser}")
+        val ipw = IndentingPrintWriter(pw, "  ")
+        ipw.increaseIndent()
+        ipw.println("Current user: ${handler.currentUser}")
         for (index in 0 until receiversByUser.size()) {
-            pw.println("  User ${receiversByUser.keyAt(index)}")
-            receiversByUser.valueAt(index).dump(fd, pw, args)
+            ipw.println("User ${receiversByUser.keyAt(index)}")
+            receiversByUser.valueAt(index).dump(fd, ipw, args)
         }
+        ipw.decreaseIndent()
     }
 
     private val handler = object : Handler(bgLooper) {
