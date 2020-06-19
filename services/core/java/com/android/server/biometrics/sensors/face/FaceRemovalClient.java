@@ -21,6 +21,7 @@ import android.content.Context;
 import android.hardware.biometrics.face.V1_0.IBiometricsFace;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -31,24 +32,36 @@ import com.android.server.biometrics.sensors.RemovalClient;
  * and {@link android.hardware.biometrics.face.V1_1} HIDL interfaces.
  */
 class FaceRemovalClient extends RemovalClient {
+    private static final String TAG = "FaceRemovalClient";
     private final IBiometricsFace mDaemon;
 
-    FaceRemovalClient(@NonNull Context context, @NonNull IBiometricsFace daemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int userId, boolean restricted, @NonNull String owner,
-            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, listener, biometricId, userId, restricted, owner, utils, sensorId,
-                statsModality);
+    FaceRemovalClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBiometricsFace daemon, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
+            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            int statsModality) {
+        super(finishCallback, context, token, listener, biometricId, userId, restricted, owner,
+                utils, sensorId, statsModality);
         mDaemon = daemon;
     }
 
     @Override
-    protected int startHalOperation() throws RemoteException {
-        return mDaemon.remove(mBiometricId);
+    protected void startHalOperation() {
+        try {
+            mDaemon.remove(mBiometricId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting remove", e);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 
     @Override
-    protected int stopHalOperation() throws RemoteException {
-        return mDaemon.cancel();
+    protected void stopHalOperation() {
+        try {
+            mDaemon.cancel();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting cancel", e);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 }

@@ -22,6 +22,7 @@ import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.InternalEnumerateClient;
@@ -34,25 +35,37 @@ import java.util.List;
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
 class FingerprintInternalEnumerateClient extends InternalEnumerateClient {
+    private static final String TAG = "FingerprintInternalEnumerateClient";
+
     private final IBiometricsFingerprint mDaemon;
 
-    FingerprintInternalEnumerateClient(@NonNull Context context,
-            @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token, int userId,
-            boolean restricted, @NonNull String owner,
+    FingerprintInternalEnumerateClient(@NonNull FinishCallback finishCallback,
+            @NonNull Context context, @NonNull IBiometricsFingerprint daemon,
+            @NonNull IBinder token, int userId, boolean restricted, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, userId, restricted, owner, enrolledList, utils, sensorId,
-                statsModality);
+        super(finishCallback, context, token, userId, restricted, owner, enrolledList, utils,
+                sensorId, statsModality);
         mDaemon = daemon;
     }
 
     @Override
-    protected int startHalOperation() throws RemoteException {
-        return mDaemon.enumerate();
+    protected void startHalOperation() {
+        try {
+            mDaemon.enumerate();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting enumerate", e);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 
     @Override
-    protected int stopHalOperation() throws RemoteException {
-        return mDaemon.cancel();
+    protected void stopHalOperation() {
+        try {
+            mDaemon.cancel();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting cancel", e);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 }

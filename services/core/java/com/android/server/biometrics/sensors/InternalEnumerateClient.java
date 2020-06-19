@@ -19,10 +19,8 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.util.Slog;
 
 import com.android.internal.util.FrameworkStatsLog;
@@ -44,13 +42,14 @@ public abstract class InternalEnumerateClient extends ClientMonitor implements E
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token,
-            int userId, boolean restricted, @NonNull String owner,
+    protected InternalEnumerateClient(@NonNull FinishCallback finishCallback,
+            @NonNull Context context, @NonNull IBinder token, int userId, boolean restricted,
+            @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
         // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        super(context, token, null /* ClientMonitorCallbackConverter */, userId,
+        super(finishCallback, context, token, null /* ClientMonitorCallbackConverter */, userId,
                 restricted, owner, 0 /* cookie */, sensorId, statsModality,
                 BiometricsProtoEnums.ACTION_ENUMERATE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
@@ -59,57 +58,19 @@ public abstract class InternalEnumerateClient extends ClientMonitor implements E
     }
 
     @Override
-    public boolean onEnumerationResult(BiometricAuthenticator.Identifier identifier,
+    public void onEnumerationResult(BiometricAuthenticator.Identifier identifier,
             int remaining) {
         handleEnumeratedTemplate(identifier);
         if (remaining == 0) {
             doTemplateCleanup();
+            mFinishCallback.onClientFinished(this);
         }
-        return remaining == 0;
     }
 
     @Override
-    public int start() {
+    public void start() {
         // The biometric template ids will be removed when we get confirmation from the HAL
-        try {
-            final int result = startHalOperation();
-            if (result != 0) {
-                Slog.w(TAG, "start enumerate for user " + getTargetUserId()
-                        + " failed, result=" + result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startEnumeration failed", e);
-        }
-        return 0;
-    }
-
-    @Override
-    public int stop(boolean initiatedByClient) {
-        if (mAlreadyCancelled) {
-            Slog.w(TAG, "stopEnumerate: already cancelled!");
-            return 0;
-        }
-
-        try {
-            final int result = stopHalOperation();
-            if (result != 0) {
-                Slog.w(TAG, "stop enumeration failed, result=" + result);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "stopEnumeration failed", e);
-            return BiometricConstants.BIOMETRIC_ERROR_UNABLE_TO_PROCESS;
-        }
-
-        // We don't actually stop enumerate, but inform the client that the cancel operation
-        // succeeded so we can start the next operation.
-        if (initiatedByClient) {
-            onError(BiometricConstants.BIOMETRIC_ERROR_CANCELED, 0 /* vendorCode */);
-        }
-        mAlreadyCancelled = true;
-        return 0; // success
+        startHalOperation();
     }
 
     private void handleEnumeratedTemplate(BiometricAuthenticator.Identifier identifier) {
@@ -143,8 +104,7 @@ public abstract class InternalEnumerateClient extends ClientMonitor implements E
         for (int i = 0; i < mEnrolledList.size(); i++) {
             BiometricAuthenticator.Identifier identifier = mEnrolledList.get(i);
             Slog.e(TAG, "doTemplateCleanup(): Removing dangling template from framework: "
-                    + identifier.getBiometricId() + " "
-                    + identifier.getName());
+                    + identifier.getBiometricId() + " " + identifier.getName());
             mUtils.removeBiometricForUser(getContext(),
                     getTargetUserId(), identifier.getBiometricId());
             FrameworkStatsLog.write(FrameworkStatsLog.BIOMETRIC_SYSTEM_HEALTH_ISSUE_DETECTED,

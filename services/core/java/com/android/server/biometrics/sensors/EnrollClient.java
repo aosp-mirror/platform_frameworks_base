@@ -19,7 +19,6 @@ package com.android.server.biometrics.sensors;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
-import android.hardware.biometrics.BiometricConstants;
 import android.hardware.biometrics.BiometricsProtoEnums;
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -40,14 +39,15 @@ public abstract class EnrollClient extends AcquisitionClient {
     private final boolean mShouldVibrate;
 
     private long mEnrollmentStartTimeMs;
+    private boolean mAlreadyCancelled;
 
-    public EnrollClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int userId,
+    public EnrollClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
             @NonNull byte[] hardwareAuthToken, boolean restricted, String owner,
             @NonNull BiometricUtils utils, int timeoutSec, int statsModality, int sensorId,
             boolean shouldVibrate) {
-        super(context, token, listener, userId, restricted, owner, 0 /* cookie */, sensorId,
-                statsModality, BiometricsProtoEnums.ACTION_ENROLL,
+        super(finishCallback, context, token, listener, userId, restricted, owner, 0 /* cookie */,
+                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENROLL,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
         mBiometricUtils = utils;
         mHardwareAuthToken = Arrays.copyOf(hardwareAuthToken, hardwareAuthToken.length);
@@ -88,39 +88,20 @@ public abstract class EnrollClient extends AcquisitionClient {
     }
 
     @Override
-    public int start() {
+    public void start() {
         mEnrollmentStartTimeMs = System.currentTimeMillis();
-        try {
-            final int result = startHalOperation();
-            if (result != 0) {
-                Slog.w(TAG, "startEnroll failed, result=" + result);
-                onError(BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE, 0 /* vendorCode */);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startEnroll failed", e);
-        }
-        return 0; // success
+        startHalOperation();
     }
 
     @Override
-    public int stop(boolean initiatedByClient) {
+    public void cancel() {
         if (mAlreadyCancelled) {
             Slog.w(TAG, "stopEnroll: already cancelled!");
-            return 0;
+            return;
         }
 
-        try {
-            final int result = stopHalOperation();
-            if (result != 0) {
-                Slog.w(TAG, "startEnrollCancel failed, result = " + result);
-                return result;
-            }
-        } catch (RemoteException e) {
-            Slog.e(TAG, "stopEnrollment failed", e);
-        }
+        stopHalOperation();
         mAlreadyCancelled = true;
-        return 0;
     }
 
     /**

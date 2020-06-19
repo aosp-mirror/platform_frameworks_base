@@ -152,7 +152,7 @@ public class FaceService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final EnrollClient client = new FaceEnrollClient(getContext(),
+            final EnrollClient client = new FaceEnrollClient(mClientFinishCallback, getContext(),
                     daemon, token, new ClientMonitorCallbackConverter(receiver),
                     userId, cryptoToken, restricted, opPackageName, getBiometricUtils(),
                     disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
@@ -193,11 +193,11 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final int statsClient = isKeyguard(opPackageName) ? BiometricsProtoEnums.CLIENT_KEYGUARD
                     : BiometricsProtoEnums.CLIENT_UNKNOWN;
-            final AuthenticationClient client = new FaceAuthenticationClient(getContext(),
-                    daemon, token, new ClientMonitorCallbackConverter(receiver), userId, opId,
-                    restricted, opPackageName, 0 /* cookie */, false /* requireConfirmation */,
-                    getSensorId(), isStrongBiometric(), statsClient, mTaskStackListener,
-                    mLockoutTracker, mUsageStats);
+            final AuthenticationClient client = new FaceAuthenticationClient(mClientFinishCallback,
+                    getContext(), daemon, token, new ClientMonitorCallbackConverter(receiver),
+                    userId, opId, restricted, opPackageName, 0 /* cookie */,
+                    false /* requireConfirmation */, getSensorId(), isStrongBiometric(),
+                    statsClient, mTaskStackListener, mLockoutTracker, mUsageStats);
             authenticateInternal(client, opPackageName);
         }
 
@@ -218,11 +218,12 @@ public class FaceService extends BiometricServiceBase {
             }
 
             final boolean restricted = true; // BiometricPrompt is always restricted
-            final AuthenticationClient client = new FaceAuthenticationClient(getContext(), daemon,
-                    token, new ClientMonitorCallbackConverter(sensorReceiver), userId, opId,
-                    restricted, opPackageName, cookie, requireConfirmation, getSensorId(),
-                    isStrongBiometric(), BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
-                    mTaskStackListener, mLockoutTracker, mUsageStats);
+            final AuthenticationClient client = new FaceAuthenticationClient(mClientFinishCallback,
+                    getContext(), daemon, token, new ClientMonitorCallbackConverter(sensorReceiver),
+                    userId, opId, restricted, opPackageName, cookie, requireConfirmation,
+                    getSensorId(), isStrongBiometric(),
+                    BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, mTaskStackListener,
+                    mLockoutTracker, mUsageStats);
             authenticateInternal(client, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
@@ -269,9 +270,9 @@ public class FaceService extends BiometricServiceBase {
             }
 
             final boolean restricted = isRestricted();
-            final RemovalClient client = new FaceRemovalClient(getContext(), daemon, token,
-                    new ClientMonitorCallbackConverter(receiver), faceId, userId, restricted,
-                    token.toString(), getBiometricUtils(), getSensorId(), statsModality());
+            final RemovalClient client = new FaceRemovalClient(mClientFinishCallback, getContext(),
+                    daemon, token, new ClientMonitorCallbackConverter(receiver), faceId, userId,
+                    restricted, opPackageName, getBiometricUtils(), getSensorId(), statsModality());
             removeInternal(client);
         }
 
@@ -758,8 +759,9 @@ public class FaceService extends BiometricServiceBase {
         final List<? extends BiometricAuthenticator.Identifier> enrolledList =
                 getEnrolledTemplates(userId);
         final FaceInternalCleanupClient client = new FaceInternalCleanupClient(
-                getContext(), daemon, userId, restricted, getContext().getOpPackageName(),
-                getSensorId(), statsModality(), enrolledList, getBiometricUtils());
+                mClientFinishCallback, getContext(), daemon, userId, restricted,
+                getContext().getOpPackageName(), getSensorId(), statsModality(), enrolledList,
+                getBiometricUtils());
         cleanupInternal(client);
     }
 

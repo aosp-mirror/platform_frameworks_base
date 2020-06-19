@@ -21,6 +21,7 @@ import android.content.Context;
 import android.hardware.biometrics.fingerprint.V2_1.IBiometricsFingerprint;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 
 import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
@@ -32,26 +33,38 @@ import com.android.server.biometrics.sensors.RemovalClient;
  * {@link android.hardware.biometrics.fingerprint.V2_2} HIDL interfaces.
  */
 class FingerprintRemovalClient extends RemovalClient {
+    private static final String TAG = "FingerprintRemovalClient";
 
     private final IBiometricsFingerprint mDaemon;
 
-    FingerprintRemovalClient(@NonNull Context context, @NonNull IBiometricsFingerprint daemon,
-            @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int userId, boolean restricted, @NonNull String owner,
-            @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, listener, biometricId, userId, restricted, owner, utils, sensorId,
-                statsModality);
+    FingerprintRemovalClient(@NonNull FinishCallback finishCallback, @NonNull Context context,
+            @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token,
+            @NonNull ClientMonitorCallbackConverter listener, int biometricId, int userId,
+            boolean restricted, @NonNull String owner, @NonNull BiometricUtils utils, int sensorId,
+            int statsModality) {
+        super(finishCallback, context, token, listener, biometricId, userId, restricted, owner,
+                utils, sensorId, statsModality);
         mDaemon = daemon;
     }
 
     @Override
-    protected int startHalOperation() throws RemoteException {
-        // GroupId was never used. In fact, groupId is always the same as userId.
-        return mDaemon.remove(getTargetUserId(), mBiometricId);
+    protected void startHalOperation() {
+        try {
+            // GroupId was never used. In fact, groupId is always the same as userId.
+            mDaemon.remove(getTargetUserId(), mBiometricId);
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting remove", e);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 
     @Override
-    protected int stopHalOperation() throws RemoteException {
-        return mDaemon.cancel();
+    protected void stopHalOperation() {
+        try {
+            mDaemon.cancel();
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Remote exception when requesting cancel", e);
+            mFinishCallback.onClientFinished(this);
+        }
     }
 }
