@@ -691,8 +691,14 @@ public class ChooserActivity extends ResolverActivity implements
         mPinnedSharedPrefs = getPinnedSharedPrefs(this);
 
         pa = intent.getParcelableArrayExtra(Intent.EXTRA_EXCLUDE_COMPONENTS);
+
+
+        // Exclude out Nearby from main list if chip is present, to avoid duplication
+        ComponentName nearbySharingComponent = getNearbySharingComponent();
+        boolean hasNearby = nearbySharingComponent != null;
+
         if (pa != null) {
-            ComponentName[] names = new ComponentName[pa.length];
+            ComponentName[] names = new ComponentName[pa.length + (hasNearby ? 1 : 0)];
             for (int i = 0; i < pa.length; i++) {
                 if (!(pa[i] instanceof ComponentName)) {
                     Log.w(TAG, "Filtered component #" + i + " not a ComponentName: " + pa[i]);
@@ -701,7 +707,14 @@ public class ChooserActivity extends ResolverActivity implements
                 }
                 names[i] = (ComponentName) pa[i];
             }
+            if (hasNearby) {
+                names[names.length - 1] = nearbySharingComponent;
+            }
+
             mFilteredComponentNames = names;
+        } else if (hasNearby) {
+            mFilteredComponentNames = new ComponentName[1];
+            mFilteredComponentNames[0] = nearbySharingComponent;
         }
 
         pa = intent.getParcelableArrayExtra(Intent.EXTRA_CHOOSER_TARGETS);
