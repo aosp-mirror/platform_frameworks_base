@@ -58,7 +58,7 @@ public class MediaTranscodeManagerTest
         extends ActivityInstrumentationTestCase2<MediaTranscodingTest> {
     private static final String TAG = "MediaTranscodeManagerTest";
     /** The time to wait for the transcode operation to complete before failing the test. */
-    private static final int TRANSCODE_TIMEOUT_SECONDS = 2;
+    private static final int TRANSCODE_TIMEOUT_SECONDS = 10;
     private Context mContext;
     private MediaTranscodeManager mMediaTranscodeManager = null;
     private Uri mSourceHEVCVideoUri = null;
@@ -70,6 +70,9 @@ public class MediaTranscodeManagerTest
     private static final int BIT_RATE = 2000000;            // 2Mbps
     private static final int WIDTH = 1920;
     private static final int HEIGHT = 1080;
+
+    // Threshold for the psnr to make sure the transcoded video is sane.
+    private static final int PSNR_THRESHOLD = 20;
 
     public MediaTranscodeManagerTest() {
         super("com.android.MediaTranscodeManagerTest", MediaTranscodingTest.class);
@@ -120,6 +123,7 @@ public class MediaTranscodeManagerTest
     public void setUp() throws Exception {
         Log.d(TAG, "setUp");
         super.setUp();
+
         mContext = getInstrumentation().getContext();
         mMediaTranscodeManager = MediaTranscodeManager.getInstance(mContext);
         assertNotNull(mMediaTranscodeManager);
@@ -179,7 +183,13 @@ public class MediaTranscodeManagerTest
             assertTrue("Transcode failed to complete in time.", finishedOnTime);
         }
 
-        //TODO(hkuang): Verify the transcoded video's psnr to make sure it is correct.
+        // TODO(hkuang): Validate the transcoded video's width and height, framerate.
+
+        // Validates the transcoded video's psnr.
+        MediaTranscodingTestUtil.VideoTranscodingStatistics stats =
+                MediaTranscodingTestUtil.computeStats(mContext, mSourceAVCVideoUri, destinationUri);
+        assertTrue("PSNR: " + stats.mAveragePSNR + " is too low",
+                stats.mAveragePSNR >= PSNR_THRESHOLD);
     }
 
 }

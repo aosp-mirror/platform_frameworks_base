@@ -29,3 +29,4 @@ adb install -r -g ${OUT}/testcases/mediatranscodingtest/arm64/mediatranscodingte
 
 echo "[==========] running real transcoding tests"
 adb shell am instrument -e class com.android.mediatranscodingtest.MediaTranscodeManagerTest -w com.android.mediatranscodingtest/.MediaTranscodingTestRunner
+
