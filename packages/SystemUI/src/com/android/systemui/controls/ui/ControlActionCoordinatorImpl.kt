@@ -35,7 +35,6 @@ import com.android.systemui.globalactions.GlobalActionsComponent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.DelayableExecutor
-import com.android.systemui.R
 
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -164,8 +163,7 @@ class ControlActionCoordinatorImpl @Inject constructor(
                         it.show()
                     }
                 } else {
-                    cvh.setTransientStatus(
-                        cvh.context.resources.getString(R.string.controls_error_failed))
+                    cvh.setErrorStatus()
                 }
             }
         }
