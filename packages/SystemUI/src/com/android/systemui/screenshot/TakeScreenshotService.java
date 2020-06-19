@@ -16,12 +16,17 @@
 
 package com.android.systemui.screenshot;
 
+import static android.content.Intent.ACTION_CLOSE_SYSTEM_DIALOGS;
+
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_PROCESS_COMPLETE;
 import static com.android.internal.util.ScreenshotHelper.SCREENSHOT_MSG_URI;
 
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -50,6 +55,16 @@ public class TakeScreenshotService extends Service {
     private final GlobalScreenshot mScreenshot;
     private final UserManager mUserManager;
     private final UiEventLogger mUiEventLogger;
+
+    private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (ACTION_CLOSE_SYSTEM_DIALOGS.equals(intent.getAction()) && mScreenshot != null) {
+                mScreenshot.dismissScreenshot("close system dialogs", true);
+            }
+        }
+    };
 
     private Handler mHandler = new Handler(Looper.myLooper()) {
         @Override
@@ -119,12 +134,18 @@ public class TakeScreenshotService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        // register broadcast receiver
+        IntentFilter filter = new IntentFilter(ACTION_CLOSE_SYSTEM_DIALOGS);
+        registerReceiver(mBroadcastReceiver, filter);
+
         return new Messenger(mHandler).getBinder();
+
     }
 
     @Override
     public boolean onUnbind(Intent intent) {
         if (mScreenshot != null) mScreenshot.stopScreenshot();
+        unregisterReceiver(mBroadcastReceiver);
         return true;
     }
 }
