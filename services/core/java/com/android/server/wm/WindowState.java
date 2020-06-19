@@ -706,6 +706,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
+    private final WindowProcessController mWpcForDisplayConfigChanges;
+
     /**
      * @return The insets state as requested by the client, i.e. the dispatched insets state
      *         for which the visibilities are overridden with what the client requested.
@@ -720,8 +722,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateRequestedInsetsState(InsetsState state) {
 
         // Only update the sources the client is actually controlling.
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            final InsetsSource source = state.peekSource(i);
+            if (source == null) continue;
             mRequestedInsetsState.addSource(source);
         }
     }
@@ -873,6 +876,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mSubLayer = 0;
             mInputWindowHandle = null;
             mWinAnimator = null;
+            mWpcForDisplayConfigChanges = null;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -928,6 +932,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
+
+        // System process or invalid process cannot register to display config change.
+        mWpcForDisplayConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
+                ? null
+                : service.mAtmService.getProcessController(s.mPid, s.mUid);
     }
 
     void attach() {
@@ -3514,13 +3523,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return {@code true} if the process registered to a display as a config listener. */
     private boolean registeredForDisplayConfigChanges() {
         final WindowState parentWindow = getParentWindow();
-        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
-        // System process or invalid process cannot register to display config change.
-        if (session.mPid == MY_PID || session.mPid < 0) return false;
-        WindowProcessController app =
-                mWmService.mAtmService.getProcessController(session.mPid, session.mUid);
-        if (app == null || !app.registeredForDisplayConfigChanges()) return false;
-        return true;
+        final WindowProcessController wpc = parentWindow != null
+                ? parentWindow.mWpcForDisplayConfigChanges
+                : mWpcForDisplayConfigChanges;
+        return wpc != null && wpc.registeredForDisplayConfigChanges();
     }
 
     void reportResized() {
@@ -5103,13 +5109,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.updateLastInsetValues();
     }
 
-    @Nullable
     @Override
-    WindowContainer<WindowState> getAnimatingContainer(int flags, int typesToCheck) {
+    protected boolean isSelfAnimating(int flags, int typesToCheck) {
         if (mControllableInsetProvider != null) {
-            return null;
+            return false;
         }
-        return super.getAnimatingContainer(flags, typesToCheck);
+        return super.isSelfAnimating(flags, typesToCheck);
     }
 
     void startAnimation(Animation anim) {
@@ -5299,10 +5304,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWillReplaceWindow;
     }
 
-    private void applyDims(Dimmer dimmer) {
+    private void applyDims() {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
-            dimmer.dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
+            getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow() && !mHidden) {
             // Only show a dim behind when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND
@@ -5310,7 +5315,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
             mIsDimming = true;
-            dimmer.dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
+            getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
         }
     }
 
@@ -5334,11 +5339,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void prepareSurfaces() {
-        final Dimmer dimmer = getDimmer();
         mIsDimming = false;
-        if (dimmer != null) {
-            applyDims(dimmer);
-        }
+        applyDims();
         updateSurfacePosition();
         // Send information to SufaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();

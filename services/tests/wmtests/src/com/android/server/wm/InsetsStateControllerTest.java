@@ -87,10 +87,7 @@ public class InsetsStateControllerTest extends WindowTestsBase {
                 .setWindow(statusBar, null, null);
         statusBar.setControllableInsetProvider(getController().getSourceProvider(ITYPE_STATUS_BAR));
         final InsetsState state = getController().getInsetsForDispatch(statusBar);
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
-            assertNotEquals(ITYPE_STATUS_BAR, source.getType());
-        }
+        assertNull(state.peekSource(ITYPE_STATUS_BAR));
     }
 
     @Test
