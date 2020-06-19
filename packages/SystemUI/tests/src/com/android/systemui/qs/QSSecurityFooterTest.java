@@ -96,6 +96,7 @@ public class QSSecurityFooterTest extends SysuiTestCase {
     @Test
     public void testUnmanaged() {
         when(mSecurityController.isDeviceManaged()).thenReturn(false);
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(false);
         mFooter.refreshState();
 
         TestableLooper.get(this).processAllMessages();
@@ -314,6 +315,33 @@ public class QSSecurityFooterTest extends SysuiTestCase {
                              R.string.quick_settings_disclosure_managed_profile_named_vpn,
                              VPN_PACKAGE_2),
                      mFooterText.getText());
+    }
+
+    @Test
+    public void testProfileOwnerOfOrganizationOwnedDeviceNoName() {
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+
+        mFooter.refreshState();
+        TestableLooper.get(this).processAllMessages();
+
+        assertEquals(mContext.getString(
+                R.string.quick_settings_disclosure_management),
+                mFooterText.getText());
+    }
+
+    @Test
+    public void testProfileOwnerOfOrganizationOwnedDeviceWithName() {
+        when(mSecurityController.isProfileOwnerOfOrganizationOwnedDevice()).thenReturn(true);
+        when(mSecurityController.getWorkProfileOrganizationName())
+                .thenReturn(MANAGING_ORGANIZATION);
+
+        mFooter.refreshState();
+        TestableLooper.get(this).processAllMessages();
+
+        assertEquals(mContext.getString(
+                R.string.quick_settings_disclosure_named_management,
+                MANAGING_ORGANIZATION),
+                mFooterText.getText());
     }
 
     @Test
