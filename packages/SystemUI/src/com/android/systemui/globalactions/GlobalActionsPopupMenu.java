@@ -54,6 +54,7 @@ public class GlobalActionsPopupMenu extends ListPopupWindow {
 
         // required to show above the global actions dialog
         setWindowLayoutType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY);
+        setInputMethodMode(INPUT_METHOD_NOT_NEEDED);
         setModal(true);
 
         mGlobalActionsSidePadding = res.getDimensionPixelSize(R.dimen.global_actions_side_margin);
