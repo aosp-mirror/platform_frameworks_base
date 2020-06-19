@@ -37,7 +37,6 @@ import android.util.Log;
 
 import com.android.internal.util.BitUtils;
 import com.android.internal.util.ObjectUtils;
-import com.android.internal.util.Preconditions;
 
 import libcore.util.HexEncoding;
 
@@ -166,19 +165,16 @@ public final class BluetoothLeDeviceFilter implements DeviceFilter<ScanResult> {
 
     /** @hide */
     @Override
-    public boolean matches(ScanResult device) {
-        boolean result = matches(device.getDevice())
+    public boolean matches(ScanResult scanResult) {
+        BluetoothDevice device = scanResult.getDevice();
+        boolean result = getScanFilter().matches(scanResult)
+                && BluetoothDeviceFilterUtils.matchesName(getNamePattern(), device)
                 && (mRawDataFilter == null
-                    || BitUtils.maskedEquals(device.getScanRecord().getBytes(),
+                    || BitUtils.maskedEquals(scanResult.getScanRecord().getBytes(),
                             mRawDataFilter, mRawDataFilterMask));
         if (DEBUG) Log.i(LOG_TAG, "matches(this = " + this + ", device = " + device +
                 ") -> " + result);
         return result;
-    }
-
-    private boolean matches(BluetoothDevice device) {
-        return BluetoothDeviceFilterUtils.matches(getScanFilter(), device)
-                && BluetoothDeviceFilterUtils.matchesName(getNamePattern(), device);
     }
 
     /** @hide */

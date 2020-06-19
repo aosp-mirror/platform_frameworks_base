@@ -41,6 +41,7 @@ import androidx.test.filters.SmallTest;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
@@ -113,7 +114,8 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mock(DynamicPrivacyController.class),
                 mock(ForegroundServiceSectionController.class),
                 mock(DynamicChildBindController.class),
-                mock(LowPriorityInflationHelper.class));
+                mock(LowPriorityInflationHelper.class),
+                mock(AssistantFeedbackController.class));
         mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 

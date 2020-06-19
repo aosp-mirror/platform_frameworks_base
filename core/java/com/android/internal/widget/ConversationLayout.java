@@ -52,6 +52,7 @@ import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.RemotableViewMethod;
 import android.view.TouchDelegate;
 import android.view.View;
@@ -169,10 +170,13 @@ public class ConversationLayout extends FrameLayout
     private TextView mUnreadBadge;
     private ViewGroup mAppOps;
     private Rect mAppOpsTouchRect = new Rect();
+    private View mFeedbackIcon;
     private float mMinTouchSize;
     private Icon mConversationIcon;
     private Icon mShortcutIcon;
     private View mAppNameDivider;
+    private TouchDelegateComposite mTouchDelegate = new TouchDelegateComposite(this);
+    private int mNotificationHeaderSeparatingMargin;
 
     public ConversationLayout(@NonNull Context context) {
         super(context);
@@ -212,6 +216,7 @@ public class ConversationLayout extends FrameLayout
         mConversationIconContainer = findViewById(R.id.conversation_icon_container);
         mIcon = findViewById(R.id.icon);
         mAppOps = findViewById(com.android.internal.R.id.app_ops);
+        mFeedbackIcon = findViewById(com.android.internal.R.id.feedback);
         mMinTouchSize = 48 * getResources().getDisplayMetrics().density;
         mImportanceRingView = findViewById(R.id.conversation_icon_badge_ring);
         mConversationIconBadge = findViewById(R.id.conversation_icon_badge);
@@ -314,6 +319,8 @@ public class ConversationLayout extends FrameLayout
         mInternalButtonPadding
                 = getResources().getDimensionPixelSize(R.dimen.button_padding_horizontal_material)
                 + getResources().getDimensionPixelSize(R.dimen.button_inset_horizontal_material);
+        mNotificationHeaderSeparatingMargin = getResources().getDimensionPixelSize(
+                R.dimen.notification_header_separating_margin);
     }
 
     private void animateViewForceHidden(CachingIconView view, boolean forceHidden) {
@@ -1167,6 +1174,7 @@ public class ConversationLayout extends FrameLayout
                 }
             });
         }
+        mTouchDelegate.clear();
         if (mAppOps.getWidth() > 0) {
 
             // Let's increase the touch size of the app ops view if it's here
@@ -1198,16 +1206,49 @@ public class ConversationLayout extends FrameLayout
             }
             mAppOpsTouchRect.inset(0, -heightIncrease);
 
-            // Let's adjust the hitrect since app ops isn't a direct child
-            ViewGroup viewGroup = (ViewGroup) mAppOps.getParent();
-            while (viewGroup != this) {
-                mAppOpsTouchRect.offset(viewGroup.getLeft(), viewGroup.getTop());
-                viewGroup = (ViewGroup) viewGroup.getParent();
-            }
-            //
+            getRelativeTouchRect(mAppOpsTouchRect, mAppOps);
+
             // Extend the size of the app opps to be at least 48dp
-            setTouchDelegate(new TouchDelegate(mAppOpsTouchRect, mAppOps));
+            mTouchDelegate.add(new TouchDelegate(mAppOpsTouchRect, mAppOps));
+
         }
+        if (mFeedbackIcon.getVisibility() == VISIBLE) {
+            updateFeedbackIconMargins();
+            float width = Math.max(mMinTouchSize, mFeedbackIcon.getWidth());
+            float height = Math.max(mMinTouchSize, mFeedbackIcon.getHeight());
+            final Rect feedbackTouchRect = new Rect();
+            feedbackTouchRect.left = (int) ((mFeedbackIcon.getLeft() + mFeedbackIcon.getRight())
+                    / 2.0f - width / 2.0f);
+            feedbackTouchRect.top = (int) ((mFeedbackIcon.getTop() + mFeedbackIcon.getBottom())
+                    / 2.0f - height / 2.0f);
+            feedbackTouchRect.bottom = (int) (feedbackTouchRect.top + height);
+            feedbackTouchRect.right = (int) (feedbackTouchRect.left + width);
+
+            getRelativeTouchRect(feedbackTouchRect, mFeedbackIcon);
+            mTouchDelegate.add(new TouchDelegate(feedbackTouchRect, mFeedbackIcon));
+        }
+
+        setTouchDelegate(mTouchDelegate);
+    }
+
+    private void getRelativeTouchRect(Rect touchRect, View view) {
+        ViewGroup viewGroup = (ViewGroup) view.getParent();
+        while (viewGroup != this) {
+            touchRect.offset(viewGroup.getLeft(), viewGroup.getTop());
+            viewGroup = (ViewGroup) viewGroup.getParent();
+        }
+    }
+
+    private void updateFeedbackIconMargins() {
+        MarginLayoutParams lp = (MarginLayoutParams) mFeedbackIcon.getLayoutParams();
+        if (mAppOps.getWidth() == 0) {
+            lp.setMarginStart(mNotificationHeaderSeparatingMargin);
+        } else {
+            float width = Math.max(mMinTouchSize, mFeedbackIcon.getWidth());
+            int horizontalMargin = (int) ((width - mFeedbackIcon.getWidth()) / 2);
+            lp.setMarginStart(horizontalMargin);
+        }
+        mFeedbackIcon.setLayoutParams(lp);
     }
 
     public MessagingLinearLayout getMessagingLinearLayout() {
@@ -1353,5 +1394,34 @@ public class ConversationLayout extends FrameLayout
     @Nullable
     public Icon getConversationIcon() {
         return mConversationIcon;
+    }
+
+    private static class TouchDelegateComposite extends TouchDelegate {
+        private final ArrayList<TouchDelegate> mDelegates = new ArrayList<>();
+
+        private TouchDelegateComposite(View view) {
+            super(new Rect(), view);
+        }
+
+        public void add(TouchDelegate delegate) {
+            mDelegates.add(delegate);
+        }
+
+        public void clear() {
+            mDelegates.clear();
+        }
+
+        @Override
+        public boolean onTouchEvent(MotionEvent event) {
+            float x = event.getX();
+            float y = event.getY();
+            for (TouchDelegate delegate: mDelegates) {
+                event.setLocation(x, y);
+                if (delegate.onTouchEvent(event)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

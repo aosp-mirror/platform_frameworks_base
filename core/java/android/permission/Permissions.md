@@ -706,8 +706,8 @@ App-op permissions are user-switchable permissions that are not runtime permissi
 be used for permissions that are really only meant to be ever granted to a very small amount of
 apps. Traditionally granting these permissions is intentionally very heavy weight so that the
 user really needs to understand the use case. For example one use case is the
-`INTERACT_ACROSS_PROFILES` permission that allows apps of different
-[user profiles](../os/Users.md#user-profile) to interact. Of course this is breaking a very basic
+`INTERACT_ACROSS_PROFILES` permission that allows apps of different users within the same
+[profile group](../os/Users.md#profile-group) to interact. Of course this is breaking a very basic
 security container and hence should only ever be granted with a lot of care.
 
 **Warning:** Most app-op permissions follow this logic, but most of them also have exceptions

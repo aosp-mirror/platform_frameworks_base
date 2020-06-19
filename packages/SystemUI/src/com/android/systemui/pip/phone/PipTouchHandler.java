@@ -70,6 +70,8 @@ import com.android.systemui.util.magnetictarget.MagnetizedObject;
 
 import java.io.PrintWriter;
 
+import kotlin.Unit;
+
 /**
  * Manages all the touch handling for PIP on the Phone, including moving, dismissing and expanding
  * the PIP.
@@ -122,7 +124,7 @@ public class PipTouchHandler {
     /** Default configuration to use for springing the dismiss target in/out. */
     private final PhysicsAnimator.SpringConfig mTargetSpringConfig =
             new PhysicsAnimator.SpringConfig(
-                    SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+                    SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -248,8 +250,9 @@ public class PipTouchHandler {
 
         mPipBoundsHandler = pipBoundsHandler;
         mFloatingContentCoordinator = floatingContentCoordinator;
-        mConnection = new PipAccessibilityInteractionConnection(mMotionHelper,
-                this::onAccessibilityShowMenu, mHandler);
+        mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
+                pipTaskOrganizer, pipSnapAlgorithm, this::onAccessibilityShowMenu,
+                this::updateMovementBounds, mHandler);
 
         mTargetView = new DismissCircleView(context);
         mTargetViewContainer = new FrameLayout(context);
@@ -262,12 +265,14 @@ public class PipTouchHandler {
         mMagneticTarget = mMagnetizedPip.addTarget(mTargetView, 0);
         updateMagneticTargetSize();
 
-        mMagnetizedPip.setPhysicsAnimatorUpdateListener(mMotionHelper.mResizePipUpdateListener);
+        mMagnetizedPip.setAnimateStuckToTarget(
+                (target, velX, velY, flung, after) -> {
+                    mMotionHelper.animateIntoDismissTarget(target, velX, velY, flung, after);
+                    return Unit.INSTANCE;
+                });
         mMagnetizedPip.setMagnetListener(new MagnetizedObject.MagnetListener() {
             @Override
             public void onStuckToTarget(@NonNull MagnetizedObject.MagneticTarget target) {
-                mMotionHelper.prepareForAnimation();
-
                 // Show the dismiss target, in case the initial touch event occurred within the
                 // magnetic field radius.
                 showDismissTargetMaybe();
@@ -286,11 +291,12 @@ public class PipTouchHandler {
 
             @Override
             public void onReleasedInTarget(@NonNull MagnetizedObject.MagneticTarget target) {
+                mMotionHelper.notifyDismissalPending();
+
                 mHandler.post(() -> {
                     mMotionHelper.animateDismiss();
                     hideDismissTarget();
                 });
-
 
                 MetricsLoggerWrapper.logPictureInPictureDismissByDrag(mContext,
                         PipUtils.getTopPipActivity(mContext, mActivityManager));
@@ -319,7 +325,9 @@ public class PipTouchHandler {
         final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(targetSize, targetSize);
-        newParams.gravity = Gravity.CENTER;
+        newParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        newParams.bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 
         // Set the magnetic field radius equal to twice the size of the target.
@@ -462,9 +470,9 @@ public class PipTouchHandler {
                 // touching the screen
             } else {
                 final boolean isExpanded = mMenuState == MENU_STATE_FULL && willResizeMenu();
-                final Rect toMovementBounds = isExpanded
-                        ? new Rect(expandedMovementBounds)
-                        : new Rect(normalMovementBounds);
+                final Rect toMovementBounds = new Rect();
+                mSnapAlgorithm.getMovementBounds(curBounds, insetBounds,
+                        toMovementBounds, mIsImeShowing ? mImeHeight : 0);
                 final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
                 final int toBottom = toMovementBounds.bottom < toMovementBounds.top
                         ? toMovementBounds.bottom
@@ -492,6 +500,8 @@ public class PipTouchHandler {
         mInsetBounds.set(insetBounds);
         updateMovementBounds();
         mMovementBoundsExtraOffsets = extraOffset;
+        mConnection.onMovementBoundsChanged(mNormalBounds, mExpandedBounds, mNormalMovementBounds,
+                mExpandedMovementBounds);
 
         // If we have a deferred resize, apply it now
         if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
@@ -617,11 +627,16 @@ public class PipTouchHandler {
         }
 
         MotionEvent ev = (MotionEvent) inputEvent;
-
-        if (mPipResizeGestureHandler.isWithinTouchRegion((int) ev.getRawX(), (int) ev.getRawY())) {
+        if (!mTouchState.isDragging()
+                && !mMagnetizedPip.getObjectStuckToTarget()
+                && !mMotionHelper.isAnimating()
+                && mPipResizeGestureHandler.isWithinTouchRegion(
+                        (int) ev.getRawX(), (int) ev.getRawY())) {
             return true;
         }
-        if (mMagnetizedPip.maybeConsumeMotionEvent(ev)) {
+
+        if ((ev.getAction() == MotionEvent.ACTION_DOWN || mTouchState.isUserInteracting())
+                && mMagnetizedPip.maybeConsumeMotionEvent(ev)) {
             // If the first touch event occurs within the magnetic field, pass the ACTION_DOWN event
             // to the touch state. Touch state needs a DOWN event in order to later process MOVE
             // events it'll receive if the object is dragged out of the magnetic field.
@@ -643,7 +658,6 @@ public class PipTouchHandler {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                mMotionHelper.synchronizePinnedStackBoundsForTouchGesture();
                 mGesture.onDown(mTouchState);
                 break;
             }
@@ -872,7 +886,7 @@ public class PipTouchHandler {
                 return;
             }
 
-            Rect bounds = mMotionHelper.getBounds();
+            Rect bounds = mMotionHelper.getPossiblyAnimatingBounds();
             mDelta.set(0f, 0f);
             mStartPosition.set(bounds.left, bounds.top);
             mMovementWithinDismiss = touchState.getDownTouchPosition().y >= mMovementBounds.bottom;
@@ -914,7 +928,7 @@ public class PipTouchHandler {
                 mDelta.x += left - lastX;
                 mDelta.y += top - lastY;
 
-                mTmpBounds.set(mMotionHelper.getBounds());
+                mTmpBounds.set(mMotionHelper.getPossiblyAnimatingBounds());
                 mTmpBounds.offsetTo((int) left, (int) top);
                 mMotionHelper.movePip(mTmpBounds, true /* isDragging */);
 
@@ -1030,6 +1044,7 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
         pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + mEnableDismissDragToEdge);
+        pw.println(innerPrefix + "mMovementBoundsExtraOffsets=" + mMovementBoundsExtraOffsets);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);
     }

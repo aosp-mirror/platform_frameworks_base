@@ -26,6 +26,8 @@ java_library_static {
     },
     srcs: ["src/metrics_constants/metrics_constants.proto"],
     sdk_version: "system_current",
+    // this is part of updatable modules(CaptivePortalLogin) which targets 29(Q)
+    min_sdk_version: "29",
 }
 
 filegroup {

@@ -110,6 +110,7 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     private ViewGroup mMessagingIconContainer;
     private int mConversationContentStart;
     private int mNonConversationMarginEnd;
+    private int mNotificationTextMarginTop;
 
     public MessagingGroup(@NonNull Context context) {
         super(context);
@@ -149,6 +150,8 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
                 R.dimen.conversation_content_start);
         mNonConversationMarginEnd = getResources().getDimensionPixelSize(
                 R.dimen.messaging_layout_margin_end);
+        mNotificationTextMarginTop = getResources().getDimensionPixelSize(
+                R.dimen.notification_text_margin_top);
     }
 
     public void updateClipRect() {
@@ -665,6 +668,9 @@ public class MessagingGroup extends LinearLayout implements MessagingLinearLayou
     public void setSingleLine(boolean singleLine) {
         if (singleLine != mSingleLine) {
             mSingleLine = singleLine;
+            MarginLayoutParams p = (MarginLayoutParams) mMessageContainer.getLayoutParams();
+            p.topMargin = singleLine ? 0 : mNotificationTextMarginTop;
+            mMessageContainer.setLayoutParams(p);
             mContentContainer.setOrientation(
                     singleLine ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
             MarginLayoutParams layoutParams = (MarginLayoutParams) mSenderView.getLayoutParams();

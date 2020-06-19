@@ -16,9 +16,6 @@
 
 package com.android.server.location.util;
 
-
-import android.content.Context;
-
 import com.android.internal.annotations.VisibleForTesting;
 
 /**
@@ -26,8 +23,6 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 @VisibleForTesting
 public interface Injector {
-    /** Returns a context. */
-    Context getContext();
 
     /** Returns a UserInfoHelper. */
     UserInfoHelper getUserInfoHelper();
@@ -43,4 +38,7 @@ public interface Injector {
 
     /** Returns a LocationUsageLogger. */
     LocationUsageLogger getLocationUsageLogger();
+
+    /** Returns a LocationAttributionHelper. */
+    LocationAttributionHelper getLocationAttributionHelper();
 }

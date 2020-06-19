@@ -47,6 +47,10 @@ import android.service.dreams.IDreamManager;
 import android.util.Slog;
 import android.view.Display;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.logging.UiEvent;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
@@ -77,6 +81,8 @@ public final class DreamManagerService extends SystemService {
     private final PowerManagerInternal mPowerManagerInternal;
     private final PowerManager.WakeLock mDozeWakeLock;
     private final ActivityTaskManagerInternal mAtmInternal;
+    private final UiEventLogger mUiEventLogger;
+    private final ComponentName mAmbientDisplayComponent;
 
     private Binder mCurrentDreamToken;
     private ComponentName mCurrentDreamName;
@@ -91,6 +97,26 @@ public final class DreamManagerService extends SystemService {
 
     private AmbientDisplayConfiguration mDozeConfig;
 
+    @VisibleForTesting
+    public enum DreamManagerEvent implements UiEventLogger.UiEventEnum {
+        @UiEvent(doc = "The screensaver has started.")
+        DREAM_START(577),
+
+        @UiEvent(doc = "The screensaver has stopped.")
+        DREAM_STOP(578);
+
+        private final int mId;
+
+        DreamManagerEvent(int id) {
+            mId = id;
+        }
+
+        @Override
+        public int getId() {
+            return mId;
+        }
+    }
+
     public DreamManagerService(Context context) {
         super(context);
         mContext = context;
@@ -102,6 +128,9 @@ public final class DreamManagerService extends SystemService {
         mAtmInternal = getLocalService(ActivityTaskManagerInternal.class);
         mDozeWakeLock = mPowerManager.newWakeLock(PowerManager.DOZE_WAKE_LOCK, TAG);
         mDozeConfig = new AmbientDisplayConfiguration(mContext);
+        mUiEventLogger = new UiEventLoggerImpl();
+        AmbientDisplayConfiguration adc = new AmbientDisplayConfiguration(mContext);
+        mAmbientDisplayComponent = ComponentName.unflattenFromString(adc.ambientDisplayComponent());
     }
 
     @Override
@@ -388,6 +417,9 @@ public final class DreamManagerService extends SystemService {
                 .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "startDream");
         mHandler.post(wakeLock.wrap(() -> {
             mAtmInternal.notifyDreamStateChanged(true);
+            if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
+                mUiEventLogger.log(DreamManagerEvent.DREAM_START);
+            }
             mController.startDream(newToken, name, isTest, canDoze, userId, wakeLock);
         }));
     }
@@ -415,6 +447,9 @@ public final class DreamManagerService extends SystemService {
     }
 
     private void cleanupDreamLocked() {
+        if (!mCurrentDreamName.equals(mAmbientDisplayComponent)) {
+            mUiEventLogger.log(DreamManagerEvent.DREAM_STOP);
+        }
         mCurrentDreamToken = null;
         mCurrentDreamName = null;
         mCurrentDreamIsTest = false;

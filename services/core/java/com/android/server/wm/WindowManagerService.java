@@ -370,7 +370,8 @@ public class WindowManagerService extends IWindowManager.Stub
     static final long DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS = 5000 * 1000000L;
 
     // Poll interval in milliseconds for watching boot animation finished.
-    private static final int BOOT_ANIMATION_POLL_INTERVAL = 200;
+    // TODO(b/159045990) Migrate to SystemService.waitForState with dedicated thread.
+    private static final int BOOT_ANIMATION_POLL_INTERVAL = 50;
 
     // The name of the boot animation service in init.rc.
     private static final String BOOT_ANIMATION_SERVICE = "bootanim";

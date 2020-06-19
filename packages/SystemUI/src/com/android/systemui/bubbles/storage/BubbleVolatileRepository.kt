@@ -60,7 +60,8 @@ class BubbleVolatileRepository @Inject constructor(
         // Verify the size of given bubbles is within capacity, otherwise trim down to capacity
         val bubblesInRange = bubbles.takeLast(capacity)
         // To ensure natural ordering of the bubbles, removes bubbles which already exist
-        val uniqueBubbles = bubblesInRange.filterNot { entities.remove(it) }
+        val uniqueBubbles = bubblesInRange.filterNot { b: BubbleEntity ->
+            entities.removeIf { e: BubbleEntity -> b.key == e.key } }
         val overflowCount = entities.size + bubblesInRange.size - capacity
         if (overflowCount > 0) {
             // Uncache ShortcutInfo of bubbles that will be removed due to capacity
@@ -72,7 +73,9 @@ class BubbleVolatileRepository @Inject constructor(
     }
 
     @Synchronized
-    fun removeBubbles(bubbles: List<BubbleEntity>) = uncache(bubbles.filter { entities.remove(it) })
+    fun removeBubbles(bubbles: List<BubbleEntity>) =
+            uncache(bubbles.filter { b: BubbleEntity ->
+                entities.removeIf { e: BubbleEntity -> b.key == e.key } })
 
     private fun cache(bubbles: List<BubbleEntity>) {
         bubbles.groupBy { ShortcutKey(it.userId, it.packageName) }.forEach { (key, bubbles) ->

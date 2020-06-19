@@ -128,6 +128,8 @@ class ControlViewHolder(
     val controlTemplate: ControlTemplate
         get() = cws.control?.let { it.controlTemplate } ?: ControlTemplate.NO_TEMPLATE
 
+    var userInteractionInProgress = false
+
     init {
         val ld = layout.getBackground() as LayerDrawable
         ld.mutate()
@@ -139,6 +141,11 @@ class ControlViewHolder(
     }
 
     fun bindData(cws: ControlWithState) {
+        // If an interaction is in progress, the update may visually interfere with the action the
+        // action the user wants to make. Don't apply the update, and instead assume a new update
+        // will coming from when the user interaction is complete.
+        if (userInteractionInProgress) return
+
         this.cws = cws
 
         cancelUpdate?.run()
@@ -189,12 +196,12 @@ class ControlViewHolder(
             }
             ControlAction.RESPONSE_CHALLENGE_PIN -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
-                    this, false, failedAttempt, onDialogCancel)
+                    this, false /* useAlphanumeric */, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_PASSPHRASE -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
-                    this, false, failedAttempt, onDialogCancel)
+                    this, true /* useAlphanumeric */, failedAttempt, onDialogCancel)
                 lastChallengeDialog?.show()
             }
             ControlAction.RESPONSE_CHALLENGE_ACK -> {
@@ -218,13 +225,11 @@ class ControlViewHolder(
         cancelUpdate = uiExecutor.executeDelayed({
             animateStatusChange(/* animated */ true, {
                 setStatusText(previousText, /* immediately */ true)
-                updateContentDescription()
             })
         }, UPDATE_DELAY_IN_MILLIS)
 
         animateStatusChange(/* animated */ true, {
             setStatusText(tempStatus, /* immediately */ true)
-            updateContentDescription()
         })
     }
 
@@ -296,6 +301,7 @@ class ControlViewHolder(
         if (immediately) {
             status.alpha = STATUS_ALPHA_ENABLED
             status.text = text
+            updateContentDescription()
         }
         nextStatusText = text
     }
@@ -412,6 +418,8 @@ class ControlViewHolder(
         setEnabled(enabled)
 
         status.text = text
+        updateContentDescription()
+
         status.setTextColor(color)
 
         control?.getCustomIcon()?.let {

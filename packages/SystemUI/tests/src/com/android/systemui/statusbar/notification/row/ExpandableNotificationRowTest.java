@@ -242,13 +242,51 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testAppOpsOnClick() {
-        ExpandableNotificationRow.OnAppOpsClickListener l = mock(
-                ExpandableNotificationRow.OnAppOpsClickListener.class);
+        ExpandableNotificationRow.CoordinateOnClickListener l = mock(
+                ExpandableNotificationRow.CoordinateOnClickListener.class);
         View view = mock(View.class);
 
         mGroupRow.setAppOpsOnClickListener(l);
 
         mGroupRow.getAppOpsOnClickListener().onClick(view);
+        verify(l, times(1)).onClick(any(), anyInt(), anyInt(), any());
+    }
+
+    @Test
+    public void testFeedback_noHeader() {
+        // public notification is custom layout - no header
+        mGroupRow.setSensitive(true, true);
+        mGroupRow.setOnFeedbackClickListener(null);
+        mGroupRow.showFeedbackIcon(false);
+    }
+
+    @Test
+    public void testFeedback_header() {
+        NotificationContentView publicLayout = mock(NotificationContentView.class);
+        mGroupRow.setPublicLayout(publicLayout);
+        NotificationContentView privateLayout = mock(NotificationContentView.class);
+        mGroupRow.setPrivateLayout(privateLayout);
+        NotificationChildrenContainer mockContainer = mock(NotificationChildrenContainer.class);
+        when(mockContainer.getNotificationChildCount()).thenReturn(1);
+        mGroupRow.setChildrenContainer(mockContainer);
+
+        final boolean show = true;
+        mGroupRow.showFeedbackIcon(show);
+
+        verify(mockContainer, times(1)).showFeedbackIcon(show);
+        verify(privateLayout, times(1)).showFeedbackIcon(show);
+        verify(publicLayout, times(1)).showFeedbackIcon(show);
+    }
+
+    @Test
+    public void testFeedbackOnClick() {
+        ExpandableNotificationRow.CoordinateOnClickListener l = mock(
+                ExpandableNotificationRow.CoordinateOnClickListener.class);
+        View view = mock(View.class);
+
+        mGroupRow.setOnFeedbackClickListener(l);
+
+        mGroupRow.getFeedbackOnClickListener().onClick(view);
         verify(l, times(1)).onClick(any(), anyInt(), anyInt(), any());
     }
 

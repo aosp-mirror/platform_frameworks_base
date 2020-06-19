@@ -70,6 +70,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
     private View mAppOps;
     private View mAudiblyAlertedIcon;
     private FrameLayout mIconContainer;
+    private View mFeedbackIcon;
 
     private boolean mIsLowPriority;
     private boolean mTransformLowPriorityTitle;
@@ -109,6 +110,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
                 }, TRANSFORMING_VIEW_TITLE);
         resolveHeaderViews();
         addAppOpsOnClickListener(row);
+        addFeedbackOnClickListener(row);
     }
 
     protected void resolveHeaderViews() {
@@ -124,6 +126,7 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         mOverlayIcon = mView.findViewById(com.android.internal.R.id.overlay);
         mAppOps = mView.findViewById(com.android.internal.R.id.app_ops);
         mAudiblyAlertedIcon = mView.findViewById(com.android.internal.R.id.alerted_icon);
+        mFeedbackIcon = mView.findViewById(com.android.internal.R.id.feedback);
         if (mNotificationHeader != null) {
             mNotificationHeader.setShowExpandButtonAtEnd(mShowExpandButtonAtEnd);
             mColor = mNotificationHeader.getOriginalIconColor();
@@ -160,6 +163,22 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
             mMicIcon.setVisibility(appOps.contains(AppOpsManager.OP_RECORD_AUDIO)
                     ? View.VISIBLE : View.GONE);
         }
+    }
+
+    private void addFeedbackOnClickListener(ExpandableNotificationRow row) {
+        View.OnClickListener listener = row.getFeedbackOnClickListener();
+        if (mNotificationHeader != null) {
+            mNotificationHeader.setFeedbackOnClickListener(listener);
+        }
+        if (mFeedbackIcon != null) {
+            mFeedbackIcon.setOnClickListener(listener);
+        }
+    }
+
+    /** Shows or hides feedback indicator */
+    @Override
+    public void showFeedbackIcon(boolean show) {
+        mFeedbackIcon.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     @Override
@@ -296,6 +315,9 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
         }
         if (mAudiblyAlertedIcon != null) {
             mTransformationHelper.addViewTransformingToSimilar(mAudiblyAlertedIcon);
+        }
+        if (mFeedbackIcon != null) {
+            mTransformationHelper.addViewTransformingToSimilar(mFeedbackIcon);
         }
     }
 

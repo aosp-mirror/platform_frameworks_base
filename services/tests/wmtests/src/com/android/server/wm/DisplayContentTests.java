@@ -527,7 +527,7 @@ public class DisplayContentTests extends WindowTestsBase {
 
         final int maxWidth = 300;
         final int resultingHeight = (maxWidth * baseHeight) / baseWidth;
-        final int resultingDensity = (maxWidth * baseDensity) / baseWidth;
+        final int resultingDensity = baseDensity;
 
         displayContent.setMaxUiWidth(maxWidth);
         verifySizes(displayContent, maxWidth, resultingHeight, resultingDensity);
@@ -1236,17 +1236,27 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testRecentsNotRotatingWithFixedRotation() {
         final DisplayRotation displayRotation = mDisplayContent.getDisplayRotation();
         doCallRealMethod().when(displayRotation).updateRotationUnchecked(anyBoolean());
-        doCallRealMethod().when(displayRotation).updateOrientation(anyInt(), anyBoolean());
+        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
+        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
 
         final ActivityRecord recentsActivity = createActivityRecord(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_RECENTS);
         recentsActivity.setRequestedOrientation(SCREEN_ORIENTATION_PORTRAIT);
 
+        // Do not rotate if the recents animation is animating on top.
         mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
         displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
         assertFalse(displayRotation.updateRotationUnchecked(false));
 
+        // Rotation can be updated if the recents animation is finished.
         mDisplayContent.mFixedRotationTransitionListener.onFinishRecentsAnimation(false);
+        assertTrue(displayRotation.updateRotationUnchecked(false));
+
+        // Rotation can be updated if the recents animation is animating but it is not on top, e.g.
+        // switching activities in different orientations by quickstep gesture.
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
+        mDisplayContent.setFixedRotationLaunchingAppUnchecked(mAppWindow.mActivityRecord);
+        displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
         assertTrue(displayRotation.updateRotationUnchecked(false));
     }
 

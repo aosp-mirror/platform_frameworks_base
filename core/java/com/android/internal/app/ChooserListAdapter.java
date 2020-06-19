@@ -275,33 +275,43 @@ public class ChooserListAdapter extends ResolverListAdapter {
     }
 
     void updateAlphabeticalList() {
-        mSortedList.clear();
-        List<DisplayResolveInfo> tempList = new ArrayList<>();
-        tempList.addAll(mDisplayList);
-        tempList.addAll(mCallerTargets);
-        if (mEnableStackedApps) {
-            // Consolidate multiple targets from same app.
-            Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
-            for (DisplayResolveInfo info : tempList) {
-                String packageName = info.getResolvedComponentName().getPackageName();
-                DisplayResolveInfo multiDri = consolidated.get(packageName);
-                if (multiDri == null) {
-                    consolidated.put(packageName, info);
-                } else if (multiDri instanceof MultiDisplayResolveInfo) {
-                    ((MultiDisplayResolveInfo) multiDri).addTarget(info);
-                } else {
-                    // create consolidated target from the single DisplayResolveInfo
-                    MultiDisplayResolveInfo multiDisplayResolveInfo =
-                            new MultiDisplayResolveInfo(packageName, multiDri);
-                    multiDisplayResolveInfo.addTarget(info);
-                    consolidated.put(packageName, multiDisplayResolveInfo);
+        new AsyncTask<Void, Void, List<DisplayResolveInfo>>() {
+            @Override
+            protected List<DisplayResolveInfo> doInBackground(Void... voids) {
+                List<DisplayResolveInfo> allTargets = new ArrayList<>();
+                allTargets.addAll(mDisplayList);
+                allTargets.addAll(mCallerTargets);
+                if (!mEnableStackedApps) {
+                    return allTargets;
                 }
+                // Consolidate multiple targets from same app.
+                Map<String, DisplayResolveInfo> consolidated = new HashMap<>();
+                for (DisplayResolveInfo info : allTargets) {
+                    String packageName = info.getResolvedComponentName().getPackageName();
+                    DisplayResolveInfo multiDri = consolidated.get(packageName);
+                    if (multiDri == null) {
+                        consolidated.put(packageName, info);
+                    } else if (multiDri instanceof MultiDisplayResolveInfo) {
+                        ((MultiDisplayResolveInfo) multiDri).addTarget(info);
+                    } else {
+                        // create consolidated target from the single DisplayResolveInfo
+                        MultiDisplayResolveInfo multiDisplayResolveInfo =
+                            new MultiDisplayResolveInfo(packageName, multiDri);
+                        multiDisplayResolveInfo.addTarget(info);
+                        consolidated.put(packageName, multiDisplayResolveInfo);
+                    }
+                }
+                List<DisplayResolveInfo> groupedTargets = new ArrayList<>();
+                groupedTargets.addAll(consolidated.values());
+                Collections.sort(groupedTargets, new ChooserActivity.AzInfoComparator(mContext));
+                return groupedTargets;
             }
-            mSortedList.addAll(consolidated.values());
-        } else {
-            mSortedList.addAll(tempList);
-        }
-        Collections.sort(mSortedList, new ChooserActivity.AzInfoComparator(mContext));
+            @Override
+            protected void onPostExecute(List<DisplayResolveInfo> newList) {
+                mSortedList = newList;
+                notifyDataSetChanged();
+            }
+        }.execute();
     }
 
     @Override
@@ -826,6 +836,12 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     public ChooserTarget getChooserTargetForValue(int value) {
         return mServiceTargets.get(value).getChooserTarget();
+    }
+
+    protected boolean alwaysShowSubLabel() {
+        // Always show a subLabel for visual consistency across list items. Show an empty
+        // subLabel if the subLabel is the same as the label
+        return true;
     }
 
     /**

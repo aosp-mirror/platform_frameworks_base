@@ -51,6 +51,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
@@ -92,7 +93,6 @@ import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -303,7 +303,7 @@ public class BubbleStackView extends FrameLayout
     private BubbleController.BubbleExpandListener mExpandListener;
 
     /** Callback to run when we want to unbubble the given notification's conversation. */
-    private Consumer<NotificationEntry> mUnbubbleConversationCallback;
+    private Consumer<String> mUnbubbleConversationCallback;
 
     private SysUiState mSysUiState;
 
@@ -890,14 +890,7 @@ public class BubbleStackView extends FrameLayout
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
                     mStackAnimationController.updateResources(mOrientation);
-
-                    // Reposition & adjust the height for new orientation
-                    if (mIsExpanded) {
-                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
-                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-                            mExpandedBubble.getExpandedView().updateView(getLocationOnScreen());
-                        }
-                    }
+                    mBubbleOverflow.updateDimensions();
 
                     // Need to update the padding around the view
                     WindowInsets insets = getRootWindowInsets();
@@ -921,9 +914,15 @@ public class BubbleStackView extends FrameLayout
 
                     if (mIsExpanded) {
                         // Re-draw bubble row and pointer for new orientation.
+                        beforeExpandedViewAnimation();
+                        updateOverflowVisibility();
+                        updatePointerPosition();
                         mExpandedAnimationController.expandFromStack(() -> {
-                            updatePointerPosition();
+                            afterExpandedViewAnimation();
                         } /* after */);
+                        mExpandedViewContainer.setTranslationX(0);
+                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
+                        mExpandedViewContainer.setAlpha(1f);
                     }
                     if (mVerticalPosPercentBeforeRotation >= 0) {
                         mStackAnimationController.moveStackToSimilarPositionAfterRotation(
@@ -1057,10 +1056,7 @@ public class BubbleStackView extends FrameLayout
         mManageMenu.findViewById(R.id.bubble_manage_menu_dont_bubble_container).setOnClickListener(
                 view -> {
                     showManageMenu(false /* show */);
-                    final Bubble bubble = mBubbleData.getSelectedBubble();
-                    if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-                        mUnbubbleConversationCallback.accept(bubble.getEntry());
-                    }
+                    mUnbubbleConversationCallback.accept(mBubbleData.getSelectedBubble().getKey());
                 });
 
         mManageMenu.findViewById(R.id.bubble_manage_menu_settings_container).setOnClickListener(
@@ -1070,10 +1066,8 @@ public class BubbleStackView extends FrameLayout
                     if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                         final Intent intent = bubble.getSettingsIntent(mContext);
                         collapseStack(() -> {
-
                             mContext.startActivityAsUser(intent, bubble.getUser());
-                            logBubbleClickEvent(
-                                    bubble,
+                            logBubbleEvent(bubble,
                                     SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
                         });
                     }
@@ -1412,7 +1406,7 @@ public class BubbleStackView extends FrameLayout
 
     /** Sets the function to call to un-bubble the given conversation. */
     public void setUnbubbleConversationCallback(
-            Consumer<NotificationEntry> unbubbleConversationCallback) {
+            Consumer<String> unbubbleConversationCallback) {
         mUnbubbleConversationCallback = unbubbleConversationCallback;
     }
 
@@ -2764,16 +2758,28 @@ public class BubbleStackView extends FrameLayout
     /**
      * Logs the bubble UI event.
      *
-     * @param bubble the bubble that is being interacted on. Null value indicates that
-     *               the user interaction is not specific to one bubble.
+     * @param provider the bubble view provider that is being interacted on. Null value indicates
+     *               that the user interaction is not specific to one bubble.
      * @param action the user interaction enum.
      */
-    private void logBubbleEvent(@Nullable BubbleViewProvider bubble, int action) {
-        if (bubble == null) {
+    private void logBubbleEvent(@Nullable BubbleViewProvider provider, int action) {
+        if (provider == null || provider.getKey().equals(BubbleOverflow.KEY)) {
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    mContext.getApplicationInfo().packageName,
+                    provider == null ? null : BubbleOverflow.KEY /* notification channel */,
+                    0 /* notification ID */,
+                    0 /* bubble position */,
+                    getBubbleCount(),
+                    action,
+                    getNormalizedXPosition(),
+                    getNormalizedYPosition(),
+                    false /* unread bubble */,
+                    false /* on-going bubble */,
+                    false /* isAppForeground (unused) */);
             return;
         }
-        bubble.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
-                getNormalizedYPosition(), getBubbleIndex(bubble));
+        provider.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
+                getNormalizedYPosition(), getBubbleIndex(provider));
     }
 
     /**
@@ -2811,21 +2817,5 @@ public class BubbleStackView extends FrameLayout
             }
         }
         return bubbles;
-    }
-
-    /**
-     * Logs bubble UI click event.
-     *
-     * @param bubble the bubble notification entry that user is interacting with.
-     * @param action the user interaction enum.
-     */
-    private void logBubbleClickEvent(Bubble bubble, int action) {
-        bubble.logUIEvent(
-                getBubbleCount(),
-                action,
-                getNormalizedXPosition(),
-                getNormalizedYPosition(),
-                getBubbleIndex(getExpandedBubble())
-        );
     }
 }

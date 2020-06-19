@@ -18,4 +18,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.server.pm.test.dummy_app"
     android:versionCode="2"
-    />
+    >
+
+    <permission
+        android:name="com.android.server.pm.test.dummy_app.TEST_PERMISSION"
+        android:protectionLevel="normal"
+        />
+
+</manifest>

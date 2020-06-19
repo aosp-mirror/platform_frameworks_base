@@ -202,14 +202,15 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     public PipTaskOrganizer(Context context, @NonNull PipBoundsHandler boundsHandler,
             @NonNull PipSurfaceTransactionHelper surfaceTransactionHelper,
             @Nullable Divider divider,
-            @NonNull DisplayController displayController) {
+            @NonNull DisplayController displayController,
+            @NonNull PipAnimationController pipAnimationController) {
         mMainHandler = new Handler(Looper.getMainLooper());
         mUpdateHandler = new Handler(PipUpdateThread.get().getLooper(), mUpdateCallbacks);
         mPipBoundsHandler = boundsHandler;
         mEnterExitAnimationDuration = context.getResources()
                 .getInteger(R.integer.config_pipResizeAnimationDuration);
         mSurfaceTransactionHelper = surfaceTransactionHelper;
-        mPipAnimationController = new PipAnimationController(context, surfaceTransactionHelper);
+        mPipAnimationController = pipAnimationController;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
         mSplitDivider = divider;
         displayController.addDisplayWindowListener(this);
@@ -708,6 +709,12 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             Log.w(TAG, "Abort animation, invalid leash");
             return;
         }
+
+        if (startBounds.isEmpty() || destinationBounds.isEmpty()) {
+            Log.w(TAG, "Attempted to user resize PIP to or from empty bounds, aborting.");
+            return;
+        }
+
         final SurfaceControl.Transaction tx = mSurfaceControlTransactionFactory.getTransaction();
         mSurfaceTransactionHelper.scale(tx, mLeash, startBounds, destinationBounds);
         tx.apply();
@@ -738,9 +745,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             // on the task to ensure that the task "matches" the parent's bounds.
             taskBounds = (direction == TRANSITION_DIRECTION_TO_FULLSCREEN)
                     ? null : destinationBounds;
-            // As for the final windowing mode, simply reset it to undefined and reset the activity
-            // mode set prior to the animation running
-            wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            // Reset the final windowing mode.
+            wct.setWindowingMode(mToken, getOutPipWindowingMode());
+            // Simply reset the activity mode set prior to the animation running.
             wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
             if (mSplitDivider != null && direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN) {
                 wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
@@ -752,7 +759,28 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
         wct.setBounds(mToken, taskBounds);
         wct.setBoundsChangeTransaction(mToken, tx);
+        applyFinishBoundsResize(wct, direction);
+    }
+
+    /**
+     * Applies the window container transaction to finish a bounds resize.
+     *
+     * Called by {@link #finishResize(SurfaceControl.Transaction, Rect, int, int)}} once it has
+     * finished preparing the transaction. It allows subclasses to modify the transaction before
+     * applying it.
+     */
+    public void applyFinishBoundsResize(@NonNull WindowContainerTransaction wct,
+            @PipAnimationController.TransitionDirection int direction) {
         WindowOrganizer.applyTransaction(wct);
+    }
+
+    /**
+     * The windowing mode to restore to when resizing out of PIP direction. Defaults to undefined
+     * and can be overridden to restore to an alternate windowing mode.
+     */
+    public int getOutPipWindowingMode() {
+        // By default, simply reset the windowing mode to undefined.
+        return WINDOWING_MODE_UNDEFINED;
     }
 
     private void animateResizePip(Rect currentBounds, Rect destinationBounds,

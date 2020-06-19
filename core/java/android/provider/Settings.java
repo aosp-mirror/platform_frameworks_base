@@ -8541,14 +8541,15 @@ public final class Settings {
         public static final int VR_DISPLAY_MODE_OFF = 1;
 
         /**
-         * Whether CarrierAppUtils#disableCarrierAppsUntilPrivileged has been executed at least
-         * once.
+         * The latest SDK version that CarrierAppUtils#disableCarrierAppsUntilPrivileged has been
+         * executed for.
          *
          * <p>This is used to ensure that we only take one pass which will disable apps that are not
          * privileged (if any). From then on, we only want to enable apps (when a matching SIM is
          * inserted), to avoid disabling an app that the user might actively be using.
          *
-         * <p>Will be set to 1 once executed.
+         * <p>Will be set to {@link android.os.Build.VERSION#SDK_INT} once executed. Note that older
+         * SDK versions prior to R set 1 for this value.
          *
          * @hide
          */
@@ -8698,6 +8699,16 @@ public final class Settings {
          */
         public static final String BUBBLE_IMPORTANT_CONVERSATIONS
                 = "bubble_important_conversations";
+
+        /**
+         * When enabled, notifications the notification assistant service has modified will show an
+         * indicator. When tapped, this indicator will describe the adjustment made and solicit
+         * feedback. This flag will also add a "automatic" option to the long press menu.
+         *
+         * The value 1 - enable, 0 - disable
+         * @hide
+         */
+        public static final String NOTIFICATION_FEEDBACK_ENABLED = "notification_feedback_enabled";
 
         /**
          * Whether notifications are dismissed by a right-to-left swipe (instead of a left-to-right

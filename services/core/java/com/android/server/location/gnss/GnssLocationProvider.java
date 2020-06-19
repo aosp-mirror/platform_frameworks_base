@@ -81,11 +81,7 @@ import com.android.server.LocalServices;
 import com.android.server.location.AbstractLocationProvider;
 import com.android.server.location.gnss.GnssSatelliteBlacklistHelper.GnssSatelliteBlacklistCallback;
 import com.android.server.location.gnss.NtpTimeHelper.InjectNtpTimeCallback;
-import com.android.server.location.util.AppForegroundHelper;
-import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.LocationUsageLogger;
-import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
+import com.android.server.location.util.Injector;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -588,9 +584,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    public GnssLocationProvider(Context context, UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper, LocationUsageLogger logger) {
+    public GnssLocationProvider(Context context, Injector injector) {
         super(FgThread.getExecutor(), CallerIdentity.fromContext(context));
 
         mContext = context;
@@ -634,15 +628,11 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(context,
                 GnssLocationProvider.this::onNetworkAvailable, mLooper, mNIHandler);
 
-        mGnssStatusListenerHelper = new GnssStatusProvider(userInfoHelper, settingsHelper,
-                appOpsHelper, appForegroundHelper, logger);
-        mGnssMeasurementsProvider = new GnssMeasurementsProvider(userInfoHelper,
-                settingsHelper, appOpsHelper, appForegroundHelper, logger);
+        mGnssStatusListenerHelper = new GnssStatusProvider(injector);
+        mGnssMeasurementsProvider = new GnssMeasurementsProvider(injector);
         mGnssMeasurementCorrectionsProvider = new GnssMeasurementCorrectionsProvider(mHandler);
-        mGnssAntennaInfoProvider = new GnssAntennaInfoProvider(userInfoHelper, settingsHelper,
-                appOpsHelper, appForegroundHelper);
-        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(userInfoHelper,
-                settingsHelper, appOpsHelper, appForegroundHelper);
+        mGnssAntennaInfoProvider = new GnssAntennaInfoProvider(injector);
+        mGnssNavigationMessageProvider = new GnssNavigationMessageProvider(injector);
 
         mGnssMetrics = new GnssMetrics(mContext, mBatteryStats);
         mNtpTimeHelper = new NtpTimeHelper(mContext, mLooper, this);

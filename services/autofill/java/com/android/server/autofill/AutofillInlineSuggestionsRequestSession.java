@@ -29,6 +29,7 @@ import android.os.Handler;
 import android.os.RemoteException;
 import android.util.Slog;
 import android.view.autofill.AutofillId;
+import android.view.inputmethod.InlineSuggestion;
 import android.view.inputmethod.InlineSuggestionsRequest;
 import android.view.inputmethod.InlineSuggestionsResponse;
 
@@ -40,6 +41,7 @@ import com.android.server.autofill.ui.InlineFillUi;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -65,6 +67,8 @@ final class AutofillInlineSuggestionsRequestSession {
     private final Handler mHandler;
     @NonNull
     private final Bundle mUiExtras;
+    @NonNull
+    private final InlineFillUi.InlineUiEventCallback mUiCallback;
 
     @GuardedBy("mLock")
     @NonNull
@@ -97,18 +101,22 @@ final class AutofillInlineSuggestionsRequestSession {
 
     @GuardedBy("mLock")
     private boolean mDestroyed = false;
+    @GuardedBy("mLock")
+    private boolean mPreviousHasNonPinSuggestionShow;
 
     AutofillInlineSuggestionsRequestSession(
             @NonNull InputMethodManagerInternal inputMethodManagerInternal, int userId,
             @NonNull ComponentName componentName, @NonNull Handler handler, @NonNull Object lock,
             @NonNull AutofillId autofillId,
-            @NonNull Consumer<InlineSuggestionsRequest> requestConsumer, @NonNull Bundle uiExtras) {
+            @NonNull Consumer<InlineSuggestionsRequest> requestConsumer, @NonNull Bundle uiExtras,
+            @NonNull InlineFillUi.InlineUiEventCallback callback) {
         mInputMethodManagerInternal = inputMethodManagerInternal;
         mUserId = userId;
         mComponentName = componentName;
         mHandler = handler;
         mLock = lock;
         mUiExtras = uiExtras;
+        mUiCallback = callback;
 
         mAutofillId = autofillId;
         mImeRequestConsumer = requestConsumer;
@@ -217,6 +225,7 @@ final class AutofillInlineSuggestionsRequestSession {
                 // No-op if both the previous response and current response are empty.
                 return;
             }
+            maybeNotifyFillUiEventLocked(response.getInlineSuggestions());
             updateResponseToImeUncheckLocked(response);
             mPreviousResponseIsNotEmpty = !isEmptyResponse;
         }
@@ -236,6 +245,38 @@ final class AutofillInlineSuggestionsRequestSession {
         } catch (RemoteException e) {
             Slog.e(TAG, "RemoteException sending InlineSuggestionsResponse to IME");
         }
+    }
+
+    @GuardedBy("mLock")
+    private void maybeNotifyFillUiEventLocked(@NonNull List<InlineSuggestion> suggestions) {
+        if (mDestroyed) {
+            return;
+        }
+        boolean hasSuggestionToShow = false;
+        for (int i = 0; i < suggestions.size(); i++) {
+            InlineSuggestion suggestion = suggestions.get(i);
+            // It is possible we don't have any match result but we still have pinned
+            // suggestions. Only notify we have non-pinned suggestions to show
+            if (!suggestion.getInfo().isPinned()) {
+                hasSuggestionToShow = true;
+                break;
+            }
+        }
+        if (sDebug) {
+            Slog.d(TAG, "maybeNotifyFillUiEventLoked(): hasSuggestionToShow=" + hasSuggestionToShow
+                    + ", mPreviousHasNonPinSuggestionShow=" + mPreviousHasNonPinSuggestionShow);
+        }
+        // Use mPreviousHasNonPinSuggestionShow to save previous status, if the display status
+        // change, we can notify the event.
+        if (hasSuggestionToShow && !mPreviousHasNonPinSuggestionShow) {
+            // From no suggestion to has suggestions to show
+            mUiCallback.notifyInlineUiShown(mAutofillId);
+        } else if (!hasSuggestionToShow && mPreviousHasNonPinSuggestionShow) {
+            // From has suggestions to no suggestions to show
+            mUiCallback.notifyInlineUiHidden(mAutofillId);
+        }
+        // Update the latest status
+        mPreviousHasNonPinSuggestionShow = hasSuggestionToShow;
     }
 
     /**

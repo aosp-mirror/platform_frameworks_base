@@ -43,6 +43,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/tethering.proto";
 import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
@@ -483,6 +484,8 @@ message Atom {
         BlobOpened blob_opened = 300 [(module) = "framework"];
         ContactsProviderStatusReported contacts_provider_status_reported = 301;
         KeystoreKeyEventReported keystore_key_event_reported = 302;
+        NetworkTetheringReported  network_tethering_reported =
+            303 [(module) = "network_tethering"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -6904,6 +6907,24 @@ message AppCompacted {
 }
 
 /**
+ * Logs when a Tethering event occurs.
+ *
+ */
+message NetworkTetheringReported {
+  // tethering error code
+  optional android.stats.connectivity.ErrorCode error_code = 1;
+
+  // tethering downstream type
+  optional android.stats.connectivity.DownstreamType downstream_type = 2;
+
+  // transport type of upstream network
+  optional android.stats.connectivity.UpstreamType upstream_type = 3;
+
+  // The user type of Tethering
+  optional android.stats.connectivity.UserType user_type= 4;
+}
+
+/**
  * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
  * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
  *
@@ -10499,7 +10520,7 @@ message DisplayWakeReported {
  * Logs app usage events.
  */
 message AppUsageEventOccurred {
-    optional int32 uid = 1;
+    optional int32 uid = 1 [(is_uid) = true];
     optional string package_name = 2;
     optional string class_name = 3;
 

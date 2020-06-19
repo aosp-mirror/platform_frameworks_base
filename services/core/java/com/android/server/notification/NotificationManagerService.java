@@ -391,6 +391,8 @@ public class NotificationManagerService extends SystemService {
     private static final String SCHEME_TIMEOUT = "timeout";
     private static final String EXTRA_KEY = "key";
 
+    private static final String FEEDBACK_KEY = "feedback_key";
+
     private static final int NOTIFICATION_INSTANCE_ID_MAX = (1 << 13);
 
     /**
@@ -936,26 +938,30 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
                 final long now = System.currentTimeMillis();
-                MetricsLogger.action(r.getLogMaker(now)
-                        .setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION)
-                        .setType(MetricsEvent.TYPE_ACTION)
-                        .setSubtype(actionIndex)
-                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
-                        .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
-                        .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
-                                action.isContextual() ? 1 : 0)
-                        .addTaggedData(
-                                MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
-                                generatedByAssistant ? 1 : 0)
-                        .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
-                                nv.location.toMetricsEventEnum()));
-                mNotificationRecordLogger.log(
-                        NotificationRecordLogger.NotificationEvent.fromAction(actionIndex,
-                                generatedByAssistant, action.isContextual()), r);
-                EventLogTags.writeNotificationActionClicked(key, actionIndex,
-                        r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
-                        nv.rank, nv.count);
-                nv.recycle();
+                //TODO(b/154257994): remove this when feedback apis are in place
+                boolean isFeedback = action.getExtras().containsKey(FEEDBACK_KEY);
+                if (!isFeedback) {
+                    MetricsLogger.action(r.getLogMaker(now)
+                            .setCategory(MetricsEvent.NOTIFICATION_ITEM_ACTION)
+                            .setType(MetricsEvent.TYPE_ACTION)
+                            .setSubtype(actionIndex)
+                            .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
+                            .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count)
+                            .addTaggedData(MetricsEvent.NOTIFICATION_ACTION_IS_SMART,
+                                    action.isContextual() ? 1 : 0)
+                            .addTaggedData(
+                                    MetricsEvent.NOTIFICATION_SMART_SUGGESTION_ASSISTANT_GENERATED,
+                                    generatedByAssistant ? 1 : 0)
+                            .addTaggedData(MetricsEvent.NOTIFICATION_LOCATION,
+                                    nv.location.toMetricsEventEnum()));
+                    mNotificationRecordLogger.log(
+                            NotificationRecordLogger.NotificationEvent.fromAction(actionIndex,
+                                    generatedByAssistant, action.isContextual()), r);
+                    EventLogTags.writeNotificationActionClicked(key, actionIndex,
+                            r.getLifespanMs(now), r.getFreshnessMs(now), r.getExposureMs(now),
+                            nv.rank, nv.count);
+                    nv.recycle();
+                }
                 reportUserInteraction(r);
                 mAssistants.notifyAssistantActionClicked(
                         r.getSbn(), actionIndex, action, generatedByAssistant);
