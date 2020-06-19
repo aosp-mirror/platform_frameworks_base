@@ -2866,15 +2866,13 @@ public class WindowManagerService extends IWindowManager.Stub
                 aspectRatio);
     }
 
-    public void getStackBounds(int windowingMode, int activityType, Rect bounds) {
-        synchronized (mGlobalLock) {
-            final ActivityStack stack = mRoot.getStack(windowingMode, activityType);
-            if (stack != null) {
-                stack.getBounds(bounds);
-                return;
-            }
-            bounds.setEmpty();
+    void getStackBounds(int windowingMode, int activityType, Rect bounds) {
+        final ActivityStack stack = mRoot.getStack(windowingMode, activityType);
+        if (stack != null) {
+            stack.getBounds(bounds);
+            return;
         }
+        bounds.setEmpty();
     }
 
     /**
