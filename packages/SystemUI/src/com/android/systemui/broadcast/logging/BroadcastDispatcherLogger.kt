@@ -99,11 +99,12 @@ class BroadcastDispatcherLogger @Inject constructor(
         })
     }
 
-    fun logContextReceiverUnregistered(user: Int) {
+    fun logContextReceiverUnregistered(user: Int, action: String) {
         log(INFO, {
             int1 = user
+            str1 = action
         }, {
-            "Receiver unregistered with Context for user $int1."
+            "Receiver unregistered with Context for user $int1, action $str1"
         })
     }
 
