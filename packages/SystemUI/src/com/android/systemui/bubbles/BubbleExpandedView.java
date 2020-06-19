@@ -120,6 +120,8 @@ public class BubbleExpandedView extends LinearLayout {
     private int mPointerWidth;
     private int mPointerHeight;
     private ShapeDrawable mPointerDrawable;
+    private int mExpandedViewPadding;
+
 
     @Nullable private Bubble mBubble;
 
@@ -345,11 +347,9 @@ public class BubbleExpandedView extends LinearLayout {
             return view.onApplyWindowInsets(insets);
         });
 
-        final int expandedViewPadding =
-                res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
-
-        setPadding(
-                expandedViewPadding, expandedViewPadding, expandedViewPadding, expandedViewPadding);
+        mExpandedViewPadding = res.getDimensionPixelSize(R.dimen.bubble_expanded_view_padding);
+        setPadding(mExpandedViewPadding, mExpandedViewPadding, mExpandedViewPadding,
+                mExpandedViewPadding);
         setOnTouchListener((view, motionEvent) -> {
             if (!usingActivityView()) {
                 return false;
@@ -730,7 +730,7 @@ public class BubbleExpandedView extends LinearLayout {
      */
     public void setPointerPosition(float x) {
         float halfPointerWidth = mPointerWidth / 2f;
-        float pointerLeft = x - halfPointerWidth;
+        float pointerLeft = x - halfPointerWidth - mExpandedViewPadding;
         mPointerView.setTranslationX(pointerLeft);
         mPointerView.setVisibility(VISIBLE);
     }
