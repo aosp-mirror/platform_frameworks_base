@@ -148,14 +148,19 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
         final String vpnName = mSecurityController.getPrimaryVpnName();
         final String vpnNameWorkProfile = mSecurityController.getWorkProfileVpnName();
         final CharSequence organizationName = mSecurityController.getDeviceOwnerOrganizationName();
-        final CharSequence workProfileName = mSecurityController.getWorkProfileOrganizationName();
+        final CharSequence workProfileOrganizationName =
+                mSecurityController.getWorkProfileOrganizationName();
+        final boolean isProfileOwnerOfOrganizationOwnedDevice =
+                mSecurityController.isProfileOwnerOfOrganizationOwnedDevice();
         // Update visibility of footer
-        mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile ||
-            vpnName != null || vpnNameWorkProfile != null;
+        mIsVisible = (isDeviceManaged && !isDemoDevice) || hasCACerts || hasCACertsInWorkProfile
+                || vpnName != null || vpnNameWorkProfile != null
+                || isProfileOwnerOfOrganizationOwnedDevice;
         // Update the string
         mFooterTextContent = getFooterText(isDeviceManaged, hasWorkProfile,
                 hasCACerts, hasCACertsInWorkProfile, isNetworkLoggingEnabled, vpnName,
-                vpnNameWorkProfile, organizationName, workProfileName);
+                vpnNameWorkProfile, organizationName, workProfileOrganizationName,
+                isProfileOwnerOfOrganizationOwnedDevice);
         // Update the icon
         int footerIconId = R.drawable.ic_info_outline;
         if (vpnName != null || vpnNameWorkProfile != null) {
@@ -175,7 +180,8 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
     protected CharSequence getFooterText(boolean isDeviceManaged, boolean hasWorkProfile,
             boolean hasCACerts, boolean hasCACertsInWorkProfile, boolean isNetworkLoggingEnabled,
             String vpnName, String vpnNameWorkProfile, CharSequence organizationName,
-            CharSequence workProfileName) {
+            CharSequence workProfileOrganizationName,
+            boolean isProfileOwnerOfOrganizationOwnedDevice) {
         if (isDeviceManaged || DEBUG_FORCE_VISIBLE) {
             if (hasCACerts || hasCACertsInWorkProfile || isNetworkLoggingEnabled) {
                 if (organizationName == null) {
@@ -211,13 +217,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
                     organizationName);
         } // end if(isDeviceManaged)
         if (hasCACertsInWorkProfile) {
-            if (workProfileName == null) {
+            if (workProfileOrganizationName == null) {
                 return mContext.getString(
                         R.string.quick_settings_disclosure_managed_profile_monitoring);
             }
             return mContext.getString(
                     R.string.quick_settings_disclosure_named_managed_profile_monitoring,
-                    workProfileName);
+                    workProfileOrganizationName);
         }
         if (hasCACerts) {
             return mContext.getString(R.string.quick_settings_disclosure_monitoring);
@@ -237,6 +243,13 @@ public class QSSecurityFooter implements OnClickListener, DialogInterface.OnClic
             }
             return mContext.getString(R.string.quick_settings_disclosure_named_vpn,
                     vpnName);
+        }
+        if (isProfileOwnerOfOrganizationOwnedDevice) {
+            if (workProfileOrganizationName == null) {
+                return mContext.getString(R.string.quick_settings_disclosure_management);
+            }
+            return mContext.getString(R.string.quick_settings_disclosure_named_management,
+                    workProfileOrganizationName);
         }
         return null;
     }
