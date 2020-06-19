@@ -19,6 +19,9 @@ package com.android.systemui.stackdivider;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
@@ -115,7 +118,7 @@ public class WindowManagerProxy {
         WindowOrganizer.applyTransaction(t);
     }
 
-    private static boolean getHomeAndRecentsTasks(List<WindowContainerToken> out,
+    private static boolean getHomeAndRecentsTasks(List<ActivityManager.RunningTaskInfo> out,
             WindowContainerToken parent) {
         boolean resizable = false;
         List<ActivityManager.RunningTaskInfo> rootTasks = parent == null
@@ -123,7 +126,7 @@ public class WindowManagerProxy {
                 : TaskOrganizer.getChildTasks(parent, HOME_AND_RECENTS);
         for (int i = 0, n = rootTasks.size(); i < n; ++i) {
             final ActivityManager.RunningTaskInfo ti = rootTasks.get(i);
-            out.add(ti.token);
+            out.add(ti);
             if (ti.topActivityType == ACTIVITY_TYPE_HOME) {
                 resizable = ti.isResizeable;
             }
@@ -140,16 +143,37 @@ public class WindowManagerProxy {
             @NonNull WindowContainerTransaction wct) {
         // Resize the home/recents stacks to the larger minimized-state size
         final Rect homeBounds;
-        final ArrayList<WindowContainerToken> homeStacks = new ArrayList<>();
+        final ArrayList<ActivityManager.RunningTaskInfo> homeStacks = new ArrayList<>();
         boolean isHomeResizable = getHomeAndRecentsTasks(homeStacks, parent);
         if (isHomeResizable) {
-            homeBounds = layout.calcMinimizedHomeStackBounds();
+            homeBounds = layout.calcResizableMinimizedHomeStackBounds();
         } else {
-            homeBounds = new Rect(0, 0, layout.mDisplayLayout.width(),
-                    layout.mDisplayLayout.height());
+            // home is not resizable, so lock it to its inherent orientation size.
+            homeBounds = new Rect(0, 0, 0, 0);
+            for (int i = homeStacks.size() - 1; i >= 0; --i) {
+                if (homeStacks.get(i).topActivityType == ACTIVITY_TYPE_HOME) {
+                    final int orient = homeStacks.get(i).configuration.orientation;
+                    final boolean displayLandscape = layout.mDisplayLayout.isLandscape();
+                    final boolean isLandscape = orient == ORIENTATION_LANDSCAPE
+                            || (orient == ORIENTATION_UNDEFINED && displayLandscape);
+                    homeBounds.right = isLandscape == displayLandscape
+                            ? layout.mDisplayLayout.width() : layout.mDisplayLayout.height();
+                    homeBounds.bottom = isLandscape == displayLandscape
+                            ? layout.mDisplayLayout.height() : layout.mDisplayLayout.width();
+                    break;
+                }
+            }
         }
         for (int i = homeStacks.size() - 1; i >= 0; --i) {
-            wct.setBounds(homeStacks.get(i), homeBounds);
+            // For non-resizable homes, the minimized size is actually the fullscreen-size. As a
+            // result, we don't minimize for recents since it only shows half-size screenshots.
+            if (!isHomeResizable) {
+                if (homeStacks.get(i).topActivityType == ACTIVITY_TYPE_RECENTS) {
+                    continue;
+                }
+                wct.setWindowingMode(homeStacks.get(i).token, WINDOWING_MODE_FULLSCREEN);
+            }
+            wct.setBounds(homeStacks.get(i).token, homeBounds);
         }
         layout.mTiles.mHomeBounds.set(homeBounds);
         return isHomeResizable;
@@ -175,11 +199,13 @@ public class WindowManagerProxy {
             return false;
         }
         ActivityManager.RunningTaskInfo topHomeTask = null;
-        boolean homeIsTop = false;
         for (int i = rootTasks.size() - 1; i >= 0; --i) {
             final ActivityManager.RunningTaskInfo rootTask = rootTasks.get(i);
-            // Only move resizeable task to split secondary. WM will just ignore this anyways...
-            if (!rootTask.isResizeable) continue;
+            // Only move resizeable task to split secondary. However, we have an exception
+            // for non-resizable home because we will minimize to show it.
+            if (!rootTask.isResizeable && rootTask.topActivityType != ACTIVITY_TYPE_HOME) {
+                continue;
+            }
             // Only move fullscreen tasks to split secondary.
             if (rootTask.configuration.windowConfiguration.getWindowingMode()
                     != WINDOWING_MODE_FULLSCREEN) {
@@ -193,7 +219,7 @@ public class WindowManagerProxy {
         // Move the secondary split-forward.
         wct.reorder(tiles.mSecondary.token, true /* onTop */);
         boolean isHomeResizable = applyHomeTasksMinimized(layout, null /* parent */, wct);
-        if (isHomeResizable && topHomeTask != null) {
+        if (topHomeTask != null) {
             // Translate/update-crop of secondary out-of-band with sync transaction -- Until BALST
             // is enabled, this temporarily syncs the home surface position with offset until
             // sync transaction finishes.
@@ -253,6 +279,7 @@ public class WindowManagerProxy {
                 wct.reparent(ti.token, null /* parent */, true /* onTop */);
                 if (isHomeOrRecentTask(ti)) {
                     wct.setBounds(ti.token, null);
+                    wct.setWindowingMode(ti.token, WINDOWING_MODE_UNDEFINED);
                     if (i == 0) {
                         homeOnTop = true;
                     }
@@ -293,8 +320,9 @@ public class WindowManagerProxy {
                 final ActivityManager.RunningTaskInfo ti = secondaryChildren.get(i);
                 if (isHomeOrRecentTask(ti)) {
                     wct.reparent(ti.token, null /* parent */, true /* onTop */);
-                    // reset bounds too
+                    // reset bounds and mode too
                     wct.setBounds(ti.token, null);
+                    wct.setWindowingMode(ti.token, WINDOWING_MODE_UNDEFINED);
                 }
             }
             for (int i = primaryChildren.size() - 1; i >= 0; --i) {
@@ -304,6 +332,7 @@ public class WindowManagerProxy {
         }
         for (int i = freeHomeAndRecents.size() - 1; i >= 0; --i) {
             wct.setBounds(freeHomeAndRecents.get(i).token, null);
+            wct.setWindowingMode(freeHomeAndRecents.get(i).token, WINDOWING_MODE_UNDEFINED);
         }
         // Reset focusable to true
         wct.setFocusable(tiles.mPrimary.token, true /* focusable */);
