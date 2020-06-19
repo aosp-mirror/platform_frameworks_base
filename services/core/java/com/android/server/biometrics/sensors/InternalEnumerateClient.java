@@ -42,13 +42,13 @@ public abstract class InternalEnumerateClient extends EnumerateClient {
     // List of templates to remove from the HAL
     private List<BiometricAuthenticator.Identifier> mUnknownHALTemplates = new ArrayList<>();
 
-    protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token, int groupId,
+    protected InternalEnumerateClient(@NonNull Context context, @NonNull IBinder token,
             int userId, boolean restricted, @NonNull String owner,
             @NonNull List<? extends BiometricAuthenticator.Identifier> enrolledList,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
         // Internal enumerate does not need to send results to anyone. Cleanup (enumerate + remove)
         // is all done internally.
-        super(context, token, null /* ClientMonitorCallbackConverter */, groupId, userId,
+        super(context, token, null /* ClientMonitorCallbackConverter */, userId,
                 restricted, owner, sensorId, statsModality);
         mEnrolledList = enrolledList;
         mUtils = utils;

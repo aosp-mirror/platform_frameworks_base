@@ -39,7 +39,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     private final Context mContext;
     private final int mTargetUserId;
-    private final int mGroupId;
     // True if client does not have MANAGE_FINGERPRINT permission
     private final boolean mIsRestricted;
     private final String mOwner;
@@ -59,7 +58,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @param token      a unique token for the client
      * @param listener   recipient of related events (e.g. authentication)
      * @param userId     target user id for operation
-     * @param groupId    groupId for the fingerprint set
      * @param restricted whether or not client has the MANAGE_* permission
      *                   permission
      * @param owner      name of the client that owns this
@@ -70,15 +68,14 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
      * @param statsClient   One of {@link BiometricsProtoEnums} CLIENT_* constants
      */
     public ClientMonitor(@NonNull Context context, IBinder token,
-            @Nullable ClientMonitorCallbackConverter listener, int userId, int groupId,
-            boolean restricted, @NonNull String owner, int cookie, int sensorId, int statsModality,
-            int statsAction, int statsClient) {
+            @Nullable ClientMonitorCallbackConverter listener, int userId, boolean restricted,
+            @NonNull String owner, int cookie, int sensorId, int statsModality, int statsAction,
+            int statsClient) {
         super(statsModality, statsAction, statsClient);
         mContext = context;
         mToken = token;
         mListener = listener;
         mTargetUserId = userId;
-        mGroupId = groupId;
         mIsRestricted = restricted;
         mOwner = owner;
         mCookie = cookie;
@@ -207,10 +204,6 @@ public abstract class ClientMonitor extends LoggableMonitor implements IBinder.D
 
     public final int getTargetUserId() {
         return mTargetUserId;
-    }
-
-    public final int getGroupId() {
-        return mGroupId;
     }
 
     public final IBinder getToken() {

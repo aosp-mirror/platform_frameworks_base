@@ -36,17 +36,18 @@ public class FingerprintEnrollClient extends EnrollClient {
 
     FingerprintEnrollClient(@NonNull Context context, @NonNull IBiometricsFingerprint daemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener, int userId,
-            int groupId, @NonNull byte[] hardwareAuthToken, boolean restricted,
-            @NonNull String owner, @NonNull BiometricUtils utils, int timeoutSec, int statsModality,
+            @NonNull byte[] hardwareAuthToken, boolean restricted, @NonNull String owner,
+            @NonNull BiometricUtils utils, int timeoutSec, int statsModality,
             int sensorId, boolean shouldVibrate) {
-        super(context, token, listener, userId, groupId, hardwareAuthToken, restricted, owner,
-                utils, timeoutSec, statsModality, sensorId, shouldVibrate);
+        super(context, token, listener, userId, hardwareAuthToken, restricted, owner, utils,
+                timeoutSec, statsModality, sensorId, shouldVibrate);
         mDaemon = daemon;
     }
 
     @Override
     protected int startHalOperation() throws RemoteException {
-        return mDaemon.enroll(mHardwareAuthToken, getGroupId(), mTimeoutSec);
+        // GroupId was never used. In fact, groupId is always the same as userId.
+        return mDaemon.enroll(mHardwareAuthToken, getTargetUserId(), mTimeoutSec);
     }
 
     @Override

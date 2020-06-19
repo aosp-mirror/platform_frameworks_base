@@ -154,8 +154,8 @@ public class FaceService extends BiometricServiceBase {
             final boolean restricted = isRestricted();
             final EnrollClient client = new FaceEnrollClient(getContext(),
                     daemon, token, new ClientMonitorCallbackConverter(receiver),
-                    userId, 0 /* groupId */, cryptoToken, restricted, opPackageName,
-                    getBiometricUtils(), disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
+                    userId, cryptoToken, restricted, opPackageName, getBiometricUtils(),
+                    disabledFeatures, ENROLL_TIMEOUT_SEC, statsModality(),
                     convertSurfaceToNativeHandle(surface), getSensorId());
 
             enrollInternal(client, userId);
@@ -270,9 +270,8 @@ public class FaceService extends BiometricServiceBase {
 
             final boolean restricted = isRestricted();
             final RemovalClient client = new FaceRemovalClient(getContext(), daemon, token,
-                    new ClientMonitorCallbackConverter(receiver), faceId, 0 /* groupId */, userId,
-                    restricted, token.toString(), getBiometricUtils(), getSensorId(),
-                    statsModality());
+                    new ClientMonitorCallbackConverter(receiver), faceId, userId, restricted,
+                    token.toString(), getBiometricUtils(), getSensorId(), statsModality());
             removeInternal(client);
         }
 
@@ -759,7 +758,7 @@ public class FaceService extends BiometricServiceBase {
         final List<? extends BiometricAuthenticator.Identifier> enrolledList =
                 getEnrolledTemplates(userId);
         final FaceInternalCleanupClient client = new FaceInternalCleanupClient(
-                getContext(), daemon, userId, userId, restricted, getContext().getOpPackageName(),
+                getContext(), daemon, userId, restricted, getContext().getOpPackageName(),
                 getSensorId(), statsModality(), enrolledList, getBiometricUtils());
         cleanupInternal(client);
     }

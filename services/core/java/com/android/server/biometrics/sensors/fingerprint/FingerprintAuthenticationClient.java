@@ -49,14 +49,13 @@ class FingerprintAuthenticationClient extends AuthenticationClient {
 
     FingerprintAuthenticationClient(@NonNull Context context,
             @NonNull IBiometricsFingerprint daemon, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
-            long operationId, boolean restricted, @NonNull String owner, int cookie,
-            boolean requireConfirmation, int sensorId, boolean isStrongBiometric,
-            @Nullable Surface surface, int statsClient,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, @Nullable Surface surface, int statsClient,
             @NonNull TaskStackListener taskStackListener,
             @NonNull LockoutFrameworkImpl lockoutTracker) {
-        super(context, token, listener, targetUserId, groupId, operationId, restricted, owner,
-                cookie, requireConfirmation, sensorId, isStrongBiometric,
+        super(context, token, listener, targetUserId, operationId, restricted, owner, cookie,
+                requireConfirmation, sensorId, isStrongBiometric,
                 BiometricsProtoEnums.MODALITY_FINGERPRINT, statsClient, taskStackListener,
                 lockoutTracker);
         mDaemon = daemon;
@@ -102,7 +101,8 @@ class FingerprintAuthenticationClient extends AuthenticationClient {
 
     @Override
     protected int startHalOperation() throws RemoteException {
-        return mDaemon.authenticate(mOperationId, getGroupId());
+        // GroupId was never used. In fact, groupId is always the same as userId.
+        return mDaemon.authenticate(mOperationId, getTargetUserId());
     }
 
     @Override

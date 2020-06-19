@@ -49,12 +49,11 @@ public abstract class AuthenticationClient extends AcquisitionClient {
     private long mStartTimeMs;
 
     public AuthenticationClient(@NonNull Context context, @NonNull IBinder token,
-            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, int groupId,
-            long operationId, boolean restricted, @NonNull String owner, int cookie,
-            boolean requireConfirmation, int sensorId, boolean isStrongBiometric, int statsModality,
-            int statsClient, @NonNull TaskStackListener taskStackListener,
-            @NonNull LockoutTracker lockoutTracker) {
-        super(context, token, listener, targetUserId, groupId, restricted, owner, cookie, sensorId,
+            @NonNull ClientMonitorCallbackConverter listener, int targetUserId, long operationId,
+            boolean restricted, @NonNull String owner, int cookie, boolean requireConfirmation,
+            int sensorId, boolean isStrongBiometric, int statsModality, int statsClient,
+            @NonNull TaskStackListener taskStackListener, @NonNull LockoutTracker lockoutTracker) {
+        super(context, token, listener, targetUserId, restricted, owner, cookie, sensorId,
                 statsModality, BiometricsProtoEnums.ACTION_AUTHENTICATE, statsClient);
         mIsStrongBiometric = isStrongBiometric;
         mOperationId = operationId;

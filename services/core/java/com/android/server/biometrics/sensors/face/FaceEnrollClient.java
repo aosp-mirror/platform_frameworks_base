@@ -49,10 +49,10 @@ public class FaceEnrollClient extends EnrollClient {
     private final int[] mEnrollIgnoreListVendor;
 
     FaceEnrollClient(Context context, IBiometricsFace daemon, IBinder token,
-            ClientMonitorCallbackConverter listener, int userId, int groupId, byte[] cryptoToken,
+            ClientMonitorCallbackConverter listener, int userId, byte[] cryptoToken,
             boolean restricted, String owner, BiometricUtils utils, int[] disabledFeatures,
             int timeoutSec, int statsModality, NativeHandle surfaceHandle, int sensorId) {
-        super(context, token, listener, userId, groupId, cryptoToken, restricted, owner, utils,
+        super(context, token, listener, userId, cryptoToken, restricted, owner, utils,
                 timeoutSec, statsModality, sensorId, false /* shouldVibrate */);
         mDaemon = daemon;
         mDisabledFeatures = Arrays.copyOf(disabledFeatures, disabledFeatures.length);

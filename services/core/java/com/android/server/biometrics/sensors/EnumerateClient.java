@@ -34,10 +34,10 @@ public abstract class EnumerateClient extends ClientMonitor implements Enumerate
     private static final String TAG = "Biometrics/EnumerateClient";
 
     public EnumerateClient(@NonNull Context context, @NonNull IBinder token,
-            @Nullable ClientMonitorCallbackConverter listener, int groupId, int userId,
+            @Nullable ClientMonitorCallbackConverter listener, int userId,
             boolean restricted, @NonNull String owner, int sensorId, int statsModality) {
-        super(context, token, listener, userId, groupId, restricted, owner, 0 /* cookie */,
-                sensorId, statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
+        super(context, token, listener, userId, restricted, owner, 0 /* cookie */, sensorId,
+                statsModality, BiometricsProtoEnums.ACTION_ENUMERATE,
                 BiometricsProtoEnums.CLIENT_UNKNOWN);
     }
 

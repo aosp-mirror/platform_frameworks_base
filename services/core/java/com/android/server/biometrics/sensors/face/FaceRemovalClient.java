@@ -35,10 +35,10 @@ class FaceRemovalClient extends RemovalClient {
 
     FaceRemovalClient(@NonNull Context context, @NonNull IBiometricsFace daemon,
             @NonNull IBinder token, @NonNull ClientMonitorCallbackConverter listener,
-            int biometricId, int groupId, int userId, boolean restricted, @NonNull String owner,
+            int biometricId, int userId, boolean restricted, @NonNull String owner,
             @NonNull BiometricUtils utils, int sensorId, int statsModality) {
-        super(context, token, listener, biometricId, groupId, userId, restricted, owner, utils,
-                sensorId, statsModality);
+        super(context, token, listener, biometricId, userId, restricted, owner, utils, sensorId,
+                statsModality);
         mDaemon = daemon;
     }
 
