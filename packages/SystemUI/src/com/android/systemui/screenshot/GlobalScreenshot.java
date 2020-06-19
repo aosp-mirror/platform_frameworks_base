@@ -622,7 +622,7 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
     /**
      * Clears current screenshot
      */
-    private void dismissScreenshot(String reason, boolean immediate) {
+    void dismissScreenshot(String reason, boolean immediate) {
         Log.v(TAG, "clearing screenshot: " + reason);
         mScreenshotHandler.removeMessages(MESSAGE_CORNER_TIMEOUT);
         mScreenshotLayout.getViewTreeObserver().removeOnComputeInternalInsetsListener(this);
