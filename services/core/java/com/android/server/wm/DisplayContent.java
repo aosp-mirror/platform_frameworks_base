@@ -2483,7 +2483,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, width * mBaseDisplayDensity / mBaseDisplayWidth);
+        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
         reconfigureDisplayLocked();
 
         if (!mIsSizeForced) {
