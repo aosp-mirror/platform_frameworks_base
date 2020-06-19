@@ -1019,9 +1019,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Navigaciju sustavom možete ažurirati u Postavkama"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje mirovanja"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Razgovor postavljen na prioritetan"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritetni razgovori će sljedeće:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazuje se pri vrhu odjeljka razgovora"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazuje profilnu sliku na zaključanom zaslonu"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritetni razgovori:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazuju se pri vrhu odjeljka razgovora"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazuju profilnu sliku na zaključanom zaslonu"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Prikazuje se kao lebdeći oblačić iznad aplikacija"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Prekida Ne uznemiravaj"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Shvaćam"</string>
@@ -1051,7 +1051,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Zadržite i povucite da biste promijenili raspored kontrola"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve su kontrole uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu spremljene"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Popis svih kontrola nije se učitao."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrole se ne mogu učitati. U aplikaciji <xliff:g id="APP">%s</xliff:g> provjerite da se postavke aplikacije nisu promijenile."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole nisu dostupne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodavanje kontrolama uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>

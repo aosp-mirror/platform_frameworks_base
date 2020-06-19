@@ -57,12 +57,12 @@
     <string name="label_view" msgid="6815442985276363364">"Prikaži"</string>
     <string name="always_use_device" msgid="210535878779644679">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="1977225429341838444">"Uvijek otvori aplikaciju <xliff:g id="APPLICATION">%1$s</xliff:g> kada se poveže <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
-    <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
+    <string name="usb_debugging_title" msgid="8274884945238642726">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
     <string name="usb_debugging_message" msgid="5794616114463921773">"RSA otisak prsta za otključavanje računara je: \n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="4003121804294739548">"Uvijek dozvoli sa ovog računara"</string>
     <string name="usb_debugging_allow" msgid="1722643858015321328">"Dozvoli"</string>
-    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem uređaja spojenog na USB nije dozvoljeno"</string>
-    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka koristeći USB. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
+    <string name="usb_debugging_secondary_user_title" msgid="7843050591380107998">"Otklanjanje grešaka putem USB-a nije dozvoljeno"</string>
+    <string name="usb_debugging_secondary_user_message" msgid="3740347841470403244">"Korisnik koji je trenutno prijavljen na ovaj uređaj ne može uključiti opciju za otklanjanje grešaka putem USB-a. Da koristite tu funkciju, prebacite se na primarnog korisnika."</string>
     <string name="wifi_debugging_title" msgid="7300007687492186076">"Dozvoliti bežično otklanjanje grešaka na ovoj mreži?"</string>
     <string name="wifi_debugging_message" msgid="5461204211731802995">"Naziv mreže (SSID)\n<xliff:g id="SSID_0">%1$s</xliff:g>\n\nAdresa WiFi mreže (BSSID)\n<xliff:g id="BSSID_1">%2$s</xliff:g>"</string>
     <string name="wifi_debugging_always" msgid="2968383799517975155">"Uvijek dozvoli na ovoj mreži"</string>
@@ -1013,7 +1013,7 @@
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Nemoj prikazivati razgovor u oblačićima"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Chatajte koristeći oblačiće"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Novi razgovori se prikazuju kao plutajuće ikone ili oblačići. Dodirnite da otvorite oblačić. Prevucite da ga premjestite."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljajte oblačićima u svakom momentu"</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Upravljajte oblačićima u svakom trenutku"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Dodirnite Upravljaj da isključite oblačiće iz ove aplikacije"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Razumijem"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"Postavke aplikacije <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
@@ -1022,8 +1022,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Stanje mirovanja"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Razgovor je postavljen kao prioritetan"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Prioritetni razgovori će:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Prikazuje se na vrhu odjeljka za razgovor"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazuje sliku profila na zaključanom ekranu"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Biti prikazani na vrhu odjeljka za razgovor"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Prikazivati sliku profila na zaključanom ekranu"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Izgleda kao plutajući oblačić iznad aplikacija"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Prekida način rada Ne ometaj"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Razumijem"</string>
@@ -1053,7 +1053,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Učitavanje liste svih kontrola nije uspjelo."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Učitavanje kontrola nije uspjelo. Provjerite aplikaciju <xliff:g id="APP">%s</xliff:g> da se uvjerite da postavke aplikacije nisu izmijenjene."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole su nedostupne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>
@@ -1075,7 +1076,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"Greška, ponovni pokušaj…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Nije pronađeno"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrola nije dostupna"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"Pristup uređaju <xliff:g id="DEVICE">%1$s</xliff:g> nije uspio. Provjerite aplikaciju <xliff:g id="APPLICATION">%2$s</xliff:g> da se uvjerite da je kontrola i dalje dostupna i da se postavke aplikacije nisu promijenile."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Pristupanje uređaju <xliff:g id="DEVICE">%1$s</xliff:g> nije uspjelo. Provjerite aplikaciju <xliff:g id="APPLICATION">%2$s</xliff:g> da se uvjerite da je kontrola i dalje dostupna i da se postavke aplikacije nisu promijenile."</string>
     <string name="controls_open_app" msgid="483650971094300141">"Otvori aplikaciju"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Nije moguće učitati status"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Greška, pokušajte ponovo"</string>

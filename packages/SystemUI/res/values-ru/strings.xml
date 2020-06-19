@@ -419,7 +419,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="1791389609409211628">"Ограничение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="7957253810481086455">"Предупреждение: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_work_mode_label" msgid="2754212289804324685">"Рабочий профиль"</string>
-    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Ночной режим"</string>
+    <string name="quick_settings_night_display_label" msgid="8180030659141778180">"Ночная подсветка"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="3358706312129866626">"Вкл. на закате"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4063448287758262485">"До рассвета"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="3584738542293528235">"Включить в <xliff:g id="TIME">%s</xliff:g>"</string>
@@ -1012,21 +1012,21 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Перенести в правый верхний угол"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Перенести в левый нижний угол"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Перенести в правый нижний угол"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Закрыть всплывающий чат"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не показывать всплывающие чаты для разговоров"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Скрыть всплывающий чат"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не показывать всплывающий чат для разговора"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Всплывающие чаты"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Новые разговоры будут появляться в виде плавающих значков, или всплывающих чатов. Чтобы открыть чат, нажмите на него, а чтобы переместить – перетащите."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Настройки всплывающих чатов"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Чтобы отключить всплывающие чаты от приложения, нажмите \"Настроить\"."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Всплывающие чаты"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Чтобы отключить всплывающие чаты из этого приложения, нажмите \"Настроить\"."</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"ОК"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>: настройки"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Параметры навигации в системе обновлены. Чтобы изменить их, перейдите в настройки."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Чтобы обновить параметры навигации в системе, перейдите в настройки."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Переход в режим ожидания"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговор помечен как важный"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Важные разговоры:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Показывать в верхней части списка разговоров"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Показывать фото профиля на заблокированном экране"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Преимущества:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Важные разговоры показываются в верхней части списка разговоров."</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Фото профиля показывается на заблокированном экране."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Показывать как всплывающий чат над приложениями"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Показывать в режиме \"Не беспокоить\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"ОК"</string>
@@ -1034,8 +1034,8 @@
     <string name="magnification_overlay_title" msgid="6584179429612427958">"Наложение окна увеличения"</string>
     <string name="magnification_window_title" msgid="4863914360847258333">"Окно увеличения"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Настройки окна увеличения"</string>
-    <string name="quick_controls_title" msgid="6839108006171302273">"Виджеты управления устройствами"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте элементы управления для подключенных устройств"</string>
+    <string name="quick_controls_title" msgid="6839108006171302273">"Управление устройствами"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Добавьте виджеты для управления устройствами."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Настройте виджеты управления устройствами"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Чтобы перейти к элементам управления, удерживайте кнопку питания."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Чтобы добавить элементы управления, выберите приложение"</string>
@@ -1057,7 +1057,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Чтобы изменить порядок элементов управления, перетащите их"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Все элементы управления удалены"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Изменения не сохранены."</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не удалось загрузить список элементов управления."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Другое"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Добавьте виджеты управления устройствами"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Добавить"</string>
@@ -1079,7 +1082,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"Ошибка. Повторная попытка…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не найдено."</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Управление недоступно"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"Нет доступа к устройству (<xliff:g id="DEVICE">%1$s</xliff:g>). Проверьте, доступно ли управление в приложении \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" и не изменились ли настройки этого приложения."</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Нет доступа к устройству \"<xliff:g id="DEVICE">%1$s</xliff:g>\". Проверьте, доступно ли управление в приложении \"<xliff:g id="APPLICATION">%2$s</xliff:g>\" и не изменились ли настройки этого приложения."</string>
     <string name="controls_open_app" msgid="483650971094300141">"Открыть приложение"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Не удалось загрузить статус."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Ошибка. Повторите попытку."</string>

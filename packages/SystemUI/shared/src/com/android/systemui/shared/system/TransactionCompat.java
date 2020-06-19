@@ -99,8 +99,8 @@ public class TransactionCompat {
         return this;
     }
 
+    @Deprecated
     public TransactionCompat setEarlyWakeup() {
-        mTransaction.setEarlyWakeup();
         return this;
     }
 
@@ -114,7 +114,7 @@ public class TransactionCompat {
         t.deferTransactionUntil(surfaceControl, barrier, frameNumber);
     }
 
+    @Deprecated
     public static void setEarlyWakeup(Transaction t) {
-        t.setEarlyWakeup();
     }
 }

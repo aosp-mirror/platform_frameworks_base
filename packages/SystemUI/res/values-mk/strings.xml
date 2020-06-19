@@ -994,7 +994,7 @@
     <string name="bubbles_settings_button_description" msgid="7324245408859877545">"Поставки за балончињата за <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"Прелевање"</string>
     <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"Додајте назад во stack"</string>
-    <string name="manage_bubbles_text" msgid="6856830436329494850">"Управување"</string>
+    <string name="manage_bubbles_text" msgid="6856830436329494850">"Управувајте"</string>
     <string name="bubble_content_description_single" msgid="5175160674436546329">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> од <xliff:g id="APP_NAME">%2$s</xliff:g>"</string>
     <string name="bubble_content_description_stack" msgid="7907610717462651870">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> од <xliff:g id="APP_NAME">%2$s</xliff:g> и уште <xliff:g id="BUBBLE_COUNT">%3$d</xliff:g>"</string>
     <string name="bubble_accessibility_action_move" msgid="3185080443743819178">"Премести"</string>
@@ -1014,9 +1014,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Одете во „Поставки“ за да ја ажурирате навигацијата на системот"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Подготвеност"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Разговорот е поставен како приоритетен"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приорететните разговори ќе:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Се прикажува најгоре во делот со разговори"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Се прикажува профилна слика на заклучен екран"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетните разговори:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ќе се прикажуваат најгоре во делот со разговори;"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ќе прикажуваат профилна слика на заклучен екран."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Се појавува како лебдечко балонче врз апликациите"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Прекинува „Не вознемирувај“"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Сфатив"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржете и влечете за да ги преуредите контролите"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Сите контроли се отстранети"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промените не се зачувани"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Не можеше да се вчита списокот со сите контроли."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Контролите не можеше да се вчитаат. Проверете ја апликацијата <xliff:g id="APP">%s</xliff:g> за да се уверите дека поставките за апликацијата не се променети."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Нема компатибилни контроли"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друга"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте во контроли за уредите"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>
@@ -1067,8 +1068,8 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"Грешка, повторен обид…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Не е најдено"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"Контролата не е достапна"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"Не може да се пристапи до <xliff:g id="DEVICE">%1$s</xliff:g>. Проверете ја апликацијата <xliff:g id="APPLICATION">%2$s</xliff:g> за да се осигурите дека контролата е сè уште достапна и дека поставките за апликацијата не се сменети."</string>
-    <string name="controls_open_app" msgid="483650971094300141">"Отвори ја апликација"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Не може да се пристапи до <xliff:g id="DEVICE">%1$s</xliff:g>. Проверете ја апликацијата <xliff:g id="APPLICATION">%2$s</xliff:g> за да се уверите дека контролата е сѐ уште достапна и дека поставките за апликацијата не се сменети."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отвори апликација"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Не може да се вчита статусот"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка, обидете се повторно"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Во тек"</string>

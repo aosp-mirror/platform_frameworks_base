@@ -241,13 +241,13 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Možnosti telefónu"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zámka obrazovky"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Vypnúť"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Vypnutie"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Vypnúť"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Reštartovať"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Tieseň"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Hlásenie o chybách"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Ukončiť reláciu"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Snímka obrazovky"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Hlásenie chyby"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Nahlásiť chybu"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Týmto zhromaždíte informácie o aktuálnom stave zariadenia. Informácie je potom možné odoslať e-mailom, chvíľu však potrvá, kým bude hlásenie chyby pripravené na odoslanie. Prosíme vás preto o trpezlivosť."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Interaktívne nahlásenie"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Táto možnosť je vhodná pre väčšinu prípadov. Umožňuje sledovať priebeh nahlásenia, zadávať ďalšie podrobnosti o probléme a vytvárať snímky obrazovky. Môžu byť vynechané niektoré menej používané sekcie, ktorých nahlásenie trvá dlho."</string>
@@ -1663,12 +1663,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g>-krát ste nesprávne nakreslili svoj bezpečnostný vzor. Po <xliff:g id="NUMBER_1">%2$d</xliff:g> ďalších neúspešných pokusoch sa zobrazí výzva na odomknutie telefónu pomocou e-mailového účtu.\n\n Skúste to znova o <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Odstrániť"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Služba na popredí spustená na pozadí z balíka <xliff:g id="PACKAGENAME">%1$s</xliff:g> nebude mať v budúcich zostavách R povolenie Počas používania. Prejdite na go/r-bg-fgs-restriction a odošlite hlásenie chyby."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Zvýšiť hlasitosť nad odporúčanú úroveň?\n\nDlhodobé počúvanie pri vysokej hlasitosti môže poškodiť váš sluch."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Použiť skratku dostupnosti?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Keď je skratka zapnutá, stlačením obidvoch tlačidiel hlasitosti na tri sekundy spustíte funkciu dostupnosti."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Chcete zapnúť funkcie dostupnosti?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Pridržaním oboch klávesov hlasitosti na niekoľko sekúnd zapnete funkcie dostupnosti. Môže sa tým zmeniť spôsob fungovania vášho zariadenia.\n\nAktuálne funkcie:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVybrané funkcie môžete zmeniť v časti Nastavenia &gt; Dostupnosť."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Pridržaním oboch tlačidiel hlasitosti na niekoľko sekúnd zapnete funkcie dostupnosti. Môže sa tým zmeniť spôsob fungovania vášho zariadenia.\n\nAktuálne funkcie:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nVybrané funkcie môžete zmeniť v časti Nastavenia &gt; Dostupnosť."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Chcete zapnúť <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Pridržaním oboch klávesov hlasitosti na niekoľko sekúnd zapnete funkciu dostupnosti <xliff:g id="SERVICE">%1$s</xliff:g>. Môže sa tým zmeniť spôsob fungovania vášho zariadenia.\n\nTúto skratku môžete zmeniť na inú funkciu v časti Nastavenia &gt; Dostupnosť."</string>
@@ -1695,8 +1694,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Použiť skratku"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzia farieb"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Úprava farieb"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste klávesy hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste klávesy hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Ak chcete používať službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, pridržte tri sekundy oba klávesy hlasitosti"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Klepnutím na tlačidlo dostupnosti vyberte požadovanú funkciu:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Vyberte funkciu, ktorú chcete používať s daným gestom dostupnosti (potiahnutím dvoma prstami z dolnej časti obrazovky nahor):"</string>

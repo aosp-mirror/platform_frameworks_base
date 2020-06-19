@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"கட்டுப்பாடுகளை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"கட்டுப்பாடுகள் அனைத்தும் அகற்றப்பட்டன"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"மாற்றங்கள் சேமிக்கப்படவில்லை"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"எல்லா கட்டுப்பாடுகளின் பட்டியலை ஏற்ற முடியவில்லை."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"கட்டுப்பாடுகளை ஏற்ற முடியவில்லை. ஆப்ஸ் அமைப்புகள் மாறவில்லை என்பதை உறுதிப்படுத்த <xliff:g id="APP">%s</xliff:g> ஆப்ஸைப் பார்க்கவும்."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"இணக்கமான கட்டுப்பாடுகள் இல்லை"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"பிற"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"சாதனக் கட்டுப்பாடுகளில் சேர்த்தல்"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"சேர்"</string>

@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Anda telah <xliff:g id="NUMBER_0">%1$d</xliff:g> kali salah menggambar pola pembuka kunci. Setelah <xliff:g id="NUMBER_1">%2$d</xliff:g> lagi upaya gagal, Anda akan diminta membuka kunci ponsel menggunakan akun email.\n\nCoba lagi dalam <xliff:g id="NUMBER_2">%3$d</xliff:g> detik."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Hapus"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Layanan latar depan yang dimulai oleh latar belakang dari <xliff:g id="PACKAGENAME">%1$s</xliff:g> tidak akan memiliki izin saat-sedang-digunakan pada build R masa mendatang Lihat go/r-bg-fgs-restriction dan kirim laporan bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Mengeraskan volume di atas tingkat yang disarankan?\n\nMendengarkan dengan volume keras dalam waktu yang lama dapat merusak pendengaran Anda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Gunakan Pintasan Aksesibilitas?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Saat pintasan aktif, menekan kedua tombol volume selama 3 detik akan memulai fitur aksesibilitas."</string>
@@ -1651,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Gunakan Pintasan"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversi Warna"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Koreksi Warna"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tombol volume yang ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> diaktifkan."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tombol volume yang ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dinonaktifkan."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> diaktifkan."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tombol volume ditahan. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> dinonaktifkan."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Tekan dan tahan kedua tombol volume selama tiga detik untuk menggunakan <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Pilih fitur yang akan digunakan saat mengetuk tombol aksesibilitas:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Pilih fitur yang akan digunakan dengan gestur aksesibilitas (geser ke atas dari bawah layar dengan dua jari):"</string>

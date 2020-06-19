@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"నియంత్రణల క్రమం మార్చడానికి దేనినైనా పట్టుకుని, లాగి వదిలేయండి"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"అన్ని నియంత్రణలు తీసివేయబడ్డాయి"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"మార్పులు సేవ్ చేయబడలేదు"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"అన్ని నియంత్రణలు గల జాబితాను లోడ్ చేయలేకపోయాము."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"కంట్రోల్‌లను లోడ్ చేయడం సాధ్యపడలేదు. యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించడానికి <xliff:g id="APP">%s</xliff:g> యాప్‌ను చెక్ చేయండి."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"అనుకూల కంట్రోల్‌లు అందుబాటులో లేవు"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ఇతరం"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"పరికరం నియంత్రణలకు జోడించడం"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"జోడించండి"</string>

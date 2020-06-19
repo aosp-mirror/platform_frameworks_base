@@ -510,7 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ਸਭ ਕਲੀਅਰ ਕਰੋ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ਪ੍ਰਬੰਧਨ ਕਰੋ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ਇਤਿਹਾਸ"</string>
-    <string name="notification_section_header_incoming" msgid="850925217908095197">"ਨਵਾਂ"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"ਨਵੀਆਂ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ਸ਼ਾਂਤ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ਗੱਲਾਂਬਾਤਾਂ"</string>
@@ -1014,7 +1014,7 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"ਸਿਸਟਮ ਨੈਵੀਗੇਸ਼ਨ ਨੂੰ ਅੱਪਡੇਟ ਕਰਨ ਲਈ ਸੈਟਿੰਗਾਂ \'ਤੇ ਜਾਓ"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"ਸਟੈਂਡਬਾਈ"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"ਗੱਲਬਾਤ ਨੂੰ ਤਰਜੀਹੀ ਗੱਲਬਾਤ ਵਜੋਂ ਸੈੱਟ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ ਇਹ ਹੋਣਗੀਆਂ:"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ਤਰਜੀਹੀ ਗੱਲਾਂਬਾਤਾਂ ਨਾਲ ਇਹ ਵਿਹਾਰ ਹੋਵੇਗਾ:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"ਗੱਲਬਾਤ ਸੈਕਸ਼ਨ ਦੇ ਸਿਖਰ \'ਤੇ ਦਿਖਾਓ"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"ਲਾਕ ਸਕ੍ਰੀਨ \'ਤੇ ਪ੍ਰੋਫਾਈਲ ਤਸਵੀਰ ਦਿਖਾਓ"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ਐਪਾਂ ਦੇ ਸਿਖਰ \'ਤੇ ਫਲੋਟਿੰਗ ਬਬਲ ਵਜੋਂ ਦਿਸਦੀਆਂ ਹਨ"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਮੁੜ-ਵਿਵਸਥਿਤ ਕਰਨ ਲਈ ਫੜ੍ਹ ਕੇ ਘਸੀਟੋ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ਸਾਰੇ ਕੰਟਰੋਲ ਹਟਾਏ ਗਏ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ਤਬਦੀਲੀਆਂ ਨੂੰ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਗਿਆ"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"ਸਾਰੇ ਕੰਟਰੋਲਾਂ ਦੀ ਸੂਚੀ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ।"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"ਕੰਟਰੋਲਾਂ ਨੂੰ ਲੋਡ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਿਆ। ਇਹ ਪੱਕਾ ਕਰਨ ਲਈ <xliff:g id="APP">%s</xliff:g> ਐਪ ਦੀ ਜਾਂਚ ਕਰੋ ਕਿ ਐਪ ਸੈਟਿੰਗਾਂ ਨਹੀਂ ਬਦਲੀਆਂ ਹਨ।"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"ਕੋਈ ਅਨੁਰੂਪ ਕੰਟਰੋਲ ਉਪਲਬਧ ਨਹੀਂ ਹੈ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ਹੋਰ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ਡੀਵਾਈਸ ਕੰਟਰੋਲਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ਸ਼ਾਮਲ ਕਰੋ"</string>

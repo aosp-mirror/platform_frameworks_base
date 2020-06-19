@@ -45,6 +45,8 @@ final class AutofillInlineSessionController {
     private final Object mLock;
     @NonNull
     private final Handler mHandler;
+    @NonNull
+    private final InlineFillUi.InlineUiEventCallback mUiCallback;
 
     @Nullable
     @GuardedBy("mLock")
@@ -54,12 +56,14 @@ final class AutofillInlineSessionController {
     private InlineFillUi mInlineFillUi;
 
     AutofillInlineSessionController(InputMethodManagerInternal inputMethodManagerInternal,
-            int userId, ComponentName componentName, Handler handler, Object lock) {
+            int userId, ComponentName componentName, Handler handler, Object lock,
+            InlineFillUi.InlineUiEventCallback callback) {
         mInputMethodManagerInternal = inputMethodManagerInternal;
         mUserId = userId;
         mComponentName = componentName;
         mHandler = handler;
         mLock = lock;
+        mUiCallback = callback;
     }
 
 
@@ -82,7 +86,8 @@ final class AutofillInlineSessionController {
         // TODO(b/151123764): consider reusing the same AutofillInlineSession object for the
         // same field.
         mSession = new AutofillInlineSuggestionsRequestSession(mInputMethodManagerInternal, mUserId,
-                mComponentName, mHandler, mLock, autofillId, requestConsumer, uiExtras);
+                mComponentName, mHandler, mLock, autofillId, requestConsumer, uiExtras,
+                mUiCallback);
         mSession.onCreateInlineSuggestionsRequestLocked();
     }
 

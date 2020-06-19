@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Në gatishmëri"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Biseda u caktua me përparësi"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Bisedat me përparësi do të:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Shfaq në krye të seksionit të bisedës"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Shfaq figurën e profilit në ekranin e kyçjes"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Shfaqen në krye të seksionit të bisedës"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Shfaqin fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Shfaq si flluskë pluskuese mbi aplikacione"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ndërprit \"Mos shqetëso\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"E kuptova"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje të shtypur dhe zvarrit për të risistemuar kontrollet"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Të gjitha kontrollet u hoqën"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ndryshimet nuk u ruajtën"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Lista e të gjitha kontrolleve nuk mund të ngarkohej."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Tjetër"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Shto te kontrollet e pajisjes"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Shto"</string>

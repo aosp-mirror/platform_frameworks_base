@@ -96,6 +96,14 @@ public class AppsFilter {
     private final SparseSetArray<Integer> mQueriesViaComponent = new SparseSetArray<>();
 
     /**
+     * Pending full recompute of mQueriesViaComponent. Occurs when a package adds a new set of
+     * protected broadcast. This in turn invalidates all prior additions and require a very
+     * computationally expensive recomputing.
+     * Full recompute is done lazily at the point when we use mQueriesViaComponent to filter apps.
+     */
+    private boolean mQueriesViaComponentRequireRecompute = false;
+
+    /**
      * A set of App IDs that are always queryable by any package, regardless of their manifest
      * content.
      */
@@ -278,7 +286,7 @@ public class AppsFilter {
 
         private void updateEnabledState(AndroidPackage pkg) {
             // TODO(b/135203078): Do not use toAppInfo
-            final boolean enabled = mInjector.getCompatibility().isChangeEnabled(
+            final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternal(
                     PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
             if (enabled) {
                 mDisabledPackages.remove(pkg.getPackageName());
@@ -523,9 +531,8 @@ public class AppsFilter {
             return;
         }
 
-        if (!newPkg.getProtectedBroadcasts().isEmpty()) {
-            mProtectedBroadcasts.addAll(newPkg.getProtectedBroadcasts());
-            recomputeComponentVisibility(existingSettings, newPkg.getPackageName());
+        if (mProtectedBroadcasts.addAll(newPkg.getProtectedBroadcasts())) {
+            mQueriesViaComponentRequireRecompute = true;
         }
 
         final boolean newIsForceQueryable =
@@ -550,7 +557,8 @@ public class AppsFilter {
             final AndroidPackage existingPkg = existingSetting.pkg;
             // let's evaluate the ability of already added packages to see this new package
             if (!newIsForceQueryable) {
-                if (canQueryViaComponents(existingPkg, newPkg, mProtectedBroadcasts)) {
+                if (!mQueriesViaComponentRequireRecompute && canQueryViaComponents(existingPkg,
+                        newPkg, mProtectedBroadcasts)) {
                     mQueriesViaComponent.add(existingSetting.appId, newPkgSetting.appId);
                 }
                 if (canQueryViaPackage(existingPkg, newPkg)
@@ -560,7 +568,8 @@ public class AppsFilter {
             }
             // now we'll evaluate our new package's ability to see existing packages
             if (!mForceQueryable.contains(existingSetting.appId)) {
-                if (canQueryViaComponents(newPkg, existingPkg, mProtectedBroadcasts)) {
+                if (!mQueriesViaComponentRequireRecompute && canQueryViaComponents(newPkg,
+                        existingPkg, mProtectedBroadcasts)) {
                     mQueriesViaComponent.add(newPkgSetting.appId, existingSetting.appId);
                 }
                 if (canQueryViaPackage(newPkg, existingPkg)
@@ -689,13 +698,11 @@ public class AppsFilter {
         return ret;
     }
 
-    private void recomputeComponentVisibility(ArrayMap<String, PackageSetting> existingSettings,
-            @Nullable String excludePackage) {
+    private void recomputeComponentVisibility(ArrayMap<String, PackageSetting> existingSettings) {
         mQueriesViaComponent.clear();
         for (int i = existingSettings.size() - 1; i >= 0; i--) {
             PackageSetting setting = existingSettings.valueAt(i);
             if (setting.pkg == null
-                    || setting.pkg.getPackageName().equals(excludePackage)
                     || mForceQueryable.contains(setting.appId)) {
                 continue;
             }
@@ -704,8 +711,7 @@ public class AppsFilter {
                     continue;
                 }
                 final PackageSetting otherSetting = existingSettings.valueAt(j);
-                if (otherSetting.pkg == null
-                        || otherSetting.pkg.getPackageName().equals(excludePackage)) {
+                if (otherSetting.pkg == null) {
                     continue;
                 }
                 if (canQueryViaComponents(setting.pkg, otherSetting.pkg, mProtectedBroadcasts)) {
@@ -713,6 +719,7 @@ public class AppsFilter {
                 }
             }
         }
+        mQueriesViaComponentRequireRecompute = false;
     }
 
     /**
@@ -787,9 +794,11 @@ public class AppsFilter {
                 }
             }
 
-            mQueriesViaComponent.remove(setting.appId);
-            for (int i = mQueriesViaComponent.size() - 1; i >= 0; i--) {
-                mQueriesViaComponent.remove(mQueriesViaComponent.keyAt(i), setting.appId);
+            if (!mQueriesViaComponentRequireRecompute) {
+                mQueriesViaComponent.remove(setting.appId);
+                for (int i = mQueriesViaComponent.size() - 1; i >= 0; i--) {
+                    mQueriesViaComponent.remove(mQueriesViaComponent.keyAt(i), setting.appId);
+                }
             }
             mQueriesViaPackage.remove(setting.appId);
             for (int i = mQueriesViaPackage.size() - 1; i >= 0; i--) {
@@ -810,10 +819,11 @@ public class AppsFilter {
 
             if (!setting.pkg.getProtectedBroadcasts().isEmpty()) {
                 final String removingPackageName = setting.pkg.getPackageName();
-                mProtectedBroadcasts.clear();
-                mProtectedBroadcasts.addAll(
-                        collectProtectedBroadcasts(settings, removingPackageName));
-                recomputeComponentVisibility(settings, removingPackageName);
+                final Set<String> protectedBroadcasts = mProtectedBroadcasts;
+                mProtectedBroadcasts = collectProtectedBroadcasts(settings, removingPackageName);
+                if (!mProtectedBroadcasts.containsAll(protectedBroadcasts)) {
+                    mQueriesViaComponentRequireRecompute = true;
+                }
             }
 
             mOverlayReferenceMapper.removePkg(setting.name);
@@ -1011,6 +1021,11 @@ public class AppsFilter {
             }
             try {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "mQueriesViaComponent");
+                if (mQueriesViaComponentRequireRecompute) {
+                    mStateProvider.runWithState((settings, users) -> {
+                        recomputeComponentVisibility(settings);
+                    });
+                }
                 if (mQueriesViaComponent.contains(callingAppId, targetAppId)) {
                     if (DEBUG_LOGGING) {
                         log(callingSetting, targetPkgSetting, "queries component");

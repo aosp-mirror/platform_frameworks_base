@@ -22,6 +22,7 @@ import static android.view.WindowManager.TAKE_SCREENSHOT_FULLSCREEN;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_USER_REQUEST;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
+import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_BOOT;
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
 
@@ -395,11 +396,14 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             controlsComponent.getControlsListingController().get()
                     .addCallback(list -> {
                         mControlsServiceInfos = list;
-                        // This callback may occur after the dialog has been shown.
-                        // If so, add controls into the already visible space
-                        if (mDialog != null && !mDialog.isShowingControls()
-                                && shouldShowControls()) {
-                            mDialog.showControls(mControlsUiControllerOptional.get());
+                        // This callback may occur after the dialog has been shown. If so, add
+                        // controls into the already visible space or show the lock msg if needed.
+                        if (mDialog != null) {
+                            if (!mDialog.isShowingControls() && shouldShowControls()) {
+                                mDialog.showControls(mControlsUiControllerOptional.get());
+                            } else if (shouldShowLockMessage()) {
+                                mDialog.showLockMessage();
+                            }
                         }
                     });
         }
@@ -700,9 +704,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 mStatusBarService, mNotificationShadeWindowController,
                 controlsAvailable(), uiController,
                 mSysUiState, this::onRotate, mKeyguardShowing, mPowerAdapter);
-        boolean walletViewAvailable = walletViewController != null
-                && walletViewController.getPanelContent() != null;
-        if (shouldShowLockMessage(walletViewAvailable)) {
+
+        if (shouldShowLockMessage()) {
             dialog.showLockMessage();
         }
         dialog.setCanceledOnTouchOutside(false); // Handled by the custom class.
@@ -1422,16 +1425,26 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 Log.w(TAG, "No power options action found at position: " + position);
                 return null;
             }
-            int viewLayoutResource = com.android.systemui.R.layout.controls_more_item;
+            int viewLayoutResource = com.android.systemui.R.layout.global_actions_power_item;
             View view = convertView != null ? convertView
                     : LayoutInflater.from(mContext).inflate(viewLayoutResource, parent, false);
-            TextView textView = (TextView) view;
-            if (action.getMessageResId() != 0) {
-                textView.setText(action.getMessageResId());
-            } else {
-                textView.setText(action.getMessage());
+            view.setOnClickListener(v -> onClickItem(position));
+            if (action instanceof LongPressAction) {
+                view.setOnLongClickListener(v -> onLongClickItem(position));
             }
-            return textView;
+            ImageView icon = view.findViewById(R.id.icon);
+            TextView messageView = view.findViewById(R.id.message);
+            messageView.setSelected(true); // necessary for marquee to work
+
+            icon.setImageDrawable(action.getIcon(mContext));
+            icon.setScaleType(ScaleType.CENTER_CROP);
+
+            if (action.getMessage() != null) {
+                messageView.setText(action.getMessage());
+            } else {
+                messageView.setText(action.getMessageResId());
+            }
+            return view;
         }
 
         private boolean onLongClickItem(int position) {
@@ -1567,6 +1580,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         int getMessageResId();
 
         /**
+         * Return the icon drawable for this action.
+         */
+        Drawable getIcon(Context context);
+
+        /**
          * Return the message associated with this action, or null if it doesn't have one.
          * @return
          */
@@ -1630,6 +1648,15 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             return mMessage;
         }
 
+        @Override
+        public Drawable getIcon(Context context) {
+            if (mIcon != null) {
+                return mIcon;
+            } else {
+                return context.getDrawable(mIconResId);
+            }
+        }
+
         public View create(
                 Context context, View convertView, ViewGroup parent, LayoutInflater inflater) {
             View v = inflater.inflate(com.android.systemui.R.layout.global_actions_grid_item_v2,
@@ -1639,12 +1666,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             TextView messageView = v.findViewById(R.id.message);
             messageView.setSelected(true); // necessary for marquee to work
 
-            if (mIcon != null) {
-                icon.setImageDrawable(mIcon);
-                icon.setScaleType(ScaleType.CENTER_CROP);
-            } else if (mIconResId != 0) {
-                icon.setImageDrawable(context.getDrawable(mIconResId));
-            }
+            icon.setImageDrawable(getIcon(context));
+            icon.setScaleType(ScaleType.CENTER_CROP);
+
             if (mMessage != null) {
                 messageView.setText(mMessage);
             } else {
@@ -1733,6 +1757,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         private int getIconResId() {
             return isOn() ? mEnabledIconResId : mDisabledIconResid;
+        }
+
+        @Override
+        public Drawable getIcon(Context context) {
+            return context.getDrawable(getIconResId());
         }
 
         public View create(Context context, View convertView, ViewGroup parent,
@@ -1900,6 +1929,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         public CharSequence getMessage() {
             return null;
         }
+
+        @Override
+        public Drawable getIcon(Context context) {
+            return null;
+        }
+
 
         public View create(Context context, View convertView, ViewGroup parent,
                 LayoutInflater inflater) {
@@ -2072,7 +2107,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         private final NotificationShadeDepthController mDepthController;
         private final SysUiState mSysUiState;
         private ListPopupWindow mOverflowPopup;
-        private ListPopupWindow mPowerOptionsPopup;
+        private Dialog mPowerOptionsDialog;
         private final Runnable mOnRotateCallback;
         private final boolean mControlsAvailable;
 
@@ -2208,21 +2243,6 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
             }
         }
 
-        private ListPopupWindow createPowerOptionsPopup() {
-            GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
-                    new ContextThemeWrapper(
-                            mContext,
-                            com.android.systemui.R.style.Control_ListPopupWindow
-                    ), false /* isDropDownMode */);
-            popup.setOnItemClickListener(
-                    (parent, view, position, id) -> mPowerOptionsAdapter.onClickItem(position));
-            popup.setOnItemLongClickListener(
-                    (parent, view, position, id) -> mPowerOptionsAdapter.onLongClickItem(position));
-            popup.setAnchorView(mGlobalActionsLayout);
-            popup.setAdapter(mPowerOptionsAdapter);
-            return popup;
-        }
-
         private ListPopupWindow createPowerOverflowPopup() {
             GlobalActionsPopupMenu popup = new GlobalActionsPopupMenu(
                     new ContextThemeWrapper(
@@ -2241,8 +2261,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         public void showPowerOptionsMenu() {
-            mPowerOptionsPopup = createPowerOptionsPopup();
-            mPowerOptionsPopup.show();
+            mPowerOptionsDialog = GlobalActionsPowerDialog.create(mContext, mPowerOptionsAdapter);
+            mPowerOptionsDialog.show();
         }
 
         private void showPowerOverflowMenu() {
@@ -2476,11 +2496,11 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         private void dismissPowerOptions(boolean immediate) {
-            if (mPowerOptionsPopup != null) {
+            if (mPowerOptionsDialog != null) {
                 if (immediate) {
-                    mPowerOptionsPopup.dismissImmediate();
+                    mPowerOptionsDialog.dismiss();
                 } else {
-                    mPowerOptionsPopup.dismiss();
+                    mPowerOptionsDialog.dismiss();
                 }
             }
         }
@@ -2591,7 +2611,9 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
     private boolean shouldShowControls() {
         return (mKeyguardStateController.isUnlocked() || mShowLockScreenCardsAndControls)
-                && controlsAvailable();
+                && controlsAvailable()
+                && mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
+                    != STRONG_AUTH_REQUIRED_AFTER_BOOT;
     }
 
     private boolean controlsAvailable() {
@@ -2601,10 +2623,18 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 && !mControlsServiceInfos.isEmpty();
     }
 
-    private boolean shouldShowLockMessage(boolean walletViewAvailable) {
+    private boolean walletViewAvailable() {
+        GlobalActionsPanelPlugin.PanelViewController walletViewController =
+                getWalletViewController();
+        return walletViewController != null && walletViewController.getPanelContent() != null;
+    }
+
+    private boolean shouldShowLockMessage() {
+        boolean isLockedAfterBoot = mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
+                == STRONG_AUTH_REQUIRED_AFTER_BOOT;
         return !mKeyguardStateController.isUnlocked()
-                && !mShowLockScreenCardsAndControls
-                && (controlsAvailable() || walletViewAvailable);
+                && (!mShowLockScreenCardsAndControls || isLockedAfterBoot)
+                && (controlsAvailable() || walletViewAvailable());
     }
 
     private void onPowerMenuLockScreenSettingsChanged() {

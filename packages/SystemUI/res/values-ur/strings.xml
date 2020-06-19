@@ -1003,7 +1003,7 @@
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"نیچے بائیں جانب لے جائیں"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"نیچے دائیں جانب لے جائیں"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"بلبلہ برخاست کریں"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"بلبلہ گفتگو نہ کریں"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"گفتگو بلبلہ نہ کریں"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"بلبلے کے ذریعے چیٹ کریں"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"نئی گفتگوئیں فلوٹنگ آئیکن یا بلبلے کے طور پر ظاہر ہوں گی۔ بلبلہ کھولنے کے لیے تھپتھپائیں۔ اسے منتقل کرنے کے لیے گھسیٹیں۔"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کسی بھی وقت بلبلے کو کنٹرول کریں"</string>
@@ -1014,9 +1014,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"سسٹم نیویگیشن اپ ڈیٹ کرنے کے لیے ترتیبات پر جائیں"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"اسٹینڈ بائی"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"گفتگو کو ترجیح پر سیٹ کیا گیا"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ترجیحی گفتگوئیں یہ ہوگی:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو کے سیکشن میں سب سے اوپر دکھائیں"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"ترجیحی گفتگوئیں:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"گفتگو سیکشن میں سب سے اوپر نظر آئیں گی"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"مقفل سکرین پر پروفائل کی تصویر دکھائیں گی"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"ایپس کے سب سے اوپر فلوٹنگ بلبلہ کے طور پر ظاہر ہوں"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"ڈسٹرب نہ کریں میں مداخلت کریں"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"سمجھ آ گئی"</string>
@@ -1045,7 +1045,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"کنٹرولز کو دوبارہ ترتیب دینے کے ليے پکڑیں اور گھسیٹیں"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"سبھی کنٹرولز ہٹا دیے گئے"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تبدیلیاں محفوظ نہیں ہوئیں"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"تمام کنٹرولز کی فہرست لوڈ نہیں کی جا سکی۔"</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"دیگر"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"آلہ کے کنٹرولز میں شامل کریں"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"شامل کریں"</string>
@@ -1067,7 +1070,7 @@
     <string name="controls_error_retryable" msgid="864025882878378470">"خرابی، دوبارہ کوشش کی جا رہی ہے…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"نہیں ملا"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"کنٹرول دستیاب نہیں ہے"</string>
-    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> تک رسائی حاصل نہیں ہو سکی۔ اس بات کو یقینی بنانے کے لیے کہ کنٹرول ابھی بھی دستیاب ہے اور ایپ کی ترتیبات تبدیل نہیں ہوئی، تو <xliff:g id="APPLICATION">%2$s</xliff:g> ایپ چیک کریں۔"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"‫<xliff:g id="DEVICE">%1$s</xliff:g> تک رسائی حاصل نہیں ہو سکی۔ اس بات کو یقینی بنانے کے لیے کہ کنٹرول ابھی بھی دستیاب ہے اور ایپ کی ترتیبات تبدیل نہیں ہوئی، تو <xliff:g id="APPLICATION">%2$s</xliff:g> ایپ چیک کریں۔"</string>
     <string name="controls_open_app" msgid="483650971094300141">"ایپ کھولیں"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"صورتحال لوڈ نہیں ہو سکتی"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"خرابی، دوبارہ کوشش کریں"</string>
