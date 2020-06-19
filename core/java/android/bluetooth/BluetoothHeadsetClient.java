@@ -758,7 +758,7 @@ public final class BluetoothHeadsetClient implements BluetoothProfile {
      * @return bundle of AG  indicators; null if device is not in CONNECTED state
      */
     public Bundle getCurrentAgEvents(BluetoothDevice device) {
-        if (DBG) log("getCurrentCalls()");
+        if (DBG) log("getCurrentAgEvents()");
         final IBluetoothHeadsetClient service =
                 getService();
         if (service != null && isEnabled() && isValidDevice(device)) {
