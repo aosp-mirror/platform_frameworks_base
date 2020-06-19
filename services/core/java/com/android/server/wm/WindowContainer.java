@@ -93,6 +93,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -2685,11 +2686,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     @Override
-    public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
-        mergedTransaction.merge(mBLASTSyncTransaction);
-        mUsingBLASTSyncTransaction = false;
+    public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
+        if (mWaitingListener == null) {
+            return;
+        }
 
-        mWaitingListener.onTransactionReady(mWaitingSyncId, mergedTransaction);
+        windowContainersReady.add(this);
+        mWaitingListener.onTransactionReady(mWaitingSyncId, windowContainersReady);
 
         mWaitingListener = null;
         mWaitingSyncId = -1;
@@ -2739,5 +2742,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     boolean useBLASTSync() {
         return mUsingBLASTSyncTransaction;
+    }
+
+    void mergeBlastSyncTransaction(Transaction t) {
+        t.merge(mBLASTSyncTransaction);
+        mUsingBLASTSyncTransaction = false;
     }
 }
