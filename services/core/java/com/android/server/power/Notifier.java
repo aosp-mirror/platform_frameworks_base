@@ -96,6 +96,7 @@ public class Notifier {
     private static final int MSG_BROADCAST_ENHANCED_PREDICTION = 4;
     private static final int MSG_PROFILE_TIMED_OUT = 5;
     private static final int MSG_WIRED_CHARGING_STARTED = 6;
+    private static final int MSG_SCREEN_POLICY = 7;
 
     private static final long[] CHARGING_VIBRATION_TIME = {
             40, 40, 40, 40, 40, 40, 40, 40, 40, // ramp-up sampling rate = 40ms
@@ -120,6 +121,7 @@ public class Notifier {
     private final SuspendBlocker mSuspendBlocker;
     private final WindowManagerPolicy mPolicy;
     private final FaceDownDetector mFaceDownDetector;
+    private final ScreenUndimDetector mScreenUndimDetector;
     private final ActivityManagerInternal mActivityManagerInternal;
     private final InputManagerInternal mInputManagerInternal;
     private final InputMethodManagerInternal mInputMethodManagerInternal;
@@ -167,13 +169,14 @@ public class Notifier {
 
     public Notifier(Looper looper, Context context, IBatteryStats batteryStats,
             SuspendBlocker suspendBlocker, WindowManagerPolicy policy,
-            FaceDownDetector faceDownDetector) {
+            FaceDownDetector faceDownDetector, ScreenUndimDetector screenUndimDetector) {
         mContext = context;
         mBatteryStats = batteryStats;
         mAppOps = mContext.getSystemService(AppOpsManager.class);
         mSuspendBlocker = suspendBlocker;
         mPolicy = policy;
         mFaceDownDetector = faceDownDetector;
+        mScreenUndimDetector = screenUndimDetector;
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mInputManagerInternal = LocalServices.getService(InputManagerInternal.class);
         mInputMethodManagerInternal = LocalServices.getService(InputMethodManagerInternal.class);
@@ -620,6 +623,22 @@ public class Notifier {
     }
 
     /**
+     * Called when the screen policy changes.
+     */
+    public void onScreenPolicyUpdate(int newPolicy) {
+        if (DEBUG) {
+            Slog.d(TAG, "onScreenPolicyUpdate: newPolicy=" + newPolicy);
+        }
+
+        synchronized (mLock) {
+            Message msg = mHandler.obtainMessage(MSG_SCREEN_POLICY);
+            msg.arg1 = newPolicy;
+            msg.setAsynchronous(true);
+            mHandler.sendMessage(msg);
+        }
+    }
+
+    /**
      * Dumps data for bugreports.
      *
      * @param pw The stream to print to.
@@ -659,6 +678,7 @@ public class Notifier {
         tm.notifyUserActivity();
         mPolicy.userActivity();
         mFaceDownDetector.userActivity(event);
+        mScreenUndimDetector.userActivity();
     }
 
     void postEnhancedDischargePredictionBroadcast(long delayMs) {
@@ -812,6 +832,10 @@ public class Notifier {
         mSuspendBlocker.release();
     }
 
+    private void screenPolicyChanging(int screenPolicy) {
+        mScreenUndimDetector.recordScreenPolicy(screenPolicy);
+    }
+
     private void lockProfile(@UserIdInt int userId) {
         mTrustManager.setDeviceLockedForUser(userId, true /*locked*/);
     }
@@ -851,6 +875,9 @@ public class Notifier {
                     break;
                 case MSG_WIRED_CHARGING_STARTED:
                     showWiredChargingStarted(msg.arg1);
+                    break;
+                case MSG_SCREEN_POLICY:
+                    screenPolicyChanging(msg.arg1);
                     break;
             }
         }
