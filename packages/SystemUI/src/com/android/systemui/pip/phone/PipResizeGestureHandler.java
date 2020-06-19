@@ -21,6 +21,13 @@ import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_LEFT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_NONE;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_RIGHT;
 import static com.android.internal.policy.TaskResizingAlgorithm.CTRL_TOP;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_GLOBAL_ACTIONS_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -43,6 +50,7 @@ import android.view.ViewConfiguration;
 
 import com.android.internal.policy.TaskResizingAlgorithm;
 import com.android.systemui.R;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipTaskOrganizer;
 import com.android.systemui.util.DeviceConfigProxy;
@@ -58,11 +66,21 @@ public class PipResizeGestureHandler {
 
     private static final String TAG = "PipResizeGestureHandler";
 
+    private static final int INVALID_SYSUI_STATE_MASK =
+            SYSUI_STATE_GLOBAL_ACTIONS_SHOWING
+            | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING
+            | SYSUI_STATE_STATUS_BAR_KEYGUARD_SHOWING_OCCLUDED
+            | SYSUI_STATE_BOUNCER_SHOWING
+            | SYSUI_STATE_NOTIFICATION_PANEL_EXPANDED
+            | SYSUI_STATE_BUBBLES_EXPANDED
+            | SYSUI_STATE_QUICK_SETTINGS_EXPANDED;
+
     private final Context mContext;
     private final PipBoundsHandler mPipBoundsHandler;
     private final PipMotionHelper mMotionHelper;
     private final int mDisplayId;
     private final Executor mMainExecutor;
+    private final SysUiState mSysUiState;
     private final Region mTmpRegion = new Region();
 
     private final PointF mDownPoint = new PointF();
@@ -96,7 +114,7 @@ public class PipResizeGestureHandler {
     public PipResizeGestureHandler(Context context, PipBoundsHandler pipBoundsHandler,
             PipMotionHelper motionHelper, DeviceConfigProxy deviceConfig,
             PipTaskOrganizer pipTaskOrganizer, Supplier<Rect> movementBoundsSupplier,
-            Runnable updateMovementBoundsRunnable) {
+            Runnable updateMovementBoundsRunnable, SysUiState sysUiState) {
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
@@ -105,6 +123,7 @@ public class PipResizeGestureHandler {
         mPipTaskOrganizer = pipTaskOrganizer;
         mMovementBoundsSupplier = movementBoundsSupplier;
         mUpdateMovementBoundsRunnable = updateMovementBoundsRunnable;
+        mSysUiState = sysUiState;
 
         context.getDisplay().getRealSize(mMaxSize);
         reloadResources();
@@ -258,13 +277,17 @@ public class PipResizeGestureHandler {
         }
     }
 
+    private boolean isInValidSysUiState() {
+        return (mSysUiState.getFlags() & INVALID_SYSUI_STATE_MASK) == 0;
+    }
+
     private void onMotionEvent(MotionEvent ev) {
         int action = ev.getActionMasked();
         float x = ev.getX();
         float y = ev.getY();
         if (action == MotionEvent.ACTION_DOWN) {
             mLastResizeBounds.setEmpty();
-            mAllowGesture = isWithinTouchRegion((int) x, (int) y);
+            mAllowGesture = isInValidSysUiState() && isWithinTouchRegion((int) x, (int) y);
             if (mAllowGesture) {
                 setCtrlType((int) x, (int) y);
                 mDownPoint.set(x, y);
