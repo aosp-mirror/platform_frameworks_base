@@ -51,6 +51,7 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
@@ -92,7 +93,6 @@ import com.android.systemui.bubbles.animation.StackAnimationController;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.QuickStepContract;
 import com.android.systemui.shared.system.SysUiStatsLog;
-import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.phone.CollapsedStatusBarFragment;
 import com.android.systemui.util.DismissCircleView;
 import com.android.systemui.util.FloatingContentCoordinator;
@@ -144,6 +144,12 @@ public class BubbleStackView extends FrameLayout
     /** How long to wait, in milliseconds, before hiding the flyout. */
     @VisibleForTesting
     static final int FLYOUT_HIDE_AFTER = 5000;
+
+    /**
+     * How long to wait to animate the stack temporarily invisible after a drag/flyout hide
+     * animation ends, if we are in fact temporarily invisible.
+     */
+    private static final int ANIMATE_TEMPORARILY_INVISIBLE_DELAY = 1000;
 
     private static final PhysicsAnimator.SpringConfig FLYOUT_IME_ANIMATION_SPRING_CONFIG =
             new PhysicsAnimator.SpringConfig(
@@ -281,6 +287,9 @@ public class BubbleStackView extends FrameLayout
     /** Whether or not the stack is temporarily invisible off the side of the screen. */
     private boolean mTemporarilyInvisible = false;
 
+    /** Whether we're in the middle of dragging the stack around by touch. */
+    private boolean mIsDraggingStack = false;
+
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
@@ -294,7 +303,7 @@ public class BubbleStackView extends FrameLayout
     private BubbleController.BubbleExpandListener mExpandListener;
 
     /** Callback to run when we want to unbubble the given notification's conversation. */
-    private Consumer<NotificationEntry> mUnbubbleConversationCallback;
+    private Consumer<String> mUnbubbleConversationCallback;
 
     private SysUiState mSysUiState;
 
@@ -478,6 +487,8 @@ public class BubbleStackView extends FrameLayout
     private OnClickListener mBubbleClickListener = new OnClickListener() {
         @Override
         public void onClick(View view) {
+            mIsDraggingStack = false; // If the touch ended in a click, we're no longer dragging.
+
             // Bubble clicks either trigger expansion/collapse or a bubble switch, both of which we
             // shouldn't interrupt. These are quick transitions, so it's not worth trying to adjust
             // the animations inflight.
@@ -563,6 +574,12 @@ public class BubbleStackView extends FrameLayout
                 // Also, save the magnetized stack so we can dispatch touch events to it.
                 mMagnetizedObject = mStackAnimationController.getMagnetizedStack(mMagneticTarget);
                 mMagnetizedObject.setMagnetListener(mStackMagnetListener);
+
+                mIsDraggingStack = true;
+
+                // Cancel animations to make the stack temporarily invisible, since we're now
+                // dragging it.
+                updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
             }
 
             passEventToMagnetizedObject(ev);
@@ -624,6 +641,11 @@ public class BubbleStackView extends FrameLayout
 
                 hideDismissTarget();
             }
+
+            mIsDraggingStack = false;
+
+            // Hide the stack after a delay, if needed.
+            updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
         }
     };
 
@@ -868,14 +890,7 @@ public class BubbleStackView extends FrameLayout
                 (v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom) -> {
                     mExpandedAnimationController.updateResources(mOrientation, mDisplaySize);
                     mStackAnimationController.updateResources(mOrientation);
-
-                    // Reposition & adjust the height for new orientation
-                    if (mIsExpanded) {
-                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
-                        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-                            mExpandedBubble.getExpandedView().updateView(getLocationOnScreen());
-                        }
-                    }
+                    mBubbleOverflow.updateDimensions();
 
                     // Need to update the padding around the view
                     WindowInsets insets = getRootWindowInsets();
@@ -899,9 +914,15 @@ public class BubbleStackView extends FrameLayout
 
                     if (mIsExpanded) {
                         // Re-draw bubble row and pointer for new orientation.
+                        beforeExpandedViewAnimation();
+                        updateOverflowVisibility();
+                        updatePointerPosition();
                         mExpandedAnimationController.expandFromStack(() -> {
-                            updatePointerPosition();
+                            afterExpandedViewAnimation();
                         } /* after */);
+                        mExpandedViewContainer.setTranslationX(0);
+                        mExpandedViewContainer.setTranslationY(getExpandedViewY());
+                        mExpandedViewContainer.setAlpha(1f);
                     }
                     if (mVerticalPosPercentBeforeRotation >= 0) {
                         mStackAnimationController.moveStackToSimilarPositionAfterRotation(
@@ -967,14 +988,35 @@ public class BubbleStackView extends FrameLayout
      */
     public void setTemporarilyInvisible(boolean invisible) {
         mTemporarilyInvisible = invisible;
-        animateTemporarilyInvisible();
+
+        // If we are animating out, hide immediately if possible so we animate out with the status
+        // bar.
+        updateTemporarilyInvisibleAnimation(invisible /* hideImmediately */);
     }
 
     /**
-     * Animates onto or off the screen depending on whether we're temporarily invisible, and whether
-     * a flyout is visible.
+     * Animates the stack to be temporarily invisible, if needed.
+     *
+     * If we're currently dragging the stack, or a flyout is visible, the stack will remain visible.
+     * regardless of the value of {@link #mTemporarilyInvisible}. This method is called on ACTION_UP
+     * as well as whenever a flyout hides, so we will animate invisible at that point if needed.
      */
-    private void animateTemporarilyInvisible() {
+    private void updateTemporarilyInvisibleAnimation(boolean hideImmediately) {
+        removeCallbacks(mAnimateTemporarilyInvisibleImmediate);
+
+        if (mIsDraggingStack) {
+            // If we're dragging the stack, don't animate it invisible.
+            return;
+        }
+
+        final boolean shouldHide =
+                mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE;
+
+        postDelayed(mAnimateTemporarilyInvisibleImmediate,
+                shouldHide && !hideImmediately ? ANIMATE_TEMPORARILY_INVISIBLE_DELAY : 0);
+    }
+
+    private final Runnable mAnimateTemporarilyInvisibleImmediate = () -> {
         if (mTemporarilyInvisible && mFlyout.getVisibility() != View.VISIBLE) {
             if (mStackAnimationController.isStackOnLeftSide()) {
                 animate().translationX(-mBubbleSize).start();
@@ -984,7 +1026,7 @@ public class BubbleStackView extends FrameLayout
         } else {
             animate().translationX(0).start();
         }
-    }
+    };
 
     private void setUpManageMenu() {
         if (mManageMenu != null) {
@@ -1014,10 +1056,7 @@ public class BubbleStackView extends FrameLayout
         mManageMenu.findViewById(R.id.bubble_manage_menu_dont_bubble_container).setOnClickListener(
                 view -> {
                     showManageMenu(false /* show */);
-                    final Bubble bubble = mBubbleData.getSelectedBubble();
-                    if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-                        mUnbubbleConversationCallback.accept(bubble.getEntry());
-                    }
+                    mUnbubbleConversationCallback.accept(mBubbleData.getSelectedBubble().getKey());
                 });
 
         mManageMenu.findViewById(R.id.bubble_manage_menu_settings_container).setOnClickListener(
@@ -1027,10 +1066,8 @@ public class BubbleStackView extends FrameLayout
                     if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
                         final Intent intent = bubble.getSettingsIntent(mContext);
                         collapseStack(() -> {
-
                             mContext.startActivityAsUser(intent, bubble.getUser());
-                            logBubbleClickEvent(
-                                    bubble,
+                            logBubbleEvent(bubble,
                                     SysUiStatsLog.BUBBLE_UICHANGED__ACTION__HEADER_GO_TO_SETTINGS);
                         });
                     }
@@ -1369,7 +1406,7 @@ public class BubbleStackView extends FrameLayout
 
     /** Sets the function to call to un-bubble the given conversation. */
     public void setUnbubbleConversationCallback(
-            Consumer<NotificationEntry> unbubbleConversationCallback) {
+            Consumer<String> unbubbleConversationCallback) {
         mUnbubbleConversationCallback = unbubbleConversationCallback;
     }
 
@@ -2303,7 +2340,9 @@ public class BubbleStackView extends FrameLayout
                     BadgedImageView.SuppressionFlag.FLYOUT_VISIBLE);
 
             mFlyout.setVisibility(INVISIBLE);
-            animateTemporarilyInvisible();
+
+            // Hide the stack after a delay, if needed.
+            updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
         };
         mFlyout.setVisibility(INVISIBLE);
 
@@ -2321,7 +2360,7 @@ public class BubbleStackView extends FrameLayout
             final Runnable expandFlyoutAfterDelay = () -> {
                 mAnimateInFlyout = () -> {
                     mFlyout.setVisibility(VISIBLE);
-                    animateTemporarilyInvisible();
+                    updateTemporarilyInvisibleAnimation(false /* hideImmediately */);
                     mFlyoutDragDeltaX =
                             mStackAnimationController.isStackOnLeftSide()
                                     ? -mFlyout.getWidth()
@@ -2470,6 +2509,10 @@ public class BubbleStackView extends FrameLayout
                     .spring(DynamicAnimation.SCALE_Y, 1f)
                     .spring(DynamicAnimation.TRANSLATION_X, targetX)
                     .spring(DynamicAnimation.TRANSLATION_Y, targetY)
+                    .withEndActions(() -> {
+                        View child = mManageMenu.getChildAt(0);
+                        child.requestAccessibilityFocus();
+                    })
                     .start();
 
             mManageMenu.setVisibility(View.VISIBLE);
@@ -2713,16 +2756,28 @@ public class BubbleStackView extends FrameLayout
     /**
      * Logs the bubble UI event.
      *
-     * @param bubble the bubble that is being interacted on. Null value indicates that
-     *               the user interaction is not specific to one bubble.
+     * @param provider the bubble view provider that is being interacted on. Null value indicates
+     *               that the user interaction is not specific to one bubble.
      * @param action the user interaction enum.
      */
-    private void logBubbleEvent(@Nullable BubbleViewProvider bubble, int action) {
-        if (bubble == null) {
+    private void logBubbleEvent(@Nullable BubbleViewProvider provider, int action) {
+        if (provider == null || provider.getKey().equals(BubbleOverflow.KEY)) {
+            SysUiStatsLog.write(SysUiStatsLog.BUBBLE_UI_CHANGED,
+                    mContext.getApplicationInfo().packageName,
+                    provider == null ? null : BubbleOverflow.KEY /* notification channel */,
+                    0 /* notification ID */,
+                    0 /* bubble position */,
+                    getBubbleCount(),
+                    action,
+                    getNormalizedXPosition(),
+                    getNormalizedYPosition(),
+                    false /* unread bubble */,
+                    false /* on-going bubble */,
+                    false /* isAppForeground (unused) */);
             return;
         }
-        bubble.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
-                getNormalizedYPosition(), getBubbleIndex(bubble));
+        provider.logUIEvent(getBubbleCount(), action, getNormalizedXPosition(),
+                getNormalizedYPosition(), getBubbleIndex(provider));
     }
 
     /**
@@ -2760,21 +2815,5 @@ public class BubbleStackView extends FrameLayout
             }
         }
         return bubbles;
-    }
-
-    /**
-     * Logs bubble UI click event.
-     *
-     * @param bubble the bubble notification entry that user is interacting with.
-     * @param action the user interaction enum.
-     */
-    private void logBubbleClickEvent(Bubble bubble, int action) {
-        bubble.logUIEvent(
-                getBubbleCount(),
-                action,
-                getNormalizedXPosition(),
-                getNormalizedYPosition(),
-                getBubbleIndex(getExpandedBubble())
-        );
     }
 }

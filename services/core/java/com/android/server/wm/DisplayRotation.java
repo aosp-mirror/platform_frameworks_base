@@ -430,6 +430,15 @@ public class DisplayRotation {
                         "Deferring rotation, still finishing previous rotation");
                 return false;
             }
+
+            if (mDisplayContent.mFixedRotationTransitionListener
+                    .isTopFixedOrientationRecentsAnimating()) {
+                // During the recents animation, the closing app might still be considered on top.
+                // In order to ignore its requested orientation to avoid a sensor led rotation (e.g
+                // user rotating the device while the recents animation is running), we ignore
+                // rotation update while the animation is running.
+                return false;
+            }
         }
 
         if (!mService.mDisplayEnabled) {

@@ -22,7 +22,6 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_BUBBLES;
 import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.NonNull;
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.util.Log;
@@ -34,6 +33,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController.DismissReason;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 
 import java.io.FileDescriptor;
@@ -256,8 +256,7 @@ public class BubbleData {
         }
         mPendingBubbles.remove(bubble.getKey()); // No longer pending once we're here
         Bubble prevBubble = getBubbleInStackWithKey(bubble.getKey());
-        suppressFlyout |= bubble.getEntry() == null
-                || !bubble.getEntry().getRanking().visuallyInterruptive();
+        suppressFlyout |= !bubble.isVisuallyInterruptive();
 
         if (prevBubble == null) {
             // Create a new bubble
@@ -335,13 +334,15 @@ public class BubbleData {
      * Retrieves any bubbles that are part of the notification group represented by the provided
      * group key.
      */
-    ArrayList<Bubble> getBubblesInGroup(@Nullable String groupKey) {
+    ArrayList<Bubble> getBubblesInGroup(@Nullable String groupKey, @NonNull
+            NotificationEntryManager nem) {
         ArrayList<Bubble> bubbleChildren = new ArrayList<>();
         if (groupKey == null) {
             return bubbleChildren;
         }
         for (Bubble b : mBubbles) {
-            if (b.getEntry() != null && groupKey.equals(b.getEntry().getSbn().getGroupKey())) {
+            final NotificationEntry entry = nem.getPendingOrActiveNotif(b.getKey());
+            if (entry != null && groupKey.equals(entry.getSbn().getGroupKey())) {
                 bubbleChildren.add(b);
             }
         }
@@ -439,9 +440,7 @@ public class BubbleData {
             Bubble newSelected = mBubbles.get(newIndex);
             setSelectedBubbleInternal(newSelected);
         }
-        if (bubbleToRemove.getEntry() != null) {
-            maybeSendDeleteIntent(reason, bubbleToRemove.getEntry());
-        }
+        maybeSendDeleteIntent(reason, bubbleToRemove);
     }
 
     void overflowBubble(@DismissReason int reason, Bubble bubble) {
@@ -611,21 +610,14 @@ public class BubbleData {
         return true;
     }
 
-    private void maybeSendDeleteIntent(@DismissReason int reason,
-            @NonNull final NotificationEntry entry) {
-        if (reason == BubbleController.DISMISS_USER_GESTURE) {
-            Notification.BubbleMetadata bubbleMetadata = entry.getBubbleMetadata();
-            PendingIntent deleteIntent = bubbleMetadata != null
-                    ? bubbleMetadata.getDeleteIntent()
-                    : null;
-            if (deleteIntent != null) {
-                try {
-                    deleteIntent.send();
-                } catch (PendingIntent.CanceledException e) {
-                    Log.w(TAG, "Failed to send delete intent for bubble with key: "
-                            + entry.getKey());
-                }
-            }
+    private void maybeSendDeleteIntent(@DismissReason int reason, @NonNull final Bubble bubble) {
+        if (reason != BubbleController.DISMISS_USER_GESTURE) return;
+        PendingIntent deleteIntent = bubble.getDeleteIntent();
+        if (deleteIntent == null) return;
+        try {
+            deleteIntent.send();
+        } catch (PendingIntent.CanceledException e) {
+            Log.w(TAG, "Failed to send delete intent for bubble with key: " + bubble.getKey());
         }
     }
 

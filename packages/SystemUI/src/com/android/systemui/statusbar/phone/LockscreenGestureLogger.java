@@ -39,7 +39,7 @@ import javax.inject.Singleton;
 public class LockscreenGestureLogger {
 
     /**
-     * Contains Lockscreen related Westworld UiEvent enums.
+     * Contains Lockscreen related statsd UiEvent enums.
      */
     public enum LockscreenUiEvent implements UiEventLogger.UiEventEnum {
         @UiEvent(doc = "Lockscreen > Pull shade open")

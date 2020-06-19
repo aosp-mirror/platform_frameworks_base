@@ -1050,22 +1050,6 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         return false;
     }
 
-    public static int getColorViewTopInset(int stableTop, int systemTop) {
-        return Math.min(stableTop, systemTop);
-    }
-
-    public static int getColorViewBottomInset(int stableBottom, int systemBottom) {
-        return Math.min(stableBottom, systemBottom);
-    }
-
-    public static int getColorViewRightInset(int stableRight, int systemRight) {
-        return Math.min(stableRight, systemRight);
-    }
-
-    public static int getColorViewLeftInset(int stableLeft, int systemLeft) {
-        return Math.min(stableLeft, systemLeft);
-    }
-
     public static boolean isNavBarToRightEdge(int bottomInset, int rightInset) {
         return bottomInset == 0 && rightInset > 0;
     }
@@ -1079,14 +1063,11 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                 : isNavBarToLeftEdge(bottomInset, leftInset) ? leftInset : bottomInset;
     }
 
-    public static void getNavigationBarRect(int canvasWidth, int canvasHeight, Rect stableInsets,
-            Rect contentInsets, Rect outRect, float scale) {
-        final int bottomInset =
-                (int) (getColorViewBottomInset(stableInsets.bottom, contentInsets.bottom) * scale);
-        final int leftInset =
-                (int) (getColorViewLeftInset(stableInsets.left, contentInsets.left) * scale);
-        final int rightInset =
-                (int) (getColorViewLeftInset(stableInsets.right, contentInsets.right) * scale);
+    public static void getNavigationBarRect(int canvasWidth, int canvasHeight, Rect systemBarInsets,
+            Rect outRect, float scale) {
+        final int bottomInset = (int) (systemBarInsets.bottom * scale);
+        final int leftInset = (int) (systemBarInsets.left * scale);
+        final int rightInset = (int) (systemBarInsets.right * scale);
         final int size = getNavBarSize(bottomInset, rightInset, leftInset);
         if (isNavBarToRightEdge(bottomInset, rightInset)) {
             outRect.set(canvasWidth - size, 0, canvasWidth, canvasHeight);
@@ -1113,31 +1094,30 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
             mLastWindowFlags = attrs.flags;
 
             if (insets != null) {
-                mLastTopInset = getColorViewTopInset(insets.getStableInsetTop(),
-                        insets.getSystemWindowInsetTop());
-                mLastBottomInset = getColorViewBottomInset(insets.getStableInsetBottom(),
-                        insets.getSystemWindowInsetBottom());
-                mLastRightInset = getColorViewRightInset(insets.getStableInsetRight(),
-                        insets.getSystemWindowInsetRight());
-                mLastLeftInset = getColorViewRightInset(insets.getStableInsetLeft(),
-                        insets.getSystemWindowInsetLeft());
+                final Insets systemBarInsets = insets.getInsets(WindowInsets.Type.systemBars());
+                final Insets stableBarInsets = insets.getInsetsIgnoringVisibility(
+                        WindowInsets.Type.systemBars());
+                mLastTopInset = systemBarInsets.top;
+                mLastBottomInset = systemBarInsets.bottom;
+                mLastRightInset = systemBarInsets.right;
+                mLastLeftInset = systemBarInsets.left;
 
                 // Don't animate if the presence of stable insets has changed, because that
                 // indicates that the window was either just added and received them for the
                 // first time, or the window size or position has changed.
-                boolean hasTopStableInset = insets.getStableInsetTop() != 0;
+                boolean hasTopStableInset = stableBarInsets.top != 0;
                 disallowAnimate |= (hasTopStableInset != mLastHasTopStableInset);
                 mLastHasTopStableInset = hasTopStableInset;
 
-                boolean hasBottomStableInset = insets.getStableInsetBottom() != 0;
+                boolean hasBottomStableInset = stableBarInsets.bottom != 0;
                 disallowAnimate |= (hasBottomStableInset != mLastHasBottomStableInset);
                 mLastHasBottomStableInset = hasBottomStableInset;
 
-                boolean hasRightStableInset = insets.getStableInsetRight() != 0;
+                boolean hasRightStableInset = stableBarInsets.right != 0;
                 disallowAnimate |= (hasRightStableInset != mLastHasRightStableInset);
                 mLastHasRightStableInset = hasRightStableInset;
 
-                boolean hasLeftStableInset = insets.getStableInsetLeft() != 0;
+                boolean hasLeftStableInset = stableBarInsets.left != 0;
                 disallowAnimate |= (hasLeftStableInset != mLastHasLeftStableInset);
                 mLastHasLeftStableInset = hasLeftStableInset;
 
@@ -2296,7 +2276,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     public void onWindowSizeIsChanging(Rect newBounds, boolean fullscreen, Rect systemInsets,
             Rect stableInsets) {
         if (mBackdropFrameRenderer != null) {
-            mBackdropFrameRenderer.setTargetRect(newBounds, fullscreen, systemInsets, stableInsets);
+            mBackdropFrameRenderer.setTargetRect(newBounds, fullscreen, systemInsets);
         }
     }
 
@@ -2314,11 +2294,12 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         final ThreadedRenderer renderer = getThreadedRenderer();
         if (renderer != null) {
             loadBackgroundDrawablesIfNeeded();
+            WindowInsets rootInsets = getRootWindowInsets();
             mBackdropFrameRenderer = new BackdropFrameRenderer(this, renderer,
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
-                    getCurrentColor(mNavigationColorViewState), fullscreen, systemInsets,
-                    stableInsets);
+                    getCurrentColor(mNavigationColorViewState), fullscreen,
+                    rootInsets.getInsets(WindowInsets.Type.systemBars()));
 
             // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
             // If we want to get the shadow shown while resizing, we would need to elevate a new

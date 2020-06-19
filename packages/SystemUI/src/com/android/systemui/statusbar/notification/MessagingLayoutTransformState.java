@@ -17,9 +17,11 @@
 package com.android.systemui.statusbar.notification;
 
 import android.content.res.Resources;
+import android.text.Layout;
 import android.util.Pools;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.android.internal.widget.IMessagingLayout;
 import com.android.internal.widget.MessagingGroup;
@@ -229,6 +231,15 @@ public class MessagingLayoutTransformState extends TransformState {
         return result;
     }
 
+    private boolean hasEllipses(TextView textView) {
+        Layout layout = textView.getLayout();
+        return layout != null && layout.getEllipsisCount(layout.getLineCount() - 1) > 0;
+    }
+
+    private boolean needsReflow(TextView own, TextView other) {
+        return hasEllipses(own) != hasEllipses(other);
+    }
+
     /**
      * Transform two groups towards each other.
      *
@@ -238,13 +249,20 @@ public class MessagingLayoutTransformState extends TransformState {
             float transformationAmount, boolean to) {
         boolean useLinearTransformation =
                 otherGroup.getIsolatedMessage() == null && !mTransformInfo.isAnimating();
-        transformView(transformationAmount, to, ownGroup.getSenderView(), otherGroup.getSenderView(),
-                true /* sameAsAny */, useLinearTransformation);
+        TextView ownSenderView = ownGroup.getSenderView();
+        TextView otherSenderView = otherGroup.getSenderView();
+        transformView(transformationAmount, to, ownSenderView, otherSenderView,
+                // Normally this would be handled by the TextViewMessageState#sameAs check, but in
+                // this case it doesn't work because our text won't match, due to the appended colon
+                // in the collapsed view.
+                !needsReflow(ownSenderView, otherSenderView),
+                useLinearTransformation);
         int totalAvatarTranslation = transformView(transformationAmount, to, ownGroup.getAvatar(),
                 otherGroup.getAvatar(), true /* sameAsAny */, useLinearTransformation);
         List<MessagingMessage> ownMessages = ownGroup.getMessages();
         List<MessagingMessage> otherMessages = otherGroup.getMessages();
         float previousTranslation = 0;
+        boolean isLastView = true;
         for (int i = 0; i < ownMessages.size(); i++) {
             View child = ownMessages.get(ownMessages.size() - 1 - i).getView();
             if (isGone(child)) {
@@ -278,6 +296,9 @@ public class MessagingLayoutTransformState extends TransformState {
                 mMessagingLayout.setMessagingClippingDisabled(true);
             }
             if (otherChild == null) {
+                if (isLastView) {
+                    previousTranslation = ownSenderView.getTranslationY();
+                }
                 child.setTranslationY(previousTranslation);
                 setClippingDeactivated(child, true);
             } else if (ownGroup.getIsolatedMessage() == child || otherIsIsolated) {
@@ -287,6 +308,7 @@ public class MessagingLayoutTransformState extends TransformState {
             } else {
                 previousTranslation = child.getTranslationY();
             }
+            isLastView = false;
         }
         ownGroup.updateClipRect();
         return totalAvatarTranslation;
@@ -380,6 +402,9 @@ public class MessagingLayoutTransformState extends TransformState {
             return true;
         }
         if (view.getParent() == null) {
+            return true;
+        }
+        if (view.getWidth() == 0) {
             return true;
         }
         final ViewGroup.LayoutParams lp = view.getLayoutParams();

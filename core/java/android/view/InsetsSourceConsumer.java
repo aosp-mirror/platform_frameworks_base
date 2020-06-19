@@ -18,8 +18,8 @@ package android.view;
 
 import static android.view.InsetsController.ANIMATION_TYPE_NONE;
 import static android.view.InsetsController.AnimationType;
-import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsState.getDefaultVisibility;
+import static android.view.InsetsController.DEBUG;
 import static android.view.InsetsState.toPublicType;
 
 import static com.android.internal.annotations.VisibleForTesting.Visibility.PACKAGE;
@@ -275,9 +275,9 @@ public class InsetsSourceConsumer {
     }
 
     @VisibleForTesting(visibility = PACKAGE)
-    public void updateSource(InsetsSource newSource, @AnimationType int animationType) {
+    public void updateSource(InsetsSource newSource) {
         InsetsSource source = mState.peekSource(mType);
-        if (source == null || animationType == ANIMATION_TYPE_NONE
+        if (source == null || mController.getAnimationType(mType) == ANIMATION_TYPE_NONE
                 || source.getFrame().equals(newSource.getFrame())) {
             mPendingFrame = null;
             mPendingVisibleFrame = null;
@@ -286,7 +286,7 @@ public class InsetsSourceConsumer {
         }
 
         // Frame is changing while animating. Keep note of the new frame but keep existing frame
-        // until animation is finished.
+        // until animaition is finished.
         newSource = new InsetsSource(newSource);
         mPendingFrame = new Rect(newSource.getFrame());
         mPendingVisibleFrame = newSource.getVisibleFrame() != null

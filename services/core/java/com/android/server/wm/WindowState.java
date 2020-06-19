@@ -2339,6 +2339,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return false;
         }
 
+        if (inPinnedWindowingMode()) {
+            return false;
+        }
+
         final boolean windowsAreFocusable = mActivityRecord == null || mActivityRecord.windowsAreFocusable();
         if (!windowsAreFocusable) {
             // This window can't be an IME target if the app's windows should not be focusable.
@@ -5159,17 +5163,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         float9[Matrix.MSKEW_Y] = mWinAnimator.mDtDx;
         float9[Matrix.MSKEW_X] = mWinAnimator.mDtDy;
         float9[Matrix.MSCALE_Y] = mWinAnimator.mDsDy;
-        int x = mSurfacePosition.x;
-        int y = mSurfacePosition.y;
+        transformSurfaceInsetsPosition(mTmpPoint, mAttrs.surfaceInsets);
+        int x = mSurfacePosition.x + mTmpPoint.x;
+        int y = mSurfacePosition.y + mTmpPoint.y;
 
         // We might be on a display which has been re-parented to a view in another window, so here
         // computes the global location of our display.
         DisplayContent dc = getDisplayContent();
         while (dc != null && dc.getParentWindow() != null) {
             final WindowState displayParent = dc.getParentWindow();
-            x += displayParent.mWindowFrames.mFrame.left - displayParent.mAttrs.surfaceInsets.left
+            x += displayParent.mWindowFrames.mFrame.left
                     + (dc.getLocationInParentWindow().x * displayParent.mGlobalScale + 0.5f);
-            y += displayParent.mWindowFrames.mFrame.top - displayParent.mAttrs.surfaceInsets.top
+            y += displayParent.mWindowFrames.mFrame.top
                     + (dc.getLocationInParentWindow().y * displayParent.mGlobalScale + 0.5f);
             dc = displayParent.getDisplayContent();
         }

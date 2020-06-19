@@ -52,7 +52,6 @@ import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeIntAttribute;
 import static com.android.internal.util.XmlUtils.writeLongAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
-import static com.android.server.storage.StorageUserConnection.REMOTE_TIMEOUT_SECONDS;
 
 import static org.xmlpull.v1.XmlPullParser.END_DOCUMENT;
 import static org.xmlpull.v1.XmlPullParser.START_TAG;
@@ -224,6 +223,9 @@ class StorageManagerService extends IStorageManager.Stub
     private static final String ANDROID_VOLD_APP_DATA_ISOLATION_ENABLED_PROPERTY =
             "persist.sys.vold_app_data_isolation_enabled";
 
+    // How long we wait to reset storage, if we failed to call onMount on the
+    // external storage service.
+    public static final int FAILED_MOUNT_RESET_TIMEOUT_SECONDS = 10;
     /**
      * If {@code 1}, enables the isolated storage feature. If {@code -1},
      * disables the isolated storage feature. If {@code 0}, uses the default
@@ -1083,7 +1085,12 @@ class StorageManagerService extends IStorageManager.Stub
             final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
 
             if (mIsFuseEnabled) {
-                mStorageSessionController.onReset(mVold, mHandler);
+                mStorageSessionController.onReset(mVold, () -> {
+                    mHandler.removeMessages(H_RESET);
+                    mHandler.removeMessages(H_VOLUME_BROADCAST);
+                    mHandler.removeMessages(H_VOLUME_MOUNT);
+                    mHandler.removeMessages(H_VOLUME_UNMOUNT);
+                });
             } else {
                 killMediaProvider(users);
             }
@@ -2202,7 +2209,7 @@ class StorageManagerService extends IStorageManager.Stub
                     } catch (ExternalStorageServiceException e) {
                         Slog.e(TAG, "Failed to mount volume " + vol, e);
 
-                        int nextResetSeconds = REMOTE_TIMEOUT_SECONDS * 2;
+                        int nextResetSeconds = FAILED_MOUNT_RESET_TIMEOUT_SECONDS;
                         Slog.i(TAG, "Scheduling reset in " + nextResetSeconds + "s");
                         mHandler.removeMessages(H_RESET);
                         mHandler.sendMessageDelayed(mHandler.obtainMessage(H_RESET),
@@ -2252,8 +2259,15 @@ class StorageManagerService extends IStorageManager.Stub
         enforcePermission(android.Manifest.permission.MOUNT_FORMAT_FILESYSTEMS);
 
         final VolumeInfo vol = findVolumeByIdOrThrow(volId);
+        final String fsUuid = vol.fsUuid;
         try {
             mVold.format(vol.id, "auto");
+
+            // After a successful format above, we should forget about any
+            // records for the old partition, since it'll never appear again
+            if (!TextUtils.isEmpty(fsUuid)) {
+                forgetVolume(fsUuid);
+            }
         } catch (Exception e) {
             Slog.wtf(TAG, e);
         }
@@ -3535,6 +3549,13 @@ class StorageManagerService extends IStorageManager.Stub
         // point
         final boolean systemUserUnlocked = isSystemUnlocked(UserHandle.USER_SYSTEM);
 
+        // When the caller is the app actually hosting external storage, we
+        // should never attempt to augment the actual storage volume state,
+        // otherwise we risk confusing it with race conditions as users go
+        // through various unlocked states
+        final boolean callerIsMediaStore = UserHandle.isSameApp(Binder.getCallingUid(),
+                mMediaStoreAuthorityAppId);
+
         final boolean userIsDemo;
         final boolean userKeyUnlocked;
         final boolean storagePermission;
@@ -3554,6 +3575,7 @@ class StorageManagerService extends IStorageManager.Stub
         final ArraySet<String> resUuids = new ArraySet<>();
         synchronized (mLock) {
             for (int i = 0; i < mVolumes.size(); i++) {
+                final String volId = mVolumes.keyAt(i);
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 switch (vol.getType()) {
                     case VolumeInfo.TYPE_PUBLIC:
@@ -3578,11 +3600,19 @@ class StorageManagerService extends IStorageManager.Stub
                 if (!match) continue;
 
                 boolean reportUnmounted = false;
-                if (!systemUserUnlocked) {
+                if (callerIsMediaStore) {
+                    // When the caller is the app actually hosting external storage, we
+                    // should never attempt to augment the actual storage volume state,
+                    // otherwise we risk confusing it with race conditions as users go
+                    // through various unlocked states
+                } else if (!systemUserUnlocked) {
                     reportUnmounted = true;
+                    Slog.w(TAG, "Reporting " + volId + " unmounted due to system locked");
                 } else if ((vol.getType() == VolumeInfo.TYPE_EMULATED) && !userKeyUnlocked) {
                     reportUnmounted = true;
+                    Slog.w(TAG, "Reporting " + volId + "unmounted due to " + userId + " locked");
                 } else if (!storagePermission && !realState) {
+                    Slog.w(TAG, "Reporting " + volId + "unmounted due to missing permissions");
                     reportUnmounted = true;
                 }
 

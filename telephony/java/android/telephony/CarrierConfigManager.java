@@ -1385,6 +1385,14 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * To override wifi calling's carrier name string using ef_pnn from sim card when SPN in empty.
+     *
+     * @hide
+     */
+    public static final String KEY_WFC_CARRIER_NAME_OVERRIDE_BY_PNN_BOOL =
+            "wfc_carrier_name_override_by_pnn_bool";
+
+    /**
      * Override the SPN Display Condition 2 integer bits (lsb). B2, B1 is the last two bits of the
      * spn display condition coding.
      *
@@ -4008,6 +4016,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putBoolean(KEY_WFC_CARRIER_NAME_OVERRIDE_BY_PNN_BOOL, false);
         sDefaults.putInt(KEY_SPN_DISPLAY_CONDITION_OVERRIDE_INT, -1);
         sDefaults.putStringArray(KEY_SPDI_OVERRIDE_STRING_ARRAY, null);
         sDefaults.putStringArray(KEY_PNN_OVERRIDE_STRING_ARRAY, null);

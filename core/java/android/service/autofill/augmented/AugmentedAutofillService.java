@@ -564,9 +564,9 @@ public abstract class AugmentedAutofillService extends Service {
         }
 
         void reportResult(@Nullable List<Dataset> inlineSuggestionsData,
-                @Nullable Bundle clientState) {
+                @Nullable Bundle clientState, boolean showingFillWindow) {
             try {
-                mCallback.onSuccess(inlineSuggestionsData, clientState);
+                mCallback.onSuccess(inlineSuggestionsData, clientState, showingFillWindow);
             } catch (RemoteException e) {
                 Log.e(TAG, "Error calling back with the inline suggestions data: " + e);
             }

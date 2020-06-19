@@ -620,6 +620,7 @@ public final class MediaRouter2 {
                     changedRoutes.add(route);
                 }
             }
+            mShouldUpdateRoutes = true;
         }
         if (changedRoutes.size() > 0) {
             notifyRoutesChanged(changedRoutes);

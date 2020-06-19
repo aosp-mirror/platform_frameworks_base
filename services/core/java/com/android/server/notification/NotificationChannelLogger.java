@@ -99,6 +99,16 @@ public interface NotificationChannelLogger {
     }
 
     /**
+     * Log blocking or unblocking of the entire app's notifications.
+     * @param uid UID of the app.
+     * @param pkg Package name of the app.
+     * @param enabled If true, notifications are now allowed.
+     */
+    default void logAppNotificationsAllowed(int uid, String pkg, boolean enabled) {
+        logAppEvent(NotificationChannelEvent.getBlocked(enabled), uid, pkg);
+    }
+
+    /**
      * Low-level interface for logging events, to be implemented.
      * @param event Event to log.
      * @param channel Notification channel.
@@ -124,6 +134,13 @@ public interface NotificationChannelLogger {
             boolean wasBlocked);
 
     /**
+     * Low-level interface for logging app-as-a-whole events, to be implemented.
+     * @param uid UID of app.
+     * @param pkg Package of app.
+     */
+    void logAppEvent(@NonNull NotificationChannelEvent event, int uid, String pkg);
+
+    /**
      * The UiEvent enums that this class can log.
      */
     enum NotificationChannelEvent implements UiEventLogger.UiEventEnum {
@@ -144,8 +161,11 @@ public interface NotificationChannelLogger {
         @UiEvent(doc = "System created a new conversation (sub-channel in a notification channel)")
         NOTIFICATION_CHANNEL_CONVERSATION_CREATED(272),
         @UiEvent(doc = "System deleted a new conversation (sub-channel in a notification channel)")
-        NOTIFICATION_CHANNEL_CONVERSATION_DELETED(274);
-
+        NOTIFICATION_CHANNEL_CONVERSATION_DELETED(274),
+        @UiEvent(doc = "All notifications for the app were blocked.")
+        APP_NOTIFICATIONS_BLOCKED(557),
+        @UiEvent(doc = "Notifications for the app as a whole were unblocked.")
+        APP_NOTIFICATIONS_UNBLOCKED(558);
 
         private final int mId;
         NotificationChannelEvent(int id) {
@@ -177,6 +197,10 @@ public interface NotificationChannelLogger {
             return isNew
                     ? NotificationChannelEvent.NOTIFICATION_CHANNEL_GROUP_CREATED
                     : NotificationChannelEvent.NOTIFICATION_CHANNEL_GROUP_DELETED;
+        }
+
+        public static NotificationChannelEvent getBlocked(boolean enabled) {
+            return enabled ? APP_NOTIFICATIONS_UNBLOCKED : APP_NOTIFICATIONS_BLOCKED;
         }
     }
 

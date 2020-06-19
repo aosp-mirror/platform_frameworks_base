@@ -22,12 +22,10 @@ import static com.android.systemui.bubbles.BubbleDebugConfig.TAG_WITH_CLASS_NAME
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -290,20 +288,10 @@ class BubbleOverflowAdapter extends RecyclerView.Adapter<BubbleOverflowAdapter.V
                     }
                 });
 
-        // If the bubble was persisted, the entry is null but it should have shortcut info
-        ShortcutInfo info = b.getEntry() == null
-                ? b.getShortcutInfo()
-                : b.getEntry().getRanking().getShortcutInfo();
-        if (info == null) {
-            Log.d(TAG, "ShortcutInfo required to bubble but none found for " + b);
-        } else {
-            CharSequence label = info.getLabel();
-            if (label == null) {
-                vh.textView.setText(b.getAppName());
-            } else {
-                vh.textView.setText(label.toString());
-            }
-        }
+        CharSequence label = b.getShortcutInfo() != null
+                ? b.getShortcutInfo().getLabel()
+                : b.getAppName();
+        vh.textView.setText(label);
     }
 
     @Override

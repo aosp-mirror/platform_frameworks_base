@@ -25,6 +25,7 @@ import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -56,7 +57,7 @@ public class RouteInfoTest {
     private static final int INVALID_ROUTE_TYPE = -1;
 
     private InetAddress Address(String addr) {
-        return InetAddress.parseNumericAddress(addr);
+        return InetAddresses.parseNumericAddress(addr);
     }
 
     private IpPrefix Prefix(String prefix) {
@@ -390,5 +391,44 @@ public class RouteInfoTest {
 
         r = new RouteInfo(Prefix("0.0.0.0/0"), Address("0.0.0.0"), "wlan0");
         assertEquals(0, r.getMtu());
+    }
+
+    @Test @IgnoreUpTo(Build.VERSION_CODES.Q)
+    public void testRouteKey() {
+        RouteInfo.RouteKey k1, k2;
+        // Only prefix, null gateway and null interface
+        k1 = new RouteInfo(Prefix("2001:db8::/128"), null).getRouteKey();
+        k2 = new RouteInfo(Prefix("2001:db8::/128"), null).getRouteKey();
+        assertEquals(k1, k2);
+        assertEquals(k1.hashCode(), k2.hashCode());
+
+        // With prefix, gateway and interface. Type and MTU does not affect RouteKey equality
+        k1 = new RouteInfo(Prefix("192.0.2.0/24"), Address("192.0.2.1"), "wlan0",
+                RTN_UNREACHABLE, 1450).getRouteKey();
+        k2 = new RouteInfo(Prefix("192.0.2.0/24"), Address("192.0.2.1"), "wlan0",
+                RouteInfo.RTN_UNICAST, 1400).getRouteKey();
+        assertEquals(k1, k2);
+        assertEquals(k1.hashCode(), k2.hashCode());
+
+        // Different scope IDs are ignored by the kernel, so we consider them equal here too.
+        k1 = new RouteInfo(Prefix("2001:db8::/64"), Address("fe80::1%1"), "wlan0").getRouteKey();
+        k2 = new RouteInfo(Prefix("2001:db8::/64"), Address("fe80::1%2"), "wlan0").getRouteKey();
+        assertEquals(k1, k2);
+        assertEquals(k1.hashCode(), k2.hashCode());
+
+        // Different prefix
+        k1 = new RouteInfo(Prefix("192.0.2.0/24"), null).getRouteKey();
+        k2 = new RouteInfo(Prefix("192.0.3.0/24"), null).getRouteKey();
+        assertNotEquals(k1, k2);
+
+        // Different gateway
+        k1 = new RouteInfo(Prefix("ff02::1/128"), Address("2001:db8::1"), null).getRouteKey();
+        k2 = new RouteInfo(Prefix("ff02::1/128"), Address("2001:db8::2"), null).getRouteKey();
+        assertNotEquals(k1, k2);
+
+        // Different interface
+        k1 = new RouteInfo(Prefix("ff02::1/128"), null, "tun0").getRouteKey();
+        k2 = new RouteInfo(Prefix("ff02::1/128"), null, "tun1").getRouteKey();
+        assertNotEquals(k1, k2);
     }
 }

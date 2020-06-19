@@ -1938,7 +1938,7 @@ public class ResolverActivity extends Activity implements
                 ResolverListAdapter activeListAdapter =
                         mMultiProfilePagerAdapter.getActiveListAdapter();
                 activeListAdapter.notifyDataSetChanged();
-                if (activeListAdapter.getCount() == 0) {
+                if (activeListAdapter.getCount() == 0 && !inactiveListAdapterHasItems()) {
                     // We no longer have any items...  just finish the activity.
                     finish();
                 }
@@ -1946,6 +1946,13 @@ public class ResolverActivity extends Activity implements
         } else {
             mMultiProfilePagerAdapter.clearInactiveProfileCache();
         }
+    }
+
+    private boolean inactiveListAdapterHasItems() {
+        if (!shouldShowTabs()) {
+            return false;
+        }
+        return mMultiProfilePagerAdapter.getInactiveListAdapter().getCount() > 0;
     }
 
     private BroadcastReceiver createWorkProfileStateReceiver() {

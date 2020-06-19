@@ -178,6 +178,18 @@ abstract class MagnetizedObject<T : Any>(
     var physicsAnimatorEndListener: PhysicsAnimator.EndListener<T>? = null
 
     /**
+     * Method that is called when the object should be animated stuck to the target. The default
+     * implementation uses the object's x and y properties to animate the object centered inside the
+     * target. You can override this if you need custom animation.
+     *
+     * The method is invoked with the MagneticTarget that the object is sticking to, the X and Y
+     * velocities of the gesture that brought the object into the magnetic radius, whether or not it
+     * was flung, and a callback you must call after your animation completes.
+     */
+    var animateStuckToTarget: (MagneticTarget, Float, Float, Boolean, (() -> Unit)?) -> Unit =
+            ::animateStuckToTargetInternal
+
+    /**
      * Sets whether forcefully flinging the object vertically towards a target causes it to be
      * attracted to the target and then released immediately, despite never being dragged within the
      * magnetic field.
@@ -229,7 +241,7 @@ abstract class MagnetizedObject<T : Any>(
      * to the target. If this velocity is reached, the object will be freed even if it wasn't moved
      * outside the magnetic field radius.
      */
-    var flingUnstuckFromTargetMinVelocity = 1000f
+    var flingUnstuckFromTargetMinVelocity = 4000f
 
     /**
      * Sets the maximum X velocity above which the object will not stick to the target. Even if the
@@ -373,7 +385,7 @@ abstract class MagnetizedObject<T : Any>(
             targetObjectIsStuckTo = targetObjectIsInMagneticFieldOf
             cancelAnimations()
             magnetListener.onStuckToTarget(targetObjectIsInMagneticFieldOf!!)
-            animateStuckToTarget(targetObjectIsInMagneticFieldOf, velX, velY, false)
+            animateStuckToTarget(targetObjectIsInMagneticFieldOf, velX, velY, false, null)
 
             vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
         } else if (targetObjectIsInMagneticFieldOf == null && objectStuckToTarget) {
@@ -402,9 +414,10 @@ abstract class MagnetizedObject<T : Any>(
             cancelAnimations()
 
             if (objectStuckToTarget) {
-                if (hypot(velX, velY) > flingUnstuckFromTargetMinVelocity) {
-                    // If the object is stuck, but it was forcefully flung away from the target,
-                    // tell the listener so the object can be animated out of the target.
+                if (-velY > flingUnstuckFromTargetMinVelocity) {
+                    // If the object is stuck, but it was forcefully flung away from the target in
+                    // the upward direction, tell the listener so the object can be animated out of
+                    // the target.
                     magnetListener.onUnstuckFromTarget(
                             targetObjectIsStuckTo!!, velX, velY, wasFlungOut = true)
                 } else {
@@ -430,8 +443,8 @@ abstract class MagnetizedObject<T : Any>(
                 targetObjectIsStuckTo = flungToTarget
 
                 animateStuckToTarget(flungToTarget, velX, velY, true) {
-                    targetObjectIsStuckTo = null
                     magnetListener.onReleasedInTarget(flungToTarget)
+                    targetObjectIsStuckTo = null
                     vibrateIfEnabled(VibrationEffect.EFFECT_HEAVY_CLICK)
                 }
 
@@ -465,7 +478,7 @@ abstract class MagnetizedObject<T : Any>(
     }
 
     /** Animates sticking the object to the provided target with the given start velocities.  */
-    private fun animateStuckToTarget(
+    private fun animateStuckToTargetInternal(
         target: MagneticTarget,
         velX: Float,
         velY: Float,
@@ -581,10 +594,10 @@ abstract class MagnetizedObject<T : Any>(
      * multiple objects.
      */
     class MagneticTarget(
-        internal val targetView: View,
+        val targetView: View,
         var magneticFieldRadiusPx: Int
     ) {
-        internal val centerOnScreen = PointF()
+        val centerOnScreen = PointF()
 
         private val tempLoc = IntArray(2)
 

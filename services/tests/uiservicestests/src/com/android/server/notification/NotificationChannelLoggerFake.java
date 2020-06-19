@@ -51,4 +51,9 @@ public class NotificationChannelLoggerFake implements NotificationChannelLogger 
             NotificationChannelGroup channelGroup, int uid, String pkg, boolean wasBlocked) {
         mCalls.add(new CallRecord(event));
     }
+
+    @Override
+    public void logAppEvent(NotificationChannelEvent event, int uid, String pkg) {
+        mCalls.add(new CallRecord(event));
+    }
 }

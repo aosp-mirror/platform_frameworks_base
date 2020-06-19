@@ -50,33 +50,55 @@ enum class AssistantInvocationEvent(private val id: Int) : UiEventLogger.UiEvent
     ASSISTANT_INVOCATION_HOME_LONG_PRESS(447),
 
     @UiEvent(doc = "Assistant invoked by physical gesture")
-    ASSISTANT_INVOCATION_PHYSICAL_GESTURE(448);
+    ASSISTANT_INVOCATION_PHYSICAL_GESTURE(448),
+
+    @UiEvent(doc = "Assistant invocation started by unknown method")
+    ASSISTANT_INVOCATION_START_UNKNOWN(530),
+
+    @UiEvent(doc = "Assistant invocation started by touch gesture")
+    ASSISTANT_INVOCATION_START_TOUCH_GESTURE(531),
+
+    @UiEvent(doc = "Assistant invocation started by physical gesture")
+    ASSISTANT_INVOCATION_START_PHYSICAL_GESTURE(532);
 
     override fun getId(): Int {
         return id
     }
 
     companion object {
-        fun eventIdFromLegacyInvocationType(legacyInvocationType: Int): Int {
-            return when (legacyInvocationType) {
-                AssistManager.INVOCATION_TYPE_GESTURE ->
-                    ASSISTANT_INVOCATION_TOUCH_GESTURE
+        fun eventFromLegacyInvocationType(legacyInvocationType: Int, isInvocationComplete: Boolean)
+                : AssistantInvocationEvent {
+            return if (isInvocationComplete) {
+                when (legacyInvocationType) {
+                    AssistManager.INVOCATION_TYPE_GESTURE ->
+                        ASSISTANT_INVOCATION_TOUCH_GESTURE
 
-                AssistManager.INVOCATION_TYPE_OTHER ->
-                    ASSISTANT_INVOCATION_PHYSICAL_GESTURE
+                    AssistManager.INVOCATION_TYPE_OTHER ->
+                        ASSISTANT_INVOCATION_PHYSICAL_GESTURE
 
-                AssistManager.INVOCATION_TYPE_VOICE ->
-                    ASSISTANT_INVOCATION_HOTWORD
+                    AssistManager.INVOCATION_TYPE_VOICE ->
+                        ASSISTANT_INVOCATION_HOTWORD
 
-                AssistManager.INVOCATION_TYPE_QUICK_SEARCH_BAR ->
-                    ASSISTANT_INVOCATION_QUICK_SEARCH_BAR
+                    AssistManager.INVOCATION_TYPE_QUICK_SEARCH_BAR ->
+                        ASSISTANT_INVOCATION_QUICK_SEARCH_BAR
 
-                AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS ->
-                    ASSISTANT_INVOCATION_HOME_LONG_PRESS
+                    AssistManager.INVOCATION_HOME_BUTTON_LONG_PRESS ->
+                        ASSISTANT_INVOCATION_HOME_LONG_PRESS
 
-                else ->
-                    ASSISTANT_INVOCATION_UNKNOWN
-            }.id
+                    else ->
+                        ASSISTANT_INVOCATION_UNKNOWN
+                }
+            } else {
+                when (legacyInvocationType) {
+                    AssistManager.INVOCATION_TYPE_GESTURE ->
+                        ASSISTANT_INVOCATION_START_TOUCH_GESTURE
+
+                    AssistManager.INVOCATION_TYPE_OTHER ->
+                        ASSISTANT_INVOCATION_START_PHYSICAL_GESTURE
+
+                    else -> ASSISTANT_INVOCATION_START_UNKNOWN
+                }
+            }
         }
 
         fun deviceStateFromLegacyDeviceState(legacyDeviceState: Int): Int {

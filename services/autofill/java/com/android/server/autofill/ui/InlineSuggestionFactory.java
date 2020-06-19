@@ -109,7 +109,7 @@ final class InlineSuggestionFactory {
         return createInlineSuggestionsInternal(/* isAugmented= */ true, request,
                 datasets, autofillId, onErrorCallback,
                 (dataset, datasetIndex) ->
-                        inlineSuggestionUiCallback.autofill(dataset),
+                        inlineSuggestionUiCallback.autofill(dataset, datasetIndex),
                 (intentSender) ->
                         inlineSuggestionUiCallback.startIntentSender(intentSender, new Intent()),
                 remoteRenderService);

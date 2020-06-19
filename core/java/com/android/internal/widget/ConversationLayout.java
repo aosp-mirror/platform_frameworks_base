@@ -233,12 +233,19 @@ public class ConversationLayout extends FrameLayout
             oldVisibility = mImportanceRingView.getVisibility();
             wasGone = oldVisibility == GONE;
             visibility = !mImportantConversation ? GONE : visibility;
-            isGone = visibility == GONE;
-            if (wasGone != isGone) {
+            boolean isRingGone = visibility == GONE;
+            if (wasGone != isRingGone) {
                 // Keep the badge visibility in sync with the icon. This is necessary in cases
                 // Where the icon is being hidden externally like in group children.
                 mImportanceRingView.animate().cancel();
                 mImportanceRingView.setVisibility(visibility);
+            }
+
+            oldVisibility = mConversationIconBadge.getVisibility();
+            wasGone = oldVisibility == GONE;
+            if (wasGone != isGone) {
+                mConversationIconBadge.animate().cancel();
+                mConversationIconBadge.setVisibility(visibility);
             }
         });
         // When the small icon is gone, hide the rest of the badge

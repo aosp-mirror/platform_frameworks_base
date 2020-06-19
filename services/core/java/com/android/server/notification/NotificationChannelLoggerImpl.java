@@ -19,6 +19,8 @@ package com.android.server.notification;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.UiEventLoggerImpl;
 import com.android.internal.util.FrameworkStatsLog;
 
 /**
@@ -27,6 +29,8 @@ import com.android.internal.util.FrameworkStatsLog;
  * should live in the interface so it can be tested.
  */
 public class NotificationChannelLoggerImpl implements NotificationChannelLogger {
+    UiEventLogger mUiEventLogger = new UiEventLoggerImpl();
+
     @Override
     public void logNotificationChannel(NotificationChannelEvent event,
             NotificationChannel channel, int uid, String pkg,
@@ -50,5 +54,10 @@ public class NotificationChannelLoggerImpl implements NotificationChannelLogger 
                 /* int32 channel_id_hash */ NotificationChannelLogger.getIdHash(channelGroup),
                 /* int old_importance*/ NotificationChannelLogger.getImportance(wasBlocked),
                 /* int importance*/ NotificationChannelLogger.getImportance(channelGroup));
+    }
+
+    @Override
+    public void logAppEvent(NotificationChannelEvent event, int uid, String pkg) {
+        mUiEventLogger.log(event, uid, pkg);
     }
 }

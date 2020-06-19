@@ -340,7 +340,7 @@ public class Events {
     }
 
     /**
-     * Logs an event to the event log and UiEvent (Westworld) logging. Compare writeEvent, which
+     * Logs an event to the event log and UiEvent (statsd) logging. Compare writeEvent, which
      * adds more log destinations.
      * @param tag One of the EVENT_* codes above.
      * @param list Any additional event-specific arguments, documented above.

@@ -42,7 +42,7 @@ namespace renderthread {
 // to the screen resolution. This is meant to be a conservative default based on
 // that analysis. The 4.0f is used because the default pixel format is assumed to
 // be ARGB_8888.
-#define SURFACE_SIZE_MULTIPLIER (5.0f * 4.0f)
+#define SURFACE_SIZE_MULTIPLIER (12.0f * 4.0f)
 #define BACKGROUND_RETENTION_PERCENTAGE (0.5f)
 
 CacheManager::CacheManager()

@@ -104,7 +104,7 @@ public final class PhoneStateMonitor {
         });
     }
 
-    int getPhoneState() {
+    public int getPhoneState() {
         int phoneState;
         if (isShadeFullscreen()) {
             phoneState = getPhoneLockscreenState();

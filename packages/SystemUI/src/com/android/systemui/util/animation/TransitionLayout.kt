@@ -17,6 +17,7 @@
 package com.android.systemui.util.animation
 
 import android.content.Context
+import android.graphics.Canvas
 import android.graphics.PointF
 import android.graphics.Rect
 import android.util.AttributeSet
@@ -37,6 +38,7 @@ class TransitionLayout @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : ConstraintLayout(context, attrs, defStyleAttr) {
 
+    private val boundsRect = Rect()
     private val originalGoneChildrenSet: MutableSet<Int> = mutableSetOf()
     private val originalViewAlphas: MutableMap<Int, Float> = mutableMapOf()
     private var measureAsConstraint: Boolean = false
@@ -147,16 +149,26 @@ class TransitionLayout @JvmOverloads constructor(
         }
     }
 
+    override fun dispatchDraw(canvas: Canvas?) {
+        val clip = !boundsRect.isEmpty
+        if (clip) {
+            canvas?.save()
+            canvas?.clipRect(boundsRect)
+        }
+        super.dispatchDraw(canvas)
+        if (clip) {
+            canvas?.restore()
+        }
+    }
+
     private fun updateBounds() {
         val layoutLeft = left
         val layoutTop = top
         setLeftTopRightBottom(layoutLeft, layoutTop, layoutLeft + currentState.width,
                 layoutTop + currentState.height)
-        val bounds = clipBounds ?: Rect()
-        bounds.set(left, top, right, bottom)
-        clipBounds = bounds
         translationX = currentState.translation.x
         translationY = currentState.translation.y
+        boundsRect.set(0, 0, (width + translationX).toInt(), (height + translationY).toInt())
     }
 
     /**

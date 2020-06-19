@@ -90,7 +90,7 @@ public class PreferencesHelper implements RankingConfig {
     private static final String NON_BLOCKABLE_CHANNEL_DELIM = ":";
 
     @VisibleForTesting
-    static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 5000;
+    static final int NOTIFICATION_CHANNEL_COUNT_LIMIT = 50000;
 
     private static final int NOTIFICATION_PREFERENCES_PULL_LIMIT = 1000;
     private static final int NOTIFICATION_CHANNEL_PULL_LIMIT = 2000;
@@ -1654,6 +1654,7 @@ public class PreferencesHelper implements RankingConfig {
         }
         setImportance(packageName, uid,
                 enabled ? DEFAULT_IMPORTANCE : IMPORTANCE_NONE);
+        mNotificationChannelLogger.logAppNotificationsAllowed(uid, packageName, enabled);
     }
 
     /**

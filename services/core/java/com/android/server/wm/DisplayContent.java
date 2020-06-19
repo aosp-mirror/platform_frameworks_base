@@ -32,6 +32,7 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_USER;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.os.Build.VERSION_CODES.N;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
 import static android.util.DisplayMetrics.DENSITY_DEFAULT;
@@ -1526,12 +1527,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Sets the provided record to {@link mFixedRotationLaunchingApp} if possible to apply fixed
+     * Sets the provided record to {@link #mFixedRotationLaunchingApp} if possible to apply fixed
      * rotation transform to it and indicate that the display may be rotated after it is launched.
      */
     void setFixedRotationLaunchingApp(@NonNull ActivityRecord r, @Surface.Rotation int rotation) {
         final WindowToken prevRotatedLaunchingApp = mFixedRotationLaunchingApp;
-        if (prevRotatedLaunchingApp != null && prevRotatedLaunchingApp == r
+        if (prevRotatedLaunchingApp == r
                 && r.getWindowConfiguration().getRotation() == rotation) {
             // The given launching app and target rotation are the same as the existing ones.
             return;
@@ -5657,6 +5658,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // to the current top activity.
                 continueUpdateOrientationForDiffOrienLaunchingApp();
             }
+        }
+
+        /**
+         * Return {@code true} if there is an ongoing animation to the "Recents" activity and this
+         * activity as a fixed orientation so shouldn't be rotated.
+         */
+        boolean isTopFixedOrientationRecentsAnimating() {
+            return mAnimatingRecents != null
+                    && mAnimatingRecents.getRequestedConfigurationOrientation()
+                    != ORIENTATION_UNDEFINED && !hasTopFixedRotationLaunchingApp();
         }
 
         @Override

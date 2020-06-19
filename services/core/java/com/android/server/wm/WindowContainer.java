@@ -1032,7 +1032,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * @return Whether this child is on top of the window hierarchy.
      */
     boolean isOnTop() {
-        return getParent().getTopChild() == this && getParent().isOnTop();
+        final WindowContainer parent = getParent();
+        return parent != null && parent.getTopChild() == this && parent.isOnTop();
     }
 
     /** Returns the top child container. */

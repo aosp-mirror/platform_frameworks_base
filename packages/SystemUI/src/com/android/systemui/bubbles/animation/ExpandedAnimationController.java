@@ -203,12 +203,22 @@ public class ExpandedAnimationController
     public void updateResources(int orientation, Point displaySize) {
         mScreenOrientation = orientation;
         mDisplaySize = displaySize;
-        if (mLayout != null) {
-            Resources res = mLayout.getContext().getResources();
-            mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-            mStatusBarHeight = res.getDimensionPixelSize(
-                    com.android.internal.R.dimen.status_bar_height);
+        if (mLayout == null) {
+            return;
         }
+        Resources res = mLayout.getContext().getResources();
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mStatusBarHeight = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.status_bar_height);
+        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
+        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
+        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
+        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
+
+        // Includes overflow button.
+        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
+                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
+        mSpaceBetweenBubbles = totalGapWidth / mBubblesMaxRendered;
     }
 
     /**
@@ -464,18 +474,7 @@ public class ExpandedAnimationController
 
     @Override
     void onActiveControllerForLayout(PhysicsAnimationLayout layout) {
-        final Resources res = layout.getResources();
-        mStackOffsetPx = res.getDimensionPixelSize(R.dimen.bubble_stack_offset);
-        mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
-        mBubbleSizePx = res.getDimensionPixelSize(R.dimen.individual_bubble_size);
-        mStatusBarHeight =
-                res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
-        mBubblesMaxRendered = res.getInteger(R.integer.bubbles_max_rendered);
-
-        // Includes overflow button.
-        float totalGapWidth = getWidthForDisplayingBubbles() - (mExpandedViewPadding * 2)
-                - (mBubblesMaxRendered + 1) * mBubbleSizePx;
-        mSpaceBetweenBubbles = totalGapWidth / mBubblesMaxRendered;
+        updateResources(mScreenOrientation, mDisplaySize);
 
         // Ensure that all child views are at 1x scale, and visible, in case they were animating
         // in.

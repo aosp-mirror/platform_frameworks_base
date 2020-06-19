@@ -43,6 +43,7 @@ import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/service/usb.proto";
 import "frameworks/base/core/proto/android/stats/connectivity/network_stack.proto";
+import "frameworks/base/core/proto/android/stats/connectivity/tethering.proto";
 import "frameworks/base/core/proto/android/stats/dnsresolver/dns_resolver.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
@@ -481,6 +482,10 @@ message Atom {
         BlobCommitted blob_committed = 298 [(module) = "framework"];
         BlobLeased blob_leased = 299 [(module) = "framework"];
         BlobOpened blob_opened = 300 [(module) = "framework"];
+        ContactsProviderStatusReported contacts_provider_status_reported = 301;
+        KeystoreKeyEventReported keystore_key_event_reported = 302;
+        NetworkTetheringReported  network_tethering_reported =
+            303 [(module) = "network_tethering"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -6889,6 +6894,24 @@ message AppCompacted {
 }
 
 /**
+ * Logs when a Tethering event occurs.
+ *
+ */
+message NetworkTetheringReported {
+  // tethering error code
+  optional android.stats.connectivity.ErrorCode error_code = 1;
+
+  // tethering downstream type
+  optional android.stats.connectivity.DownstreamType downstream_type = 2;
+
+  // transport type of upstream network
+  optional android.stats.connectivity.UpstreamType upstream_type = 3;
+
+  // The user type of Tethering
+  optional android.stats.connectivity.UserType user_type= 4;
+}
+
+/**
  * Logs a DNS lookup operation initiated by the system resolver on behalf of an application
  * invoking native APIs such as getaddrinfo() or Java APIs such as Network#getAllByName().
  *
@@ -9907,6 +9930,48 @@ message TvCasSessionOpenStatus {
 }
 
 /**
+ * Logs for ContactsProvider general usage.
+ * This is atom ID 301.
+ *
+ * Logged from:
+ *   packages/providers/ContactsProvider/src/com/android/providers/contacts/ContactsProvider2.java
+ */
+message ContactsProviderStatusReported {
+    enum ApiType {
+        UNKNOWN_API = 0;
+        QUERY = 1;
+        // INSERT includes insert and bulkInsert, and inserts triggered by applyBatch.
+        INSERT = 2;
+        // UPDATE and DELETE includes update/delete and the ones triggered by applyBatch.
+        UPDATE = 3;
+        DELETE = 4;
+    }
+
+    enum ResultType {
+        UNKNOWN_RESULT = 0;
+        SUCCESS = 1;
+        FAIL = 2;
+        ILLEGAL_ARGUMENT = 3;
+        UNSUPPORTED_OPERATION = 4;
+    }
+
+    enum CallerType {
+        UNSPECIFIED_CALLER_TYPE = 0;
+        CALLER_IS_SYNC_ADAPTER = 1;
+        CALLER_IS_NOT_SYNC_ADAPTER = 2;
+    }
+
+    optional ApiType api_type = 1;
+    // Defined in
+    // packages/providers/ContactsProvider/src/com/android/providers/contacts/ContactsProvider2.java
+    optional int32 uri_type = 2;
+    optional CallerType caller_type = 3;
+    optional ResultType result_type = 4;
+    optional int32 result_count = 5;
+    optional int64 latency_micros = 6;
+}
+
+/**
  * Logs when an app is frozen or unfrozen.
  *
  * Logged from:
@@ -10881,6 +10946,114 @@ message MediametricsAudioDeviceConnectionReported {
 
     // Number of connections if aggregated statistics, otherwise 1.
     optional int32 connection_count = 6;
+}
+
+/**
+ * Logs: i) creation of different types of cryptographic keys in the keystore,
+ * ii) operations performed using the keys,
+ * iii) attestation of the keys
+ * Logged from: system/security/keystore/key_event_log_handler.cpp
+ */
+message KeystoreKeyEventReported {
+
+    enum Algorithm {
+        /** Asymmetric algorithms. */
+        RSA = 1;
+        // 2 removed, do not reuse.
+        EC = 3;
+        /** Block cipher algorithms */
+        AES = 32;
+        TRIPLE_DES = 33;
+        /** MAC algorithms */
+        HMAC = 128;
+    };
+    /** Algorithm associated with the key */
+    optional Algorithm algorithm = 1;
+
+    /** Size of the key */
+    optional int32 key_size = 2;
+
+    enum KeyOrigin {
+        /** Generated in keymaster.  Should not exist outside the TEE. */
+        GENERATED = 0;
+        /** Derived inside keymaster.  Likely exists off-device. */
+        DERIVED = 1;
+        /** Imported into keymaster.  Existed as cleartext in Android. */
+        IMPORTED = 2;
+        /** Keymaster did not record origin. */
+        UNKNOWN = 3;
+        /** Securely imported into Keymaster. */
+        SECURELY_IMPORTED = 4;
+    };
+    /* Logs whether the key was generated, imported, securely imported, or derived.*/
+    optional KeyOrigin key_origin = 3;
+
+    enum HardwareAuthenticatorType {
+        NONE = 0;
+        PASSWORD = 1;
+        FINGERPRINT = 2;
+        // Additional entries must be powers of 2.
+    };
+    /**
+     * What auth types does this key require? If none,
+     * then no auth required.
+     */
+    optional HardwareAuthenticatorType user_auth_type = 4;
+
+    /**
+     * If user authentication is required, is the requirement time based? If it
+     * is not time based then this field will not be used and the key is per
+     * operation. Per operation keys must be user authenticated on each usage.
+     */
+    optional int32 user_auth_key_timeout_secs = 5;
+
+    /**
+     * padding mode, digest, block_mode and purpose should ideally be repeated
+     * fields. However, since statsd does not support repeated fields in
+     * pushed atoms, they are represented using bitmaps.
+     */
+
+    /** Track which padding mode is being used.*/
+    optional int32 padding_mode_bitmap = 6;
+
+    /** Track which digest is being used. */
+    optional int32 digest_bitmap = 7;
+
+    /** Track what block mode is being used (for encryption). */
+    optional int32 block_mode_bitmap = 8;
+
+    /** Track what purpose is this key serving. */
+    optional int32 purpose_bitmap = 9;
+
+    enum EcCurve {
+        P_224 = 0;
+        P_256 = 1;
+        P_384 = 2;
+        P_521 = 3;
+    };
+    /** Which ec curve was selected if elliptic curve cryptography is in use **/
+    optional EcCurve ec_curve = 10;
+
+    enum KeyBlobUsageRequirements {
+        STANDALONE = 0;
+        REQUIRES_FILE_SYSTEM = 1;
+    };
+    /** Standalone or is a file system required */
+    optional KeyBlobUsageRequirements key_blob_usage_reqs = 11;
+
+    enum Type {
+        key_operation = 0;
+        key_creation = 1;
+        key_attestation = 2;
+    }
+    /** Key creation event, operation event or attestation event? */
+    optional Type type = 12;
+
+    /** Was the key creation, operation, or attestation successful? */
+    optional bool was_successful = 13;
+
+    /** Response code or error code */
+    optional int32 error_code = 14;
 }
 
 // Blob Committer stats

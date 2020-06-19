@@ -16,6 +16,7 @@
 
 package com.android.internal.policy;
 
+import android.graphics.Insets;
 import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RenderNode;
@@ -69,16 +70,14 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     private ColorDrawable mNavigationBarColor;
     private boolean mOldFullscreen;
     private boolean mFullscreen;
-    private final Rect mOldSystemInsets = new Rect();
-    private final Rect mOldStableInsets = new Rect();
-    private final Rect mSystemInsets = new Rect();
-    private final Rect mStableInsets = new Rect();
+    private final Rect mOldSystemBarInsets = new Rect();
+    private final Rect mSystemBarInsets = new Rect();
     private final Rect mTmpRect = new Rect();
 
     public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
             Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable,
             Drawable userCaptionBackgroundDrawable, int statusBarColor, int navigationBarColor,
-            boolean fullscreen, Rect systemInsets, Rect stableInsets) {
+            boolean fullscreen, Insets systemBarInsets) {
         setName("ResizeFrame");
 
         mRenderer = renderer;
@@ -95,10 +94,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mTargetRect.set(initialBounds);
         mFullscreen = fullscreen;
         mOldFullscreen = fullscreen;
-        mSystemInsets.set(systemInsets);
-        mStableInsets.set(stableInsets);
-        mOldSystemInsets.set(systemInsets);
-        mOldStableInsets.set(stableInsets);
+        mSystemBarInsets.set(systemBarInsets.toRect());
+        mOldSystemBarInsets.set(systemBarInsets.toRect());
 
         // Kick off our draw thread.
         start();
@@ -154,16 +151,13 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
      *
      * @param newTargetBounds The new target bounds.
      * @param fullscreen Whether the window is currently drawing in fullscreen.
-     * @param systemInsets The current visible system insets for the window.
-     * @param stableInsets The stable insets for the window.
+     * @param systemBarInsets The current visible system insets for the window.
      */
-    public void setTargetRect(Rect newTargetBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets) {
+    public void setTargetRect(Rect newTargetBounds, boolean fullscreen, Rect systemBarInsets) {
         synchronized (this) {
             mFullscreen = fullscreen;
             mTargetRect.set(newTargetBounds);
-            mSystemInsets.set(systemInsets);
-            mStableInsets.set(stableInsets);
+            mSystemBarInsets.set(systemBarInsets);
             // Notify of a bounds change.
             pingRenderLocked(false /* drawImmediate */);
         }
@@ -247,14 +241,12 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mNewTargetRect.set(mTargetRect);
         if (!mNewTargetRect.equals(mOldTargetRect)
                 || mOldFullscreen != mFullscreen
-                || !mStableInsets.equals(mOldStableInsets)
-                || !mSystemInsets.equals(mOldSystemInsets)
+                || !mSystemBarInsets.equals(mOldSystemBarInsets)
                 || mReportNextDraw) {
             mOldFullscreen = mFullscreen;
             mOldTargetRect.set(mNewTargetRect);
-            mOldSystemInsets.set(mSystemInsets);
-            mOldStableInsets.set(mStableInsets);
-            redrawLocked(mNewTargetRect, mFullscreen, mSystemInsets, mStableInsets);
+            mOldSystemBarInsets.set(mSystemBarInsets);
+            redrawLocked(mNewTargetRect, mFullscreen);
         }
     }
 
@@ -304,11 +296,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
      *
      * @param newBounds The window bounds which needs to be drawn.
      * @param fullscreen Whether the window is currently drawing in fullscreen.
-     * @param systemInsets The current visible system insets for the window.
-     * @param stableInsets The stable insets for the window.
      */
-    private void redrawLocked(Rect newBounds, boolean fullscreen, Rect systemInsets,
-            Rect stableInsets) {
+    private void redrawLocked(Rect newBounds, boolean fullscreen) {
 
         // While a configuration change is taking place the view hierarchy might become
         // inaccessible. For that case we remember the previous metrics to avoid flashes.
@@ -355,7 +344,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         }
         mFrameAndBackdropNode.endRecording();
 
-        drawColorViews(left, top, width, height, fullscreen, systemInsets, stableInsets);
+        drawColorViews(left, top, width, height, fullscreen);
 
         // We need to render the node explicitly
         mRenderer.drawRenderNode(mFrameAndBackdropNode);
@@ -363,14 +352,13 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         reportDrawIfNeeded();
     }
 
-    private void drawColorViews(int left, int top, int width, int height,
-            boolean fullscreen, Rect systemInsets, Rect stableInsets) {
+    private void drawColorViews(int left, int top, int width, int height, boolean fullscreen) {
         if (mSystemBarBackgroundNode == null) {
             return;
         }
         RecordingCanvas canvas = mSystemBarBackgroundNode.beginRecording(width, height);
         mSystemBarBackgroundNode.setLeftTopRightBottom(left, top, left + width, top + height);
-        final int topInset = DecorView.getColorViewTopInset(mStableInsets.top, mSystemInsets.top);
+        final int topInset = mSystemBarInsets.top;
         if (mStatusBarColor != null) {
             mStatusBarColor.setBounds(0, 0, left + width, topInset);
             mStatusBarColor.draw(canvas);
@@ -380,7 +368,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         // don't want the navigation bar background be moving around when resizing in docked mode.
         // However, we need it for the transitions into/out of docked mode.
         if (mNavigationBarColor != null && fullscreen) {
-            DecorView.getNavigationBarRect(width, height, stableInsets, systemInsets, mTmpRect, 1f);
+            DecorView.getNavigationBarRect(width, height, mSystemBarInsets, mTmpRect, 1f);
             mNavigationBarColor.setBounds(mTmpRect);
             mNavigationBarColor.draw(canvas);
         }
