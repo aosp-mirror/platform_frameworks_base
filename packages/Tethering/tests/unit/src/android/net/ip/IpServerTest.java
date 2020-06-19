@@ -859,6 +859,7 @@ public class IpServerTest {
         verify(mBpfCoordinator).tetherOffloadRuleClear(mIpServer);
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighA, macA));
         verify(mNetd).tetherOffloadRuleRemove(matches(UPSTREAM_IFINDEX, neighB, macB));
+        verify(mIpNeighborMonitor).stop();
         resetNetdAndBpfCoordinator();
     }
 
