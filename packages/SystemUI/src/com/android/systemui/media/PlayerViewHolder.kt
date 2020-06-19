@@ -44,6 +44,7 @@ class PlayerViewHolder private constructor(itemView: View) {
     val seamless = itemView.requireViewById<ViewGroup>(R.id.media_seamless)
     val seamlessIcon = itemView.requireViewById<ImageView>(R.id.media_seamless_image)
     val seamlessText = itemView.requireViewById<TextView>(R.id.media_seamless_text)
+    val seamlessFallback = itemView.requireViewById<ImageView>(R.id.media_seamless_fallback)
 
     // Seek bar
     val seekBar = itemView.requireViewById<SeekBar>(R.id.media_progress_bar)
