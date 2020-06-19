@@ -31,6 +31,7 @@ import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.ParserException;
 import com.google.android.exoplayer2.drm.DrmInitData.SchemeData;
+import com.google.android.exoplayer2.extractor.ChunkIndex;
 import com.google.android.exoplayer2.extractor.DefaultExtractorInput;
 import com.google.android.exoplayer2.extractor.Extractor;
 import com.google.android.exoplayer2.extractor.ExtractorInput;
@@ -817,6 +818,30 @@ public final class MediaParser {
     public static final String PARAMETER_EXPOSE_DUMMY_SEEKMAP =
             "android.media.mediaparser.exposeDummySeekMap";
 
+    /**
+     * Sets whether chunk indices available in the extracted media should be exposed as {@link
+     * MediaFormat MediaFormats}. {@code boolean} expected. Default value is {@link false}.
+     *
+     * <p>When set to true, any information about media segmentation will be exposed as a {@link
+     * MediaFormat} (with track index 0) containing four {@link ByteBuffer} elements under the
+     * following keys:
+     *
+     * <ul>
+     *   <li>"chunk-index-int-sizes": Contains {@code ints} representing the sizes in bytes of each
+     *       of the media segments.
+     *   <li>"chunk-index-long-offsets": Contains {@code longs} representing the byte offsets of
+     *       each segment in the stream.
+     *   <li>"chunk-index-long-us-durations": Contains {@code longs} representing the media duration
+     *       of each segment, in microseconds.
+     *   <li>"chunk-index-long-us-times": Contains {@code longs} representing the start time of each
+     *       segment, in microseconds.
+     * </ul>
+     *
+     * @hide
+     */
+    public static final String PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT =
+            "android.media.mediaParser.exposeChunkIndexAsMediaFormat";
+
     // Private constants.
 
     private static final String TAG = "MediaParser";
@@ -980,6 +1005,7 @@ public final class MediaParser {
     private boolean mIgnoreTimestampOffset;
     private boolean mEagerlyExposeTrackType;
     private boolean mExposeDummySeekMap;
+    private boolean mExposeChunkIndexAsMediaFormat;
     private String mParserName;
     private Extractor mExtractor;
     private ExtractorInput mExtractorInput;
@@ -1041,6 +1067,9 @@ public final class MediaParser {
         }
         if (PARAMETER_EXPOSE_DUMMY_SEEKMAP.equals(parameterName)) {
             mExposeDummySeekMap = (boolean) value;
+        }
+        if (PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT.equals(parameterName)) {
+            mExposeChunkIndexAsMediaFormat = (boolean) value;
         }
         mParserParameters.put(parameterName, value);
         return this;
@@ -1436,6 +1465,19 @@ public final class MediaParser {
 
         @Override
         public void seekMap(com.google.android.exoplayer2.extractor.SeekMap exoplayerSeekMap) {
+            if (mExposeChunkIndexAsMediaFormat && exoplayerSeekMap instanceof ChunkIndex) {
+                ChunkIndex chunkIndex = (ChunkIndex) exoplayerSeekMap;
+                MediaFormat mediaFormat = new MediaFormat();
+                mediaFormat.setByteBuffer("chunk-index-int-sizes", toByteBuffer(chunkIndex.sizes));
+                mediaFormat.setByteBuffer(
+                        "chunk-index-long-offsets", toByteBuffer(chunkIndex.offsets));
+                mediaFormat.setByteBuffer(
+                        "chunk-index-long-us-durations", toByteBuffer(chunkIndex.durationsUs));
+                mediaFormat.setByteBuffer(
+                        "chunk-index-long-us-times", toByteBuffer(chunkIndex.timesUs));
+                mOutputConsumer.onTrackDataFound(
+                        /* trackIndex= */ 0, new TrackData(mediaFormat, /* drmInitData= */ null));
+            }
             mOutputConsumer.onSeekMapFound(new SeekMap(exoplayerSeekMap));
         }
     }
@@ -1823,6 +1865,24 @@ public final class MediaParser {
         return result;
     }
 
+    private static ByteBuffer toByteBuffer(long[] longArray) {
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(longArray.length * Long.BYTES);
+        for (long element : longArray) {
+            byteBuffer.putLong(element);
+        }
+        byteBuffer.flip();
+        return byteBuffer;
+    }
+
+    private static ByteBuffer toByteBuffer(int[] intArray) {
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(intArray.length * Integer.BYTES);
+        for (int element : intArray) {
+            byteBuffer.putInt(element);
+        }
+        byteBuffer.flip();
+        return byteBuffer;
+    }
+
     private static String toTypeString(int type) {
         switch (type) {
             case C.TRACK_TYPE_VIDEO:
@@ -1979,6 +2039,8 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_IGNORE_TIMESTAMP_OFFSET, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_EAGERLY_EXPOSE_TRACKTYPE, Boolean.class);
         expectedTypeByParameterName.put(PARAMETER_EXPOSE_DUMMY_SEEKMAP, Boolean.class);
+        expectedTypeByParameterName.put(
+                PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT, Boolean.class);
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }
