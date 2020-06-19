@@ -122,6 +122,15 @@ class BlobStoreConfig {
         public static long COMMIT_COOL_OFF_DURATION_MS =
                 DEFAULT_COMMIT_COOL_OFF_DURATION_MS;
 
+        /**
+         * Denotes whether to use RevocableFileDescriptor when apps try to read session/blob data.
+         */
+        public static final String KEY_USE_REVOCABLE_FD_FOR_READS =
+                "use_revocable_fd_for_reads";
+        public static final boolean DEFAULT_USE_REVOCABLE_FD_FOR_READS = true;
+        public static boolean USE_REVOCABLE_FD_FOR_READS =
+                DEFAULT_USE_REVOCABLE_FD_FOR_READS;
+
         static void refresh(Properties properties) {
             if (!NAMESPACE_BLOBSTORE.equals(properties.getNamespace())) {
                 return;
@@ -151,6 +160,10 @@ class BlobStoreConfig {
                         COMMIT_COOL_OFF_DURATION_MS = properties.getLong(key,
                                 DEFAULT_COMMIT_COOL_OFF_DURATION_MS);
                         break;
+                    case KEY_USE_REVOCABLE_FD_FOR_READS:
+                        USE_REVOCABLE_FD_FOR_READS = properties.getBoolean(key,
+                                DEFAULT_USE_REVOCABLE_FD_FOR_READS);
+                        break;
                     default:
                         Slog.wtf(TAG, "Unknown key in device config properties: " + key);
                 }
@@ -178,6 +191,8 @@ class BlobStoreConfig {
             fout.println(String.format(dumpFormat, KEY_COMMIT_COOL_OFF_DURATION_MS,
                     TimeUtils.formatDuration(COMMIT_COOL_OFF_DURATION_MS),
                     TimeUtils.formatDuration(DEFAULT_COMMIT_COOL_OFF_DURATION_MS)));
+            fout.println(String.format(dumpFormat, KEY_USE_REVOCABLE_FD_FOR_READS,
+                    USE_REVOCABLE_FD_FOR_READS, DEFAULT_USE_REVOCABLE_FD_FOR_READS));
         }
     }
 
@@ -240,6 +255,13 @@ class BlobStoreConfig {
     private static boolean hasCommitCoolOffPeriodElapsed(long commitTimeMs) {
         return commitTimeMs + DeviceConfigProperties.COMMIT_COOL_OFF_DURATION_MS
                 < System.currentTimeMillis();
+    }
+
+    /**
+     * Return whether to use RevocableFileDescriptor when apps try to read session/blob data.
+     */
+    public static boolean shouldUseRevocableFdForReads() {
+        return DeviceConfigProperties.USE_REVOCABLE_FD_FOR_READS;
     }
 
     @Nullable
