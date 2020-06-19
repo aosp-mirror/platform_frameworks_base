@@ -49,6 +49,7 @@ import android.os.Build;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.Trace;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.SparseIntArray;
@@ -439,7 +440,9 @@ public final class SurfaceControl implements Parcelable {
             release();
         }
         if (nativeObject != 0) {
+            Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "closeGuard");
             mCloseGuard.open("release");
+            Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
         }
         mNativeObject = nativeObject;
         mNativeHandle = mNativeObject != 0 ? nativeGetHandle(nativeObject) : 0;
