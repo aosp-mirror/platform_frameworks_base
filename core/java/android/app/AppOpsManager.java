@@ -7370,15 +7370,17 @@ public class AppOpsManager {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
+            boolean shouldCollectMessage = Process.myUid() == Process.SYSTEM_UID ? true : false;
             if (collectionMode == COLLECT_ASYNC) {
                 if (message == null) {
                     // Set stack trace as default message
                     message = getFormattedStackTrace();
+                    shouldCollectMessage = true;
                 }
             }
 
             int mode = mService.noteOperation(op, uid, packageName, attributionTag,
-                    collectionMode == COLLECT_ASYNC, message);
+                    collectionMode == COLLECT_ASYNC, message, shouldCollectMessage);
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -7531,16 +7533,19 @@ public class AppOpsManager {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(proxiedUid, proxiedPackageName, op);
+            boolean shouldCollectMessage = myUid == Process.SYSTEM_UID ? true : false;
             if (collectionMode == COLLECT_ASYNC) {
                 if (message == null) {
                     // Set stack trace as default message
                     message = getFormattedStackTrace();
+                    shouldCollectMessage = true;
                 }
             }
 
             int mode = mService.noteProxyOperation(op, proxiedUid, proxiedPackageName,
                     proxiedAttributionTag, myUid, mContext.getOpPackageName(),
-                    mContext.getAttributionTag(), collectionMode == COLLECT_ASYNC, message);
+                    mContext.getAttributionTag(), collectionMode == COLLECT_ASYNC, message,
+                    shouldCollectMessage);
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
@@ -7855,15 +7860,18 @@ public class AppOpsManager {
         try {
             collectNoteOpCallsForValidation(op);
             int collectionMode = getNotedOpCollectionMode(uid, packageName, op);
+            boolean shouldCollectMessage = Process.myUid() == Process.SYSTEM_UID ? true : false;
             if (collectionMode == COLLECT_ASYNC) {
                 if (message == null) {
                     // Set stack trace as default message
                     message = getFormattedStackTrace();
+                    shouldCollectMessage = true;
                 }
             }
 
             int mode = mService.startOperation(getClientId(), op, uid, packageName,
-                    attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message);
+                    attributionTag, startIfModeDefault, collectionMode == COLLECT_ASYNC, message,
+                    shouldCollectMessage);
 
             if (mode == MODE_ALLOWED) {
                 if (collectionMode == COLLECT_SELF) {
