@@ -51,7 +51,6 @@ import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.service.notification.StatusBarNotification;
 import android.util.Log;
 import android.view.Choreographer;
 import android.view.DisplayCutout;
@@ -71,6 +70,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.MainThread;
@@ -1107,6 +1107,7 @@ public class BubbleStackView extends FrameLayout
             title.setTextColor(textColor);
             description.setTextColor(textColor);
 
+            updateUserEducationForLayoutDirection();
             addView(mUserEducationView);
         }
 
@@ -1123,7 +1124,7 @@ public class BubbleStackView extends FrameLayout
                             false /* attachToRoot */);
             mManageEducationView.setVisibility(GONE);
             mManageEducationView.setElevation(mBubbleElevation);
-
+            mManageEducationView.setLayoutDirection(View.LAYOUT_DIRECTION_LOCALE);
             addView(mManageEducationView);
         }
     }
@@ -1205,13 +1206,17 @@ public class BubbleStackView extends FrameLayout
     }
 
     /** Tells the views with locale-dependent layout direction to resolve the new direction. */
-    public void onLayoutDirectionChanged() {
-        mManageMenu.resolveLayoutDirection();
-        mFlyout.resolveLayoutDirection();
-
-        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-            mExpandedBubble.getExpandedView().resolveLayoutDirection();
+    public void onLayoutDirectionChanged(int direction) {
+        mManageMenu.setLayoutDirection(direction);
+        mFlyout.setLayoutDirection(direction);
+        if (mUserEducationView != null) {
+            mUserEducationView.setLayoutDirection(direction);
+            updateUserEducationForLayoutDirection();
         }
+        if (mManageEducationView != null) {
+            mManageEducationView.setLayoutDirection(direction);
+        }
+        updateExpandedViewDirection(direction);
     }
 
     /** Respond to the display size change by recalculating view size and location. */
@@ -1282,6 +1287,18 @@ public class BubbleStackView extends FrameLayout
         bubbles.forEach(bubble -> {
             if (bubble.getExpandedView() != null) {
                 bubble.getExpandedView().applyThemeAttrs();
+            }
+        });
+    }
+
+    void updateExpandedViewDirection(int direction) {
+        final List<Bubble> bubbles = mBubbleData.getBubbles();
+        if (bubbles.isEmpty()) {
+            return;
+        }
+        bubbles.forEach(bubble -> {
+            if (bubble.getExpandedView() != null) {
+                bubble.getExpandedView().setLayoutDirection(direction);
             }
         });
     }
@@ -1633,6 +1650,8 @@ public class BubbleStackView extends FrameLayout
         if (mShouldShowUserEducation && mUserEducationView.getVisibility() != VISIBLE) {
             mUserEducationView.setAlpha(0);
             mUserEducationView.setVisibility(VISIBLE);
+            updateUserEducationForLayoutDirection();
+
             // Post so we have height of mUserEducationView
             mUserEducationView.post(() -> {
                 final int viewHeight = mUserEducationView.getHeight();
@@ -1648,6 +1667,28 @@ public class BubbleStackView extends FrameLayout
             return true;
         }
         return false;
+    }
+
+    private void updateUserEducationForLayoutDirection() {
+        if (mUserEducationView == null) {
+            return;
+        }
+        LinearLayout textLayout =  mUserEducationView.findViewById(R.id.user_education_view);
+        TextView title = mUserEducationView.findViewById(R.id.user_education_title);
+        TextView description = mUserEducationView.findViewById(R.id.user_education_description);
+        boolean isLtr =
+                getResources().getConfiguration().getLayoutDirection() == LAYOUT_DIRECTION_LTR;
+        if (isLtr) {
+            mUserEducationView.setLayoutDirection(LAYOUT_DIRECTION_LTR);
+            textLayout.setBackgroundResource(R.drawable.bubble_stack_user_education_bg);
+            title.setGravity(Gravity.LEFT);
+            description.setGravity(Gravity.LEFT);
+        } else {
+            mUserEducationView.setLayoutDirection(LAYOUT_DIRECTION_RTL);
+            textLayout.setBackgroundResource(R.drawable.bubble_stack_user_education_bg_rtl);
+            title.setGravity(Gravity.RIGHT);
+            description.setGravity(Gravity.RIGHT);
+        }
     }
 
     /**

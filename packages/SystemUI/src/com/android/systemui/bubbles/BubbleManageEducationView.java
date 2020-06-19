@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -34,6 +35,8 @@ import com.android.systemui.R;
 public class BubbleManageEducationView extends LinearLayout {
 
     private View mManageView;
+    private TextView mTitleTextView;
+    private TextView mDescTextView;
 
     public BubbleManageEducationView(Context context) {
         this(context, null);
@@ -57,6 +60,8 @@ public class BubbleManageEducationView extends LinearLayout {
         super.onFinishInflate();
 
         mManageView = findViewById(R.id.manage_education_view);
+        mTitleTextView = findViewById(R.id.user_education_title);
+        mDescTextView = findViewById(R.id.user_education_description);
 
         final TypedArray ta = mContext.obtainStyledAttributes(
                 new int[] {android.R.attr.colorAccent,
@@ -66,8 +71,8 @@ public class BubbleManageEducationView extends LinearLayout {
         ta.recycle();
 
         textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, true);
-        ((TextView) findViewById(R.id.user_education_title)).setTextColor(textColor);
-        ((TextView) findViewById(R.id.user_education_description)).setTextColor(textColor);
+        mTitleTextView.setTextColor(textColor);
+        mDescTextView.setTextColor(textColor);
     }
 
     /**
@@ -83,5 +88,19 @@ public class BubbleManageEducationView extends LinearLayout {
      */
     public int getManageViewHeight() {
         return mManageView.getHeight();
+    }
+
+    @Override
+    public void setLayoutDirection(int direction) {
+        super.setLayoutDirection(direction);
+        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            mManageView.setBackgroundResource(R.drawable.bubble_stack_user_education_bg_rtl);
+            mTitleTextView.setGravity(Gravity.RIGHT);
+            mDescTextView.setGravity(Gravity.RIGHT);
+        } else {
+            mManageView.setBackgroundResource(R.drawable.bubble_stack_user_education_bg);
+            mTitleTextView.setGravity(Gravity.LEFT);
+            mDescTextView.setGravity(Gravity.LEFT);
+        }
     }
 }
