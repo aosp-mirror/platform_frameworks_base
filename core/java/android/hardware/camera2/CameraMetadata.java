@@ -952,19 +952,35 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference}</li>
      * <li>{@link CameraCharacteristics#LENS_DISTORTION android.lens.distortion}</li>
      * </ul>
-     * <p>The field of view of all non-RAW physical streams must be the same or as close as
-     * possible to that of non-RAW logical streams. If the requested FOV is outside of the
-     * range supported by the physical camera, the physical stream for that physical camera
-     * will use either the maximum or minimum scaler crop region, depending on which one is
-     * closer to the requested FOV. For example, for a logical camera with wide-tele lens
-     * configuration where the wide lens is the default, if the logical camera's crop region
-     * is set to maximum, the physical stream for the tele lens will be configured to its
-     * maximum crop region. On the other hand, if the logical camera has a normal-wide lens
-     * configuration where the normal lens is the default, when the logical camera's crop
-     * region is set to maximum, the FOV of the logical streams will be that of the normal
-     * lens. The FOV of the physical streams for the wide lens will be the same as the
-     * logical stream, by making the crop region smaller than its active array size to
-     * compensate for the smaller focal length.</p>
+     * <p>The field of view of non-RAW physical streams must not be smaller than that of the
+     * non-RAW logical streams, or the maximum field-of-view of the physical camera,
+     * whichever is smaller. The application should check the physical capture result
+     * metadata for how the physical streams are cropped or zoomed. More specifically, given
+     * the physical camera result metadata, the effective horizontal field-of-view of the
+     * physical camera is:</p>
+     * <pre><code>fov = 2 * atan2(cropW * sensorW / (2 * zoomRatio * activeArrayW), focalLength)
+     * </code></pre>
+     * <p>where the equation parameters are the physical camera's crop region width, physical
+     * sensor width, zoom ratio, active array width, and focal length respectively. Typically
+     * the physical stream of active physical camera has the same field-of-view as the
+     * logical streams. However, the same may not be true for physical streams from
+     * non-active physical cameras. For example, if the logical camera has a wide-ultrawide
+     * configuration where the wide lens is the default, when the crop region is set to the
+     * logical camera's active array size, (and the zoom ratio set to 1.0 starting from
+     * Android 11), a physical stream for the ultrawide camera may prefer outputing images
+     * with larger field-of-view than that of the wide camera for better stereo matching
+     * margin or more robust motion tracking. At the same time, the physical non-RAW streams'
+     * field of view must not be smaller than the requested crop region and zoom ratio, as
+     * long as it's within the physical lens' capability. For example, for a logical camera
+     * with wide-tele lens configuration where the wide lens is the default, if the logical
+     * camera's crop region is set to maximum size, and zoom ratio set to 1.0, the physical
+     * stream for the tele lens will be configured to its maximum size crop region (no zoom).</p>
+     * <p><em>Deprecated:</em> Prior to Android 11, the field of view of all non-RAW physical streams
+     * cannot be larger than that of non-RAW logical streams. If the logical camera has a
+     * wide-ultrawide lens configuration where the wide lens is the default, when the logical
+     * camera's crop region is set to maximum size, the FOV of the physical streams for the
+     * ultrawide lens will be the same as the logical stream, by making the crop region
+     * smaller than its active array size to compensate for the smaller focal length.</p>
      * <p>Even if the underlying physical cameras have different RAW characteristics (such as
      * size or CFA pattern), a logical camera can still advertise RAW capability. In this
      * case, when the application configures a RAW stream, the camera device will make sure
