@@ -127,7 +127,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
                         snap.calculateNonDismissingSnapTarget(position);
                 sdl.resizeSplits(target.position, t);
 
-                if (isSplitActive()) {
+                if (isSplitActive() && mHomeStackResizable) {
                     WindowManagerProxy.applyHomeTasksMinimized(sdl, mSplits.mSecondary.token, t);
                 }
                 if (mWindowManagerProxy.queueSyncTransactionIfWaiting(t)) {
@@ -428,7 +428,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     private void updateTouchable() {
-        mWindowManager.setTouchable((mHomeStackResizable || !mMinimized) && !mAdjustedForIme);
+        mWindowManager.setTouchable(!mAdjustedForIme);
     }
 
     /**
@@ -523,7 +523,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
     }
 
     void ensureMinimizedSplit() {
-        setHomeMinimized(true /* minimized */, mSplits.mSecondary.isResizeable);
+        setHomeMinimized(true /* minimized */, mHomeStackResizable);
         if (!isDividerVisible()) {
             // Wasn't in split-mode yet, so enter now.
             if (DEBUG) {
