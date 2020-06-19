@@ -18,7 +18,6 @@ package android.bluetooth;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
-import android.annotation.SystemApi;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.Binder;
@@ -328,7 +327,6 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return true if connectionPolicy is set, false on error
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public boolean setConnectionPolicy(BluetoothDevice device,
             @ConnectionPolicy int connectionPolicy) {
@@ -377,7 +375,6 @@ public final class BluetoothSap implements BluetoothProfile {
      * @return connection policy of the device
      * @hide
      */
-    @SystemApi
     @RequiresPermission(Manifest.permission.BLUETOOTH_PRIVILEGED)
     public @ConnectionPolicy int getConnectionPolicy(BluetoothDevice device) {
         if (VDBG) log("getConnectionPolicy(" + device + ")");
