@@ -51,7 +51,8 @@ public class NotificationRecordLoggerImpl implements NotificationRecordLogger {
                 /* int32 style = 11 */ p.getStyle(),
                 /* int32 num_people = 12 */ p.getNumPeople(),
                 /* int32 position = 13 */ position,
-                /* android.stats.sysui.NotificationImportance importance = 14 */ r.getImportance(),
+                /* android.stats.sysui.NotificationImportance importance = 14 */
+                NotificationRecordLogger.getLoggingImportance(r),
                 /* int32 alerting = 15 */ buzzBeepBlink,
                 /* NotificationImportanceExplanation importance_source = 16 */
                 r.getImportanceExplanationCode(),
