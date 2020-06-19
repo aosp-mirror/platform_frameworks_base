@@ -940,8 +940,12 @@ public class StackAnimationController extends
 
     /** Returns the default stack position, which is on the top left. */
     public PointF getDefaultStartPosition() {
-        return new PointF(
-                getAllowableStackPositionRegion().left,
+        boolean isRtl = mLayout != null
+                && mLayout.getResources().getConfiguration().getLayoutDirection()
+                == View.LAYOUT_DIRECTION_RTL;
+        return new PointF(isRtl
+                        ? getAllowableStackPositionRegion().right
+                        : getAllowableStackPositionRegion().left,
                 getAllowableStackPositionRegion().top + mStackStartingVerticalOffset);
     }
 
