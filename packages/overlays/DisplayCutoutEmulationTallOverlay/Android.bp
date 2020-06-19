@@ -1,0 +1,5 @@
+runtime_resource_overlay {
+    name: "DisplayCutoutEmulationTallOverlay",
+    theme: "DisplayCutoutEmulationTall",
+    product_specific: true,
+}
