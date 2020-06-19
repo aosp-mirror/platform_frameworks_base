@@ -21,7 +21,6 @@ import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.annotation.TestApi;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -241,7 +240,6 @@ public class OverlayManager {
      *
      * @hide
      */
-    @TestApi
     @RequiresPermission(anyOf = {
             "android.permission.INTERACT_ACROSS_USERS",
     })

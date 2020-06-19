@@ -343,7 +343,6 @@ public class MmTelFeature extends ImsFeature {
          * @hide
          */
         @Override
-        @SystemApi @TestApi
         public void onIncomingCall(IImsCallSession c, Bundle extras) {
 
         }
@@ -355,7 +354,6 @@ public class MmTelFeature extends ImsFeature {
          * @hide
          */
         @Override
-        @SystemApi @TestApi
         public void onRejectedCall(ImsCallProfile callProfile, ImsReasonInfo reason) {
 
         }
@@ -366,7 +364,6 @@ public class MmTelFeature extends ImsFeature {
          * @hide
          */
         @Override
-        @SystemApi @TestApi
         public void onVoiceMessageCountUpdate(int count) {
 
         }

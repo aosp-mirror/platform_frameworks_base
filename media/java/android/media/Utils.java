@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.database.Cursor;
@@ -440,7 +439,6 @@ public class Utils {
      *
      * @param <V> The class of the object returned to the listener.
      */
-    @TestApi
     public static class ListenerList<V> {
         /**
          * The Listener interface for callback.

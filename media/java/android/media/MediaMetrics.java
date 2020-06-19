@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.os.Bundle;
 
 import java.nio.ByteBuffer;
@@ -583,7 +582,6 @@ public class MediaMetrics {
          *
          * @return a Bundle with the keys set according to data in the Item's buffer.
          */
-        @TestApi
         public Bundle toBundle() {
             updateHeader();
 
@@ -596,23 +594,14 @@ public class MediaMetrics {
 
         // The following constants are used for tests to extract
         // the content of the Bundle for CTS testing.
-        @TestApi
         public static final String BUNDLE_TOTAL_SIZE = "_totalSize";
-        @TestApi
         public static final String BUNDLE_HEADER_SIZE = "_headerSize";
-        @TestApi
         public static final String BUNDLE_VERSION = "_version";
-        @TestApi
         public static final String BUNDLE_KEY_SIZE = "_keySize";
-        @TestApi
         public static final String BUNDLE_KEY = "_key";
-        @TestApi
         public static final String BUNDLE_PID = "_pid";
-        @TestApi
         public static final String BUNDLE_UID = "_uid";
-        @TestApi
         public static final String BUNDLE_TIMESTAMP = "_timestamp";
-        @TestApi
         public static final String BUNDLE_PROPERTY_COUNT = "_propertyCount";
 
         /**
@@ -623,7 +612,6 @@ public class MediaMetrics {
          * @param buffer contains the byte data serialized according to the byte string version.
          * @return a Bundle with the keys set according to data in the buffer.
          */
-        @TestApi
         public static Bundle toBundle(ByteBuffer buffer) {
             final Bundle bundle = new Bundle();
 

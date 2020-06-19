@@ -18,7 +18,6 @@ package android.telephony;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
-import android.annotation.TestApi;
 import android.compat.Compatibility;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledAfter;
@@ -283,7 +282,6 @@ public class TelephonyRegistryManager {
      * @param incomingNumber incoming phone number.
      * @hide
      */
-    @TestApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void notifyCallStateChangedForAllSubscriptions(@CallState int state,
             @Nullable String incomingNumber) {
