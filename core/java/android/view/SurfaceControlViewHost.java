@@ -273,6 +273,6 @@ public class SurfaceControlViewHost {
      */
     public void release() {
         // ViewRoot will release mSurfaceControl for us.
-        mViewRoot.die(false /* immediate */);
+        mViewRoot.die(true /* immediate */);
     }
 }
