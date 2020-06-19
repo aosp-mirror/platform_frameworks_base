@@ -206,6 +206,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void synchronizePinnedStackBounds() {
         cancelAnimations();
         mBounds.set(mPipTaskOrganizer.getLastReportedBounds());
+        mTemporaryBounds.setEmpty();
 
         if (mPipTaskOrganizer.isInPip()) {
             mFloatingContentCoordinator.onContentMoved(this);
@@ -274,6 +275,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         final float destinationX = targetCenter.x - (desiredWidth / 2f);
         final float destinationY = targetCenter.y - (desiredHeight / 2f);
 
+        // If we're already in the dismiss target area, then there won't be a move to set the
+        // temporary bounds, so just initialize it to the current bounds
+        if (mTemporaryBounds.isEmpty()) {
+            mTemporaryBounds.set(mBounds);
+        }
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_X, destinationX, velX, mSpringConfig)
                 .spring(FloatProperties.RECT_Y, destinationY, velY, mSpringConfig)
