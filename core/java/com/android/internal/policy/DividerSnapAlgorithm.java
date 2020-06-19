@@ -104,17 +104,18 @@ public class DividerSnapAlgorithm {
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
             boolean isHorizontalDivision, Rect insets) {
         this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
-                DOCKED_INVALID, false);
+                DOCKED_INVALID, false /* minimized */, true /* resizable */);
     }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
         boolean isHorizontalDivision, Rect insets, int dockSide) {
         this(res, displayWidth, displayHeight, dividerSize, isHorizontalDivision, insets,
-            dockSide, false);
+            dockSide, false /* minimized */, true /* resizable */);
     }
 
     public DividerSnapAlgorithm(Resources res, int displayWidth, int displayHeight, int dividerSize,
-            boolean isHorizontalDivision, Rect insets, int dockSide, boolean isMinimizedMode) {
+            boolean isHorizontalDivision, Rect insets, int dockSide, boolean isMinimizedMode,
+            boolean isHomeResizable) {
         mMinFlingVelocityPxPerSecond =
                 MIN_FLING_VELOCITY_DP_PER_SECOND * res.getDisplayMetrics().density;
         mMinDismissVelocityPxPerSecond =
@@ -132,8 +133,8 @@ public class DividerSnapAlgorithm {
                 com.android.internal.R.fraction.docked_stack_divider_fixed_ratio, 1, 1);
         mMinimalSizeResizableTask = res.getDimensionPixelSize(
                 com.android.internal.R.dimen.default_minimal_size_resizable_task);
-        mTaskHeightInMinimizedMode = res.getDimensionPixelSize(
-                com.android.internal.R.dimen.task_height_of_minimized_mode);
+        mTaskHeightInMinimizedMode = isHomeResizable ? res.getDimensionPixelSize(
+                com.android.internal.R.dimen.task_height_of_minimized_mode) : 0;
         calculateTargets(isHorizontalDivision, dockSide);
         mFirstSplitTarget = mTargets.get(1);
         mLastSplitTarget = mTargets.get(mTargets.size() - 2);
