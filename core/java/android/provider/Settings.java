@@ -1898,6 +1898,15 @@ public final class Settings {
             "android.settings.ACTION_DEVICE_CONTROLS_SETTINGS";
 
     /**
+     * Activity Action: Show media control settings
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MEDIA_CONTROLS_SETTINGS =
+            "android.settings.ACTION_MEDIA_CONTROLS_SETTINGS";
+
+    /**
      * Activity Action: Show a dialog with disabled by policy message.
      * <p> If an user action is disabled by policy, this dialog can be triggered to let
      * the user know about this.
@@ -8909,6 +8918,15 @@ public final class Settings {
          * @hide
          */
         public static final String PEOPLE_STRIP = "people_strip";
+
+        /**
+         * Whether or not to enable media resumption
+         * When enabled, media controls in quick settings will populate on boot and persist if
+         * resumable via a MediaBrowserService.
+         * @see Settings.Global#SHOW_MEDIA_ON_QUICK_SETTINGS
+         * @hide
+         */
+        public static final String MEDIA_CONTROLS_RESUME = "qs_media_resumption";
 
         /**
          * Controls if window magnification is enabled.
