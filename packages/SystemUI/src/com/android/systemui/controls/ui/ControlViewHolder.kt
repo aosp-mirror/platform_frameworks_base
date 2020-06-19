@@ -67,7 +67,6 @@ class ControlViewHolder(
 
     companion object {
         const val STATE_ANIMATION_DURATION = 700L
-        private const val UPDATE_DELAY_IN_MILLIS = 3000L
         private const val ALPHA_ENABLED = 255
         private const val ALPHA_DISABLED = 0
         private const val STATUS_ALPHA_ENABLED = 1f
@@ -113,7 +112,6 @@ class ControlViewHolder(
     val context: Context = layout.getContext()
     val clipLayer: ClipDrawable
     lateinit var cws: ControlWithState
-    var cancelUpdate: Runnable? = null
     var behavior: Behavior? = null
     var lastAction: ControlAction? = null
     var isLoading = false
@@ -147,8 +145,6 @@ class ControlViewHolder(
         if (userInteractionInProgress) return
 
         this.cws = cws
-
-        cancelUpdate?.run()
 
         // For the following statuses only, assume the title/subtitle could not be set properly
         // by the app and instead use the last known information from favorites
@@ -188,11 +184,11 @@ class ControlViewHolder(
                 lastChallengeDialog = null
             ControlAction.RESPONSE_UNKNOWN -> {
                 lastChallengeDialog = null
-                setTransientStatus(context.resources.getString(R.string.controls_error_failed))
+                setErrorStatus()
             }
             ControlAction.RESPONSE_FAIL -> {
                 lastChallengeDialog = null
-                setTransientStatus(context.resources.getString(R.string.controls_error_failed))
+                setErrorStatus()
             }
             ControlAction.RESPONSE_CHALLENGE_PIN -> {
                 lastChallengeDialog = ChallengeDialogs.createPinDialog(
@@ -219,17 +215,10 @@ class ControlViewHolder(
         visibleDialog = null
     }
 
-    fun setTransientStatus(tempStatus: String) {
-        val previousText = status.getText()
-
-        cancelUpdate = uiExecutor.executeDelayed({
-            animateStatusChange(/* animated */ true, {
-                setStatusText(previousText, /* immediately */ true)
-            })
-        }, UPDATE_DELAY_IN_MILLIS)
-
+    fun setErrorStatus() {
+        val text = context.resources.getString(R.string.controls_error_failed)
         animateStatusChange(/* animated */ true, {
-            setStatusText(tempStatus, /* immediately */ true)
+            setStatusText(text, /* immediately */ true)
         })
     }
 
