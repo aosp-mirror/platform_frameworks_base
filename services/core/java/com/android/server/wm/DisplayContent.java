@@ -3729,7 +3729,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
     }
 
     boolean hasSecureWindowOnScreen() {
-        final WindowState win = getWindow(w -> w.isOnScreen() && mWmService.isSecureLocked(w));
+        final WindowState win = getWindow(w -> w.isOnScreen() && w.isSecureLocked());
         return win != null;
     }
 
