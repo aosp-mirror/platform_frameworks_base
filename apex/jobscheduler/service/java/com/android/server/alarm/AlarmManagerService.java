@@ -16,6 +16,7 @@
 
 package com.android.server.alarm;
 
+import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AlarmManager.ELAPSED_REALTIME;
 import static android.app.AlarmManager.ELAPSED_REALTIME_WAKEUP;
 import static android.app.AlarmManager.FLAG_ALLOW_WHILE_IDLE;
@@ -27,14 +28,13 @@ import static android.os.UserHandle.USER_SYSTEM;
 
 import android.annotation.UserIdInt;
 import android.app.Activity;
-import android.app.ActivityManager;
+import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IAlarmCompleteListener;
 import android.app.IAlarmListener;
 import android.app.IAlarmManager;
-import android.app.IUidObserver;
 import android.app.PendingIntent;
 import android.app.usage.UsageStatsManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -183,6 +183,7 @@ public class AlarmManagerService extends SystemService {
     AppOpsManager mAppOps;
     DeviceIdleInternal mLocalDeviceIdleController;
     private UsageStatsManagerInternal mUsageStatsManagerInternal;
+    private ActivityManagerInternal mActivityManagerInternal;
 
     final Object mLock = new Object();
 
@@ -1572,15 +1573,6 @@ public class AlarmManagerService extends SystemService {
             } else {
                 Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
             }
-
-            try {
-                ActivityManager.getService().registerUidObserver(new UidObserver(),
-                        ActivityManager.UID_OBSERVER_GONE | ActivityManager.UID_OBSERVER_IDLE
-                                | ActivityManager.UID_OBSERVER_ACTIVE,
-                        ActivityManager.PROCESS_STATE_UNKNOWN, null);
-            } catch (RemoteException e) {
-                // ignored; both services live in system_server
-            }
         }
         publishLocalService(AlarmManagerInternal.class, new LocalService());
         publishBinderService(Context.ALARM_SERVICE, mService);
@@ -1592,6 +1584,7 @@ public class AlarmManagerService extends SystemService {
             synchronized (mLock) {
                 mConstants.start(getContext().getContentResolver());
                 mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
+                mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
                 mLocalDeviceIdleController =
                         LocalServices.getService(DeviceIdleInternal.class);
                 mUsageStatsManagerInternal =
@@ -1790,13 +1783,10 @@ public class AlarmManagerService extends SystemService {
         Alarm a = new Alarm(type, when, whenElapsed, windowLength, maxWhen, interval,
                 operation, directReceiver, listenerTag, workSource, flags, alarmClock,
                 callingUid, callingPackage);
-        try {
-            if (ActivityManager.getService().isAppStartModeDisabled(callingUid, callingPackage)) {
-                Slog.w(TAG, "Not setting alarm from " + callingUid + ":" + a
-                        + " -- package not allowed to start");
-                return;
-            }
-        } catch (RemoteException e) {
+        if (mActivityManagerInternal.isAppStartModeDisabled(callingUid, callingPackage)) {
+            Slog.w(TAG, "Not setting alarm from " + callingUid + ":" + a
+                    + " -- package not allowed to start");
+            return;
         }
         removeLocked(operation, directReceiver);
         incrementAlarmCount(a.uid);
@@ -2147,10 +2137,11 @@ public class AlarmManagerService extends SystemService {
 
         @Override
         public AlarmManager.AlarmClockInfo getNextAlarmClock(int userId) {
-            userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                    Binder.getCallingUid(), userId, false /* allowAll */, false /* requireFull */,
-                    "getNextAlarmClock", null);
-
+            if (mActivityManagerInternal != null) {
+                userId = mActivityManagerInternal.handleIncomingUser(Binder.getCallingPid(),
+                        Binder.getCallingUid(), userId, /*allowAll=*/false, ALLOW_NON_FULL,
+                        "getNextAlarmClock", null);
+            }
             return getNextAlarmClockImpl(userId);
         }
 
@@ -3226,15 +3217,8 @@ public class AlarmManagerService extends SystemService {
             return;
         }
         boolean didRemove = false;
-        final Predicate<Alarm> whichAlarms = (Alarm a) -> {
-            try {
-                if (a.uid == uid && ActivityManager.getService().isAppStartModeDisabled(
-                        uid, a.packageName)) {
-                    return true;
-                }
-            } catch (RemoteException e) { /* fall through */}
-            return false;
-        };
+        final Predicate<Alarm> whichAlarms = (a) -> (a.uid == uid
+                && mActivityManagerInternal.isAppStartModeDisabled(uid, a.packageName));
         for (int i = mAlarmBatches.size() - 1; i >= 0; i--) {
             Batch b = mAlarmBatches.get(i);
             didRemove |= b.remove(whichAlarms, false);
@@ -3822,8 +3806,8 @@ public class AlarmManagerService extends SystemService {
                     Slog.v(TAG, "sending alarm " + alarm);
                 }
                 if (RECORD_ALARMS_IN_HISTORY) {
-                    ActivityManager.noteAlarmStart(alarm.operation, alarm.workSource, alarm.uid,
-                            alarm.statsTag);
+                    mActivityManagerInternal.noteAlarmStart(alarm.operation, alarm.workSource,
+                            alarm.uid, alarm.statsTag);
                 }
                 mDeliveryTracker.deliverLocked(alarm, nowELAPSED, allowWhileIdle);
             } catch (RuntimeException e) {
@@ -4128,15 +4112,10 @@ public class AlarmManagerService extends SystemService {
         public static final int REPORT_ALARMS_ACTIVE = 4;
         public static final int APP_STANDBY_BUCKET_CHANGED = 5;
         public static final int CHARGING_STATUS_CHANGED = 6;
-        public static final int REMOVE_FOR_STOPPED = 7;
-        public static final int REMOVE_FOR_CANCELED = 8;
+        public static final int REMOVE_FOR_CANCELED = 7;
 
         AlarmHandler() {
             super(Looper.myLooper());
-        }
-
-        public void postRemoveForStopped(int uid) {
-            obtainMessage(REMOVE_FOR_STOPPED, uid, 0).sendToTarget();
         }
 
         @Override
@@ -4203,12 +4182,6 @@ public class AlarmManagerService extends SystemService {
                             rescheduleKernelAlarmsLocked();
                             updateNextAlarmClockLocked();
                         }
-                    }
-                    break;
-
-                case REMOVE_FOR_STOPPED:
-                    synchronized (mLock) {
-                        removeForStoppedLocked(msg.arg1);
                     }
                     break;
 
@@ -4418,30 +4391,6 @@ public class AlarmManagerService extends SystemService {
         }
     }
 
-    final class UidObserver extends IUidObserver.Stub {
-        @Override public void onUidStateChanged(int uid, int procState, long procStateSeq,
-            int capability) {
-        }
-
-        @Override public void onUidGone(int uid, boolean disabled) {
-            if (disabled) {
-                mHandler.postRemoveForStopped(uid);
-            }
-        }
-
-        @Override public void onUidActive(int uid) {
-        }
-
-        @Override public void onUidIdle(int uid, boolean disabled) {
-            if (disabled) {
-                mHandler.postRemoveForStopped(uid);
-            }
-        }
-
-        @Override public void onUidCachedChanged(int uid, boolean cached) {
-        }
-    }
-
     /**
      * Tracking of app assignments to standby buckets
      */
@@ -4491,6 +4440,13 @@ public class AlarmManagerService extends SystemService {
                     // Note we don't have to drain the pending while-idle alarms here, because
                     // this event should coincide with unblockAlarmsForUid().
                 }
+            }
+        }
+
+        @Override
+        public void removeAlarmsForUid(int uid) {
+            synchronized (mLock) {
+                removeForStoppedLocked(uid);
             }
         }
     };
@@ -4570,8 +4526,8 @@ public class AlarmManagerService extends SystemService {
                 fs.aggregateTime += nowELAPSED - fs.startTime;
             }
             if (RECORD_ALARMS_IN_HISTORY) {
-                ActivityManager.noteAlarmFinish(inflight.mPendingIntent, inflight.mWorkSource,
-                        inflight.mUid, inflight.mTag);
+                mActivityManagerInternal.noteAlarmFinish(inflight.mPendingIntent,
+                        inflight.mWorkSource, inflight.mUid, inflight.mTag);
             }
         }
 
@@ -4808,7 +4764,7 @@ public class AlarmManagerService extends SystemService {
                     || alarm.type == RTC_WAKEUP) {
                 bs.numWakeup++;
                 fs.numWakeup++;
-                ActivityManager.noteWakeupAlarm(
+                mActivityManagerInternal.noteWakeupAlarm(
                         alarm.operation, alarm.workSource, alarm.uid, alarm.packageName,
                         alarm.statsTag);
             }
