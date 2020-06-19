@@ -36,7 +36,8 @@ import static android.net.netlink.NetlinkConstants.RTM_NEWNEIGH;
 import static android.net.netlink.StructNdMsg.NUD_FAILED;
 import static android.net.netlink.StructNdMsg.NUD_REACHABLE;
 import static android.net.netlink.StructNdMsg.NUD_STALE;
-import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
+
+import static com.android.net.module.util.Inet4AddressUtils.intToInet4AddressHTH;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
