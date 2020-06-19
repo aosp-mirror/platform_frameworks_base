@@ -3824,7 +3824,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             userId = activity.mUserId;
         }
-        return !DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId);
+        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId, false);
     }
 
     @Override
