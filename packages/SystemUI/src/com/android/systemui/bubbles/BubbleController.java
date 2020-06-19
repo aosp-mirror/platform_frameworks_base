@@ -183,6 +183,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     // Only load overflow data from disk once
     private boolean mOverflowDataLoaded = false;
 
+    /**
+     * When the shade status changes to SHADE (from anything but SHADE, like LOCKED) we'll select
+     * this bubble and expand the stack.
+     */
+    @Nullable private NotificationEntry mNotifEntryToExpandOnShadeUnlock;
+
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
     private WindowManager mWindowManager;
@@ -295,6 +301,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (shouldCollapse) {
                 collapseStack();
             }
+
+            if (mNotifEntryToExpandOnShadeUnlock != null) {
+                expandStackAndSelectBubble(mNotifEntryToExpandOnShadeUnlock);
+                mNotifEntryToExpandOnShadeUnlock = null;
+            }
+
             updateStack();
         }
     }
@@ -936,20 +948,29 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param entry the notification for the bubble to be selected
      */
     public void expandStackAndSelectBubble(NotificationEntry entry) {
-        String key = entry.getKey();
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
-        if (bubble != null) {
-            mBubbleData.setSelectedBubble(bubble);
-            mBubbleData.setExpanded(true);
-        } else {
-            bubble = mBubbleData.getOverflowBubbleWithKey(key);
+        if (mStatusBarStateListener.getCurrentState() == SHADE) {
+            mNotifEntryToExpandOnShadeUnlock = null;
+
+            String key = entry.getKey();
+            Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
             if (bubble != null) {
-                promoteBubbleFromOverflow(bubble);
-            } else if (entry.canBubble()) {
-                // It can bubble but it's not -- it got aged out of the overflow before it
-                // was dismissed or opened, make it a bubble again.
-                setIsBubble(entry, true /* isBubble */, true /* autoExpand */);
+                mBubbleData.setSelectedBubble(bubble);
+                mBubbleData.setExpanded(true);
+            } else {
+                bubble = mBubbleData.getOverflowBubbleWithKey(key);
+                if (bubble != null) {
+                    promoteBubbleFromOverflow(bubble);
+                } else if (entry.canBubble()) {
+                    // It can bubble but it's not -- it got aged out of the overflow before it
+                    // was dismissed or opened, make it a bubble again.
+                    setIsBubble(entry, true /* isBubble */, true /* autoExpand */);
+                }
             }
+        } else {
+            // Wait until we're unlocked to expand, so that the user can see the expand animation
+            // and also to work around bugs with expansion animation + shade unlock happening at the
+            // same time.
+            mNotifEntryToExpandOnShadeUnlock = entry;
         }
     }
 
