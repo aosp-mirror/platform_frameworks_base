@@ -7990,7 +7990,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     private void updateScreenCaptureDisabled(int userHandle, boolean disabled) {
-        mPolicyCache.setScreenCaptureDisabled(userHandle, disabled);
+        mPolicyCache.setScreenCaptureAllowed(userHandle, !disabled);
         mHandler.post(() -> {
             try {
                 mInjector.getIWindowManager().refreshScreenCaptureDisabled(userHandle);
