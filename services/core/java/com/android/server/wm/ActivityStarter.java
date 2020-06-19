@@ -2632,6 +2632,11 @@ class ActivityStarter {
         return mRequest.intent;
     }
 
+    ActivityStarter setIntentGrants(NeededUriGrants intentGrants) {
+        mRequest.intentGrants = intentGrants;
+        return this;
+    }
+
     ActivityStarter setReason(String reason) {
         mRequest.reason = reason;
         return this;
