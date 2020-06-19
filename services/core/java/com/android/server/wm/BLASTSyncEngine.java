@@ -16,17 +16,19 @@
 
 package com.android.server.wm;
 
-import android.view.SurfaceControl;
+import android.util.ArrayMap;
+import android.util.ArraySet;
 
-import java.util.HashMap;
+import java.util.Set;
 
 /**
- * Utility class for collecting and merging transactions from various sources asynchronously.
+ * Utility class for collecting WindowContainers that will merge transactions.
  * For example to use to synchronously resize all the children of a window container
  *   1. Open a new sync set, and pass the listener that will be invoked
  *        int id startSyncSet(TransactionReadyListener)
  *      the returned ID will be eventually passed to the TransactionReadyListener in combination
- *      with the prepared transaction. You also use it to refer to the operation in future steps.
+ *      with a set of WindowContainers that are ready, meaning onTransactionReady was called for
+ *      those WindowContainers. You also use it to refer to the operation in future steps.
  *   2. Ask each child to participate:
  *       addToSyncSet(int id, WindowContainer wc)
  *      if the child thinks it will be affected by a configuration change (a.k.a. has a visible
@@ -38,35 +40,37 @@ import java.util.HashMap;
  *       setReady(int id)
  *   5. If there were no sub windows anywhere in the hierarchy to wait on, then
  *      transactionReady is immediately invoked, otherwise all the windows are poked
- *      to redraw and to deliver a buffer to WMS#finishDrawing.
- *      Once all this drawing is complete the combined transaction of all the buffers
- *      and pending transaction hierarchy changes will be delivered to the TransactionReadyListener
+ *      to redraw and to deliver a buffer to {@link WindowState#finishDrawing}.
+ *      Once all this drawing is complete the WindowContainer that's ready will be added to the
+ *      set of ready WindowContainers. When the final onTransactionReady is called, it will merge
+ *      the transactions of the all the WindowContainers and will be delivered to the
+ *      TransactionReadyListener
  */
 class BLASTSyncEngine {
     private static final String TAG = "BLASTSyncEngine";
 
     interface TransactionReadyListener {
-        void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction);
+        void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady);
     };
 
     // Holds state associated with a single synchronous set of operations.
     class SyncState implements TransactionReadyListener {
         int mSyncId;
-        SurfaceControl.Transaction mMergedTransaction;
         int mRemainingTransactions;
         TransactionReadyListener mListener;
         boolean mReady = false;
+        Set<WindowContainer> mWindowContainersReady = new ArraySet<>();
 
         private void tryFinish() {
             if (mRemainingTransactions == 0 && mReady) {
-                mListener.onTransactionReady(mSyncId, mMergedTransaction);
+                mListener.onTransactionReady(mSyncId, mWindowContainersReady);
                 mPendingSyncs.remove(mSyncId);
             }
         }
 
-        public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
+        public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
             mRemainingTransactions--;
-            mMergedTransaction.merge(mergedTransaction);
+            mWindowContainersReady.addAll(windowContainersReady);
             tryFinish();
         }
 
@@ -86,14 +90,13 @@ class BLASTSyncEngine {
         SyncState(TransactionReadyListener l, int id) {
             mListener = l;
             mSyncId = id;
-            mMergedTransaction = new SurfaceControl.Transaction();
             mRemainingTransactions = 0;
         }
     };
 
-    int mNextSyncId = 0;
+    private int mNextSyncId = 0;
 
-    final HashMap<Integer, SyncState> mPendingSyncs = new HashMap();
+    private final ArrayMap<Integer, SyncState> mPendingSyncs = new ArrayMap<>();
 
     BLASTSyncEngine() {
     }

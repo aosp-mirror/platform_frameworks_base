@@ -67,6 +67,7 @@ import android.util.Rational;
 import android.view.Display;
 import android.view.SurfaceControl;
 import android.window.ITaskOrganizer;
+import android.window.IWindowContainerTransactionCallback;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
@@ -728,7 +729,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // We should be rejected from the second sync since we are already
         // in one.
         assertEquals(false, bse.addToSyncSet(id2, task));
-        w.finishDrawing(null);
+        finishAndNotifyDrawing(w);
         assertEquals(true, bse.addToSyncSet(id2, task));
         bse.setReady(id2);
     }
@@ -752,7 +753,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Since we have a window we have to wait for it to draw to finish sync.
         verify(transactionListener, never())
             .onTransactionReady(anyInt(), any());
-        w.finishDrawing(null);
+        finishAndNotifyDrawing(w);
         verify(transactionListener)
             .onTransactionReady(anyInt(), any());
     }
@@ -820,14 +821,14 @@ public class WindowOrganizerTests extends WindowTestsBase {
         int id = bse.startSyncSet(transactionListener);
         assertEquals(true, bse.addToSyncSet(id, task));
         bse.setReady(id);
-        w.finishDrawing(null);
+        finishAndNotifyDrawing(w);
 
         // Since we have a child window we still shouldn't be done.
         verify(transactionListener, never())
             .onTransactionReady(anyInt(), any());
         reset(transactionListener);
 
-        child.finishDrawing(null);
+        finishAndNotifyDrawing(child);
         // Ah finally! Done
         verify(transactionListener)
                 .onTransactionReady(anyInt(), any());
@@ -978,5 +979,43 @@ public class WindowOrganizerTests extends WindowTestsBase {
         mWm.mAtmService.onBackPressedOnTaskRoot(activity.token,
                 new IRequestFinishCallback.Default());
         verify(organizer, times(1)).onBackPressedOnTaskRoot(any());
+    }
+
+    @Test
+    public void testBLASTCallbackWithMultipleWindows() throws Exception {
+        final ActivityStack stackController = createStack();
+        final Task task = createTask(stackController);
+        final ITaskOrganizer organizer = registerMockOrganizer();
+        final WindowState w1 = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window 1");
+        final WindowState w2 = createAppWindow(task, TYPE_APPLICATION, "Enlightened Window 2");
+        makeWindowVisible(w1);
+        makeWindowVisible(w2);
+
+        IWindowContainerTransactionCallback mockCallback =
+                mock(IWindowContainerTransactionCallback.class);
+        int id = mWm.mAtmService.mWindowOrganizerController.startSyncWithOrganizer(mockCallback);
+
+        mWm.mAtmService.mWindowOrganizerController.addToSyncSet(id, task);
+        mWm.mAtmService.mWindowOrganizerController.setSyncReady(id);
+
+        // Since we have a window we have to wait for it to draw to finish sync.
+        verify(mockCallback, never()).onTransactionReady(anyInt(), any());
+        assertTrue(w1.useBLASTSync());
+        assertTrue(w2.useBLASTSync());
+        finishAndNotifyDrawing(w1);
+
+        // Even though one Window finished drawing, both windows should still be using blast sync
+        assertTrue(w1.useBLASTSync());
+        assertTrue(w2.useBLASTSync());
+
+        finishAndNotifyDrawing(w2);
+        verify(mockCallback).onTransactionReady(anyInt(), any());
+        assertFalse(w1.useBLASTSync());
+        assertFalse(w2.useBLASTSync());
+    }
+
+    private void finishAndNotifyDrawing(WindowState ws) {
+        ws.finishDrawing(null);
+        ws.notifyBlastSyncTransaction();
     }
 }
