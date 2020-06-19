@@ -953,7 +953,7 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void accept(@NonNull IDataShareReadAdapter serviceAdapter) throws RemoteException {
+        public void accept(@NonNull IDataShareReadAdapter serviceAdapter) {
             Slog.i(TAG, "Data share request accepted by Content Capture service");
             logServiceEvent(CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__ACCEPT_DATA_SHARE_REQUEST);
 
@@ -961,8 +961,8 @@ public final class ContentCaptureManagerService extends
             if (clientPipe == null) {
                 logServiceEvent(
                         CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
-                mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                serviceAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 return;
             }
 
@@ -975,8 +975,8 @@ public final class ContentCaptureManagerService extends
                         CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
                 bestEffortCloseFileDescriptors(sourceIn, sinkIn);
 
-                mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
-                serviceAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
                 return;
             }
 
@@ -985,8 +985,26 @@ public final class ContentCaptureManagerService extends
 
             mParentService.mPackagesWithShareRequests.add(mDataShareRequest.getPackageName());
 
-            mClientAdapter.write(sourceIn);
-            serviceAdapter.start(sinkOut);
+            try {
+                mClientAdapter.write(sourceIn);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call write() the client operation", e);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_CLIENT_PIPE_FAIL);
+                return;
+            }
+            try {
+                serviceAdapter.start(sinkOut);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to call start() the service operation", e);
+                sendErrorSignal(mClientAdapter, serviceAdapter,
+                        ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                logServiceEvent(
+                        CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__DATA_SHARE_ERROR_SERVICE_PIPE_FAIL);
+                return;
+            }
 
             // File descriptors received by remote apps will be copies of the current one. Close
             // the ones that belong to the system server, so there's only 1 open left for the
@@ -1061,11 +1079,20 @@ public final class ContentCaptureManagerService extends
         }
 
         @Override
-        public void reject() throws RemoteException {
+        public void reject() {
             Slog.i(TAG, "Data share request rejected by Content Capture service");
             logServiceEvent(CONTENT_CAPTURE_SERVICE_EVENTS__EVENT__REJECT_DATA_SHARE_REQUEST);
 
-            mClientAdapter.rejected();
+            try {
+                mClientAdapter.rejected();
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to call rejected() the client operation", e);
+                try {
+                    mClientAdapter.error(ContentCaptureManager.DATA_SHARE_ERROR_UNKNOWN);
+                } catch (RemoteException e2) {
+                    Slog.w(TAG, "Failed to call error() the client operation", e2);
+                }
+            }
         }
 
         private void enforceDataSharingTtl(ParcelFileDescriptor sourceIn,
