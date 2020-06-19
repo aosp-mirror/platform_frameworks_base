@@ -33,6 +33,7 @@ import com.android.systemui.settings.CurrentUserContextTracker;
 import com.android.systemui.statusbar.FeatureFlags;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.ForegroundServiceDismissalFeatureController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManagerLogger;
@@ -114,7 +115,8 @@ public interface NotificationsModule {
             ShortcutManager shortcutManager,
             ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
-            Provider<PriorityOnboardingDialogController.Builder> builderProvider) {
+            Provider<PriorityOnboardingDialogController.Builder> builderProvider,
+            AssistantFeedbackController assistantFeedbackController) {
         return new NotificationGutsManager(
                 context,
                 visualStabilityManager,
@@ -128,7 +130,8 @@ public interface NotificationsModule {
                 shortcutManager,
                 channelEditorDialogController,
                 contextTracker,
-                builderProvider);
+                builderProvider,
+                assistantFeedbackController);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */

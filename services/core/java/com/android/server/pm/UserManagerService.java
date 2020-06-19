@@ -2528,7 +2528,12 @@ public class UserManagerService extends IUserManager.Stub {
                     if (name.equals(TAG_USER)) {
                         String id = parser.getAttributeValue(null, ATTR_ID);
 
-                        UserData userData = readUserLP(Integer.parseInt(id));
+                        int userId = Integer.parseInt(id);
+                        UserData userData = readUserLP(userId);
+                        if (userData == null && userId == UserHandle.USER_SYSTEM) {
+                            fallbackToSingleUserLP();
+                            return;
+                        }
 
                         if (userData != null) {
                             synchronized (mUsersLock) {
@@ -2994,10 +2999,8 @@ public class UserManagerService extends IUserManager.Stub {
                     new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
             fis = userFile.openRead();
             return readUserLP(id, fis);
-        } catch (IOException ioe) {
-            Slog.e(LOG_TAG, "Error reading user list");
-        } catch (XmlPullParserException pe) {
-            Slog.e(LOG_TAG, "Error reading user list");
+        } catch (IOException | XmlPullParserException e) {
+            Slog.e(LOG_TAG, "Error reading user " + id + ": " + e);
         } finally {
             IoUtils.closeQuietly(fis);
         }
@@ -3289,11 +3292,13 @@ public class UserManagerService extends IUserManager.Stub {
         final TimingsTraceAndSlog t = new TimingsTraceAndSlog();
         t.traceBegin("createUser-" + flags);
         final long sessionId = logUserCreateJourneyBegin(nextProbableUserId, userType, flags);
+        UserInfo newUser = null;
         try {
-            return createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
-                    preCreate, disallowedPackages, t);
+            newUser = createUserInternalUncheckedNoTracing(name, userType, flags, parentId,
+                        preCreate, disallowedPackages, t);
+            return newUser;
         } finally {
-            logUserCreateJourneyFinish(sessionId, nextProbableUserId);
+            logUserCreateJourneyFinish(sessionId, nextProbableUserId, newUser != null);
             t.traceEnd();
         }
     }
@@ -3312,10 +3317,11 @@ public class UserManagerService extends IUserManager.Stub {
         return sessionId;
     }
 
-    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId) {
+    private void logUserCreateJourneyFinish(long sessionId, @UserIdInt int userId, boolean finish) {
         FrameworkStatsLog.write(FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED, sessionId, userId,
                 FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__EVENT__CREATE_USER,
-                FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH);
+                finish ? FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__FINISH
+                       : FrameworkStatsLog.USER_LIFECYCLE_EVENT_OCCURRED__STATE__NONE);
     }
 
     private UserInfo createUserInternalUncheckedNoTracing(@Nullable String name,

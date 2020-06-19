@@ -30,4 +30,9 @@ interface ISystemConfig {
      * @see SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierAssociatedApps
      */
     Map getDisabledUntilUsedPreinstalledCarrierAssociatedApps();
+
+    /**
+     * @see SystemConfigManager#getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries
+     */
+    Map getDisabledUntilUsedPreinstalledCarrierAssociatedAppEntries();
 }

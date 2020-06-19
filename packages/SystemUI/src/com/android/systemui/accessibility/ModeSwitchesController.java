@@ -18,17 +18,10 @@ package com.android.systemui.accessibility;
 
 import android.annotation.MainThread;
 import android.content.Context;
-import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
-import android.provider.Settings;
 import android.util.Log;
 import android.util.SparseArray;
 import android.view.Display;
-import android.view.Gravity;
-import android.view.WindowManager;
-import android.widget.ImageView;
-
-import com.android.systemui.R;
 
 import javax.inject.Singleton;
 
@@ -42,31 +35,15 @@ public class ModeSwitchesController {
 
     private static final String TAG = "ModeSwitchesController";
 
-    private static final int DURATION_MS = 5000;
-    private static final int START_DELAY_MS = 3000;
-
     private final Context mContext;
     private final DisplayManager mDisplayManager;
 
-    private final SparseArray<MagnificationSwitchController> mDisplaysToSwitches =
+    private final SparseArray<MagnificationModeSwitch> mDisplaysToSwitches =
             new SparseArray<>();
-    private final WindowManager.LayoutParams mParams;
-    private final int mPadding;
 
     public ModeSwitchesController(Context context) {
         mContext = context;
         mDisplayManager = mContext.getSystemService(DisplayManager.class);
-
-        // Initialize view param and dimen.
-        mPadding = context.getResources().getDimensionPixelSize(
-                R.dimen.magnification_switch_button_padding);
-        mParams = new WindowManager.LayoutParams(
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.WRAP_CONTENT,
-                WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY,
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-                PixelFormat.TRANSPARENT);
-        mParams.gravity = Gravity.BOTTOM | Gravity.RIGHT;
     }
 
     /**
@@ -75,15 +52,16 @@ public class ModeSwitchesController {
      *
      * @param displayId The logical display id
      * @param mode      The magnification mode
-     * @see Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
-     * @see Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
+     *
+     * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
+     * @see android.provider.Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
      */
     @MainThread
     void showButton(int displayId, int mode) {
         if (mDisplaysToSwitches.get(displayId) == null) {
-            final MagnificationSwitchController magnificationSwitchController =
+            final MagnificationModeSwitch magnificationModeSwitch =
                     createMagnificationSwitchController(displayId);
-            if (magnificationSwitchController == null) {
+            if (magnificationModeSwitch == null) {
                 return;
             }
         }
@@ -102,16 +80,16 @@ public class ModeSwitchesController {
         mDisplaysToSwitches.get(displayId).removeButton();
     }
 
-    private MagnificationSwitchController createMagnificationSwitchController(int displayId) {
+    private MagnificationModeSwitch createMagnificationSwitchController(int displayId) {
         if (mDisplayManager.getDisplay(displayId) == null) {
             Log.w(TAG, "createMagnificationSwitchController displayId is invalid.");
             return null;
         }
-        final MagnificationSwitchController
-                magnificationSwitchController = new MagnificationSwitchController(
+        final MagnificationModeSwitch
+                magnificationModeSwitch = new MagnificationModeSwitch(
                 getDisplayContext(displayId));
-        mDisplaysToSwitches.put(displayId, magnificationSwitchController);
-        return magnificationSwitchController;
+        mDisplaysToSwitches.put(displayId, magnificationModeSwitch);
+        return magnificationModeSwitch;
     }
 
     private Context getDisplayContext(int displayId) {
@@ -122,78 +100,4 @@ public class ModeSwitchesController {
         return context;
     }
 
-    private class MagnificationSwitchController {
-
-        private final Context mContext;
-        private final WindowManager mWindowManager;
-        private ImageView mImageView;
-        private int mMagnificationMode;
-
-        MagnificationSwitchController(Context context) {
-            mContext = context;
-            mWindowManager = (WindowManager) mContext.getSystemService(
-                    Context.WINDOW_SERVICE);
-        }
-
-        void removeButton() {
-            if (mImageView == null) {
-                return;
-            }
-            mWindowManager.removeView(mImageView);
-            mImageView = null;
-        }
-
-        void showButton(int mode) {
-            if (mImageView == null) {
-                createView(mode);
-                mWindowManager.addView(mImageView, mParams);
-            } else if (mMagnificationMode != mode) {
-                mImageView.setImageResource(getIconResId(mode));
-            }
-            mMagnificationMode = mode;
-
-            // TODO(b/143852371): use accessibility timeout as a delay.
-            // Dismiss the magnification switch button after the button is displayed for a period of
-            // time.
-            mImageView.animate().cancel();
-            mImageView
-                    .animate()
-                    .alpha(0f)
-                    .setStartDelay(START_DELAY_MS)
-                    .setDuration(DURATION_MS)
-                    .withEndAction(
-                            () -> removeButton());
-        }
-
-        private void createView(int mode) {
-            mImageView = new ImageView(mContext);
-            mImageView.setImageResource(getIconResId(mode));
-            mImageView.setClickable(true);
-            mImageView.setFocusable(true);
-            mImageView.setPadding(mPadding, mPadding, mPadding, mPadding);
-            mImageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
-            mImageView.setOnClickListener(
-                    view -> {
-                        if (view != null) {
-                            view.animate().cancel();
-                            removeButton();
-                            toggleMagnificationMode();
-                        }
-                    });
-        }
-
-        private int getIconResId(int mode) {
-            return (mode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
-                    ? R.drawable.ic_open_in_new_window
-                    : R.drawable.ic_open_in_new_fullscreen;
-        }
-
-        private void toggleMagnificationMode() {
-            final int newMode =
-                    mMagnificationMode ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
-            mMagnificationMode = newMode;
-            Settings.Secure.putInt(mContext.getContentResolver(),
-                    Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, newMode);
-        }
-    }
 }

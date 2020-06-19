@@ -21,6 +21,7 @@ import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.service.notification.NotificationListenerService.Ranking;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +31,7 @@ import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.dagger.StatusBarModule;
+import com.android.systemui.statusbar.notification.AssistantFeedbackController;
 import com.android.systemui.statusbar.notification.DynamicChildBindController;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -87,6 +89,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final KeyguardBypassController mBypassController;
     private final ForegroundServiceSectionController mFgsSectionController;
+    private AssistantFeedbackController mAssistantFeedbackController;
     private final Context mContext;
 
     private NotificationPresenter mPresenter;
@@ -114,7 +117,8 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             DynamicPrivacyController privacyController,
             ForegroundServiceSectionController fgsSectionController,
             DynamicChildBindController dynamicChildBindController,
-            LowPriorityInflationHelper lowPriorityInflationHelper) {
+            LowPriorityInflationHelper lowPriorityInflationHelper,
+            AssistantFeedbackController assistantFeedbackController) {
         mContext = context;
         mHandler = mainHandler;
         mLockscreenUserManager = notificationLockscreenUserManager;
@@ -131,6 +135,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
         mDynamicPrivacyController = privacyController;
         mDynamicChildBindController = dynamicChildBindController;
         mLowPriorityInflationHelper = lowPriorityInflationHelper;
+        mAssistantFeedbackController = assistantFeedbackController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -487,6 +492,7 @@ public class NotificationViewHierarchyManager implements DynamicPrivacyControlle
             }
 
             row.showAppOpsIcons(entry.mActiveAppOps);
+            row.showFeedbackIcon(mAssistantFeedbackController.showFeedbackIndicator(entry));
             row.setLastAudiblyAlertedMs(entry.getLastAudiblyAlertedMs());
         }
 

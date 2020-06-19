@@ -6445,7 +6445,7 @@ public class Intent implements Parcelable, Cloneable {
     public static final int FLAG_ACTIVITY_RETAIN_IN_RECENTS = 0x00002000;
 
     /**
-     * This flag is only used in split-screen multi-window mode. The new activity will be displayed
+     * This flag is only used for split-screen multi-window mode. The new activity will be displayed
      * adjacent to the one launching it. This can only be used in conjunction with
      * {@link #FLAG_ACTIVITY_NEW_TASK}. Also, setting {@link #FLAG_ACTIVITY_MULTIPLE_TASK} is
      * required if you want a new instance of an existing activity to be created.

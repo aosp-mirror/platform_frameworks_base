@@ -58,7 +58,7 @@ import java.util.List;
 @Presubmit
 @SmallTest
 @RunWith(AndroidJUnit4.class)
-public class AppOpsHelperTest {
+public class SystemAppOpsHelperTest {
 
     private static final long TIMEOUT_MS = 5000;
 
@@ -67,7 +67,7 @@ public class AppOpsHelperTest {
 
     private List<AppOpsManager.OnOpChangedInternalListener> mListeners = new ArrayList<>();
 
-    private AppOpsHelper mHelper;
+    private SystemAppOpsHelper mHelper;
 
     @Before
     public void setUp() {
@@ -81,7 +81,7 @@ public class AppOpsHelperTest {
                         eq(AppOpsManager.WATCH_FOREGROUND_CHANGES),
                         any(AppOpsManager.OnOpChangedInternalListener.class));
 
-        mHelper = new AppOpsHelper(mContext);
+        mHelper = new SystemAppOpsHelper(mContext);
         mHelper.onSystemReady();
     }
 

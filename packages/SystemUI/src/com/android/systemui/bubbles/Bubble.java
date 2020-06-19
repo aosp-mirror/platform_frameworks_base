@@ -77,6 +77,7 @@ class Bubble implements BubbleViewProvider {
     private BubbleViewInfoTask mInflationTask;
     private boolean mInflateSynchronously;
     private boolean mPendingIntentCanceled;
+    private boolean mIsImportantConversation;
 
     /**
      * Presentational info about the flyout.
@@ -144,6 +145,7 @@ class Bubble implements BubbleViewProvider {
         mDesiredHeight = desiredHeight;
         mDesiredHeightResId = desiredHeightResId;
         mTitle = title;
+        mShowBubbleUpdateDot = false;
     }
 
     /** Used in tests when no UI is required. */
@@ -362,6 +364,8 @@ class Bubble implements BubbleViewProvider {
             mIntent = entry.getBubbleMetadata().getIntent();
             mDeleteIntent = entry.getBubbleMetadata().getDeleteIntent();
         }
+        mIsImportantConversation =
+                entry.getChannel() == null ? false : entry.getChannel().isImportantConversation();
     }
 
     @Nullable
@@ -429,6 +433,13 @@ class Bubble implements BubbleViewProvider {
      */
     boolean showInShade() {
         return !shouldSuppressNotification() || !mIsClearable;
+    }
+
+    /**
+     * Whether this notification conversation is important.
+     */
+    boolean isImportantConversation() {
+        return mIsImportantConversation;
     }
 
     /**

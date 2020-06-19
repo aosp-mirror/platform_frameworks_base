@@ -87,6 +87,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.net.DataUsageRequest;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkStatsService;
@@ -103,6 +104,7 @@ import android.net.NetworkStats.NonMonotonicObserver;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.net.TrafficStats;
+import android.net.Uri;
 import android.net.netstats.provider.INetworkStatsProvider;
 import android.net.netstats.provider.INetworkStatsProviderCallback;
 import android.net.netstats.provider.NetworkStatsProvider;
@@ -212,6 +214,9 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
     private final PowerManager.WakeLock mWakeLock;
 
     private final boolean mUseBpfTrafficStats;
+
+    private final ContentObserver mContentObserver;
+    private final ContentResolver mContentResolver;
 
     @VisibleForTesting
     public static final String ACTION_NETWORK_STATS_POLL =
@@ -437,7 +442,10 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         handlerThread.start();
         mHandler = new NetworkStatsHandler(handlerThread.getLooper());
         mNetworkStatsSubscriptionsMonitor = deps.makeSubscriptionsMonitor(mContext,
-                new HandlerExecutor(mHandler), this);
+                mHandler.getLooper(), new HandlerExecutor(mHandler), this);
+        mContentResolver = mContext.getContentResolver();
+        mContentObserver = mDeps.makeContentObserver(mHandler, mSettings,
+                mNetworkStatsSubscriptionsMonitor);
     }
 
     /**
@@ -460,11 +468,31 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
          */
         @NonNull
         public NetworkStatsSubscriptionsMonitor makeSubscriptionsMonitor(@NonNull Context context,
-                @NonNull Executor executor, @NonNull NetworkStatsService service) {
+                @NonNull Looper looper, @NonNull Executor executor,
+                @NonNull NetworkStatsService service) {
             // TODO: Update RatType passively in NSS, instead of querying into the monitor
             //  when forceUpdateIface.
-            return new NetworkStatsSubscriptionsMonitor(context, executor, (subscriberId, type) ->
-                    service.handleOnCollapsedRatTypeChanged());
+            return new NetworkStatsSubscriptionsMonitor(context, looper, executor,
+                    (subscriberId, type) -> service.handleOnCollapsedRatTypeChanged());
+        }
+
+        /**
+         * Create a ContentObserver instance which is used to observe settings changes,
+         * and dispatch onChange events on handler thread.
+         */
+        public @NonNull ContentObserver makeContentObserver(@NonNull Handler handler,
+                @NonNull NetworkStatsSettings settings,
+                @NonNull NetworkStatsSubscriptionsMonitor monitor) {
+            return new ContentObserver(handler) {
+                @Override
+                public void onChange(boolean selfChange, @NonNull Uri uri) {
+                    if (!settings.getCombineSubtypeEnabled()) {
+                        monitor.start();
+                    } else {
+                        monitor.stop();
+                    }
+                }
+            };
         }
     }
 
@@ -530,11 +558,14 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         mAlarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME, currentRealtime,
                 mSettings.getPollInterval(), pollIntent);
 
-        // TODO: listen to settings changed to support dynamically enable/disable.
-        // watch for networkType changes
-        if (!mSettings.getCombineSubtypeEnabled()) {
-            mNetworkStatsSubscriptionsMonitor.start();
-        }
+        mContentResolver.registerContentObserver(Settings.Global
+                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED),
+                        false /* notifyForDescendants */, mContentObserver);
+
+        // Post a runnable on handler thread to call onChange(). It's for getting current value of
+        // NETSTATS_COMBINE_SUBTYPE_ENABLED to decide start or stop monitoring RAT type changes.
+        mHandler.post(() -> mContentObserver.onChange(false, Settings.Global
+                .getUriFor(Settings.Global.NETSTATS_COMBINE_SUBTYPE_ENABLED)));
 
         registerGlobalAlert();
     }
@@ -559,6 +590,8 @@ public class NetworkStatsService extends INetworkStatsService.Stub {
         if (!mSettings.getCombineSubtypeEnabled()) {
             mNetworkStatsSubscriptionsMonitor.stop();
         }
+
+        mContentResolver.unregisterContentObserver(mContentObserver);
 
         final long currentTime = mClock.millis();
 

@@ -780,6 +780,22 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     void reportEvent(Event event, int userId) {
+        final int uid;
+        // Acquire uid outside of mLock for events that need it
+        switch (event.mEventType) {
+            case Event.ACTIVITY_RESUMED:
+            case Event.ACTIVITY_PAUSED:
+                uid = mPackageManagerInternal.getPackageUid(event.mPackage, 0, userId);
+                break;
+            default:
+                uid = 0;
+        }
+
+        if (event.mPackage != null
+                && mPackageManagerInternal.isPackageEphemeral(userId, event.mPackage)) {
+            event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
+        }
+
         synchronized (mLock) {
             // This should never be called directly when the user is locked
             if (!mUserUnlockedStates.get(userId)) {
@@ -792,13 +808,15 @@ public class UsageStatsService extends SystemService implements
 
             final long elapsedRealtime = SystemClock.elapsedRealtime();
 
-            if (event.mPackage != null
-                    && mPackageManagerInternal.isPackageEphemeral(userId, event.mPackage)) {
-                event.mFlags |= Event.FLAG_IS_PACKAGE_INSTANT_APP;
-            }
-
             switch (event.mEventType) {
                 case Event.ACTIVITY_RESUMED:
+                    FrameworkStatsLog.write(
+                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
+                            uid,
+                            event.mPackage,
+                            event.mClass,
+                            FrameworkStatsLog
+                                    .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     // check if this activity has already been resumed
                     if (mVisibleActivities.get(event.mInstanceId) != null) break;
                     mVisibleActivities.put(event.mInstanceId,
@@ -816,13 +834,6 @@ public class UsageStatsService extends SystemService implements
                     } catch (IllegalArgumentException iae) {
                         Slog.e(TAG, "Failed to note usage start", iae);
                     }
-                    FrameworkStatsLog.write(
-                            FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                            mPackageManagerInternal.getPackageUid(event.mPackage, 0, userId),
-                            event.mPackage,
-                            event.mClass,
-                            FrameworkStatsLog
-                                .APP_USAGE_EVENT_OCCURRED__EVENT_TYPE__MOVE_TO_FOREGROUND);
                     break;
                 case Event.ACTIVITY_PAUSED:
                     if (event.mTaskRootPackage == null) {
@@ -839,7 +850,7 @@ public class UsageStatsService extends SystemService implements
                     }
                     FrameworkStatsLog.write(
                             FrameworkStatsLog.APP_USAGE_EVENT_OCCURRED,
-                            mPackageManagerInternal.getPackageUid(event.mPackage, 0, userId),
+                            uid,
                             event.mPackage,
                             event.mClass,
                             FrameworkStatsLog

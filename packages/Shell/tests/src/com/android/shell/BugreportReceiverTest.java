@@ -25,19 +25,22 @@ import static com.android.shell.BugreportPrefs.STATE_SHOW;
 import static com.android.shell.BugreportPrefs.STATE_UNKNOWN;
 import static com.android.shell.BugreportPrefs.getWarningState;
 import static com.android.shell.BugreportPrefs.setWarningState;
-import static com.android.shell.BugreportProgressService.EXTRA_BUGREPORT;
-import static com.android.shell.BugreportProgressService.EXTRA_ID;
-import static com.android.shell.BugreportProgressService.EXTRA_NAME;
-import static com.android.shell.BugreportProgressService.EXTRA_SCREENSHOT;
-import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_FINISHED;
+import static com.android.shell.BugreportProgressService.INTENT_BUGREPORT_REQUESTED;
+import static com.android.shell.BugreportProgressService.PROPERTY_LAST_ID;
 import static com.android.shell.BugreportProgressService.SCREENSHOT_DELAY_SECONDS;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.verify;
 
 import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
@@ -46,13 +49,18 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.BugreportManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.IDumpstate;
+import android.os.IDumpstateListener;
+import android.os.ParcelFileDescriptor;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.support.test.uiautomator.UiDevice;
 import android.support.test.uiautomator.UiObject;
+import android.support.test.uiautomator.UiObject2;
 import android.support.test.uiautomator.UiObjectNotFoundException;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -60,10 +68,12 @@ import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
+import androidx.test.rule.ServiceTestRule;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.shell.ActionSendMultipleConsumerActivity.CustomActionSendMultipleListener;
 
+import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import org.junit.After;
@@ -72,17 +82,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedWriter;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedSet;
@@ -92,10 +104,10 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 /**
- * Integration tests for {@link BugreportReceiver}.
+ * Integration tests for {@link BugreportProgressService}.
  * <p>
- * These tests don't mock any component and rely on external UI components (like the notification
- * bar and activity chooser), which can make them unreliable and slow.
+ * These tests rely on external UI components (like the notificatio bar and activity chooser),
+ * which can make them unreliable and slow.
  * <p>
  * The general workflow is:
  * <ul>
@@ -115,63 +127,48 @@ public class BugreportReceiverTest {
     // Timeout for UI operations, in milliseconds.
     private static final int TIMEOUT = (int) (5 * DateUtils.SECOND_IN_MILLIS);
 
+    // The default timeout is too short to verify the notification button state. Using a longer
+    // timeout in the tests.
+    private static final int SCREENSHOT_DELAY_SECONDS = 5;
+
     // Timeout for when waiting for a screenshot to finish.
     private static final int SAFE_SCREENSHOT_DELAY = SCREENSHOT_DELAY_SECONDS + 10;
 
-    private static final String BUGREPORTS_DIR = "bugreports";
     private static final String BUGREPORT_FILE = "test_bugreport.txt";
-    private static final String ZIP_FILE = "test_bugreport.zip";
-    private static final String ZIP_FILE2 = "test_bugreport2.zip";
     private static final String SCREENSHOT_FILE = "test_screenshot.png";
-
     private static final String BUGREPORT_CONTENT = "Dump, might as well dump!\n";
     private static final String SCREENSHOT_CONTENT = "A picture is worth a thousand words!\n";
 
-    private static final int PID = 42;
-    private static final int PID2 = 24;
-    private static final int ID = 108;
-    private static final int ID2 = 801;
-    private static final String PROGRESS_PROPERTY = "dumpstate." + PID + ".progress";
-    private static final String MAX_PROPERTY = "dumpstate." + PID + ".max";
-    private static final String NAME_PROPERTY = "dumpstate." + PID + ".name";
     private static final String NAME = "BUG, Y U NO REPORT?";
-    private static final String NAME2 = "A bugreport's life";
     private static final String NEW_NAME = "Bug_Forrest_Bug";
-    private static final String NEW_NAME2 = "BugsyReportsy";
     private static final String TITLE = "Wimbugdom Champion 2015";
-    private static final String TITLE2 = "Master of the Universe";
-    private static final String DESCRIPTION = "One's description...";
-    private static final String DESCRIPTION2 = "...is another's treasure.";
-    // TODO(b/143130523): Fix (update) tests and add to presubmit
-    private static final String EXTRA_MAX = "android.intent.extra.MAX";
-    private static final String EXTRA_PID = "android.intent.extra.PID";
-    private static final String INTENT_BUGREPORT_STARTED =
-            "com.android.internal.intent.action.BUGREPORT_STARTED";
 
     private static final String NO_DESCRIPTION = null;
     private static final String NO_NAME = null;
     private static final String NO_SCREENSHOT = null;
     private static final String NO_TITLE = null;
-    private static final int NO_ID = 0;
-    private static final boolean RENAMED_SCREENSHOTS = true;
-    private static final boolean DIDNT_RENAME_SCREENSHOTS = false;
 
     private String mDescription;
-
-    private String mPlainTextPath;
-    private String mZipPath;
-    private String mZipPath2;
-    private String mScreenshotPath;
+    private String mProgressTitle;
+    private int mBugreportId;
 
     private Context mContext;
     private UiBot mUiBot;
     private CustomActionSendMultipleListener mListener;
+    private BugreportProgressService mService;
+    private IDumpstateListener mIDumpstateListener;
+    private ParcelFileDescriptor mBugreportFd;
+    private ParcelFileDescriptor mScreenshotFd;
+
+    @Mock private IDumpstate mMockIDumpstate;
 
     @Rule public TestName mName = new TestName();
+    @Rule public ServiceTestRule mServiceRule = new ServiceTestRule();
 
     @Before
     public void setUp() throws Exception {
         Log.i(TAG, getName() + ".setup()");
+        MockitoAnnotations.initMocks(this);
         Instrumentation instrumentation = getInstrumentation();
         mContext = instrumentation.getTargetContext();
         mUiBot = new UiBot(instrumentation, TIMEOUT);
@@ -179,21 +176,30 @@ public class BugreportReceiverTest {
 
         cancelExistingNotifications();
 
-        mPlainTextPath = getPath(BUGREPORT_FILE);
-        mZipPath = getPath(ZIP_FILE);
-        mZipPath2 = getPath(ZIP_FILE2);
-        mScreenshotPath = getPath(SCREENSHOT_FILE);
-        createTextFile(mPlainTextPath, BUGREPORT_CONTENT);
-        createTextFile(mScreenshotPath, SCREENSHOT_CONTENT);
-        createZipFile(mZipPath, BUGREPORT_FILE, BUGREPORT_CONTENT);
-        createZipFile(mZipPath2, BUGREPORT_FILE, BUGREPORT_CONTENT);
-
+        mBugreportId = getBugreportId();
+        mProgressTitle = getBugreportInProgress(mBugreportId);
         // Creates a multi-line description.
         StringBuilder sb = new StringBuilder();
         for (int i = 1; i <= 20; i++) {
             sb.append("All work and no play makes Shell a dull app!\n");
         }
         mDescription = sb.toString();
+
+        // Mocks BugreportManager and updates tests value to the service
+        mService = ((BugreportProgressService.LocalBinder) mServiceRule.bindService(
+                new Intent(mContext, BugreportProgressService.class))).getService();
+        mService.mBugreportManager = new BugreportManager(mContext, mMockIDumpstate);
+        mService.mScreenshotDelaySec = SCREENSHOT_DELAY_SECONDS;
+        // Dup the fds which are passing to startBugreport function.
+        Mockito.doAnswer(invocation -> {
+            final boolean isScreenshotRequested = invocation.getArgument(6);
+            if (isScreenshotRequested) {
+                mScreenshotFd = ParcelFileDescriptor.dup(invocation.getArgument(3));
+            }
+            mBugreportFd = ParcelFileDescriptor.dup(invocation.getArgument(2));
+            return null;
+        }).when(mMockIDumpstate).startBugreport(anyInt(), any(), any(), any(), anyInt(), any(),
+                anyBoolean());
 
         setWarningState(mContext, STATE_HIDE);
 
@@ -203,6 +209,13 @@ public class BugreportReceiverTest {
     @After
     public void tearDown() throws Exception {
         Log.i(TAG, getName() + ".tearDown()");
+        if (mBugreportFd != null) {
+            IoUtils.closeQuietly(mBugreportFd);
+        }
+        if (mScreenshotFd != null) {
+            IoUtils.closeQuietly(mScreenshotFd);
+        }
+        mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
         try {
             cancelExistingNotifications();
         } finally {
@@ -219,131 +232,90 @@ public class BugreportReceiverTest {
      */
     @Test
     public void testProgress() throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
+        assertProgressNotification(mProgressTitle, 0f);
 
-        assertProgressNotification(NAME, 0f);
+        mIDumpstateListener.onProgress(10);
+        assertProgressNotification(mProgressTitle, 10);
 
-        SystemProperties.set(PROGRESS_PROPERTY, "108");
-        assertProgressNotification(NAME, 10.80f);
-
-        assertProgressNotification(NAME, 50.00f);
-
-        SystemProperties.set(PROGRESS_PROPERTY, "950");
-        assertProgressNotification(NAME, 95.00f);
-
-        // Make sure progress never goes back...
-        SystemProperties.set(MAX_PROPERTY, "2000");
-        assertProgressNotification(NAME, 95.00f);
-
-        SystemProperties.set(PROGRESS_PROPERTY, "1000");
-        assertProgressNotification(NAME, 95.00f);
-
-        // ...only forward...
-        SystemProperties.set(PROGRESS_PROPERTY, "1902");
-        assertProgressNotification(NAME, 95.10f);
-
-        SystemProperties.set(PROGRESS_PROPERTY, "1960");
-        assertProgressNotification(NAME, 98.00f);
+        mIDumpstateListener.onProgress(95);
+        assertProgressNotification(mProgressTitle, 95.00f);
 
         // ...but never more than the capped value.
-        SystemProperties.set(PROGRESS_PROPERTY, "2000");
-        assertProgressNotification(NAME, 99.00f);
+        mIDumpstateListener.onProgress(200);
+        assertProgressNotification(mProgressTitle, 99);
 
-        SystemProperties.set(PROGRESS_PROPERTY, "3000");
-        assertProgressNotification(NAME, 99.00f);
+        mIDumpstateListener.onProgress(300);
+        assertProgressNotification(mProgressTitle, 99);
 
-        Bundle extras =
-                sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 0, RENAMED_SCREENSHOTS);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId);
+        assertActionSendMultiple(extras);
 
         assertServiceNotRunning();
     }
 
     @Test
     public void testProgress_cancel() throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
 
-        final NumberFormat nf = NumberFormat.getPercentInstance();
-        nf.setMinimumFractionDigits(2);
-        nf.setMaximumFractionDigits(2);
+        assertProgressNotification(mProgressTitle, 00.00f);
 
-        assertProgressNotification(NAME, 00.00f);
+        cancelFromNotification(mProgressTitle);
 
-        cancelFromNotification();
-
-        waitForService(false);
+        assertServiceNotRunning();
     }
 
     @Test
     public void testProgress_takeExtraScreenshot() throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
 
         waitForScreenshotButtonEnabled(true);
         takeScreenshot();
         assertScreenshotButtonEnabled(false);
         waitForScreenshotButtonEnabled(true);
 
-        sendBugreportFinished(ID, mPlainTextPath, mScreenshotPath);
-
-        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId);
+        assertActionSendMultiple(extras, NO_NAME, NO_TITLE, NO_DESCRIPTION, 1);
 
         assertServiceNotRunning();
     }
 
     @Test
     public void testScreenshotFinishesAfterBugreport() throws Exception {
-        resetProperties();
-
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
         takeScreenshot();
-        sendBugreportFinished(ID, mPlainTextPath, NO_SCREENSHOT);
-        waitShareNotification(ID);
+        sendBugreportFinished();
+        waitShareNotification(mBugreportId);
 
         // There's no indication in the UI about the screenshot finish, so just sleep like a baby...
         sleep(SAFE_SCREENSHOT_DELAY * DateUtils.SECOND_IN_MILLIS);
 
-        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID, PID, ZIP_FILE,
-                NAME, NO_TITLE, NO_DESCRIPTION, 1, RENAMED_SCREENSHOTS);
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
+        assertActionSendMultiple(extras, NO_NAME, NO_TITLE, NO_DESCRIPTION, 1);
 
         assertServiceNotRunning();
     }
 
     @Test
     public void testProgress_changeDetailsInvalidInput() throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
+        DetailsUi detailsUi = new DetailsUi(mBugreportId);
 
-        // Check initial name.
-        detailsUi.assertName(NAME);
-
-        // Change name - it should have changed system property once focus is changed.
+        // Change name
         detailsUi.focusOnName();
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.focusAwayFromName();
-        assertPropertyValue(NAME_PROPERTY, NEW_NAME);
-
-        // Cancel the dialog to make sure property was restored.
-        detailsUi.clickCancel();
-        assertPropertyValue(NAME_PROPERTY, NAME);
+        detailsUi.clickOk();
 
         // Now try to set an invalid name.
-        detailsUi.reOpen(NAME);
+        detailsUi.reOpen(NEW_NAME);
         detailsUi.nameField.setText("/etc/passwd");
         detailsUi.clickOk();
-        assertPropertyValue(NAME_PROPERTY, "_etc_passwd");
 
         // Finally, make the real changes.
         detailsUi.reOpen("_etc_passwd");
@@ -353,27 +325,20 @@ public class BugreportReceiverTest {
 
         detailsUi.clickOk();
 
-        assertPropertyValue(NAME_PROPERTY, NEW_NAME);
         assertProgressNotification(NEW_NAME, 00.00f);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mPlainTextPath,
-                mScreenshotPath, TITLE);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(TITLE);
+        assertActionSendMultiple(extras, NEW_NAME, TITLE, mDescription, 0);
 
         assertServiceNotRunning();
     }
 
     @Test
     public void testProgress_cancelBugClosesDetailsDialog() throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
-        detailsUi.assertName(NAME);  // Sanity check
-
-        cancelFromNotification();
+        cancelFromNotification(mProgressTitle);
         mUiBot.collapseStatusBar();
 
         assertDetailsUiClosed();
@@ -381,40 +346,24 @@ public class BugreportReceiverTest {
     }
 
     @Test
-    public void testProgress_changeDetailsPlainBugreport() throws Exception {
-        changeDetailsTest(true);
-    }
-
-    @Test
-    public void testProgress_changeDetailsZippedBugreport() throws Exception {
-        changeDetailsTest(false);
-    }
-
-    private void changeDetailsTest(boolean plainText) throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+    public void testProgress_changeDetailsTest() throws Exception {
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
-
-        // Check initial name.
-        detailsUi.assertName(NAME);
+        DetailsUi detailsUi = new DetailsUi(mBugreportId);
 
         // Change fields.
-        detailsUi.reOpen(NAME);
+        detailsUi.reOpen(mProgressTitle);
         detailsUi.nameField.setText(NEW_NAME);
         detailsUi.titleField.setText(TITLE);
         detailsUi.descField.setText(mDescription);
 
         detailsUi.clickOk();
 
-        assertPropertyValue(NAME_PROPERTY, NEW_NAME);
         assertProgressNotification(NEW_NAME, 00.00f);
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID,
-                plainText? mPlainTextPath : mZipPath, mScreenshotPath, TITLE);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NEW_NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(TITLE);
+        assertActionSendMultiple(extras, NEW_NAME, TITLE, mDescription, 0);
 
         assertServiceNotRunning();
     }
@@ -430,60 +379,18 @@ public class BugreportReceiverTest {
     }
 
     private void changeJustDetailsTest(boolean touchDetails) throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         waitForScreenshotButtonEnabled(true);
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME, touchDetails);
+        DetailsUi detailsUi = new DetailsUi(mBugreportId, touchDetails);
 
         detailsUi.nameField.setText("");
         detailsUi.titleField.setText("");
         detailsUi.descField.setText(mDescription);
         detailsUi.clickOk();
 
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(ID, mZipPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, ZIP_FILE,
-                NO_NAME, NO_TITLE, mDescription, 0, DIDNT_RENAME_SCREENSHOTS);
-
-        assertServiceNotRunning();
-    }
-
-    @Test
-    public void testProgress_changeJustDetailsIsClearedOnSecondBugreport() throws Exception {
-        resetProperties();
-        sendBugreportStarted(ID, PID, NAME, 1000);
-        waitForScreenshotButtonEnabled(true);
-
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
-        detailsUi.assertName(NAME);
-        detailsUi.assertTitle("");
-        detailsUi.assertDescription("");
-        assertTrue("didn't enable name on UI", detailsUi.nameField.isEnabled());
-        detailsUi.nameField.setText(NEW_NAME);
-        detailsUi.titleField.setText(TITLE);
-        detailsUi.descField.setText(DESCRIPTION);
-        detailsUi.clickOk();
-
-        sendBugreportStarted(ID2, PID2, NAME2, 1000);
-
-        sendBugreportFinished(ID, mZipPath, mScreenshotPath);
-        Bundle extras = acceptBugreportAndGetSharedIntent(TITLE);
-
-        detailsUi = new DetailsUi(mUiBot, ID2, NAME2);
-        detailsUi.assertName(NAME2);
-        detailsUi.assertTitle("");
-        detailsUi.assertDescription("");
-        assertTrue("didn't enable name on UI", detailsUi.nameField.isEnabled());
-        detailsUi.nameField.setText(NEW_NAME2);
-        detailsUi.titleField.setText(TITLE2);
-        detailsUi.descField.setText(DESCRIPTION2);
-        detailsUi.clickOk();
-
-        // Must use a different zip file otherwise it will fail because zip already contains
-        // title.txt and description.txt entries.
-        extras = sendBugreportFinishedAndGetSharedIntent(ID2, mZipPath2, NO_SCREENSHOT, TITLE2);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT, ID2, PID2, TITLE2,
-                NEW_NAME2, TITLE2, DESCRIPTION2, 0, RENAMED_SCREENSHOTS);
+        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mBugreportId);
+        assertActionSendMultiple(extras, NO_NAME, NO_TITLE, mDescription, 0);
 
         assertServiceNotRunning();
     }
@@ -507,26 +414,25 @@ public class BugreportReceiverTest {
     }
 
     private void bugreportFinishedWhileChangingDetailsTest(boolean waitScreenshot) throws Exception {
-        resetProperties();
-        sendBugreportStarted(1000);
+        sendBugreportStarted();
         if (waitScreenshot) {
             waitForScreenshotButtonEnabled(true);
         }
 
-        DetailsUi detailsUi = new DetailsUi(mUiBot, ID, NAME);
+        DetailsUi detailsUi = new DetailsUi(mBugreportId);
 
         // Finish the bugreport while user's still typing the name.
         detailsUi.nameField.setText(NEW_NAME);
-        sendBugreportFinished(ID, mPlainTextPath, mScreenshotPath);
+        sendBugreportFinished();
 
         // Wait until the share notification is received...
-        waitShareNotification(ID);
+        waitShareNotification(mBugreportId);
         // ...then close notification bar.
         mContext.sendBroadcast(new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS));
 
         // Make sure UI was updated properly.
         assertFalse("didn't disable name on UI", detailsUi.nameField.isEnabled());
-        assertEquals("didn't revert name on UI", NAME, detailsUi.nameField.getText().toString());
+        assertNotEquals("didn't revert name on UI", NAME, detailsUi.nameField.getText());
 
         // Finish changing other fields.
         detailsUi.titleField.setText(TITLE);
@@ -534,9 +440,8 @@ public class BugreportReceiverTest {
         detailsUi.clickOk();
 
         // Finally, share bugreport.
-        Bundle extras = acceptBugreportAndGetSharedIntent(ID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT, ID, PID, TITLE,
-                NAME, TITLE, mDescription, 0, RENAMED_SCREENSHOTS);
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
+        assertActionSendMultiple(extras, NO_NAME, TITLE, mDescription, 0);
 
         assertServiceNotRunning();
     }
@@ -569,11 +474,14 @@ public class BugreportReceiverTest {
         }
 
         // Send notification and click on share.
-        sendBugreportFinished(NO_ID, mPlainTextPath, null);
-        mUiBot.clickOnNotification(mContext.getString(R.string.bugreport_finished_title, NO_ID));
+        sendBugreportStarted();
+        waitForScreenshotButtonEnabled(true);
+        sendBugreportFinished();
+        mUiBot.clickOnNotification(mContext.getString(
+                R.string.bugreport_finished_title, mBugreportId));
 
         // Handle the warning
-        mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm));
+        mUiBot.getObject(mContext.getString(R.string.bugreport_confirm));
         // TODO: get ok and dontShowAgain from the dialog reference above
         UiObject dontShowAgain =
                 mUiBot.getVisibleObject(mContext.getString(R.string.bugreport_confirm_dont_repeat));
@@ -597,7 +505,7 @@ public class BugreportReceiverTest {
         // Share the bugreport.
         mUiBot.chooseActivity(UI_NAME);
         Bundle extras = mListener.getExtras();
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
+        assertActionSendMultiple(extras);
 
         // Make sure it's hidden now.
         int newState = getWarningState(mContext, STATE_UNKNOWN);
@@ -606,34 +514,13 @@ public class BugreportReceiverTest {
 
     @Test
     public void testShareBugreportAfterServiceDies() throws Exception {
-        sendBugreportFinished(NO_ID, mPlainTextPath, NO_SCREENSHOT);
-        waitForService(false);
-        Bundle extras = acceptBugreportAndGetSharedIntent(NO_ID);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
-    }
-
-    @Test
-    public void testBugreportFinished_plainBugreportAndScreenshot() throws Exception {
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
-    }
-
-    @Test
-    public void testBugreportFinished_zippedBugreportAndScreenshot() throws Exception {
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, mScreenshotPath);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, SCREENSHOT_CONTENT);
-    }
-
-    @Test
-    public void testBugreportFinished_plainBugreportAndNoScreenshot() throws Exception {
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mPlainTextPath, NO_SCREENSHOT);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
-    }
-
-    @Test
-    public void testBugreportFinished_zippedBugreportAndNoScreenshot() throws Exception {
-        Bundle extras = sendBugreportFinishedAndGetSharedIntent(mZipPath, NO_SCREENSHOT);
-        assertActionSendMultiple(extras, BUGREPORT_CONTENT, NO_SCREENSHOT);
+        sendBugreportStarted();
+        waitForScreenshotButtonEnabled(true);
+        sendBugreportFinished();
+        killService();
+        assertServiceNotRunning();
+        Bundle extras = acceptBugreportAndGetSharedIntent(mBugreportId);
+        assertActionSendMultiple(extras);
     }
 
     private void cancelExistingNotifications() {
@@ -664,10 +551,10 @@ public class BugreportReceiverTest {
         assertEquals("old notifications were not cancelled", 0, nm.getActiveNotifications().length);
     }
 
-    private void cancelFromNotification() {
-        openProgressNotification(NAME);
-        UiObject cancelButton = mUiBot.getVisibleObject(mContext.getString(
-                com.android.internal.R.string.cancel).toUpperCase());
+    private void cancelFromNotification(String name) {
+        openProgressNotification(name);
+        UiObject cancelButton = mUiBot.getObject(mContext.getString(
+                com.android.internal.R.string.cancel));
         mUiBot.click(cancelButton, "cancel_button");
     }
 
@@ -676,67 +563,59 @@ public class BugreportReceiverTest {
         // TODO: need a way to get the ProgresBar from the "android:id/progress" UIObject...
     }
 
-    private UiObject openProgressNotification(String bugreportName) {
-        Log.v(TAG, "Looking for progress notification for '" + bugreportName + "'");
-        return mUiBot.getNotification(bugreportName);
-    }
-
-    void resetProperties() {
-        // TODO: call method to remove property instead
-        SystemProperties.set(PROGRESS_PROPERTY, "Reset");
-        SystemProperties.set(MAX_PROPERTY, "Reset");
-        SystemProperties.set(NAME_PROPERTY, "Reset");
+    private void openProgressNotification(String title) {
+        Log.v(TAG, "Looking for progress notification for '" + title + "'");
+        UiObject2 notification = mUiBot.getNotification2(title);
+        if (notification != null) {
+            mUiBot.expandNotification(notification);
+        }
     }
 
     /**
-     * Sends a "bugreport started" intent with the default values.
+     * Sends a "bugreport requested" intent with the default values.
      */
-    private void sendBugreportStarted(int max) throws Exception {
-        sendBugreportStarted(ID, PID, NAME, max);
-    }
-
-    private void sendBugreportStarted(int id, int pid, String name, int max) throws Exception {
-        Intent intent = new Intent(INTENT_BUGREPORT_STARTED);
+    private void sendBugreportStarted() throws Exception {
+        Intent intent = new Intent(INTENT_BUGREPORT_REQUESTED);
         intent.setPackage("com.android.shell");
         intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        intent.putExtra(EXTRA_ID, id);
-        intent.putExtra(EXTRA_PID, pid);
-        intent.putExtra(EXTRA_NAME, name);
-        intent.putExtra(EXTRA_MAX, max);
         mContext.sendBroadcast(intent);
+
+        ArgumentCaptor<IDumpstateListener> listenerCap = ArgumentCaptor.forClass(
+                IDumpstateListener.class);
+        verify(mMockIDumpstate, timeout(TIMEOUT)).startBugreport(anyInt(), any(), any(), any(),
+                anyInt(), listenerCap.capture(), anyBoolean());
+        mIDumpstateListener = listenerCap.getValue();
+        assertNotNull("Dumpstate listener should not be null", mIDumpstateListener);
+        mIDumpstateListener.onProgress(0);
     }
 
     /**
-     * Sends a "bugreport finished" intent and waits for the result.
+     * Sends a "bugreport finished" event and waits for the result.
      *
+     * @param id The bugreport id for finished notification string title substitution.
      * @return extras sent in the shared intent.
      */
-    private Bundle sendBugreportFinishedAndGetSharedIntent(String bugreportPath,
-            String screenshotPath) {
-        return sendBugreportFinishedAndGetSharedIntent(NO_ID, bugreportPath, screenshotPath);
-    }
-
-    /**
-     * Sends a "bugreport finished" intent and waits for the result.
-     *
-     * @return extras sent in the shared intent.
-     */
-    private Bundle sendBugreportFinishedAndGetSharedIntent(int id, String bugreportPath,
-            String screenshotPath) {
-        sendBugreportFinished(id, bugreportPath, screenshotPath);
+    private Bundle sendBugreportFinishedAndGetSharedIntent(int id) throws Exception {
+        sendBugreportFinished();
         return acceptBugreportAndGetSharedIntent(id);
     }
 
-    // TODO: document / merge these 3 sendBugreportFinishedAndGetSharedIntent methods
-    private Bundle sendBugreportFinishedAndGetSharedIntent(int id, String bugreportPath,
-            String screenshotPath, String notificationTitle) {
-        sendBugreportFinished(id, bugreportPath, screenshotPath);
+    /**
+     * Sends a "bugreport finished" event and waits for the result.
+     *
+     * @param notificationTitle The title of finished notification.
+     * @return extras sent in the shared intent.
+     */
+    private Bundle sendBugreportFinishedAndGetSharedIntent(String notificationTitle)
+            throws Exception {
+        sendBugreportFinished();
         return acceptBugreportAndGetSharedIntent(notificationTitle);
     }
 
     /**
      * Accepts the notification to share the finished bugreport and waits for the result.
      *
+     * @param id The bugreport id for finished notification string title substitution.
      * @return extras sent in the shared intent.
      */
     private Bundle acceptBugreportAndGetSharedIntent(int id) {
@@ -744,7 +623,12 @@ public class BugreportReceiverTest {
         return acceptBugreportAndGetSharedIntent(notificationTitle);
     }
 
-    // TODO: document and/or merge these 2 acceptBugreportAndGetSharedIntent methods
+    /**
+     * Accepts the notification to share the finished bugreport and waits for the result.
+     *
+     * @param notificationTitle The title of finished notification.
+     * @return extras sent in the shared intent.
+     */
     private Bundle acceptBugreportAndGetSharedIntent(String notificationTitle) {
         mUiBot.clickOnNotification(notificationTitle);
         mUiBot.chooseActivity(UI_NAME);
@@ -759,53 +643,36 @@ public class BugreportReceiverTest {
     }
 
     /**
-     * Sends a "bugreport finished" intent.
+     * Callbacks to service to finish the bugreport.
      */
-    private void sendBugreportFinished(int id, String bugreportPath, String screenshotPath) {
-        Intent intent = new Intent(INTENT_BUGREPORT_FINISHED);
-        intent.setPackage("com.android.shell");
-        intent.setFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        if (id != NO_ID) {
-            intent.putExtra(EXTRA_ID, id);
+    private void sendBugreportFinished() throws Exception {
+        writeZipFile(mBugreportFd, BUGREPORT_FILE, BUGREPORT_CONTENT);
+        if (mScreenshotFd != null) {
+            writeScreenshotFile(mScreenshotFd, SCREENSHOT_CONTENT);
         }
-        if (bugreportPath != null) {
-            intent.putExtra(EXTRA_BUGREPORT, bugreportPath);
-        }
-        if (screenshotPath != null) {
-            intent.putExtra(EXTRA_SCREENSHOT, screenshotPath);
-        }
-
-        mContext.sendBroadcast(intent);
+        mIDumpstateListener.onFinished();
+        getInstrumentation().waitForIdleSync();
     }
 
     /**
      * Asserts the proper {@link Intent#ACTION_SEND_MULTIPLE} intent was sent.
      */
-    private void assertActionSendMultiple(Bundle extras, String bugreportContent,
-            String screenshotContent) throws IOException {
-        assertActionSendMultiple(extras, bugreportContent, screenshotContent, ID, PID, ZIP_FILE,
-                NO_NAME, NO_TITLE, NO_DESCRIPTION, 0, DIDNT_RENAME_SCREENSHOTS);
+    private void assertActionSendMultiple(Bundle extras) throws IOException {
+        assertActionSendMultiple(extras, NO_NAME, NO_TITLE, NO_DESCRIPTION, 0);
     }
 
     /**
      * Asserts the proper {@link Intent#ACTION_SEND_MULTIPLE} intent was sent.
      *
      * @param extras extras received in the intent
-     * @param bugreportContent expected content in the bugreport file
-     * @param screenshotContent expected content in the screenshot file (sent by dumpstate), if any
-     * @param id emulated dumpstate id
-     * @param pid emulated dumpstate pid
-     * @param name expected subject
      * @param name bugreport name as provided by the user (or received by dumpstate)
      * @param title bugreport name as provided by the user
      * @param description bugreport description as provided by the user
      * @param numberScreenshots expected number of screenshots taken by Shell.
-     * @param renamedScreenshots whether the screenshots are expected to be renamed
      */
-    private void assertActionSendMultiple(Bundle extras, String bugreportContent,
-            String screenshotContent, int id, int pid, String subject,
-            String name, String title, String description,
-            int numberScreenshots, boolean renamedScreenshots) throws IOException {
+    private void assertActionSendMultiple(Bundle extras, String name, String title,
+            String description, int numberScreenshots)
+            throws IOException {
         String body = extras.getString(Intent.EXTRA_TEXT);
         assertContainsRegex("missing build info",
                 SystemProperties.get("ro.build.description"), body);
@@ -815,11 +682,21 @@ public class BugreportReceiverTest {
             assertContainsRegex("missing description", description, body);
         }
 
-        assertEquals("wrong subject", subject, extras.getString(Intent.EXTRA_SUBJECT));
+        final String extrasSubject = extras.getString(Intent.EXTRA_SUBJECT);
+        if (title != null) {
+            assertEquals("wrong subject", title, extrasSubject);
+        } else {
+            if (name != null) {
+                assertEquals("wrong subject", getBugreportName(name), extrasSubject);
+            } else {
+                assertTrue("wrong subject", extrasSubject.startsWith(
+                        getBugreportPrefixName()));
+            }
+        }
 
         List<Uri> attachments = extras.getParcelableArrayList(Intent.EXTRA_STREAM);
         int expectedNumberScreenshots = numberScreenshots;
-        if (screenshotContent != null) {
+        if (getScreenshotContent() != null) {
             expectedNumberScreenshots ++; // Add screenshot received by dumpstate
         }
         int expectedSize = expectedNumberScreenshots + 1; // All screenshots plus the bugreport file
@@ -858,7 +735,7 @@ public class BugreportReceiverTest {
             }
         }
         // Check external screenshot
-        if (screenshotContent != null) {
+        if (getScreenshotContent() != null) {
             assertNotNull("did not get .png attachment for external screenshot",
                     externalScreenshotUri);
             assertContent(externalScreenshotUri, SCREENSHOT_CONTENT);
@@ -866,17 +743,18 @@ public class BugreportReceiverTest {
             assertNull("should not have .png attachment for external screenshot",
                     externalScreenshotUri);
         }
-        // Check internal screenshots.
-        SortedSet<String> expectedNames = new TreeSet<>();
-        for (int i = 1 ; i <= numberScreenshots; i++) {
-            String prefix = renamedScreenshots  ? name : Integer.toString(pid);
-            String expectedName = "screenshot-" + prefix + "-" + i + ".png";
-            expectedNames.add(expectedName);
+        // Check internal screenshots' file names.
+        if (name != null) {
+            SortedSet<String> expectedNames = new TreeSet<>();
+            for (int i = 1; i <= numberScreenshots; i++) {
+                String expectedName = "screenshot-" + name + "-" + i + ".png";
+                expectedNames.add(expectedName);
+            }
+            // Ideally we should use MoreAsserts, but the error message in case of failure is not
+            // really useful.
+            assertEquals("wrong names for internal screenshots",
+                    expectedNames, internalScreenshotNames);
         }
-        // Ideally we should use MoreAsserts, but the error message in case of failure is not
-        // really useful.
-        assertEquals("wrong names for internal screenshots",
-                expectedNames, internalScreenshotNames);
     }
 
     private void assertContent(Uri uri, String expectedContent) throws IOException {
@@ -909,28 +787,9 @@ public class BugreportReceiverTest {
         fail("Did not find entry '" + entryName + "' on file '" + uri + "'");
     }
 
-    private void assertPropertyValue(String key, String expectedValue) {
-        // Since the property is set in a different thread by BugreportProgressService, we need to
-        // poll it a couple times...
-
-        for (int i = 1; i <= 5; i++) {
-            String actualValue = SystemProperties.get(key);
-            if (expectedValue.equals(actualValue)) {
-                return;
-            }
-            Log.d(TAG, "Value of property " + key + " (" + actualValue
-                    + ") does not match expected value (" + expectedValue
-                    + ") on attempt " + i + ". Sleeping before next attempt...");
-            sleep(1000);
-        }
-        // Final try...
-        String actualValue = SystemProperties.get(key);
-        assertEquals("Wrong value for property '" + key + "'", expectedValue, actualValue);
-    }
-
     private void assertServiceNotRunning() {
-        String service = BugreportProgressService.class.getName();
-        assertFalse("Service '" + service + "' is still running", isServiceRunning(service));
+        mServiceRule.unbindService();
+        waitForService(false);
     }
 
     private boolean isServiceRunning(String name) {
@@ -962,7 +821,7 @@ public class BugreportReceiverTest {
 
     private void killService() {
         String service = BugreportProgressService.class.getName();
-
+        mServiceRule.unbindService();
         if (!isServiceRunning(service)) return;
 
         Log.w(TAG, "Service '" + service + "' is still running, killing it");
@@ -980,18 +839,19 @@ public class BugreportReceiverTest {
         }
     }
 
-    private void createTextFile(String path, String content) throws IOException {
-        Log.v(TAG, "createFile(" + path + ")");
+    private void writeScreenshotFile(ParcelFileDescriptor fd, String content) throws IOException {
+        Log.v(TAG, "writeScreenshotFile(" + fd + ")");
         try (Writer writer = new BufferedWriter(new OutputStreamWriter(
-                new FileOutputStream(path)))) {
+                new FileOutputStream(fd.getFileDescriptor())))) {
             writer.write(content);
         }
     }
 
-    private void createZipFile(String path, String entryName, String content) throws IOException {
-        Log.v(TAG, "createZipFile(" + path + ", " + entryName + ")");
+    private void writeZipFile(ParcelFileDescriptor fd, String entryName, String content)
+            throws IOException {
+        Log.v(TAG, "writeZipFile(" + fd + ", " + entryName + ")");
         try (ZipOutputStream zos = new ZipOutputStream(
-                new BufferedOutputStream(new FileOutputStream(path)))) {
+                new BufferedOutputStream(new FileOutputStream(fd.getFileDescriptor())))) {
             ZipEntry entry = new ZipEntry(entryName);
             zos.putNextEntry(entry);
             byte[] data = content.getBytes();
@@ -1000,25 +860,13 @@ public class BugreportReceiverTest {
         }
     }
 
-    private String getPath(String file) {
-        final File rootDir = mContext.getFilesDir();
-        final File dir = new File(rootDir, BUGREPORTS_DIR);
-        if (!dir.exists()) {
-            Log.i(TAG, "Creating directory " + dir);
-            assertTrue("Could not create directory " + dir, dir.mkdir());
-        }
-        String path = new File(dir, file).getAbsolutePath();
-        Log.v(TAG, "Path for '" + file + "': " + path);
-        return path;
-    }
-
     /**
      * Gets the notification button used to take a screenshot.
      */
     private UiObject getScreenshotButton() {
-        openProgressNotification(NAME);
-        return mUiBot.getVisibleObject(
-                mContext.getString(R.string.bugreport_screenshot_action).toUpperCase());
+        openProgressNotification(mProgressTitle);
+        return mUiBot.getObject(
+                mContext.getString(R.string.bugreport_screenshot_action));
     }
 
     /**
@@ -1072,12 +920,36 @@ public class BugreportReceiverTest {
         Log.d(TAG, "woke up");
     }
 
+    private int getBugreportId() {
+        return SystemProperties.getInt(PROPERTY_LAST_ID, 1);
+    }
+
+    private String getBugreportInProgress(int bugreportId) {
+        return mContext.getString(R.string.bugreport_in_progress_title, bugreportId);
+    }
+
+    private String getBugreportPrefixName() {
+        String buildId = SystemProperties.get("ro.build.id", "UNKNOWN_BUILD");
+        String deviceName = SystemProperties.get("ro.product.name", "UNKNOWN_DEVICE");
+        return String.format("bugreport-%s-%s", deviceName, buildId);
+    }
+
+    private String getBugreportName(String name) {
+        return String.format("%s-%s.zip", getBugreportPrefixName(), name);
+    }
+
+    private String getScreenshotContent() {
+        if (mScreenshotFd == null) {
+            return NO_SCREENSHOT;
+        }
+        return SCREENSHOT_CONTENT;
+    }
+
     /**
      * Helper class containing the UiObjects present in the bugreport info dialog.
      */
     private final class DetailsUi {
 
-        final UiObject detailsButton;
         final UiObject nameField;
         final UiObject titleField;
         final UiObject descField;
@@ -1088,10 +960,9 @@ public class BugreportReceiverTest {
          * Gets the UI objects by opening the progress notification and clicking on DETAILS.
          *
          * @param id bugreport id
-         * @param id bugreport name
          */
-        DetailsUi(UiBot uiBot, int id, String name) throws UiObjectNotFoundException {
-            this(uiBot, id, name, true);
+        DetailsUi(int id) throws UiObjectNotFoundException {
+            this(id, true);
         }
 
         /**
@@ -1099,13 +970,12 @@ public class BugreportReceiverTest {
          * the notification itself.
          *
          * @param id bugreport id
-         * @param id bugreport name
          */
-        DetailsUi(UiBot uiBot, int id, String name, boolean clickDetails)
-                throws UiObjectNotFoundException {
-            final UiObject notification = openProgressNotification(name);
-            detailsButton = mUiBot.getVisibleObject(mContext.getString(
-                    R.string.bugreport_info_action).toUpperCase());
+        DetailsUi(int id, boolean clickDetails) throws UiObjectNotFoundException {
+            openProgressNotification(mProgressTitle);
+            final UiObject notification = mUiBot.getObject(mProgressTitle);
+            final UiObject detailsButton = mUiBot.getObject(mContext.getString(
+                    R.string.bugreport_info_action));
 
             if (clickDetails) {
                 mUiBot.click(detailsButton, "details_button");
@@ -1121,24 +991,6 @@ public class BugreportReceiverTest {
             descField = mUiBot.getVisibleObjectById("com.android.shell:id/description");
             okButton = mUiBot.getObjectById("android:id/button1");
             cancelButton = mUiBot.getObjectById("android:id/button2");
-        }
-
-        private void assertField(String name, UiObject field, String expected)
-                throws UiObjectNotFoundException {
-            String actual = field.getText().toString();
-            assertEquals("Wrong value on field '" + name + "'", expected, actual);
-        }
-
-        void assertName(String expected) throws UiObjectNotFoundException {
-            assertField("name", nameField, expected);
-        }
-
-        void assertTitle(String expected) throws UiObjectNotFoundException {
-            assertField("title", titleField, expected);
-        }
-
-        void assertDescription(String expected) throws UiObjectNotFoundException {
-            assertField("description", descField, expected);
         }
 
         /**
@@ -1159,6 +1011,8 @@ public class BugreportReceiverTest {
 
         void reOpen(String name) {
             openProgressNotification(name);
+            final UiObject detailsButton = mUiBot.getObject(mContext.getString(
+                    R.string.bugreport_info_action));
             mUiBot.click(detailsButton, "details_button");
         }
 

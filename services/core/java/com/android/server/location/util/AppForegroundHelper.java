@@ -19,16 +19,6 @@ package com.android.server.location.util;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 import static android.app.ActivityManager.RunningAppProcessInfo.Importance;
 
-import android.annotation.Nullable;
-import android.app.ActivityManager;
-import android.content.Context;
-import android.os.Binder;
-
-import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
-import com.android.server.FgThread;
-
-import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -36,7 +26,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * considered foreground if it's uid's importance level is at or more important than
  * {@link android.app.ActivityManager.RunningAppProcessInfo#IMPORTANCE_FOREGROUND_SERVICE}.
  */
-public class AppForegroundHelper {
+public abstract class AppForegroundHelper {
 
     /**
      * Listener for application foreground state changes.
@@ -50,71 +40,40 @@ public class AppForegroundHelper {
 
     // importance constants decrement with increasing importance - this is our limit for an
     // importance level we consider foreground.
-    private static final int FOREGROUND_IMPORTANCE_CUTOFF = IMPORTANCE_FOREGROUND_SERVICE;
+    protected static final int FOREGROUND_IMPORTANCE_CUTOFF = IMPORTANCE_FOREGROUND_SERVICE;
 
-    private static boolean isForeground(@Importance int importance) {
+    protected static boolean isForeground(@Importance int importance) {
         return importance <= FOREGROUND_IMPORTANCE_CUTOFF;
     }
 
-    private final Context mContext;
     private final CopyOnWriteArrayList<AppForegroundListener> mListeners;
 
-    @GuardedBy("this")
-    @Nullable private ActivityManager mActivityManager;
-
-    public AppForegroundHelper(Context context) {
-        mContext = context;
+    public AppForegroundHelper() {
         mListeners = new CopyOnWriteArrayList<>();
-    }
-
-    /** Called when system is ready. */
-    public synchronized void onSystemReady() {
-        if (mActivityManager != null) {
-            return;
-        }
-
-        mActivityManager = Objects.requireNonNull(mContext.getSystemService(ActivityManager.class));
-        mActivityManager.addOnUidImportanceListener(this::onAppForegroundChanged,
-                FOREGROUND_IMPORTANCE_CUTOFF);
     }
 
     /**
      * Adds a listener for app foreground changed events. Callbacks occur on an unspecified thread.
      */
-    public void addListener(AppForegroundListener listener) {
+    public final void addListener(AppForegroundListener listener) {
         mListeners.add(listener);
     }
 
     /**
      * Removes a listener for app foreground changed events.
      */
-    public void removeListener(AppForegroundListener listener) {
+    public final void removeListener(AppForegroundListener listener) {
         mListeners.remove(listener);
     }
 
-    private void onAppForegroundChanged(int uid, @Importance int importance) {
-        // invoked on ui thread, move to fg thread so we don't block the ui thread
-        boolean foreground = isForeground(importance);
-        FgThread.getHandler().post(() -> {
-            for (AppForegroundListener listener : mListeners) {
-                listener.onAppForegroundChanged(uid, foreground);
-            }
-        });
+    protected final void notifyAppForeground(int uid, boolean foreground) {
+        for (AppForegroundListener listener : mListeners) {
+            listener.onAppForegroundChanged(uid, foreground);
+        }
     }
 
     /**
      * Whether the given uid is currently foreground.
      */
-    public boolean isAppForeground(int uid) {
-        synchronized (this) {
-            Preconditions.checkState(mActivityManager != null);
-        }
-
-        long identity = Binder.clearCallingIdentity();
-        try {
-            return isForeground(mActivityManager.getUidImportance(uid));
-        } finally {
-            Binder.restoreCallingIdentity(identity);
-        }
-    }
+    public abstract boolean isAppForeground(int uid);
 }

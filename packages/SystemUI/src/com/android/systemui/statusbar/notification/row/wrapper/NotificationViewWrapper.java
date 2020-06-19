@@ -104,6 +104,12 @@ public abstract class NotificationViewWrapper implements TransformableView {
     public void showAppOpsIcons(ArraySet<Integer> appOps) {
     }
 
+    /**
+     * Shows or hides feedback icon.
+     */
+    public void showFeedbackIcon(boolean show) {
+    }
+
     public void onReinflated() {
         if (shouldClearBackgroundOnReapply()) {
             mBackgroundColor = 0;

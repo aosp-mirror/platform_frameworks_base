@@ -49,9 +49,8 @@ import com.android.internal.util.Preconditions;
 import com.android.server.LocalServices;
 import com.android.server.location.util.AppForegroundHelper;
 import com.android.server.location.util.AppOpsHelper;
-import com.android.server.location.util.LocationUsageLogger;
+import com.android.server.location.util.Injector;
 import com.android.server.location.util.SettingsHelper;
-import com.android.server.location.util.UserInfoHelper;
 
 import java.io.FileDescriptor;
 import java.util.List;
@@ -98,31 +97,25 @@ public class GnssManagerService implements GnssNative.Callbacks {
     @GuardedBy("mGnssBatchingLock")
     private boolean mGnssBatchingInProgress = false;
 
-    public GnssManagerService(Context context, UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper, LocationUsageLogger locationUsageLogger) {
-        this(context, userInfoHelper, settingsHelper, appOpsHelper, appForegroundHelper,
-                locationUsageLogger, null);
+    public GnssManagerService(Context context, Injector injector) {
+        this(context, injector, null);
     }
 
     @VisibleForTesting
-    GnssManagerService(Context context, UserInfoHelper userInfoHelper,
-            SettingsHelper settingsHelper, AppOpsHelper appOpsHelper,
-            AppForegroundHelper appForegroundHelper, LocationUsageLogger locationUsageLogger,
+    GnssManagerService(Context context, Injector injector,
             GnssLocationProvider gnssLocationProvider) {
         Preconditions.checkState(isGnssSupported());
 
         GnssNative.initialize();
 
         mContext = context.createAttributionContext(ATTRIBUTION_ID);
-        mSettingsHelper = settingsHelper;
-        mAppOpsHelper = appOpsHelper;
-        mAppForegroundHelper = appForegroundHelper;
+        mSettingsHelper = injector.getSettingsHelper();
+        mAppOpsHelper = injector.getAppOpsHelper();
+        mAppForegroundHelper = injector.getAppForegroundHelper();
         mLocationManagerInternal = LocalServices.getService(LocationManagerInternal.class);
 
         if (gnssLocationProvider == null) {
-            gnssLocationProvider = new GnssLocationProvider(mContext, userInfoHelper,
-                    mSettingsHelper, mAppOpsHelper, mAppForegroundHelper, locationUsageLogger);
+            gnssLocationProvider = new GnssLocationProvider(mContext, injector);
         }
 
         mGnssLocationProvider = gnssLocationProvider;
@@ -145,10 +138,6 @@ public class GnssManagerService implements GnssNative.Callbacks {
 
     /** Called when system is ready. */
     public synchronized void onSystemReady() {
-        mAppOpsHelper.onSystemReady();
-        mSettingsHelper.onSystemReady();
-        mAppForegroundHelper.onSystemReady();
-
         mGnssLocationProvider.onSystemReady();
     }
 
