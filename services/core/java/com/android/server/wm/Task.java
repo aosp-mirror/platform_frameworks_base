@@ -939,14 +939,15 @@ class Task extends WindowContainer<WindowContainer> {
 
     /** Sets the original intent, _without_ updating the calling uid or package. */
     private void setIntent(Intent _intent, ActivityInfo info) {
+        final boolean isLeaf = isLeafTask();
         if (intent == null) {
             mNeverRelinquishIdentity =
                     (info.flags & FLAG_RELINQUISH_TASK_IDENTITY) == 0;
-        } else if (mNeverRelinquishIdentity) {
+        } else if (mNeverRelinquishIdentity && isLeaf) {
             return;
         }
 
-        affinity = isLeafTask() ? info.taskAffinity : null;
+        affinity = isLeaf ? info.taskAffinity : null;
         if (intent == null) {
             // If this task already has an intent associated with it, don't set the root
             // affinity -- we don't want it changing after initially set, but the initially
@@ -3587,6 +3588,7 @@ class Task extends WindowContainer<WindowContainer> {
         final Task top = getTopMostTask();
         info.resizeMode = top != null ? top.mResizeMode : mResizeMode;
         info.topActivityType = top.getActivityType();
+        info.isResizeable = isResizeable();
 
         ActivityRecord rootActivity = top.getRootActivity();
         if (rootActivity == null || rootActivity.pictureInPictureArgs.empty()) {
@@ -3684,20 +3686,6 @@ class Task extends WindowContainer<WindowContainer> {
             final int otherWindowingMode = other.getWindowingMode();
 
             if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
-                // In this case the home stack isn't resizeable even though we are in split-screen
-                // mode. We still want the primary splitscreen stack to be visible as there will be
-                // a slight hint of it in the status bar area above the non-resizeable home
-                // activity. In addition, if the fullscreen assistant is over primary splitscreen
-                // stack, the stack should still be visible in the background as long as the recents
-                // animation is running.
-                final int activityType = other.getActivityType();
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    if (activityType == ACTIVITY_TYPE_HOME
-                            || (activityType == ACTIVITY_TYPE_ASSISTANT
-                            && mWmService.getRecentsAnimationController() != null)) {
-                        break;
-                    }
-                }
                 if (other.isTranslucent(starting)) {
                     // Can be visible behind a translucent fullscreen stack.
                     gotTranslucentFullscreen = true;

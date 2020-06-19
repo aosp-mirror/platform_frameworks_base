@@ -193,6 +193,8 @@ class MediaHierarchyManager @Inject constructor(
             override fun onDozingChanged(isDozing: Boolean) {
                 if (!isDozing) {
                     dozeAnimationRunning = false
+                } else {
+                    updateDesiredLocation()
                 }
             }
         })
@@ -510,12 +512,19 @@ class MediaHierarchyManager @Inject constructor(
                 (statusbarState == StatusBarState.KEYGUARD ||
                         statusbarState == StatusBarState.FULLSCREEN_USER_SWITCHER))
         val allowedOnLockscreen = notifLockscreenUserManager.shouldShowLockscreenNotifications()
-        return when {
+        val location = when {
             qsExpansion > 0.0f && !onLockscreen -> LOCATION_QS
             qsExpansion > 0.4f && onLockscreen -> LOCATION_QS
             onLockscreen && allowedOnLockscreen -> LOCATION_LOCKSCREEN
             else -> LOCATION_QQS
         }
+        // When we're on lock screen and the player is not active, we should keep it in QS.
+        // Otherwise it will try to animate a transition that doesn't make sense.
+        if (location == LOCATION_LOCKSCREEN && getHost(location)?.visible != true &&
+                !statusBarStateController.isDozing) {
+            return LOCATION_QS
+        }
+        return location
     }
 
     companion object {

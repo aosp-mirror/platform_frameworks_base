@@ -61,6 +61,9 @@ int64_t getElapsedRealtimeMillis();
 // Gets the elapsed timestamp in seconds.
 int64_t getElapsedRealtimeSec();
 
+// Gets the system uptime in millis.
+int64_t getSystemUptimeMillis();
+
 // Gets the wall clock timestamp in ns.
 int64_t getWallClockNs();
 

@@ -222,6 +222,9 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
 
             try {
                 Set<Association> associations = readAllAssociations(userId);
+                if (associations == null) {
+                    continue;
+                }
                 for (Association a : associations) {
                     try {
                         int uid = pm.getPackageUidAsUser(a.companionAppPackage, userId);

@@ -149,7 +149,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testPrune_badFileName() {
+    public void testPrune_badFileName_noCrash() {
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTimeInMillis(10);
         int retainDays = 1;
@@ -159,7 +159,7 @@ public class NotificationHistoryDatabaseTest extends UiServiceTestCase {
         // add 5 files with a creation date of "today", but the file names are bad
         for (long i = cal.getTimeInMillis(); i >= 5; i--) {
             File file = mock(File.class);
-            when(file.getName()).thenReturn(i + ".txt");
+            when(file.getName()).thenReturn(i + ".bak");
             AtomicFile af = new AtomicFile(file);
             mDataBase.mHistoryFiles.addLast(af);
         }

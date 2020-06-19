@@ -82,6 +82,9 @@ public class PipTouchHandler {
     /** Duration of the dismiss scrim fading in/out. */
     private static final int DISMISS_TRANSITION_DURATION_MS = 200;
 
+    /* The multiplier to apply scale the target size by when applying the magnetic field radius */
+    private static final float MAGNETIC_FIELD_RADIUS_MULTIPLIER = 1.25f;
+
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDismissDragToEdge;
     // Allow PIP to resize to a slightly bigger state upon touch
@@ -124,7 +127,7 @@ public class PipTouchHandler {
     /** Default configuration to use for springing the dismiss target in/out. */
     private final PhysicsAnimator.SpringConfig mTargetSpringConfig =
             new PhysicsAnimator.SpringConfig(
-                    SpringForce.STIFFNESS_MEDIUM, SpringForce.DAMPING_RATIO_NO_BOUNCY);
+                    SpringForce.STIFFNESS_LOW, SpringForce.DAMPING_RATIO_LOW_BOUNCY);
 
     // The current movement bounds
     private Rect mMovementBounds = new Rect();
@@ -250,8 +253,9 @@ public class PipTouchHandler {
 
         mPipBoundsHandler = pipBoundsHandler;
         mFloatingContentCoordinator = floatingContentCoordinator;
-        mConnection = new PipAccessibilityInteractionConnection(mMotionHelper,
-                this::onAccessibilityShowMenu, mHandler);
+        mConnection = new PipAccessibilityInteractionConnection(mContext, mMotionHelper,
+                pipTaskOrganizer, pipSnapAlgorithm, this::onAccessibilityShowMenu,
+                this::updateMovementBounds, mHandler);
 
         mTargetView = new DismissCircleView(context);
         mTargetViewContainer = new FrameLayout(context);
@@ -324,11 +328,14 @@ public class PipTouchHandler {
         final int targetSize = res.getDimensionPixelSize(R.dimen.dismiss_circle_size);
         final FrameLayout.LayoutParams newParams =
                 new FrameLayout.LayoutParams(targetSize, targetSize);
-        newParams.gravity = Gravity.CENTER;
+        newParams.gravity = Gravity.CENTER_HORIZONTAL | Gravity.BOTTOM;
+        newParams.bottomMargin = mContext.getResources().getDimensionPixelSize(
+                R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 
-        // Set the magnetic field radius equal to twice the size of the target.
-        mMagneticTarget.setMagneticFieldRadiusPx(targetSize * 2);
+        // Set the magnetic field radius equal to the target size from the center of the target
+        mMagneticTarget.setMagneticFieldRadiusPx(
+                (int) (targetSize * MAGNETIC_FIELD_RADIUS_MULTIPLIER));
     }
 
     private boolean shouldShowResizeHandle() {
@@ -467,9 +474,9 @@ public class PipTouchHandler {
                 // touching the screen
             } else {
                 final boolean isExpanded = mMenuState == MENU_STATE_FULL && willResizeMenu();
-                final Rect toMovementBounds = isExpanded
-                        ? new Rect(expandedMovementBounds)
-                        : new Rect(normalMovementBounds);
+                final Rect toMovementBounds = new Rect();
+                mSnapAlgorithm.getMovementBounds(curBounds, insetBounds,
+                        toMovementBounds, mIsImeShowing ? mImeHeight : 0);
                 final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
                 final int toBottom = toMovementBounds.bottom < toMovementBounds.top
                         ? toMovementBounds.bottom
@@ -497,6 +504,8 @@ public class PipTouchHandler {
         mInsetBounds.set(insetBounds);
         updateMovementBounds();
         mMovementBoundsExtraOffsets = extraOffset;
+        mConnection.onMovementBoundsChanged(mNormalBounds, mExpandedBounds, mNormalMovementBounds,
+                mExpandedMovementBounds);
 
         // If we have a deferred resize, apply it now
         if (mDeferResizeToNormalBoundsUntilRotation == displayRotation) {
@@ -948,7 +957,6 @@ public class PipTouchHandler {
             }
 
             final PointF vel = touchState.getVelocity();
-            final float velocity = PointF.length(vel.x, vel.y);
 
             if (touchState.isDragging()) {
                 if (mMenuState != MENU_STATE_NONE) {
@@ -1039,6 +1047,7 @@ public class PipTouchHandler {
         pw.println(innerPrefix + "mShelfHeight=" + mShelfHeight);
         pw.println(innerPrefix + "mSavedSnapFraction=" + mSavedSnapFraction);
         pw.println(innerPrefix + "mEnableDragToEdgeDismiss=" + mEnableDismissDragToEdge);
+        pw.println(innerPrefix + "mMovementBoundsExtraOffsets=" + mMovementBoundsExtraOffsets);
         mTouchState.dump(pw, innerPrefix);
         mMotionHelper.dump(pw, innerPrefix);
     }

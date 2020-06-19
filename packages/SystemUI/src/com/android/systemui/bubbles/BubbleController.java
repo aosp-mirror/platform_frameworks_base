@@ -207,6 +207,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      */
     private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
 
+    /** Last known direction, used to detect layout direction changes @link #onConfigChanged}. */
+    private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
+
     private boolean mInflateSynchronously;
 
     // TODO (b/145659174): allow for multiple callbacks to support the "shadow" new notif pipeline
@@ -832,8 +835,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }
-
-            mStackView.onLayoutDirectionChanged();
+            if (newConfig.getLayoutDirection() != mLayoutDirection) {
+                mLayoutDirection = newConfig.getLayoutDirection();
+                mStackView.onLayoutDirectionChanged(mLayoutDirection);
+            }
         }
     }
 

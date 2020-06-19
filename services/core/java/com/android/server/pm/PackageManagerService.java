@@ -12148,15 +12148,17 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            // Ensure the package is signed with at least the minimum signature scheme version
-            // required for its target SDK.
-            int minSignatureSchemeVersion =
-                    ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
-                            pkg.getTargetSdkVersion());
-            if (pkg.getSigningDetails().signatureSchemeVersion < minSignatureSchemeVersion) {
-                throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
-                        "No signature found in package of version " + minSignatureSchemeVersion
-                                + " or newer for package " + pkg.getPackageName());
+            // If the package is not on a system partition ensure it is signed with at least the
+            // minimum signature scheme version required for its target SDK.
+            if ((parseFlags & PackageParser.PARSE_IS_SYSTEM_DIR) == 0) {
+                int minSignatureSchemeVersion =
+                        ApkSignatureVerifier.getMinimumSignatureSchemeVersionForTargetSdk(
+                                pkg.getTargetSdkVersion());
+                if (pkg.getSigningDetails().signatureSchemeVersion < minSignatureSchemeVersion) {
+                    throw new PackageManagerException(INSTALL_PARSE_FAILED_NO_CERTIFICATES,
+                            "No signature found in package of version " + minSignatureSchemeVersion
+                                    + " or newer for package " + pkg.getPackageName());
+                }
             }
         }
     }
