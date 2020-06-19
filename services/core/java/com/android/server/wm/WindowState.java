@@ -181,6 +181,7 @@ import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyCache;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -1764,6 +1765,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isDreamWindow() {
         return mActivityRecord != null
                && mActivityRecord.getActivityType() == ACTIVITY_TYPE_DREAM;
+    }
+
+    boolean isSecureLocked() {
+        if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+            return true;
+        }
+        return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId,
+                mOwnerCanAddInternalSystemWindow);
     }
 
     /**

@@ -662,10 +662,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
     }
 
-    void setSecureSurfaceState(int userId, boolean disabled) {
+    void setSecureSurfaceState(int userId) {
         forAllWindows((w) -> {
             if (w.mHasSurface && userId == w.mShowUserId) {
-                w.mWinAnimator.setSecureLocked(disabled);
+                w.mWinAnimator.setSecureLocked(w.isSecureLocked());
             }
         }, true /* traverseTopToBottom */);
     }
