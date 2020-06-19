@@ -207,6 +207,11 @@ public class SecurityControllerImpl extends CurrentUserTracker implements Securi
     }
 
     @Override
+    public boolean isProfileOwnerOfOrganizationOwnedDevice() {
+        return mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile();
+    }
+
+    @Override
     public String getWorkProfileVpnName() {
         final int profileId = getWorkProfileUserId(mVpnUserId);
         if (profileId == UserHandle.USER_NULL) return null;
