@@ -139,7 +139,8 @@ public class Utils {
      * Off by default, but can be enabled by setting to 1
      */
     public static boolean useMediaResumption(Context context) {
-        int flag = Settings.System.getInt(context.getContentResolver(), "qs_media_resumption", 0);
+        int flag = Settings.Secure.getInt(context.getContentResolver(),
+                Settings.Secure.MEDIA_CONTROLS_RESUME, 1);
         return useQsMediaPlayer(context) && flag > 0;
     }
 }
