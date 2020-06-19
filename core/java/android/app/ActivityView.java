@@ -33,7 +33,10 @@ import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.AttributeSet;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -416,6 +419,9 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
     }
 
     private class SurfaceCallback implements SurfaceHolder.Callback {
+        private final DisplayInfo mTempDisplayInfo = new DisplayInfo();
+        private final DisplayMetrics mTempMetrics = new DisplayMetrics();
+
         @Override
         public void surfaceCreated(SurfaceHolder surfaceHolder) {
             if (!mTaskEmbedder.isInitialized()) {
@@ -424,13 +430,21 @@ public class ActivityView extends ViewGroup implements android.window.TaskEmbedd
                 mTmpTransaction.reparent(mTaskEmbedder.getSurfaceControl(),
                         mSurfaceView.getSurfaceControl()).apply();
             }
+            mTaskEmbedder.resizeTask(getWidth(), getHeight());
             mTaskEmbedder.start();
         }
 
         @Override
         public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int width, int height) {
-            mTaskEmbedder.resizeTask(width, height);
-            mTaskEmbedder.notifyBoundsChanged();
+            final Display display = getVirtualDisplay().getDisplay();
+            if (!display.getDisplayInfo(mTempDisplayInfo)) {
+                return;
+            }
+            mTempDisplayInfo.getAppMetrics(mTempMetrics);
+            if (width != mTempMetrics.widthPixels || height != mTempMetrics.heightPixels) {
+                mTaskEmbedder.resizeTask(width, height);
+                mTaskEmbedder.notifyBoundsChanged();
+            }
         }
 
         @Override
