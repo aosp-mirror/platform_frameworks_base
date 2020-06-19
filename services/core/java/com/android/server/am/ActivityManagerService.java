@@ -1671,6 +1671,12 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Nullable ContentCaptureManagerInternal mContentCaptureService;
 
+    /**
+     * Set of {@link ProcessRecord} that have either {@link ProcessRecord#hasTopUi()} or
+     * {@link ProcessRecord#runningRemoteAnimation} set to {@code true}.
+     */
+    final ArraySet<ProcessRecord> mTopUiOrRunningRemoteAnimApps = new ArraySet<>();
+
     final class UiHandler extends Handler {
         public UiHandler() {
             super(com.android.server.UiThread.get().getLooper(), null, true);
@@ -14702,6 +14708,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mProcessesToGc.remove(app);
         mPendingPssProcesses.remove(app);
+        mTopUiOrRunningRemoteAnimApps.remove(app);
         ProcessList.abortNextPssTime(app.procStateMemTracker);
 
         // Dismiss any open dialogs.
@@ -18500,6 +18507,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return proc;
+    }
+
+    /**
+     * @return {@code true} if {@link #mTopUiOrRunningRemoteAnimApps} set contains {@code app} or when there are no apps
+     *         in this list, an false otherwise.
+     */
+    boolean containsTopUiOrRunningRemoteAnimOrEmptyLocked(ProcessRecord app) {
+        return mTopUiOrRunningRemoteAnimApps.isEmpty() || mTopUiOrRunningRemoteAnimApps.contains(app);
+    }
+
+    void addTopUiOrRunningRemoteAnim(ProcessRecord app) {
+        mTopUiOrRunningRemoteAnimApps.add(app);
+    }
+
+    void removeTopUiOrRunningRemoteAnim(ProcessRecord app) {
+        mTopUiOrRunningRemoteAnimApps.remove(app);
     }
 
     @Override
