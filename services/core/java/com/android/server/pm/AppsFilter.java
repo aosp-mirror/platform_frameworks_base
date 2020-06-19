@@ -817,7 +817,7 @@ public class AppsFilter {
                 }
             }
 
-            if (!setting.pkg.getProtectedBroadcasts().isEmpty()) {
+            if (setting.pkg != null && !setting.pkg.getProtectedBroadcasts().isEmpty()) {
                 final String removingPackageName = setting.pkg.getPackageName();
                 final Set<String> protectedBroadcasts = mProtectedBroadcasts;
                 mProtectedBroadcasts = collectProtectedBroadcasts(settings, removingPackageName);
