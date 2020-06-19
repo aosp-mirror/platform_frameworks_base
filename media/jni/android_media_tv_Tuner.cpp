@@ -314,8 +314,9 @@ MediaEvent::~MediaEvent() {
     if (mIonHandle != NULL) {
         delete mIonHandle;
     }
-    if (mC2Buffer != NULL) {
-        mC2Buffer->unregisterOnDestroyNotify(&DestroyCallback, this);
+    std::shared_ptr<C2Buffer> pC2Buffer = mC2Buffer.lock();
+    if (pC2Buffer != NULL) {
+        pC2Buffer->unregisterOnDestroyNotify(&DestroyCallback, this);
     }
 }
 
@@ -340,15 +341,17 @@ jobject MediaEvent::getLinearBlock() {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
     std::unique_ptr<JMediaCodecLinearBlock> context{new JMediaCodecLinearBlock};
     context->mBlock = block;
-    mC2Buffer = context->toC2Buffer(0, mDataLength);
+    std::shared_ptr<C2Buffer> pC2Buffer = context->toC2Buffer(0, mDataLength);
+    context->mBuffer = pC2Buffer;
+    mC2Buffer = pC2Buffer;
     if (mAvHandle->numInts > 0) {
         // use first int in the native_handle as the index
         int index = mAvHandle->data[mAvHandle->numFds];
         std::shared_ptr<C2Param> c2param = std::make_shared<C2DataIdInfo>(index, mDataId);
         std::shared_ptr<C2Info> info(std::static_pointer_cast<C2Info>(c2param));
-        mC2Buffer->setInfo(info);
+        pC2Buffer->setInfo(info);
     }
-    mC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
+    pC2Buffer->registerOnDestroyNotify(&DestroyCallback, this);
     jobject linearBlock =
             env->NewObject(
                     env->FindClass("android/media/MediaCodec$LinearBlock"),
