@@ -178,7 +178,7 @@ public class OneHandedEvents {
     }
 
     /**
-     * Logs an event to the UiEvent (Westworld) logging.
+     * Logs an event to the UiEvent (statsd) logging.
      * @param event One of the EVENT_* codes above.
      * @return String a readable description of the event.  Begins "writeEvent <tag_description>"
      * if the tag is valid.
