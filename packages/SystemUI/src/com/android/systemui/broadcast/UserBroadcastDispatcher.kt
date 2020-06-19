@@ -18,8 +18,6 @@ package com.android.systemui.broadcast
 
 import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
@@ -31,11 +29,10 @@ import androidx.annotation.VisibleForTesting
 import com.android.internal.util.Preconditions
 import com.android.systemui.Dumpable
 import com.android.systemui.broadcast.logging.BroadcastDispatcherLogger
+import com.android.systemui.util.indentIfPossible
 import java.io.FileDescriptor
 import java.io.PrintWriter
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.Executor
 import java.util.concurrent.atomic.AtomicInteger
 
 private const val MSG_REGISTER_RECEIVER = 0
@@ -48,16 +45,14 @@ private const val DEBUG = false
  *
  * Created by [BroadcastDispatcher] as needed by users. The value of [userId] can be
  * [UserHandle.USER_ALL].
- *
- * Each instance of this class will register itself exactly once with [Context]. Updates to the
- * [IntentFilter] will be done in the background thread.
  */
-class UserBroadcastDispatcher(
+open class UserBroadcastDispatcher(
     private val context: Context,
     private val userId: Int,
     private val bgLooper: Looper,
+    private val bgExecutor: Executor,
     private val logger: BroadcastDispatcherLogger
-) : BroadcastReceiver(), Dumpable {
+) : Dumpable {
 
     companion object {
         // Used only for debugging. If not debugging, this variable will not be accessed and all
@@ -76,47 +71,16 @@ class UserBroadcastDispatcher(
         }
     }
 
-    private val registered = AtomicBoolean(false)
-
-    internal fun isRegistered() = registered.get()
-
     // Only modify in BG thread
-    private val actionsToReceivers = ArrayMap<String, MutableSet<ReceiverData>>()
-    private val receiverToReceiverData = ArrayMap<BroadcastReceiver, MutableSet<ReceiverData>>()
+    @VisibleForTesting
+    internal val actionsToActionsReceivers = ArrayMap<String, ActionReceiver>()
+    private val receiverToActions = ArrayMap<BroadcastReceiver, MutableSet<String>>()
 
     @VisibleForTesting
     internal fun isReceiverReferenceHeld(receiver: BroadcastReceiver): Boolean {
-        return receiverToReceiverData.contains(receiver) ||
-                actionsToReceivers.any {
-            it.value.any { it.receiver == receiver }
-        }
-    }
-
-    // Only call on BG thread as it reads from the maps
-    private fun createFilter(): IntentFilter {
-        Preconditions.checkState(bgHandler.looper.isCurrentThread,
-                "This method should only be called from BG thread")
-        val categories = mutableSetOf<String>()
-        receiverToReceiverData.values.flatten().forEach {
-            it.filter.categoriesIterator()?.asSequence()?.let {
-                categories.addAll(it)
-            }
-        }
-        val intentFilter = IntentFilter().apply {
-            // The keys of the arrayMap are of type String! so null check is needed
-            actionsToReceivers.keys.forEach { if (it != null) addAction(it) else Unit }
-            categories.forEach { addCategory(it) }
-        }
-        return intentFilter
-    }
-
-    override fun onReceive(context: Context, intent: Intent) {
-        val id = index.getAndIncrement()
-        if (DEBUG) Log.w(TAG, "[$id] Received $intent")
-        logger.logBroadcastReceived(id, userId, intent)
-        bgHandler.post(
-                HandleBroadcastRunnable(
-                        actionsToReceivers, context, intent, pendingResult, id, logger))
+        return actionsToActionsReceivers.values.any {
+            it.hasReceiver(receiver)
+        } || (receiver in receiverToActions)
     }
 
     /**
@@ -137,109 +101,57 @@ class UserBroadcastDispatcher(
         Preconditions.checkState(bgHandler.looper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Register receiver: ${receiverData.receiver}")
-        receiverToReceiverData.getOrPut(receiverData.receiver, { ArraySet() }).add(receiverData)
-        var changed = false
-        // Index the BroadcastReceiver by all its actions, that way it's easier to dispatch given
-        // a received intent.
+        receiverToActions
+                .getOrPut(receiverData.receiver, { ArraySet() })
+                .addAll(receiverData.filter.actionsIterator()?.asSequence() ?: emptySequence())
         receiverData.filter.actionsIterator().forEach {
-            actionsToReceivers.getOrPut(it) {
-                changed = true
-                ArraySet()
-            }.add(receiverData)
+            actionsToActionsReceivers
+                    .getOrPut(it, { createActionReceiver(it) })
+                    .addReceiverData(receiverData)
         }
         logger.logReceiverRegistered(userId, receiverData.receiver)
-        if (changed) {
-            createFilterAndRegisterReceiverBG()
-        }
+    }
+
+    @VisibleForTesting
+    internal open fun createActionReceiver(action: String): ActionReceiver {
+        return ActionReceiver(
+                action,
+                userId,
+                {
+                    context.registerReceiverAsUser(this, UserHandle.of(userId), it, null, bgHandler)
+                    logger.logContextReceiverRegistered(userId, it)
+                },
+                {
+                    try {
+                        context.unregisterReceiver(this)
+                        logger.logContextReceiverUnregistered(userId, action)
+                    } catch (e: IllegalArgumentException) {
+                        Log.e(TAG, "Trying to unregister unregistered receiver for user $userId, " +
+                                "action $action",
+                                IllegalStateException(e))
+                    }
+                },
+                bgExecutor,
+                logger
+        )
     }
 
     private fun handleUnregisterReceiver(receiver: BroadcastReceiver) {
         Preconditions.checkState(bgHandler.looper.isCurrentThread,
                 "This method should only be called from BG thread")
         if (DEBUG) Log.w(TAG, "Unregister receiver: $receiver")
-        val actions = receiverToReceiverData.getOrElse(receiver) { return }
-                .flatMap { it.filter.actionsIterator().asSequence().asIterable() }.toSet()
-        receiverToReceiverData.remove(receiver)?.clear()
-        var changed = false
-        actions.forEach { action ->
-            actionsToReceivers.get(action)?.removeIf { it.receiver == receiver }
-            if (actionsToReceivers.get(action)?.isEmpty() ?: false) {
-                changed = true
-                actionsToReceivers.remove(action)
-            }
+        receiverToActions.getOrDefault(receiver, mutableSetOf()).forEach {
+            actionsToActionsReceivers.get(it)?.removeReceiver(receiver)
         }
+        receiverToActions.remove(receiver)
         logger.logReceiverUnregistered(userId, receiver)
-        if (changed) {
-            createFilterAndRegisterReceiverBG()
-        }
-    }
-
-    // Only call this from a BG thread
-    private fun createFilterAndRegisterReceiverBG() {
-        val intentFilter = createFilter()
-        bgHandler.post(RegisterReceiverRunnable(intentFilter))
     }
 
     override fun dump(fd: FileDescriptor, pw: PrintWriter, args: Array<out String>) {
-        pw.println("  Registered=${registered.get()}")
-        actionsToReceivers.forEach { (action, list) ->
-            pw.println("    $action:")
-            list.forEach { pw.println("      ${it.receiver}") }
-        }
-    }
-
-    private class HandleBroadcastRunnable(
-        val actionsToReceivers: Map<String, Set<ReceiverData>>,
-        val context: Context,
-        val intent: Intent,
-        val pendingResult: PendingResult,
-        val index: Int,
-        val logger: BroadcastDispatcherLogger
-    ) : Runnable {
-        override fun run() {
-            if (DEBUG) Log.w(TAG, "[$index] Dispatching $intent")
-            actionsToReceivers.get(intent.action)
-                    ?.filter {
-                        it.filter.hasAction(intent.action) &&
-                            it.filter.matchCategories(intent.categories) == null }
-                    ?.forEach {
-                        it.executor.execute {
-                            if (DEBUG) Log.w(TAG,
-                                    "[$index] Dispatching ${intent.action} to ${it.receiver}")
-                            logger.logBroadcastDispatched(index, intent.action, it.receiver)
-                            it.receiver.pendingResult = pendingResult
-                            it.receiver.onReceive(context, intent)
-                        }
-                    }
-        }
-    }
-
-    private inner class RegisterReceiverRunnable(val intentFilter: IntentFilter) : Runnable {
-
-        /*
-         * Registers and unregisters the BroadcastReceiver
-         */
-        override fun run() {
-            if (registered.get()) {
-                try {
-                    context.unregisterReceiver(this@UserBroadcastDispatcher)
-                    logger.logContextReceiverUnregistered(userId)
-                } catch (e: IllegalArgumentException) {
-                    Log.e(TAG, "Trying to unregister unregistered receiver for user $userId",
-                            IllegalStateException(e))
-                }
-                registered.set(false)
-            }
-            // Short interval without receiver, this can be problematic
-            if (intentFilter.countActions() > 0 && !registered.get()) {
-                context.registerReceiverAsUser(
-                        this@UserBroadcastDispatcher,
-                        UserHandle.of(userId),
-                        intentFilter,
-                        null,
-                        bgHandler)
-                registered.set(true)
-                logger.logContextReceiverRegistered(userId, intentFilter)
+        pw.indentIfPossible {
+            actionsToActionsReceivers.forEach { (action, actionReceiver) ->
+                println("$action:")
+                actionReceiver.dump(fd, pw, args)
             }
         }
     }
