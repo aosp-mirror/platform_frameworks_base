@@ -49,6 +49,7 @@ import org.junit.Rule;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 
 /**
@@ -74,7 +75,8 @@ public abstract class SysuiTestCase {
         SystemUIFactory.createFromConfig(mContext);
         mDependency = new TestableDependency(mContext);
         mFakeBroadcastDispatcher = new FakeBroadcastDispatcher(mContext, mock(Looper.class),
-                mock(DumpManager.class), mock(BroadcastDispatcherLogger.class));
+                mock(Executor.class), mock(DumpManager.class),
+                mock(BroadcastDispatcherLogger.class));
 
         mRealInstrumentation = InstrumentationRegistry.getInstrumentation();
         Instrumentation inst = spy(mRealInstrumentation);
