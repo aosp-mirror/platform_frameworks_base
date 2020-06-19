@@ -179,6 +179,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Applied as part of the animation pass in "prepareSurfaces".
      */
     protected final SurfaceAnimator mSurfaceAnimator;
+    private boolean mAnyParentAnimating;
+
     final SurfaceFreezer mSurfaceFreezer;
     protected final WindowManagerService mWmService;
 
@@ -2460,21 +2462,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @Nullable
     WindowContainer getAnimatingContainer(int flags, int typesToCheck) {
-        int animationType = mSurfaceAnimator.getAnimationType();
-        if (mSurfaceAnimator.isAnimating() && (animationType & typesToCheck) > 0) {
-            return this;
-        }
-        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
+        if (isSelfAnimating(flags, typesToCheck)) {
             return this;
         }
         if ((flags & PARENTS) != 0) {
-            final WindowContainer parent = getParent();
-            if (parent != null) {
-                final WindowContainer wc = parent.getAnimatingContainer(
-                        flags & ~CHILDREN, typesToCheck);
-                if (wc != null) {
-                    return wc;
+            WindowContainer parent = getParent();
+            while (parent != null) {
+                if (parent.isSelfAnimating(flags, typesToCheck)) {
+                    return parent;
                 }
+                parent = parent.getParent();
             }
         }
         if ((flags & CHILDREN) != 0) {
@@ -2487,6 +2484,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         return null;
+    }
+
+    /**
+     * Internal method only to be used during {@link #getAnimatingContainer(int, int)}.DO NOT CALL
+     * FROM OUTSIDE.
+     */
+    protected boolean isSelfAnimating(int flags, int typesToCheck) {
+        if (mSurfaceAnimator.isAnimating()
+                && (mSurfaceAnimator.getAnimationType() & typesToCheck) > 0) {
+            return true;
+        }
+        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
+            return true;
+        }
+        return false;
     }
 
     /**
