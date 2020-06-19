@@ -227,7 +227,7 @@ public class AppOpsManager {
      * {@link #sMessageCollector}, which forces {@link COLLECT_SYNC} mode.
      */
     @GuardedBy("sLock")
-    private static ArrayList<SyncNotedAppOp> sUnforwardedOps = new ArrayList<>();
+    private static ArrayList<AsyncNotedAppOp> sUnforwardedOps = new ArrayList<>();
 
     /**
      * Additional collector that collect accesses and forwards a few of them them via
@@ -8195,7 +8195,10 @@ public class AppOpsManager {
                         if (sOnOpNotedCallback != null) {
                             sOnOpNotedCallback.onNoted(new SyncNotedAppOp(code, attributionTag));
                         } else {
-                            sUnforwardedOps.add(new SyncNotedAppOp(code, attributionTag));
+                            String message = getFormattedStackTrace();
+                            sUnforwardedOps.add(
+                                    new AsyncNotedAppOp(code, Process.myUid(), attributionTag,
+                                            message, System.currentTimeMillis()));
                             if (sUnforwardedOps.size() > MAX_UNFORWARDED_OPS) {
                                 sUnforwardedOps.remove(0);
                             }
@@ -8268,10 +8271,10 @@ public class AppOpsManager {
                 synchronized (this) {
                     int numMissedSyncOps = sUnforwardedOps.size();
                     for (int i = 0; i < numMissedSyncOps; i++) {
-                        final SyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
+                        final AsyncNotedAppOp syncNotedAppOp = sUnforwardedOps.get(i);
                         if (sOnOpNotedCallback != null) {
                             sOnOpNotedCallback.getAsyncNotedExecutor().execute(
-                                    () -> sOnOpNotedCallback.onNoted(syncNotedAppOp));
+                                    () -> sOnOpNotedCallback.onAsyncNoted(syncNotedAppOp));
                         }
                     }
                     sUnforwardedOps.clear();
