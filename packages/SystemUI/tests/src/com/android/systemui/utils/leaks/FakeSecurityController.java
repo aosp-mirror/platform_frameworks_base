@@ -41,6 +41,11 @@ public class FakeSecurityController extends BaseLeakChecker<SecurityControllerCa
     }
 
     @Override
+    public boolean isProfileOwnerOfOrganizationOwnedDevice() {
+        return false;
+    }
+
+    @Override
     public String getDeviceOwnerName() {
         return null;
     }
