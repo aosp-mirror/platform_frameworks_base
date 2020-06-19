@@ -266,6 +266,7 @@ class BluetoothRouteProvider {
         // Current volume will be set when connected.
         newBtRoute.route = new MediaRoute2Info.Builder(routeId, deviceName)
                 .addFeature(MediaRoute2Info.FEATURE_LIVE_AUDIO)
+                .addFeature(MediaRoute2Info.FEATURE_LOCAL_PLAYBACK)
                 .setConnectionState(MediaRoute2Info.CONNECTION_STATE_DISCONNECTED)
                 .setDescription(mContext.getResources().getText(
                         R.string.bluetooth_a2dp_audio_route_name).toString())
