@@ -154,7 +154,7 @@
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
         android:textColor="@color/media_primary_text"
-        android:textSize="18sp" />
+        android:textSize="16sp" />
 
     <!-- Artist name -->
     <TextView
