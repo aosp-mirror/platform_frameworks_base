@@ -778,7 +778,6 @@ filegroup {
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
         "core/java/com/android/internal/util/WakeupMessage.java",
         "core/java/com/android/internal/util/TokenBucket.java",
-        "core/java/android/net/shared/*.java",
     ],
 }
 
@@ -786,7 +785,6 @@ filegroup {
     name: "framework-services-net-module-wifi-shared-srcs",
     srcs: [
         "core/java/android/net/DhcpResults.java",
-        "core/java/android/net/shared/InetAddressUtils.java",
         "core/java/android/net/util/IpUtils.java",
         "core/java/android/util/LocalLog.java",
     ],
@@ -803,7 +801,6 @@ filegroup {
         "core/java/com/android/internal/util/State.java",
         "core/java/com/android/internal/util/StateMachine.java",
         "core/java/com/android/internal/util/TrafficStatsConstants.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
     ],
 }
 
@@ -1240,7 +1237,6 @@ java_library {
     srcs: [
         "core/java/android/content/pm/BaseParceledListSlice.java",
         "core/java/android/content/pm/ParceledListSlice.java",
-        "core/java/android/net/shared/Inet4AddressUtils.java",
         "core/java/android/os/HandlerExecutor.java",
         "core/java/com/android/internal/util/AsyncChannel.java",
         "core/java/com/android/internal/util/AsyncService.java",
