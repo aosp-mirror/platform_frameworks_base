@@ -165,8 +165,9 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
             Log.e(TAG, "Got handleTaskInfoChanged when not initialized: " + info);
             return;
         }
-        final boolean secondaryWasHomeOrRecents = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
-                || mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS;
+        final boolean secondaryImpliedMinimize = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
+                || (mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS
+                        && mDivider.isHomeStackResizable());
         final boolean primaryWasEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryWasEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         if (info.token.asBinder() == mPrimary.token.asBinder()) {
@@ -176,13 +177,14 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
         }
         final boolean primaryIsEmpty = mPrimary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
         final boolean secondaryIsEmpty = mSecondary.topActivityType == ACTIVITY_TYPE_UNDEFINED;
-        final boolean secondaryIsHomeOrRecents = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
-                || mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS;
+        final boolean secondaryImpliesMinimize = mSecondary.topActivityType == ACTIVITY_TYPE_HOME
+                || (mSecondary.topActivityType == ACTIVITY_TYPE_RECENTS
+                        && mDivider.isHomeStackResizable());
         if (DEBUG) {
             Log.d(TAG, "onTaskInfoChanged " + mPrimary + "  " + mSecondary);
         }
         if (primaryIsEmpty == primaryWasEmpty && secondaryWasEmpty == secondaryIsEmpty
-                && secondaryWasHomeOrRecents == secondaryIsHomeOrRecents) {
+                && secondaryImpliedMinimize == secondaryImpliesMinimize) {
             // No relevant changes
             return;
         }
@@ -211,7 +213,7 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
                 }
                 mDivider.startEnterSplit();
             }
-        } else if (secondaryIsHomeOrRecents) {
+        } else if (secondaryImpliesMinimize) {
             // Both splits are populated but the secondary split has a home/recents stack on top,
             // so enter minimized mode.
             mDivider.ensureMinimizedSplit();
