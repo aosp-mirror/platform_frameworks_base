@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"You have incorrectly drawn your unlock pattern <xliff:g id="NUMBER_0">%1$d</xliff:g> times. After <xliff:g id="NUMBER_1">%2$d</xliff:g> more unsuccessful attempts, you will be asked to unlock your phone using an email account.\n\n Try again in <xliff:g id="NUMBER_2">%3$d</xliff:g> seconds."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remove"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"The background started foreground service from <xliff:g id="PACKAGENAME">%1$s</xliff:g> will not have while-in-use permission in future R builds. Please see go/r-bg-fgs-restriction and file a bug report."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Raise volume above recommended level?\n\nListening at high volume for long periods may damage your hearing."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Use Accessibility Shortcut?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"When the shortcut is on, pressing both volume buttons for three seconds will start an accessibility feature."</string>
@@ -1650,7 +1649,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Turn off Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Use Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Colour Inversion"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Colour Correction"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Colour correction"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned on."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned off."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Press and hold both volume keys for three seconds to use <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
@@ -1766,7 +1765,7 @@
     <string name="restr_pin_confirm_pin" msgid="7143161971614944989">"Confirm new PIN"</string>
     <string name="restr_pin_create_pin" msgid="917067613896366033">"Create a PIN for modifying restrictions"</string>
     <string name="restr_pin_error_doesnt_match" msgid="7063392698489280556">"PINs don\'t match. Try again."</string>
-    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN is too short. Must be at least 4 digits."</string>
+    <string name="restr_pin_error_too_short" msgid="1547007808237941065">"PIN is too short. Must be at least four digits."</string>
     <plurals name="restr_pin_countdown" formatted="false" msgid="4427486903285216153">
       <item quantity="other">Try again in <xliff:g id="COUNT">%d</xliff:g> seconds</item>
       <item quantity="one">Try again in 1 second</item>
@@ -1793,8 +1792,8 @@
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Updated by your admin"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Deleted by your admin"</string>
     <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
-    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"To extend battery life, Battery Saver:\n\n•Turns on Dark theme\n•Turns off or restricts background activity, some visual effects and other features like “Hey Google”\n\n"<annotation id="url">"Learn more"</annotation></string>
-    <string name="battery_saver_description" msgid="8587408568232177204">"To extend battery life, Battery Saver:\n\n•Turns on Dark theme\n•Turns off or restricts background activity, some visual effects and other features like “Hey Google”"</string>
+    <string name="battery_saver_description_with_learn_more" msgid="5997766757551917769">"To extend battery life, Battery Saver:\n\n•Turns on Dark theme\n•Turns off or restricts background activity, some visual effects and other features like \'Hey Google\'\n\n"<annotation id="url">"Learn more"</annotation></string>
+    <string name="battery_saver_description" msgid="8587408568232177204">"To extend battery life, Battery Saver:\n\n•Turns on Dark theme\n•Turns off or restricts background activity, some visual effects and other features like \'Hey Google\'"</string>
     <string name="data_saver_description" msgid="4995164271550590517">"To help reduce data usage, Data Saver prevents some apps from sending or receiving data in the background. An app that you’re currently using can access data, but may do so less frequently. This may mean, for example, that images don’t display until you tap them."</string>
     <string name="data_saver_enable_title" msgid="7080620065745260137">"Turn on Data Saver?"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"Turn on"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Camera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microphone"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"displaying over other apps on your screen"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Routine Mode info notification"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Battery may run out before usual charge"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Battery Saver activated to extend battery life"</string>

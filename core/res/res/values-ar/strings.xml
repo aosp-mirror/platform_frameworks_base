@@ -976,7 +976,7 @@
     <string name="permlab_addVoicemail" msgid="4770245808840814471">"إضافة بريد صوتي"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"للسماح للتطبيق بإضافة رسائل إلى صندوق البريد الصوتي."</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"تعديل أذونات الموقع الجغرافي للمتصفح"</string>
-    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع ويب عشوائية."</string>
+    <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"للسماح لأحد التطبيقات بتعديل أذونات الموقع الجغرافي للمتصفح. يمكن أن تستخدم التطبيقات الضارة هذا للسماح بإرسال معلومات الموقع إلى مواقع إلكترونية عشوائية."</string>
     <string name="save_password_message" msgid="2146409467245462965">"هل تريد من المتصفح تذكر كلمة المرور هذه؟"</string>
     <string name="save_password_notnow" msgid="2878327088951240061">"ليس الآن"</string>
     <string name="save_password_remember" msgid="6490888932657708341">"تذكّر"</string>
@@ -1394,7 +1394,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"‏اختيار إيقاف تصحيح أخطاء USB."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"تم تفعيل ميزة \"تصحيح الأخطاء اللاسلكي\"."</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"انقر لإيقاف ميزة \"تصحيح الأخطاء اللاسلكي\"."</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"اختيار إيقاف ميزة \"تصحيح الأخطاء اللاسلكي\""</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"انقر لإيقاف ميزة \"تصحيح الأخطاء اللاسلكي\""</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"تم تفعيل وضع \"مفعّل الاختبار\""</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"يمكنك إجراء إعادة ضبط على الإعدادات الأصلية لإيقاف وضع \"مفعِّل اختبار\"."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"وحدة التحكّم التسلسلية مفعّلة"</string>
@@ -1707,12 +1707,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"لقد رسمت نقش فتح القفل بشكل غير صحيح <xliff:g id="NUMBER_0">%1$d</xliff:g> مرة. بعد إجراء <xliff:g id="NUMBER_1">%2$d</xliff:g> من المحاولات غير الناجحة الأخرى، ستُطالب بإلغاء تأمين الهاتف باستخدام حساب بريد إلكتروني لإلغاء تأمين الهاتف.\n\n أعد المحاولة خلال <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانية."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"إزالة"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏لن يتم منح إذن الوصول إلى الموقع الجغرافي أثناء الاستخدام للخدمات التي تعمل في المقدّمة من <xliff:g id="PACKAGENAME">%1$s</xliff:g> والتي تبدأ من الخلفية في إصدارات R القادمة. يُرجى مراجعة go/r-bg-fgs-restriction وتقديم تقرير خطأ."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"هل تريد رفع مستوى الصوت فوق المستوى الموصى به؟\n\nقد يضر سماع صوت عالٍ لفترات طويلة بسمعك."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"هل تريد استخدام اختصار \"سهولة الاستخدام\"؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"عند تفعيل الاختصار، يؤدي الضغط على زرّي التحكّم في مستوى الصوت معًا لمدة 3 ثوانٍ إلى تفعيل إحدى ميزات إمكانية الوصول."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"هل تريد تفعيل ميزات إمكانية الوصول؟"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"‏يؤدي الضغط مع الاستمرار على كلا مفتاحَي التحكّم في مستوى الصوت لبضع ثوانٍ إلى تفعيل ميزات إمكانية الوصول. قد يؤدي هذا إلى تغيير كيفية عمل جهازك.\n\nالميزات الحالية:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nيمكنك تغيير الميزات المحددة في الإعدادات &gt; أدوات تمكين الوصول."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"يؤدي الضغط مع الاستمرار على كلا مفتاحَي التحكّم في مستوى الصوت لبضع ثوانٍ إلى تفعيل ميزات إمكانية الوصول. قد يؤدي هذا الإجراء إلى تغيير طريقة عمل جهازك.\n\nالميزات الحالية:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nيمكنك تغيير الميزات المحددة في الإعدادات &gt; إمكانية الوصول."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"هل تريد تفعيل <xliff:g id="SERVICE">%1$s</xliff:g>؟"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"‏يؤدي الضغط مع الاستمرار لبضع ثوانٍ على كلا مفتاحَي التحكّم في مستوى الصوت إلى تفعيل <xliff:g id="SERVICE">%1$s</xliff:g> وهي إحدى ميزات إمكانية الوصول. يمكن أن يؤدي هذا الإجراء إلى تغيير كيفية عمل جهازك.\n\nيمكنك تغيير هذا الاختصار لاستخدامه مع ميزة أخرى في الإعدادات &gt; أدوات تمكين الوصول."</string>
@@ -2130,6 +2129,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"كاميرا"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"ميكروفون"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"العرض فوق التطبيقات الأخرى على شاشتك"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"إشعار معلومات \"وضع سلسلة الإجراءات\""</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"قد تنفد طاقة البطارية قبل الشحن المعتاد"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"تم تفعيل \"توفير شحن البطارية\" لإطالة عمرها."</string>

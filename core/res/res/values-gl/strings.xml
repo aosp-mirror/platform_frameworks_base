@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Debuxaches o padrón de desbloqueo incorrectamente <xliff:g id="NUMBER_0">%1$d</xliff:g> veces. Se realizas <xliff:g id="NUMBER_1">%2$d</xliff:g> intentos incorrectos máis, terás que desbloquear o teléfono a través dunha conta de correo electrónico.\n\n Téntao de novo dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eliminar"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Nas futuras compilacións R, o servizo en primeiro plano iniciado en segundo plano desde <xliff:g id="PACKAGENAME">%1$s</xliff:g> non terá permiso mentres estea en uso. Consulta go/r-bg-fgs-restriction e presenta un informe de erros."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Queres subir o volume máis do nivel recomendado?\n\nA reprodución de son a un volume elevado durante moito tempo pode provocar danos nos oídos."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Queres utilizar o atallo de accesibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Cando o atallo está activado, podes premer os dous botóns de volume durante 3 segundos para iniciar unha función de accesibilidade."</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Denegar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tocar unha función para comezar a utilizala:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escoller as funcións que queres utilizar co botón Accesibilidade"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escoller as funcións que queres utilizar co atallo da tecla de volume"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolle as funcións que queres utilizar co atallo da tecla de volume"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g>: desactivouse"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atallos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Feito"</string>
@@ -1651,8 +1650,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Utilizar atallo"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversión de cor"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Corrección de cor"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activado."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desactivado."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas de volume premidas. Activouse o servizo <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Desactivouse <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Mantén premidas as teclas do volume durante tres segudos para usar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolle a función que queres utilizar cando toques o botón Accesibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolle a función que queres usar co xesto de accesibilidade (pasa dous dedos cara arriba desde a parte inferior da pantalla):"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Cámara"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micrófono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"mostrando outras aplicacións na pantalla"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificación da información do modo de rutina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"A batería pode esgotarse antes do habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Para ampliar a duración da batería activouse a función Aforro de batería"</string>

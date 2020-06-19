@@ -245,7 +245,7 @@
     <string name="global_action_bug_report" msgid="5127867163044170003">"Извештај за грешка"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Завршете ја сесијата"</string>
     <string name="global_action_screenshot" msgid="2610053466156478564">"Слика од екранот"</string>
-    <string name="bugreport_title" msgid="8549990811777373050">"Извештај за грешка"</string>
+    <string name="bugreport_title" msgid="8549990811777373050">"Извештај за грешки"</string>
     <string name="bugreport_message" msgid="5212529146119624326">"Ова ќе собира информации за моменталната состојба на вашиот уред, за да ги испрати како порака по е-пошта. Тоа ќе одземе малку време почнувајќи од извештајот за грешки додека не се подготви за праќање; бидете трпеливи."</string>
     <string name="bugreport_option_interactive_title" msgid="7968287837902871289">"Интерактивен извештај"</string>
     <string name="bugreport_option_interactive_summary" msgid="8493795476325339542">"Користете го ова во повеќето ситуации. Ви дозволува да го следите напредокот на извештајот, да внесете повеќе детали во врска со проблемот и да сликате слики од екранот. Може да испушти некои помалку користени делови за коишто е потребно долго време за да се пријават."</string>
@@ -1312,7 +1312,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Поврзано е отстранување грешки преку USB"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Допрете за да го исклучите"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Изберете за да се оневозможи отстранување грешки на USB."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Безжичното отстранување грешки е поврзано"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Поврзано е безжично отстранување грешки"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Допрете за да се исклучи безжичното отстранување грешки"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Изберете за да се оневозможи безжично отстранување грешки."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Овозможен е режимот на рамка за тестирање"</string>
@@ -1586,7 +1586,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="8366024510502517748">"Употреби ја својата шема"</string>
     <string name="kg_sim_pin_instructions" msgid="6479401489471690359">"Внеси PIN на SIM картичка"</string>
-    <string name="kg_pin_instructions" msgid="7355933174673539021">"Внеси PIN"</string>
+    <string name="kg_pin_instructions" msgid="7355933174673539021">"Впишете PIN"</string>
     <string name="kg_password_instructions" msgid="7179782578809398050">"Внеси лозинка"</string>
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"SIM картичката е сега оневозможена. Внесете ПУК код за да продолжите. Контактирајте го операторот за детали."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Внеси посакуван PIN код"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Погрешно сте ја употребиле вашата шема на отклучување <xliff:g id="NUMBER_0">%1$d</xliff:g> пати. По <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни обиди, ќе побараат од вас да го отклучите телефонот со користење сметка на е-пошта.\n\n Обидете се повторно за <xliff:g id="NUMBER_2">%3$d</xliff:g> секунди."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Отстрани"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Услугата од преден план започната во заднина од <xliff:g id="PACKAGENAME">%1$s</xliff:g> нема да има дозола за „додека се користи“ во идните R-верзии. Погледнете на go/r-bg-fgs-restriction и испратете извештај за грешка."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да го зголемиме звукот над препорачаното ниво?\n\nСлушањето звуци со голема јачина подолги периоди може да ви го оштети сетилото за слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Да се користи кратенка за „Пристапност“?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Кога е вклучена кратенката, ако ги притиснете двете копчиња за јачина на звук во времетраење од 3 секунди, ќе се стартува функција за пристапност."</string>
@@ -1759,7 +1758,7 @@
     <string name="print_service_installed_title" msgid="6134880817336942482">"Услугате <xliff:g id="NAME">%s</xliff:g> е инсталирана"</string>
     <string name="print_service_installed_message" msgid="7005672469916968131">"Допри да се овозможи"</string>
     <string name="restr_pin_enter_admin_pin" msgid="1199419462726962697">"Внесете PIN на админстратор"</string>
-    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Внеси PIN"</string>
+    <string name="restr_pin_enter_pin" msgid="373139384161304555">"Впишете PIN"</string>
     <string name="restr_pin_incorrect" msgid="3861383632940852496">"Неточно"</string>
     <string name="restr_pin_enter_old_pin" msgid="7537079094090650967">"Тековен PIN"</string>
     <string name="restr_pin_enter_new_pin" msgid="3267614461844565431">"Нов PIN"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"се прикажува преку други апликации на вашиот екран"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известување за информации за режимот за рутини"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батеријата може да се потроши пред вообичаеното време за полнење"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Активиран е „Штедачот на батерија“ за да се продолжи траењето на батеријата"</string>

@@ -310,7 +310,7 @@
     <string name="permgrouplab_activityRecognition" msgid="3324466667921775766">"Физическа активност"</string>
     <string name="permgroupdesc_activityRecognition" msgid="4725624819457670704">"достъп до физическата ви активност"</string>
     <string name="permgrouplab_camera" msgid="9090413408963547706">"Камера"</string>
-    <string name="permgroupdesc_camera" msgid="7585150538459320326">"да прави снимки и записва видеоклипове"</string>
+    <string name="permgroupdesc_camera" msgid="7585150538459320326">"да прави снимки и записва видео"</string>
     <string name="permgrouplab_calllog" msgid="7926834372073550288">"Списъци с обажданията"</string>
     <string name="permgroupdesc_calllog" msgid="2026996642917801803">"четене и запис на списъка с телефонните обаждания"</string>
     <string name="permgrouplab_phone" msgid="570318944091926620">"Телефон"</string>
@@ -438,9 +438,9 @@
     <string name="permlab_activityRecognition" msgid="1782303296053990884">"разпознаване на физическата активност"</string>
     <string name="permdesc_activityRecognition" msgid="8667484762991357519">"Това приложение може да разпознава физическата ви активност."</string>
     <string name="permlab_camera" msgid="6320282492904119413">"правене на снимки и видеоклипове"</string>
-    <string name="permdesc_camera" msgid="1354600178048761499">"Това приложение може по всяко време да прави снимки и да записва видеоклипове посредством камерата."</string>
+    <string name="permdesc_camera" msgid="1354600178048761499">"Това приложение може по всяко време да прави снимки и да записва видео посредством камерата."</string>
     <string name="permlab_systemCamera" msgid="3642917457796210580">"Разрешаване на достъп на приложение или услуга до системните камери с цел правене на снимки и видеоклипове"</string>
-    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Това привилегировано или системно приложение може по всяко време да прави снимки и да записва видеоклипове посредством системна камера. Необходимо е също на приложението да бъде дадено разрешението android.permission.CAMERA"</string>
+    <string name="permdesc_systemCamera" msgid="5938360914419175986">"Това привилегировано или системно приложение може по всяко време да прави снимки и да записва видео посредством системна камера. Необходимо е също на приложението да бъде дадено разрешението android.permission.CAMERA"</string>
     <string name="permlab_cameraOpenCloseListener" msgid="5548732769068109315">"Разрешаване на приложение или услуга да получават обратни повиквания за отварянето или затварянето на снимачни устройства."</string>
     <string name="permdesc_cameraOpenCloseListener" msgid="2002636131008772908">"Това приложение може да получава обратни повиквания, когато снимачно устройство бъде отворено (от кое приложение) или затворено."</string>
     <string name="permlab_vibrate" msgid="8596800035791962017">"контролиране на вибрирането"</string>
@@ -1619,11 +1619,10 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Начертахте неправилно фигурата си за отключване <xliff:g id="NUMBER_0">%1$d</xliff:g> пъти. След още <xliff:g id="NUMBER_1">%2$d</xliff:g> неуспешни опита ще бъдете помолени да отключите телефона посредством имейл адрес.\n\n Опитайте отново след <xliff:g id="NUMBER_2">%3$d</xliff:g> секунди."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Премахване"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Задният план, който е стартирал услуга на преден план от <xliff:g id="PACKAGENAME">%1$s</xliff:g>, няма да има разрешение при използване в бъдещите компилации R. Моля, вижте go/r-bg-fgs-restriction и подайте сигнал за програмна грешка."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Да се увеличи ли силата на звука над препоръчителното ниво?\n\nПродължителното слушане при висока сила на звука може да увреди слуха ви."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Искате ли да използвате пряк път към функцията за достъпност?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Когато прекият път е включен, можете да стартирате дадена функция за достъпност, като натиснете двата бутона за силата на звука и ги задържите за 3 секунди."</string>
-    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Да се включат ли функциите за достъпност?"</string>
+    <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Включване на функциите за достъпност?"</string>
     <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Натиснете двата бутона за силата на звука и ги задръжте за няколко секунди, за да включите функциите за достъпност. Това може да промени начина, по който работи устройството ви.\n\nТекущи функции:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nМожете да промените избраните функции от „Настройки“ &gt; „Достъпност“."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Да се включи ли <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"се показва върху други приложения на екрана"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Известие с информация за режима на поредица"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батерията може да се изтощи преди обичайното зареждане"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режимът за запазване на батерията е активиран с цел удължаване на живота на батерията"</string>

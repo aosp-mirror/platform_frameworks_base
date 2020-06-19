@@ -1621,7 +1621,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"អ្នក​បាន​គូរ​លំនាំ​ដោះ​​សោ​របស់​អ្នក​មិន​ត្រឹមត្រូវ​ចំនួន <xliff:g id="NUMBER_0">%1$d</xliff:g> ដង។ បន្ទាប់​ពី​ការ​ព្យាយាម​មិន​ជោគជ័យ​​ច្រើនជាង <xliff:g id="NUMBER_1">%2$d</xliff:g> ដង អ្នក​នឹង​ត្រូវ​បាន​​ស្នើ​ឲ្យ​ដោះ​សោ​ទូរស័ព្ទ​របស់​អ្នក​ដោយ​ប្រើ​គណនី​អ៊ីមែល។\n\n ព្យាយាម​ម្ដង​ទៀត​ក្នុង​រយៈ​ពេល <xliff:g id="NUMBER_2">%3$d</xliff:g> វិនាទី។"</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"លុប​ចេញ"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"សេវាកម្ម​ផ្ទៃខាងមុខ​ដែលចាប់ផ្ដើមដោយ​ផ្ទៃខាងក្រោយ​ពី <xliff:g id="PACKAGENAME">%1$s</xliff:g> នឹង​មិនមាន​ការអនុញ្ញាត​ខណៈពេល​កំពុង​ប្រើប្រាស់​ទេ នៅក្នុង​កំណែបង្កើត R នៅពេល​អនាគត​។ សូម​មើល go/r-bg-fgs-restriction និង​ផ្ញើ​របាយការណ៍​អំពី​បញ្ហា​។"</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"បង្កើន​កម្រិត​សំឡេង​លើស​ពី​កម្រិត​បាន​ផ្ដល់​យោបល់?\n\nការ​ស្ដាប់​នៅ​កម្រិត​សំឡេង​ខ្លាំង​យូរ​អាច​ធ្វើឲ្យ​ខូច​ត្រចៀក។"</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"ប្រើប្រាស់​ផ្លូវកាត់​ភាព​ងាយស្រួល?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"នៅពេលបើក​ផ្លូវកាត់ ការចុច​ប៊ូតុង​កម្រិតសំឡេង​ទាំងពីរ​រយៈពេល 3 វិនាទី​នឹង​ចាប់ផ្តើម​មុខងារ​ភាពងាយប្រើ។"</string>
@@ -2000,6 +1999,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"កាមេរ៉ា"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"មីក្រូហ្វូន"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"កំពុងបង្ហាញ​ពីលើកម្មវិធីផ្សេងទៀត​នៅលើអេក្រង់​របស់អ្នក"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"ការ​ជូនដំណឹង​ព័ត៌មាន​របស់​មុខងារ​ទម្លាប់"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ថ្ម​អាច​នឹង​អស់ មុនពេល​សាកថ្មធម្មតា"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"បាន​បើក​ដំណើរការកម្មវិធី​សន្សំ​ថ្ម ដើម្បីបង្កើនកម្រិត​ថាមពល​​ថ្ម"</string>

@@ -239,7 +239,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Valkostir síma"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Skjálás"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Slökkva"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Orka"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Slökkva/endurræsa"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Endurræsa"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Neyðarsímtal"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Villutilkynning"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Þú hefur teiknað rangt opnunarmynstur <xliff:g id="NUMBER_0">%1$d</xliff:g> sinnum. Eftir <xliff:g id="NUMBER_1">%2$d</xliff:g> árangurslausar tilraunir í viðbót verður þú beðin(n) um að opna símann með tölvupóstreikningi.\n\n Reyndu aftur eftir <xliff:g id="NUMBER_2">%3$d</xliff:g> sekúndur."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjarlægja"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Forgrunnsþjónusta frá <xliff:g id="PACKAGENAME">%1$s</xliff:g> sem er ræst úr bakgrunni mun ekki hafa heimild við notkun í framtíðarútgáfum R. Farðu á go/r-bg-fgs-restriction og gefðu villuskýrslu."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Hækka hljóðstyrk umfram ráðlagðan styrk?\n\nEf hlustað er á háum hljóðstyrk í langan tíma kann það að skaða heyrnina."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Viltu nota aðgengisflýtileið?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Þegar flýtileiðin er virk er kveikt á aðgengiseiginleikanum með því að halda báðum hljóðstyrkshnöppunum inni í þrjár sekúndur."</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Hafna"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Ýttu á eiginleika til að byrja að nota hann:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Veldu eiginleika sem á að nota með aðgengishnappinum"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Veldu eiginleika á að nota með flýtileið hljóðstyrkstakka"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Veldu eiginleika sem á að nota með flýtileið hljóðstyrkstakka"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Slökkt hefur verið á <xliff:g id="SERVICE_NAME">%s</xliff:g>"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Breyta flýtileiðum"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Lokið"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Myndavél"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Hljóðnemi"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"birt yfir öðrum forritum á skjánum"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Upplýsingatilkynning aðgerðastillingar"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Rafhlaðan kann að tæmast áður en hún kemst í hleðslu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Kveikt á rafhlöðusparnaði til að lengja endingu rafhlöðunnar"</string>

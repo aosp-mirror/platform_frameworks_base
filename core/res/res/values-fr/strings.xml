@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Vous avez dessiné un schéma de déverrouillage incorrect à <xliff:g id="NUMBER_0">%1$d</xliff:g> reprises. Si vous échouez encore <xliff:g id="NUMBER_1">%2$d</xliff:g> fois, vous devrez déverrouiller votre téléphone à l\'aide d\'un compte de messagerie électronique.\n\n Veuillez réessayer dans <xliff:g id="NUMBER_2">%3$d</xliff:g> secondes."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Supprimer"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Le service de premier plan qui a démarré en arrière-plan et provenant de <xliff:g id="PACKAGENAME">%1$s</xliff:g> ne disposera pas de l\'autorisation \"pendant l\'utilisation\" dans les futurs builds R. Veuillez accéder à go/r-bg-fgs-restriction et envoyer un rapport de bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Augmenter le volume au dessus du niveau recommandé ?\n\nL\'écoute prolongée à un volume élevé peut endommager vos facultés auditives."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Utiliser le raccourci d\'accessibilité ?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quand le raccourci est activé, appuyez sur les deux boutons de volume pendant trois secondes pour démarrer une fonctionnalité d\'accessibilité."</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Caméra"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Micro"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"se superpose aux autres applications sur l\'écran"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notification d\'information du mode Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Vous risquez d\'être à court de batterie plus tôt que prévu"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Économiseur de batterie activé pour prolonger l\'autonomie"</string>
