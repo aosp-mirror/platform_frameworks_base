@@ -838,6 +838,8 @@ public class PreferencesHelper implements RankingConfig {
                 // Apps are allowed to downgrade channel importance if the user has not changed any
                 // fields on this channel yet.
                 final int previousExistingImportance = existing.getImportance();
+                final int previousLoggingImportance =
+                        NotificationChannelLogger.getLoggingImportance(existing);
                 if (existing.getUserLockedFields() == 0 &&
                         channel.getImportance() < existing.getImportance()) {
                     existing.setImportance(channel.getImportance());
@@ -867,7 +869,7 @@ public class PreferencesHelper implements RankingConfig {
                 updateConfig();
                 if (needsPolicyFileChange && !wasUndeleted) {
                     mNotificationChannelLogger.logNotificationChannelModified(existing, uid, pkg,
-                            previousExistingImportance, false);
+                            previousLoggingImportance, false);
                 }
                 return needsPolicyFileChange;
             }
@@ -985,7 +987,7 @@ public class PreferencesHelper implements RankingConfig {
                 MetricsLogger.action(getChannelLog(updatedChannel, pkg)
                         .setSubtype(fromUser ? 1 : 0));
                 mNotificationChannelLogger.logNotificationChannelModified(updatedChannel, uid, pkg,
-                        channel.getImportance(), fromUser);
+                        NotificationChannelLogger.getLoggingImportance(channel), fromUser);
             }
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
