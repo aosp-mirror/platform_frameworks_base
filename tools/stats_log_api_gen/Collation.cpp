@@ -52,9 +52,7 @@ AtomDecl::AtomDecl(const AtomDecl& that)
       defaultState(that.defaultState),
       triggerStateReset(that.triggerStateReset),
       nested(that.nested),
-      uidField(that.uidField),
-      whitelisted(that.whitelisted),
-      truncateTimestamp(that.truncateTimestamp) {
+      uidField(that.uidField) {
 }
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m) : code(c), name(n), message(m) {
@@ -519,13 +517,6 @@ int collate_atoms(const Descriptor* descriptor, const string& moduleName, Atoms*
         const Descriptor* atom = atomField->message_type();
         shared_ptr<AtomDecl> atomDecl =
                 make_shared<AtomDecl>(atomField->number(), atomField->name(), atom->name());
-
-        if (atomField->options().GetExtension(os::statsd::allow_from_any_uid) == true) {
-            atomDecl->whitelisted = true;
-            if (dbg) {
-                printf("%s is whitelisted\n", atomField->name().c_str());
-            }
-        }
 
         if (atomDecl->code < PULL_ATOM_START_ID &&
             atomField->options().GetExtension(os::statsd::truncate_timestamp)) {
