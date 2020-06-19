@@ -79,7 +79,6 @@ import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
 import android.telephony.TelephonyManager;
-import android.util.EventLog;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseBooleanArray;
@@ -1075,17 +1074,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 != LockPatternUtils.StrongAuthTracker.STRONG_AUTH_NOT_REQUIRED;
     }
 
-    private boolean isUserEncryptedOrLockdown(int userId) {
-        // Biometrics should not be started in this case. Think carefully before modifying this
-        // method, see b/79776455
-        final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(userId);
-        final boolean isLockDown =
-                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
-                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
-        final boolean isEncrypted = containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT);
-        return isLockDown || isEncrypted;
-    }
-
     private boolean containsFlag(int haystack, int needle) {
         return (haystack & needle) != 0;
     }
@@ -1915,7 +1903,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private boolean shouldListenForFingerprint() {
         final boolean allowedOnBouncer =
                 !(mFingerprintLockedOut && mBouncer && mCredentialAttempted);
-        final int user = getCurrentUser();
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -1924,7 +1911,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
                 && (!mKeyguardGoingAway || !mDeviceInteractive) && mIsPrimaryUser
-                && allowedOnBouncer && !isUserEncryptedOrLockdown(user);
+                && allowedOnBouncer;
         return shouldListen;
     }
 
@@ -1938,8 +1925,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !statusBarShadeLocked;
         final int user = getCurrentUser();
         final int strongAuth = mStrongAuthTracker.getStrongAuthForUser(user);
-        final boolean isTimedOut =
-                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
+        final boolean isLockDown =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_DPM_LOCK_NOW)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN);
+        final boolean isEncryptedOrTimedOut =
+                containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_BOOT)
+                        || containsFlag(strongAuth, STRONG_AUTH_REQUIRED_AFTER_TIMEOUT);
 
         boolean canBypass = mKeyguardBypassController != null
                 && mKeyguardBypassController.canBypass();
@@ -1948,9 +1939,10 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         // TrustAgents or biometrics are keeping the device unlocked.
         boolean becauseCannotSkipBouncer = !getUserCanSkipBouncer(user) || canBypass;
 
-        // Scan even when timeout to show a preemptive bouncer when bypassing.
+        // Scan even when encrypted or timeout to show a preemptive bouncer when bypassing.
         // Lock-down mode shouldn't scan, since it is more explicit.
-        boolean strongAuthAllowsScanning = (!isTimedOut || canBypass && !mBouncer);
+        boolean strongAuthAllowsScanning = (!isEncryptedOrTimedOut || canBypass && !mBouncer)
+                && !isLockDown;
 
         // Only listen if this KeyguardUpdateMonitor belongs to the primary user. There is an
         // instance of KeyguardUpdateMonitor for each user but KeyguardUpdateMonitor is user-aware.
@@ -1960,7 +1952,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
                 && !mSwitchingUser && !isFaceDisabled(user) && becauseCannotSkipBouncer
                 && !mKeyguardGoingAway && mFaceSettingEnabledForUser.get(user) && !mLockIconPressed
                 && strongAuthAllowsScanning && mIsPrimaryUser
-                && !mSecureCameraLaunched && !isUserEncryptedOrLockdown(user);
+                && !mSecureCameraLaunched;
 
         // Aggregate relevant fields for debug logging.
         if (DEBUG_FACE || DEBUG_SPEW) {
@@ -2033,11 +2025,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
             if (mFingerprintCancelSignal != null) {
                 mFingerprintCancelSignal.cancel();
             }
-
-            if (isUserEncryptedOrLockdown(userId)) {
-                // If this happens, shouldListenForFingerprint() is wrong. SafetyNet for b/79776455
-                EventLog.writeEvent(0x534e4554, "79776455", "startListeningForFingerprint");
-            }
             mFingerprintCancelSignal = new CancellationSignal();
             mFpm.authenticate(null, mFingerprintCancelSignal, 0, mFingerprintAuthenticationCallback,
                     null, userId);
@@ -2055,11 +2042,6 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         if (isUnlockWithFacePossible(userId)) {
             if (mFaceCancelSignal != null) {
                 mFaceCancelSignal.cancel();
-            }
-
-            if (isUserEncryptedOrLockdown(userId)) {
-                // If this happens, shouldListenForFace() is wrong. SafetyNet for b/79776455
-                EventLog.writeEvent(0x534e4554, "79776455", "startListeningForFace");
             }
             mFaceCancelSignal = new CancellationSignal();
             mFaceManager.authenticate(null, mFaceCancelSignal, 0,
