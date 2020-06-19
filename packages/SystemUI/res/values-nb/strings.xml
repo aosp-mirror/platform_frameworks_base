@@ -1013,10 +1013,10 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systemnavigeringen er oppdatert. For å gjøre endringer, gå til Innstillinger."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Gå til Innstillinger for å oppdatere systemnavigeringen"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Ventemodus"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Samtalen er satt som prioritert"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Samtalen er prioritert"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Dette skjer med prioriterte samtaler:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Vis øverst i samtaledelen"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Vis profilbildet på låseskjermen"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"De vises øverst i samtaledelen."</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Profilbildet vises på låseskjermen."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Vises som en svevende boble over apper"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Overstyr «Ikke forstyrr»"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Greit"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Hold og dra for å flytte kontroller"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle kontroller er fjernet"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Endringene er ikke lagret"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Listen over alle kontroller kunne ikke lastes inn."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kunne ikke laste inn kontrollene. Sjekk <xliff:g id="APP">%s</xliff:g>-appen for å sjekke at appinnstillingene ikke er endret."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatible kontroller er ikke tilgjengelige"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Annet"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Legg til i enhetsstyring"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Legg til"</string>

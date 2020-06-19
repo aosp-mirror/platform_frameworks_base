@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Бекітпені ашу кескінін <xliff:g id="NUMBER_0">%1$d</xliff:g> рет қате сыздыңыз. <xliff:g id="NUMBER_1">%2$d</xliff:g> сәтсіз әрекеттен кейін телефоныңызды есептік жазба арқылы ашу өтінішін аласыз. \n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> секундтан кейін қайта әрекеттеніңіз."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Алып тастау"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Фондық режимде іске қосылған <xliff:g id="PACKAGENAME">%1$s</xliff:g> белсенді пакетінің алдағы R құрамаларында \"Пайдаланғанда ғана рұқсат ету\" рұқсаты болмайды. go/r-bg-fgs-restriction бетіне өтіп, қате туралы есеп жіберіңіз."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Дыбыс деңгейін ұсынылған деңгейден көтеру керек пе?\n\nЖоғары дыбыс деңгейінде ұзақ кезеңдер бойы тыңдау есту қабілетіңізге зиян тигізуі мүмкін."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Арнайы мүмкіндік төте жолын пайдалану керек пе?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Түймелер тіркесімі қосулы кезде, екі дыбыс түймесін 3 секунд басып тұрсаңыз, \"Арнайы мүмкіндіктер\" функциясы іске қосылады."</string>

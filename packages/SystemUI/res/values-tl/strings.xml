@@ -1015,8 +1015,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Naka-standby"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Ginawang priyoridad ang pag-uusap"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Ang mga priyoridad na pag-uusap ay:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Ipakita sa itaas ng seksyon ng pag-uusap"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Ipakita ang larawan sa profile sa lock screen"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Lalabas sa itaas ng seksyon ng pag-uusap"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Magpapakita ng larawan sa profile sa lock screen"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Ipakitang floating bubble sa ibabaw ng mga app"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ihinto ang Huwag Istorbohin"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
@@ -1025,7 +1025,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Window ng Pag-magnify"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Mga Kontrol sa Pag-magnify ng Window"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Mga kontrol ng device"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Magdagdag ng mga kontrol para sa iyong mga nakakonektang device"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Magdagdag ng kontrol para sa mga nakakonektang device"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"I-set up ang mga kontrol ng device"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Pindutin nang matagal ang Power button para ma-access ang iyong mga kontrol"</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Pumili ng app para magdagdag ng mga kontrol"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"I-hold at i-drag para baguhin ang pagkakaayos ng mga kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Inalis ang lahat ng kontrol"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Hindi na-save ang mga pagbabago"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Hindi ma-load ang listahan ng lahat ng control."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Hindi ma-load ang mga kontrol. Tingnan ang app na <xliff:g id="APP">%s</xliff:g> para matiyak na hindi nabago ang mga setting ng app."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Hindi available ang mga compatible na kontrol"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iba pa"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Idagdag sa mga kontrol ng device"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Idagdag"</string>

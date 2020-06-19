@@ -1019,7 +1019,7 @@
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Nastavení bublin můžete kdykoli upravit"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Bubliny pro tuto aplikaci můžete vypnout klepnutím na Spravovat"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"Rozumím"</string>
-    <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> – nastavení"</string>
+    <string name="bubbles_app_settings" msgid="5779443644062348657">"Nastavení <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Systémová navigace byla aktualizována. Chcete-li provést změny, přejděte do Nastavení."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Přejděte do Nastavení a aktualizujte systémovou navigaci"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Pohotovostní režim"</string>
@@ -1057,7 +1057,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ovládací prvky můžete uspořádat podržením a přetažením"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všechny ovládací prvky byly odstraněny"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Změny nebyly uloženy"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Načtení seznamu všech ovládacích prvků se nezdařilo."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Jiné"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Přidání ovládání zařízení"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Přidat"</string>

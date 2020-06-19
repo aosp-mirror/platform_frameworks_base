@@ -510,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सर्व साफ करा"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थापित करा"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
-    <!-- no translation found for notification_section_header_incoming (850925217908095197) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"नवीन"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"सायलंट"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचना"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"संभाषणे"</string>
@@ -1046,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियंत्रणांची पुनर्रचना करण्यासाठी धरून ठेवा आणि ड्रॅग करा"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सर्व नियंत्रणे काढून टाकली आहेत"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदल सेव्ह केले गेले नाहीत"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सर्व नियंत्रणांची सूची लोड करता आली नाही."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियंत्रणे लोड करता अली नाहीत. ॲपची सेटिंग्ज बदलली नसल्याची खात्री करण्यासाठी <xliff:g id="APP">%s</xliff:g> ॲप तपासा."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"कंपॅटिबल नियंत्रणे उपलब्ध नाहीत"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"इतर"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिव्हाइस नियंत्रणांमध्ये जोडा"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"जोडा"</string>

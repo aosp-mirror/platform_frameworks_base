@@ -510,8 +510,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"सबै हटाउनुहोस्"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"व्यवस्थित गर्नुहोस्"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"इतिहास"</string>
-    <!-- no translation found for notification_section_header_incoming (850925217908095197) -->
-    <skip />
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"नयाँ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"मौन"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"सूचनाहरू"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"वार्तालापहरू"</string>
@@ -1008,16 +1007,16 @@
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"बबलहरू प्रयोग गरी कुराकानी गर्नुहोस्"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"नयाँ वार्तालापहरू तैरने आइकन वा बबलका रूपमा देखिन्छन्। बबल खोल्न ट्याप गर्नुहोस्। बबल सार्न सो बबललाई ड्र्याग गर्नुहोस्।"</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"जुनसुकै बेला बबलहरू नियन्त्रण गर्नुहोस्"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"यो अनुप्रयोगबाट आएका बबलहरू निष्क्रिय पार्न व्यवस्थापन गर्नुहोस् नामक बटनमा ट्याप गर्नुहोस्"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"यो एपबाट आएका बबलहरू अफ गर्न \"व्यवस्थापन गर्नुहोस्\" बटनमा ट्याप गर्नुहोस्"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"बुझेँ"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g> का सेटिङहरू"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"प्रणालीको नेभिगेसन अद्यावधिक गरियो। परिवर्तन गर्न सेटिङमा जानुहोस्।"</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"प्रणालीको नेभिगेसन अद्यावधिक गर्न सेटिङमा जानुहोस्"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्ट्यान्डबाई"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"वार्तालापको प्राथमिकता निर्धारण गरी महत्त्वपूर्ण बनाइयो"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"महत्वपूर्ण वार्तालापहरू यहाँ देखिने छन्:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"वार्तालाप खण्डको सिरानमा देखाइयोस्"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लक स्क्रिनमा प्रोफाइल तस्बिर देखाइयोस्"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"वार्तालापको प्राथमिकता निर्धारण गरी \"महत्त्वपूर्ण\" बनाइयो"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"महत्वपूर्ण वार्तालापहरू:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"वार्तालाप खण्डको सिरानमा देखिने छन्"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लक स्क्रिनमा प्रोफाइल तस्बिर देखाउने छन्"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"एपहरूमाथि तैरिने बबलका रूपमा देखाइयोस्"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"बाधा नपुऱ्याउनुहोस् मोडलाई बेवास्ता गरियोस्"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"बुझेँ"</string>
@@ -1046,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"नियन्त्रणहरूको क्रम मिलाउन तिनलाई थिचेर ड्र्याग गर्नुहोस्"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सबै नियन्त्रणहरू हटाइए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"परिवर्तनहरू सुरक्षित गरिएका छैनन्"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सबै नियन्त्रणहरूको सूची लोड गर्न सकिएन।"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"नियन्त्रण सुविधाहरू लोड गर्न सकिएन। <xliff:g id="APP">%s</xliff:g> एपका सेटिङ परिवर्तन गरिएका छैनन् भन्ने कुरा सुनिश्चित गर्न यो एप जाँच्नुहोस्।"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"मिल्दा नियन्त्रण सुविधाहरू उपलब्ध छैनन्"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"यन्त्र नियन्त्रण गर्ने विजेटहरूको सूचीमा थप्नुहोस्"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"थप्नुहोस्"</string>

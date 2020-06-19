@@ -264,7 +264,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Indstillinger"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistance"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Taleassistent"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Lukning"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Lås enhed"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Ny notifikation"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Virtuelt tastatur"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Du har tegnet dit oplåsningsmønster forkert <xliff:g id="NUMBER_0">%1$d</xliff:g> gange. Efter <xliff:g id="NUMBER_1">%2$d</xliff:g> yderligere mislykkede forsøg til vil du blive bedt om at låse din telefon op ved hjælp af en mailkonto.\n\n Prøv igen om <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunder."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Fjern"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Tjenesten i forgrunden fra <xliff:g id="PACKAGENAME">%1$s</xliff:g>, der starter i baggrunden, vil i fremtidige R-builds ikke have tilladelse, mens den er i brug. Se go/r-bg-fgs-restriction, og indsend en fejlrapport."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vil du skrue højere op end det anbefalede lydstyrkeniveau?\n\nDu kan skade hørelsen ved at lytte til meget høj musik over længere tid."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vil du bruge genvejen til Hjælpefunktioner?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Når genvejen er aktiveret, kan du starte en hjælpefunktion ved at trykke på begge lydstyrkeknapper i tre sekunder."</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Afvis"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tryk på en funktion for at bruge den:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Vælg, hvilke funktioner du vil bruge med knappen Hjælpefunktioner"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Vælg, hvilke funktioner du vil bruge med genvejen via lydstyrkeknapperne"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Vælg de funktioner, du vil bruge via lydstyrkeknapperne"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> er blevet deaktiveret"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Rediger genveje"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Udfør"</string>

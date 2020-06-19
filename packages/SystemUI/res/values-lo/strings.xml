@@ -1002,7 +1002,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ຍ້າຍຂວາເທິງ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"ຍ້າຍຊ້າຍລຸ່ມ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ຍ້າຍຂວາລຸ່ມ"</string>
-    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ປິດ bubble ໄວ້"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"ປິດຟອງໄວ້"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ຢ່າໃຊ້ຟອງໃນການສົນທະນາ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"ສົນທະນາໂດຍໃຊ້ຟອງ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"ການສົນທະນາໃໝ່ຈະປາກົດເປັນໄອຄອນ ຫຼື ຟອງແບບລອຍ. ແຕະເພື່ອເປີດຟອງ. ລາກເພື່ອຍ້າຍມັນ."</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ກົດຄ້າງໄວ້ເພື່ອຈັດຮຽງການຄວບຄຸມຄືນໃໝ່"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ລຶບການຄວບຄຸມທັງໝົດອອກແລ້ວ"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ບໍ່ໄດ້ບັນທຶກການປ່ຽນແປງໄວ້"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"ບໍ່ສາມາດໂຫຼດລາຍຊື່ການຄວບຄຸມທັງໝົດໄດ້."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"ບໍ່ສາມາດໂຫຼດການຄວບຄຸມໄດ້. ກວດສອບແອັບ <xliff:g id="APP">%s</xliff:g> ເພື່ອໃຫ້ແນ່ໃຈວ່າຍັງບໍ່ມີການປ່ຽນແປງການຕັ້ງຄ່າແອັບເທື່ອ."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"ບໍ່ມີການຄວບຄຸມທີ່ໃຊ້ຮ່ວມກັນທີ່ສາມາດໃຊ້ໄດ້"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ອື່ນໆ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ເພີ່ມໃສ່ການຄວບຄຸມອຸປະກອນ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"ເພີ່ມ"</string>

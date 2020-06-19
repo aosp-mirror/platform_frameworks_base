@@ -237,7 +237,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcions del telèfon"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Bloqueig de pantalla"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Apaga"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Engegada"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Engega"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Reinicia"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Emergència"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Informe d\'error"</string>
@@ -264,7 +264,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Configuració"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistència"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assist. per veu"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloq. de seguretat"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloqueig de seguretat"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"+999"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Notificació nova"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Teclat virtual"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Has dibuixat el patró de desbloqueig <xliff:g id="NUMBER_0">%1$d</xliff:g> vegades de manera incorrecta. Si falles <xliff:g id="NUMBER_1">%2$d</xliff:g> vegades més, se\'t demanarà que desbloquegis el telèfon amb un compte de correu electrònic.\n\n Torna-ho a provar d\'aquí a <xliff:g id="NUMBER_2">%3$d</xliff:g> segons."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Elimina"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"El servei en primer pla (<xliff:g id="PACKAGENAME">%1$s</xliff:g>) iniciat en segon pla no tindrà permís durant l\'ús en compilacions R posteriors. Consulta la pàgina go/r-bg-fgs-restriction i presenta un informe d\'errors."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vols apujar el volum per sobre del nivell recomanat?\n\nSi escoltes música a un volum alt durant períodes llargs, pots danyar-te l\'oïda."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Vols fer servir la drecera d\'accessibilitat?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Si la drecera està activada, prem els dos botons de volum durant 3 segons per iniciar una funció d\'accessibilitat."</string>

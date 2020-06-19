@@ -1013,7 +1013,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"Navigasi sistem diupdate. Untuk melakukan perubahan, buka Setelan."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Buka Setelan untuk mengupdate navigasi sistem"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Siaga"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"Percakapan disetel ke prioritas"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"Percakapan ditetapkan jadi prioritas"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Percakapan prioritas akan:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Muncul di atas bagian percakapan"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Menampilkan gambar profil di layar kunci"</string>
@@ -1045,7 +1045,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Tahan &amp; tarik untuk mengatur ulang kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Semua kontrol dihapus"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Perubahan tidak disimpan"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Daftar semua kontrol tidak dapat dimuat."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrol tidak dapat dimuat. Periksa aplikasi <xliff:g id="APP">%s</xliff:g> untuk memastikan setelan aplikasi tidak berubah."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kontrol yang kompatibel tidak tersedia"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Lainnya"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Tambahkan ke kontrol perangkat"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Tambahkan"</string>

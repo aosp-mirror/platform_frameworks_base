@@ -55,7 +55,7 @@ class BubbleXmlHelperTest : SysuiTestCase() {
     fun testReadXml() {
         val src = """
 <?xml version='1.0' encoding='utf-8' standalone='yes' ?>
-<bs>
+<bs v="1">
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
 <bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
 <bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
@@ -63,5 +63,20 @@ class BubbleXmlHelperTest : SysuiTestCase() {
         """.trimIndent()
         val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
         assertEquals("failed parsing bubbles from xml\n$src", bubbles, actual)
+    }
+
+    // TODO: We should handle upgrades gracefully but this is v1
+    @Test
+    fun testUpgradeDropsPreviousData() {
+        val src = """
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?>
+<bs>
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-1" key="k1" h="120" hid="0" />
+<bb uid="10" pkg="com.example.chat" sid="alice and bob" key="k2" h="0" hid="16537428" t="title" />
+<bb uid="0" pkg="com.example.messenger" sid="shortcut-2" key="k3" h="120" hid="0" />
+</bs>
+        """.trimIndent()
+        val actual = readXml(ByteArrayInputStream(src.toByteArray(Charsets.UTF_8)))
+        assertEquals("failed parsing bubbles from xml\n$src", emptyList<BubbleEntity>(), actual)
     }
 }

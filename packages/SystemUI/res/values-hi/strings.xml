@@ -1015,7 +1015,7 @@
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"सिस्टम नेविगेशन अपडेट हो गया. बदलाव करने के लिए \'सेटिंग\' पर जाएं."</string>
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"सिस्टम नेविगेशन अपडेट करने के लिए \'सेटिंग\' में जाएं"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"स्टैंडबाई"</string>
-    <string name="priority_onboarding_title" msgid="2893070698479227616">"बातचीत को अहम बातचीत के तौर पर सेट किया गया है"</string>
+    <string name="priority_onboarding_title" msgid="2893070698479227616">"बातचीत को \'अहम बातचीत\' के तौर पर सेट किया गया है"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"अहम बातचीत यहां दिखेगी:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"बातचीत सेक्शन में सबसे ऊपर दिखाएं"</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"लॉक स्क्रीन पर प्रोफ़ाइल फ़ोटो दिखाएं"</string>
@@ -1047,7 +1047,10 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"कंट्रोल का क्रम फिर से बदलने के लिए उन्हें दबाकर रखें और खींचें"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"सभी कंट्रोल हटा दिए गए"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"बदलाव सेव नहीं किए गए"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"सभी कंट्रोल की सूची लोड नहीं हो सकी."</string>
+    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
+    <skip />
+    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
+    <skip />
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"अन्य"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"डिवाइस कंट्रोल में जोड़ें"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"जोड़ें"</string>
@@ -1067,7 +1070,7 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"फिर से शुरू करें"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"काम नहीं कर रहा, ऐप जांचें"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"कोई गड़बड़ी हुई, फिर से कोशिश की जा रही है…"</string>
-    <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल मौजूद नहीं है"</string>
+    <string name="controls_error_removed" msgid="6675638069846014366">"कंट्रोल नहीं है"</string>
     <string name="controls_error_removed_title" msgid="1207794911208047818">"कंट्रोल मौजूद नहीं है"</string>
     <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> को ऐक्सेस नहीं किया जा सका. <xliff:g id="APPLICATION">%2$s</xliff:g> ऐप्लिकेशन देखें, ताकि यह पक्का किया जा सके कि कंट्रोल अब भी मौजूद है और सेटिंग में कोई बदलाव नहीं हुआ है."</string>
     <string name="controls_open_app" msgid="483650971094300141">"ऐप्लिकेशन खोलें"</string>
