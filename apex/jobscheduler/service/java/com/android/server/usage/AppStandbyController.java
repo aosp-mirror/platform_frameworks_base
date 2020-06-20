@@ -90,6 +90,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
@@ -240,6 +241,14 @@ public class AppStandbyController implements AppStandbyInternal {
     private final ArraySet<String> mHeadlessSystemApps = new ArraySet<>();
 
     private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
+
+    // Cache the active network scorer queried from the network scorer service
+    private volatile String mCachedNetworkScorer = null;
+    // The last time the network scorer service was queried
+    private volatile long mCachedNetworkScorerAtMillis = 0L;
+    // How long before querying the network scorer again. During this time, subsequent queries will
+    // get the cached value
+    private static final long NETWORK_SCORER_CACHE_DURATION_MILLIS = 5000L;
 
     // Messages for the handler
     static final int MSG_INFORM_LISTENERS = 3;
@@ -1160,6 +1169,8 @@ public class AppStandbyController implements AppStandbyInternal {
             return new int[0];
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "getIdleUidsForUser");
+
         final long elapsedRealtime = mInjector.elapsedRealtime();
 
         List<ApplicationInfo> apps;
@@ -1195,6 +1206,7 @@ public class AppStandbyController implements AppStandbyInternal {
                 uidStates.setValueAt(index, value + 1 + (idle ? 1<<16 : 0));
             }
         }
+
         if (DEBUG) {
             Slog.d(TAG, "getIdleUids took " + (mInjector.elapsedRealtime() - elapsedRealtime));
         }
@@ -1215,6 +1227,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 numIdle++;
             }
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return res;
     }
@@ -1582,8 +1596,16 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     private boolean isActiveNetworkScorer(String packageName) {
-        String activeScorer = mInjector.getActiveNetworkScorer();
-        return packageName != null && packageName.equals(activeScorer);
+        // Validity of network scorer cache is limited to a few seconds. Fetch it again
+        // if longer since query.
+        // This is a temporary optimization until there's a callback mechanism for changes to network scorer.
+        final long now = SystemClock.elapsedRealtime();
+        if (mCachedNetworkScorer == null
+                || mCachedNetworkScorerAtMillis < now - NETWORK_SCORER_CACHE_DURATION_MILLIS) {
+            mCachedNetworkScorer = mInjector.getActiveNetworkScorer();
+            mCachedNetworkScorerAtMillis = now;
+        }
+        return packageName != null && packageName.equals(mCachedNetworkScorer);
     }
 
     private void informListeners(String packageName, int userId, int bucket, int reason,
