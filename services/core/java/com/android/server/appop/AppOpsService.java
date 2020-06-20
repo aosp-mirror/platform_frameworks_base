@@ -44,6 +44,7 @@ import static android.app.AppOpsManager.RestrictionBypass;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_BOOT_TIME_SAMPLING;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_RARELY_USED;
 import static android.app.AppOpsManager.SAMPLING_STRATEGY_UNIFORM;
+import static android.app.AppOpsManager.SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -146,6 +147,7 @@ import com.android.internal.app.IAppOpsNotedCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.app.IAppOpsStartedCallback;
 import com.android.internal.app.MessageSamplingConfig;
+import com.android.internal.compat.IPlatformCompat;
 import com.android.internal.os.Zygote;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -269,6 +271,9 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     private final AppOpsManagerInternalImpl mAppOpsManagerInternal
             = new AppOpsManagerInternalImpl();
+
+    private final IPlatformCompat mPlatformCompat = IPlatformCompat.Stub.asInterface(
+            ServiceManager.getService(Context.PLATFORM_COMPAT_SERVICE));
 
     /**
      * Registered callbacks, called from {@link #collectAsyncNotedOp}.
@@ -3826,6 +3831,9 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
+        int callingUid = Binder.getCallingUid();
+        int userId = UserHandle.getUserId(uid);
+
         RestrictionBypass bypass = null;
         final long ident = Binder.clearCallingIdentity();
         try {
@@ -3848,8 +3856,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
 
-                pkgUid = UserHandle.getUid(
-                        UserHandle.getUserId(uid), UserHandle.getAppId(pkg.getUid()));
+                pkgUid = UserHandle.getUid(userId, UserHandle.getAppId(pkg.getUid()));
                 bypass = getBypassforPackage(pkg);
             } else {
                 // Allow any attribution tag for resolvable uids
@@ -3866,9 +3873,19 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
 
             if (!isAttributionTagValid) {
-                // TODO moltmann: Switch from logging to enforcement
-                Slog.e(TAG, "attributionTag " + attributionTag + " not declared in manifest of "
-                        + packageName);
+                String msg = "attributionTag " + attributionTag + " not declared in"
+                        + "manifest of " + packageName;
+                try {
+                    if (mPlatformCompat.isChangeEnabledByPackageName(
+                            SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, packageName,
+                            userId) && mPlatformCompat.isChangeEnabledByUid(
+                            SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE, callingUid)) {
+                        throw new SecurityException(msg);
+                    } else {
+                        Slog.e(TAG, msg);
+                    }
+                } catch (RemoteException neverHappens) {
+                }
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
