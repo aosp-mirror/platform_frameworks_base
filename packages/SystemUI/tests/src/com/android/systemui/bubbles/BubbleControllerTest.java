@@ -44,6 +44,7 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.pm.LauncherApps;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
 import android.os.Handler;
@@ -179,6 +180,8 @@ public class BubbleControllerTest extends SysuiTestCase {
     private NotificationShadeWindowView mNotificationShadeWindowView;
     @Mock
     private IStatusBarService mStatusBarService;
+    @Mock
+    private LauncherApps mLauncherApps;
 
     private BubbleData mBubbleData;
 
@@ -256,7 +259,8 @@ public class BubbleControllerTest extends SysuiTestCase {
                 mSysUiState,
                 mock(INotificationManager.class),
                 mStatusBarService,
-                mWindowManager);
+                mWindowManager,
+                mLauncherApps);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 
         // Get a reference to the BubbleController's entry listener
