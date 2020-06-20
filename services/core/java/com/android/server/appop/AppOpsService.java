@@ -3735,7 +3735,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     mHandler.sendMessage(PooledLambda.obtainMessage(
                             AppOpsService::notifyOpChangedForAllPkgsInUid,
                             this, code, uidState.uid, true, null));
-                } else {
+                } else if (uidState.pkgOps != null) {
                     final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(code);
                     if (callbacks != null) {
                         for (int cbi = callbacks.size() - 1; cbi >= 0; cbi--) {
