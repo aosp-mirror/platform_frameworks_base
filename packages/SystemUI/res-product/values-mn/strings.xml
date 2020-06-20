@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"Илүү хурдан цэнэглэхийн тулд утсыг дахин байрлуулна уу"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"Утасгүйгээр цэнэглэхийн тулд утсыг дахин байрлуулна уу"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TВ төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд товчлуурыг дарна уу."</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд товчлуурыг дарна уу."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"Төхөөрөмж удахгүй унтрах тул асаалттай хэвээр байлгахын тулд дарна уу."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"Таблетад SIM карт алга байна."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"Утсанд SIM карт алга байна."</string>
