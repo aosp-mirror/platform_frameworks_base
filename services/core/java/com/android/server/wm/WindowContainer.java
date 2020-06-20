@@ -93,6 +93,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -179,6 +180,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      * Applied as part of the animation pass in "prepareSurfaces".
      */
     protected final SurfaceAnimator mSurfaceAnimator;
+    private boolean mAnyParentAnimating;
+
     final SurfaceFreezer mSurfaceFreezer;
     protected final WindowManagerService mWmService;
 
@@ -2460,21 +2463,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
      */
     @Nullable
     WindowContainer getAnimatingContainer(int flags, int typesToCheck) {
-        int animationType = mSurfaceAnimator.getAnimationType();
-        if (mSurfaceAnimator.isAnimating() && (animationType & typesToCheck) > 0) {
-            return this;
-        }
-        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
+        if (isSelfAnimating(flags, typesToCheck)) {
             return this;
         }
         if ((flags & PARENTS) != 0) {
-            final WindowContainer parent = getParent();
-            if (parent != null) {
-                final WindowContainer wc = parent.getAnimatingContainer(
-                        flags & ~CHILDREN, typesToCheck);
-                if (wc != null) {
-                    return wc;
+            WindowContainer parent = getParent();
+            while (parent != null) {
+                if (parent.isSelfAnimating(flags, typesToCheck)) {
+                    return parent;
                 }
+                parent = parent.getParent();
             }
         }
         if ((flags & CHILDREN) != 0) {
@@ -2487,6 +2485,21 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
             }
         }
         return null;
+    }
+
+    /**
+     * Internal method only to be used during {@link #getAnimatingContainer(int, int)}.DO NOT CALL
+     * FROM OUTSIDE.
+     */
+    protected boolean isSelfAnimating(int flags, int typesToCheck) {
+        if (mSurfaceAnimator.isAnimating()
+                && (mSurfaceAnimator.getAnimationType() & typesToCheck) > 0) {
+            return true;
+        }
+        if ((flags & TRANSITION) != 0 && isWaitingForTransitionStart()) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -2673,11 +2686,13 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     @Override
-    public void onTransactionReady(int mSyncId, SurfaceControl.Transaction mergedTransaction) {
-        mergedTransaction.merge(mBLASTSyncTransaction);
-        mUsingBLASTSyncTransaction = false;
+    public void onTransactionReady(int mSyncId, Set<WindowContainer> windowContainersReady) {
+        if (mWaitingListener == null) {
+            return;
+        }
 
-        mWaitingListener.onTransactionReady(mWaitingSyncId, mergedTransaction);
+        windowContainersReady.add(this);
+        mWaitingListener.onTransactionReady(mWaitingSyncId, windowContainersReady);
 
         mWaitingListener = null;
         mWaitingSyncId = -1;
@@ -2727,5 +2742,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     boolean useBLASTSync() {
         return mUsingBLASTSyncTransaction;
+    }
+
+    void mergeBlastSyncTransaction(Transaction t) {
+        t.merge(mBLASTSyncTransaction);
+        mUsingBLASTSyncTransaction = false;
     }
 }

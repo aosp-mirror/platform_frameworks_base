@@ -1154,7 +1154,6 @@ public class CameraDeviceImpl extends CameraDevice
             checkIfCameraClosedOrInError();
 
             // Make sure that there all requests have at least 1 surface; all surfaces are non-null;
-            // the surface isn't a physical stream surface for reprocessing request
             for (CaptureRequest request : requestList) {
                 if (request.getTargets().isEmpty()) {
                     throw new IllegalArgumentException(
@@ -1164,17 +1163,6 @@ public class CameraDeviceImpl extends CameraDevice
                 for (Surface surface : request.getTargets()) {
                     if (surface == null) {
                         throw new IllegalArgumentException("Null Surface targets are not allowed");
-                    }
-
-                    for (int i = 0; i < mConfiguredOutputs.size(); i++) {
-                        OutputConfiguration configuration = mConfiguredOutputs.valueAt(i);
-                        if (configuration.isForPhysicalCamera()
-                                && configuration.getSurfaces().contains(surface)) {
-                            if (request.isReprocess()) {
-                                throw new IllegalArgumentException(
-                                        "Reprocess request on physical stream is not allowed");
-                            }
-                        }
                     }
                 }
             }

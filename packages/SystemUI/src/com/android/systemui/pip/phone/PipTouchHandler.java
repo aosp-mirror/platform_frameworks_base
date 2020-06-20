@@ -57,6 +57,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.systemui.R;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
@@ -222,7 +223,8 @@ public class PipTouchHandler {
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
             DeviceConfigProxy deviceConfig,
-            PipSnapAlgorithm pipSnapAlgorithm) {
+            PipSnapAlgorithm pipSnapAlgorithm,
+            SysUiState sysUiState) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -237,7 +239,7 @@ public class PipTouchHandler {
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds);
+                        this::updateMovementBounds, sysUiState);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()));
@@ -636,6 +638,7 @@ public class PipTouchHandler {
                 && !mMotionHelper.isAnimating()
                 && mPipResizeGestureHandler.isWithinTouchRegion(
                         (int) ev.getRawX(), (int) ev.getRawY())) {
+            mTouchState.onTouchEvent(ev);
             return true;
         }
 

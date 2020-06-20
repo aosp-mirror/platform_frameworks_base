@@ -98,6 +98,7 @@ class BroadcastDispatcherTest : SysuiTestCase() {
         broadcastDispatcher = TestBroadcastDispatcher(
                 mockContext,
                 testableLooper.looper,
+                mock(Executor::class.java),
                 mock(DumpManager::class.java),
                 logger,
                 mapOf(0 to mockUBRUser0, 1 to mockUBRUser1))
@@ -246,10 +247,11 @@ class BroadcastDispatcherTest : SysuiTestCase() {
     private class TestBroadcastDispatcher(
         context: Context,
         bgLooper: Looper,
+        executor: Executor,
         dumpManager: DumpManager,
         logger: BroadcastDispatcherLogger,
         var mockUBRMap: Map<Int, UserBroadcastDispatcher>
-    ) : BroadcastDispatcher(context, bgLooper, dumpManager, logger) {
+    ) : BroadcastDispatcher(context, bgLooper, executor, dumpManager, logger) {
         override fun createUBRForUser(userId: Int): UserBroadcastDispatcher {
             return mockUBRMap.getOrDefault(userId, mock(UserBroadcastDispatcher::class.java))
         }

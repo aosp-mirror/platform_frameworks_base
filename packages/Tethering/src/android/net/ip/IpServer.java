@@ -616,8 +616,9 @@ public class IpServer extends StateMachine {
 
         final Boolean setIfaceUp;
         if (mInterfaceType == TetheringManager.TETHERING_WIFI
-                || mInterfaceType == TetheringManager.TETHERING_WIFI_P2P) {
-            // The WiFi stack has ownership of the interface up/down state.
+                || mInterfaceType == TetheringManager.TETHERING_WIFI_P2P
+                || mInterfaceType == TetheringManager.TETHERING_ETHERNET) {
+            // The WiFi and Ethernet stack has ownership of the interface up/down state.
             // It is unclear whether the Bluetooth or USB stacks will manage their own
             // state.
             setIfaceUp = null;
@@ -1322,6 +1323,7 @@ public class IpServer extends StateMachine {
     class UnavailableState extends State {
         @Override
         public void enter() {
+            mIpNeighborMonitor.stop();
             mLastError = TetheringManager.TETHER_ERROR_NO_ERROR;
             sendInterfaceState(STATE_UNAVAILABLE);
         }
