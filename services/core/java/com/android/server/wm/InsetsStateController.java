@@ -254,8 +254,9 @@ class InsetsStateController {
 
     void onInsetsModified(InsetsControlTarget windowState, InsetsState state) {
         boolean changed = false;
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            final InsetsSource source = state.peekSource(i);
+            if (source == null) continue;
             final InsetsSourceProvider provider = mProviders.get(source.getType());
             if (provider == null) {
                 continue;

@@ -20,8 +20,10 @@ import static android.service.notification.NotificationListenerService.REASON_CA
 import static android.service.notification.NotificationListenerService.REASON_CLICK;
 import static android.service.notification.NotificationListenerService.REASON_TIMEOUT;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.Person;
 import android.os.Bundle;
 import android.service.notification.NotificationListenerService;
@@ -346,7 +348,8 @@ public interface NotificationRecordLogger {
                         == old.getSbn().getNotification().isGroupSummary())
                     && Objects.equals(r.getSbn().getNotification().category,
                         old.getSbn().getNotification().category)
-                    && (r.getImportance() == old.getImportance()));
+                    && (r.getImportance() == old.getImportance())
+                    && (getLoggingImportance(r) == getLoggingImportance(old)));
         }
 
         /**
@@ -413,5 +416,17 @@ public interface NotificationRecordLogger {
 
     }
 
+    /**
+     * @param r NotificationRecord
+     * @return Logging importance of record, taking important conversation channels into account.
+     */
+    static int getLoggingImportance(@NonNull NotificationRecord r) {
+        final int importance = r.getImportance();
+        final NotificationChannel channel = r.getChannel();
+        if (channel == null) {
+            return importance;
+        }
+        return NotificationChannelLogger.getLoggingImportance(channel, importance);
+    }
 
 }

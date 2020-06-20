@@ -44,7 +44,6 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.statusbar.NotificationMediaManager
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor
 import com.android.systemui.statusbar.notification.row.HybridGroupManager
 import com.android.systemui.util.Assert
@@ -96,7 +95,7 @@ class MediaDataManager(
     dumpManager: DumpManager,
     mediaTimeoutListener: MediaTimeoutListener,
     mediaResumeListener: MediaResumeListener,
-    private val useMediaResumption: Boolean,
+    private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean
 ) : Dumpable {
 
@@ -149,18 +148,9 @@ class MediaDataManager(
         mediaTimeoutListener.timeoutCallback = { token: String, timedOut: Boolean ->
             setTimedOut(token, timedOut) }
         addListener(mediaTimeoutListener)
-        if (useMediaResumption) {
-            mediaResumeListener.addTrackToResumeCallback = { desc: MediaDescription,
-                resumeAction: Runnable, token: MediaSession.Token, appName: String,
-                appIntent: PendingIntent, packageName: String ->
-                addResumptionControls(desc, resumeAction, token, appName, appIntent, packageName)
-            }
-            mediaResumeListener.resumeComponentFoundCallback = { key: String, action: Runnable? ->
-                mediaEntries.get(key)?.resumeAction = action
-                mediaEntries.get(key)?.hasCheckedForResume = true
-            }
-            addListener(mediaResumeListener)
-        }
+
+        mediaResumeListener.setManager(this)
+        addListener(mediaResumeListener)
 
         val userFilter = IntentFilter(Intent.ACTION_USER_SWITCHED)
         broadcastDispatcher.registerReceiver(userChangeReceiver, userFilter, null, UserHandle.ALL)
@@ -223,7 +213,14 @@ class MediaDataManager(
         }
     }
 
-    private fun addResumptionControls(
+    fun setResumeAction(key: String, action: Runnable?) {
+        mediaEntries.get(key)?.let {
+            it.resumeAction = action
+            it.hasCheckedForResume = true
+        }
+    }
+
+    fun addResumptionControls(
         desc: MediaDescription,
         action: Runnable,
         token: MediaSession.Token,
@@ -233,7 +230,8 @@ class MediaDataManager(
     ) {
         // Resume controls don't have a notification key, so store by package name instead
         if (!mediaEntries.containsKey(packageName)) {
-            val resumeData = LOADING.copy(packageName = packageName, resumeAction = action)
+            val resumeData = LOADING.copy(packageName = packageName, resumeAction = action,
+                hasCheckedForResume = true)
             mediaEntries.put(packageName, resumeData)
         }
         backgroundExecutor.execute {
@@ -301,6 +299,8 @@ class MediaDataManager(
     ) {
         if (TextUtils.isEmpty(desc.title)) {
             Log.e(TAG, "Description incomplete")
+            // Delete the placeholder entry
+            mediaEntries.remove(packageName)
             return
         }
 
@@ -323,7 +323,8 @@ class MediaDataManager(
             onMediaDataLoaded(packageName, null, MediaData(true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
-                    resumeAction = resumeAction))
+                    resumeAction = resumeAction, notificationKey = packageName,
+                    hasCheckedForResume = true))
         }
     }
 
@@ -432,11 +433,12 @@ class MediaDataManager(
         }
 
         val resumeAction: Runnable? = mediaEntries.get(key)?.resumeAction
+        val hasCheckedForResume = mediaEntries.get(key)?.hasCheckedForResume == true
         foregroundExecutor.execute {
             onMediaDataLoaded(key, oldKey, MediaData(true, bgColor, app, smallIconDrawable, artist,
                     song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
                     notif.contentIntent, null, active = true, resumeAction = resumeAction,
-                    notificationKey = key))
+                    notificationKey = key, hasCheckedForResume = hasCheckedForResume))
         }
     }
 
@@ -540,7 +542,7 @@ class MediaDataManager(
             val data = mediaEntries.remove(key)!!
             val resumeAction = getResumeMediaAction(data.resumeAction!!)
             val updated = data.copy(token = null, actions = listOf(resumeAction),
-                actionsToShowInCompact = listOf(0))
+                actionsToShowInCompact = listOf(0), active = false)
             mediaEntries.put(data.packageName, updated)
             // Notify listeners of "new" controls
             val listenersCopy = listeners.toSet()
@@ -563,19 +565,32 @@ class MediaDataManager(
      */
     fun hasActiveMedia() = mediaEntries.any { it.value.active }
 
-    fun isActive(token: MediaSession.Token?): Boolean {
-        if (token == null) {
-            return false
-        }
-        val controller = mediaControllerFactory.create(token)
-        val state = controller?.playbackState?.state
-        return state != null && NotificationMediaManager.isActiveState(state)
-    }
-
     /**
-     * Are there any media entries, including resume controls?
+     * Are there any media entries we should display?
+     * If resumption is enabled, this will include inactive players
+     * If resumption is disabled, we only want to show active players
      */
     fun hasAnyMedia() = if (useMediaResumption) mediaEntries.isNotEmpty() else hasActiveMedia()
+
+    fun setMediaResumptionEnabled(isEnabled: Boolean) {
+        if (useMediaResumption == isEnabled) {
+            return
+        }
+
+        useMediaResumption = isEnabled
+
+        if (!useMediaResumption) {
+            // Remove any existing resume controls
+            val listenersCopy = listeners.toSet()
+            val filtered = mediaEntries.filter { !it.value.active }
+            filtered.forEach {
+                mediaEntries.remove(it.key)
+                listenersCopy.forEach { listener ->
+                    listener.onMediaDataRemoved(it.key)
+                }
+            }
+        }
+    }
 
     interface Listener {
 

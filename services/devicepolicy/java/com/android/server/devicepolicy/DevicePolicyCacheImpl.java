@@ -51,15 +51,15 @@ public class DevicePolicyCacheImpl extends DevicePolicyCache {
     }
 
     @Override
-    public boolean getScreenCaptureDisabled(int userHandle) {
+    public boolean isScreenCaptureAllowed(int userHandle, boolean ownerCanAddInternalSystemWindow) {
         synchronized (mLock) {
-            return mScreenCaptureDisabled.get(userHandle);
+            return !mScreenCaptureDisabled.get(userHandle) || ownerCanAddInternalSystemWindow;
         }
     }
 
-    public void setScreenCaptureDisabled(int userHandle, boolean disabled) {
+    public void setScreenCaptureAllowed(int userHandle, boolean allowed) {
         synchronized (mLock) {
-            mScreenCaptureDisabled.put(userHandle, disabled);
+            mScreenCaptureDisabled.put(userHandle, !allowed);
         }
     }
 
