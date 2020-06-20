@@ -46,6 +46,7 @@ import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -115,6 +116,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final Lazy<StatusBar> mStatusBarLazy;
     private final Handler mMainHandler;
     private final Handler mBgHandler;
+    private final BubbleController mBubbleController;
     private Runnable mOpenRunnable;
     private final INotificationManager mNotificationManager;
     private final LauncherApps mLauncherApps;
@@ -135,8 +137,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
-            AssistantFeedbackController assistantFeedbackController
-    ) {
+            AssistantFeedbackController assistantFeedbackController,
+            BubbleController bubbleController) {
         mContext = context;
         mVisualStabilityManager = visualStabilityManager;
         mStatusBarLazy = statusBarLazy;
@@ -151,6 +153,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mBuilderProvider = builderProvider;
         mChannelEditorDialogController = channelEditorDialogController;
         mAssistantFeedbackController = assistantFeedbackController;
+        mBubbleController = bubbleController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -507,7 +510,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 mMainHandler,
                 mBgHandler,
-                onConversationSettingsListener);
+                onConversationSettingsListener,
+                mBubbleController);
     }
 
     /**
