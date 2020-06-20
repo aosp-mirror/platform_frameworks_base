@@ -64,6 +64,7 @@ stubs_defaults {
     ],
     api_levels_annotations_enabled: false,
     filter_packages: packages_to_document,
+    sandbox: true,
 }
 
 stubs_defaults {
@@ -441,6 +442,7 @@ droidstubs {
         "core/java/android/os/RemoteException.java",
         "core/java/android/util/AndroidException.java",
     ],
+    sandbox: true,
     installable: false,
     sdk_version: "core_platform",
     annotations_enabled: true,
