@@ -97,9 +97,9 @@ checking the state before later calling `noteOp` anyway.
 If an operation refers to a time span (e.g. a audio-recording session) the API provider should
 use `AppOpsManager.startOp` and `AppOpsManager.finishOp` instead of `noteOp`.
 
-`noteOp` and `startOp` take a `packageName` and `featureId` parameter. These need to be read from
-the calling apps context as `Context.getOpPackageName` and `Context.getFeatureId`, then send to
-the data provider and then passed on the `noteOp`/`startOp` method.
+`noteOp` and `startOp` take a `packageName` and `attributionTag` parameter. These need to be read
+from the calling app's context as `Context.getOpPackageName` and `Context.getAttributionTag`, then
+send to the data provider and then passed on the `noteOp`/`startOp` method.
 
 #### App-ops and permissions
 
@@ -144,6 +144,30 @@ Uid u0a118:
   capability=6
 ```
 
+## Instantaneous and long running ops
+
+Some events such as reading the last known location as instantaneous ops, i.e. they happen
+without taking any relevant time. The data provider should use `noteOp` to signal to the system
+that such an event happened.
+
+For events that take some time (such as recording a video) the data provider should call `startOp`
+at the beginning of the event and `finishOp` at the end of th event. It is uncommon but possible
+that at a given time multiple such events are in progress and hence this is properly handled.
+While such an event is in progress the app-op is considered `active`.
+
+For some ops both instantaneous and long running ops are recorded, e.g. recoding a video and taking
+a picture.
+
+## Forwarding (==proxying) operations to another process
+
+Some apps are forwarding access to other apps. E.g. an app might get the location from the
+system's location provider and then send the location further to a 3rd app. In this case the
+app passing on the data needs to call `AppOpsManager.noteProxyOp` to signal the access proxying.
+This might also make sense inside of a single app if the access is forwarded between two
+attribution tags of the app. In this case an app-op is noted for the forwarding app (proxy) and
+the app that received the data (proxied). As any app can do it is important to track how much the
+system trusts this proxy-access-tracking. For more details see `AppOpService.noteProxyOperation`.
+
 ## App-ops for tracking
 
 App-ops track many important events, including all accesses to runtime permission protected
@@ -154,21 +178,13 @@ read by system components.
 important to eventually call `noteOp` or `startOp` when providing access to protected operations
 or data.
 
-Some apps are forwarding access to other apps. E.g. an app might get the location from the
-system's location provider and then send the location further to a 3rd app. In this case the
-app passing on the data needs to call `AppOpsManager.noteProxyOp` to signal the access proxying.
-This might also make sense inside of a single app if the access is forwarded between two features of
-the app. In this case an app-op is noted for the forwarding app (proxy) and the app that received
-the data (proxied). As any app can do it is important to track how much the system trusts this
-proxy-access-tracking. For more details see `AppOpService.noteProxyOperation`.
-
-The tracking information can be read from `dumpsys appops` split by feature, proc state and
+The tracking information can be read from `dumpsys appops` split by attribution tag, proc state and
 proxying information with the syntax
 
 ```
 Package THE_PACKAGE_NAME:
   AN_APP_OP (CURRENT_MODE):
-    FEATURE_ID (or null for default feature)=[
+    ATTRIBUTION_TAG (or null for default attribution)=[
       ACCESS_OR_REJECT: [PROC_STATE-PROXYING_TAG] TIME proxy[INFO_ABOUT_PROXY IF_PROXY_ACCESS]
 ```
 
@@ -185,9 +201,9 @@ Package com.google.android.gms:
       Access: [fg-tp] 2020-02-17 14:24:54.721 (-23h14m59s480ms)
     ]
     com.google.android.gms.icing=[
-      Access: [fgsvc-tpd] 2020-02-14 14:26:27.018 (-3d23h13m27s183ms) proxy[uid=10070, pkg=com.android.providers.contacts, feature=null]
-      Access: [fg-tpd] 2020-02-18 02:26:08.711 (-11h13m45s490ms) proxy[uid=10070, pkg=com.android.providers.contacts, feature=null]
-      Access: [bg-tpd] 2020-02-14 14:34:55.310 (-3d23h4m58s891ms) proxy[uid=10070, pkg=com.android.providers.contacts, feature=null]
+      Access: [fgsvc-tpd] 2020-02-14 14:26:27.018 (-3d23h13m27s183ms) proxy[uid=10070, pkg=com.android.providers.contacts, attributionTag=null]
+      Access: [fg-tpd] 2020-02-18 02:26:08.711 (-11h13m45s490ms) proxy[uid=10070, pkg=com.android.providers.contacts, attributionTag=null]
+      Access: [bg-tpd] 2020-02-14 14:34:55.310 (-3d23h4m58s891ms) proxy[uid=10070, pkg=com.android.providers.contacts, attributionTag=null]
     ]
   MANAGE_EXTERNAL_STORAGE (default):
     null=[
@@ -196,11 +212,28 @@ Package com.google.android.gms:
     ]
 ```
 
+For in progress ops above command shows the amount of time the op is already in progress for and
+how many ops have been started and not yet finished for this package.
+
+```
+MONITOR_LOCATION (allow / switch COARSE_LOCATION=allow):
+  null=[
+    Access: [top-s] 2020-06-18 19:22:38.445 (-27s668ms) duration=+27s670ms
+    Running start at: +27s669ms
+    startNesting=2
+  ]
+```
+
 ### Tracking an app's own private data accesses
 
-An app can register an `AppOpsManager.OnOpNotedCallback` to get informed about what accesses the
-system is tracking for it. As each runtime permission has an associated app-op this API is
-particularly useful for an app that want to find unexpected private data accesses.
+An app can register an `AppOpsManager.OnOpNotedCallback` to [get informed about what accesses the
+system is tracking for it](https://developer.android.com/preview/privacy/data-access-auditing).
+As each runtime permission has an associated app-op this API is particularly useful for an app
+that want to find unexpected private data accesses.
+
+### Tracking the last accesses via an API
+
+To get the last accesses for an op or package an app can use `AppOpsManager.getPackagesForOps`.
 
 ## Listening to app-op events
 
