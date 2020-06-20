@@ -18,7 +18,7 @@ package com.android.systemui.controls.management
 
 import android.content.ComponentName
 import com.android.systemui.controls.ControlsServiceInfo
-import com.android.systemui.controls.UserAwareController
+import com.android.systemui.util.UserAwareController
 import com.android.systemui.statusbar.policy.CallbackController
 
 /**
@@ -26,7 +26,7 @@ import com.android.systemui.statusbar.policy.CallbackController
  */
 interface ControlsListingController :
         CallbackController<ControlsListingController.ControlsListingCallback>,
-        UserAwareController {
+    UserAwareController {
 
     /**
      * @return the current list of services that satisfies the [ServiceListing].

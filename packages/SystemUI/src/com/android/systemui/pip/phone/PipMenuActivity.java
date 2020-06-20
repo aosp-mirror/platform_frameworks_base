@@ -110,6 +110,8 @@ public class PipMenuActivity extends Activity {
 
     private static final float DISABLED_ACTION_ALPHA = 0.54f;
 
+    private static final boolean ENABLE_RESIZE_HANDLE = false;
+
     private int mMenuState;
     private boolean mResize = true;
     private boolean mAllowMenuTimeout = true;
@@ -388,7 +390,8 @@ public class PipMenuActivity extends Activity {
             ObjectAnimator dismissAnim = ObjectAnimator.ofFloat(mDismissButton, View.ALPHA,
                     mDismissButton.getAlpha(), 1f);
             ObjectAnimator resizeAnim = ObjectAnimator.ofFloat(mResizeHandle, View.ALPHA,
-                    mResizeHandle.getAlpha(), menuState == MENU_STATE_CLOSE && showResizeHandle
+                    mResizeHandle.getAlpha(),
+                    ENABLE_RESIZE_HANDLE && menuState == MENU_STATE_CLOSE && showResizeHandle
                             ? 1f : 0f);
             if (menuState == MENU_STATE_FULL) {
                 mMenuContainerAnimator.playTogether(menuAnim, settingsAnim, dismissAnim,

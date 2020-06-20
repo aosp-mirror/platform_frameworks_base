@@ -606,12 +606,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void updateState(InsetsState newState) {
         mState.setDisplayFrame(newState.getDisplayFrame());
-        for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = newState.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            InsetsSource source = newState.peekSource(i);
+            if (source == null) continue;;
             getSourceConsumer(source.getType()).updateSource(source);
         }
-        for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = mState.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            InsetsSource source = mState.peekSource(i);
+            if (source == null) continue;
             if (newState.peekSource(source.getType()) == null) {
                 mState.removeSource(source.getType());
             }
@@ -707,7 +709,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (hideTypes[0] != 0) {
             applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
         }
-        if (hasControl && mRequestedState.getSourcesCount() > 0) {
+        if (hasControl && mRequestedState.hasSources()) {
             // We might have changed our requested visibilities while we don't have the control,
             // so we need to update our requested state once we have control. Otherwise, our
             // requested state at the server side might be incorrect.

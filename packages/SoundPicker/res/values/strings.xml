@@ -37,4 +37,7 @@
     <string name="unable_to_add_ringtone">Unable to add custom ringtone</string>
     <!-- Text for the Toast displayed when deleting a custom ringtone fails. -->
     <string name="unable_to_delete_ringtone">Unable to delete custom ringtone</string>
+
+    <!-- Text for the name of the app. [CHAR LIMIT=12] -->
+    <string name="app_label">Sounds</string>
 </resources>

@@ -162,7 +162,7 @@ internal class BubbleDataRepository @Inject constructor(
         // into Bubble.
         val bubbles = entities.mapNotNull { entity ->
             shortcutMap[ShortcutKey(entity.userId, entity.packageName)]
-                    ?.first { shortcutInfo -> entity.shortcutId == shortcutInfo.id }
+                    ?.firstOrNull { shortcutInfo -> entity.shortcutId == shortcutInfo.id }
                     ?.let { shortcutInfo -> Bubble(
                             entity.key,
                             shortcutInfo,

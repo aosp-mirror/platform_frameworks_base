@@ -3507,7 +3507,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         updateShadowsRadius(isFocused(), getSyncTransaction());
 
-        if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
+        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
     }
@@ -3686,20 +3686,6 @@ class Task extends WindowContainer<WindowContainer> {
             final int otherWindowingMode = other.getWindowingMode();
 
             if (otherWindowingMode == WINDOWING_MODE_FULLSCREEN) {
-                // In this case the home stack isn't resizeable even though we are in split-screen
-                // mode. We still want the primary splitscreen stack to be visible as there will be
-                // a slight hint of it in the status bar area above the non-resizeable home
-                // activity. In addition, if the fullscreen assistant is over primary splitscreen
-                // stack, the stack should still be visible in the background as long as the recents
-                // animation is running.
-                final int activityType = other.getActivityType();
-                if (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
-                    if (activityType == ACTIVITY_TYPE_HOME
-                            || (activityType == ACTIVITY_TYPE_ASSISTANT
-                            && mWmService.getRecentsAnimationController() != null)) {
-                        break;
-                    }
-                }
                 if (other.isTranslucent(starting)) {
                     // Can be visible behind a translucent fullscreen stack.
                     gotTranslucentFullscreen = true;

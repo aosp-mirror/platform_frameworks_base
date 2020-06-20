@@ -235,7 +235,7 @@ public enum ScrimState {
 
             mFrontAlpha = 0f;
             mBehindAlpha = mDefaultScrimAlpha;
-            mBubbleAlpha = mDefaultScrimAlpha;
+            mBubbleAlpha = ScrimController.BUBBLE_SCRIM_ALPHA;
 
             mAnimationDuration = ScrimController.ANIMATION_DURATION;
             mBlankScreen = false;

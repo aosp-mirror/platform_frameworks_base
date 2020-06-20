@@ -1091,11 +1091,11 @@
     <!-- Message shown when face authentication fails and the pin pad is visible. [CHAR LIMIT=60] -->
     <string name="keyguard_retry">Swipe up to try again</string>
 
-    <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=60] -->
-    <string name="do_disclosure_generic">This device is managed by your organization</string>
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that the user's device belongs to their organization. [CHAR LIMIT=60] -->
+    <string name="do_disclosure_generic">This device belongs to your organization</string>
 
-    <!-- Text on keyguard screen and in Quick Settings footer indicating that the device is enterprise-managed by a Device Owner [CHAR LIMIT=40] -->
-    <string name="do_disclosure_with_name">This device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
+    <!-- Text on keyguard screen and in Quick Settings footer indicating that user's device belongs to their organization. [CHAR LIMIT=40] -->
+    <string name="do_disclosure_with_name">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%s</xliff:g></string>
 
     <!-- Shows when people have clicked on the phone icon [CHAR LIMIT=60] -->
     <string name="phone_hint">Swipe from icon for phone</string>
@@ -1288,29 +1288,29 @@
     <!-- Footer vpn present text [CHAR LIMIT=50] -->
     <string name="branded_vpn_footer">Network may be monitored</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner that can monitor the network traffic [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_monitoring">Your organization manages this device and may monitor network traffic</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the organization can monitor network traffic on that device. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management_monitoring">Your organization owns this device and may monitor network traffic</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner that can monitor the network traffic [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_monitoring"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> manages this device and may monitor network traffic</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the organization can monitor network traffic on that device. The placeholder is the organization's name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management_monitoring"><xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> owns this device and may monitor network traffic</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to a VPN [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_named_vpn">Device is managed by your organization and connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management_named_vpn">This device belongs to your organization and is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to a VPN [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_named_vpn">Device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and connected to <xliff:g id="vpn_app" example="Foo VPN App">%2$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to a VPN. The first placeholder is the organization name, and the second placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management_named_vpn">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to <xliff:g id="vpn_app" example="Foo VPN App">%2$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management">Device is managed by your organization</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management">This device belongs to your organization</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management">Device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization. The placeholder is the organization's name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to two VPNs, one in the current user, one in the managed profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_management_vpns">Device is managed by your organization and connected to VPNs</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to multiple VPNs. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_management_vpns">This device belongs to your organization and is connected to VPNs</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a device owner and is connected to two VPNs, one in the current user, one in the managed profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_management_vpns">Device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and connected to VPNs</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the user's device belongs to their organization, and the device is connected to multiple VPNs. The placeholder is the organization's name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_management_vpns">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g> and is connected to VPNs</string>
 
     <!-- Disclosure at the bottom of Quick Settings that indicates that the device has a managed profile which can be monitored by the profile owner [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_managed_profile_monitoring">Your organization may monitor network traffic in your work profile</string>
@@ -1321,17 +1321,17 @@
     <!-- Disclosure at the bottom of Quick Settings that indicates that a certificate authorithy is installed on this device and the traffic might be monitored [CHAR LIMIT=100] -->
     <string name="quick_settings_disclosure_monitoring">Network may be monitored</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to two VPNs, one in the current user, one in the managed profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_vpns">Device connected to VPNs</string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to multiple VPNs. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_vpns">This device is connected to VPNs</string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the work profile [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_managed_profile_named_vpn">Work profile connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the work profile. The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_managed_profile_named_vpn">Your work profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the personal profile (as opposed to the work profile) [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_personal_profile_named_vpn">Personal profile connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN in the personal profile (instead of the work profile). The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_personal_profile_named_vpn">Your personal profile is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
-    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN [CHAR LIMIT=100] -->
-    <string name="quick_settings_disclosure_named_vpn">Device connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
+    <!-- Disclosure at the bottom of Quick Settings that indicates that the device is connected to a VPN. The placeholder is the VPN name. [CHAR LIMIT=100] -->
+    <string name="quick_settings_disclosure_named_vpn">This device is connected to <xliff:g id="vpn_app" example="Foo VPN App">%1$s</xliff:g></string>
 
     <!-- Monitoring dialog title for device owned devices [CHAR LIMIT=35] -->
     <string name="monitoring_title_device_owned">Device management</string>
@@ -1361,11 +1361,11 @@
     <!-- Monitoring dialog label for button opening a page with more information on the admin's abilities [CHAR LIMIT=30] -->
     <string name="monitoring_button_view_policies">View Policies</string>
 
-    <!-- Monitoring dialog: Description of the device owner by name. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_named_management">Your device is managed by <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your admin.</string>
+    <!-- Dialog that a user can access via Quick Settings. The dialog describes what the IT admin can monitor (and the changes they can make) on the user's device. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_named_management">This device belongs to <xliff:g id="organization_name" example="Foo, Inc.">%1$s</xliff:g>.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
 
-    <!-- Monitoring dialog: Description of a device owner. [CHAR LIMIT=NONE]-->
-    <string name="monitoring_description_management">Your device is managed by your organization.\n\nYour admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your admin.</string>
+    <!-- Dialog that a user can access via Quick Settings. The dialog describes what the IT admin can monitor (and the changes they can make) on the user's device. [CHAR LIMIT=NONE]-->
+    <string name="monitoring_description_management">This device belongs to your organization.\n\nYour IT admin can monitor and manage settings, corporate access, apps, data associated with your device, and your device\'s location information.\n\nFor more information, contact your IT admin.</string>
 
     <!-- Monitoring dialog: Description of a CA Certificate. [CHAR LIMIT=NONE]-->
     <string name="monitoring_description_management_ca_certificate">Your organization installed a certificate authority on this device. Your secure network traffic may be monitored or modified.</string>
@@ -2784,10 +2784,16 @@
          recommended controls [CHAR_LIMIT=60] -->
     <string name="controls_seeding_in_progress">Loading recommendations</string>
 
-    <!-- Close the controls associated with a specific media session [CHAR_LIMIT=NONE] -->
-    <string name="controls_media_close_session">Close this media session</string>
+    <!-- Title for media controls [CHAR_LIMIT=50] -->
+    <string name="controls_media_title">Media</string>
+    <!-- Explanation for closing controls associated with a specific media session [CHAR_LIMIT=NONE] -->
+    <string name="controls_media_close_session">Hide the current session.</string>
+    <!-- Label for a button that will hide media controls [CHAR_LIMIT=30] -->
+    <string name="controls_media_dismiss_button">Hide</string>
     <!-- Label for button to resume media playback [CHAR_LIMIT=NONE] -->
     <string name="controls_media_resume">Resume</string>
+    <!-- Label for button to go to media control settings screen [CHAR_LIMIT=30] -->
+    <string name="controls_media_settings_button">Settings</string>
 
     <!-- Error message indicating that a control timed out while waiting for an update [CHAR_LIMIT=30] -->
     <string name="controls_error_timeout">Inactive, check app</string>
