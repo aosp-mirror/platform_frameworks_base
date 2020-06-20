@@ -60,8 +60,13 @@ public class GlobalActionsImeTest extends SysuiTestCase {
     public void testGlobalActions_doesntStealImeControl() throws Exception {
         turnScreenOn();
         final TestActivity activity = mActivityTestRule.launchActivity(null);
-
-        waitUntil("Ime is visible", activity::isImeVisible);
+        boolean isImeVisible = waitUntil(activity::isImeVisible);
+        if (!isImeVisible) {
+            // Sometimes the keyboard is dismissed when run with other tests. Bringing it up again
+            // should improve test reliability
+            activity.showIme();
+            waitUntil("Ime is not visible", activity::isImeVisible);
+        }
 
         executeShellCommand("input keyevent --longpress POWER");
 
@@ -91,17 +96,23 @@ public class GlobalActionsImeTest extends SysuiTestCase {
 
     private static void waitUntil(String message, BooleanSupplier predicate)
             throws Exception {
+        if (!waitUntil(predicate)) {
+            fail(message);
+        }
+    }
+
+    private static boolean waitUntil(BooleanSupplier predicate) throws Exception {
         int sleep = 125;
         final long timeout = SystemClock.uptimeMillis() + 10_000;  // 10 second timeout
         while (SystemClock.uptimeMillis() < timeout) {
             if (predicate.getAsBoolean()) {
-                return; // okay
+                return true;
             }
             Thread.sleep(sleep);
             sleep *= 5;
             sleep = Math.min(2000, sleep);
         }
-        fail(message);
+        return false;
     }
 
     private static void executeShellCommand(String cmd) {
@@ -130,6 +141,7 @@ public class GlobalActionsImeTest extends SysuiTestCase {
             WindowInsetsController.OnControllableInsetsChangedListener,
             View.OnApplyWindowInsetsListener {
 
+        private EditText mEditText;
         boolean mHasFocus;
         boolean mControlsIme;
         boolean mImeVisible;
@@ -137,14 +149,16 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         @Override
         protected void onCreate(@Nullable Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
+            mEditText = new EditText(this);
+            mEditText.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
+            setContentView(mEditText);
+            showIme();
+        }
 
-            EditText content = new EditText(this);
-            content.setCursorVisible(false);  // Otherwise, main thread doesn't go idle.
-            setContentView(content);
-            content.requestFocus();
-
+        private void showIme() {
+            mEditText.requestFocus();
             getWindow().getDecorView().setOnApplyWindowInsetsListener(this);
-            WindowInsetsController wic = content.getWindowInsetsController();
+            WindowInsetsController wic = mEditText.getWindowInsetsController();
             wic.addOnControllableInsetsChangedListener(this);
             wic.show(ime());
         }
