@@ -300,33 +300,17 @@ public class BiometricManager {
     }
 
     /**
-     * Sets the active user.
-     * @hide
-     */
-    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void setActiveUser(int userId) {
-        if (mService != null) {
-            try {
-                mService.setActiveUser(userId);
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        } else {
-            Slog.w(TAG, "setActiveUser(): Service not connected");
-        }
-    }
-
-    /**
      * Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
      *
-     * @param token an opaque token returned by password confirmation.
+     * @param userId this operation takes effect for.
+     * @param hardwareAuthToken an opaque token returned by password confirmation.
      * @hide
      */
     @RequiresPermission(USE_BIOMETRIC_INTERNAL)
-    public void resetLockout(byte[] token) {
+    public void resetLockout(int userId, byte[] hardwareAuthToken) {
         if (mService != null) {
             try {
-                mService.resetLockout(token);
+                mService.resetLockout(userId, hardwareAuthToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

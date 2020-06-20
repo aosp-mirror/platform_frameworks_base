@@ -243,22 +243,11 @@ public class AuthService extends SystemService {
         }
 
         @Override
-        public void setActiveUser(int userId) throws RemoteException {
+        public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
             checkInternalPermission();
             final long identity = Binder.clearCallingIdentity();
             try {
-                mBiometricService.setActiveUser(userId);
-            } finally {
-                Binder.restoreCallingIdentity(identity);
-            }
-        }
-
-        @Override
-        public void resetLockout(byte[] token) throws RemoteException {
-            checkInternalPermission();
-            final long identity = Binder.clearCallingIdentity();
-            try {
-                mBiometricService.resetLockout(token);
+                mBiometricService.resetLockout(userId, hardwareAuthToken);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }

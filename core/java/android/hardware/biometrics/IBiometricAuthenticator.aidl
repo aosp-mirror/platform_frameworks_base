@@ -51,10 +51,7 @@ interface IBiometricAuthenticator {
     boolean hasEnrolledTemplates(int userId, String opPackageName);
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(in byte [] token);
-
-    // Explicitly set the active user (for enrolling work profile)
-    void setActiveUser(int uid);
+    void resetLockout(int userId, in byte [] hardwareAuthToken);
 
     // Gets the authenticator ID representing the current set of enrolled templates
     long getAuthenticatorId(int callingUserId);

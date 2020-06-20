@@ -564,15 +564,14 @@ public abstract class BiometricServiceBase extends SystemService
         });
     }
 
-    protected void authenticateInternal(AuthenticationClient client, long opId,
-            String opPackageName) {
+    protected void authenticateInternal(AuthenticationClient client, String opPackageName) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();
         final int callingUserId = UserHandle.getCallingUserId();
-        authenticateInternal(client, opId, opPackageName, callingUid, callingPid, callingUserId);
+        authenticateInternal(client, opPackageName, callingUid, callingPid, callingUserId);
     }
 
-    protected void authenticateInternal(AuthenticationClient client, long opId,
+    protected void authenticateInternal(AuthenticationClient client,
             String opPackageName, int callingUid, int callingPid, int callingUserId) {
         if (!canUseBiometric(opPackageName, true /* foregroundOnly */, callingUid, callingPid,
                 callingUserId)) {
@@ -626,15 +625,6 @@ public abstract class BiometricServiceBase extends SystemService
                 if (DEBUG) Slog.v(getTag(), "Can't cancel non-authenticating client "
                         + client.getOwnerString());
             }
-        });
-    }
-
-    protected void setActiveUserInternal(int userId) {
-        mHandler.post(() -> {
-            if (DEBUG) {
-                Slog.d(getTag(), "setActiveUser(" + userId + ")");
-            }
-            updateActiveGroup(userId, null /* clientPackage */);
         });
     }
 
