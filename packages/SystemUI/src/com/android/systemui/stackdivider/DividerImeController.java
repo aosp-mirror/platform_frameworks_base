@@ -126,16 +126,16 @@ class DividerImeController implements DisplayImeController.ImePositionProcessor 
     @Override
     public void onImeStartPositioning(int displayId, int hiddenTop, int shownTop,
             boolean imeShouldShow, SurfaceControl.Transaction t) {
+        mHiddenTop = hiddenTop;
+        mShownTop = shownTop;
+        mTargetShown = imeShouldShow;
         if (!isDividerVisible()) {
             return;
         }
         final boolean splitIsVisible = !getView().isHidden();
         mSecondaryHasFocus = getSecondaryHasFocus(displayId);
         final boolean targetAdjusted = splitIsVisible && imeShouldShow && mSecondaryHasFocus
-                && !getLayout().mDisplayLayout.isLandscape();
-        mHiddenTop = hiddenTop;
-        mShownTop = shownTop;
-        mTargetShown = imeShouldShow;
+                && !getLayout().mDisplayLayout.isLandscape() && !mSplits.mDivider.isMinimized();
         if (mLastAdjustTop < 0) {
             mLastAdjustTop = imeShouldShow ? hiddenTop : shownTop;
         } else if (mLastAdjustTop != (imeShouldShow ? mShownTop : mHiddenTop)) {

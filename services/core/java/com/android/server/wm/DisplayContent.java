@@ -3782,7 +3782,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     boolean hasSecureWindowOnScreen() {
-        final WindowState win = getWindow(w -> w.isOnScreen() && mWmService.isSecureLocked(w));
+        final WindowState win = getWindow(w -> w.isOnScreen() && w.isSecureLocked());
         return win != null;
     }
 

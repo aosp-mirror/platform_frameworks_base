@@ -268,6 +268,13 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 throw new IllegalStateException("Not allowed to read in state: "
                         + stateToString(mState));
             }
+            if (!BlobStoreConfig.shouldUseRevocableFdForReads()) {
+                try {
+                    return new ParcelFileDescriptor(openReadInternal());
+                } catch (IOException e) {
+                    throw ExceptionUtils.wrap(e);
+                }
+            }
         }
 
         FileDescriptor fd = null;
@@ -283,7 +290,6 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 trackRevocableFdLocked(revocableFd);
                 return revocableFd.getRevocableFileDescriptor();
             }
-
         } catch (IOException e) {
             IoUtils.closeQuietly(fd);
             throw ExceptionUtils.wrap(e);

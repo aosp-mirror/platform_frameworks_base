@@ -41,6 +41,7 @@ import android.window.WindowContainerTransaction;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.BasePipManager;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
@@ -81,12 +82,12 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
     private InputConsumerController mInputConsumerController;
     private PipMediaController mMediaController;
     private PipTouchHandler mTouchHandler;
+    private PipTaskOrganizer mPipTaskOrganizer;
     private PipAppOpsListener mAppOpsListener;
     private IPinnedStackAnimationListener mPinnedStackAnimationRecentsListener;
     private boolean mIsInFixedRotation;
 
     protected PipMenuActivityController mMenuController;
-    protected PipTaskOrganizer mPipTaskOrganizer;
 
     /**
      * Handler for display rotation changes.
@@ -229,7 +230,8 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
             DeviceConfigProxy deviceConfig,
             PipBoundsHandler pipBoundsHandler,
             PipSnapAlgorithm pipSnapAlgorithm,
-            PipTaskOrganizer pipTaskOrganizer) {
+            PipTaskOrganizer pipTaskOrganizer,
+            SysUiState sysUiState) {
         mContext = context;
         mActivityManager = ActivityManager.getService();
 
@@ -250,7 +252,7 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
                 mInputConsumerController);
         mTouchHandler = new PipTouchHandler(context, mActivityManager,
                 mMenuController, mInputConsumerController, mPipBoundsHandler, mPipTaskOrganizer,
-                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm);
+                floatingContentCoordinator, deviceConfig, pipSnapAlgorithm, sysUiState);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
         displayController.addDisplayChangingController(mRotationController);

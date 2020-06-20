@@ -16,9 +16,12 @@
 
 package com.android.server.notification;
 
+import static android.app.NotificationManager.IMPORTANCE_HIGH;
+
 import android.annotation.NonNull;
 import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
+import android.stats.sysui.NotificationEnums;
 
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
@@ -42,7 +45,7 @@ public interface NotificationChannelLogger {
             String pkg) {
         logNotificationChannel(
                 NotificationChannelEvent.getCreated(channel),
-                channel, uid, pkg, 0, 0);
+                channel, uid, pkg, 0, getLoggingImportance(channel));
     }
 
     /**
@@ -55,7 +58,7 @@ public interface NotificationChannelLogger {
             String pkg) {
         logNotificationChannel(
                 NotificationChannelEvent.getDeleted(channel),
-                channel, uid, pkg, 0, 0);
+                channel, uid, pkg, getLoggingImportance(channel), 0);
     }
 
     /**
@@ -63,13 +66,13 @@ public interface NotificationChannelLogger {
      * @param channel The channel.
      * @param uid UID of app that owns the channel.
      * @param pkg Package of app that owns the channel.
-     * @param oldImportance Previous importance level of the channel.
+     * @param oldLoggingImportance Previous logging importance level of the channel.
      * @param byUser True if the modification was user-specified.
      */
     default void logNotificationChannelModified(@NonNull NotificationChannel channel, int uid,
-            String pkg, int oldImportance, boolean byUser) {
+            String pkg, int oldLoggingImportance, boolean byUser) {
         logNotificationChannel(NotificationChannelEvent.getUpdated(byUser),
-                channel, uid, pkg, oldImportance, channel.getImportance());
+                channel, uid, pkg, oldLoggingImportance, getLoggingImportance(channel));
     }
 
     /**
@@ -216,6 +219,27 @@ public interface NotificationChannelLogger {
      */
     static int getIdHash(@NonNull NotificationChannelGroup group) {
         return SmallHash.hash(group.getId());
+    }
+
+    /**
+     * @return Logging importance for a channel: the regular importance, or
+     *     IMPORTANCE_IMPORTANT_CONVERSATION for a HIGH-importance conversation tagged important.
+     */
+    static int getLoggingImportance(@NonNull NotificationChannel channel) {
+        return getLoggingImportance(channel, channel.getImportance());
+    }
+
+    /**
+     * @return Logging importance for a channel or notification: the regular importance, or
+     *     IMPORTANCE_IMPORTANT_CONVERSATION for a HIGH-importance conversation tagged important.
+     */
+    static int getLoggingImportance(@NonNull NotificationChannel channel, int importance) {
+        if (channel.getConversationId() == null || importance < IMPORTANCE_HIGH) {
+            return importance;
+        }
+        return (channel.isImportantConversation())
+                ? NotificationEnums.IMPORTANCE_IMPORTANT_CONVERSATION
+                : importance;
     }
 
     /**

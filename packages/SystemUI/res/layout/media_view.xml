@@ -154,7 +154,7 @@
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
         android:textColor="@color/media_primary_text"
-        android:textSize="18sp" />
+        android:textSize="16sp" />
 
     <!-- Artist name -->
     <TextView
@@ -163,7 +163,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@*android:string/config_bodyFontFamily"
         android:singleLine="true"
-        android:textColor="@color/media_primary_text"
+        android:textColor="@color/media_secondary_text"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView

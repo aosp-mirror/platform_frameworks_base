@@ -134,6 +134,7 @@ public class PreferencesHelper implements RankingConfig {
     static final boolean DEFAULT_GLOBAL_ALLOW_BUBBLE = true;
     @VisibleForTesting
     static final int DEFAULT_BUBBLE_PREFERENCE = BUBBLE_PREFERENCE_NONE;
+    static final boolean DEFAULT_MEDIA_NOTIFICATION_FILTERING = true;
 
     /**
      * Default value for what fields are user locked. See {@link LockableAppFields} for all lockable
@@ -165,6 +166,7 @@ public class PreferencesHelper implements RankingConfig {
 
     private SparseBooleanArray mBadgingEnabled;
     private boolean mBubblesEnabledGlobally = DEFAULT_GLOBAL_ALLOW_BUBBLE;
+    private boolean mIsMediaNotificationFilteringEnabled = DEFAULT_MEDIA_NOTIFICATION_FILTERING;
     private boolean mAreChannelsBypassingDnd;
     private boolean mHideSilentStatusBarIcons = DEFAULT_HIDE_SILENT_STATUS_BAR_ICONS;
 
@@ -184,6 +186,7 @@ public class PreferencesHelper implements RankingConfig {
 
         updateBadgingEnabled();
         updateBubblesEnabled();
+        updateMediaNotificationFilteringEnabled();
         syncChannelsBypassingDnd(mContext.getUserId());
     }
 
@@ -838,6 +841,8 @@ public class PreferencesHelper implements RankingConfig {
                 // Apps are allowed to downgrade channel importance if the user has not changed any
                 // fields on this channel yet.
                 final int previousExistingImportance = existing.getImportance();
+                final int previousLoggingImportance =
+                        NotificationChannelLogger.getLoggingImportance(existing);
                 if (existing.getUserLockedFields() == 0 &&
                         channel.getImportance() < existing.getImportance()) {
                     existing.setImportance(channel.getImportance());
@@ -867,7 +872,7 @@ public class PreferencesHelper implements RankingConfig {
                 updateConfig();
                 if (needsPolicyFileChange && !wasUndeleted) {
                     mNotificationChannelLogger.logNotificationChannelModified(existing, uid, pkg,
-                            previousExistingImportance, false);
+                            previousLoggingImportance, false);
                 }
                 return needsPolicyFileChange;
             }
@@ -985,7 +990,7 @@ public class PreferencesHelper implements RankingConfig {
                 MetricsLogger.action(getChannelLog(updatedChannel, pkg)
                         .setSubtype(fromUser ? 1 : 0));
                 mNotificationChannelLogger.logNotificationChannelModified(updatedChannel, uid, pkg,
-                        channel.getImportance(), fromUser);
+                        NotificationChannelLogger.getLoggingImportance(channel), fromUser);
             }
 
             if (updatedChannel.canBypassDnd() != mAreChannelsBypassingDnd
@@ -2285,6 +2290,21 @@ public class PreferencesHelper implements RankingConfig {
 
     public boolean bubblesEnabled() {
         return mBubblesEnabledGlobally;
+    }
+
+    /** Requests check of the feature setting for showing media notifications in quick settings. */
+    public void updateMediaNotificationFilteringEnabled() {
+        final boolean newValue = Settings.Global.getInt(mContext.getContentResolver(),
+                Settings.Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1) > 0;
+        if (newValue != mIsMediaNotificationFilteringEnabled) {
+            mIsMediaNotificationFilteringEnabled = newValue;
+            updateConfig();
+        }
+    }
+
+    /** Returns true if the setting is enabled for showing media notifications in quick settings. */
+    public boolean isMediaNotificationFilteringEnabled() {
+        return mIsMediaNotificationFilteringEnabled;
     }
 
     public void updateBadgingEnabled() {

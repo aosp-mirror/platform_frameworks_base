@@ -77,8 +77,7 @@ class StatusBehavior : Behavior {
                         cws.control?.getAppIntent()?.send()
                         context.sendBroadcast(Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                     } catch (e: PendingIntent.CanceledException) {
-                        cvh.setTransientStatus(
-                            cvh.context.resources.getString(R.string.controls_error_failed))
+                        cvh.setErrorStatus()
                     }
                     dialog.dismiss()
             })

@@ -63,7 +63,7 @@ open class AssistLogger @Inject constructor(
     }
 
     fun reportAssistantInvocationEvent(
-        invocationEvent: AssistantInvocationEvent,
+        invocationEvent: UiEventLogger.UiEventEnum,
         assistantComponent: ComponentName? = null,
         deviceState: Int? = null
     ) {
@@ -86,7 +86,7 @@ open class AssistLogger @Inject constructor(
         reportAssistantInvocationExtraData()
     }
 
-    fun reportAssistantSessionEvent(sessionEvent: AssistantSessionEvent) {
+    fun reportAssistantSessionEvent(sessionEvent: UiEventLogger.UiEventEnum) {
         val assistantComponent = getAssistantComponentForCurrentUser()
         val assistantUid = getAssistantUid(assistantComponent)
         uiEventLogger.logWithInstanceId(
