@@ -3505,7 +3505,7 @@ class Task extends WindowContainer<WindowContainer> {
 
         updateShadowsRadius(isFocused(), getSyncTransaction());
 
-        if (mDimmer.updateDims(getSyncTransaction(), mTmpDimBoundsRect)) {
+        if (mDimmer.updateDims(getPendingTransaction(), mTmpDimBoundsRect)) {
             scheduleAnimation();
         }
     }

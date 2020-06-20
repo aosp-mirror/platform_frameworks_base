@@ -240,7 +240,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Näytön lukitus"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Katkaise virta"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Virta"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Uudelleenkäynnistys"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Käynnistä uudelleen"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hätäpuhelu"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Virheraportti"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Lopeta käyttökerta"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Piirsit lukituksenpoistokuvion väärin <xliff:g id="NUMBER_0">%1$d</xliff:g> kertaa. Jos piirrät kuvion väärin vielä <xliff:g id="NUMBER_1">%2$d</xliff:g> kertaa, sinua pyydetään poistamaan puhelimesi lukitus sähköpostitilin avulla.\n\n Yritä uudelleen <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunnin kuluttua."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Poista"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Taustalla aloitettu etualan palvelu (<xliff:g id="PACKAGENAME">%1$s</xliff:g>) ei ole käytön aikana sallittu R:n tulevissa versioissa. Lue go/r-bg-fgs-restriction ja lähetä virheraportti."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Nostetaanko äänenvoimakkuus suositellun tason yläpuolelle?\n\nPitkäkestoinen kova äänenvoimakkuus saattaa heikentää kuuloa."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Käytetäänkö esteettömyyden pikanäppäintä?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kun pikanäppäin on käytössä, voit käynnistää esteettömyystoiminnon pitämällä molempia äänenvoimakkuuspainikkeita painettuna kolmen sekunnin ajan."</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofoni"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"näkyy näytöllä muiden sovellusten päällä"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Ohjelmatilan tietoilmoitus"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Akku saattaa loppua ennen normaalia latausaikaa"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Virransäästö otettu käyttöön akunkeston pidentämiseksi"</string>

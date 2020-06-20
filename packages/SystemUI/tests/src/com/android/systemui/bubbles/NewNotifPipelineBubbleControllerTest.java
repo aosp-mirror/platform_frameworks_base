@@ -40,6 +40,7 @@ import android.app.IActivityManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.PendingIntent;
+import android.content.pm.LauncherApps;
 import android.content.res.Resources;
 import android.hardware.display.AmbientDisplayConfiguration;
 import android.hardware.face.FaceManager;
@@ -174,6 +175,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
     private LockscreenLockIconController mLockIconController;
     @Mock
     private IStatusBarService mStatusBarService;
+    @Mock
+    private LauncherApps mLauncherApps;
 
     private BubbleData mBubbleData;
 
@@ -241,7 +244,8 @@ public class NewNotifPipelineBubbleControllerTest extends SysuiTestCase {
                 mSysUiState,
                 mock(INotificationManager.class),
                 mStatusBarService,
-                mWindowManager);
+                mWindowManager,
+                mLauncherApps);
         mBubbleController.addNotifCallback(mNotifCallback);
         mBubbleController.setExpandListener(mBubbleExpandListener);
 

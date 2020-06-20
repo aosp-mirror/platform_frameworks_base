@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"తెరవడానికి మళ్లీ నొక్కండి"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"తెరవడానికి, పైకి స్వైప్ చేయండి"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"మళ్ళీ ప్రయత్నించడానికి పైకి స్వైప్ చేయండి"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"ఈ పరికరాన్ని మీ సంస్థ నిర్వహిస్తోంది"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"ఈ పరికరం <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> నిర్వహణలో ఉంది"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"ఫోన్ కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
     <string name="voice_hint" msgid="7476017460191291417">"వాయిస్ అసిస్టెంట్ చిహ్నం నుండి స్వైప్"</string>
     <string name="camera_hint" msgid="4519495795000658637">"కెమెరా కోసం చిహ్నాన్ని స్వైప్ చేయండి"</string>
@@ -510,7 +512,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"అన్నీ క్లియర్ చేయండి"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"నిర్వహించండి"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"చరిత్ర"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ఇన్‌కమింగ్"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"కొత్తవి"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"నిశ్శబ్దం"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"ప్రొఫైల్‌ని పర్యవేక్షించవచ్చు"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"నెట్‌వర్క్ పర్యవేక్షించబడవచ్చు"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"నెట్‌వర్క్ పర్యవేక్షించబడవచ్చు"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"మీ సంస్థ ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ఈ పరికరాన్ని నిర్వహిస్తుంది మరియు నెట్‌వర్క్ ట్రాఫిక్‌ని పర్యవేక్షించవచ్చు"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"పరికరం మీ సంస్థ నిర్వహణలో ఉంది మరియు <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> నిర్వహణలో ఉంది మరియు <xliff:g id="VPN_APP">%2$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"పరికరం మీ సంస్థ నిర్వహణలో ఉంది"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> నిర్వహణలో ఉంది"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"పరికరం మీ సంస్థ నిర్వహణలో ఉంది మరియు VPNలకు కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> నిర్వహణలో ఉంది మరియు VPNలకు కనెక్ట్ చేయబడింది"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"మీ కార్యాలయ ప్రొఫైల్‌లోని నెట్‌వర్క్ ట్రాఫిక్‌ని మీ సంస్థ పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"మీ కార్యాలయ ప్రొఫైల్‌లోని నెట్‌వర్క్ ట్రాఫిక్‌ని <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> పర్యవేక్షించవచ్చు"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"నెట్‌వర్క్ పర్యవేక్షించబడవచ్చు"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"పరికరం VPNలకు కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"<xliff:g id="VPN_APP">%1$s</xliff:g>కి కార్యాలయ ప్రొఫైల్ కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"వ్యక్తిగత ప్రొఫైల్ <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"పరికరం <xliff:g id="VPN_APP">%1$s</xliff:g>కి కనెక్ట్ చేయబడింది"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"పరికర నిర్వహణ"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"ప్రొఫైల్ పర్యవేక్షణ"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"నెట్‌వర్క్ పర్యవేక్షణ"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPNని నిలిపివేయి"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPNను డిస్‌కనెక్ట్ చేయి"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"విధానాలను వీక్షించండి"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"మీ పరికరం <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకులు మీ పరికరం అనుబంధిత సెట్టింగ్‌లు, కార్పొరేట్ యాక్సెస్, యాప్‌లు, డేటా మరియు మీ పరికర స్థాన సమాచారం పర్యవేక్షించగలరు మరియు నిర్వహించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకులను సంప్రదించండి."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"మీ పరికరం మీ సంస్థ నిర్వహణలో ఉంది.\n\nమీ నిర్వాహకులు మీ పరికరం అనుబంధిత సెట్టింగ్‌లు, కార్పొరేట్ యాక్సెస్, యాప్‌లు, డేటాను మరియు మీ పరికర స్థాన సమాచారాన్ని పర్యవేక్షించగలరు మరియు నిర్వహించగలరు.\n\nమరింత సమాచారం కోసం, మీ నిర్వాహకులను సంప్రదించండి."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ఈ పరికరంలో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"మీ కార్యాలయ ప్రొఫైల్‌లో మీ సంస్థ ఒక ప్రమాణపత్ర అధికారాన్ని ఇన్‌స్టాల్ చేసింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"ఈ పరికరంలో ప్రమాణపత్ర అధికారం ఇన్‌స్టాల్ చేయబడింది. మీ సురక్షిత నెట్‌వర్క్ ట్రాఫిక్ పర్యవేక్షించబడవచ్చు లేదా సవరించబడవచ్చు."</string>
@@ -711,17 +727,21 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"నిశ్శబ్దం"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ఆటోమేటిక్ సెట్టింగ్"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"బబుల్"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"శబ్దం లేదా వైబ్రేషన్‌లు ఏవీ లేవు"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"శబ్దం లేదా వైబ్రేషన్ లేదు, సంభాషణ విభాగం దిగువన కనిపిస్తుంది"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"ఫోన్ సెట్టింగ్‌ల ఆధారంగా రింగ్ లేదా వైబ్రేట్ కావచ్చు"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"ఫోన్ సెట్టింగ్‌ల ఆధారంగా రింగ్ లేదా వైబ్రేట్ కావచ్చు. <xliff:g id="APP_NAME">%1$s</xliff:g> నుండి సంభాషణలు ఆటోమేటిక్‌గా బబుల్‌గా కనిపిస్తాయి."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ఫ్లోటింగ్ షార్ట్‌కట్‌తో మీ దృష్టిని ఈ కంటెంట్‌పై నిలిపి ఉంచుతుంది."</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"సంభాషణ విభాగం ఎగువన ఉంటుంది, తేలుతున్న బబుల్‌లాగా కనిపిస్తుంది, లాక్ స్క్రీన్‌పై ప్రొఫైల్ ఫోటోను ప్రదర్శిస్తుంది"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"సెట్టింగ్‌లు"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ప్రాధాన్యత"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> సంభాషణ ఫీచర్‌లను సపోర్ట్ చేయదు"</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"ఇటీవలి బబుల్స్ ఏవీ లేవు"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ఇటీవలి బబుల్స్, తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ఇటీవలి బబుల్స్ మరియు తీసివేసిన బబుల్స్ ఇక్కడ కనిపిస్తాయి"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"ఈ నోటిఫికేషన్‌లను సవరించడం వీలుపడదు."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"ఈ నోటిఫికేషన్‌ల సమూహాన్ని ఇక్కడ కాన్ఫిగర్ చేయలేము"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"ప్రాక్సీ చేయబడిన నోటిఫికేషన్"</string>
@@ -736,6 +756,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ఈ యాప్ మీ స్క్రీన్‌లోని ఇతర యాప్‌లపై ప్రదర్శించబడుతోంది మరియు మైక్రోఫోన్, కెమెరాను ఉపయోగిస్తుంది."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"సెట్టింగ్‌లు"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"సరే"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> యొక్క నోటిఫికేషన్ నియంత్రణలు తెరవబడ్డాయి"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> యొక్క నోటిఫికేషన్ నియంత్రణలు మూసివేయబడ్డాయి"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"ఈ ఛానెల్ యొక్క నోటిఫికేషన్‌లను అనుమతించండి"</string>
@@ -920,6 +952,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"పాజ్ చేయి"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"దాటవేసి తర్వాత దానికి వెళ్లు"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"దాటవేసి మునుపటి దానికి వెళ్లు"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"వేడెక్కినందుకు ఫోన్ ఆఫ్ చేయబడింది"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"మీ ఫోన్ చాలా వేడిగా ఉంది, కనుక చల్లబర్చడానికి ఆఫ్ చేయబడింది. మీ ఫోన్ ఇప్పుడు సాధారణంగా పని చేస్తుంది.\n\nమీరు ఇలా చేస్తే మీ ఫోన్ చాలా వేడెక్కవచ్చు:\n	• వనరు-ఆధారిత అనువర్తనాలు (గేమింగ్, వీడియో లేదా నావిగేషన్ వంటి అనువర్తనాలు) ఉపయోగించడం\n	• పెద్ద ఫైల్‌లను డౌన్‌లోడ్ లేదా అప్‌లోడ్ చేయడం\n	• అధిక ఉష్ణోగ్రతలలో మీ ఫోన్‌ని ఉపయోగించడం"</string>
@@ -1002,7 +1036,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ఎగువ కుడివైపునకు జరుపు"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"దిగువ ఎడమవైపునకు తరలించు"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"దిగవు కుడివైపునకు జరుపు"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"విస్మరించు"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"బబుల్‌ను విస్మరించు"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"సంభాషణను బబుల్ చేయవద్దు"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"బబుల్స్‌ను ఉపయోగించి చాట్ చేయండి"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"కొత్త సంభాషణలు తేలియాడే చిహ్నాలుగా లేదా బబుల్స్ లాగా కనిపిస్తాయి. బబుల్‌ని తెరవడానికి నొక్కండి. తరలించడానికి లాగండి."</string>
@@ -1044,7 +1078,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"నియంత్రణల క్రమం మార్చడానికి దేనినైనా పట్టుకుని, లాగి వదిలేయండి"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"అన్ని నియంత్రణలు తీసివేయబడ్డాయి"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"మార్పులు సేవ్ చేయబడలేదు"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"అన్ని నియంత్రణలు గల జాబితాను లోడ్ చేయలేకపోయాము."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"కంట్రోల్‌లను లోడ్ చేయడం సాధ్యపడలేదు. యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించడానికి <xliff:g id="APP">%s</xliff:g> యాప్‌ను చెక్ చేయండి."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"అనుకూల కంట్రోల్‌లు అందుబాటులో లేవు"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ఇతరం"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"పరికరం నియంత్రణలకు జోడించడం"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"జోడించండి"</string>
@@ -1064,14 +1099,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"కొనసాగించండి"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ఇన్‌యాక్టివ్, యాప్ చెక్ చేయండి"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"లోపం, మళ్లీ ప్రయత్నిస్తోంది..."</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"కనుగొనబడలేదు"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"కంట్రోల్ అందుబాటులో లేదు"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ను యాక్సెస్ చేయడం సాధ్యపడలేదు. <xliff:g id="APPLICATION">%2$s</xliff:g> యాప్‌ను తనిఖీ చేసి, కంట్రోల్ ఇప్పటికీ అందుబాటులో ఉందని, యాప్ సెట్టింగ్‌లు మారలేదని నిర్ధారించుకోండి."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"యాప్‌ను తెరువు"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"స్థితిని లోడ్ చేయడం సాధ్యపడదు"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ఎర్రర్, మళ్లీ ప్రయత్నించండి"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"పురోగతిలో ఉంది"</string>

@@ -769,6 +769,10 @@ public class WifiEnterpriseConfig implements Parcelable {
      * certificate when the config is saved and removing the certificate when
      * the config is removed.
      *
+     * Note: If no certificate is set for an Enterprise configuration, either by not calling this
+     * API (or the {@link #setCaCertificates(X509Certificate[])}, or by calling it with null, then
+     * the server certificate validation is skipped - which means that the connection is not secure.
+     *
      * @param cert X.509 CA certificate
      * @throws IllegalArgumentException if not a CA certificate
      */
@@ -807,6 +811,11 @@ public class WifiEnterpriseConfig implements Parcelable {
      * with this configuration. The framework takes care of installing the
      * certificates when the config is saved and removing the certificates when
      * the config is removed.
+     *
+     * Note: If no certificates are set for an Enterprise configuration, either by not calling this
+     * API (or the {@link #setCaCertificate(X509Certificate)}, or by calling it with null, then the
+     * server certificate validation is skipped - which means that the
+     * connection is not secure.
      *
      * @param certs X.509 CA certificates
      * @throws IllegalArgumentException if any of the provided certificates is
@@ -859,6 +868,13 @@ public class WifiEnterpriseConfig implements Parcelable {
      * like /etc/ssl/certs. If configured, these certificates are added to the
      * list of trusted CAs. ca_cert may also be included in that case, but it is
      * not required.
+     *
+     * Note: If no certificate path is set for an Enterprise configuration, either by not calling
+     * this API, or by calling it with null, and no certificate is set by
+     * {@link #setCaCertificate(X509Certificate)} or {@link #setCaCertificates(X509Certificate[])},
+     * then the server certificate validation is skipped - which means that the connection is not
+     * secure.
+     *
      * @param path The path for CA certificate files, or empty string to clear.
      * @hide
      */
@@ -868,7 +884,7 @@ public class WifiEnterpriseConfig implements Parcelable {
     }
 
     /**
-     * Get the domain_suffix_match value. See setDomSuffixMatch.
+     * Get the ca_path directive from wpa_supplicant.
      * @return The path for CA certificate files, or an empty string if unset.
      * @hide
      */
@@ -1061,6 +1077,12 @@ public class WifiEnterpriseConfig implements Parcelable {
     /**
      * Set alternate subject match. This is the substring to be matched against the
      * alternate subject of the authentication server certificate.
+     *
+     * Note: If no alternate subject is set for an Enterprise configuration, either by not calling
+     * this API, or by calling it with null, or not setting domain suffix match using the
+     * {@link #setDomainSuffixMatch(String)}, then the server certificate validation is incomplete -
+     * which means that the connection is not secure.
+     *
      * @param altSubjectMatch substring to be matched, for example
      *                     DNS:server.example.com;EMAIL:server@example.com
      */
@@ -1095,6 +1117,12 @@ public class WifiEnterpriseConfig implements Parcelable {
      * ORed ogether.
      * <p>For example, domain_suffix_match=example.com would match test.example.com but would not
      * match test-example.com.
+     *
+     * Note: If no domain suffix is set for an Enterprise configuration, either by not calling this
+     * API, or by calling it with null, or not setting alternate subject match using the
+     * {@link #setAltSubjectMatch(String)}, then the server certificate
+     * validation is incomplete - which means that the connection is not secure.
+     *
      * @param domain The domain value
      */
     public void setDomainSuffixMatch(String domain) {
@@ -1397,10 +1425,19 @@ public class WifiEnterpriseConfig implements Parcelable {
         if (mEapMethod != Eap.PEAP && mEapMethod != Eap.TLS && mEapMethod != Eap.TTLS) {
             return false;
         }
-        if (!mIsAppInstalledCaCert && TextUtils.isEmpty(getCaPath())) {
+        if (TextUtils.isEmpty(getAltSubjectMatch())
+                && TextUtils.isEmpty(getDomainSuffixMatch())) {
+            // Both subject and domain match are not set, it's insecure.
             return true;
         }
-        return TextUtils.isEmpty(getAltSubjectMatch()) && TextUtils.isEmpty(
-                getDomainSuffixMatch());
+        if (mIsAppInstalledCaCert) {
+            // CA certificate is installed by App, it's secure.
+            return false;
+        }
+        if (getCaCertificateAliases() != null) {
+            // CA certificate alias from keyStore is set, it's secure.
+            return false;
+        }
+        return TextUtils.isEmpty(getCaPath());
     }
 }

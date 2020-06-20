@@ -32,7 +32,7 @@ import android.app.NotificationChannel;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
-
+import android.media.session.MediaSession;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
 import android.test.suitebuilder.annotation.SmallTest;
@@ -106,6 +106,31 @@ public class BadgeExtractorTest extends UiServiceTestCase {
                 .setPriority(Notification.PRIORITY_HIGH)
                 .setDefaults(Notification.DEFAULT_SOUND)
                 .setBubbleMetadata(metadata);
+
+        Notification n = builder.build();
+        StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
+                mPid, n, mUser, null, System.currentTimeMillis());
+        NotificationRecord r = new NotificationRecord(getContext(), sbn, channel);
+        return r;
+    }
+
+    private NotificationRecord getNotificationRecordWithMedia(boolean excludeSession) {
+        NotificationChannel channel = new NotificationChannel("a", "a", IMPORTANCE_UNSPECIFIED);
+        channel.setShowBadge(/* showBadge */ true);
+        when(mConfig.getNotificationChannel(mPkg, mUid, "a", false)).thenReturn(channel);
+
+        Notification.MediaStyle style = new Notification.MediaStyle();
+        if (!excludeSession) {
+            MediaSession session = new MediaSession(getContext(), "BadgeExtractorTestSession");
+            style.setMediaSession(session.getSessionToken());
+        }
+
+        final Builder builder = new Builder(getContext())
+                .setContentTitle("foo")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setPriority(Notification.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_SOUND)
+                .setStyle(style);
 
         Notification n = builder.build();
         StatusBarNotification sbn = new StatusBarNotification(mPkg, mPkg, mId, mTag, mUid,
@@ -200,6 +225,66 @@ public class BadgeExtractorTest extends UiServiceTestCase {
         extractor.process(r);
 
         assertFalse(r.canShowBadge());
+    }
+
+    @Test
+    public void testHideMediaNotifOverridesYes() throws Exception {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+
+        when(mConfig.isMediaNotificationFilteringEnabled()).thenReturn(true);
+        NotificationRecord r = getNotificationRecordWithMedia(/* excludeSession */ false);
+
+        extractor.process(r);
+
+        assertFalse(r.canShowBadge());
+    }
+
+    @Test
+    public void testHideMediaNotifDisabledOverridesNo() throws Exception {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+
+        when(mConfig.isMediaNotificationFilteringEnabled()).thenReturn(false);
+        NotificationRecord r = getNotificationRecordWithMedia(/* excludeSession */ false);
+
+        extractor.process(r);
+
+        assertTrue(r.canShowBadge());
+    }
+
+    @Test
+    public void testHideMediaNotifNoSessionOverridesNo() throws Exception {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+
+        when(mConfig.isMediaNotificationFilteringEnabled()).thenReturn(true);
+        NotificationRecord r = getNotificationRecordWithMedia(/* excludeSession */ true);
+
+        extractor.process(r);
+
+        assertTrue(r.canShowBadge());
+    }
+
+    @Test
+    public void testHideMediaNotifNotMediaStyleOverridesNo() throws Exception {
+        BadgeExtractor extractor = new BadgeExtractor();
+        extractor.setConfig(mConfig);
+        when(mConfig.badgingEnabled(mUser)).thenReturn(true);
+        when(mConfig.canShowBadge(mPkg, mUid)).thenReturn(true);
+
+        when(mConfig.isMediaNotificationFilteringEnabled()).thenReturn(true);
+        NotificationRecord r = getNotificationRecord(true, IMPORTANCE_UNSPECIFIED);
+
+        extractor.process(r);
+
+        assertTrue(r.canShowBadge());
     }
 
     @Test

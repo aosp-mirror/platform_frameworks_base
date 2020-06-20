@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"ለመክፈት ዳግም መታ ያድርጉ"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"ለመክፈት በጣት ወደ ላይ ጠረግ ያድርጉ"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"እንደገና ለመሞከር ወደ ላይ ይጥረጉ"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"ይህ መሣሪያ በእርስዎ ድርጅት የሚተዳደር ነው"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%s</xliff:g> የሚተዳደር ነው"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"ለስልክ ከአዶ ላይ ጠረግ ያድርጉ"</string>
     <string name="voice_hint" msgid="7476017460191291417">"ለድምጽ ረዳት ከአዶ ጠረግ ያድርጉ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"ለካሜራ ከአዶ ላይ ጠረግ ያድርጉ"</string>
@@ -510,7 +512,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"ገቢ"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"አዲስ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ጸጥ ያለ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ማሳወቂያዎች"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ውይይቶች"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"መገለጫ ክትትል ሊደረግበት ይችላል"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"አውታረ መረብ በክትትል እየተደረገበት ሊሆን ይችላል"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"አውታረ መረብ ክትትል የሚደረግበት ሊሆን ይችላል"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"የእርስዎ ድርጅት ይህን መሣሪያ ያስተዳድራል፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ይህን መሣሪያ ያስተዳድራል፣ እና የአውታረ መረብ ትራፊክን ሊከታተል ይችላል"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"ይህ መሣሪያ በእርስዎ ድርጅት የሚተዳደር ሲሆን ከ<xliff:g id="VPN_APP">%1$s</xliff:g> ጋር ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የሚተዳደር ሲሆን ወደ <xliff:g id="VPN_APP">%2$s</xliff:g> ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"መሣሪያ በእርስዎ ድርጅት የሚተዳደር ነው"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የሚተዳደር ነው"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"ይህ መሣሪያ በእርስዎ ድርጅት የሚተዳደር ሲሆን ወደ VPNዎች ተገናኝቷል።"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"ይህ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የሚተዳደር ሲሆን ወደ VPNዎች ተገናኝቷል"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"የእርስዎ ድርጅት በእርስዎ የሥራ መገለጫ ያለን የአውታረ መረብ ትራፊክን ሊቆጣጠር ይችል ይሆናል"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> በእርስዎ የሥራ መገለጫ ውስጥ የአውታረ መረብ ትራፊክ ላይ ክትትል ሊያደርግ ይችላል"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"አውታረ መረብ ክትትል የሚደረግበት ሊሆን ይችላል"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"ይህ መሣሪያ ወደ VPNዎች ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"የሥራ መገለጫ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"የግል መገለጫ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"ይህ መሣሪያ ወደ <xliff:g id="VPN_APP">%1$s</xliff:g> ተገናኝቷል"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"የመሣሪያ አስተዳደር"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"መገለጫን መከታተል"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"የአውታረ መረብ ክትትል"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN አሰናክል"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"የVPN ግንኙነት አቋርጥ"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"መመሪያዎችን ይመልከቱ"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"የእርስዎ መሣሪያ በ<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> የሚተዳደር ነው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻን፣ መተግበሪያዎችን እና የመሣሪያዎን የአካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"የእርስዎ መሣሪያ በድርጅትዎ የሚተዳደር ነው።\n\nየእርስዎ አስተዳዳሪ ከመሣሪያዎ ጋር የተጎዳኙ ቅንብሮችን፣ የኮርፖሬት መዳረሻንና ውሂብን እና የመሣሪያዎን የአካባቢ መረጃ መከታተል እና ማቀናበር ይችላሉ።\n\nተጨማሪ መረጃ ለማግኘት አስተዳዳሪዎን ያነጋግሩ።"</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"የእርስዎ ድርጅት የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"የእርስዎ ድርጅት የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በእርስዎ የሥራ መገለጫ ላይ ጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"የእውቅና ማረጋገጫ ሰጪ ባለሥልጣን በዚህ መሣሪያ ላይ ተጭኗል። የእርስዎ ደኅንነቱ የተጠበቀ አውታረ መረብ ትራፊክ ክትትል ሊደረግበት እና ሊሻሻል ይችላል።"</string>
@@ -711,11 +727,15 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"ፀጥ ያለ"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"ነባሪ"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"አረፋ"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ምንም ድምጽ ወይም ንዝረት የለም"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ምንም ድምጽ ወይም ንዝረት የለም እና በውይይት ክፍል ላይ አይታይም"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"በእርስዎ የስልክ ቅንብሮች የሚወሰን ሆኖ ሊደውል ወይም ሊነዝር ይችላል"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"በእርስዎ የስልክ ቅንብሮች የሚወሰን ሆኖ ሊደውል ወይም ሊነዝር ይችላል። የ<xliff:g id="APP_NAME">%1$s</xliff:g> አረፋ ውይይቶች በነባሪነት።"</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"ለዚህ ይዞታ ከተንሳፋፊ አቋራጭ ጋር የእርስዎን ትኩረት ያቆያል።"</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"በውይይት ክፍል አናት ላይ ያሳያል፣ እንደ ተንሳፋፊ አረፋ ብቅ ይላል፣ በቆልፍ ማያ ገጽ ላይ የመገለጫ ሥዕልን ያሳያል"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"ቅንብሮች"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"ቅድሚያ"</string>
@@ -736,6 +756,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"ይህ መተግበሪያ በማያ ገጽዎ ላይ በሌሎች መተግበሪያዎች ላይ እያሳየ እና ማይክሮፎኑንና ካሜራውን እየተጠቀመ ነው።"</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"ቅንብሮች"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"እሺ"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ መቆጣጠሪያዎች ተከፍተዋል"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"የ<xliff:g id="APP_NAME">%1$s</xliff:g> ማሳወቂያ መቆጣጠሪያዎች ተዘግተዋል"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"ከዚህ ሰርጥ የመጡ ሁሉንም ማሳወቂያች ፍቀድ"</string>
@@ -920,6 +952,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"ባለበት አቁም"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"ወደ ቀጣይ ዝለል"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ወደ ቀዳሚ ዝለል"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"የእርስዎ ስልክ በጣም ግሎ ነበር፣ ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪዲዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትላልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
@@ -1002,7 +1036,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"ወደ ላይኛው ቀኝ አንቀሳቅስ"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"የግርጌውን ግራ አንቀሳቅስ"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"ታችኛውን ቀኝ ያንቀሳቅሱ"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"አሰናብት"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"አረፋን አሰናብት"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"ውይይቶችን በአረፋ አታሳይ"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"አረፋዎችን በመጠቀም ይወያዩ"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"አዲስ ውይይቶች እንደ ተንሳፋፊ አዶዎች ወይም አረፋዎች ሆነው ይታያሉ። አረፋን ለመክፈት መታ ያድርጉ። ለመውሰድ ይጎትቱት።"</string>
@@ -1044,7 +1078,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"መቆጣጠሪያዎችን ዳግም ለማስተካከል ይያዙ እና ይጎትቱ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ሁሉም መቆጣጠሪያዎች ተወግደዋል"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"ለውጦች አልተቀመጡም"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"የሁሉም መቆጣጠሪያዎች ዝርዝር ሊጫን አልተቻለም።"</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"መቆጣጠሪያዎች ሊጫኑ አልቻሉም። የመተግበሪያው ቅንብሮች እንዳልተቀየሩ ለማረጋገጥ <xliff:g id="APP">%s</xliff:g> መተግበሪያን ይፈትሹ።"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"ተኳዃኝ መቆጣጠሪያዎች አይገኙም"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"ሌላ"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"ወደ የመሣሪያ መቆጣጠሪያዎች ያክሉ"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"አክል"</string>
@@ -1064,14 +1099,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"ከቆመበት ቀጥል"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ስህተት፣ እንደገና በመሞከር ላይ…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"አልተገኘም"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"መቆጣጠሪያ አይገኝም"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g>ን መድረስ አልተቻለም። አሁንም ድረስ መቆጣጠሪያው ሊገኝ እንደሚችል እና የመተግበሪያ ቅንብሮቹ እንዳልተለወጡ ለማረጋገጥ <xliff:g id="APPLICATION">%2$s</xliff:g> መተግበሪያን ይፈትሹ።"</string>
+    <string name="controls_open_app" msgid="483650971094300141">"መተግበሪያ ክፈት"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"ሁኔታን መጫን አልተቻልም"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"ስህተት፣ እንደገና ይሞክሩ"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"በሂደት ላይ"</string>
