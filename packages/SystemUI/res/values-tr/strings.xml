@@ -139,7 +139,7 @@
     <string name="voice_assist_label" msgid="3725967093735929020">"sesli yardımı aç"</string>
     <string name="camera_label" msgid="8253821920931143699">"kamerayı aç"</string>
     <string name="cancel" msgid="1089011503403416730">"İptal"</string>
-    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onaylayın"</string>
+    <string name="biometric_dialog_confirm" msgid="2005978443007344895">"Onayla"</string>
     <string name="biometric_dialog_try_again" msgid="8575345628117768844">"Tekrar dene"</string>
     <string name="biometric_dialog_empty_space_description" msgid="3330555462071453396">"Kimlik doğrulama işlemini iptal etmek için dokunun"</string>
     <string name="biometric_dialog_face_icon_description_idle" msgid="4351777022315116816">"Lütfen tekrar deneyin"</string>
@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Açmak için tekrar dokunun"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Açmak için yukarı kaydırın"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Tekrar denemek için yukarı kaydırın"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Bu cihaz kuruluşunuz tarafından yönetiliyor"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Bu cihaz <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> tarafından yönetilmektedir."</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"Telefon için, simgeden hızlıca kaydırın"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Sesli yardım için, simgeden hızlıca kaydırın"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Kamera için, simgeden hızlıca kaydırın"</string>
@@ -510,7 +512,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tümünü temizle"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Yönet"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Geçmiş"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Gelen"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Yeni"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Sessiz"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Bildirimler"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Görüşmeler"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profil izlenebilir"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Ağ etkinliği izlenebilir"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Ağ etkinliği izlenebilir"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"Bu cihazı kuruluşunuz yönetiyor ve ağ trafiğini izleyebilir"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, bu cihazı yönetiyor ve ağ trafiğini izleyebilir"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Cihaz, kuruluşunuz tarafından yönetiliyor ve <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Cihaz, <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tarafından yönetiliyor ve <xliff:g id="VPN_APP">%2$s</xliff:g> uygulamasına bağlı"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Cihaz, kuruluşunuz tarafından yönetiliyor"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Cihaz, <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tarafından yönetiliyor"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Cihaz, kuruluşunuz tarafından yönetiliyor ve VPN\'lere bağlı"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Cihaz, <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tarafından yönetiliyor ve VPN\'lere bağlı"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Kuruluşunuz, iş profilinizdeki ağ trafiğini izleyebilir"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>, iş profilinizdeki ağ trafiğini izleyebilir"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Ağ trafiği izlenebilir"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Cihaz VPN\'lere bağlı"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"İş profiliniz <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Kişisel profil <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Cihaz <xliff:g id="VPN_APP">%1$s</xliff:g> uygulamasına bağlı"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Cihaz yönetimi"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Profil izleme"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Ağ izleme"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN\'yi devre dışı bırak"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN bağlantısını kes"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Politikaları Göster"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Cihazınız <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> tarafından yönetiliyor.\n\nYöneticiniz ayarları, şirket erişimini, uygulamaları, cihazınızla ilişkili verileri ve cihazınızın konum bilgilerini izleyebilir ve yönetebilir.\n\nDaha fazla bilgi için yöneticinize başvurun."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Cihazınız kuruluşunuz tarafından yönetiliyor.\n\nYöneticiniz ayarları, şirket erişimini, uygulamaları, cihazınızla ilişkili verileri ve cihazınızın konum bilgilerini izleyebilir ve yönetebilir.\n\nDaha fazla bilgi için yöneticinize başvurun."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Kuruluşunuz bu cihaza bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Kuruluşunuz iş profilinize bir sertifika yetkilisi yükledi. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Bu cihazda bir sertifika yetkilisi yüklü. Güvenli ağ trafiğiniz izlenebilir veya değiştirilebilir."</string>
@@ -711,11 +727,15 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Sessiz"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Varsayılan"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Baloncuk"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Sessiz veya titreşim yok"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Sessizdir veya titreşim yoktur ve görüşme bölümünün altında görünür"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Telefon ayarlarına bağlı olarak zili çalabilir veya titreyebilir <xliff:g id="APP_NAME">%1$s</xliff:g> adlı uygulamadan görüşmeler varsayılan olarak baloncukla gösterilir."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Kayan kısayolla dikkatinizi bu içerik üzerinde tutar."</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Görüşme bölümünün üstünde gösterilir, kayan baloncuk olarak görünür, kilit ekranında profil resmini görüntüler"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Ayarlar"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Öncelik"</string>
@@ -736,6 +756,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Bu uygulama, ekranınızdaki diğer uygulamaların üzerinde görüntüleniyor ve mikrofon ile kamerayı kullanıyor."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Ayarlar"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Tamam"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> için bildirim kontrolleri açıldı"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> için bildirim kontrolleri kapatıldı"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Bu kanaldan bildirimlere izin verir"</string>
@@ -920,6 +952,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"Duraklat"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Sonrakine atla"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Öncekine atla"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefon ısındığından kapatıldı"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefonunuz şu anda normal bir şekilde çalışıyor"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefonunuz çok ısındığından soğuması için kapatıldı ve şu anda normal bir şekilde çalışıyor.\n\nTelefon şu koşullarda çok ısınabilir:\n	• Yoğun kaynak gerektiren uygulamalar (oyun, video veya gezinme uygulamaları gibi) kullanma\n	• Büyük dosyalar indirme veya yükleme\n	• Telefonu sıcak yerlerde kullanma"</string>
@@ -1002,7 +1036,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Sağ üste taşı"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Sol alta taşı"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Sağ alta taşı"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Kapat"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Baloncuğu kapat"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Görüşmeyi baloncuk olarak görüntüleme"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Baloncukları kullanarak sohbet edin"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Yeni görüşmeler kayan simgeler veya baloncuk olarak görünür. Açmak için baloncuğa dokunun. Baloncuğu taşımak için sürükleyin."</string>
@@ -1044,7 +1078,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Değişiklikler kaydedilmedi"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Tüm kontrollerin listesi yüklenemedi."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontroller yüklenemedi. Uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APP">%s</xliff:g> uygulamasını kontrol edin."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Uyumlu kontrol bulunamadı"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Diğer"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Cihaz denetimlerine ekle"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Ekle"</string>
@@ -1064,14 +1099,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Devam ettir"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Devre dışı, uygulamaya bakın"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Hata, yeniden deneniyor…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Bulunamadı"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Kontrol kullanılamıyor"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> cihazına erişilemedi. Kontrolün kullanılabilir olduğundan ve uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APPLICATION">%2$s</xliff:g> uygulamasını kontrol edin."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Uygulama aç"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Durum yüklenemiyor"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Hata, yeniden deneyin"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Devam ediyor"</string>
