@@ -239,7 +239,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opções do telefone"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Bloqueio de ecrã"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Desligar"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Ligar/desligar"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Ligar"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Reiniciar"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Emergência"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Relatório de erros"</string>
@@ -266,7 +266,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Definições"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Assistência"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Assist. de voz"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloqueio"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Bloquear"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Nova notificação"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6465975799223304567">"Teclado virtual"</string>
@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Desenhou o padrão de desbloqueio incorretamente <xliff:g id="NUMBER_0">%1$d</xliff:g> vezes. Depois de mais <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativas sem sucesso, ser-lhe-á pedido para desbloquear o telemóvel através de uma conta de email.\n\n Tente novamente dentro de <xliff:g id="NUMBER_2">%3$d</xliff:g> segundos."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" - "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Remover"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"O serviço em primeiro plano iniciado em segundo plano de <xliff:g id="PACKAGENAME">%1$s</xliff:g> não terá a autorização durante a utilização em compilações R futuras. Aceda a go/r-bg-fgs-restriction e envie um relatório de erros."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Aumentar o volume acima do nível recomendado?\n\nOuvir com um volume elevado durante longos períodos poderá ser prejudicial para a sua audição."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Pretende utilizar o atalho de acessibilidade?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando o atalho está ativado, premir ambos os botões de volume durante 3 segundos inicia uma funcionalidade de acessibilidade."</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Recusar"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Toque numa funcionalidade para começar a utilizá-la:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Escolha funcionalidades para utilizar com o botão Acessibilidade"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolha funcionalidades para utilizar com o atalho das teclas de volume"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Escolha funcionalidades para usar com o atalho das teclas de volume"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"O serviço <xliff:g id="SERVICE_NAME">%s</xliff:g> foi desativado."</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Editar atalhos"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Concluído"</string>
@@ -1652,7 +1651,7 @@
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inversão de cores"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Correção da cor"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ativado."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas do volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Teclas de volume premidas. Serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desativado."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Prima sem soltar as teclas de volume durante três segundos para utilizar o serviço <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Escolha uma funcionalidade para utilizar quando tocar no botão Acessibilidade:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Escolha a funcionalidade a utilizar com o gesto de acessibilidade (deslize rapidamente com dois dedos para cima a partir da parte inferior do ecrã):"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Câmara"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfone"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"sobrepõe-se a outras aplicações no ecrã"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notificação de informações do Modo rotina"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Pode ficar sem bateria antes do carregamento habitual"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Poupança de bateria ativada para prolongar a duração da bateria"</string>

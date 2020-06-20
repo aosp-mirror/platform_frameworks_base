@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"‏شما الگوی بازگشایی قفل خود را <xliff:g id="NUMBER_0">%1$d</xliff:g> بار اشتباه کشیده‌اید. پس از <xliff:g id="NUMBER_1">%2$d</xliff:g> تلاش ناموفق، از شما خواسته می‎شود که با استفاده از یک حساب ایمیل قفل تلفن خود را باز کنید.\n\n لطفاً پس از <xliff:g id="NUMBER_2">%3$d</xliff:g> ثانیه دوباره امتحان کنید."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"حذف"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"‏سرویس پیش‌نمای <xliff:g id="PACKAGENAME">%1$s</xliff:g>، که در پس‌زمینه شروع شده، در ساخت‌های آتی R اجازهٔ حین استفاده نخواهد داشت. لطفاً به go/r-bg-fgs-restriction بروید و گزارش اشکال ارسال کنید."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"میزان صدا را به بالاتر از حد توصیه شده افزایش می‌دهید؟\n\nگوش دادن به صداهای بلند برای مدت طولانی می‌تواند به شنوایی‌تان آسیب وارد کند."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"از میان‌بر دسترس‌پذیری استفاده شود؟"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"وقتی میان‌بر روشن باشد، با فشار دادن هردو دکمه صدا به‌مدت ۳ ثانیه ویژگی دسترس‌پذیری فعال می‌شود."</string>
@@ -1628,7 +1627,7 @@
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> روشن شود؟"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"با پایین نگه داشتن هردو کلید میزان صدا به‌مدت چند ثانیه، <xliff:g id="SERVICE">%1$s</xliff:g> (یکی از ویژگی‌های دسترس‌پذیری) روشن می‌شود. با این کار نحوه عملکرد دستگاهتان تغییر می‌کند.\n\nمی‌توانید در «تنظیمات &gt; دسترس‌پذیری»،‌این میان‌بر را به ویژگی دیگری تغییر دهید."</string>
-    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"روشن کردن"</string>
+    <string name="accessibility_shortcut_on" msgid="5463618449556111344">"روشن شود"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"روشن نشود"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"روشن"</string>
     <string name="accessibility_shortcut_menu_item_status_off" msgid="5531598275559472393">"خاموش"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"دوربین"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"میکروفون"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"نمایش روی برنامه‌های دیگر در صفحه‌نمایش"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"اعلان اطلاعات حالت روال معمول"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"ممکن است شارژ باتری قبل از شارژ معمول تمام شود"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"جهت افزایش عمر باتری، «بهینه‌سازی باتری» فعال شد"</string>

@@ -1619,15 +1619,14 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Joonistasite oma avamismustri <xliff:g id="NUMBER_0">%1$d</xliff:g> korda valesti. Pärast veel <xliff:g id="NUMBER_1">%2$d</xliff:g> ebaõnnestunud katset palutakse teil telefon avada meilikontoga.\n\n Proovige uuesti <xliff:g id="NUMBER_2">%3$d</xliff:g> sekundi pärast."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Eemalda"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Taustal käitatud esiplaanil oleval teenusel paketist <xliff:g id="PACKAGENAME">%1$s</xliff:g> ei ole tulevastes R-järkudes luba „kui kasutuses”. Vaadake saiti go/r-bg-fgs-restriction ja esitage veaaruanne."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Kas suurendada helitugevuse taset üle soovitatud taseme?\n\nPikaajaline valju helitugevusega kuulamine võib kuulmist kahjustada."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Kas kasutada juurdepääsetavuse otseteed?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kui otsetee on sisse lülitatud, käivitab mõlema helitugevuse nupu kolm sekundit all hoidmine juurdepääsetavuse funktsiooni."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Kas lülitada juurdepääsufunktsioonid sisse?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hoidke mõlemat helitugevuse nuppu mõni sekund all, et juurdepääsufunktsioonid sisse lülitada. See võib teie seadme tööviisi muuta.\n\nPraegused funktsioonid:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nValitud funktsioone saab muuta jaotises Seaded &gt; Juurdepääsetavus."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Hoidke juurdepääsufunktsioonide sisselülitamiseks mõlemat helitugevuse klahvi mõni sekund all. See võib teie seadme tööviisi muuta.\n\nPraegused funktsioonid:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nValitud funktsioone saab muuta jaotises Seaded &gt; Juurdepääsetavus."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Kas lülitada <xliff:g id="SERVICE">%1$s</xliff:g> sisse?"</string>
-    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Kui hoiate mõlemat helitugevuse nuppu mõni sekund all, lülitatakse sisse juurdepääsufunktsioon <xliff:g id="SERVICE">%1$s</xliff:g>. See võib teie seadme tööviisi muuta.\n\nSelle otsetee saab asendada muu otseteega jaotises Seaded &gt; Juurdepääsetavus."</string>
+    <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Kui hoiate mõlemat helitugevuse klahvi mõni sekund all, lülitatakse juurdepääsufunktsioon <xliff:g id="SERVICE">%1$s</xliff:g> sisse. See võib teie seadme tööviisi muuta.\n\nSelle otsetee saab asendada muu otseteega jaotises Seaded &gt; Juurdepääsetavus."</string>
     <string name="accessibility_shortcut_on" msgid="5463618449556111344">"Lülita sisse"</string>
     <string name="accessibility_shortcut_off" msgid="3651336255403648739">"Ära lülita sisse"</string>
     <string name="accessibility_shortcut_menu_item_status_on" msgid="6608392117189732543">"SEES"</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Keela"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Puudutage funktsiooni, et selle kasutamist alustada."</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Valige funktsioonid, mida juurdepääsetavuse nupuga kasutada"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Valige funktsioonid, mida helitugevuse nupu otseteega kasutada"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Valige helitugevuse nupu otsetee funktsioonid"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"<xliff:g id="SERVICE_NAME">%s</xliff:g> on välja lülitatud"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Muuda otseteid"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Valmis"</string>
@@ -1651,13 +1650,13 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Kasuta otseteed"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Värvide ümberpööramine"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Värvide korrigeerimine"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Helitugevuse nuppe hoiti all. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> lülitati sisse."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Helitugevuse nuppe hoiti all. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> lülitati välja."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Helitugevuse klahve hoiti all. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> lülitati sisse."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Helitugevuse klahve hoiti all. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> lülitati välja."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Teenuse <xliff:g id="SERVICE_NAME">%1$s</xliff:g> kasutamiseks hoidke kolm sekundit all mõlemat helitugevuse klahvi"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Valige, millist funktsiooni kasutada, kui vajutate juurdepääsetavuse nuppu:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Valige, millist funktsiooni juurdepääsetavuse liigutusega (kahe sõrmega ekraanikuval alt üles pühkimine) kasutada:"</string>
     <string name="accessibility_gesture_3finger_prompt_text" msgid="5211827854510660203">"Valige, millist funktsiooni juurdepääsetavuse liigutusega (kolme sõrmega ekraanikuval alt üles pühkimine) kasutada:"</string>
-    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funktsioonide vahel vahetamiseks vajutage pikalt juurdepääsetavuse nuppu."</string>
+    <string name="accessibility_button_instructional_text" msgid="8853928358872550500">"Funktsioonide vahel vahetamiseks vajutage juurdepääsetavuse nuppu pikalt."</string>
     <string name="accessibility_gesture_instructional_text" msgid="9196230728837090497">"Funktsioonide vahel vahetamiseks pühkige kahe sõrmega üles ja hoidke."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="3425123684990193765">"Funktsioonide vahel vahetamiseks pühkige kolme sõrmega üles ja hoidke."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Suurendus"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kaamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"teie ekraanil muude rakenduste peal kuvamine"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Rutiinirežiimi teabe märguanne"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Aku võib enne tavapärast laadimist tühjaks saada"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Akusäästja aktiveeriti aku tööea pikendamiseks"</string>

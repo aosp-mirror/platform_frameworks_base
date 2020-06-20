@@ -1641,7 +1641,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Nacrtali ste šablon za otključavanje netačno <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Posle još <xliff:g id="NUMBER_1">%2$d</xliff:g> neuspešna(ih) pokušaja, od vas će biti zatraženo da otključate telefon pomoću naloga e-pošte.\n\nProbajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sekunde/i."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Ukloni"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Usluga u prvom planu sa <xliff:g id="PACKAGENAME">%1$s</xliff:g> koja je pokrenuta u pozadini neće imati dozvolu tokom korišćenja u budućim R verzijama. Posetite go/r-bg-fgs-restriction i pošaljite izveštaj o grešci."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Želite da pojačate zvuk iznad preporučenog nivoa?\n\nSlušanje glasne muzike duže vreme može da vam ošteti sluh."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Želite li da koristite prečicu za pristupačnost?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Kada je prečica uključena, pritisnite oba dugmeta za jačinu zvuka da biste pokrenuli funkciju pristupačnosti."</string>
@@ -1665,7 +1664,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Odbij"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Dodirnite neku funkciju da biste počeli da je koristite:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Odaberite funkcije koje ćete koristiti sa dugmetom Pristupačnost"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Odaberite funkcije koje ćete koristiti sa tasterom jačine zvuka kao prečicom"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Odaberite funkcije za prečicu tasterom jačine zvuka"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Usluga <xliff:g id="SERVICE_NAME">%s</xliff:g> je isključena"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Izmenite prečice"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Gotovo"</string>
@@ -1673,8 +1672,8 @@
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Koristi prečicu"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Inverzija boja"</string>
     <string name="color_correction_feature_name" msgid="3655077237805422597">"Korekcija boja"</string>
-    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Zadržali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
-    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Zadržali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
+    <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je uključena."</string>
+    <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Držali ste tastere za jačinu zvuka. Usluga <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je isključena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Pritisnite i zadržite oba tastera za jačinu zvuka tri sekunde da biste koristili <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>
     <string name="accessibility_button_prompt_text" msgid="8343213623338605305">"Izaberite funkciju koja će se koristiti kada dodirnete dugme Pristupačnost:"</string>
     <string name="accessibility_gesture_prompt_text" msgid="8742535972130563952">"Odaberite funkciju koja će se koristiti pomoću pokreta za pristupačnost (pomoću dva prsta prevucite nagore od dna ekrana):"</string>
@@ -2031,6 +2030,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Kamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Mikrofon"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"prikazuje se na ekranu dok koristite druge aplikacije"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Obaveštenje o informacijama Rutinskog režima"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Baterija će se možda isprazniti pre uobičajenog punjenja"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Ušteda baterije je aktivirana da bi se produžilo trajanje baterije"</string>

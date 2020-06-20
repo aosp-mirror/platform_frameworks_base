@@ -1352,9 +1352,9 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Налагодження USB підключено"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Торкніться, щоб вимкнути налагодження через USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Виберіть, щоб вимкнути налагодження за USB"</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Налагодження через Wi-Fi активне"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Активне налагодження через Wi-Fi"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Натисніть, щоб вимкнути налагодження через Wi-Fi"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Виберіть, щоб вимкнути налагодження через Wi-Fi."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Натисніть, щоб вимкнути налагодження."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Увімкнено режим автоматизованого тестування"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"Щоб вимкнути режим автоматизованого тестування, відновіть заводські налаштування."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"Послідовну консоль увімкнено"</string>
@@ -1663,12 +1663,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Ключ розблокування неправильно намальовано стільки разів: <xliff:g id="NUMBER_0">%1$d</xliff:g>. У вас є ще стільки спроб: <xliff:g id="NUMBER_1">%2$d</xliff:g>. У разі невдачі з’явиться запит розблокувати телефон за допомогою облікового запису електронної пошти.\n\n Повторіть спробу через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Вилучити"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Активний сервіс пакета <xliff:g id="PACKAGENAME">%1$s</xliff:g>, запущений у фоновому режимі, не матиме дозволу \"Коли додаток використовується\" в майбутніх складаннях R. Перегляньте go/r-bg-fgs-restriction і надішліть звіт про помилки."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Збільшити гучність понад рекомендований рівень?\n\nЯкщо слухати надто гучну музику тривалий час, можна пошкодити слух."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Використовувати швидке ввімкнення?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Якщо цей засіб увімкнено, ви можете активувати спеціальні можливості, утримуючи обидві кнопки гучності протягом трьох секунд."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Увімкнути спеціальні можливості?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, буде ввімкнено спеціальні можливості. Це може вплинути на роботу пристрою.\n\nПоточні функції:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nВибрані функції можна змінити в меню \"Налаштування &gt; Спеціальні можливості\"."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, вмикаються спеціальні можливості. Це впливає на роботу пристрою.\n\nПоточні функції:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nВибрані функції можна змінити в налаштуваннях у меню спеціальних можливостей."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Увімкнути <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Якщо втримувати обидві клавіші гучності впродовж кількох секунд, буде ввімкнено спеціальні можливості – <xliff:g id="SERVICE">%1$s</xliff:g>. Це може вплинути на роботу пристрою.\n\nДля цієї комбінації клавіш можна вибрати іншу функцію в меню \"Налаштування &gt; Спеціальні можливості\"."</string>
@@ -1820,7 +1819,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Спробуйте пізніше"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Перегляд на весь екран"</string>
     <string name="immersive_cling_description" msgid="7092737175345204832">"Щоб вийти, проведіть пальцем зверху вниз."</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"Зрозуміло"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
     <string name="done_label" msgid="7283767013231718521">"Готово"</string>
     <string name="hour_picker_description" msgid="5153757582093524635">"Вибір годин на циферблаті"</string>
     <string name="minute_picker_description" msgid="9029797023621927294">"Вибір хвилин на циферблаті"</string>
@@ -2064,6 +2063,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Мікрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"показ поверх інших додатків на екрані"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Сповіщення про послідовнсть дій"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Акумулятор може розрядитися раніше ніж зазвичай"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Режим енергозбереження активовано для збільшення часу роботи акумулятора"</string>

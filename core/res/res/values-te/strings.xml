@@ -1314,7 +1314,7 @@
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"డీబగ్గింగ్‌ని నిలిపివేయడానికి ఎంచుకోండి."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"వైర్‌లెస్ డీబగ్గింగ్ కనెక్ట్ చేయబడింది"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"వైర్‌లెస్ డీబగ్గింగ్‌ని ఆఫ్ చేయడానికి ట్యాప్ చేయండి"</string>
-    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"వైర్‌లెస్ డీబగ్గింగ్‌ని డిజేబుల్ చేయడానికి ఎంచుకోండి."</string>
+    <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"వైర్‌లెస్ డీబగ్గింగ్‌ను డిజేబుల్ చేయడానికి ఎంచుకోండి."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"పరీక్ష నియంత్రణ మోడ్ ప్రారంభించబడింది"</string>
     <string name="test_harness_mode_notification_message" msgid="3039123743127958420">"పరీక్ష నియంత్రణ మోడ్‌ను నిలిపివేయడానికి ఫ్యాక్టరీ రీసెట్‍‌ను అమలు చేయండి."</string>
     <string name="console_running_notification_title" msgid="6087888939261635904">"సీరియల్ కన్సోల్ ప్రారంభించబడింది"</string>
@@ -1619,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"మీరు మీ అన్‌లాక్ నమూనాను <xliff:g id="NUMBER_0">%1$d</xliff:g> సార్లు తప్పుగా గీసారు. మరో <xliff:g id="NUMBER_1">%2$d</xliff:g> విఫల ప్రయత్నాల తర్వాత, ఇమెయిల్ ఖాతాను ఉపయోగించి మీ ఫోన్‌ను అన్‌లాక్ చేయాల్సిందిగా మిమ్మల్ని అడుగుతారు.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> సెకన్లలో మళ్లీ ప్రయత్నించండి."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"తీసివేయి"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> నుండి, బ్యాక్‌గ్రౌండ్‌లో ప్రారంభమైన ఫోర్ గ్రౌండ్ సేవకు భవిష్యత్తు R బిల్డ్స్‌లో \'ఉపయోగంలో వున్నప్పుడు\' అనుమతి ఉండదు. దయచేసి go/r-bg-fgs-restrictionను చూసి బగ్ నివేదికను ఫైల్ చేయండి."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"వాల్యూమ్‌ను సిఫార్సు చేయబడిన స్థాయి కంటే ఎక్కువగా పెంచాలా?\n\nసుదీర్ఘ వ్యవధుల పాటు అధిక వాల్యూమ్‌లో వినడం వలన మీ వినికిడి శక్తి దెబ్బ తినవచ్చు."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"యాక్సెస్ సామర్థ్యం షార్ట్‌కట్‌ను ఉపయోగించాలా?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"షార్ట్‌కట్ ఆన్ చేసి ఉన్నప్పుడు, రెండు వాల్యూమ్ బటన్‌లను 3 సెకన్ల పాటు నొక్కి ఉంచితే యాక్సెస్ సౌలభ్య ఫీచర్ ప్రారంభం అవుతుంది."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"యాక్సెసిబిలిటీ‌లను ఆన్ చేయాలా?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"రెండు వాల్యూమ్ కీలను కొంత సేపు నొక్కి పట్టుకోవడం ద్వారా యాక్సెసిబిలిటీలు ఆన్ అవుతాయి. ఇది మీ పరికరం పనిచేసే విధానాన్ని మార్చవచ్చు.\n\nప్రస్తుత ఫీచర్లు:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nఎంపిక చేసిన ఫీచర్లను మీరు సెట్టింగ్‌లు&gt;యాక్సెసిబిలిటీలో మార్చవచ్చు."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"రెండు వాల్యూమ్ కీలను కొంత సేపు నొక్కి పట్టుకుంటే యాక్సెసిబిలిటీలు ఆన్ అవుతాయి. ఇది మీ పరికరం పనిచేసే విధానాన్ని మార్చవచ్చు.\n\nప్రస్తుత ఫీచర్లు:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nఎంపిక చేసిన ఫీచర్లను మీరు సెట్టింగ్‌లు&gt;యాక్సెసిబిలిటీలో మార్చవచ్చు."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"<xliff:g id="SERVICE">%1$s</xliff:g> ఆన్ చేయాాలా?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"రెండు వాల్యూమ్ కీలను కొన్ని సెకన్ల పాటు నొక్కి పట్టుకోవడం ద్వారా యాక్సెసిబిలిటీ అయిన <xliff:g id="SERVICE">%1$s</xliff:g> ఆన్ అవుతుంది. ఇది మీ పరికరం పని చేసే విధానాన్ని మార్చవచ్చు.\n\nసెట్టింగ్‌లు &gt; యాక్సెసిబిలిటీలో, వేరొక ఫీచర్‌ను ప్రారంభించేలా ఈ షార్ట్ కట్‌ను మీరు మార్చవచ్చు."</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"కెమెరా"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"మైక్రోఫోన్"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"మీ స్క్రీన్‌పై ఇతర యాప్‌ల ద్వారా ప్రదర్శించబడుతోంది"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"రొటీన్ మోడ్ సమాచార నోటిఫికేషన్"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"మామూలుగా ఛార్జ్ చేసేలోపు బ్యాటరీ ఖాళీ కావచ్చు"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"బ్యాటరీ జీవితకాలాన్ని పెంచడానికి బ్యాటరీ సేవర్ యాక్టివేట్ చేయబడింది"</string>

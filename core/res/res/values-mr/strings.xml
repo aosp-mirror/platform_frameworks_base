@@ -1619,7 +1619,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"तुम्ही तुमचा अनलॉक पॅटर्न <xliff:g id="NUMBER_0">%1$d</xliff:g> वेळा अयोग्यपणे काढला आहे. आणखी <xliff:g id="NUMBER_1">%2$d</xliff:g> अयशस्वी प्रयत्नांनंतर, तुम्हाला ईमेल खाते वापरून तुमचा फोन अनलॉक करण्यास सांगितले जाईल.\n\n <xliff:g id="NUMBER_2">%3$d</xliff:g> सेकंदांमध्ये पुन्हा प्रयत्न करा."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"काढा"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"<xliff:g id="PACKAGENAME">%1$s</xliff:g> कडून बॅकग्राउंडने फोरग्राउंडमध्ये सुरू केलेल्या सेवेला भविष्यातील आर बिल्डमध्ये वापर करते वेळची परवानगी नसेल. कृपया go/r-bg-fgs-restriction पहा आणि बगची तक्रार नोंदवा."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"शिफारस केलेल्‍या पातळीच्या वर आवाज वाढवायचा?\n\nउच्च आवाजात दीर्घ काळ ऐकण्‍याने आपल्‍या श्रवणशक्तीची हानी होऊ शकते."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"प्रवेशयोग्यता शॉर्टकट वापरायचा?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"शॉर्टकट सुरू असताना, दोन्ही व्‍हॉल्‍यूम बटणे तीन सेकंदांसाठी दाबून ठेवल्याने अ‍ॅक्सेसिबिलिटी वैशिष्ट्य सुरू होईल."</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"कॅमेरा"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"मायक्रोफोन"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"तुमच्‍या स्‍क्रीनवर इतर ॲप्‍सवर डिस्‍प्‍ले करत आहे"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"दिनक्रम मोडची माहिती सूचना"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"चार्जिंगची सामान्य पातळी गाठेपर्यंत कदाचित बॅटरी संपू शकते"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"बॅटरी लाइफ वाढवण्यासाठी बॅटरी सेव्हर सुरू केला आहे"</string>

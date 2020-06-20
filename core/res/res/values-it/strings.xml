@@ -224,7 +224,7 @@
     <string name="reboot_to_update_reboot" msgid="4474726009984452312">"Riavvio in corso…"</string>
     <string name="reboot_to_reset_title" msgid="2226229680017882787">"Ripristino dati di fabbrica"</string>
     <string name="reboot_to_reset_message" msgid="3347690497972074356">"Riavvio in corso…"</string>
-    <string name="shutdown_progress" msgid="5017145516412657345">"Spegnimento..."</string>
+    <string name="shutdown_progress" msgid="5017145516412657345">"Spegnimento…"</string>
     <string name="shutdown_confirm" product="tablet" msgid="2872769463279602432">"Il tablet verrà spento."</string>
     <string name="shutdown_confirm" product="tv" msgid="7975942887313518330">"Il dispositivo Android TV verrà spento."</string>
     <string name="shutdown_confirm" product="watch" msgid="2977299851200240146">"L\'orologio verrà spento."</string>
@@ -859,7 +859,7 @@
     <string name="lockscreen_sim_puk_locked_message" msgid="6618356415831082174">"La SIM è bloccata tramite PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="5307979043730860995">"Consulta la Guida dell\'utente o contatta il servizio clienti."</string>
     <string name="lockscreen_sim_locked_message" msgid="3160196135801185938">"La SIM è bloccata."</string>
-    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Sblocco SIM..."</string>
+    <string name="lockscreen_sim_unlock_progress_dialog_message" msgid="2286497117428409709">"Sblocco SIM…"</string>
     <string name="lockscreen_too_many_failed_attempts_dialog_message" msgid="6458790975898594240">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. \n\nRiprova tra <xliff:g id="NUMBER_1">%2$d</xliff:g> secondi."</string>
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="3118353451602377380">"Hai digitato la tua password <xliff:g id="NUMBER_0">%1$d</xliff:g> volte in modo errato. \n\nRiprova tra <xliff:g id="NUMBER_1">%2$d</xliff:g> secondi."</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="2874278239714821984">"Hai digitato il tuo PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> volte in modo errato. \n\nRiprova tra <xliff:g id="NUMBER_1">%2$d</xliff:g> secondi."</string>
@@ -882,7 +882,7 @@
     <string name="lockscreen_glogin_submit_button" msgid="3590556636347843733">"Accedi"</string>
     <string name="lockscreen_glogin_invalid_input" msgid="4369219936865697679">"Password o nome utente non valido."</string>
     <string name="lockscreen_glogin_account_recovery_hint" msgid="1683405808525090649">"Hai dimenticato il nome utente o la password?\nVisita "<b>"google.com/accounts/recovery"</b>"."</string>
-    <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Verifica..."</string>
+    <string name="lockscreen_glogin_checking_password" msgid="2607271802803381645">"Verifica…"</string>
     <string name="lockscreen_unlock_label" msgid="4648257878373307582">"Sblocca"</string>
     <string name="lockscreen_sound_on_label" msgid="1660281470535492430">"Audio attivato"</string>
     <string name="lockscreen_sound_off_label" msgid="2331496559245450053">"Audio disattivato"</string>
@@ -1098,7 +1098,7 @@
     <string name="failed_to_copy_to_clipboard" msgid="725919885138539875">"Impossibile copiare negli appunti"</string>
     <string name="paste" msgid="461843306215520225">"Incolla"</string>
     <string name="paste_as_plain_text" msgid="7664800665823182587">"Incolla come testo normale"</string>
-    <string name="replace" msgid="7842675434546657444">"Sostituisci..."</string>
+    <string name="replace" msgid="7842675434546657444">"Sostituisci…"</string>
     <string name="delete" msgid="1514113991712129054">"Elimina"</string>
     <string name="copyUrl" msgid="6229645005987260230">"Copia URL"</string>
     <string name="selectTextMode" msgid="3225108910999318778">"Seleziona testo"</string>
@@ -1120,7 +1120,7 @@
     <string name="yes" msgid="9069828999585032361">"OK"</string>
     <string name="no" msgid="5122037903299899715">"Annulla"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Attenzione"</string>
-    <string name="loading" msgid="3138021523725055037">"Caricamento..."</string>
+    <string name="loading" msgid="3138021523725055037">"Caricamento…"</string>
     <string name="capital_on" msgid="2770685323900821829">"ON"</string>
     <string name="capital_off" msgid="7443704171014626777">"OFF"</string>
     <string name="checked" msgid="9179896827054513119">"selezionato"</string>
@@ -1544,7 +1544,7 @@
     <string name="activity_chooser_view_see_all" msgid="3917045206812726099">"Mostra tutto"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="8880731437191978314">"Scegli attività"</string>
     <string name="share_action_provider_share_with" msgid="1904096863622941880">"Condividi con"</string>
-    <string name="sending" msgid="206925243621664438">"Invio..."</string>
+    <string name="sending" msgid="206925243621664438">"Invio…"</string>
     <string name="launchBrowserDefault" msgid="6328349989932924119">"Avviare l\'applicazione Browser?"</string>
     <string name="SetupCallDefault" msgid="5581740063237175247">"Accettare la chiamata?"</string>
     <string name="activity_resolver_use_always" msgid="5575222334666843269">"Sempre"</string>
@@ -1591,7 +1591,7 @@
     <string name="kg_puk_enter_puk_hint" msgid="6696187482616360994">"La scheda SIM è disattivata. Inserisci il codice PUK per continuare. Contatta l\'operatore per avere informazioni dettagliate."</string>
     <string name="kg_puk_enter_pin_hint" msgid="8190982314659429770">"Inserisci il codice PIN desiderato"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="6372557107414074580">"Conferma il codice PIN desiderato"</string>
-    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Sblocco scheda SIM..."</string>
+    <string name="kg_sim_unlock_progress_dialog_message" msgid="8871937892678885545">"Sblocco scheda SIM…"</string>
     <string name="kg_password_wrong_pin_code" msgid="9013856346870572451">"Codice PIN errato."</string>
     <string name="kg_invalid_sim_pin_hint" msgid="4821601451222564077">"Il PIN deve essere di 4-8 numeri."</string>
     <string name="kg_invalid_sim_puk_hint" msgid="2539364558870734339">"Il codice PUK deve essere di 8 cifre."</string>
@@ -1619,12 +1619,11 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"<xliff:g id="NUMBER_0">%1$d</xliff:g> tentativi errati di inserimento della sequenza di sblocco. Dopo altri <xliff:g id="NUMBER_1">%2$d</xliff:g> tentativi falliti, ti verrà chiesto di sbloccare il telefono con un account email.\n\n Riprova tra <xliff:g id="NUMBER_2">%3$d</xliff:g> secondi."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Rimuovi"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Il servizio in primo piano avviato in background da <xliff:g id="PACKAGENAME">%1$s</xliff:g> non avrà l\'autorizzazione \"durante l\'uso\" nelle future build R. Visita la pagina go/r-bg-fgs-restriction e invia una segnalazione di bug."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Vuoi aumentare il volume oltre il livello consigliato?\n\nL\'ascolto ad alto volume per lunghi periodi di tempo potrebbe danneggiare l\'udito."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Usare la scorciatoia Accessibilità?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Quando la scorciatoia è attiva, puoi premere entrambi i pulsanti del volume per tre secondi per avviare una funzione di accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_warning_title" msgid="8417489297036013065">"Attivare le funzioni di accessibilità?"</string>
-    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Se tieni premuti entrambi i tasti del volume per qualche secondo, le funzioni di accessibilità vengono attivate. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nFunzionalità correnti:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuoi modificare le funzionalità selezionate in Impostazioni &gt; Accessibilità."</string>
+    <string name="accessibility_shortcut_multiple_service_warning" msgid="3740723309483706911">"Se tieni premuti entrambi i tasti del volume per qualche secondo, vengono attivate le funzioni di accessibilità. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nFunzioni correnti:\n<xliff:g id="SERVICE">%1$s</xliff:g>\nPuoi modificare le funzioni selezionate in Impostazioni &gt; Accessibilità."</string>
     <string name="accessibility_shortcut_multiple_service_list" msgid="6935581470716541531">"	• <xliff:g id="SERVICE">%1$s</xliff:g>\n"</string>
     <string name="accessibility_shortcut_single_service_warning_title" msgid="2819109500943271385">"Attivare <xliff:g id="SERVICE">%1$s</xliff:g>?"</string>
     <string name="accessibility_shortcut_single_service_warning" msgid="6363127705112844257">"Se tieni premuti entrambi i tasti del volume per qualche secondo verrà attivata la funzione di accessibilità <xliff:g id="SERVICE">%1$s</xliff:g>. Questa operazione potrebbe modificare il funzionamento del dispositivo.\n\nPuoi associare questa scorciatoia a un\'altra funzionalità in Impostazioni &gt; Accessibilità."</string>
@@ -1643,7 +1642,7 @@
     <string name="accessibility_dialog_button_deny" msgid="4129575637812472671">"Rifiuta"</string>
     <string name="accessibility_select_shortcut_menu_title" msgid="6002726538854613272">"Tocca una funzionalità per iniziare a usarla:"</string>
     <string name="accessibility_edit_shortcut_menu_button_title" msgid="239446795930436325">"Scegli le funzionalità da usare con il pulsante Accessibilità"</string>
-    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Scegli le funzionalità da usare con la scorciatoia per i tasti del volume"</string>
+    <string name="accessibility_edit_shortcut_menu_volume_title" msgid="1077294237378645981">"Scegli le funzionalità da usare con la scorciatoia dei tasti del volume"</string>
     <string name="accessibility_uncheck_legacy_item_warning" msgid="8047830891064817447">"Il servizio <xliff:g id="SERVICE_NAME">%s</xliff:g> è stato disattivato"</string>
     <string name="edit_accessibility_shortcut_menu_button" msgid="8885752738733772935">"Modifica scorciatoie"</string>
     <string name="done_accessibility_shortcut_menu_button" msgid="3668407723770815708">"Fine"</string>
@@ -1998,6 +1997,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Fotocamera"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Microfono"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"si sovrappone ad altre app sullo schermo"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Notifica di informazioni sulla modalità Routine"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"La batteria potrebbe esaurirsi prima della ricarica abituale"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Risparmio energetico attivo per far durare di più la batteria"</string>

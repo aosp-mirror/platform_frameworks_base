@@ -244,7 +244,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Блокировка экрана"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Выключить"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Питание"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Перезапуск"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Перезапустить"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Экстренный вызов"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Отчет об ошибке"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Закончить сеанс"</string>
@@ -1663,7 +1663,6 @@
     <string name="kg_failed_attempts_almost_at_login" product="default" msgid="5270861875006378092">"Вы <xliff:g id="NUMBER_0">%1$d</xliff:g> раз неверно указали графический ключ. После <xliff:g id="NUMBER_1">%2$d</xliff:g> неверных попыток для разблокировки телефона потребуется войти в аккаунт Google.\n\nПовтор через <xliff:g id="NUMBER_2">%3$d</xliff:g> сек."</string>
     <string name="kg_text_message_separator" product="default" msgid="4503708889934976866">" – "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="2034358143731750914">"Удалить"</string>
-    <string name="allow_while_in_use_permission_in_fgs" msgid="4101339676785053656">"Службы из пакета <xliff:g id="PACKAGENAME">%1$s</xliff:g>, переведенные из фонового режима в активный, не будут получать разрешение while-in-use в будущих сборках на языке R. Перейдите на страницу go/r-bg-fgs-restriction и отправьте отчет об ошибке."</string>
     <string name="safe_media_volume_warning" product="default" msgid="3751676824423049994">"Установить громкость выше рекомендуемого уровня?\n\nВоздействие громкого звука в течение долгого времени может привести к повреждению слуха."</string>
     <string name="accessibility_shortcut_warning_dialog_title" msgid="4017995837692622933">"Использовать быстрое включение?"</string>
     <string name="accessibility_shortcut_toogle_warning" msgid="4161716521310929544">"Чтобы использовать функцию специальных возможностей, когда она включена, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
@@ -2064,6 +2063,8 @@
     <string name="notification_appops_camera_active" msgid="8177643089272352083">"Камера"</string>
     <string name="notification_appops_microphone_active" msgid="581333393214739332">"Микрофон"</string>
     <string name="notification_appops_overlay_active" msgid="5571732753262836481">"показ поверх других окон"</string>
+    <!-- no translation found for notification_feedback_indicator (663476517711323016) -->
+    <skip />
     <string name="dynamic_mode_notification_channel_name" msgid="2986926422100223328">"Уведомление о батарее"</string>
     <string name="dynamic_mode_notification_title" msgid="9205715501274608016">"Батарея может разрядиться"</string>
     <string name="dynamic_mode_notification_summary" msgid="4141614604437372157">"Чтобы увеличить время работы от батареи, был включен режим энергосбережения."</string>
