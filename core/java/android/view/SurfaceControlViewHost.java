@@ -178,6 +178,17 @@ public class SurfaceControlViewHost {
     }
 
     /**
+     * @hide
+     */
+    @Override
+    protected void finalize() throws Throwable {
+        // We aren't on the UI thread here so we need to pass false to
+        // doDie
+        mViewRoot.die(false /* immediate */);
+    }
+
+
+    /**
      * Return a SurfacePackage for the root SurfaceControl of the embedded hierarchy.
      * Rather than be directly reparented using {@link SurfaceControl.Transaction} this
      * SurfacePackage should be passed to {@link SurfaceView#setChildSurfacePackage}
@@ -273,6 +284,6 @@ public class SurfaceControlViewHost {
      */
     public void release() {
         // ViewRoot will release mSurfaceControl for us.
-        mViewRoot.die(false /* immediate */);
+        mViewRoot.die(true /* immediate */);
     }
 }
