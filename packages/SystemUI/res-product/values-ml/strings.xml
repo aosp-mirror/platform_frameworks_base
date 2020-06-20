@@ -21,7 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="dock_alignment_slow_charging" product="default" msgid="6997633396534416792">"അതിവേഗം ചാർജ് ചെയ്യാൻ ഫോണിന്റെ സ്ഥാനം പുനഃക്രമീകരിക്കുക"</string>
     <string name="dock_alignment_not_charging" product="default" msgid="3980752926226749808">"വയർലെസായി ചാർജ് ചെയ്യാൻ ഫോണിന്റെ സ്ഥാനം പുനഃക്രമീകരിക്കുക"</string>
-    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android ടിവി ഉടൻ ഓഫാകും, ഓണാക്കി നിർത്താൻ ഒരു ബട്ടൺ അമർത്തുക."</string>
+    <string name="inattentive_sleep_warning_message" product="tv" msgid="6844464574089665063">"Android TV ഉടൻ ഓഫാകും, ഓണാക്കി നിർത്താൻ ഒരു ബട്ടൺ അമർത്തുക."</string>
     <string name="inattentive_sleep_warning_message" product="default" msgid="5693904520452332224">"ഉപകരണം ഉടൻ ഓഫാകും; ഓണാക്കി നിർത്താൻ അമർത്തുക."</string>
     <string name="keyguard_missing_sim_message" product="tablet" msgid="5018086454277963787">"ടാബ്‌ലെറ്റിൽ സിം കാർഡൊന്നുമില്ല."</string>
     <string name="keyguard_missing_sim_message" product="default" msgid="7053347843877341391">"ഫോണിൽ സിം കാർഡൊന്നുമില്ല."</string>
