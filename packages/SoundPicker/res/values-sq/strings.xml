@@ -25,4 +25,6 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Fshi"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Nuk mund të shtojë ton zileje të personalizuar"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Nuk mund të fshijë ton zileje të personalizuar"</string>
+    <!-- no translation found for app_label (3091611356093417332) -->
+    <skip />
 </resources>

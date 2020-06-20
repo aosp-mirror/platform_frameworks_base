@@ -25,4 +25,6 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"हटवा"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"कस्टम रिंगटोन जोडण्यात अक्षम"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"कस्टम रिंगटोन हटविण्यात अक्षम"</string>
+    <!-- no translation found for app_label (3091611356093417332) -->
+    <skip />
 </resources>
