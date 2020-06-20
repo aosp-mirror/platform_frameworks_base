@@ -565,6 +565,13 @@ public class WifiEnterpriseConfigTest {
         secureConfig.setCaCertificate(FakeKeys.CA_CERT0);
         secureConfig.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
         assertFalse(secureConfig.isInsecure());
+
+        WifiEnterpriseConfig secureConfigWithCaAlias = new WifiEnterpriseConfig();
+        secureConfigWithCaAlias.setEapMethod(Eap.PEAP);
+        secureConfigWithCaAlias.setPhase2Method(Phase2.MSCHAPV2);
+        secureConfigWithCaAlias.setCaCertificateAliases(new String[]{"alias1", "alisa2"});
+        secureConfigWithCaAlias.setDomainSuffixMatch(TEST_DOMAIN_SUFFIX_MATCH);
+        assertFalse(secureConfigWithCaAlias.isInsecure());
     }
 
 }
