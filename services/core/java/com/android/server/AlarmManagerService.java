@@ -104,6 +104,7 @@ import com.android.server.usage.AppStandbyInternal.AppIdleStateChangeListener;
 import java.io.ByteArrayOutputStream;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.text.SimpleDateFormat;
 import java.time.DateTimeException;
 import java.util.ArrayList;
@@ -146,6 +147,12 @@ class AlarmManagerService extends SystemService {
     static final boolean DEBUG_WAKELOCK = localLOGV || false;
     static final boolean DEBUG_BG_LIMIT = localLOGV || false;
     static final boolean DEBUG_STANDBY = localLOGV || false;
+
+    // TODO (b/157782538): Turn off once bug is fixed.
+    static final boolean DEBUG_PER_UID_LIMIT = true;
+    // TODO (b/157782538): Turn off once bug is fixed.
+    static final boolean WARN_SYSTEM_ON_ALARM_LIMIT = true;
+
     static final boolean RECORD_ALARMS_IN_HISTORY = true;
     static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
@@ -1767,12 +1774,56 @@ class AlarmManagerService extends SystemService {
                         "Maximum limit of concurrent alarms " + mConstants.MAX_ALARMS_PER_UID
                                 + " reached for uid: " + UserHandle.formatUid(callingUid)
                                 + ", callingPackage: " + callingPackage;
-                Slog.w(TAG, errorMsg);
+
+                if (WARN_SYSTEM_ON_ALARM_LIMIT && UserHandle.isCore(callingUid)) {
+                    final StringWriter logWriter = new StringWriter();
+                    final PrintWriter pw = new PrintWriter(logWriter);
+                    pw.println(errorMsg);
+                    pw.println("Next 20 alarms for " + callingUid + ":");
+                    dumpUpcomingNAlarmsForUid(pw, callingUid, 20);
+                    pw.flush();
+                    Slog.wtf(TAG, logWriter.toString());
+                } else {
+                    Slog.w(TAG, errorMsg);
+                }
+                if (DEBUG_PER_UID_LIMIT) {
+                    logAllAlarmsForUidLocked(callingUid);
+                }
                 throw new IllegalStateException(errorMsg);
             }
             setImplLocked(type, triggerAtTime, triggerElapsed, windowLength, maxElapsed,
                     interval, operation, directReceiver, listenerTag, flags, true, workSource,
                     alarmClock, callingUid, callingPackage);
+        }
+    }
+
+    private void logAllAlarmsForUidLocked(int uid) {
+        final StringWriter logWriter = new StringWriter();
+        final PrintWriter pw = new PrintWriter(logWriter);
+
+        pw.println("List of all pending alarms for " + UserHandle.formatUid(uid) + ":");
+        dumpUpcomingNAlarmsForUid(pw, uid, mConstants.MAX_ALARMS_PER_UID);
+        pw.flush();
+        Slog.d(TAG, logWriter.toString());
+    }
+
+    private void dumpUpcomingNAlarmsForUid(PrintWriter pw, int uid, int n) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        final long nowElapsed = mInjector.getElapsedRealtime();
+        final long nowRtc = mInjector.getCurrentTimeMillis();
+
+        int count = 0;
+        for (int i = 0; i < mAlarmBatches.size() && count < n; i++) {
+            final Batch b = mAlarmBatches.get(i);
+            for (int j = 0; j < b.size() && count < n; j++) {
+                final Alarm a = b.get(j);
+                if (a.uid == uid) {
+                    final String label = labelForType(a.type);
+                    pw.print(label + " #" + (++count) + ": ");
+                    pw.println(a);
+                    a.dump(pw, "  ", nowElapsed, nowRtc, sdf);
+                }
+            }
         }
     }
 
