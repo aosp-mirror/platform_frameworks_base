@@ -101,7 +101,7 @@
     <string name="screenrecord_start" msgid="330991441575775004">"Бастау"</string>
     <string name="screenrecord_ongoing_screen_only" msgid="4459670242451527727">"Экрандағы бейне жазылуда."</string>
     <string name="screenrecord_ongoing_screen_and_audio" msgid="5351133763125180920">"Экрандағы бейне және аудио жазылуда."</string>
-    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Экранды түртуді көрсету"</string>
+    <string name="screenrecord_taps_label" msgid="1595690528298857649">"Экранды түрткенде көрсету"</string>
     <string name="screenrecord_stop_text" msgid="6549288689506057686">"Тоқтату үшін түртіңіз"</string>
     <string name="screenrecord_stop_label" msgid="72699670052087989">"Тоқтату"</string>
     <string name="screenrecord_pause_label" msgid="6004054907104549857">"Тоқтата тұру"</string>
@@ -274,7 +274,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="8880183481476943754">"Ұшақ режимі өшірілді."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="6327378061894076288">"Ұшақ режимі қосылды."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="3235552940146035383">"үнсіз"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"тек дабылдар"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3375848309132140014">"оятқыштар ғана"</string>
     <string name="accessibility_quick_settings_dnd" msgid="2415967452264206047">"Мазаламау."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="1457150026842505799">"\"Мазаламау\" режимі өшірілді."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="186315911607486129">"\"Мазаламау\" режимі қосылды."</string>
@@ -344,7 +344,7 @@
     <string name="quick_settings_header_onboarding_text" msgid="1918085351115504765">"Басқа опцияларды көру үшін белгішелерді түртіп ұстап тұрыңыз"</string>
     <string name="quick_settings_dnd_label" msgid="7728690179108024338">"Мазаламау"</string>
     <string name="quick_settings_dnd_priority_label" msgid="6251076422352664571">"Маңыздылары ғана"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Тек дабылдар"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="1241780970469630835">"Оятқыштар ғана"</string>
     <string name="quick_settings_dnd_none_label" msgid="8420869988472836354">"Толық тыныштық"</string>
     <string name="quick_settings_bluetooth_label" msgid="7018763367142041481">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="6595808498429809855">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> құрылғылары)"</string>
@@ -454,15 +454,17 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Ашу үшін қайта түртіңіз"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Ашу үшін жоғары қарай сырғытыңыз."</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Әрекетті қайталау үшін жоғары сырғытыңыз."</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Бұл құрылғыны ұйым басқарады"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Бұл құрылғыны <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> басқарады"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"Телефонды ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Дауыс көмекшісін ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Камераны ашу үшін белгішеден әрі қарай сырғытыңыз"</string>
     <string name="interruption_level_none_with_warning" msgid="8394434073508145437">"Толық тыныштық. Экранды оқу құралдары да өшеді."</string>
     <string name="interruption_level_none" msgid="219484038314193379">"Толық тыныштық"</string>
     <string name="interruption_level_priority" msgid="661294280016622209">"Маңыздылары ғана"</string>
-    <string name="interruption_level_alarms" msgid="2457850481335846959">"Тек дабылдар"</string>
+    <string name="interruption_level_alarms" msgid="2457850481335846959">"Оятқыштар ғана"</string>
     <string name="interruption_level_none_twoline" msgid="8579382742855486372">"Толық\nтыныштық"</string>
     <string name="interruption_level_priority_twoline" msgid="8523482736582498083">"Тек\nбасымдық"</string>
     <string name="interruption_level_alarms_twoline" msgid="2045067991335708767">"Тек\nдабылдар"</string>
@@ -510,7 +512,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Барлығын тазалау"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Басқару"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Тарих"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Кіріс"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Жаңа"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Үнсіз"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Хабарландырулар"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Әңгімелер"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Профиль бақылануы мүмкін"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Желі бақылауда болуы мүмкін"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Желі бақылауда болуы мүмкін"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"Ұйымыңыз осы құрылғыны басқарады және желі трафигін бақылауы мүмкін"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> осы құрылғыны басқарады және желі трафигін бақылауы мүмкін"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Құрылғыны ұйымыңыз басқарады және ол <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Құрылғыны <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> басқарады және ол <xliff:g id="VPN_APP">%2$s</xliff:g> қолданбасына қосылған"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Құрылғыны ұйымыңыз басқарады"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Құрылғыны <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> басқарады"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Құрылғыны ұйымыңыз басқарады және ол VPN желілеріне қосылған"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Құрылғыны <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> басқарады және ол VPN желілеріне қосылған"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Ұйымыңыз жұмыс профиліңіздегі желі трафигін бақылауы мүмкін"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> жұмыс профиліңіздегі желі трафигін бақылауы мүмкін"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Желі бақылануы мүмкін"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Құрылғы VPN желілеріне қосылған"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Жұмыс профилі <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Жеке профиль <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Құрылғы <xliff:g id="VPN_APP">%1$s</xliff:g> қолданбасына қосылған"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Құрылғыны басқару"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Профильді бақылау"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Желіні бақылау"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN функциясын өшіру"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN желісін ажырату"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Саясаттарды көру"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Құрылғыңызды <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> басқарады.\n\nӘкімші параметрлерді, корпоративтік кіру құқығын, қолданбаларды, құрылғыңызбен байланысты деректерді және құрылғыңыздың орналасқан жері туралы ақпаратты бақылай және басқара алады.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Құрылғыңызды ұйымыңыз басқарады.\n\nӘкімші параметрлерді, корпоративтік кіру құқығын, қолданбаларды, құрылғыңызбен байланысты деректерді және құрылғыңыздың орналасқан жері туралы ақпаратты бақылай және басқара алады.\n\nҚосымша ақпарат алу үшін әкімшіге хабарласыңыз."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Ұйымыңыз осы құрылғыда сертификат орнатқан. Қорғалған желі трафигіңіз бақылануы немесе өзгертілуі мүмкін."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Ұйымыңыз жұмыс профиліңізде сертификат орнатқан. Қорғалған желі трафигіңіз бақылануы немесе өзгертілуі мүмкін."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Осы құрылғыда сертификат орнатылған. Қорғалған желі трафигіңіз бақылануы немесе өзгертілуі мүмкін."</string>
@@ -711,17 +727,21 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Дыбыссыз"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Әдепкі"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Көпіршік"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Дыбыс не діріл қолданылмайды"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Дыбыс не діріл қолданылмайды, төменде әңгімелер бөлімінде шығады"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Телефон параметрлеріне байланысты шылдырлауы не дірілдеуі мүмкін. <xliff:g id="APP_NAME">%1$s</xliff:g> чаттары әдепкісінше қалқымалы етіп көрсетіледі."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Осы мазмұнға бекітілген қалқымалы таңбашамен назарыңызды өзіне тартады."</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Әңгімелер бөлімінің жоғарғы жағында тұрады, қалқыма хабар түрінде шығады, құлыптаулы экранда профиль суретін көрсетеді"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Параметрлер"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Маңыздылығы"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> әңгімелесу функцияларын қолдамайды."</string>
     <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"Жақындағы қалқыма хабарлар жоқ"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Жақында ашылған және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"Соңғы және жабылған қалқыма хабарлар осы жерде көрсетіледі."</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"Бұл хабарландыруларды өзгерту мүмкін емес."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"Мұндай хабарландырулар бұл жерде конфигурацияланбайды."</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"Прокси-сервер арқылы жіберілген хабарландыру"</string>
@@ -736,6 +756,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Бұл қолданба экранда басқа қолданбалардың үстінен көрсетіліп тұр және ол микрофон мен камераны пайдалануда."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Параметрлер"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Жарайды"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері ашылды"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g> хабарландыруларын басқару элементтері жабылды"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Осы арнадан келетін хабарландыруларға рұқсат беру"</string>
@@ -920,6 +952,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"Кідірту"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Келесіге өту"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Алдыңғысына оралу"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон қызып кеткендіктен өшірілді"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефоныңыз қазір қалыпты жұмыс істеп тұр"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефоныңыз қатты қызып кеткендіктен өшірілді. Телефоныңыз қазір қалыпты жұмыс істеп тұр.\n\nТелефоныңыз мына жағдайларда ыстық болуы мүмкін:\n	• Ресурстар талап ететін қолданбаларды пайдалану (ойын, бейне немесе навигация қолданбалары)\n	• Үлкен көлемді файлдарды жүктеу немесе жүктеп салу\n	• Телефонды жоғары температурада пайдалану"</string>
@@ -1002,9 +1036,9 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Жоғары оң жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Төменгі сол жаққа жылжыту"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Төменгі оң жаққа жылжыту"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Жабу"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Қалқымалы хабарды жабу"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Әңгіменің қалқыма хабары көрсетілмесін"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Сөйлесуге арналған қалқыма хабарлар"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Қалқыма хабарлар арқылы сөйлесу"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Жаңа әңгімелер қалқыма белгішелер немесе хабарлар түрінде көрсетіледі. Қалқыма хабарды ашу үшін түртіңіз. Жылжыту үшін сүйреңіз."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Қалқыма хабарларды реттеу"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Бұл қолданбадан қалқыма хабарларды өшіру үшін \"Басқару\" түймесін түртіңіз."</string>
@@ -1014,8 +1048,8 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Жүйе навигациясын жаңарту үшін \"Параметрлер\" бөліміне өтіңіз."</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Күту режимі"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Әңгіме маңызды деп белгіленді"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Маңызды әңгімелердің әрекеті:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Сөйлесу бөлімінің жоғарғы жағында көрсетіледі."</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Маңызды әңгімелер:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Әңгімелер бөлімінің жоғарғы жағында көрсетіледі."</string>
     <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Профиль суреті құлыптаулы экранда көрсетіледі."</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Қолданбалар терезесінің бергі жағынан қалқыма хабарлар түрінде көрсетіледі."</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"\"Мазаламау\" режимінде көрсетіледі."</string>
@@ -1024,7 +1058,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Ұлғайту терезесі"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Ұлғайту терезесінің басқару элементтері"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Құрылғы басқару виджеттері"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Жалғанған құрылғыларға басқару элементтерін енгізу"</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Жалғанған құрылғылар үшін басқару виджеттерін қосу"</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Құрылғы басқару виджеттерін реттеу"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Басқару элементтерін шығару үшін қуат түймесін басып тұрыңыз."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Басқару элементтері енгізілетін қолданбаны таңдаңыз"</string>
@@ -1044,7 +1078,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Басқару элементтерінің ретін өзгерту үшін оларды басып тұрып сүйреңіз."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Барлық басқару элементтері өшірілді."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Өзгерістер сақталмады."</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Барлық басқару элементі тізімі жүктелмеді."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Басқару элементтері жүктелмеді. Қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APP">%s</xliff:g> қолданбасын қараңыз."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Үйлесімді басқару элементтері қолжетімді емес."</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Басқа"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Құрылғы басқару виджеттеріне қосу"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Енгізу"</string>
@@ -1064,14 +1099,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Жалғастыру"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Өшірулі. Қолданба тексеріңіз."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Қате, әрекет қайталануда…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Табылмады"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Басқару виджеті қолжетімсіз"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> ашылмады. Басқару виджетінің әлі қолжетімді екенін және қолданба параметрлерінің өзгермегенін тексеру үшін <xliff:g id="APPLICATION">%2$s</xliff:g> қолданбасын қараңыз."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Қолданбаны ашу"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Күйді жүктеу мүмкін емес."</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Қате шықты. Қайталап көріңіз."</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"Орындалуда"</string>

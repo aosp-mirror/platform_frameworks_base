@@ -456,8 +456,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Додирните поново да бисте отворили"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Превуците нагоре да бисте отворили"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Превуците нагоре да бисте пробали поново"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Овим уређајем управља организација"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Овим уређајем управља <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"Превуците од иконе за телефон"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Превуците од иконе за гласовну помоћ"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Превуците од иконе за камеру"</string>
@@ -513,7 +515,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Обриши све"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Управљајте"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Историја"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Долазно"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Ново"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Нечујно"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Обавештења"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Конверзације"</string>
@@ -524,21 +526,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Профил се можда надгледа"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Мрежа се можда надгледа"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Мрежа се можда надгледа"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"Организација управља овим уређајем и може да надгледа мрежни саобраћај"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> управља овим уређајем и може да надгледа мрежни саобраћај"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Уређајем управља организација и повезан је са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и повезан је са апликацијом <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Уређајем управља организација"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Овим уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Уређајем управља организација и повезан је са VPN-овима"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> и повезан је са VPN-овима"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Организација може да прати мрежни саобраћај на пословном профилу"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> може да надгледа мрежни саобраћај на пословном профилу"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Мрежа се можда надгледа"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Уређај је повезан са VPN-овима"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Пословни профил је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Лични профил је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Уређај је повезан са апликацијом <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Управљање уређајима"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Надгледање профила"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Надгледање мреже"</string>
@@ -548,8 +562,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"Онемогући VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Прекини везу са VPN-ом"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Прикажи смернице"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Уређајем управља <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nВише информација потражите од администратора."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Уређајем управља организација.\n\nАдминистратор може да надгледа подешавања, корпоративни приступ, апликације, податке повезане са уређајем и информације о локацији уређаја, као и да управља њима.\n\nВише информација потражите од администратора."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Организација је на овом уређају инсталирала ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Организација је на пословном профилу инсталирала ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"На овом уређају је инсталиран ауторитет за издавање сертификата. Безбедни мрежни саобраћај може да се прати или мења."</string>
@@ -598,7 +614,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Апликација је закачена"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Назад и Почетна да бисте га откачили."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"На овај начин се стално приказује док га не откачите. Превуците нагоре и задржите да бисте га откачили."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Стално ће се приказивати док је не откачите. Превуците нагоре и задржите да бисте је откачили."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Преглед да бисте га откачили."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"На овај начин се ово стално приказује док га не откачите. Додирните и задржите Почетна да бисте га откачили."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Могу да буду доступни лични подаци (као што су контакти и садржај имејлова)."</string>
@@ -714,11 +730,15 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Нечујно"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"Подразумевано"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Облачић"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Без звука и вибрирања"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Без звука и вибрирања и приказује се у наставку одељка за конверзације"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Може да звони или вибрира у зависности од подешавања телефона"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Може да звони или вибрира у зависности од подешавања телефона. Конверзације из апликације <xliff:g id="APP_NAME">%1$s</xliff:g> се подразумевано приказују у облачићима."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Привлачи вам пажњу помоћу плутајуће пречице до овог садржаја."</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Приказује се у врху одељка за конверзације као плутајући облачић, приказује слику профила на закључаном екрану"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Подешавања"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Приоритет"</string>
@@ -739,6 +759,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Ова апликација се приказује преко других апликација на екрану и користи микрофон и камеру."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Подешавања"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Потврди"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Контроле обавештења за отварање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Контроле обавештења за затварање апликације <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Дозволи обавештења са овог канала"</string>
@@ -925,6 +957,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"Паузирај"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Пређи на следеће"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Пређи на претходно"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон се искључио због топлоте"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефон сада нормално ради"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон је био преврућ, па се искључио да се охлади. Сада ради нормално.\n\nТелефон може превише да се угреје ако:\n	• Користите апликације које захтевају пуно ресурса (нпр. видео игре, видео или апликације за навигацију)\n	• Преузимате/отпремате велике датотеке\n	• Користите телефон на високој температури"</string>
@@ -1007,9 +1041,9 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Премести горе десно"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Премести доле лево"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Премести доле десно"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Одбаци"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Одбаци облачић"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Не користи облачиће за конверзацију"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Ћаскајте помоћу облачића"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"Ћаскајте у облачићима"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Нове конверзације се приказују као плутајуће иконе или облачићи. Додирните да бисте отворили облачић. Превуците да бисте га преместили."</string>
     <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"Контролишите облачиће у било ком тренутку"</string>
     <string name="bubbles_user_education_manage" msgid="1391639189507036423">"Додирните Управљајте да бисте искључили облачиће из ове апликације"</string>
@@ -1019,9 +1053,9 @@
     <string name="notification_content_gesture_nav_available" msgid="4431460803004659888">"Идите у Подешавања да бисте ажурирали навигацију система"</string>
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Стање приправности"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Конверзација је подешена на приоритетну"</string>
-    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације ће:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Приказује се у врху одељка за конверзације"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Приказује слику профила на закључаном екрану"</string>
+    <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Приоритетне конверзације:"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"се приказују у врху одељка за конверзације"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"приказују слику профила на закључаном екрану"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Приказују се плутајући облачићи преко апликација"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Омета подешавање Не узнемиравај"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"Важи"</string>
@@ -1050,7 +1084,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржите и превуците да бисте променили распоред контрола"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Учитавање листе свих контрола није успело."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Учитавање контрола није успело. Погледајте апликацију <xliff:g id="APP">%s</xliff:g> да бисте се уверили да се подешавања апликације нису променила."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Компатибилне контроле нису доступне"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Додајте у контроле уређаја"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Додај"</string>
@@ -1070,14 +1105,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"Настави"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Неактивно. Видите апликацију"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Грешка, покушава се поново…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"Није пронађено"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"Контрола није доступна"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"Приступање уређају <xliff:g id="DEVICE">%1$s</xliff:g> није успело. Погледајте апликацију <xliff:g id="APPLICATION">%2$s</xliff:g> да бисте се уверили да је контрола још увек доступна и да се подешавања апликације нису променила."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"Отвори апликацију"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"Учитавање статуса није успело"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"Грешка. Пробајте поново"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"У току"</string>

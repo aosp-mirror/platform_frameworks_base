@@ -35,7 +35,7 @@
     <string name="battery_low_why" msgid="2056750982959359863">"Cilësimet"</string>
     <string name="battery_saver_confirmation_title" msgid="1234998463717398453">"Të aktivizohet \"Kursyesi i baterisë\"?"</string>
     <string name="battery_saver_confirmation_title_generic" msgid="2299231884234959849">"Rreth \"Kursyesit të baterisë\""</string>
-    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Ndiz"</string>
+    <string name="battery_saver_confirmation_ok" msgid="5042136476802816494">"Aktivizo"</string>
     <string name="battery_saver_start_action" msgid="4553256017945469937">"Aktivizo \"Kursyesin e baterisë\""</string>
     <string name="status_bar_settings_settings_button" msgid="534331565185171556">"Cilësimet"</string>
     <string name="status_bar_settings_wifi_button" msgid="7243072479837270946">"Wi-Fi"</string>
@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Trokit përsëri për ta hapur"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Rrëshqit lart për ta hapur"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Rrëshqit lart për të provuar përsëri"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Kjo pajisje menaxhohet nga organizata jote"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Kjo pajisje menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"Rrëshqit për të hapur telefonin"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Rrëshqit për të hapur ndihmën zanore"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Rrëshqit për të hapur kamerën"</string>
@@ -510,7 +512,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Pastroji të gjitha"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Menaxho"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Historiku"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"Hyrëse"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"Të reja"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Në heshtje"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Njoftimet"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Bisedat"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Profili mund të monitorohet"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Rrjeti mund të jetë i monitoruar"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Rrjeti mund të jetë i monitoruar"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"Organizata jote e menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit."</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> menaxhon këtë pajisje dhe mund të monitorojë trafikun e rrjetit"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Pajisja menaxhohet nga organizata jote dhe është lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Pajisja menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dhe është e lidhur me <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Pajisja menaxhohet nga organizata jote"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Pajisja menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Pajisja menaxhohet nga organizata jote dhe është e lidhur me VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Pajisja menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> dhe është e lidhur me VPN"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organizata jote mund të monitorojë trafikun e rrjetit në profilin tënd të punës"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> mund të monitorojë trafikun e rrjetit në profilin tënd të punës"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Rrjeti mund të jetë i monitoruar"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Pajisja është e lidhur me VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Profili i punës është i lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Profili personal është i lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Pajisja është e lidhur me <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Menaxhimi i pajisjes"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Monitorimi i profilit"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Monitorimi i rrjetit"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"Çaktivizo VPN-në"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Shkëput VPN-në"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Shiko politikat"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Pajisja jote menaxhohet nga <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nAdministratori mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes tënde.\n\nPër më shumë informacione, kontakto me administratorin."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Pajisja jote menaxhohet nga organizata jote.\n\nAdministratori mund të monitorojë dhe menaxhojë cilësimet, qasjen e korporatës, aplikacionet, të dhënat e lidhura me pajisjen tënde, si dhe informacionet e vendndodhjes së pajisjes tënde.\n\nPër më shumë informacione, kontakto me administratorin."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizata jote instaloi një autoritet certifikate në këtë pajisje. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizata jote instaloi një autoritet certifikate në profilin tënd të punës. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Në këtë pajisje është instaluar një autoritet certifikate. Trafiku i rrjetit tënd të sigurt mund të monitorohet ose modifikohet."</string>
@@ -595,7 +611,7 @@
     <string name="screen_pinning_title" msgid="9058007390337841305">"Aplikacioni është i gozhduar"</string>
     <string name="screen_pinning_description" msgid="8699395373875667743">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Prapa\" dhe \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_description_recents_invisible" msgid="4564466648700390037">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Prapa\" dhe \"Kreu\" për ta hequr nga gozhdimi."</string>
-    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Kjo e ruan në pamje deri sa ta zhgozhdosh. Rrëshqit shpejt lart dhe mbaje të shtypur për ta hequr zhgozhduar."</string>
+    <string name="screen_pinning_description_gestural" msgid="7246323931831232068">"Kjo e ruan në pamje deri sa ta zhgozhdosh. Rrëshqit shpejt lart dhe mbaje të shtypur për ta zhgozhduar."</string>
     <string name="screen_pinning_description_accessible" msgid="7386449191953535332">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Përmbledhje\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_description_recents_invisible_accessible" msgid="2857071808674481986">"Kjo e ruan në pamje deri sa ta heqësh nga gozhdimi. Prek dhe mbaj të shtypur \"Kreu\" për ta hequr nga gozhdimi."</string>
     <string name="screen_pinning_exposes_personal_data" msgid="8189852022981524789">"Të dhënat personale mund të jenë të qasshme (si kontaktet dhe përmbajtja e email-eve)"</string>
@@ -711,11 +727,15 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"Në heshtje"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"E parazgjedhur"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"Flluskë"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"Asnjë tingull ose dridhje"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"Asnjë tingull ose dridhje dhe shfaqet më poshtë në seksionin e bisedave"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"Mund të bjerë zilja ose të dridhet në bazë të cilësimeve të telefonit. Bisedat nga flluska e <xliff:g id="APP_NAME">%1$s</xliff:g> si parazgjedhje."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"Mban vëmendjen tënde me një shkurtore pluskuese te kjo përmbajtje."</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"Shfaqet në krye të seksionit të bisedës dhe shfaqet si flluskë pluskuese, shfaq fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"Cilësimet"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"Përparësia"</string>
@@ -736,6 +756,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"Ky aplikacion po shfaqet mbi aplikacionet e tjera në ekran dhe po përdor mikrofonin dhe kamerën."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"Cilësimet"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"Në rregull"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë hapur"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"Kontrollet e njoftimeve për <xliff:g id="APP_NAME">%1$s</xliff:g> janë mbyllur"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"Lejo njoftimet nga ky kanal"</string>
@@ -920,6 +952,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"Ndërprit"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Kalo te tjetra"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Kalo tek e mëparshmja"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Telefoni u fik për shkak të nxehtësisë"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefoni tani punon normalisht"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefoni yt ishte tepër i nxehtë, prandaj u fik për t\'u ftohur. Telefoni tani punon normalisht.\n\nTelefoni mund të nxehet së tepërmi nëse ti:\n	• Përdor aplikacione intensive për burimet (siç janë aplikacionet e lojërave, videove apo aplikacionet e navigimit)\n	• Shkarkon ose ngarkon skedarë të mëdhenj\n	• E përdor telefonin në temperatura të larta"</string>
@@ -1002,7 +1036,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"Lëviz lart djathtas"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"Zhvendos poshtë majtas"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"Lëvize poshtë djathtas"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"Hiq"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"Hiqe flluskën"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"Mos e vendos bisedën në flluskë"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"Bisedo duke përdorur flluskat"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"Bisedat e reja shfaqen si ikona pluskuese ose flluska. Trokit për të hapur flluskën. Zvarrit për ta zhvendosur."</string>
@@ -1015,8 +1049,8 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Në gatishmëri"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Biseda u caktua me përparësi"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Bisedat me përparësi do të:"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Shfaq në krye të seksionit të bisedës"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Shfaq figurën e profilit në ekranin e kyçjes"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Shfaqen në krye të seksionit të bisedës"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Shfaqin fotografinë e profilit në ekranin e kyçjes"</string>
     <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Shfaq si flluskë pluskuese mbi aplikacione"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Ndërprit \"Mos shqetëso\""</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"E kuptova"</string>
@@ -1044,7 +1078,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Mbaje të shtypur dhe zvarrit për të risistemuar kontrollet"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Të gjitha kontrollet u hoqën"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ndryshimet nuk u ruajtën"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"Lista e të gjitha kontrolleve nuk mund të ngarkohej."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontrollet nuk mund të ngarkoheshin. Kontrollo aplikacionin <xliff:g id="APP">%s</xliff:g> për t\'u siguruar që cilësimet e aplikacionit nuk janë ndryshuar."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kontrollet e përputhshme nuk ofrohen"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Tjetër"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Shto te kontrollet e pajisjes"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Shto"</string>

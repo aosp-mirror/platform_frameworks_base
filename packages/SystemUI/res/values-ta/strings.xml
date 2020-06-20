@@ -146,7 +146,7 @@
     <string name="biometric_dialog_face_icon_description_authenticating" msgid="3401633342366146535">"உங்கள் முகத்தை அங்கீகரிக்கிறது"</string>
     <string name="biometric_dialog_face_icon_description_authenticated" msgid="2242167416140740920">"முகம் அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_face_icon_description_confirmed" msgid="7918067993953940778">"உறுதிப்படுத்தப்பட்டது"</string>
-    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்து\' என்பதை தட்டவும்"</string>
+    <string name="biometric_dialog_tap_confirm" msgid="9166350738859143358">"முடிக்க \'உறுதிப்படுத்துக\' என்பதை தட்டவும்"</string>
     <string name="biometric_dialog_authenticated" msgid="7337147327545272484">"அங்கீகரிக்கப்பட்டது"</string>
     <string name="biometric_dialog_use_pin" msgid="8385294115283000709">"பின்னைப் பயன்படுத்து"</string>
     <string name="biometric_dialog_use_pattern" msgid="2315593393167211194">"பேட்டர்னைப் பயன்படுத்து"</string>
@@ -168,7 +168,7 @@
     <string name="biometric_dialog_last_password_attempt_before_wipe_profile" msgid="8538032972389729253">"அடுத்த முறை தவறான கடவுச்சொல்லை உள்ளிட்டால் உங்கள் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_device" msgid="6585503524026243042">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தச் சாதனத்தின் தரவு நீக்கப்படும்."</string>
     <string name="biometric_dialog_failed_attempts_now_wiping_user" msgid="7015008539146949115">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தப் பயனர் நீக்கப்படுவார்."</string>
-    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"பலமுறை தவறாக முயன்ற காரணத்தால் இந்தப் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்."</string>
+    <string name="biometric_dialog_failed_attempts_now_wiping_profile" msgid="5239378521440749682">"பலமுறை தவறாக முயன்றதால், இந்தப் பணிக் கணக்கும் அதன் தரவும் நீக்கப்படும்"</string>
     <string name="biometric_dialog_now_wiping_dialog_dismiss" msgid="7189432882125106154">"நிராகரி"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="2817887108047658975">"கைரேகை சென்சாரைத் தொடவும்"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="4465698996175640549">"கைரேகை ஐகான்"</string>
@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"திறக்க, மீண்டும் தட்டவும்"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"திறப்பதற்கு மேல் நோக்கி ஸ்வைப் செய்யவும்"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"மீண்டும் முயல மேல்நோக்கி ஸ்வைப் செய்யவும்"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"இந்தச் சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"இந்தச் சாதனத்தை நிர்வகிப்பது: <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"ஃபோனிற்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
     <string name="voice_hint" msgid="7476017460191291417">"குரல் உதவிக்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
     <string name="camera_hint" msgid="4519495795000658637">"கேமராவிற்கு ஐகானிலிருந்து ஸ்வைப் செய்யவும்"</string>
@@ -510,7 +512,7 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"எல்லாவற்றையும் அழி"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"அறிவிப்புகளை நிர்வகி"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"வரலாறு"</string>
-    <string name="notification_section_header_incoming" msgid="5295312809341711367">"உள்வருவது"</string>
+    <string name="notification_section_header_incoming" msgid="850925217908095197">"புதிது"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"நிசப்தம்"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"அறிவிப்புகள்"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"உரையாடல்கள்"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"சுயவிவரம் கண்காணிக்கப்படலாம்"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"நெட்வொர்க் கண்காணிக்கப்படலாம்"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"நெட்வொர்க் கண்காணிக்கப்படலாம்"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"உங்கள் நிறுவனம் இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம்"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> இந்தச் சாதனத்தை நிர்வகிக்கும், அத்துடன் அது நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம்"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது, மேலும் அது <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"சாதனத்தை <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிர்வகிக்கிறது, மேலும் அது <xliff:g id="VPN_APP">%2$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"சாதனத்தை <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிர்வகிக்கிறது"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது, மேலும் அது VPNகளுடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"சாதனத்தை <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிர்வகிக்கிறது, மேலும் அது VPNகளுடன் இணைக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"உங்கள் நிறுவனம் பணிக் கணக்கில் நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம்"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> உங்கள் பணிக் கணக்கில் நெட்வொர்க் ட்ராஃபிக்கைக் கண்காணிக்கலாம்"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"நெட்வொர்க் கண்காணிக்கப்படலாம்"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"சாதனம் VPNகளுடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"<xliff:g id="VPN_APP">%1$s</xliff:g> உடன் பணிவிவரம் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"தனிப்பட்ட சுயவிவரம் <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"சாதனம் <xliff:g id="VPN_APP">%1$s</xliff:g> உடன் இணைக்கப்பட்டுள்ளது"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"சாதன நிர்வாகம்"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"சுயவிவரத்தைக் கண்காணித்தல்"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"நெட்வொர்க்கைக் கண்காணித்தல்"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPNஐ முடக்கு"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPNஐத் துண்டி"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"கொள்கைகளைக் காட்டு"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"சாதனத்தை <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> நிர்வகிக்கிறது.\n\nஉங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், ஆப்ஸ், உங்கள் சாதனத்துடன் தொடர்புடைய டேட்டா, சாதனங்களின் இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"சாதனத்தை உங்கள் நிறுவனம் நிர்வகிக்கிறது.\n\nஉங்கள் நிர்வாகியால் அமைப்புகள், நிறுவன அணுகல், ஆப்ஸ், உங்கள் சாதனத்துடன் தொடர்புடைய டேட்டா, சாதனங்களின் இருப்பிடத் தகவல் ஆகியவற்றைக் கண்காணிக்கவும் நிர்வகிக்கவும் முடியும்.\n\nமேலும் தகவலுக்கு, உங்கள் நிர்வாகியைத் தொடர்புகொள்ளவும்."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"உங்கள் நிறுவனம் இந்தச் சாதனத்தில் சான்றிதழ் அங்கீகாரத்தை நிறுவியுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"உங்கள் நிறுவனம், பணிக் கணக்கில் சான்றிதழ் அங்கீகாரத்தை நிறுவியுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"இந்தச் சாதனத்தில் சான்றிதழ் அங்கீகாரம் நிறுவப்பட்டுள்ளது. உங்களின் பாதுகாப்பான நெட்வொர்க் ட்ராஃபிக் கண்காணிக்கப்படலாம் அல்லது மாற்றப்படலாம்."</string>
@@ -711,11 +727,15 @@
     <string name="notification_silence_title" msgid="8608090968400832335">"நிசப்தம்"</string>
     <string name="notification_alert_title" msgid="3656229781017543655">"இயல்புநிலை"</string>
     <string name="notification_bubble_title" msgid="8330481035191903164">"பபிள்"</string>
+    <!-- no translation found for notification_automatic_title (3745465364578762652) -->
+    <skip />
     <string name="notification_channel_summary_low" msgid="4860617986908931158">"ஒலி / அதிர்வு இல்லை"</string>
     <string name="notification_conversation_summary_low" msgid="1734433426085468009">"ஒலி / அதிர்வு இல்லாமல் உரையாடல் பிரிவின் கீழ்ப் பகுதியில் தோன்றும்"</string>
     <string name="notification_channel_summary_default" msgid="3282930979307248890">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும்"</string>
     <string name="notification_channel_summary_default_with_bubbles" msgid="1782419896613644568">"மொபைல் அமைப்புகளின் அடிப்படையில் ஒலிக்கவோ அதிரவோ செய்யும். <xliff:g id="APP_NAME">%1$s</xliff:g> இலிருந்து வரும் உரையாடல்கள் இயல்பாகவே குமிழாகத் தோன்றும்."</string>
     <string name="notification_channel_summary_bubble" msgid="7235935211580860537">"இந்த உள்ளடக்கத்திற்கான மிதக்கும் ஷார்ட்கட் மூலம் உங்கள் கவனத்தைப் பெற்றிருக்கும்."</string>
+    <!-- no translation found for notification_channel_summary_automatic (5813109268050235275) -->
+    <skip />
     <string name="notification_channel_summary_priority" msgid="7952654515769021553">"உரையாடல் பிரிவின் மேற்பகுதியில் மிதக்கும் குமிழாகத் தோன்றும். பூட்டுத் திரையின் மேல் சுயவிவரப் படத்தைக் காட்டும்"</string>
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"அமைப்புகள்"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"முன்னுரிமை"</string>
@@ -736,6 +756,18 @@
     <string name="appops_camera_mic_overlay" msgid="5584311236445644095">"இந்த ஆப்ஸானது, உங்கள் திரையில் பிற ஆப்ஸின் இடைமுகத்தின் மேல் தோன்றுவதுடன், மைக்ரோஃபோனையும் கேமராவையும் உபயோகிக்கிறது."</string>
     <string name="notification_appops_settings" msgid="5208974858340445174">"அமைப்புகள்"</string>
     <string name="notification_appops_ok" msgid="2177609375872784124">"சரி"</string>
+    <!-- no translation found for feedback_silenced (5382212321253328247) -->
+    <skip />
+    <!-- no translation found for feedback_promoted (8075757485407091976) -->
+    <skip />
+    <!-- no translation found for feedback_demoted (5848066008939031913) -->
+    <skip />
+    <!-- no translation found for feedback_prompt (2278631214125128281) -->
+    <skip />
+    <!-- no translation found for feedback_response (4671729244976641339) -->
+    <skip />
+    <!-- no translation found for feedback_ok (6481426753298857144) -->
+    <skip />
     <string name="notification_channel_controls_opened_accessibility" msgid="6111817750774381094">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் திறக்கப்பட்டன"</string>
     <string name="notification_channel_controls_closed_accessibility" msgid="1561909368876911701">"<xliff:g id="APP_NAME">%1$s</xliff:g>க்கான அறிவிப்புக் கட்டுப்பாடுகள் மூடப்பட்டன"</string>
     <string name="notification_channel_switch_accessibility" msgid="8979885820432540252">"இந்தச் சேனலிலிருந்து அறிவிப்புகளைப் பெறுவதை அனுமதிக்கும்"</string>
@@ -920,6 +952,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"இடைநிறுத்து"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"அடுத்ததற்குச் செல்"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"முந்தையதற்குச் செல்"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"வெப்பத்தினால் ஃபோன் ஆஃப் செய்யப்பட்டது"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"இப்போது உங்கள் ஃபோன் இயல்புநிலையில் இயங்குகிறது"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"உங்கள் ஃபோன் அதிகமாகச் சூடானதால், அதன் சூட்டைக் குறைக்க, ஆஃப் செய்யப்பட்டது. இப்போது உங்கள் ஃபோன் இயல்புநிலையில் இயங்குகிறது.\n\nபின்வருவனவற்றைச் செய்தால், ஃபோன் சூடாகலாம்:\n	• அதிகளவு தரவைப் பயன்படுத்தும் ஆப்ஸை (எ.கா: கேமிங், வீடியோ (அ) வழிகாட்டுதல் ஆப்ஸ்) பயன்படுத்துவது\n	• பெரிய கோப்புகளைப் பதிவிறக்குவது/பதிவேற்றுவது\n	• அதிக வெப்பநிலையில் ஃபோனைப் பயன்படுத்துவது"</string>
@@ -1002,7 +1036,7 @@
     <string name="bubble_accessibility_action_move_top_right" msgid="6916868852433483569">"மேலே வலப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_left" msgid="6339015902495504715">"கீழே இடப்புறமாக நகர்த்து"</string>
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"கீழே வலதுபுறமாக நகர்த்து"</string>
-    <string name="bubble_dismiss_text" msgid="7071770411580452911">"மூடுக"</string>
+    <string name="bubble_dismiss_text" msgid="1314082410868930066">"குமிழை அகற்று"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"உரையாடலைக் குமிழாக்காதே"</string>
     <string name="bubbles_user_education_title" msgid="5547017089271445797">"குமிழ்களைப் பயன்படுத்தி அரட்டையடியுங்கள்"</string>
     <string name="bubbles_user_education_description" msgid="1160281719576715211">"புதிய உரையாடல்கள் மிதக்கும் ஐகான்களாகவோ குமிழ்களாகவோ தோன்றும். குமிழைத் திறக்க தட்டவும். நகர்த்த இழுக்கவும்."</string>
@@ -1044,7 +1078,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"கட்டுப்பாடுகளை மறுவரிசைப்படுத்த அவற்றைப் பிடித்து இழுக்கவும்"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"கட்டுப்பாடுகள் அனைத்தும் அகற்றப்பட்டன"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"மாற்றங்கள் சேமிக்கப்படவில்லை"</string>
-    <string name="controls_favorite_load_error" msgid="2533215155804455348">"எல்லா கட்டுப்பாடுகளின் பட்டியலை ஏற்ற முடியவில்லை."</string>
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"கட்டுப்பாடுகளை ஏற்ற முடியவில்லை. ஆப்ஸ் அமைப்புகள் மாறவில்லை என்பதை உறுதிப்படுத்த <xliff:g id="APP">%s</xliff:g> ஆப்ஸைப் பார்க்கவும்."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"இணக்கமான கட்டுப்பாடுகள் இல்லை"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"பிற"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"சாதனக் கட்டுப்பாடுகளில் சேர்த்தல்"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"சேர்"</string>
@@ -1064,14 +1099,10 @@
     <string name="controls_media_resume" msgid="1933520684481586053">"தொடர்க"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"செயலில் இல்லை , சரிபார்க்கவும்"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"பிழை, மீண்டும் முயல்கிறது…"</string>
-    <!-- no translation found for controls_error_removed (6675638069846014366) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_title (1207794911208047818) -->
-    <skip />
-    <!-- no translation found for controls_error_removed_message (2885911717034750542) -->
-    <skip />
-    <!-- no translation found for controls_open_app (483650971094300141) -->
-    <skip />
+    <string name="controls_error_removed" msgid="6675638069846014366">"இல்லை"</string>
+    <string name="controls_error_removed_title" msgid="1207794911208047818">"கட்டுப்பாடு இல்லை"</string>
+    <string name="controls_error_removed_message" msgid="2885911717034750542">"<xliff:g id="DEVICE">%1$s</xliff:g> சாதனத்தை அணுக இயலவில்லை. இப்போதும் கட்டுப்பாடு உள்ளது என்பதையும் ஆப்ஸ் அமைப்புகள் மாறவில்லை என்பதையும் உறுதிப்படுத்த <xliff:g id="APPLICATION">%2$s</xliff:g> ஆப்ஸைப் பார்க்கவும்."</string>
+    <string name="controls_open_app" msgid="483650971094300141">"ஆப்ஸைத் திற"</string>
     <string name="controls_error_generic" msgid="352500456918362905">"நிலையைக் காட்ட முடியவில்லை"</string>
     <string name="controls_error_failed" msgid="960228639198558525">"பிழை, மீண்டும் முயலவும்"</string>
     <string name="controls_in_progress" msgid="4421080500238215939">"செயல்பாட்டிலுள்ளது"</string>
