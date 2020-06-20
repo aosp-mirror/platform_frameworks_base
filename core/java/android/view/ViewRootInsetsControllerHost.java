@@ -228,4 +228,12 @@ public class ViewRootInsetsControllerHost implements InsetsController.Host {
         }
         return mViewRoot.getTitle().toString();
     }
+
+    @Override
+    public int dipToPx(int dips) {
+        if (mViewRoot != null) {
+            return mViewRoot.dipToPx(dips);
+        }
+        return 0;
+    }
 }

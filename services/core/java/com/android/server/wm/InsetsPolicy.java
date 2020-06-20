@@ -387,7 +387,10 @@ class InsetsPolicy {
         InsetsPolicyAnimationControlCallbacks mControlCallbacks;
 
         InsetsPolicyAnimationControlListener(boolean show, Runnable finishCallback, int types) {
-            super(show, false /* hasCallbacks */, types, false /* disable */);
+
+            super(show, false /* hasCallbacks */, types, false /* disable */,
+                    (int) (mDisplayContent.getDisplayMetrics().density * FLOATING_IME_BOTTOM_INSET
+                            + 0.5f));
             mFinishCallback = finishCallback;
             mControlCallbacks = new InsetsPolicyAnimationControlCallbacks(this);
         }
