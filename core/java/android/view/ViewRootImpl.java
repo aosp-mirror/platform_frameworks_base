@@ -2316,7 +2316,7 @@ public final class ViewRootImpl implements ViewParent,
                 || lp.type == TYPE_VOLUME_OVERLAY;
     }
 
-    private int dipToPx(int dip) {
+    int dipToPx(int dip) {
         final DisplayMetrics displayMetrics = mContext.getResources().getDisplayMetrics();
         return (int) (displayMetrics.density * dip + 0.5f);
     }
