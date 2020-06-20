@@ -681,6 +681,8 @@ public class UsageStatsService extends SystemService implements
             reportEventToAllUserId(event);
             flushToDiskLocked();
         }
+
+        mAppStandby.flushToDisk();
     }
 
     /**
@@ -806,8 +808,6 @@ public class UsageStatsService extends SystemService implements
                 return;
             }
 
-            final long elapsedRealtime = SystemClock.elapsedRealtime();
-
             switch (event.mEventType) {
                 case Event.ACTIVITY_RESUMED:
                     FrameworkStatsLog.write(
@@ -914,9 +914,9 @@ public class UsageStatsService extends SystemService implements
                 return; // user was stopped or removed
             }
             service.reportEvent(event);
-
-            mAppStandby.reportEvent(event, elapsedRealtime, userId);
         }
+
+        mAppStandby.reportEvent(event, userId);
     }
 
     /**
@@ -948,6 +948,7 @@ public class UsageStatsService extends SystemService implements
             reportEventToAllUserId(event);
             flushToDiskLocked();
         }
+        mAppStandby.flushToDisk();
     }
 
     /**
@@ -957,9 +958,9 @@ public class UsageStatsService extends SystemService implements
         synchronized (mLock) {
             Slog.i(TAG, "Removing user " + userId + " and all data.");
             mUserState.remove(userId);
-            mAppStandby.onUserRemoved(userId);
             mAppTimeLimit.onUserRemoved(userId);
         }
+        mAppStandby.onUserRemoved(userId);
         // Cancel any scheduled jobs for this user since the user is being removed.
         UsageStatsIdleService.cancelJob(getContext(), userId);
         UsageStatsIdleService.cancelUpdateMappingsJob(getContext());
@@ -1158,10 +1159,7 @@ public class UsageStatsService extends SystemService implements
             if (service != null) {
                 service.persistActiveStats();
             }
-            mAppStandby.flushToDisk(userId);
         }
-        mAppStandby.flushDurationsToDisk();
-
         mHandler.removeMessages(MSG_FLUSH_TO_DISK);
     }
 
@@ -1169,28 +1167,31 @@ public class UsageStatsService extends SystemService implements
      * Called by the Binder stub.
      */
     void dump(String[] args, PrintWriter pw) {
-        synchronized (mLock) {
-            IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
+        IndentingPrintWriter idpw = new IndentingPrintWriter(pw, "  ");
 
-            boolean checkin = false;
-            boolean compact = false;
-            final ArrayList<String> pkgs = new ArrayList<>();
+        boolean checkin = false;
+        boolean compact = false;
+        final ArrayList<String> pkgs = new ArrayList<>();
 
-            if (args != null) {
-                for (int i = 0; i < args.length; i++) {
-                    String arg = args[i];
-                    if ("--checkin".equals(arg)) {
-                        checkin = true;
-                    } else if ("-c".equals(arg)) {
-                        compact = true;
-                    } else if ("flush".equals(arg)) {
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                String arg = args[i];
+                if ("--checkin".equals(arg)) {
+                    checkin = true;
+                } else if ("-c".equals(arg)) {
+                    compact = true;
+                } else if ("flush".equals(arg)) {
+                    synchronized (mLock) {
                         flushToDiskLocked();
-                        pw.println("Flushed stats to disk");
-                        return;
-                    } else if ("is-app-standby-enabled".equals(arg)) {
-                        pw.println(mAppStandby.isAppIdleEnabled());
-                        return;
-                    } else if ("apptimelimit".equals(arg)) {
+                    }
+                    mAppStandby.flushToDisk();
+                    pw.println("Flushed stats to disk");
+                    return;
+                } else if ("is-app-standby-enabled".equals(arg)) {
+                    pw.println(mAppStandby.isAppIdleEnabled());
+                    return;
+                } else if ("apptimelimit".equals(arg)) {
+                    synchronized (mLock) {
                         if (i + 1 >= args.length) {
                             mAppTimeLimit.dump(null, pw);
                         } else {
@@ -1199,8 +1200,10 @@ public class UsageStatsService extends SystemService implements
                             mAppTimeLimit.dump(remainingArgs, pw);
                         }
                         return;
-                    } else if ("file".equals(arg)) {
-                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    }
+                } else if ("file".equals(arg)) {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    synchronized (mLock) {
                         if (i + 1 >= args.length) {
                             // dump everything for all users
                             final int numUsers = mUserState.size();
@@ -1224,8 +1227,10 @@ public class UsageStatsService extends SystemService implements
                             }
                         }
                         return;
-                    } else if ("database-info".equals(arg)) {
-                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    }
+                } else if ("database-info".equals(arg)) {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    synchronized (mLock) {
                         if (i + 1 >= args.length) {
                             // dump info for all users
                             final int numUsers = mUserState.size();
@@ -1247,34 +1252,43 @@ public class UsageStatsService extends SystemService implements
                             }
                         }
                         return;
-                    } else if ("appstandby".equals(arg)) {
-                        mAppStandby.dumpState(args, pw);
-                        return;
-                    } else if ("stats-directory".equals(arg)) {
-                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    }
+                } else if ("appstandby".equals(arg)) {
+                    mAppStandby.dumpState(args, pw);
+                    return;
+                } else if ("stats-directory".equals(arg)) {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    synchronized (mLock) {
                         final int userId = parseUserIdFromArgs(args, i, ipw);
                         if (userId != UserHandle.USER_NULL) {
                             ipw.println(new File(Environment.getDataSystemCeDirectory(userId),
                                     "usagestats").getAbsolutePath());
                         }
                         return;
-                    } else if ("mappings".equals(arg)) {
-                        final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-                        final int userId = parseUserIdFromArgs(args, i, ipw);
+                    }
+                } else if ("mappings".equals(arg)) {
+                    final IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
+                    final int userId = parseUserIdFromArgs(args, i, ipw);
+                    synchronized (mLock) {
                         if (userId != UserHandle.USER_NULL) {
                             mUserState.get(userId).dumpMappings(ipw);
                         }
                         return;
-                    } else if (arg != null && !arg.startsWith("-")) {
-                        // Anything else that doesn't start with '-' is a pkg to filter
-                        pkgs.add(arg);
                     }
+                } else if (arg != null && !arg.startsWith("-")) {
+                    // Anything else that doesn't start with '-' is a pkg to filter
+                    pkgs.add(arg);
                 }
             }
+        }
 
+        final int[] userIds;
+        synchronized (mLock) {
             final int userCount = mUserState.size();
+            userIds = new int[userCount];
             for (int i = 0; i < userCount; i++) {
-                int userId = mUserState.keyAt(i);
+                final int userId = mUserState.keyAt(i);
+                userIds[i] = userId;
                 idpw.printPair("user", userId);
                 idpw.println();
                 idpw.increaseIndent();
@@ -1286,13 +1300,7 @@ public class UsageStatsService extends SystemService implements
                         idpw.println();
                     }
                 }
-                mAppStandby.dumpUser(idpw, userId, pkgs);
                 idpw.decreaseIndent();
-            }
-
-            if (CollectionUtils.isEmpty(pkgs)) {
-                pw.println();
-                mAppStandby.dumpState(args, pw);
             }
 
             idpw.println();
@@ -1300,6 +1308,13 @@ public class UsageStatsService extends SystemService implements
             idpw.println();
 
             mAppTimeLimit.dump(null, pw);
+        }
+
+        mAppStandby.dumpUsers(idpw, userIds, pkgs);
+
+        if (CollectionUtils.isEmpty(pkgs)) {
+            pw.println();
+            mAppStandby.dumpState(args, pw);
         }
     }
 
