@@ -2232,7 +2232,7 @@ public class BubbleStackView extends FrameLayout
 
     private void dismissBubbleIfExists(@Nullable Bubble bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-            mBubbleData.notificationEntryRemoved(
+            mBubbleData.dismissBubbleWithKey(
                     bubble.getKey(), BubbleController.DISMISS_USER_GESTURE);
         }
     }

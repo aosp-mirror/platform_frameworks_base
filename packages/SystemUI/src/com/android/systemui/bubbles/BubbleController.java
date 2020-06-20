@@ -52,13 +52,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
@@ -130,7 +133,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
-            DISMISS_OVERFLOW_MAX_REACHED})
+            DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -145,6 +148,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_GROUP_CANCELLED = 9;
     static final int DISMISS_INVALID_INTENT = 10;
     static final int DISMISS_OVERFLOW_MAX_REACHED = 11;
+    static final int DISMISS_SHORTCUT_REMOVED = 12;
+    static final int DISMISS_PACKAGE_REMOVED = 13;
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -334,7 +339,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             SysUiState sysUiState,
             INotificationManager notificationManager,
             @Nullable IStatusBarService statusBarService,
-            WindowManager windowManager) {
+            WindowManager windowManager,
+            LauncherApps launcherApps) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -426,6 +432,47 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 });
 
         mBubbleIconFactory = new BubbleIconFactory(context);
+
+        launcherApps.registerCallback(new LauncherApps.Callback() {
+            @Override
+            public void onPackageAdded(String s, UserHandle userHandle) {}
+
+            @Override
+            public void onPackageChanged(String s, UserHandle userHandle) {}
+
+            @Override
+            public void onPackageRemoved(String s, UserHandle userHandle) {
+                // Remove bubbles with this package name, since it has been uninstalled and attempts
+                // to open a bubble from an uninstalled app can cause issues.
+                mBubbleData.removeBubblesWithPackageName(s, DISMISS_PACKAGE_REMOVED);
+            }
+
+            @Override
+            public void onPackagesAvailable(String[] strings, UserHandle userHandle,
+                    boolean b) {
+
+            }
+
+            @Override
+            public void onPackagesUnavailable(String[] packages, UserHandle userHandle,
+                    boolean b) {
+                for (String packageName : packages) {
+                    // Remove bubbles from unavailable apps. This can occur when the app is on
+                    // external storage that has been removed.
+                    mBubbleData.removeBubblesWithPackageName(packageName, DISMISS_PACKAGE_REMOVED);
+                }
+            }
+
+            @Override
+            public void onShortcutsChanged(String packageName, List<ShortcutInfo> validShortcuts,
+                    UserHandle user) {
+                super.onShortcutsChanged(packageName, validShortcuts, user);
+
+                // Remove bubbles whose shortcuts aren't in the latest list of valid shortcuts.
+                mBubbleData.removeBubblesWithInvalidShortcuts(
+                        packageName, validShortcuts, DISMISS_SHORTCUT_REMOVED);
+            }
+        });
     }
 
     /**
@@ -1123,7 +1170,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @MainThread
     void removeBubble(String key, int reason) {
         if (mBubbleData.hasAnyBubbleWithKey(key)) {
-            mBubbleData.notificationEntryRemoved(key, reason);
+            mBubbleData.dismissBubbleWithKey(key, reason);
         }
     }
 
@@ -1181,7 +1228,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             rankingMap.getRanking(key, mTmpRanking);
             boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
             if (isActiveBubble && !mTmpRanking.canBubble()) {
-                mBubbleData.notificationEntryRemoved(entry.getKey(),
+                mBubbleData.dismissBubbleWithKey(entry.getKey(),
                         BubbleController.DISMISS_BLOCKED);
             } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
                 entry.setFlagBubble(true);
