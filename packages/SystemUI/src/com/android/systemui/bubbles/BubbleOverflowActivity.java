@@ -57,6 +57,8 @@ public class BubbleOverflowActivity extends Activity {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "BubbleOverflowActivity" : TAG_BUBBLES;
 
     private LinearLayout mEmptyState;
+    private TextView mEmptyStateTitle;
+    private TextView mEmptyStateSubtitle;
     private ImageView mEmptyStateImage;
     private BubbleController mBubbleController;
     private BubbleOverflowAdapter mAdapter;
@@ -100,8 +102,10 @@ public class BubbleOverflowActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.bubble_overflow_activity);
 
-        mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
         mRecyclerView = findViewById(R.id.bubble_overflow_recycler);
+        mEmptyState = findViewById(R.id.bubble_overflow_empty_state);
+        mEmptyStateTitle = findViewById(R.id.bubble_overflow_empty_title);
+        mEmptyStateSubtitle = findViewById(R.id.bubble_overflow_empty_subtitle);
         mEmptyStateImage = findViewById(R.id.bubble_overflow_empty_state_image);
 
         updateDimensions();
@@ -141,21 +145,27 @@ public class BubbleOverflowActivity extends Activity {
     void updateTheme() {
         Resources res = getResources();
         final int mode = res.getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
-        switch (mode) {
-            case Configuration.UI_MODE_NIGHT_YES:
-                mEmptyStateImage.setImageDrawable(
-                        res.getDrawable(R.drawable.ic_empty_bubble_overflow_dark));
-                findViewById(android.R.id.content)
-                        .setBackgroundColor(res.getColor(R.color.bubbles_dark));
-                break;
+        final boolean isNightMode = (mode == Configuration.UI_MODE_NIGHT_YES);
 
-            case Configuration.UI_MODE_NIGHT_NO:
-                mEmptyStateImage.setImageDrawable(
-                        res.getDrawable(R.drawable.ic_empty_bubble_overflow_light));
-                findViewById(android.R.id.content)
-                        .setBackgroundColor(res.getColor(R.color.bubbles_light));
-                break;
-        }
+        mEmptyStateImage.setImageDrawable(isNightMode
+                ? res.getDrawable(R.drawable.ic_empty_bubble_overflow_dark)
+                : res.getDrawable(R.drawable.ic_empty_bubble_overflow_light));
+
+        findViewById(android.R.id.content)
+                .setBackgroundColor(isNightMode
+                        ? res.getColor(R.color.bubbles_dark)
+                        : res.getColor(R.color.bubbles_light));
+
+        final TypedArray typedArray = getApplicationContext().obtainStyledAttributes(
+                new int[]{android.R.attr.colorBackgroundFloating,
+                        android.R.attr.textColorSecondary});
+        int bgColor = typedArray.getColor(0, isNightMode ? Color.BLACK : Color.WHITE);
+        int textColor = typedArray.getColor(1, isNightMode ? Color.WHITE : Color.BLACK);
+        textColor = ContrastColorUtil.ensureTextContrast(textColor, bgColor, isNightMode);
+        typedArray.recycle();
+
+        mEmptyStateTitle.setTextColor(textColor);
+        mEmptyStateSubtitle.setTextColor(textColor);
     }
 
     void onDataChanged(List<Bubble> bubbles) {

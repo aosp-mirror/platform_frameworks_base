@@ -1902,6 +1902,8 @@ public class BubbleStackView extends FrameLayout
                                     if (mExpandedBubble != null
                                             && mExpandedBubble.getExpandedView() != null) {
                                         mExpandedBubble.getExpandedView()
+                                                .setContentVisibility(true);
+                                        mExpandedBubble.getExpandedView()
                                                 .setSurfaceZOrderedOnTop(false);
                                     }
                                 })
@@ -2045,6 +2047,7 @@ public class BubbleStackView extends FrameLayout
                     })
                     .withEndActions(() -> {
                         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+                            mExpandedBubble.getExpandedView().setContentVisibility(true);
                             mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(false);
                         }
 
@@ -2229,7 +2232,7 @@ public class BubbleStackView extends FrameLayout
 
     private void dismissBubbleIfExists(@Nullable Bubble bubble) {
         if (bubble != null && mBubbleData.hasBubbleInStackWithKey(bubble.getKey())) {
-            mBubbleData.notificationEntryRemoved(
+            mBubbleData.dismissBubbleWithKey(
                     bubble.getKey(), BubbleController.DISMISS_USER_GESTURE);
         }
     }
