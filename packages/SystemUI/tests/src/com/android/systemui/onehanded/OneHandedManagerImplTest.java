@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
+import android.view.Display;
 
 import androidx.test.filters.SmallTest;
 
@@ -45,6 +46,7 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class OneHandedManagerImplTest extends OneHandedTestCase {
+    Display mDisplay;
     OneHandedManagerImpl mOneHandedManagerImpl;
     OneHandedTimeoutHandler mTimeoutHandler;
 
@@ -52,8 +54,6 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     DisplayController mMockDisplayController;
     @Mock
     OneHandedDisplayAreaOrganizer mMockDisplayAreaOrganizer;
-    @Mock
-    OneHandedSurfaceTransactionHelper mMockSurfaceTransactionHelper;
     @Mock
     OneHandedTouchHandler mMockTouchHandler;
     @Mock
@@ -64,6 +64,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        mDisplay = mContext.getDisplay();
         mOneHandedManagerImpl = new OneHandedManagerImpl(getContext(),
                 mMockDisplayController,
                 mMockDisplayAreaOrganizer,
@@ -72,9 +73,9 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
                 mMockSysUiState);
         mTimeoutHandler = Mockito.spy(OneHandedTimeoutHandler.get());
 
+        when(mMockDisplayController.getDisplay(anyInt())).thenReturn(mDisplay);
         when(mMockDisplayAreaOrganizer.isInOneHanded()).thenReturn(false);
     }
-
 
     @Test
     public void testDefaultShouldNotInOneHanded() {
@@ -83,8 +84,7 @@ public class OneHandedManagerImplTest extends OneHandedTestCase {
         final OneHandedAnimationController animationController = new OneHandedAnimationController(
                 mContext, transactionHelper);
         OneHandedDisplayAreaOrganizer displayAreaOrganizer = new OneHandedDisplayAreaOrganizer(
-                mContext, mMockDisplayController, animationController,
-                mMockSurfaceTransactionHelper);
+                mContext, mMockDisplayController, animationController);
 
         assertThat(displayAreaOrganizer.isInOneHanded()).isFalse();
     }

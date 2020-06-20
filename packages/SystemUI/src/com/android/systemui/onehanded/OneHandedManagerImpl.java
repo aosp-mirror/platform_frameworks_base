@@ -27,11 +27,13 @@ import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dumpable;
 import com.android.systemui.R;
 import com.android.systemui.model.SysUiState;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+import com.android.systemui.wm.DisplayChangeController;
 import com.android.systemui.wm.DisplayController;
 
 import java.io.FileDescriptor;
@@ -50,15 +52,18 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     private boolean mIsOneHandedEnabled;
     private boolean mTaskChangeToExit;
     private float mOffSetFraction;
-    private DisplayController mDisplayController;
+
+    private final DisplayController mDisplayController;
+    private final OneHandedGestureHandler mGestureHandler;
+    private final OneHandedTimeoutHandler mTimeoutHandler;
+    private final OneHandedTouchHandler mTouchHandler;
+    private final SysUiState mSysUiFlagContainer;
+
+    private Context mContext;
     private OneHandedDisplayAreaOrganizer mDisplayAreaOrganizer;
-    private OneHandedGestureHandler mGestureHandler;
     private OneHandedGestureHandler.OneHandedGestureEventCallback mGestureEventCallback;
-    private OneHandedTimeoutHandler mTimeoutHandler;
-    private OneHandedTouchHandler mTouchHandler;
     private OneHandedTouchHandler.OneHandedTouchEventCallback mTouchEventCallback;
     private OneHandedTransitionCallback mTransitionCallback;
-    private SysUiState mSysUiFlagContainer;
 
     /**
      * Handler for system task stack changes, exit when user lunch new task or bring task to front
@@ -84,6 +89,17 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
     };
 
     /**
+     * Handle rotation based on OnDisplayChangingListener callback
+     */
+    @VisibleForTesting
+    private final DisplayChangeController.OnDisplayChangingListener mRotationController =
+            (display, fromRotation, toRotation, wct) -> {
+                if (mDisplayAreaOrganizer != null) {
+                    mDisplayAreaOrganizer.onRotateDisplay(mContext.getResources(), toRotation);
+                }
+            };
+
+    /**
      * Constructor of OneHandedManager
      */
     @Inject
@@ -93,9 +109,10 @@ public class OneHandedManagerImpl implements OneHandedManager, Dumpable {
             OneHandedTouchHandler touchHandler,
             OneHandedGestureHandler gestureHandler,
             SysUiState sysUiState) {
-
+        mContext = context;
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mDisplayController = displayController;
+        mDisplayController.addDisplayChangingController(mRotationController);
         mSysUiFlagContainer = sysUiState;
         mOffSetFraction =
                 context.getResources().getFraction(R.fraction.config_one_handed_offset, 1, 1);

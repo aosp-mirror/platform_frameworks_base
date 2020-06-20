@@ -22,11 +22,14 @@ import static com.android.systemui.onehanded.OneHandedAnimationController.TRANSI
 import static com.android.systemui.onehanded.OneHandedAnimationController.TRANSITION_DIRECTION_TRIGGER;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.window.DisplayAreaInfo;
 import android.window.DisplayAreaOrganizer;
@@ -39,10 +42,12 @@ import androidx.annotation.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.systemui.Dumpable;
 import com.android.systemui.wm.DisplayController;
+import com.android.systemui.wm.DisplayLayout;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
@@ -68,22 +73,22 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     @VisibleForTesting
     static final int MSG_OFFSET_FINISH = 3;
 
-    private final Handler mUpdateHandler;
+    private final Rect mLastVisualDisplayBounds = new Rect();
+    private final Rect mDefaultDisplayBounds = new Rect();
 
+    private Handler mUpdateHandler;
     private boolean mIsInOneHanded;
     private int mEnterExitAnimationDurationMs;
 
     @VisibleForTesting
-    DisplayAreaInfo mDisplayAreaInfo;
+    HashMap<DisplayAreaInfo, SurfaceControl> mDisplayAreaMap = new HashMap();
     private DisplayController mDisplayController;
+    private DisplayLayout mDisplayLayout;
+    private DisplayInfo mDisplayInfo = new DisplayInfo();
     private OneHandedAnimationController mAnimationController;
-    private SurfaceControl mLeash;
-    private List<OneHandedTransitionCallback> mTransitionCallbacks = new ArrayList<>();
-    private OneHandedSurfaceTransactionHelper mSurfaceTransactionHelper;
     private OneHandedSurfaceTransactionHelper.SurfaceControlTransactionFactory
             mSurfaceControlTransactionFactory;
-    private Rect mLastVisualDisplayBounds;
-    private Rect mDefaultDisplayBounds;
+    private List<OneHandedTransitionCallback> mTransitionCallbacks = new ArrayList<>();
 
     @VisibleForTesting
     OneHandedAnimationCallback mOneHandedAnimationCallback =
@@ -94,17 +99,23 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
                 }
 
                 @Override
-                public void onOneHandedAnimationEnd(
+                public void onOneHandedAnimationEnd(SurfaceControl.Transaction tx,
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                    mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_FINISH,
-                            obtainArgsFromAnimator(animator)));
+                    mAnimationController.removeAnimator(animator.getLeash());
+                    if (mAnimationController.isAnimatorsConsumed()) {
+                        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_FINISH,
+                                obtainArgsFromAnimator(animator)));
+                    }
                 }
 
                 @Override
                 public void onOneHandedAnimationCancel(
                         OneHandedAnimationController.OneHandedTransitionAnimator animator) {
-                    mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_FINISH,
-                            obtainArgsFromAnimator(animator)));
+                    mAnimationController.removeAnimator(animator.getLeash());
+                    if (mAnimationController.isAnimatorsConsumed()) {
+                        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_FINISH,
+                                obtainArgsFromAnimator(animator)));
+                    }
                 }
             };
 
@@ -112,34 +123,24 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     private Handler.Callback mUpdateCallback = (msg) -> {
         SomeArgs args = (SomeArgs) msg.obj;
         final Rect currentBounds = args.arg1 != null ? (Rect) args.arg1 : mDefaultDisplayBounds;
-        final int xOffset = args.argi1;
         final int yOffset = args.argi2;
         final int direction = args.argi3;
 
-        if (mLeash == null || !mLeash.isValid()) {
-            Log.w(TAG, "mLeash is null, abort transition");
-            return false;
-        }
         switch (msg.what) {
             case MSG_RESET_IMMEDIATE:
-                final OneHandedAnimationController.OneHandedTransitionAnimator animator =
-                        mAnimationController.getAnimator(mLeash, currentBounds,
-                                mDefaultDisplayBounds);
-                if (animator != null && animator.isRunning()) {
-                    animator.cancel();
-                }
-                final SurfaceControl.Transaction tx =
-                        mSurfaceControlTransactionFactory.getTransaction();
-                tx.setPosition(mLeash, 0, 0)
-                        .setWindowCrop(mLeash, -1/* reset */, -1/* reset */)
-                        .apply();
-                finishOffset(currentBounds, yOffset, direction);
+                resetWindowsOffset();
+                mLastVisualDisplayBounds.set(currentBounds);
+                finishOffset(0, TRANSITION_DIRECTION_EXIT);
                 break;
             case MSG_OFFSET_ANIMATE:
-                offsetWindows(currentBounds, 0, yOffset, direction, mEnterExitAnimationDurationMs);
+                final Rect toBounds = new Rect(mDefaultDisplayBounds.left,
+                        mDefaultDisplayBounds.top + yOffset,
+                        mDefaultDisplayBounds.right,
+                        mDefaultDisplayBounds.bottom + yOffset);
+                offsetWindows(currentBounds, toBounds, direction, mEnterExitAnimationDurationMs);
                 break;
             case MSG_OFFSET_FINISH:
-                finishOffset(currentBounds, yOffset, direction);
+                finishOffset(yOffset, direction);
                 break;
         }
         args.recycle();
@@ -152,17 +153,15 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
     @Inject
     public OneHandedDisplayAreaOrganizer(Context context,
             DisplayController displayController,
-            OneHandedAnimationController animationController,
-            OneHandedSurfaceTransactionHelper surfaceTransactionHelper) {
-
+            OneHandedAnimationController animationController) {
         mUpdateHandler = new Handler(OneHandedThread.get().getLooper(), mUpdateCallback);
         mAnimationController = animationController;
         mDisplayController = displayController;
+        mDisplayLayout = getDisplayLayout(context);
+        mDisplayLayout.getStableBounds(mDefaultDisplayBounds);
+        mLastVisualDisplayBounds.set(mDefaultDisplayBounds);
         mEnterExitAnimationDurationMs = context.getResources().getInteger(
                 com.android.systemui.R.integer.config_one_handed_translate_animation_duration);
-        mDefaultDisplayBounds = new Rect(0, 0, getDisplayBounds().x, getDisplayBounds().y);
-        mLastVisualDisplayBounds = new Rect(mDefaultDisplayBounds);
-        mSurfaceTransactionHelper = surfaceTransactionHelper;
         mSurfaceControlTransactionFactory = SurfaceControl.Transaction::new;
     }
 
@@ -171,37 +170,49 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
             @NonNull SurfaceControl leash) {
         Objects.requireNonNull(displayAreaInfo, "displayAreaInfo must not be null");
         Objects.requireNonNull(leash, "leash must not be null");
-        mDisplayAreaInfo = displayAreaInfo;
-        mLeash = leash;
-    }
 
-    @Override
-    public void onDisplayAreaInfoChanged(@NonNull DisplayAreaInfo displayAreaInfo) {
-        Objects.requireNonNull(displayAreaInfo, "displayArea must not be null");
-        // Stop one handed without animation and reset cropped size immediately
-        if (displayAreaInfo.configuration.orientation
-                != mDisplayAreaInfo.configuration.orientation) {
-            final Rect newBounds = displayAreaInfo.configuration.windowConfiguration.getBounds();
-            resetImmediately(newBounds);
+        if (displayAreaInfo.featureId != FEATURE_ONE_HANDED) {
+            Log.w(TAG, "Bypass onDisplayAreaAppeared()! displayAreaInfo=" + displayAreaInfo);
+            return;
         }
-        mDisplayAreaInfo = displayAreaInfo;
+        mDisplayAreaMap.put(displayAreaInfo, leash);
     }
 
     @Override
     public void onDisplayAreaVanished(@NonNull DisplayAreaInfo displayAreaInfo) {
         Objects.requireNonNull(displayAreaInfo,
                 "Requires valid displayArea, and displayArea must not be null");
-        if (displayAreaInfo.token.asBinder() != mDisplayAreaInfo.token.asBinder()) {
+
+        if (!mDisplayAreaMap.containsKey(displayAreaInfo)) {
             Log.w(TAG, "Unrecognized token: " + displayAreaInfo.token);
             return;
         }
-        mDisplayAreaInfo = displayAreaInfo;
+        mDisplayAreaMap.remove(displayAreaInfo);
+    }
 
-        // Stop one handed immediately
-        if (isInOneHanded()) {
-            final Rect newBounds = mDisplayAreaInfo.configuration.windowConfiguration.getBounds();
-            resetImmediately(newBounds);
+    @Override
+    public void unregisterOrganizer() {
+        super.unregisterOrganizer();
+        if (mDisplayAreaMap != null) {
+            mDisplayAreaMap.clear();
         }
+    }
+
+    /**
+     * Handler for display rotation changes.
+     */
+    public void onRotateDisplay(Resources res, int toRotation) {
+        // Stop one handed without animation and reset cropped size immediately
+        final Rect newBounds = new Rect();
+        mDisplayLayout.rotateTo(res, toRotation);
+        mDisplayLayout.getStableBounds(newBounds);
+
+        SomeArgs args = SomeArgs.obtain();
+        args.arg1 = newBounds;
+        args.argi1 = 0 /* xOffset */;
+        args.argi2 = 0 /* yOffset */;
+        args.argi3 = TRANSITION_DIRECTION_EXIT;
+        mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESET_IMMEDIATE, args));
     }
 
     /**
@@ -217,55 +228,43 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_OFFSET_ANIMATE, args));
     }
 
-    /**
-     * Immediately resize/reset leash from previous cropped boundary to default.
-     * (i.e Screen rotation need to reset crop and position before applying new bounds)
-     */
-    public void resetImmediately(Rect newDisplayBounds) {
-        updateDisplayBounds(newDisplayBounds);
-        if (mDisplayAreaInfo != null && mLeash != null) {
-            SomeArgs args = SomeArgs.obtain();
-            args.arg1 = newDisplayBounds;
-            args.argi1 = 0 /* xOffset */;
-            args.argi2 = 0 /* yOffset */;
-            args.argi3 = TRANSITION_DIRECTION_EXIT;
-            mUpdateHandler.sendMessage(mUpdateHandler.obtainMessage(MSG_RESET_IMMEDIATE, args));
-        }
-    }
-
-    private void offsetWindows(Rect currentbounds, int xOffset, int yOffset, int direction,
-            int durationMs) {
+    private void offsetWindows(Rect fromBounds, Rect toBounds, int direction, int durationMs) {
         if (Looper.myLooper() != mUpdateHandler.getLooper()) {
             throw new RuntimeException("Callers should call scheduleOffset() instead of this "
                     + "directly");
         }
-        if (mDisplayAreaInfo == null || mLeash == null) {
-            Log.w(TAG, "mToken is not set");
-            return;
-        }
-
-        Rect toBounds = new Rect(mDefaultDisplayBounds.left,
-                mDefaultDisplayBounds.top + yOffset,
-                mDefaultDisplayBounds.right,
-                mDefaultDisplayBounds.bottom + yOffset);
-        animateWindows(currentbounds, toBounds, direction, durationMs);
+        mDisplayAreaMap.forEach(
+                (key, leash) -> animateWindows(leash, fromBounds, toBounds, direction,
+                        durationMs));
     }
 
-    private void animateWindows(Rect fromBounds, Rect toBounds,
+    private void resetWindowsOffset() {
+        mUpdateHandler.post(() -> {
+            final SurfaceControl.Transaction tx =
+                    mSurfaceControlTransactionFactory.getTransaction();
+            mDisplayAreaMap.forEach(
+                    (key, leash) -> {
+                        final OneHandedAnimationController.OneHandedTransitionAnimator animator =
+                                mAnimationController.getAnimatorMap().remove(leash);
+                        if (animator != null && animator.isRunning()) {
+                            animator.cancel();
+                        }
+                        tx.setPosition(leash, 0, 0)
+                                .setWindowCrop(leash, -1/* reset */, -1/* reset */);
+                    });
+            tx.apply();
+        });
+    }
+
+    private void animateWindows(SurfaceControl leash, Rect fromBounds, Rect toBounds,
             @OneHandedAnimationController.TransitionDirection int direction, int durationMs) {
         if (Looper.myLooper() != mUpdateHandler.getLooper()) {
             throw new RuntimeException("Callers should call scheduleOffset() instead of "
                     + "this directly");
         }
-        // Could happen when exit one handed
-        if (mDisplayAreaInfo == null || mLeash == null) {
-            Log.w(TAG, "Abort animation, invalid leash");
-            return;
-        }
-
         mUpdateHandler.post(() -> {
             final OneHandedAnimationController.OneHandedTransitionAnimator animator =
-                    mAnimationController.getAnimator(mLeash, fromBounds, toBounds);
+                    mAnimationController.getAnimator(leash, fromBounds, toBounds);
             if (animator != null) {
                 animator.setTransitionDirection(direction)
                         .setOneHandedAnimationCallback(mOneHandedAnimationCallback)
@@ -275,7 +274,7 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         });
     }
 
-    private void finishOffset(Rect currentBounds, int offset,
+    private void finishOffset(int offset,
             @OneHandedAnimationController.TransitionDirection int direction) {
         if (Looper.myLooper() != mUpdateHandler.getLooper()) {
             throw new RuntimeException(
@@ -284,18 +283,14 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         // Only finishOffset() can update mIsInOneHanded to ensure the state is handle in sequence,
         // the flag *MUST* be updated before dispatch mTransitionCallbacks
         mIsInOneHanded = (offset > 0 || direction == TRANSITION_DIRECTION_TRIGGER);
-        mLastVisualDisplayBounds.set(currentBounds);
-        if (direction == TRANSITION_DIRECTION_TRIGGER) {
-            mLastVisualDisplayBounds.offsetTo(0, offset);
-            for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
-                final OneHandedTransitionCallback callback = mTransitionCallbacks.get(i);
-                callback.onStartFinished(mLastVisualDisplayBounds);
-            }
-        } else {
-            mLastVisualDisplayBounds.offsetTo(0, 0);
-            for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
-                final OneHandedTransitionCallback callback = mTransitionCallbacks.get(i);
-                callback.onStopFinished(mLastVisualDisplayBounds);
+        mLastVisualDisplayBounds.offsetTo(0,
+                direction == TRANSITION_DIRECTION_TRIGGER ? offset : 0);
+        for (int i = mTransitionCallbacks.size() - 1; i >= 0; i--) {
+            final OneHandedTransitionCallback callback = mTransitionCallbacks.get(i);
+            if (direction == TRANSITION_DIRECTION_TRIGGER) {
+                callback.onStartFinished(getLastVisualDisplayBounds());
+            } else {
+                callback.onStopFinished(getLastVisualDisplayBounds());
             }
         }
     }
@@ -332,6 +327,16 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         return mUpdateHandler;
     }
 
+    private DisplayLayout getDisplayLayout(Context context) {
+        final Display display = mDisplayController.getDisplay(DEFAULT_DISPLAY);
+        if (display != null) {
+            display.getDisplayInfo(mDisplayInfo);
+        } else {
+            Log.w(TAG, "get DEFAULT_DISPLAY return null");
+        }
+        return new DisplayLayout(mDisplayInfo, context.getResources(), false, false);
+    }
+
     /**
      * Register transition callback
      */
@@ -349,29 +354,23 @@ public class OneHandedDisplayAreaOrganizer extends DisplayAreaOrganizer implemen
         return args;
     }
 
-    private void updateDisplayBounds(Rect newDisplayBounds) {
-        if (newDisplayBounds == null) {
-            mDefaultDisplayBounds.set(0, 0, getDisplayBounds().x, getDisplayBounds().y);
-        } else {
-            mDefaultDisplayBounds.set(newDisplayBounds);
-        }
-    }
-
     @Override
     public void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw, @NonNull String[] args) {
         final String innerPrefix = "  ";
         pw.println(TAG + "states: ");
         pw.print(innerPrefix + "mIsInOneHanded=");
         pw.println(mIsInOneHanded);
-        pw.print(innerPrefix + "mDisplayAreaInfo=");
-        pw.println(mDisplayAreaInfo);
-        pw.print(innerPrefix + "mLeash=");
-        pw.println(mLeash);
+        pw.print(innerPrefix + "mDisplayAreaMap=");
+        pw.println(mDisplayAreaMap);
         pw.print(innerPrefix + "mDefaultDisplayBounds=");
         pw.println(mDefaultDisplayBounds);
         pw.print(innerPrefix + "mLastVisualDisplayBounds=");
         pw.println(mLastVisualDisplayBounds);
         pw.print(innerPrefix + "getDisplayBounds()=");
         pw.println(getDisplayBounds());
+        if (mDisplayLayout != null) {
+            pw.print(innerPrefix + "mDisplayLayout(w, h)=");
+            pw.println(mDisplayLayout.width() + ", " + mDisplayLayout.height());
+        }
     }
 }
