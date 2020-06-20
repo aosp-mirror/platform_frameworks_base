@@ -175,7 +175,7 @@ public class LockTaskController {
      * {@link ActivityManager#LOCK_TASK_MODE_NONE}, {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
      * {@link ActivityManager#LOCK_TASK_MODE_PINNED}
      */
-    private int mLockTaskModeState = LOCK_TASK_MODE_NONE;
+    private volatile int mLockTaskModeState = LOCK_TASK_MODE_NONE;
 
     /**
      * This is ActivityStackSupervisor's Handler.
@@ -500,24 +500,29 @@ public class LockTaskController {
 
     // This method should only be called on the handler thread
     private void performStopLockTask(int userId) {
+        // Update the internal mLockTaskModeState early to avoid the scenario that SysUI queries
+        // mLockTaskModeState (from setStatusBarState) and gets staled state.
+        // TODO: revisit this approach.
+        // The race condition raised above can be addressed by moving this function out of handler
+        // thread, which makes it guarded by ATMS#mGlobalLock as ATMS#getLockTaskModeState.
+        final int oldLockTaskModeState = mLockTaskModeState;
+        mLockTaskModeState = LOCK_TASK_MODE_NONE;
         // When lock task ends, we enable the status bars.
         try {
-            setStatusBarState(LOCK_TASK_MODE_NONE, userId);
-            setKeyguardState(LOCK_TASK_MODE_NONE, userId);
-            if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
+            setStatusBarState(mLockTaskModeState, userId);
+            setKeyguardState(mLockTaskModeState, userId);
+            if (oldLockTaskModeState == LOCK_TASK_MODE_PINNED) {
                 lockKeyguardIfNeeded();
             }
             if (getDevicePolicyManager() != null) {
                 getDevicePolicyManager().notifyLockTaskModeChanged(false, null, userId);
             }
-            if (mLockTaskModeState == LOCK_TASK_MODE_PINNED) {
+            if (oldLockTaskModeState == LOCK_TASK_MODE_PINNED) {
                 getStatusBarService().showPinningEnterExitToast(false /* entering */);
             }
-            mWindowManager.onLockTaskStateChanged(LOCK_TASK_MODE_NONE);
+            mWindowManager.onLockTaskStateChanged(mLockTaskModeState);
         } catch (RemoteException ex) {
             throw new RuntimeException(ex);
-        } finally {
-            mLockTaskModeState = LOCK_TASK_MODE_NONE;
         }
     }
 
