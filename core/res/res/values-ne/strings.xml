@@ -1947,12 +1947,12 @@
     <string name="autofill_update_title" msgid="3630695947047069136"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
     <string name="autofill_update_title_with_type" msgid="5264152633488495704">"<xliff:g id="TYPE">%1$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
     <string name="autofill_update_title_with_2types" msgid="1797514386321086273">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
-    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"यी वस्तुहरू "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" मा अद्यावधिक गर्नुहोस्‌: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> हो?"</string>
+    <string name="autofill_update_title_with_3types" msgid="1312232153076212291">"यी वस्तुहरू "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" मा अपडेट गर्नुहोस्‌: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> हो?"</string>
     <string name="autofill_save_yes" msgid="8035743017382012850">"सुरक्षित गर्नुहोस्"</string>
     <string name="autofill_save_no" msgid="9212826374207023544">"पर्दैन, धन्यवाद"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"अहिले होइन"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"कहिल्यै होइन"</string>
-    <string name="autofill_update_yes" msgid="4608662968996874445">"अद्यावधिक गर्नुहोस्"</string>
+    <string name="autofill_update_yes" msgid="4608662968996874445">"अपडेट गर्नुहोस्"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"जारी राख्नुहोस्"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"पासवर्ड"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"ठेगाना"</string>
