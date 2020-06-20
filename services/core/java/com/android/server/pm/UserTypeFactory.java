@@ -49,6 +49,7 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -73,14 +74,7 @@ public final class UserTypeFactory {
      * @return mapping from the name of each user type to its {@link UserTypeDetails} object
      */
     public static ArrayMap<String, UserTypeDetails> getUserTypes() {
-        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
-        builders.put(USER_TYPE_PROFILE_MANAGED, getDefaultTypeProfileManaged());
-        builders.put(USER_TYPE_FULL_SYSTEM, getDefaultTypeFullSystem());
-        builders.put(USER_TYPE_FULL_SECONDARY, getDefaultTypeFullSecondary());
-        builders.put(USER_TYPE_FULL_GUEST, getDefaultTypeFullGuest());
-        builders.put(USER_TYPE_FULL_DEMO, getDefaultTypeFullDemo());
-        builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
-        builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
+        final ArrayMap<String, UserTypeDetails.Builder> builders = getDefaultBuilders();
 
         try (XmlResourceParser parser =
                      Resources.getSystem().getXml(com.android.internal.R.xml.config_user_types)) {
@@ -92,6 +86,20 @@ public final class UserTypeFactory {
             types.put(builders.keyAt(i), builders.valueAt(i).createUserTypeDetails());
         }
         return types;
+    }
+
+    private static ArrayMap<String, UserTypeDetails.Builder> getDefaultBuilders() {
+        final ArrayMap<String, UserTypeDetails.Builder> builders = new ArrayMap<>();
+
+        builders.put(USER_TYPE_PROFILE_MANAGED, getDefaultTypeProfileManaged());
+        builders.put(USER_TYPE_FULL_SYSTEM, getDefaultTypeFullSystem());
+        builders.put(USER_TYPE_FULL_SECONDARY, getDefaultTypeFullSecondary());
+        builders.put(USER_TYPE_FULL_GUEST, getDefaultTypeFullGuest());
+        builders.put(USER_TYPE_FULL_DEMO, getDefaultTypeFullDemo());
+        builders.put(USER_TYPE_FULL_RESTRICTED, getDefaultTypeFullRestricted());
+        builders.put(USER_TYPE_SYSTEM_HEADLESS, getDefaultTypeSystemHeadless());
+
+        return builders;
     }
 
     /**
@@ -232,6 +240,10 @@ public final class UserTypeFactory {
                     isProfile = true;
                 } else if ("full-type".equals(elementName)) {
                     isProfile = false;
+                } else if ("change-user-type".equals(elementName)) {
+                    // parsed in parseUserUpgrades
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
                 } else {
                     Slog.w(LOG_TAG, "Skipping unknown element " + elementName + " in "
                                 + parser.getPositionDescription());
@@ -386,5 +398,133 @@ public final class UserTypeFactory {
             result[i] = resList.get(i);
         }
         fcn.accept(result);
+    }
+
+    /**
+     * Returns the user type version of the config XML file.
+     * @return user type version defined in XML file, 0 if none.
+     */
+    public static int getUserTypeVersion() {
+        try (XmlResourceParser parser =
+                     Resources.getSystem().getXml(com.android.internal.R.xml.config_user_types)) {
+            return getUserTypeVersion(parser);
+        }
+    }
+
+    @VisibleForTesting
+    static int getUserTypeVersion(XmlResourceParser parser) {
+        int version = 0;
+
+        try {
+            XmlUtils.beginDocument(parser, "user-types");
+            String versionValue = parser.getAttributeValue(null, "version");
+            if (versionValue != null) {
+                try {
+                    version = Integer.parseInt(versionValue);
+                } catch (NumberFormatException e) {
+                    Slog.e(LOG_TAG, "Cannot parse value of '" + versionValue + "' for version in "
+                            + parser.getPositionDescription(), e);
+                    throw e;
+                }
+            }
+        } catch (XmlPullParserException | IOException e) {
+            Slog.w(LOG_TAG, "Cannot read user type configuration file.", e);
+        }
+
+        return version;
+    }
+
+    /**
+     * Obtains the user type upgrades for this device.
+     * @return The list of user type upgrades.
+     */
+    public static List<UserTypeUpgrade> getUserTypeUpgrades() {
+        final List<UserTypeUpgrade> userUpgrades;
+        try (XmlResourceParser parser =
+                     Resources.getSystem().getXml(com.android.internal.R.xml.config_user_types)) {
+            userUpgrades = parseUserUpgrades(getDefaultBuilders(), parser);
+        }
+        return userUpgrades;
+    }
+
+    @VisibleForTesting
+    static List<UserTypeUpgrade> parseUserUpgrades(
+            ArrayMap<String, UserTypeDetails.Builder> builders, XmlResourceParser parser) {
+        final List<UserTypeUpgrade> userUpgrades = new ArrayList<>();
+
+        try {
+            XmlUtils.beginDocument(parser, "user-types");
+            for (XmlUtils.nextElement(parser);
+                    parser.getEventType() != XmlResourceParser.END_DOCUMENT;
+                    XmlUtils.nextElement(parser)) {
+                final String elementName = parser.getName();
+                if ("change-user-type".equals(elementName)) {
+                    final String fromType = parser.getAttributeValue(null, "from");
+                    final String toType = parser.getAttributeValue(null, "to");
+                    // Check that the base type doesn't change.
+                    // Currently, only the base type of PROFILE is supported.
+                    validateUserTypeIsProfile(fromType, builders);
+                    validateUserTypeIsProfile(toType, builders);
+
+                    final int maxVersionToConvert;
+                    try {
+                        maxVersionToConvert = Integer.parseInt(
+                                parser.getAttributeValue(null, "whenVersionLeq"));
+                    } catch (NumberFormatException e) {
+                        Slog.e(LOG_TAG, "Cannot parse value of whenVersionLeq in "
+                                + parser.getPositionDescription(), e);
+                        throw e;
+                    }
+
+                    UserTypeUpgrade userTypeUpgrade = new UserTypeUpgrade(fromType, toType,
+                            maxVersionToConvert);
+                    userUpgrades.add(userTypeUpgrade);
+                    continue;
+                } else {
+                    XmlUtils.skipCurrentTag(parser);
+                    continue;
+                }
+            }
+        } catch (XmlPullParserException | IOException e) {
+            Slog.w(LOG_TAG, "Cannot read user type configuration file.", e);
+        }
+
+        return userUpgrades;
+    }
+
+    private static void validateUserTypeIsProfile(String userType,
+            ArrayMap<String, UserTypeDetails.Builder> builders) {
+        UserTypeDetails.Builder builder = builders.get(userType);
+        if (builder != null && builder.getBaseType() != FLAG_PROFILE) {
+            throw new IllegalArgumentException("Illegal upgrade of user type " + userType
+                    + " : Can only upgrade profiles user types");
+        }
+    }
+
+    /**
+     * Contains details required for an upgrade operation for {@link UserTypeDetails};
+     */
+    public static class UserTypeUpgrade {
+        private final String mFromType;
+        private final String mToType;
+        private final int mUpToVersion;
+
+        public UserTypeUpgrade(String fromType, String toType, int upToVersion) {
+            mFromType = fromType;
+            mToType = toType;
+            mUpToVersion = upToVersion;
+        }
+
+        public String getFromType() {
+            return mFromType;
+        }
+
+        public String getToType() {
+            return mToType;
+        }
+
+        public int getUpToVersion() {
+            return mUpToVersion;
+        }
     }
 }
