@@ -63,11 +63,7 @@ public final class IrisAuthenticator extends IBiometricAuthenticator.Stub {
     }
 
     @Override
-    public void resetLockout(byte[] token) throws RemoteException {
-    }
-
-    @Override
-    public void setActiveUser(int uid) throws RemoteException {
+    public void resetLockout(int userId, byte[] hardwareAuthToken) throws RemoteException {
     }
 
     @Override

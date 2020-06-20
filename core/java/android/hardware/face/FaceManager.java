@@ -24,7 +24,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemService;
-import android.app.ActivityManager;
 import android.content.Context;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
@@ -435,23 +434,6 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mService.userActivity();
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Sets the active user. This is meant to be used to select the current profile for enrollment
-     * to allow separate enrolled faces for a work profile
-     *
-     * @hide
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void setActiveUser(int userId) {
-        if (mService != null) {
-            try {
-                mService.setActiveUser(userId);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -545,21 +545,6 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Sets the active user. This is meant to be used to select the current profile for enrollment
-     * to allow separate enrolled fingers for a work profile
-     * @param userId
-     * @hide
-     */
-    @RequiresPermission(MANAGE_FINGERPRINT)
-    public void setActiveUser(int userId) {
-        if (mService != null) try {
-            mService.setActiveUser(userId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * Remove given fingerprint template from fingerprint hardware and/or protected storage.
      * @param fp the fingerprint item to remove
      * @param userId the user who this fingerprint belongs to
@@ -573,7 +558,8 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         if (mService != null) try {
             mRemovalCallback = callback;
             mRemovalFingerprint = fp;
-            mService.remove(mToken, fp.getBiometricId(), fp.getGroupId(), userId, mServiceReceiver);
+            mService.remove(mToken, fp.getBiometricId(), fp.getGroupId(), userId, mServiceReceiver,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             Slog.w(TAG, "Remote exception in remove: ", e);
             if (callback != null) {

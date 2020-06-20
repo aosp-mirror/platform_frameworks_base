@@ -120,7 +120,7 @@ public class FingerprintService extends BiometricServiceBase {
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName, Surface surface) {
             checkPermission(MANAGE_FINGERPRINT);
-
+            updateActiveGroup(userId, opPackageName);
             final boolean restricted = isRestricted();
             final int groupId = userId; // default group for fingerprint enrollment
             final EnrollClient client = new EnrollClient(getContext(),
@@ -153,7 +153,7 @@ public class FingerprintService extends BiometricServiceBase {
                     mCurrentUserId, groupId, opId, restricted, opPackageName, 0 /* cookie */,
                     false /* requireConfirmation */, getSensorId(), isStrongBiometric(), surface,
                     statsClient, mTaskStackListener, mLockoutTracker);
-            authenticateInternal(client, opId, opPackageName);
+            authenticateInternal(client, opPackageName);
         }
 
         @Override // Binder call
@@ -171,7 +171,7 @@ public class FingerprintService extends BiometricServiceBase {
                     false /* requireConfirmation */, getSensorId(), isStrongBiometric(), surface,
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT, mTaskStackListener,
                     mLockoutTracker);
-            authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
+            authenticateInternal(client, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
 
@@ -197,15 +197,11 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void setActiveUser(final int userId) {
-            checkPermission(MANAGE_FINGERPRINT);
-            setActiveUserInternal(userId);
-        }
-
-        @Override // Binder call
         public void remove(final IBinder token, final int fingerId, final int groupId,
-                final int userId, final IFingerprintServiceReceiver receiver) {
+                final int userId, final IFingerprintServiceReceiver receiver,
+                final String opPackageName) {
             checkPermission(MANAGE_FINGERPRINT);
+            updateActiveGroup(userId, opPackageName);
 
             if (token == null) {
                 Slog.w(TAG, "remove(): token is null");
@@ -268,16 +264,16 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void rename(final int fingerId, final int groupId, final String name) {
+        public void rename(final int fingerId, final int userId, final String name) {
             checkPermission(MANAGE_FINGERPRINT);
-            if (!isCurrentUserOrProfile(groupId)) {
+            if (!isCurrentUserOrProfile(userId)) {
                 return;
             }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    getBiometricUtils().renameBiometricForUser(getContext(), groupId,
-                            fingerId, name);
+                    getBiometricUtils().renameBiometricForUser(getContext(), userId, fingerId,
+                            name);
                 }
             });
         }
@@ -311,18 +307,16 @@ public class FingerprintService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void resetTimeout(byte [] token) {
+        public void resetLockout(int userId, byte [] hardwareAuthToken) throws RemoteException {
             checkPermission(RESET_FINGERPRINT_LOCKOUT);
-
-            if (!FingerprintService.this.hasEnrolledBiometrics(mCurrentUserId)) {
-                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
+            if (!FingerprintService.this.hasEnrolledBiometrics(userId)) {
+                Slog.w(TAG, "Ignoring lockout reset, no templates enrolled for user: " + userId);
                 return;
             }
 
             // TODO: confirm security token when we move timeout management into the HAL layer.
             mHandler.post(() -> {
-                mLockoutTracker.resetFailedAttemptsForUser(true /* clearAttemptCounter */,
-                        mCurrentUserId);
+                mLockoutTracker.resetFailedAttemptsForUser(true /* clearAttemptCounter */, userId);
             });
         }
 

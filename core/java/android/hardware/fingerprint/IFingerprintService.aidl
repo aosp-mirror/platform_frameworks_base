@@ -56,7 +56,7 @@ interface IFingerprintService {
             int callingUid, int callingPid, int callingUserId);
 
     // Start fingerprint enrollment
-    void enroll(IBinder token, in byte [] cryptoToken, int groupId, IFingerprintServiceReceiver receiver,
+    void enroll(IBinder token, in byte [] cryptoToken, int userId, IFingerprintServiceReceiver receiver,
             int flags, String opPackageName, in Surface surface);
 
     // Cancel enrollment in progress
@@ -64,13 +64,13 @@ interface IFingerprintService {
 
     // Any errors resulting from this call will be returned to the listener
     void remove(IBinder token, int fingerId, int groupId, int userId,
-            IFingerprintServiceReceiver receiver);
+            IFingerprintServiceReceiver receiver, String opPackageName);
 
-    // Rename the fingerprint specified by fingerId and groupId to the given name
-    void rename(int fingerId, int groupId, String name);
+    // Rename the fingerprint specified by fingerId and userId to the given name
+    void rename(int fingerId, int userId, String name);
 
-    // Get a list of enrolled fingerprints in the given group.
-    List<Fingerprint> getEnrolledFingerprints(int groupId, String opPackageName);
+    // Get a list of enrolled fingerprints in the given userId.
+    List<Fingerprint> getEnrolledFingerprints(int userId, String opPackageName);
 
     // Determine if HAL is loaded and ready
     boolean isHardwareDetected(String opPackageName);
@@ -82,19 +82,16 @@ interface IFingerprintService {
     int postEnroll(IBinder token);
 
     // Determine if a user has at least one enrolled fingerprint
-    boolean hasEnrolledFingerprints(int groupId, String opPackageName);
+    boolean hasEnrolledFingerprints(int userId, String opPackageName);
 
     // Gets the authenticator ID for fingerprint
     long getAuthenticatorId(int callingUserId);
 
     // Reset the timeout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetTimeout(in byte [] cryptoToken);
+    void resetLockout(int userId, in byte [] cryptoToken);
 
     // Add a callback which gets notified when the fingerprint lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
-
-    // Explicitly set the active user (for enrolling work profile)
-    void setActiveUser(int uid);
 
     // Check if a client request is currently being handled
     boolean isClientActive();
