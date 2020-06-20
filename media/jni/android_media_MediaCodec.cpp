@@ -235,7 +235,10 @@ void JMediaCodec::release() {
 void JMediaCodec::releaseAsync() {
     std::call_once(mAsyncReleaseFlag, [this] {
         if (mCodec != NULL) {
-            mCodec->releaseAsync(new AMessage(kWhatAsyncReleaseComplete, this));
+            sp<AMessage> notify = new AMessage(kWhatAsyncReleaseComplete, this);
+            // Hold strong reference to this until async release is complete
+            notify->setObject("this", this);
+            mCodec->releaseAsync(notify);
         }
         mInitStatus = NO_INIT;
     });
@@ -1088,8 +1091,11 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
         }
         case kWhatAsyncReleaseComplete:
         {
-            mCodec.clear();
-            mLooper->stop();
+            if (mLooper != NULL) {
+                mLooper->unregisterHandler(id());
+                mLooper->stop();
+                mLooper.clear();
+            }
             break;
         }
         default:
@@ -1104,7 +1110,7 @@ void JMediaCodec::onMessageReceived(const sp<AMessage> &msg) {
 using namespace android;
 
 static sp<JMediaCodec> setMediaCodec(
-        JNIEnv *env, jobject thiz, const sp<JMediaCodec> &codec) {
+        JNIEnv *env, jobject thiz, const sp<JMediaCodec> &codec, bool release = true) {
     sp<JMediaCodec> old = (JMediaCodec *)env->CallLongMethod(thiz, gFields.lockAndGetContextID);
     if (codec != NULL) {
         codec->incStrong(thiz);
@@ -1115,7 +1121,9 @@ static sp<JMediaCodec> setMediaCodec(
          * its message handler, doing release() from there will deadlock
          * (as MediaCodec::release() post synchronous message to the same looper)
          */
-        old->release();
+        if (release) {
+            old->release();
+        }
         old->decStrong(thiz);
     }
     env->CallVoidMethod(thiz, gFields.setAndUnlockContextID, (jlong)codec.get());
@@ -1130,7 +1138,8 @@ static sp<JMediaCodec> getMediaCodec(JNIEnv *env, jobject thiz) {
 }
 
 static void android_media_MediaCodec_release(JNIEnv *env, jobject thiz) {
-    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    // Clear Java native reference.
+    sp<JMediaCodec> codec = setMediaCodec(env, thiz, nullptr, false /* release */);
     if (codec != NULL) {
         codec->releaseAsync();
     }
