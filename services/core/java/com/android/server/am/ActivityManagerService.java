@@ -1669,12 +1669,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @Nullable ContentCaptureManagerInternal mContentCaptureService;
 
-    /**
-     * Set of {@link ProcessRecord} that have either {@link ProcessRecord#hasTopUi()} or
-     * {@link ProcessRecord#runningRemoteAnimation} set to {@code true}.
-     */
-    final ArraySet<ProcessRecord> mTopUiOrRunningRemoteAnimApps = new ArraySet<>();
-
     final class UiHandler extends Handler {
         public UiHandler() {
             super(com.android.server.UiThread.get().getLooper(), null, true);
@@ -14713,7 +14707,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mProcessesToGc.remove(app);
         mPendingPssProcesses.remove(app);
-        mTopUiOrRunningRemoteAnimApps.remove(app);
         ProcessList.abortNextPssTime(app.procStateMemTracker);
 
         // Dismiss any open dialogs.
@@ -18523,22 +18516,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return proc;
     }
 
-    /**
-     * @return {@code true} if {@link #mTopUiOrRunningRemoteAnimApps} set contains {@code app} or when there are no apps
-     *         in this list, an false otherwise.
-     */
-    boolean containsTopUiOrRunningRemoteAnimOrEmptyLocked(ProcessRecord app) {
-        return mTopUiOrRunningRemoteAnimApps.isEmpty() || mTopUiOrRunningRemoteAnimApps.contains(app);
-    }
-
-    void addTopUiOrRunningRemoteAnim(ProcessRecord app) {
-        mTopUiOrRunningRemoteAnimApps.add(app);
-    }
-
-    void removeTopUiOrRunningRemoteAnim(ProcessRecord app) {
-        mTopUiOrRunningRemoteAnimApps.remove(app);
-    }
-
     @Override
     public boolean dumpHeap(String process, int userId, boolean managed, boolean mallocInfo,
             boolean runGc, String path, ParcelFileDescriptor fd, RemoteCallback finishCallback) {
@@ -19290,6 +19267,32 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public boolean shouldConfirmCredentials(int userId) {
             return mUserController.shouldConfirmCredentials(userId);
+        }
+
+        @Override
+        public void noteAlarmFinish(PendingIntent ps, WorkSource workSource, int sourceUid,
+                String tag) {
+            ActivityManagerService.this.noteAlarmFinish((ps != null) ? ps.getTarget() : null,
+                    workSource, sourceUid, tag);
+        }
+
+        @Override
+        public void noteAlarmStart(PendingIntent ps, WorkSource workSource, int sourceUid,
+                String tag) {
+            ActivityManagerService.this.noteAlarmStart((ps != null) ? ps.getTarget() : null,
+                    workSource, sourceUid, tag);
+        }
+
+        @Override
+        public void noteWakeupAlarm(PendingIntent ps, WorkSource workSource, int sourceUid,
+                String sourcePkg, String tag) {
+            ActivityManagerService.this.noteWakeupAlarm((ps != null) ? ps.getTarget() : null,
+                    workSource, sourceUid, sourcePkg, tag);
+        }
+
+        @Override
+        public boolean isAppStartModeDisabled(int uid, String packageName) {
+            return ActivityManagerService.this.isAppStartModeDisabled(uid, packageName);
         }
 
         @Override

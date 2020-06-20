@@ -2483,7 +2483,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
         }
 
         Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        updateBaseDisplayMetrics(width, height, width * mBaseDisplayDensity / mBaseDisplayWidth);
+        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
         reconfigureDisplayLocked();
 
         if (!mIsSizeForced) {
@@ -3729,7 +3729,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
     }
 
     boolean hasSecureWindowOnScreen() {
-        final WindowState win = getWindow(w -> w.isOnScreen() && mWmService.isSecureLocked(w));
+        final WindowState win = getWindow(w -> w.isOnScreen() && w.isSecureLocked());
         return win != null;
     }
 

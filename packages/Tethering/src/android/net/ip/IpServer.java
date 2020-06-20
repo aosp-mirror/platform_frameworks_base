@@ -19,12 +19,13 @@ package android.net.ip;
 import static android.net.RouteInfo.RTN_UNICAST;
 import static android.net.TetheringManager.TetheringRequest.checkStaticAddressConfiguration;
 import static android.net.dhcp.IDhcpServer.STATUS_SUCCESS;
-import static android.net.shared.Inet4AddressUtils.intToInet4AddressHTH;
 import static android.net.util.NetworkConstants.RFC7421_PREFIX_LENGTH;
 import static android.net.util.NetworkConstants.asByte;
 import static android.net.util.PrefixUtils.asIpPrefix;
 import static android.net.util.TetheringMessageBase.BASE_IPSERVER;
 import static android.system.OsConstants.RT_SCOPE_UNIVERSE;
+
+import static com.android.net.module.util.Inet4AddressUtils.intToInet4AddressHTH;
 
 import android.net.INetd;
 import android.net.INetworkStackStatusCallback;
@@ -615,8 +616,9 @@ public class IpServer extends StateMachine {
 
         final Boolean setIfaceUp;
         if (mInterfaceType == TetheringManager.TETHERING_WIFI
-                || mInterfaceType == TetheringManager.TETHERING_WIFI_P2P) {
-            // The WiFi stack has ownership of the interface up/down state.
+                || mInterfaceType == TetheringManager.TETHERING_WIFI_P2P
+                || mInterfaceType == TetheringManager.TETHERING_ETHERNET) {
+            // The WiFi and Ethernet stack has ownership of the interface up/down state.
             // It is unclear whether the Bluetooth or USB stacks will manage their own
             // state.
             setIfaceUp = null;

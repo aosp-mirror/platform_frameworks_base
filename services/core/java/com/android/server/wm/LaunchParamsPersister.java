@@ -69,7 +69,8 @@ class LaunchParamsPersister {
 
     // Chars below are used to escape the backslash in component name to underscore.
     private static final char ORIGINAL_COMPONENT_SEPARATOR = '/';
-    private static final char ESCAPED_COMPONENT_SEPARATOR = '_';
+    private static final char ESCAPED_COMPONENT_SEPARATOR = '-';
+    private static final char OLD_ESCAPED_COMPONENT_SEPARATOR = '_';
 
     private static final String TAG_LAUNCH_PARAMS = "launch_params";
 
@@ -150,7 +151,31 @@ class LaunchParamsPersister {
                 filesToDelete.add(paramsFile);
                 continue;
             }
-            final String paramsFileName = paramsFile.getName();
+            String paramsFileName = paramsFile.getName();
+            // Migrate all records from old separator to new separator.
+            final int oldSeparatorIndex =
+                    paramsFileName.indexOf(OLD_ESCAPED_COMPONENT_SEPARATOR);
+            if (oldSeparatorIndex != -1) {
+                if (paramsFileName.indexOf(
+                        OLD_ESCAPED_COMPONENT_SEPARATOR, oldSeparatorIndex + 1) != -1) {
+                    // Rare case. We have more than one old escaped component separator probably
+                    // because this app uses underscore in their package name. We can't distinguish
+                    // which one is the real separator so let's skip it.
+                    filesToDelete.add(paramsFile);
+                    continue;
+                }
+                paramsFileName = paramsFileName.replace(
+                        OLD_ESCAPED_COMPONENT_SEPARATOR, ESCAPED_COMPONENT_SEPARATOR);
+                final File newFile = new File(launchParamsFolder, paramsFileName);
+                if (paramsFile.renameTo(newFile)) {
+                    paramsFile = newFile;
+                } else {
+                    // Rare case. For some reason we can't rename the file. Let's drop this record
+                    // instead.
+                    filesToDelete.add(paramsFile);
+                    continue;
+                }
+            }
             final String componentNameString = paramsFileName.substring(
                     0 /* beginIndex */,
                     paramsFileName.length() - LAUNCH_PARAMS_FILE_SUFFIX.length())

@@ -82,6 +82,9 @@ public class PipTouchHandler {
     /** Duration of the dismiss scrim fading in/out. */
     private static final int DISMISS_TRANSITION_DURATION_MS = 200;
 
+    /* The multiplier to apply scale the target size by when applying the magnetic field radius */
+    private static final float MAGNETIC_FIELD_RADIUS_MULTIPLIER = 1.25f;
+
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDismissDragToEdge;
     // Allow PIP to resize to a slightly bigger state upon touch
@@ -330,8 +333,9 @@ public class PipTouchHandler {
                 R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 
-        // Set the magnetic field radius equal to twice the size of the target.
-        mMagneticTarget.setMagneticFieldRadiusPx(targetSize * 2);
+        // Set the magnetic field radius equal to the target size from the center of the target
+        mMagneticTarget.setMagneticFieldRadiusPx(
+                (int) (targetSize * MAGNETIC_FIELD_RADIUS_MULTIPLIER));
     }
 
     private boolean shouldShowResizeHandle() {
@@ -953,7 +957,6 @@ public class PipTouchHandler {
             }
 
             final PointF vel = touchState.getVelocity();
-            final float velocity = PointF.length(vel.x, vel.y);
 
             if (touchState.isDragging()) {
                 if (mMenuState != MENU_STATE_NONE) {

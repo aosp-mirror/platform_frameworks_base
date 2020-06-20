@@ -181,6 +181,7 @@ import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
 import android.annotation.CallSuper;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyCache;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Matrix;
@@ -246,8 +247,10 @@ import com.android.server.wm.utils.WmDisplayCutout;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 /** A window in the window manager. */
@@ -660,6 +663,15 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private static final StringBuilder sTmpSB = new StringBuilder();
 
     /**
+     * Whether the next surfacePlacement call should notify that the blast sync is ready.
+     * This is set to true when {@link #finishDrawing(Transaction)} is called so
+     * {@link #onTransactionReady(int, Set)} is called after the next surfacePlacement. This allows
+     * Transactions to get flushed into the syncTransaction before notifying {@link BLASTSyncEngine}
+     * that this WindowState is ready.
+     */
+    private boolean mNotifyBlastOnSurfacePlacement;
+
+    /**
      * Compares two window sub-layers and returns -1 if the first is lesser than the second in terms
      * of z-order and 1 otherwise.
      */
@@ -710,6 +722,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     static final int BLAST_TIMEOUT_DURATION = 5000; /* milliseconds */
 
+    private final WindowProcessController mWpcForDisplayConfigChanges;
+
     /**
      * @return The insets state as requested by the client, i.e. the dispatched insets state
      *         for which the visibilities are overridden with what the client requested.
@@ -724,8 +738,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void updateRequestedInsetsState(InsetsState state) {
 
         // Only update the sources the client is actually controlling.
-        for (int i = state.getSourcesCount() - 1; i >= 0; i--) {
-            final InsetsSource source = state.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            final InsetsSource source = state.peekSource(i);
+            if (source == null) continue;
             mRequestedInsetsState.addSource(source);
         }
     }
@@ -877,6 +892,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mSubLayer = 0;
             mInputWindowHandle = null;
             mWinAnimator = null;
+            mWpcForDisplayConfigChanges = null;
             return;
         }
         mDeathRecipient = deathRecipient;
@@ -949,6 +965,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_ADD_REMOVE, "Adding %s to %s", this, parentWindow);
             parentWindow.addChild(this, sWindowSubLayerComparator);
         }
+
+        // System process or invalid process cannot register to display config change.
+        mWpcForDisplayConfigChanges = (s.mPid == MY_PID || s.mPid < 0)
+                ? null
+                : service.mAtmService.getProcessController(s.mPid, s.mUid);
     }
 
     void attach() {
@@ -1764,6 +1785,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean isDreamWindow() {
         return mActivityRecord != null
                && mActivityRecord.getActivityType() == ACTIVITY_TYPE_DREAM;
+    }
+
+    boolean isSecureLocked() {
+        if ((mAttrs.flags & WindowManager.LayoutParams.FLAG_SECURE) != 0) {
+            return true;
+        }
+        return !DevicePolicyCache.getInstance().isScreenCaptureAllowed(mShowUserId,
+                mOwnerCanAddInternalSystemWindow);
     }
 
     /**
@@ -3528,13 +3557,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** @return {@code true} if the process registered to a display as a config listener. */
     private boolean registeredForDisplayConfigChanges() {
         final WindowState parentWindow = getParentWindow();
-        final Session session = parentWindow != null ? parentWindow.mSession : mSession;
-        // System process or invalid process cannot register to display config change.
-        if (session.mPid == MY_PID || session.mPid < 0) return false;
-        WindowProcessController app =
-                mWmService.mAtmService.getProcessController(session.mPid, session.mUid);
-        if (app == null || !app.registeredForDisplayConfigChanges()) return false;
-        return true;
+        final WindowProcessController wpc = parentWindow != null
+                ? parentWindow.mWpcForDisplayConfigChanges
+                : mWpcForDisplayConfigChanges;
+        return wpc != null && wpc.registeredForDisplayConfigChanges();
     }
 
     void reportResized() {
@@ -5117,13 +5143,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWindowFrames.updateLastInsetValues();
     }
 
-    @Nullable
     @Override
-    WindowContainer<WindowState> getAnimatingContainer(int flags, int typesToCheck) {
+    protected boolean isSelfAnimating(int flags, int typesToCheck) {
         if (mControllableInsetProvider != null) {
-            return null;
+            return false;
         }
-        return super.getAnimatingContainer(flags, typesToCheck);
+        return super.isSelfAnimating(flags, typesToCheck);
     }
 
     void startAnimation(Animation anim) {
@@ -5314,10 +5339,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWillReplaceWindow;
     }
 
-    private void applyDims(Dimmer dimmer) {
+    private void applyDims() {
         if (!mAnimatingExit && mAppDied) {
             mIsDimming = true;
-            dimmer.dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
+            getDimmer().dimAbove(getSyncTransaction(), this, DEFAULT_DIM_AMOUNT_DEAD_WINDOW);
         } else if ((mAttrs.flags & FLAG_DIM_BEHIND) != 0 && isVisibleNow() && !mHidden) {
             // Only show a dim behind when the following is satisfied:
             // 1. The window has the flag FLAG_DIM_BEHIND
@@ -5325,7 +5350,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // 3. The WS is considered visible according to the isVisible() method
             // 4. The WS is not hidden.
             mIsDimming = true;
-            dimmer.dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
+            getDimmer().dimBelow(getSyncTransaction(), this, mAttrs.dimAmount);
         }
     }
 
@@ -5349,16 +5374,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     void prepareSurfaces() {
-        final Dimmer dimmer = getDimmer();
         mIsDimming = false;
-        if (dimmer != null) {
-            applyDims(dimmer);
-        }
+        applyDims();
         updateSurfacePosition();
         // Send information to SufaceFlinger about the priority of the current window.
         updateFrameRateSelectionPriorityIfNeeded();
 
         mWinAnimator.prepareSurfaceLocked(true);
+        notifyBlastSyncTransaction();
         super.prepareSurfaces();
     }
 
@@ -5850,6 +5873,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mBLASTSyncTransaction.merge(postDrawTransaction);
         }
 
+        mNotifyBlastOnSurfacePlacement = true;
+        return mWinAnimator.finishDrawingLocked(null);
+    }
+
+    @VisibleForTesting
+    void notifyBlastSyncTransaction() {
+        if (!mNotifyBlastOnSurfacePlacement || mWaitingListener == null) {
+            mNotifyBlastOnSurfacePlacement = false;
+            return;
+        }
+
         // If localSyncId is >0 then we are syncing with children and will
         // invoke transaction ready from our own #transactionReady callback
         // we just need to signal our side of the sync (setReady). But if we
@@ -5857,15 +5891,14 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // be invoked and we need to invoke it ourself.
         if (mLocalSyncId >= 0) {
             mBLASTSyncEngine.setReady(mLocalSyncId);
-            return mWinAnimator.finishDrawingLocked(null);
+            return;
         }
 
-        mWaitingListener.onTransactionReady(mWaitingSyncId, mBLASTSyncTransaction);
-        mUsingBLASTSyncTransaction = false;
+        mWaitingListener.onTransactionReady(mWaitingSyncId,  Collections.singleton(this));
 
         mWaitingSyncId = 0;
         mWaitingListener = null;
-        return mWinAnimator.finishDrawingLocked(null);
+        mNotifyBlastOnSurfacePlacement = false;
     }
 
     private boolean requestResizeForBlastSync() {

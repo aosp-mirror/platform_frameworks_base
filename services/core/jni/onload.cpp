@@ -64,6 +64,7 @@ int register_android_server_stats_pull_StatsPullAtomService(JNIEnv* env);
 int register_android_server_AdbDebuggingManager(JNIEnv* env);
 int register_android_server_FingerprintService(JNIEnv* env);
 int register_android_server_FaceService(JNIEnv* env);
+int register_android_server_GpuService(JNIEnv* env);
 };
 
 using namespace android;
@@ -121,5 +122,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_AdbDebuggingManager(env);
     register_android_server_FingerprintService(env);
     register_android_server_FaceService(env);
+    register_android_server_GpuService(env);
     return JNI_VERSION_1_4;
 }

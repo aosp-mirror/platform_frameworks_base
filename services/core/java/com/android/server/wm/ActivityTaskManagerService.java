@@ -3809,7 +3809,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             userId = activity.mUserId;
         }
-        return !DevicePolicyCache.getInstance().getScreenCaptureDisabled(userId);
+        return DevicePolicyCache.getInstance().isScreenCaptureAllowed(userId, false);
     }
 
     @Override
@@ -5398,7 +5398,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final boolean hideDialogsSet = Settings.Global.getInt(mContext.getContentResolver(),
                 HIDE_ERROR_DIALOGS, 0) != 0;
         mShowDialogs = inputMethodExists
-                && ActivityTaskManager.currentUiModeSupportsErrorDialogs(mContext)
+                && ActivityTaskManager.currentUiModeSupportsErrorDialogs(config)
                 && !hideDialogsSet;
     }
 
