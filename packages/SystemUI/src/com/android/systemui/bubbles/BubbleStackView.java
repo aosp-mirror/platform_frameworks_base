@@ -1902,6 +1902,8 @@ public class BubbleStackView extends FrameLayout
                                     if (mExpandedBubble != null
                                             && mExpandedBubble.getExpandedView() != null) {
                                         mExpandedBubble.getExpandedView()
+                                                .setContentVisibility(true);
+                                        mExpandedBubble.getExpandedView()
                                                 .setSurfaceZOrderedOnTop(false);
                                     }
                                 })
@@ -2045,6 +2047,7 @@ public class BubbleStackView extends FrameLayout
                     })
                     .withEndActions(() -> {
                         if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
+                            mExpandedBubble.getExpandedView().setContentVisibility(true);
                             mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(false);
                         }
 
