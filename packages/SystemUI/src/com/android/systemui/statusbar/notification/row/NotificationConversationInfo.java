@@ -65,6 +65,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.notification.ConversationIconFactory;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.statusbar.notification.NotificationChannelHelper;
@@ -91,7 +92,7 @@ public class NotificationConversationInfo extends LinearLayout implements
     private VisualStabilityManager mVisualStabilityManager;
     private Handler mMainHandler;
     private Handler mBgHandler;
-
+    private BubbleController mBubbleController;
     private String mPackageName;
     private String mAppName;
     private int mAppUid;
@@ -219,7 +220,8 @@ public class NotificationConversationInfo extends LinearLayout implements
             boolean isDeviceProvisioned,
             @Main Handler mainHandler,
             @Background Handler bgHandler,
-            OnConversationSettingsClickListener onConversationSettingsClickListener) {
+            OnConversationSettingsClickListener onConversationSettingsClickListener,
+            BubbleController bubbleController) {
         mSelectedAction = -1;
         mINotificationManager = iNotificationManager;
         mVisualStabilityManager = visualStabilityManager;
@@ -238,6 +240,7 @@ public class NotificationConversationInfo extends LinearLayout implements
         mIconFactory = conversationIconFactory;
         mUserContext = userContext;
         mBubbleMetadata = bubbleMetadata;
+        mBubbleController = bubbleController;
         mBuilderProvider = builderProvider;
         mMainHandler = mainHandler;
         mBgHandler = bgHandler;
@@ -627,6 +630,9 @@ public class NotificationConversationInfo extends LinearLayout implements
                                 mINotificationManager.setBubblesAllowed(mAppPkg, mAppUid,
                                         BUBBLE_PREFERENCE_SELECTED);
                             }
+                            post(() -> {
+                                mBubbleController.onUserChangedImportance(mEntry);
+                            });
                         }
                         mChannelToUpdate.setImportance(Math.max(
                                 mChannelToUpdate.getOriginalImportance(), IMPORTANCE_DEFAULT));
