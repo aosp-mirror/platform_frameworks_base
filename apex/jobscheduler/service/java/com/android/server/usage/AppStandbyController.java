@@ -866,7 +866,7 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId) {
+    public void reportEvent(UsageEvents.Event event, int userId) {
         if (!mAppIdleEnabled) return;
         final int eventType = event.getEventType();
         if ((eventType == UsageEvents.Event.ACTIVITY_RESUMED
@@ -880,6 +880,7 @@ public class AppStandbyController implements AppStandbyInternal {
             final String pkg = event.getPackageName();
             final List<UserHandle> linkedProfiles = getCrossProfileTargets(pkg, userId);
             synchronized (mAppIdleLock) {
+                final long elapsedRealtime = mInjector.elapsedRealtime();
                 reportEventLocked(pkg, eventType, elapsedRealtime, userId);
 
                 final int size = linkedProfiles.size();
@@ -1630,18 +1631,11 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
-    @Override
-    public void flushToDisk(int userId) {
-        synchronized (mAppIdleLock) {
-            mAppIdleHistory.writeAppIdleTimes(userId);
-        }
-    }
 
     @Override
-    public void flushDurationsToDisk() {
-        // Persist elapsed and screen on time. If this fails for whatever reason, the apps will be
-        // considered not-idle, which is the safest outcome in such an event.
+    public void flushToDisk() {
         synchronized (mAppIdleLock) {
+            mAppIdleHistory.writeAppIdleTimes();
             mAppIdleHistory.writeAppIdleDurations();
         }
     }
@@ -1818,9 +1812,9 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void dumpUser(IndentingPrintWriter idpw, int userId, List<String> pkgs) {
+    public void dumpUsers(IndentingPrintWriter idpw, int[] userIds, List<String> pkgs) {
         synchronized (mAppIdleLock) {
-            mAppIdleHistory.dump(idpw, userId, pkgs);
+            mAppIdleHistory.dumpUsers(idpw, userIds, pkgs);
         }
     }
 
