@@ -1425,10 +1425,19 @@ public class WifiEnterpriseConfig implements Parcelable {
         if (mEapMethod != Eap.PEAP && mEapMethod != Eap.TLS && mEapMethod != Eap.TTLS) {
             return false;
         }
-        if (!mIsAppInstalledCaCert && TextUtils.isEmpty(getCaPath())) {
+        if (TextUtils.isEmpty(getAltSubjectMatch())
+                && TextUtils.isEmpty(getDomainSuffixMatch())) {
+            // Both subject and domain match are not set, it's insecure.
             return true;
         }
-        return TextUtils.isEmpty(getAltSubjectMatch()) && TextUtils.isEmpty(
-                getDomainSuffixMatch());
+        if (mIsAppInstalledCaCert) {
+            // CA certificate is installed by App, it's secure.
+            return false;
+        }
+        if (getCaCertificateAliases() != null) {
+            // CA certificate alias from keyStore is set, it's secure.
+            return false;
+        }
+        return TextUtils.isEmpty(getCaPath());
     }
 }
