@@ -2125,6 +2125,22 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testShowQSMediaOverrideTrue() {
+        Global.putInt(getContext().getContentResolver(),
+                Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 1);
+        mHelper.updateMediaNotificationFilteringEnabled(); // would be called by settings observer
+        assertTrue(mHelper.isMediaNotificationFilteringEnabled());
+    }
+
+    @Test
+    public void testShowQSMediaOverrideFalse() {
+        Global.putInt(getContext().getContentResolver(),
+                Global.SHOW_MEDIA_ON_QUICK_SETTINGS, 0);
+        mHelper.updateMediaNotificationFilteringEnabled(); // would be called by settings observer
+        assertFalse(mHelper.isMediaNotificationFilteringEnabled());
+    }
+
+    @Test
     public void testOnLocaleChanged_updatesDefaultChannels() throws Exception {
         String newLabel = "bananas!";
         final NotificationChannel defaultChannel = mHelper.getNotificationChannel(PKG_N_MR1,
