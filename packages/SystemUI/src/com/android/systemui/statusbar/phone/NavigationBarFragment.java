@@ -25,6 +25,7 @@ import static android.view.InsetsState.ITYPE_NAVIGATION_BAR;
 import static android.view.InsetsState.containsType;
 import static android.view.WindowInsetsController.APPEARANCE_LOW_PROFILE_BARS;
 import static android.view.WindowInsetsController.APPEARANCE_OPAQUE_NAVIGATION_BARS;
+import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_3BUTTON;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_MODE_GESTURAL;
 
@@ -221,13 +222,14 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
      * original handle hidden and we'll flip the visibilities once the
      * {@link #mTasksFrozenListener} fires
      */
-    private VerticalNavigationHandle mOrientationHandle;
+    private QuickswitchOrientedNavHandle mOrientationHandle;
     private WindowManager.LayoutParams mOrientationParams;
     private int mStartingQuickSwitchRotation;
     private int mCurrentRotation;
     private boolean mFixedRotationEnabled;
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
     private UiEventLogger mUiEventLogger;
+    private boolean mShowOrientedHandleForImmersiveMode;
 
     @com.android.internal.annotations.VisibleForTesting
     public enum NavBarActionEvent implements UiEventLogger.UiEventEnum {
@@ -299,6 +301,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         @Override
         public void onQuickSwitchToNewTask(@Surface.Rotation int rotation) {
             mStartingQuickSwitchRotation = rotation;
+            if (rotation == -1) {
+                mShowOrientedHandleForImmersiveMode = false;
+            }
             orientSecondaryHomeHandle();
         }
 
@@ -602,7 +607,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         getContext().getSystemService(DisplayManager.class)
                 .registerDisplayListener(this, new Handler(Looper.getMainLooper()));
 
-        mOrientationHandle = new VerticalNavigationHandle(getContext());
+        mOrientationHandle = new QuickswitchOrientedNavHandle(getContext());
 
         getBarTransitions().addDarkIntensityListener(mOrientationHandleIntensityListener);
         mOrientationParams = new WindowManager.LayoutParams(0, 0,
@@ -613,8 +618,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                         | WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
                         | WindowManager.LayoutParams.FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
+        mOrientationParams.setTitle("SecondaryHomeHandle" + getContext().getDisplayId());
+        mOrientationParams.privateFlags |= PRIVATE_FLAG_NO_MOVE_ANIMATION;
         mWindowManager.addView(mOrientationHandle, mOrientationParams);
         mOrientationHandle.setVisibility(View.GONE);
+        mOrientationParams.setFitInsetsTypes(0 /* types*/);
         mOrientationHandleGlobalLayoutListener =
                 () -> {
                     if (mStartingQuickSwitchRotation == -1) {
@@ -651,22 +659,28 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
             int height = 0;
             int width = 0;
             Rect dispSize = mWindowManager.getCurrentWindowMetrics().getBounds();
+            mOrientationHandle.setDeltaRotation(deltaRotation);
             switch (deltaRotation) {
                 case Surface.ROTATION_90:
                 case Surface.ROTATION_270:
                     height = dispSize.height();
-                    width = getResources()
-                            .getDimensionPixelSize(R.dimen.navigation_bar_height);
+                    width = mNavigationBarView.getHeight();
                     break;
                 case Surface.ROTATION_180:
                 case Surface.ROTATION_0:
                     // TODO(b/152683657): Need to determine best UX for this
-                    resetSecondaryHandle();
-                    return;
+                    if (!mShowOrientedHandleForImmersiveMode) {
+                        resetSecondaryHandle();
+                        return;
+                    }
+                    width = dispSize.width();
+                    height = mNavigationBarView.getHeight();
+                    break;
             }
 
             mOrientationParams.gravity =
-                    deltaRotation == Surface.ROTATION_90 ? Gravity.LEFT : Gravity.RIGHT;
+                    deltaRotation == Surface.ROTATION_0 ? Gravity.BOTTOM :
+                            (deltaRotation == Surface.ROTATION_90 ? Gravity.LEFT : Gravity.RIGHT);
             mOrientationParams.height = height;
             mOrientationParams.width = width;
             mWindowManager.updateViewLayout(mOrientationHandle, mOrientationParams);
@@ -768,6 +782,11 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 && mNavigationBarWindowState != state) {
             mNavigationBarWindowState = state;
             updateSystemUiStateFlags(-1);
+            mShowOrientedHandleForImmersiveMode = state == WINDOW_STATE_HIDDEN;
+            if (mOrientationHandle != null
+                    && mStartingQuickSwitchRotation != -1) {
+                orientSecondaryHomeHandle();
+            }
             if (DEBUG_WINDOW_STATE) Log.d(TAG, "Navigation bar " + windowStateToString(state));
 
             if (mNavigationBarView != null) {

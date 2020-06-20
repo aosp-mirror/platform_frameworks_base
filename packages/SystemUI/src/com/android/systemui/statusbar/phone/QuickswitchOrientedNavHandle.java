@@ -19,17 +19,23 @@ package com.android.systemui.statusbar.phone;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.RectF;
+import android.view.Surface;
 
 import com.android.systemui.R;
 
 /** Temporarily shown view when using QuickSwitch to switch between apps of different rotations */
-public class VerticalNavigationHandle extends NavigationHandle {
+public class QuickswitchOrientedNavHandle extends NavigationHandle {
     private final int mWidth;
     private final RectF mTmpBoundsRectF = new RectF();
+    private @Surface.Rotation int mDeltaRotation;
 
-    public VerticalNavigationHandle(Context context) {
+    public QuickswitchOrientedNavHandle(Context context) {
         super(context);
         mWidth = context.getResources().getDimensionPixelSize(R.dimen.navigation_home_handle_width);
+    }
+
+    void setDeltaRotation(@Surface.Rotation int rotation) {
+        mDeltaRotation = rotation;
     }
 
     @Override
@@ -42,12 +48,32 @@ public class VerticalNavigationHandle extends NavigationHandle {
         int top;
         int bottom;
         int right;
-        int topStart = getLocationOnScreen()[1];
         int radiusOffset = mRadius * 2;
-        right = getWidth() - mBottom;
-        top = getHeight() / 2 - (mWidth / 2) - (topStart / 2);
-        left = getWidth() - mBottom - radiusOffset;
-        bottom = top + mWidth;
+        int topStart = getLocationOnScreen()[1];
+
+        switch (mDeltaRotation) {
+            default:
+            case Surface.ROTATION_0:
+            case Surface.ROTATION_180:
+                int height = mRadius * 2;
+                left = getWidth() / 2 - mWidth / 2;
+                top = (getHeight() - mBottom - height);
+                right = getWidth() / 2 + mWidth / 2;
+                bottom = top + height;
+                break;
+            case Surface.ROTATION_90:
+                left = mBottom;
+                right = left + radiusOffset;
+                top = getHeight() / 2 - (mWidth / 2) - (topStart / 2);
+                bottom = top + mWidth;
+                break;
+            case Surface.ROTATION_270:
+                right = getWidth() - mBottom;
+                left = right - radiusOffset;
+                top = getHeight() / 2 - (mWidth / 2) - (topStart / 2);
+                bottom = top + mWidth;
+                break;
+        }
         mTmpBoundsRectF.set(left, top, right, bottom);
         return mTmpBoundsRectF;
     }
