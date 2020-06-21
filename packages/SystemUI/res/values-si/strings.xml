@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"විවෘත කිරීමට නැවත තට්ටු කරන්න"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"විවෘත කිරීමට ස්වයිප් කරන්න"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"නැවත උත්සාහ කිරීමට ඉහළට ස්වයිප් කරන්න"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"මෙම උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> මගින් කළමනාකරණය කෙරේ"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"දුරකථනය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="voice_hint" msgid="7476017460191291417">"හඬ සහාය සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
     <string name="camera_hint" msgid="4519495795000658637">"කැමරාව සඳහා නිරූපකය වෙතින් ස්වයිප් කරන්න"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"ඇතැම් විට පැතිකඩ නිරීක්ෂණය කරන ලදි"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"ඔබගේ සංවිධානය මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මෙම උපාංගය කළමනාකරණය කරන අතර එය ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබෙන අතර එය <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධිතයි"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මගින් කළමනාකරණය කෙරෙන අතර <xliff:g id="VPN_APP">%2$s</xliff:g> වෙත සම්බන්ධිතයි"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මගින් කළමනාකරණය කෙරේ"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබෙන අතර එය VPN වෙත සම්බන්ධිතයි"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> මගින් කළමනාකරණය කෙරෙන අතර VPN වෙත සම්බන්ධිතයි"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"ඔබගේ කාර්යාල පැතිකඩ තුළ ඔබේ සංවිධානය ජාල තදබදය නිරීක්ෂණය කිරීමට හැක"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ඔබේ කාර්යාල පැතිකඩ තුළ ජාල තදබදය නිරීක්ෂණය කළ හැක"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ඇතැම් විට ජාලය නිරීක්ෂණය විය හැක"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"උපාංගය VPN වෙත සම්බන්ධිතයි"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"කාර්යාල පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"පුද්ගලික පැතිකඩ <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"උපාංගය <xliff:g id="VPN_APP">%1$s</xliff:g> වෙත සම්බන්ධ වුණි"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"උපාංග කළමනාකරණය"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"පැතිකඩ නිරීක්ෂණය කිරීම"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ජාල නිරීක්ෂණය"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN අබල කරන්න."</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN විසන්ධි කරන්න"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ප්‍රතිපත්ති පෙන්වන්න"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"ඔබගේ උපාංගය ඔබගේ <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> විසින් කළමනාකරණය කරනු ලැබේ. \n\nඔබේ පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංග ස්ථාන තොරතුරු නිරීක්ෂණය සහ කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"ඔබගේ උපාංගය ඔබගේ සංවිධානය විසින් කළමනාකරණය කරනු ලැබේ.\n\nඔබේ පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංග ස්ථාන තොරතුරු නිරීක්ෂණය සහ කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබගේ පරිපාලක අමතන්න."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ඔබගේ සංවිධානය ඔබගේ උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ඔබගේ සංවිධානය ඔබගේ කාර්යාල පැතිකඩ තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"මෙම උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
@@ -920,6 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"විරාම කරන්න"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"ඊළඟ එකට පනින්න"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"පෙර එකට පනින්න"</string>
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"ප්‍රතිප්‍රමාණ කරන්න"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"දුරකථනය රත් වීම නිසා ක්‍රියාවිරහිත කරන ලදී"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"ඔබගේ දුරකථනය දැන් සාමාන්‍ය ලෙස ධාවනය වේ"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ඔබේ දුරකථනය ඉතාම උණුසුම්ය, එම නිසා එය සිසිල් වීමට ක්‍රියාවිරහිත කරන ලදී. ධැන් ඔබේ දුරකථනය සාමාන්‍ය පරිදි ධාවනය වේ.\n\nඔබ පහත දේවල් සිදු කළහොත් ඔබේ දුරකථනය ඉතාම උණුසුම් විය හැකිය:\n	• සම්පත්-දැඩි සත්කාරක යෙදුම් භාවිතය (ක්‍රීඩා, වීඩියෝ, හෝ සංචලන යෙදුම් යනාදී)\n	• විශාල ගොනු බාගැනීම හෝ උඩුගත කිරීම\n	• ඔබේ දුරකථනය අධික උෂ්ණත්වයේදී භාවිත කිරීම"</string>
@@ -1062,8 +1079,15 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> සඳහා වෙනස තහවුරු කරන්න"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"තව බැලීමට ස්වයිප් කරන්න"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"නිර්දේශ පූරණය කරමින්"</string>
-    <string name="controls_media_close_session" msgid="9023534788828414585">"මෙම මාධ්‍ය සැසිය වසන්න"</string>
+    <!-- no translation found for controls_media_title (1746947284862928133) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
+    <skip />
+    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"නැවත පටන් ගන්න"</string>
+    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"අක්‍රියයි, යෙදුම පරීක්ෂා කරන්න"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"දෝෂයකි, නැවත උත්සාහ කරමින්…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"හමු නොවිණි"</string>
