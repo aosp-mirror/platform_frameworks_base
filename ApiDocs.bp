@@ -91,7 +91,6 @@ droidstubs {
     arg_files: [
         "core/res/AndroidManifest.xml",
     ],
-    sandbox: true,
     args: metalava_framework_docs_args,
     write_sdk_values: true,
 }
