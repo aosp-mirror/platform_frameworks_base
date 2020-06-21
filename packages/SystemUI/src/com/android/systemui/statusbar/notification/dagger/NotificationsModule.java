@@ -24,6 +24,7 @@ import android.os.Handler;
 import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.R;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -116,7 +117,8 @@ public interface NotificationsModule {
             ChannelEditorDialogController channelEditorDialogController,
             CurrentUserContextTracker contextTracker,
             Provider<PriorityOnboardingDialogController.Builder> builderProvider,
-            BubbleController bubbleController) {
+            BubbleController bubbleController,
+            UiEventLogger uiEventLogger) {
         return new NotificationGutsManager(
                 context,
                 visualStabilityManager,
@@ -131,7 +133,8 @@ public interface NotificationsModule {
                 channelEditorDialogController,
                 contextTracker,
                 builderProvider,
-                bubbleController);
+                bubbleController,
+                uiEventLogger);
     }
 
     /** Provides an instance of {@link VisualStabilityManager} */
