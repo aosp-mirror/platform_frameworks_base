@@ -90,6 +90,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
 import android.telephony.TelephonyManager;
@@ -239,6 +240,14 @@ public class AppStandbyController implements AppStandbyInternal {
     private final ArraySet<String> mHeadlessSystemApps = new ArraySet<>();
 
     private final CountDownLatch mAdminDataAvailableLatch = new CountDownLatch(1);
+
+    // Cache the active network scorer queried from the network scorer service
+    private volatile String mCachedNetworkScorer = null;
+    // The last time the network scorer service was queried
+    private volatile long mCachedNetworkScorerAtMillis = 0L;
+    // How long before querying the network scorer again. During this time, subsequent queries will
+    // get the cached value
+    private static final long NETWORK_SCORER_CACHE_DURATION_MILLIS = 5000L;
 
     // Messages for the handler
     static final int MSG_INFORM_LISTENERS = 3;
@@ -888,7 +897,7 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId) {
+    public void reportEvent(UsageEvents.Event event, int userId) {
         if (!mAppIdleEnabled) return;
         final int eventType = event.getEventType();
         if ((eventType == UsageEvents.Event.ACTIVITY_RESUMED
@@ -902,6 +911,7 @@ public class AppStandbyController implements AppStandbyInternal {
             final String pkg = event.getPackageName();
             final List<UserHandle> linkedProfiles = getCrossProfileTargets(pkg, userId);
             synchronized (mAppIdleLock) {
+                final long elapsedRealtime = mInjector.elapsedRealtime();
                 reportEventLocked(pkg, eventType, elapsedRealtime, userId);
 
                 final int size = linkedProfiles.size();
@@ -1191,6 +1201,8 @@ public class AppStandbyController implements AppStandbyInternal {
             return new int[0];
         }
 
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "getIdleUidsForUser");
+
         final long elapsedRealtime = mInjector.elapsedRealtime();
 
         List<ApplicationInfo> apps;
@@ -1226,6 +1238,7 @@ public class AppStandbyController implements AppStandbyInternal {
                 uidStates.setValueAt(index, value + 1 + (idle ? 1<<16 : 0));
             }
         }
+
         if (DEBUG) {
             Slog.d(TAG, "getIdleUids took " + (mInjector.elapsedRealtime() - elapsedRealtime));
         }
@@ -1246,6 +1259,8 @@ public class AppStandbyController implements AppStandbyInternal {
                 numIdle++;
             }
         }
+
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
         return res;
     }
@@ -1613,8 +1628,16 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     private boolean isActiveNetworkScorer(String packageName) {
-        String activeScorer = mInjector.getActiveNetworkScorer();
-        return packageName != null && packageName.equals(activeScorer);
+        // Validity of network scorer cache is limited to a few seconds. Fetch it again
+        // if longer since query.
+        // This is a temporary optimization until there's a callback mechanism for changes to network scorer.
+        final long now = SystemClock.elapsedRealtime();
+        if (mCachedNetworkScorer == null
+                || mCachedNetworkScorerAtMillis < now - NETWORK_SCORER_CACHE_DURATION_MILLIS) {
+            mCachedNetworkScorer = mInjector.getActiveNetworkScorer();
+            mCachedNetworkScorerAtMillis = now;
+        }
+        return packageName != null && packageName.equals(mCachedNetworkScorer);
     }
 
     private void informListeners(String packageName, int userId, int bucket, int reason,
@@ -1639,18 +1662,11 @@ public class AppStandbyController implements AppStandbyInternal {
         }
     }
 
-    @Override
-    public void flushToDisk(int userId) {
-        synchronized (mAppIdleLock) {
-            mAppIdleHistory.writeAppIdleTimes(userId);
-        }
-    }
 
     @Override
-    public void flushDurationsToDisk() {
-        // Persist elapsed and screen on time. If this fails for whatever reason, the apps will be
-        // considered not-idle, which is the safest outcome in such an event.
+    public void flushToDisk() {
         synchronized (mAppIdleLock) {
+            mAppIdleHistory.writeAppIdleTimes();
             mAppIdleHistory.writeAppIdleDurations();
         }
     }
@@ -1825,9 +1841,9 @@ public class AppStandbyController implements AppStandbyInternal {
     }
 
     @Override
-    public void dumpUser(IndentingPrintWriter idpw, int userId, List<String> pkgs) {
+    public void dumpUsers(IndentingPrintWriter idpw, int[] userIds, List<String> pkgs) {
         synchronized (mAppIdleLock) {
-            mAppIdleHistory.dump(idpw, userId, pkgs);
+            mAppIdleHistory.dumpUsers(idpw, userIds, pkgs);
         }
     }
 

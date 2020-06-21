@@ -52,13 +52,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.content.res.Configuration;
 import android.graphics.PixelFormat;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.RankingMap;
 import android.service.notification.ZenModeConfig;
@@ -130,7 +133,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @IntDef({DISMISS_USER_GESTURE, DISMISS_AGED, DISMISS_TASK_FINISHED, DISMISS_BLOCKED,
             DISMISS_NOTIF_CANCEL, DISMISS_ACCESSIBILITY_ACTION, DISMISS_NO_LONGER_BUBBLE,
             DISMISS_USER_CHANGED, DISMISS_GROUP_CANCELLED, DISMISS_INVALID_INTENT,
-            DISMISS_OVERFLOW_MAX_REACHED})
+            DISMISS_OVERFLOW_MAX_REACHED, DISMISS_SHORTCUT_REMOVED, DISMISS_PACKAGE_REMOVED})
     @Target({FIELD, LOCAL_VARIABLE, PARAMETER})
     @interface DismissReason {}
 
@@ -145,6 +148,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     static final int DISMISS_GROUP_CANCELLED = 9;
     static final int DISMISS_INVALID_INTENT = 10;
     static final int DISMISS_OVERFLOW_MAX_REACHED = 11;
+    static final int DISMISS_SHORTCUT_REMOVED = 12;
+    static final int DISMISS_PACKAGE_REMOVED = 13;
 
     private final Context mContext;
     private final NotificationEntryManager mNotificationEntryManager;
@@ -183,6 +188,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     // Only load overflow data from disk once
     private boolean mOverflowDataLoaded = false;
 
+    /**
+     * When the shade status changes to SHADE (from anything but SHADE, like LOCKED) we'll select
+     * this bubble and expand the stack.
+     */
+    @Nullable private NotificationEntry mNotifEntryToExpandOnShadeUnlock;
+
     private final NotificationInterruptStateProvider mNotificationInterruptStateProvider;
     private IStatusBarService mBarService;
     private WindowManager mWindowManager;
@@ -206,6 +217,9 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * Last known screen density, used to detect display size changes in {@link #onConfigChanged}.
      */
     private int mDensityDpi = Configuration.DENSITY_DPI_UNDEFINED;
+
+    /** Last known direction, used to detect layout direction changes @link #onConfigChanged}. */
+    private int mLayoutDirection = View.LAYOUT_DIRECTION_UNDEFINED;
 
     private boolean mInflateSynchronously;
 
@@ -292,6 +306,12 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             if (shouldCollapse) {
                 collapseStack();
             }
+
+            if (mNotifEntryToExpandOnShadeUnlock != null) {
+                expandStackAndSelectBubble(mNotifEntryToExpandOnShadeUnlock);
+                mNotifEntryToExpandOnShadeUnlock = null;
+            }
+
             updateStack();
         }
     }
@@ -319,7 +339,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             SysUiState sysUiState,
             INotificationManager notificationManager,
             @Nullable IStatusBarService statusBarService,
-            WindowManager windowManager) {
+            WindowManager windowManager,
+            LauncherApps launcherApps) {
         dumpManager.registerDumpable(TAG, this);
         mContext = context;
         mShadeController = shadeController;
@@ -411,6 +432,47 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 });
 
         mBubbleIconFactory = new BubbleIconFactory(context);
+
+        launcherApps.registerCallback(new LauncherApps.Callback() {
+            @Override
+            public void onPackageAdded(String s, UserHandle userHandle) {}
+
+            @Override
+            public void onPackageChanged(String s, UserHandle userHandle) {}
+
+            @Override
+            public void onPackageRemoved(String s, UserHandle userHandle) {
+                // Remove bubbles with this package name, since it has been uninstalled and attempts
+                // to open a bubble from an uninstalled app can cause issues.
+                mBubbleData.removeBubblesWithPackageName(s, DISMISS_PACKAGE_REMOVED);
+            }
+
+            @Override
+            public void onPackagesAvailable(String[] strings, UserHandle userHandle,
+                    boolean b) {
+
+            }
+
+            @Override
+            public void onPackagesUnavailable(String[] packages, UserHandle userHandle,
+                    boolean b) {
+                for (String packageName : packages) {
+                    // Remove bubbles from unavailable apps. This can occur when the app is on
+                    // external storage that has been removed.
+                    mBubbleData.removeBubblesWithPackageName(packageName, DISMISS_PACKAGE_REMOVED);
+                }
+            }
+
+            @Override
+            public void onShortcutsChanged(String packageName, List<ShortcutInfo> validShortcuts,
+                    UserHandle user) {
+                super.onShortcutsChanged(packageName, validShortcuts, user);
+
+                // Remove bubbles whose shortcuts aren't in the latest list of valid shortcuts.
+                mBubbleData.removeBubblesWithInvalidShortcuts(
+                        packageName, validShortcuts, DISMISS_SHORTCUT_REMOVED);
+            }
+        });
     }
 
     /**
@@ -833,8 +895,10 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
                 mBubbleIconFactory = new BubbleIconFactory(mContext);
                 mStackView.onDisplaySizeChanged();
             }
-
-            mStackView.onLayoutDirectionChanged();
+            if (newConfig.getLayoutDirection() != mLayoutDirection) {
+                mLayoutDirection = newConfig.getLayoutDirection();
+                mStackView.onLayoutDirectionChanged(mLayoutDirection);
+            }
         }
     }
 
@@ -931,20 +995,49 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
      * @param entry the notification for the bubble to be selected
      */
     public void expandStackAndSelectBubble(NotificationEntry entry) {
-        String key = entry.getKey();
-        Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
-        if (bubble != null) {
-            mBubbleData.setSelectedBubble(bubble);
-            mBubbleData.setExpanded(true);
-        } else {
-            bubble = mBubbleData.getOverflowBubbleWithKey(key);
+        if (mStatusBarStateListener.getCurrentState() == SHADE) {
+            mNotifEntryToExpandOnShadeUnlock = null;
+
+            String key = entry.getKey();
+            Bubble bubble = mBubbleData.getBubbleInStackWithKey(key);
             if (bubble != null) {
-                promoteBubbleFromOverflow(bubble);
-            } else if (entry.canBubble()) {
-                // It can bubble but it's not -- it got aged out of the overflow before it
-                // was dismissed or opened, make it a bubble again.
-                setIsBubble(entry, true /* isBubble */, true /* autoExpand */);
+                mBubbleData.setSelectedBubble(bubble);
+                mBubbleData.setExpanded(true);
+            } else {
+                bubble = mBubbleData.getOverflowBubbleWithKey(key);
+                if (bubble != null) {
+                    promoteBubbleFromOverflow(bubble);
+                } else if (entry.canBubble()) {
+                    // It can bubble but it's not -- it got aged out of the overflow before it
+                    // was dismissed or opened, make it a bubble again.
+                    setIsBubble(entry, true /* isBubble */, true /* autoExpand */);
+                }
             }
+        } else {
+            // Wait until we're unlocked to expand, so that the user can see the expand animation
+            // and also to work around bugs with expansion animation + shade unlock happening at the
+            // same time.
+            mNotifEntryToExpandOnShadeUnlock = entry;
+        }
+    }
+
+    /**
+     * When a notification is marked Priority, expand the stack if needed,
+     * then (maybe create and) select the given bubble.
+     *
+     * @param entry the notification for the bubble to show
+     */
+    public void onUserChangedImportance(NotificationEntry entry) {
+        try {
+            int flags = Notification.BubbleMetadata.FLAG_SUPPRESS_NOTIFICATION;
+            flags |= Notification.BubbleMetadata.FLAG_AUTO_EXPAND_BUBBLE;
+            mBarService.onNotificationBubbleChanged(entry.getKey(), true, flags);
+        } catch (RemoteException e) {
+            Log.e(TAG, e.getMessage());
+        }
+        mShadeController.collapsePanel(true);
+        if (entry.getRow() != null) {
+            entry.getRow().updateBubbleButton();
         }
     }
 
@@ -1077,7 +1170,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     @MainThread
     void removeBubble(String key, int reason) {
         if (mBubbleData.hasAnyBubbleWithKey(key)) {
-            mBubbleData.notificationEntryRemoved(key, reason);
+            mBubbleData.dismissBubbleWithKey(key, reason);
         }
     }
 
@@ -1135,7 +1228,7 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
             rankingMap.getRanking(key, mTmpRanking);
             boolean isActiveBubble = mBubbleData.hasAnyBubbleWithKey(key);
             if (isActiveBubble && !mTmpRanking.canBubble()) {
-                mBubbleData.notificationEntryRemoved(entry.getKey(),
+                mBubbleData.dismissBubbleWithKey(entry.getKey(),
                         BubbleController.DISMISS_BLOCKED);
             } else if (entry != null && mTmpRanking.isBubble() && !isActiveBubble) {
                 entry.setFlagBubble(true);

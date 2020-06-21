@@ -39,11 +39,14 @@ import javax.inject.Inject;
  */
 public class HideNotifsForOtherUsersCoordinator implements Coordinator {
     private final NotificationLockscreenUserManager mLockscreenUserManager;
+    private final SharedCoordinatorLogger mLogger;
 
     @Inject
     public HideNotifsForOtherUsersCoordinator(
-            NotificationLockscreenUserManager lockscreenUserManager) {
+            NotificationLockscreenUserManager lockscreenUserManager,
+            SharedCoordinatorLogger logger) {
         mLockscreenUserManager = lockscreenUserManager;
+        mLogger = logger;
     }
 
     @Override
@@ -61,9 +64,27 @@ public class HideNotifsForOtherUsersCoordinator implements Coordinator {
     };
 
     private final UserChangedListener mUserChangedListener = new UserChangedListener() {
+        // This listener is fired both when the list of profiles changes and when the current user
+        // changes
         @Override
         public void onCurrentProfilesChanged(SparseArray<UserInfo> currentProfiles) {
+            mLogger.logUserOrProfileChanged(
+                    mLockscreenUserManager.getCurrentUserId(),
+                    profileIdsToStr(currentProfiles));
             mFilter.invalidateList();
         }
     };
+
+    private String profileIdsToStr(SparseArray<UserInfo> currentProfiles) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{");
+        for (int i = 0; i < currentProfiles.size(); i++) {
+            sb.append(currentProfiles.keyAt(i));
+            if (i < currentProfiles.size() - 1) {
+                sb.append(",");
+            }
+        }
+        sb.append("}");
+        return sb.toString();
+    }
 }

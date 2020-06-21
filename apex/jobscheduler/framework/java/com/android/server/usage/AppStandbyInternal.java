@@ -70,7 +70,7 @@ public interface AppStandbyInternal {
      */
     void postOneTimeCheckIdleStates();
 
-    void reportEvent(UsageEvents.Event event, long elapsedRealtime, int userId);
+    void reportEvent(UsageEvents.Event event, int userId);
 
     void setLastJobRunTime(String packageName, int userId, long elapsedRealtime);
 
@@ -149,9 +149,7 @@ public interface AppStandbyInternal {
 
     void clearCarrierPrivilegedApps();
 
-    void flushToDisk(int userId);
-
-    void flushDurationsToDisk();
+    void flushToDisk();
 
     void initializeDefaultsForSystemApps(int userId);
 
@@ -161,7 +159,7 @@ public interface AppStandbyInternal {
 
     void postReportExemptedSyncStart(String packageName, int userId);
 
-    void dumpUser(IndentingPrintWriter idpw, int userId, List<String> pkgs);
+    void dumpUsers(IndentingPrintWriter idpw, int[] userIds, List<String> pkgs);
 
     void dumpState(String[] args, PrintWriter pw);
 

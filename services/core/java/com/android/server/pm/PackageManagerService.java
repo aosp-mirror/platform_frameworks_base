@@ -2980,7 +2980,7 @@ public class PackageManagerService extends IPackageManager.Stub
             t.traceEnd();
 
             t.traceBegin("read user settings");
-            mFirstBoot = !mSettings.readLPw(mUserManager.getUsers(false));
+            mFirstBoot = !mSettings.readLPw(mInjector.getUserManagerInternal().getUsers(false));
             t.traceEnd();
 
             // Clean up orphaned packages for which the code path doesn't exist
@@ -3423,7 +3423,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // boot, then we need to initialize the default preferred apps across
             // all defined users.
             if (!mOnlyCore && (mPromoteSystemApps || mFirstBoot)) {
-                for (UserInfo user : mUserManager.getUsers(true)) {
+                for (UserInfo user : mInjector.getUserManagerInternal().getUsers(true)) {
                     mSettings.applyDefaultPreferredAppsLPw(user.id);
                     primeDomainVerificationsLPw(user.id);
                 }
@@ -22112,7 +22112,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         for (String packageName : apkList) {
             setSystemAppHiddenUntilInstalled(packageName, true);
-            for (UserInfo user : mUserManager.getUsers(false)) {
+            for (UserInfo user : mInjector.getUserManagerInternal().getUsers(false)) {
                 setSystemAppInstallState(packageName, false, user.id);
             }
         }

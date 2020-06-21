@@ -65,9 +65,6 @@ interface IFaceService {
     void remove(IBinder token, int faceId, int userId, IFaceServiceReceiver receiver,
             String opPackageName);
 
-    // Rename the face specified by faceId to the given name
-    void rename(int faceId, String name);
-
     // Get the enrolled face for user.
     List<Face> getEnrolledFaces(int userId, String opPackageName);
 
@@ -87,13 +84,10 @@ interface IFaceService {
     long getAuthenticatorId(int callingUserId);
 
     // Reset the lockout when user authenticates with strong auth (e.g. PIN, pattern or password)
-    void resetLockout(in byte [] token);
+    void resetLockout(int userId, in byte [] token);
 
     // Add a callback which gets notified when the face lockout period expired.
     void addLockoutResetCallback(IBiometricServiceLockoutResetCallback callback);
-
-    // Explicitly set the active user (for enrolling work profile)
-    void setActiveUser(int uid);
 
     void setFeature(int userId, int feature, boolean enabled, in byte [] token,
             IFaceServiceReceiver receiver, String opPackageName);

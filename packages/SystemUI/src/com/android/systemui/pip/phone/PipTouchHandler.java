@@ -57,6 +57,7 @@ import androidx.dynamicanimation.animation.SpringForce;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.logging.MetricsLoggerWrapper;
 import com.android.systemui.R;
+import com.android.systemui.model.SysUiState;
 import com.android.systemui.pip.PipAnimationController;
 import com.android.systemui.pip.PipBoundsHandler;
 import com.android.systemui.pip.PipSnapAlgorithm;
@@ -81,6 +82,9 @@ public class PipTouchHandler {
 
     /** Duration of the dismiss scrim fading in/out. */
     private static final int DISMISS_TRANSITION_DURATION_MS = 200;
+
+    /* The multiplier to apply scale the target size by when applying the magnetic field radius */
+    private static final float MAGNETIC_FIELD_RADIUS_MULTIPLIER = 1.25f;
 
     // Allow dragging the PIP to a location to close it
     private final boolean mEnableDismissDragToEdge;
@@ -219,7 +223,8 @@ public class PipTouchHandler {
             PipTaskOrganizer pipTaskOrganizer,
             FloatingContentCoordinator floatingContentCoordinator,
             DeviceConfigProxy deviceConfig,
-            PipSnapAlgorithm pipSnapAlgorithm) {
+            PipSnapAlgorithm pipSnapAlgorithm,
+            SysUiState sysUiState) {
         // Initialize the Pip input consumer
         mContext = context;
         mActivityManager = activityManager;
@@ -234,7 +239,7 @@ public class PipTouchHandler {
         mPipResizeGestureHandler =
                 new PipResizeGestureHandler(context, pipBoundsHandler, mMotionHelper,
                         deviceConfig, pipTaskOrganizer, this::getMovementBounds,
-                        this::updateMovementBounds);
+                        this::updateMovementBounds, sysUiState);
         mTouchState = new PipTouchState(ViewConfiguration.get(context), mHandler,
                 () -> mMenuController.showMenuWithDelay(MENU_STATE_FULL, mMotionHelper.getBounds(),
                         true /* allowMenuTimeout */, willResizeMenu(), shouldShowResizeHandle()));
@@ -330,8 +335,9 @@ public class PipTouchHandler {
                 R.dimen.floating_dismiss_bottom_margin);
         mTargetView.setLayoutParams(newParams);
 
-        // Set the magnetic field radius equal to twice the size of the target.
-        mMagneticTarget.setMagneticFieldRadiusPx(targetSize * 2);
+        // Set the magnetic field radius equal to the target size from the center of the target
+        mMagneticTarget.setMagneticFieldRadiusPx(
+                (int) (targetSize * MAGNETIC_FIELD_RADIUS_MULTIPLIER));
     }
 
     private boolean shouldShowResizeHandle() {
@@ -632,6 +638,7 @@ public class PipTouchHandler {
                 && !mMotionHelper.isAnimating()
                 && mPipResizeGestureHandler.isWithinTouchRegion(
                         (int) ev.getRawX(), (int) ev.getRawY())) {
+            mTouchState.onTouchEvent(ev);
             return true;
         }
 
@@ -953,7 +960,6 @@ public class PipTouchHandler {
             }
 
             final PointF vel = touchState.getVelocity();
-            final float velocity = PointF.length(vel.x, vel.y);
 
             if (touchState.isDragging()) {
                 if (mMenuState != MENU_STATE_NONE) {

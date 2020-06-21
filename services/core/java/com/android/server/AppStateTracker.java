@@ -398,6 +398,14 @@ public class AppStateTracker {
          */
         public void onUidForeground(int uid, boolean foreground) {
         }
+
+        /**
+         * Called when an ephemeral uid goes to the background, so its alarms need to be removed.
+         *
+         * @param uid
+         */
+        public void removeAlarmsForUid(int uid) {
+        }
     }
 
     public AppStateTracker(Context context, Looper looper) {
@@ -910,11 +918,23 @@ public class AppStateTracker {
                     handleUidActive(msg.arg1);
                     return;
                 case MSG_ON_UID_GONE:
-                    handleUidGone(msg.arg1, msg.arg1 != 0);
+                    handleUidGone(msg.arg1);
+                    if (msg.arg2 != 0) {
+                        handleUidDisabled(msg.arg1);
+                    }
                     return;
                 case MSG_ON_UID_IDLE:
-                    handleUidIdle(msg.arg1, msg.arg1 != 0);
+                    handleUidIdle(msg.arg1);
+                    if (msg.arg2 != 0) {
+                        handleUidDisabled(msg.arg1);
+                    }
                     return;
+            }
+        }
+
+        private void handleUidDisabled(int uid) {
+            for (Listener l : cloneListeners()) {
+                l.removeAlarmsForUid(uid);
             }
         }
 
@@ -940,11 +960,11 @@ public class AppStateTracker {
             }
         }
 
-        public void handleUidGone(int uid, boolean disabled) {
+        public void handleUidGone(int uid) {
             removeUid(uid, true);
         }
 
-        public void handleUidIdle(int uid, boolean disabled) {
+        public void handleUidIdle(int uid) {
             // Just to avoid excessive memcpy, don't remove from the array in this case.
             removeUid(uid, false);
         }

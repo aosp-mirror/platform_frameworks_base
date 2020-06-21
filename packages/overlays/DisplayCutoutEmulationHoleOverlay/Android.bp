@@ -1,0 +1,5 @@
+runtime_resource_overlay {
+    name: "DisplayCutoutEmulationHoleOverlay",
+    theme: "DisplayCutoutEmulationHole",
+    product_specific: true,
+}

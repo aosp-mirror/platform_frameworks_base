@@ -675,6 +675,14 @@ public class AppIdleHistory {
         return Long.parseLong(value);
     }
 
+
+    public void writeAppIdleTimes() {
+        final int size = mIdleHistory.size();
+        for (int i = 0; i < size; i++) {
+            writeAppIdleTimes(mIdleHistory.keyAt(i));
+        }
+    }
+
     public void writeAppIdleTimes(int userId) {
         FileOutputStream fos = null;
         AtomicFile appIdleFile = new AtomicFile(getUserFile(userId));
@@ -743,8 +751,18 @@ public class AppIdleHistory {
         }
     }
 
-    public void dump(IndentingPrintWriter idpw, int userId, List<String> pkgs) {
-        idpw.println("App Standby States:");
+    public void dumpUsers(IndentingPrintWriter idpw, int[] userIds, List<String> pkgs) {
+        final int numUsers = userIds.length;
+        for (int i = 0; i < numUsers; i++) {
+            idpw.println();
+            dumpUser(idpw, userIds[i], pkgs);
+        }
+    }
+
+    private void dumpUser(IndentingPrintWriter idpw, int userId, List<String> pkgs) {
+        idpw.print("User ");
+        idpw.print(userId);
+        idpw.println(" App Standby States:");
         idpw.increaseIndent();
         ArrayMap<String, AppUsageHistory> userHistory = mIdleHistory.get(userId);
         final long elapsedRealtime = SystemClock.elapsedRealtime();

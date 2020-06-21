@@ -46,6 +46,7 @@ import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -231,31 +232,18 @@ public class AuthServiceTest {
     }
 
     @Test
-    public void testSetActiveUser_callsBiometricServiceSetActiveUser() throws
-            Exception {
-        mAuthService = new AuthService(mContext, mInjector);
-        mAuthService.onStart();
-
-        final int userId = 0;
-
-        mAuthService.mImpl.setActiveUser(userId);
-
-        waitForIdle();
-        verify(mBiometricService).setActiveUser(eq(userId));
-    }
-
-    @Test
     public void testResetLockout_callsBiometricServiceResetLockout() throws
             Exception {
         mAuthService = new AuthService(mContext, mInjector);
         mAuthService.onStart();
 
+        final int userId = 100;
         final byte[] token = new byte[0];
 
-        mAuthService.mImpl.resetLockout(token);
+        mAuthService.mImpl.resetLockout(userId, token);
 
         waitForIdle();
-        verify(mBiometricService).resetLockout(token);
+        verify(mBiometricService).resetLockout(eq(userId), AdditionalMatchers.aryEq(token));
     }
 
     private static void waitForIdle() {

@@ -17,6 +17,8 @@
 package com.android.systemui.util
 
 import android.view.ViewGroup
+import com.android.internal.util.IndentingPrintWriter
+import java.io.PrintWriter
 
 /** [Sequence] that yields all of the direct children of this [ViewGroup] */
 val ViewGroup.children
@@ -32,4 +34,15 @@ fun <T> Sequence<T>.takeUntil(pred: (T) -> Boolean): Sequence<T> = sequence {
             break
         }
     }
+}
+
+/**
+ * If `this` is an [IndentingPrintWriter], it will process block inside an indentation level.
+ *
+ * If not, this will just process block.
+ */
+inline fun PrintWriter.indentIfPossible(block: PrintWriter.() -> Unit) {
+    if (this is IndentingPrintWriter) increaseIndent()
+    block()
+    if (this is IndentingPrintWriter) decreaseIndent()
 }

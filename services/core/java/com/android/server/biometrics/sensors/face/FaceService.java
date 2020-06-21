@@ -182,7 +182,7 @@ public class FaceService extends BiometricServiceBase {
                     0 /* cookie */, false /* requireConfirmation */, getSensorId(),
                     isStrongBiometric(), statsClient,
                     mTaskStackListener, mLockoutTracker, mUsageStats);
-            authenticateInternal(client, opId, opPackageName);
+            authenticateInternal(client, opPackageName);
         }
 
         @Override // Binder call
@@ -200,7 +200,7 @@ public class FaceService extends BiometricServiceBase {
                     requireConfirmation, getSensorId(), isStrongBiometric(),
                     BiometricsProtoEnums.CLIENT_BIOMETRIC_PROMPT,
                     mTaskStackListener, mLockoutTracker, mUsageStats);
-            authenticateInternal(client, opId, opPackageName, callingUid, callingPid,
+            authenticateInternal(client, opPackageName, callingUid, callingPid,
                     callingUserId);
         }
 
@@ -223,12 +223,6 @@ public class FaceService extends BiometricServiceBase {
             // Cancellation is from system server in this case.
             cancelAuthenticationInternal(token, opPackageName, callingUid, callingPid,
                     callingUserId, false /* fromClient */);
-        }
-
-        @Override // Binder call
-        public void setActiveUser(final int userId) {
-            checkPermission(MANAGE_BIOMETRIC);
-            setActiveUserInternal(userId);
         }
 
         @Override // Binder call
@@ -299,21 +293,6 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void rename(final int faceId, final String name) {
-            checkPermission(MANAGE_BIOMETRIC);
-            if (!isCurrentUserOrProfile(UserHandle.getCallingUserId())) {
-                return;
-            }
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    getBiometricUtils().renameBiometricForUser(getContext(), mCurrentUserId,
-                            faceId, name);
-                }
-            });
-        }
-
-        @Override // Binder call
         public List<Face> getEnrolledFaces(int userId, String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
             if (!canUseBiometric(opPackageName, false /* foregroundOnly */,
@@ -344,19 +323,19 @@ public class FaceService extends BiometricServiceBase {
         }
 
         @Override // Binder call
-        public void resetLockout(byte[] token) {
+        public void resetLockout(int userId, byte[] hardwareAuthToken) {
             checkPermission(MANAGE_BIOMETRIC);
-
             mHandler.post(() -> {
-                if (!FaceService.this.hasEnrolledBiometrics(mCurrentUserId)) {
+                if (!FaceService.this.hasEnrolledBiometrics(userId)) {
                     Slog.w(TAG, "Ignoring lockout reset, no templates enrolled");
                     return;
                 }
 
-                Slog.d(TAG, "Resetting lockout for user: " + mCurrentUserId);
+                Slog.d(TAG, "Resetting lockout for user: " + userId);
 
+                updateActiveGroup(userId, null /* opPackageName */);
                 try {
-                    mDaemonWrapper.resetLockout(token);
+                    mDaemonWrapper.resetLockout(hardwareAuthToken);
                 } catch (RemoteException e) {
                     Slog.e(getTag(), "Unable to reset lockout", e);
                 }

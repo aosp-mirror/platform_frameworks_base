@@ -162,6 +162,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
          */
         @Nullable
         String getRootViewTitle();
+
+        /** @see ViewRootImpl#dipToPx */
+        int dipToPx(int dips);
     }
 
     private static final String TAG = "InsetsController";
@@ -254,6 +257,9 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     public static class InternalAnimationControlListener
             implements WindowInsetsAnimationControlListener {
 
+        /** The amount IME will move up/down when animating in floating mode. */
+        protected static final int FLOATING_IME_BOTTOM_INSET = -80;
+
         private WindowInsetsAnimationController mController;
         private ValueAnimator mAnimator;
         private final boolean mShow;
@@ -261,6 +267,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         private final @InsetsType int mRequestedTypes;
         private final long mDurationMs;
         private final boolean mDisable;
+        private final int mFloatingImeBottomInset;
 
         private ThreadLocal<AnimationHandler> mSfAnimationHandlerThreadLocal =
                 new ThreadLocal<AnimationHandler>() {
@@ -273,12 +280,13 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         };
 
         public InternalAnimationControlListener(boolean show, boolean hasAnimationCallbacks,
-                int requestedTypes, boolean disable) {
+                int requestedTypes, boolean disable, int floatingImeBottomInset) {
             mShow = show;
             mHasAnimationCallbacks = hasAnimationCallbacks;
             mRequestedTypes = requestedTypes;
             mDurationMs = calculateDurationMs();
             mDisable = disable;
+            mFloatingImeBottomInset = floatingImeBottomInset;
         }
 
         @Override
@@ -293,12 +301,19 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
             mAnimator = ValueAnimator.ofFloat(0f, 1f);
             mAnimator.setDuration(mDurationMs);
             mAnimator.setInterpolator(new LinearInterpolator());
+            Insets hiddenInsets = controller.getHiddenStateInsets();
+            // IME with zero insets is a special case: it will animate-in from offscreen and end
+            // with final insets of zero and vice-versa.
+            hiddenInsets = controller.hasZeroInsetsIme()
+                    ? Insets.of(hiddenInsets.left, hiddenInsets.top, hiddenInsets.right,
+                            mFloatingImeBottomInset)
+                    : hiddenInsets;
             Insets start = mShow
-                    ? controller.getHiddenStateInsets()
+                    ? hiddenInsets
                     : controller.getShownStateInsets();
             Insets end = mShow
                     ? controller.getShownStateInsets()
-                    : controller.getHiddenStateInsets();
+                    : hiddenInsets;
             Interpolator insetsInterpolator = getInterpolator();
             Interpolator alphaInterpolator = getAlphaInterpolator();
             mAnimator.addUpdateListener(animation -> {
@@ -606,12 +621,14 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
     private void updateState(InsetsState newState) {
         mState.setDisplayFrame(newState.getDisplayFrame());
-        for (int i = newState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = newState.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            InsetsSource source = newState.peekSource(i);
+            if (source == null) continue;;
             getSourceConsumer(source.getType()).updateSource(source);
         }
-        for (int i = mState.getSourcesCount() - 1; i >= 0; i--) {
-            InsetsSource source = mState.sourceAt(i);
+        for (int i = 0; i < InsetsState.SIZE; i++) {
+            InsetsSource source = mState.peekSource(i);
+            if (source == null) continue;
             if (newState.peekSource(source.getType()) == null) {
                 mState.removeSource(source.getType());
             }
@@ -707,7 +724,7 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
         if (hideTypes[0] != 0) {
             applyAnimation(hideTypes[0], false /* show */, false /* fromIme */);
         }
-        if (hasControl && mRequestedState.getSourcesCount() > 0) {
+        if (hasControl && mRequestedState.hasSources()) {
             // We might have changed our requested visibilities while we don't have the control,
             // so we need to update our requested state once we have control. Otherwise, our
             // requested state at the server side might be incorrect.
@@ -1171,7 +1188,8 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         boolean hasAnimationCallbacks = mHost.hasAnimationCallbacks();
         final InternalAnimationControlListener listener = new InternalAnimationControlListener(
-                show, hasAnimationCallbacks, types, mAnimationsDisabled);
+                show, hasAnimationCallbacks, types, mAnimationsDisabled,
+                mHost.dipToPx(InternalAnimationControlListener.FLOATING_IME_BOTTOM_INSET));
 
         // Show/hide animations always need to be relative to the display frame, in order that shown
         // and hidden state insets are correct.

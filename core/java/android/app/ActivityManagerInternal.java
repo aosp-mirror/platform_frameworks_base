@@ -31,6 +31,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.TransactionTooLargeException;
+import android.os.WorkSource;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -261,6 +262,33 @@ public abstract class ActivityManagerInternal {
      * when the profile user is yet to be unlocked.
      */
     public abstract boolean shouldConfirmCredentials(@UserIdInt int userId);
+
+    /**
+     * Used in conjunction with {@link #noteAlarmStart(PendingIntent, WorkSource, int, String)} to
+     * note an alarm duration for battery attribution
+     */
+    public abstract void noteAlarmFinish(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String tag);
+
+    /**
+     * Used in conjunction with {@link #noteAlarmFinish(PendingIntent, WorkSource, int, String)} to
+     * note an alarm duration for battery attribution
+     */
+    public abstract void noteAlarmStart(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String tag);
+
+    /**
+     * Used to note a wakeup alarm for battery attribution.
+     */
+    public abstract void noteWakeupAlarm(PendingIntent ps, WorkSource workSource, int sourceUid,
+            String sourcePkg, String tag);
+
+    /**
+     * Returns whether this app is disallowed to run in the background.
+     *
+     * @see ActivityManager#APP_START_MODE_DISABLED
+     */
+    public abstract boolean isAppStartModeDisabled(int uid, String packageName);
 
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();

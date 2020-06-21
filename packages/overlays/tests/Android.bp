@@ -11,27 +11,20 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
 android_test {
     name: "OverlayTests",
-
     certificate: "platform",
-
     srcs: ["src/**/*.java"],
-
     libs: [
         "android.test.runner",
         "android.test.base",
     ],
-
     platform_apis: true,
-
     static_libs: [
         "androidx.test.rules",
         "androidx.test.espresso.core",
         "mockito-target-minus-junit4",
         "truth-prebuilt",
     ],
-
     dxflags: ["--multi-dex"],
 }
