@@ -25,4 +25,6 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Eliminar"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"No se ha podido añadir un tono de llamada personalizado"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"No se ha podido eliminar un tono de llamada personalizado"</string>
+    <!-- no translation found for app_label (3091611356093417332) -->
+    <skip />
 </resources>
