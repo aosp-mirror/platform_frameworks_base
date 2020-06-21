@@ -1171,7 +1171,7 @@
     <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"Otwieraj linki w"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"Otwieraj linki w aplikacji <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
-    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z: <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
+    <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"Otwieraj linki z <xliff:g id="HOST">%1$s</xliff:g> w aplikacji <xliff:g id="APPLICATION">%2$s</xliff:g>"</string>
     <string name="whichGiveAccessToApplicationLabel" msgid="7805857277166106236">"Udziel uprawnień"</string>
     <string name="whichEditApplication" msgid="6191568491456092812">"Edytuj w aplikacji"</string>
     <string name="whichEditApplicationNamed" msgid="8096494987978521514">"Edytuj w aplikacji %1$s"</string>

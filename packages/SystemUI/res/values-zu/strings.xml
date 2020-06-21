@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"Thepha futhi ukuze uvule"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"Swayiphela phezulu ukuze uvule"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Swayiphela phezulu ukuze uzame futhi"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"Le divayisi iphethwe inhlangano yakho"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"Le divayisi iphethwe yi-<xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"Swayiphela ifoni kusukela kusithonjana"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Swayiphela isilekeleli sezwi kusukela kusithonjana"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Swayiphela ikhamela kusukela kusithonjana"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"Iphrofayela ingaqashwa"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"Inethiwekhi kungenzeka iqashiwe"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"Inethiwekhi kungenzeka iqashiwe"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"Inhlangano yakho iphethe le divayisi futhi ingaqapha ithrafikhi yenethiwekhi"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"I-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> iphethe le divayisi futhi ingahlola ithrafikhi yenethiwekhi"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"Idivayisi iphethwe inhlangano yakho futhi ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"Idivayisi iphethwe i-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> futhi ixhumeke ku-<xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"Idivayisi iphethwe inhlangano yakho"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"Idivayisi iphethwe i-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"Idivayisi iphethwe inhlangano yakho futhi ixhumeke kuma-VPN"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"Idivayisi iphethwe i-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> futhi ixhumeke kuma-VPN"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Inhlangano yakho ingaqapha ithrafikhi yenethiwekhi kuphrofayela yakho yomsebenzi"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"I-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> ingaqaphela ithrafikhi yenethiwekhi kuphrofayela yakho yomsebenzi"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"Inethiwekhi kungenzeka iqashiwe"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"Idivayisi ixhumeke kuma-VPN"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"Iphrofayela yomsebenzi ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"Iphrofayela yomuntu siqu ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"Idivayisi ixhumeke ku-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"Ukuphathwa kwedivayisi"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"Ukuqapha iphrofayela"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"Ukuqashwa kwenethiwekhi"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"Khubaza i-VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Nqamula i-VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Buka izinqubomgomo"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"Idivayisi yakho iphethwe yi-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nUmlawuli wakho angaqaphela aphinde aphathe izilungiselelo, ukufinyelela kwezinkampani, izinhlelo zokusebenza, idatha ehlotshaniswa nedivayisi yakho, kanye nolwazi lwendawo yedivayisi yakho.\n\nUkuze uthole olunye ulwazi, xhumana nomlawuli wakho."</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"Idivayisi yakho iphethwe inhlangano yakho.\n\nUmlawuli wakho angaqapha aphinde aphathe izilungiselelo, ukufinyelela kwezinkampani, izinhlelo zokusebenza, idatha ehlotshaniswa nedivayisi yakho, kanye nolwazi lwendawo yedivayisi yakho.\n\nUkuze uthole olunye ulwazi, xhumana nomlawuli wakho."</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Inhlangano yakho ifake ukugunyazwa kwesitifiketi kule divayisi. Ithrafikhi yenethiwekhi yakho evikelekile kungenzeka iqashelwe noma ilungiswe."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Inhlangano yakho ifake ukugunyaza kwesitifiketi kuphrofayela yakho yomsebenzi. Ithrafikhi yenethiwekhi yakho evikelekile ingaqashwa noma ilungiswe."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"Ukugunyaza kwesitifiketi kufakwe kule divayisi. Ithrafikhi yenethiwekhi yakho evikelekile ingaqashelwa noma ilungiswe."</string>
@@ -920,6 +936,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"Misa isikhashana"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Yeqela kokulandelayo"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Yeqela kokwangaphambilini"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ifoni ivaliwe ngenxa yokushisa"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ifoni yakho manje isebenza kahle"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ifoni yakho ibishisa kakhulu, ngakho-ke yacisha ukuze iphole. Ifoni yakho manje isebenza ngokuvamile.\n\nIfoni yakho ingashisa kakhulu uma:\n	• Usebenzisa izinhlelo zokusebenza ezinkulu (njegegeyimu, ividiyo, noma izinhlelo zokusebenza zokuzula)\n	• Landa noma layisha amafayela amakhulu\n	• Sebenzisa ifoni yakho kumathempelesha aphezulu"</string>
@@ -1045,10 +1063,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Bamba futhi uhudule ukuze uphinde ulungise izilawuli"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Zonke izilawuli zisusiwe"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Izinguquko azilondolozwanga"</string>
-    <!-- no translation found for controls_favorite_load_error (5126216176144877419) -->
-    <skip />
-    <!-- no translation found for controls_favorite_load_none (7687593026725357775) -->
-    <skip />
+    <string name="controls_favorite_load_error" msgid="5126216176144877419">"Izilawuli azikwazanga ukulayishwa. Hlola uhlelo lokusebenza le-<xliff:g id="APP">%s</xliff:g> ukuqinisekisa ukuthi amasethingi wohlelo lokusebenza awashintshile."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Izilawuli ezihambelanayo azitholakali"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Okunye"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Engeza kuzilawuli zezinsiza"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Engeza"</string>
@@ -1064,8 +1080,15 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Qinisekisa ushintsho lwe-<xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Swayipha ukuze ubone okuningi"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Ilayisha izincomo"</string>
-    <string name="controls_media_close_session" msgid="9023534788828414585">"Vala leseshini yemidiya"</string>
+    <!-- no translation found for controls_media_title (1746947284862928133) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
+    <skip />
+    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"Qalisa kabusha"</string>
+    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"Akusebenzi, hlola uhlelo lokusebenza"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Iphutha, iyazama futhi…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Ayitholakali"</string>

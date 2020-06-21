@@ -2860,9 +2860,9 @@
          -->
     <string-array translatable="false" name="config_globalActionsList">
         <item>emergency</item>
+        <item>lockdown</item>
         <item>power</item>
         <item>restart</item>
-        <item>lockdown</item>
         <item>logout</item>
         <item>bugreport</item>
     </string-array>

@@ -25,4 +25,6 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"நீக்கு"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"பிரத்தியேக ரிங்டோனைச் சேர்க்க முடியவில்லை"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"பிரத்தியேக ரிங்டோனை நீக்க முடியவில்லை"</string>
+    <!-- no translation found for app_label (3091611356093417332) -->
+    <skip />
 </resources>
