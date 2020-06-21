@@ -40,7 +40,7 @@
     <item msgid="8339720953594087771">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>に接続中..."</item>
     <item msgid="3028983857109369308">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>による認証中..."</item>
     <item msgid="4287401332778341890">"IPアドレスを<xliff:g id="NETWORK_NAME">%1$s</xliff:g>から取得中..."</item>
-    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>に接続しました"</item>
+    <item msgid="1043944043827424501">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g> に接続済み"</item>
     <item msgid="7445993821842009653">"保留中"</item>
     <item msgid="1175040558087735707">"<xliff:g id="NETWORK_NAME">%1$s</xliff:g>から切断中..."</item>
     <item msgid="699832486578171722">"切断されました"</item>
