@@ -454,8 +454,10 @@
     <string name="notification_tap_again" msgid="4477318164947497249">"開くにはもう一度タップしてください"</string>
     <string name="keyguard_unlock" msgid="8031975796351361601">"開くには上にスワイプします"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"上にスワイプしてもう一度お試しください"</string>
-    <string name="do_disclosure_generic" msgid="2388094207542706440">"このデバイスは組織によって管理されています"</string>
-    <string name="do_disclosure_with_name" msgid="9113122674419739611">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%s</xliff:g> が管理しています"</string>
+    <!-- no translation found for do_disclosure_generic (4896482821974707167) -->
+    <skip />
+    <!-- no translation found for do_disclosure_with_name (2091641464065004091) -->
+    <skip />
     <string name="phone_hint" msgid="6682125338461375925">"右にスワイプして通話"</string>
     <string name="voice_hint" msgid="7476017460191291417">"アイコンからスワイプして音声アシストを起動"</string>
     <string name="camera_hint" msgid="4519495795000658637">"左にスワイプしてカメラを起動"</string>
@@ -521,21 +523,33 @@
     <string name="profile_owned_footer" msgid="2756770645766113964">"プロファイルが監視されている可能性があります"</string>
     <string name="vpn_footer" msgid="3457155078010607471">"ネットワークが監視されている可能性があります"</string>
     <string name="branded_vpn_footer" msgid="816930186313188514">"ネットワークが監視されている可能性があります"</string>
-    <string name="quick_settings_disclosure_management_monitoring" msgid="7453097432200441126">"組織がこのデバイスを管理しています。ネットワーク トラフィックが監視されることもあります"</string>
-    <string name="quick_settings_disclosure_named_management_monitoring" msgid="8460849665162741948">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> がこのデバイスを管理しています。ネットワーク トラフィックが監視されることもあります"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="218693044433431656">"デバイスは組織によって管理され、<xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5228196397615456474">"デバイスは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によって管理され、<xliff:g id="VPN_APP">%2$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_management" msgid="5778936163447003324">"デバイスは組織によって管理されています"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="586473803771171610">"デバイスは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によって管理されています"</string>
-    <string name="quick_settings_disclosure_management_vpns" msgid="3447553497516286109">"デバイスは組織によって管理され、VPN に接続しています"</string>
-    <string name="quick_settings_disclosure_named_management_vpns" msgid="4066586579688193212">"デバイスは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によって管理され、VPN に接続しています"</string>
+    <!-- no translation found for quick_settings_disclosure_management_monitoring (8231336875820702180) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_monitoring (2831423806103479812) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_named_vpn (6096715329056415588) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_named_vpn (5302786161534380104) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management (5515296598440684962) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management (3476472755775165827) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_management_vpns (371835422690053154) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_management_vpns (4046375645500668555) -->
+    <skip />
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"組織は仕事用プロファイルのネットワーク トラフィックを監視することがあります"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8321469176706219860">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によってこの仕事用プロファイルのネットワーク トラフィックが監視されることもあります"</string>
     <string name="quick_settings_disclosure_monitoring" msgid="8548019955631378680">"ネットワークが監視されることもあります"</string>
-    <string name="quick_settings_disclosure_vpns" msgid="2890510056934492407">"デバイスは VPN に接続しています"</string>
-    <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="5149334449426566152">"仕事用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4201831495800021670">"個人用プロファイルは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
-    <string name="quick_settings_disclosure_named_vpn" msgid="5069088739435424666">"デバイスは <xliff:g id="VPN_APP">%1$s</xliff:g> に接続しています"</string>
+    <!-- no translation found for quick_settings_disclosure_vpns (7213546797022280246) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_managed_profile_named_vpn (8117568745060010789) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_personal_profile_named_vpn (5481763430080807797) -->
+    <skip />
+    <!-- no translation found for quick_settings_disclosure_named_vpn (2350838218824492465) -->
+    <skip />
     <string name="monitoring_title_device_owned" msgid="7029691083837606324">"デバイス管理"</string>
     <string name="monitoring_title_profile_owned" msgid="6301118649405449568">"プロファイルの監視"</string>
     <string name="monitoring_title" msgid="4063890083735924568">"ネットワーク監視"</string>
@@ -545,8 +559,10 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPNを無効にする"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPNを切断"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ポリシーを見る"</string>
-    <string name="monitoring_description_named_management" msgid="7424612629468754552">"このデバイスは <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> によって管理されています。\n\n管理者は、このデバイスに関連付けられた設定、コーポレート アクセス、アプリ、データと、デバイスの位置情報を監視、管理できます。\n\n詳しくは管理者にお問い合わせください。"</string>
-    <string name="monitoring_description_management" msgid="8081910434889677718">"このデバイスは組織によって管理されています。\n\n管理者は、このデバイスに関連付けられた設定、コーポレート アクセス、アプリ、データと、デバイスの位置情報を監視、管理できます。\n\n詳しくは管理者にお問い合わせください。"</string>
+    <!-- no translation found for monitoring_description_named_management (505833016545056036) -->
+    <skip />
+    <!-- no translation found for monitoring_description_management (4308879039175729014) -->
+    <skip />
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"組織によってこのデバイスに認証局がインストールされました。保護されたネットワーク トラフィックが監視、変更される場合があります。"</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"組織によって、あなたの仕事用プロファイルに認証局がインストールされました。保護されたネットワーク トラフィックが監視、変更される場合があります。"</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"このデバイスには認証局がインストールされています。保護されたネットワーク トラフィックが監視、変更される可能性があります。"</string>
@@ -920,6 +936,8 @@
     <string name="pip_pause" msgid="1139598607050555845">"一時停止"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"次へスキップ"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"前へスキップ"</string>
+    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
+    <skip />
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"高熱で電源が OFF になりました"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"お使いのスマートフォンは現在、正常に動作しています"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"スマートフォンが熱すぎたため電源が OFF になりました。現在は正常に動作しています。\n\nスマートフォンは以下の場合に熱くなる場合があります。\n	• リソースを集中的に使用する機能やアプリ（ゲームアプリ、動画アプリ、ナビアプリなど）を使用\n	• サイズの大きいファイルをダウンロードまたはアップロード\n	• 高温の場所で使用"</string>
@@ -1062,8 +1080,15 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g>の変更を確認する"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"スワイプすると他の構造が表示されます"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"候補を読み込んでいます"</string>
-    <string name="controls_media_close_session" msgid="9023534788828414585">"このメディア セッションを閉じる"</string>
+    <!-- no translation found for controls_media_title (1746947284862928133) -->
+    <skip />
+    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
+    <skip />
+    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
+    <skip />
     <string name="controls_media_resume" msgid="1933520684481586053">"再開"</string>
+    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
+    <skip />
     <string name="controls_error_timeout" msgid="794197289772728958">"無効: アプリをご確認ください"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"エラー。再試行しています…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"見つかりませんでした"</string>

@@ -1128,7 +1128,7 @@
     <string name="whichViewApplication" msgid="5733194231473132945">"اس کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"‏%1$s کے ساتھ کھولیں"</string>
     <string name="whichViewApplicationLabel" msgid="7367556735684742409">"کھولیں"</string>
-    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"‫<xliff:g id="HOST">%1$s</xliff:g> لنکس کے اس کے ساتھ کھولیں"</string>
+    <string name="whichOpenHostLinksWith" msgid="7645631470199397485">"‫‫<xliff:g id="HOST">%1$s</xliff:g> لنکس اس کے ساتھ کھولیں"</string>
     <string name="whichOpenLinksWith" msgid="1120936181362907258">"اس کے ساتھ لنکس کھولیں"</string>
     <string name="whichOpenLinksWithApp" msgid="6917864367861910086">"<xliff:g id="APPLICATION">%1$s</xliff:g> کے ذریعے لنکس کھولیں"</string>
     <string name="whichOpenHostLinksWithApp" msgid="2401668560768463004">"<xliff:g id="HOST">%1$s</xliff:g> لنکس کو <xliff:g id="APPLICATION">%2$s</xliff:g> کے ذریعے کھولیں"</string>

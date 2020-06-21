@@ -25,4 +25,6 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Radera"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Det gick inte att lägga till en egen ringsignal"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Det gick inte att radera den egna ringsignalen"</string>
+    <!-- no translation found for app_label (3091611356093417332) -->
+    <skip />
 </resources>
