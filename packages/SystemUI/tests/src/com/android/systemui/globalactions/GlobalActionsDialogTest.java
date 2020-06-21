@@ -20,12 +20,10 @@ import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.STR
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -85,6 +83,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 
 @SmallTest
@@ -248,6 +247,14 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
                 .log(event);
     }
 
+    @SafeVarargs
+    private static <T> void assertItemsOfType(List<T> stuff, Class<? extends T>... classes) {
+        assertThat(stuff).hasSize(classes.length);
+        for (int i = 0; i < stuff.size(); i++) {
+            assertThat(stuff.get(i)).isInstanceOf(classes[i]);
+        }
+    }
+
     @Test
     public void testCreateActionItems_maxThree_noOverflow() {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
@@ -263,9 +270,12 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(3, mGlobalActionsDialog.mItems.size());
-        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
-        assertEquals(0, mGlobalActionsDialog.mPowerItems.size());
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class);
+        assertThat(mGlobalActionsDialog.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialog.mPowerItems).isEmpty();
     }
 
     @Test
@@ -279,55 +289,53 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
         String[] actions = {
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(3, mGlobalActionsDialog.mItems.size());
-        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
-        assertEquals(2, mGlobalActionsDialog.mPowerItems.size());
-
-        // PowerOptionsAction should appear immediately after the Emergency action
-
-        GlobalActionsDialog.Action firstItem = mGlobalActionsDialog.mItems.get(0);
-        GlobalActionsDialog.Action secondItem = mGlobalActionsDialog.mItems.get(1);
-
-        assertTrue(firstItem instanceof GlobalActionsDialog.EmergencyAction);
-        assertTrue(secondItem instanceof GlobalActionsDialog.PowerOptionsAction);
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.LockDownAction.class,
+                GlobalActionsDialog.PowerOptionsAction.class);
+        assertThat(mGlobalActionsDialog.mOverflowItems).isEmpty();
+        assertItemsOfType(mGlobalActionsDialog.mPowerItems,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class);
     }
 
     @Test
-    public void testCreateActionItems_maxThree_condensePower_noEmergency() {
+    public void testCreateActionItems_maxThree_condensePower_splitPower() {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         // allow 3 items to be shown
         doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
         // make sure lockdown action will be shown
         doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
+        // make sure bugreport also shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayBugReport(any());
         // ensure items are not blocked by keyguard or device provisioning
         doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
         String[] actions = {
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_BUGREPORT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(3, mGlobalActionsDialog.mItems.size());
-        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
-        assertEquals(2, mGlobalActionsDialog.mPowerItems.size());
-
-        // When Emergency isn't used, PowerOptionsAction should be first
-
-        GlobalActionsDialog.Action firstItem = mGlobalActionsDialog.mItems.get(0);
-        GlobalActionsDialog.Action secondItem = mGlobalActionsDialog.mItems.get(1);
-
-        assertTrue(firstItem instanceof GlobalActionsDialog.PowerOptionsAction);
-        assertTrue(secondItem instanceof GlobalActionsDialog.ScreenshotAction);
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.LockDownAction.class,
+                GlobalActionsDialog.PowerOptionsAction.class);
+        assertItemsOfType(mGlobalActionsDialog.mOverflowItems,
+                GlobalActionsDialog.BugReportAction.class);
+        assertItemsOfType(mGlobalActionsDialog.mPowerItems,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class);
     }
 
     @Test
@@ -341,24 +349,23 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
         String[] actions = {
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(4, mGlobalActionsDialog.mItems.size());
-        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
-        assertEquals(2, mGlobalActionsDialog.mPowerItems.size());
-
-        // with four items, make sure power still shows up immediately after Emergency
-        GlobalActionsDialog.Action firstItem = mGlobalActionsDialog.mItems.get(0);
-        GlobalActionsDialog.Action secondItem = mGlobalActionsDialog.mItems.get(1);
-
-        assertTrue(firstItem instanceof GlobalActionsDialog.EmergencyAction);
-        assertTrue(secondItem instanceof GlobalActionsDialog.PowerOptionsAction);
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.LockDownAction.class,
+                GlobalActionsDialog.PowerOptionsAction.class,
+                GlobalActionsDialog.ScreenshotAction.class);
+        assertThat(mGlobalActionsDialog.mOverflowItems).isEmpty();
+        assertItemsOfType(mGlobalActionsDialog.mPowerItems,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class);
     }
 
     @Test
@@ -368,20 +375,26 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
         // make sure lockdown action will be shown
         doReturn(true).when(mGlobalActionsDialog).shouldDisplayLockdown(any());
+        // make sure bugreport is also shown
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayBugReport(any());
         // ensure items are not blocked by keyguard or device provisioning
         doReturn(true).when(mGlobalActionsDialog).shouldShowAction(any());
         String[] actions = {
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_BUGREPORT,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_LOCKDOWN,
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(3, mGlobalActionsDialog.mItems.size());
-        assertEquals(1, mGlobalActionsDialog.mOverflowItems.size());
-        assertEquals(0, mGlobalActionsDialog.mPowerItems.size());
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.BugReportAction.class);
+        assertItemsOfType(mGlobalActionsDialog.mOverflowItems,
+                GlobalActionsDialog.LockDownAction.class);
+        assertThat(mGlobalActionsDialog.mPowerItems).isEmpty();
     }
 
     @Test
@@ -402,12 +415,17 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(4, mGlobalActionsDialog.mItems.size());
-        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class,
+                GlobalActionsDialog.LockDownAction.class);
+        assertThat(mGlobalActionsDialog.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialog.mPowerItems).isEmpty();
     }
 
     @Test
-    public void testCreateActionItems_maxThree_itemNotShown() {
+    public void testCreateActionItems_maxThree_lockdownDisabled_doesNotShowLockdown() {
         mGlobalActionsDialog = spy(mGlobalActionsDialog);
         // allow only 3 items to be shown
         doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
@@ -423,8 +441,42 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
         mGlobalActionsDialog.createActionItems();
 
-        assertEquals(3, mGlobalActionsDialog.mItems.size());
-        assertEquals(0, mGlobalActionsDialog.mOverflowItems.size());
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class);
+        assertThat(mGlobalActionsDialog.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialog.mPowerItems).isEmpty();
+    }
+
+    @Test
+    public void testCreateActionItems_shouldShowAction_excludeBugReport() {
+        mGlobalActionsDialog = spy(mGlobalActionsDialog);
+        // allow only 3 items to be shown
+        doReturn(3).when(mGlobalActionsDialog).getMaxShownPowerItems();
+        doReturn(true).when(mGlobalActionsDialog).shouldDisplayBugReport(any());
+        // exclude bugreport in shouldShowAction to demonstrate how any button can be removed
+        doAnswer(
+                invocation -> !(invocation.getArgument(0)
+                        instanceof GlobalActionsDialog.BugReportAction))
+                .when(mGlobalActionsDialog).shouldShowAction(any());
+
+        String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
+                // bugreport action not allowed
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_BUGREPORT,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
+        };
+        doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
+        mGlobalActionsDialog.createActionItems();
+
+        assertItemsOfType(mGlobalActionsDialog.mItems,
+                GlobalActionsDialog.EmergencyAction.class,
+                GlobalActionsDialog.ShutDownAction.class,
+                GlobalActionsDialog.RestartAction.class);
+        assertThat(mGlobalActionsDialog.mOverflowItems).isEmpty();
+        assertThat(mGlobalActionsDialog.mPowerItems).isEmpty();
     }
 
     @Test
@@ -503,9 +555,9 @@ public class GlobalActionsDialogTest extends SysuiTestCase {
 
     private void setupDefaultActions() {
         String[] actions = {
+                GlobalActionsDialog.GLOBAL_ACTION_KEY_EMERGENCY,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_POWER,
                 GlobalActionsDialog.GLOBAL_ACTION_KEY_RESTART,
-                GlobalActionsDialog.GLOBAL_ACTION_KEY_SCREENSHOT,
         };
         doReturn(actions).when(mGlobalActionsDialog).getDefaultActions();
     }

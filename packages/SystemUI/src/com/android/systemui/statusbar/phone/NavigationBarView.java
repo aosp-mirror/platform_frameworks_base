@@ -140,6 +140,7 @@ public class NavigationBarView extends FrameLayout implements
     private boolean mInCarMode = false;
     private boolean mDockedStackExists;
     private boolean mImeVisible;
+    private boolean mScreenOn = true;
 
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
     private final ContextualButtonGroup mContextualButtonGroup;
@@ -573,6 +574,7 @@ public class NavigationBarView extends FrameLayout implements
 
     /** To be called when screen lock/unlock state changes */
     public void onScreenStateChanged(boolean isScreenOn) {
+        mScreenOn = isScreenOn;
         if (isScreenOn) {
             if (isGesturalModeOnDefaultDisplay(getContext(), mNavBarMode)) {
                 mRegionSamplingHelper.start(mSamplingBounds);
@@ -1217,6 +1219,7 @@ public class NavigationBarView extends FrameLayout implements
         dumpButton(pw, "a11y", getAccessibilityButton());
 
         pw.println("    }");
+        pw.println("    mScreenOn: " + mScreenOn);
 
         if (mNavigationInflaterView != null) {
             mNavigationInflaterView.dump(pw);
