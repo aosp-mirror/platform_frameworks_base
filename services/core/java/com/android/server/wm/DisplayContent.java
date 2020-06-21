@@ -729,7 +729,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // Sets mBehindIme for each window. Windows behind IME can get IME insets.
         if (w.mBehindIme != mTmpWindowsBehindIme) {
             w.mBehindIme = mTmpWindowsBehindIme;
-            mWinInsetsChanged.add(w);
+            if (getInsetsStateController().getRawInsetsState().getSourceOrDefaultVisibility(
+                    ITYPE_IME)) {
+                // If IME is invisible, behind IME or not doesn't make the insets different.
+                mWinInsetsChanged.add(w);
+            }
         }
         if (w == mInputMethodWindow) {
             mTmpWindowsBehindIme = true;
