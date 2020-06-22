@@ -384,6 +384,11 @@ public class BubbleStackView extends FrameLayout
     public final Consumer<Boolean> mOnImeVisibilityChanged;
 
     /**
+     * Callback to run to ask BubbleController to hide the current IME.
+     */
+    private final Runnable mHideCurrentInputMethodCallback;
+
+    /**
      * The currently magnetized object, which is being dragged and will be attracted to the magnetic
      * dismiss target.
      *
@@ -560,7 +565,7 @@ public class BubbleStackView extends FrameLayout
                         mMagneticTarget,
                         mIndividualBubbleMagnetListener);
 
-                hideImeFromExpandedBubble();
+                hideCurrentInputMethod();
 
                 // Save the magnetized individual bubble so we can dispatch touch events to it.
                 mMagnetizedObject = mExpandedAnimationController.getMagnetizedBubbleDraggingOut();
@@ -732,7 +737,8 @@ public class BubbleStackView extends FrameLayout
             FloatingContentCoordinator floatingContentCoordinator,
             SysUiState sysUiState,
             Runnable allBubblesAnimatedOutAction,
-            Consumer<Boolean> onImeVisibilityChanged) {
+            Consumer<Boolean> onImeVisibilityChanged,
+            Runnable hideCurrentInputMethodCallback) {
         super(context);
 
         mBubbleData = data;
@@ -868,6 +874,7 @@ public class BubbleStackView extends FrameLayout
         setUpOverflow();
 
         mOnImeVisibilityChanged = onImeVisibilityChanged;
+        mHideCurrentInputMethodCallback = hideCurrentInputMethodCallback;
 
         setOnApplyWindowInsetsListener((View view, WindowInsets insets) -> {
             onImeVisibilityChanged.accept(insets.getInsets(WindowInsets.Type.ime()).bottom > 0);
@@ -1584,6 +1591,8 @@ public class BubbleStackView extends FrameLayout
         updatePointerPosition();
 
         if (mIsExpanded) {
+            hideCurrentInputMethod();
+
             // Make the container of the expanded view transparent before removing the expanded view
             // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
             // expanded view becomes visible on the screen. See b/126856255
@@ -1591,11 +1600,6 @@ public class BubbleStackView extends FrameLayout
             mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
                 if (previouslySelected != null) {
                     previouslySelected.setContentVisibility(false);
-                }
-                if (previouslySelected != null && previouslySelected.getExpandedView() != null) {
-                    // Hide the currently expanded bubble's IME if it's visible before switching
-                    // to a new bubble.
-                    previouslySelected.getExpandedView().hideImeIfVisible();
                 }
 
                 updateExpandedBubble();
@@ -1623,6 +1627,8 @@ public class BubbleStackView extends FrameLayout
         if (shouldExpand == mIsExpanded) {
             return;
         }
+
+        hideCurrentInputMethod();
 
         mSysUiState
                 .setFlag(QuickStepContract.SYSUI_STATE_BUBBLES_EXPANDED, shouldExpand)
@@ -1807,12 +1813,12 @@ public class BubbleStackView extends FrameLayout
         }
     }
 
-    void hideImeFromExpandedBubble() {
-        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-            // Hide the currently expanded bubble's IME if it's visible before switching to a new
-            // bubble.
-            mExpandedBubble.getExpandedView().hideImeIfVisible();
-        }
+    /**
+     * Asks the BubbleController to hide the IME from anywhere, whether it's focused on Bubbles or
+     * not.
+     */
+    void hideCurrentInputMethod() {
+        mHideCurrentInputMethodCallback.run();
     }
 
     private void beforeExpandedViewAnimation() {
@@ -1926,10 +1932,6 @@ public class BubbleStackView extends FrameLayout
         PhysicsAnimator.getInstance(mAnimatingOutSurfaceContainer).cancel();
         mAnimatingOutSurfaceContainer.setScaleX(0f);
         mAnimatingOutSurfaceContainer.setScaleY(0f);
-
-        if (mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
-            mExpandedBubble.getExpandedView().hideImeIfVisible();
-        }
 
         // Let the expanded animation controller know that it shouldn't animate child adds/reorders
         // since we're about to animate collapsed.
