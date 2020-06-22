@@ -94,7 +94,7 @@
         android:id="@+id/media_seamless"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:foreground="@*android:drawable/media_seamless_background"
+        android:foreground="@drawable/qs_media_seamless_background"
         android:background="@drawable/qs_media_light_source"
         android:orientation="horizontal"
         android:forceHasOverlappingRendering="false"
