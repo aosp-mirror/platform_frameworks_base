@@ -349,6 +349,17 @@ class UserController implements Handler.Callback {
     @GuardedBy("mUserIdToUserJourneyMap")
     private final SparseArray<UserJourneySession> mUserIdToUserJourneyMap = new SparseArray<>();
 
+    /**
+     * Sets on {@link #setInitialConfig(boolean, int, boolean)}, which is called by
+     * {@code ActivityManager} when the system is started.
+     *
+     * <p>It's useful to ignore external operations (i.e., originated outside {@code system_server},
+     * like from {@code adb shell am switch-user})) that could happen before such call is made and
+     * the system is ready.
+     */
+    @GuardedBy("mLock")
+    private boolean mInitialized;
+
     UserController(ActivityManagerService service) {
         this(new Injector(service));
     }
@@ -373,6 +384,7 @@ class UserController implements Handler.Callback {
             mUserSwitchUiEnabled = userSwitchUiEnabled;
             mMaxRunningUsers = maxRunningUsers;
             mDelayUserDataLocking = delayUserDataLocking;
+            mInitialized = true;
         }
     }
 
@@ -1606,6 +1618,11 @@ class UserController implements Handler.Callback {
         }
         boolean userSwitchUiEnabled;
         synchronized (mLock) {
+            if (!mInitialized) {
+                Slog.e(TAG, "Cannot switch to User #" + targetUserId
+                        + ": UserController not ready yet");
+                return false;
+            }
             mTargetUserId = targetUserId;
             userSwitchUiEnabled = mUserSwitchUiEnabled;
         }
@@ -2441,6 +2458,7 @@ class UserController implements Handler.Callback {
             pw.println("  mDelayUserDataLocking:" + mDelayUserDataLocking);
             pw.println("  mMaxRunningUsers:" + mMaxRunningUsers);
             pw.println("  mUserSwitchUiEnabled:" + mUserSwitchUiEnabled);
+            pw.println("  mInitialized:" + mInitialized);
         }
     }
 
