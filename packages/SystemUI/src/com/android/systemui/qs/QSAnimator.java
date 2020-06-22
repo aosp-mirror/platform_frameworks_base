@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View.OnLayoutChangeListener;
-import android.widget.ScrollView;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.qs.QS;
@@ -300,9 +299,15 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             if (mQsPanel.getSecurityFooter() != null) {
                 builder.addFloat(mQsPanel.getSecurityFooter().getView(), "alpha", 0, 1);
             }
+            if (mQsPanel.getDivider() != null) {
+                builder.addFloat(mQsPanel.getDivider(), "alpha", 0, 1);
+            }
             mFirstPageDelayedAnimator = builder.build();
             if (mQsPanel.getSecurityFooter() != null) {
                 mAllViews.add(mQsPanel.getSecurityFooter().getView());
+            }
+            if (mQsPanel.getDivider() != null) {
+                mAllViews.add(mQsPanel.getDivider());
             }
             float px = 0;
             float py = 1;
