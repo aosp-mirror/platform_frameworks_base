@@ -1135,8 +1135,6 @@ public class DisplayContentTests extends WindowTestsBase {
         // Launch another activity before the transition is finished.
         final ActivityRecord app2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
                 .setDisplay(mDisplayContent).build().getTopMostActivity();
-        mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
-                false /* alwaysKeepCurrent */);
         mDisplayContent.mOpeningApps.add(app2);
         app2.setRequestedOrientation(newOrientation);
 
@@ -1160,6 +1158,29 @@ public class DisplayContentTests extends WindowTestsBase {
         assertFalse(app2.hasFixedRotationTransform());
         assertEquals(config90.orientation, mDisplayContent.getConfiguration().orientation);
         assertNull(mDisplayContent.getFixedRotationAnimationController());
+    }
+
+    @Test
+    public void testFinishFixedRotationNoAppTransitioningTask() {
+        final ActivityRecord app = mAppWindow.mActivityRecord;
+        final Task task = app.getTask();
+        final ActivityRecord app2 = new ActivityTestsBase.ActivityBuilder(mWm.mAtmService)
+                .setTask(task).build();
+        mDisplayContent.setFixedRotationLaunchingApp(app2, (mDisplayContent.getRotation() + 1) % 4);
+        doReturn(true).when(task).isAppTransitioning();
+        // If the task is animating transition, this should be no-op.
+        mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
+
+        assertTrue(app2.hasFixedRotationTransform());
+        assertTrue(mDisplayContent.hasTopFixedRotationLaunchingApp());
+
+        doReturn(false).when(task).isAppTransitioning();
+        // Although this notifies app instead of app2 that uses the fixed rotation, app2 should
+        // still finish the transform because there is no more transition event.
+        mDisplayContent.mFixedRotationTransitionListener.onAppTransitionFinishedLocked(app.token);
+
+        assertFalse(app2.hasFixedRotationTransform());
+        assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
 
     @Test

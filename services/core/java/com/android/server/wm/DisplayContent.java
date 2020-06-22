@@ -1448,9 +1448,10 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
             return true;
         }
         if (checkOpening) {
-            if (!mAppTransition.isTransitionSet() && !mOpeningApps.contains(r)) {
+            if (!mAppTransition.isTransitionSet() || !mOpeningApps.contains(r)) {
                 // Apply normal rotation animation in case of the activity set different requested
-                // orientation without activity switch.
+                // orientation without activity switch, or the transition is unset due to starting
+                // window was transferred ({@link #mSkipAppTransitionAnimation}).
                 return false;
             }
         } else if (r != topRunningActivity()) {
@@ -5500,16 +5501,36 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
             if (r == null || r == mAnimatingRecents) {
                 return;
             }
-            if (mFixedRotationLaunchingApp != null
-                    && mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
-                // Waiting until all of the associated activities have done animation, or the
-                // orientation would be updated too early and cause flickers.
-                if (!mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
-                    continueUpdateOrientationForDiffOrienLaunchingApp();
+            if (mFixedRotationLaunchingApp == null) {
+                // In most cases this is a no-op if the activity doesn't have fixed rotation.
+                // Otherwise it could be from finishing recents animation while the display has
+                // different orientation.
+                r.finishFixedRotationTransform();
+                return;
+            }
+            if (mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
+                if (mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
+                    // Waiting until all of the associated activities have done animation, or the
+                    // orientation would be updated too early and cause flickering.
+                    return;
                 }
             } else {
-                r.finishFixedRotationTransform();
+                // Handle a corner case that the task of {@link #mFixedRotationLaunchingApp} is no
+                // longer animating but the corresponding transition finished event won't notify.
+                // E.g. activity A transferred starting window to B, only A will receive transition
+                // finished event. A doesn't have fixed rotation but B is the rotated launching app.
+                final Task task = r.getTask();
+                if (task == null || task != mFixedRotationLaunchingApp.getTask()) {
+                    // Different tasks won't be in one activity transition animation.
+                    return;
+                }
+                if (task.isAppTransitioning()) {
+                    return;
+                    // Continue to update orientation because the transition of the top rotated
+                    // launching activity is done.
+                }
             }
+            continueUpdateOrientationForDiffOrienLaunchingApp();
         }
 
         @Override
