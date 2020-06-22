@@ -506,7 +506,7 @@ public class ActivityManagerServiceTest {
     @Test
     public void testDispatchUids_dispatchNeededChanges() throws RemoteException {
         when(mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS, Process.myUid(), null,
-                null, false, null)).thenReturn(AppOpsManager.MODE_ALLOWED);
+                null, false, null, false)).thenReturn(AppOpsManager.MODE_ALLOWED);
 
         final int[] changesToObserve = {
             ActivityManager.UID_OBSERVER_PROCSTATE,
