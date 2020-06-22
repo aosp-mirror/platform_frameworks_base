@@ -172,7 +172,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     @VisibleForTesting
     static final String GLOBAL_ACTION_KEY_POWER = "power";
     private static final String GLOBAL_ACTION_KEY_AIRPLANE = "airplane";
-    private static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
+    static final String GLOBAL_ACTION_KEY_BUGREPORT = "bugreport";
     private static final String GLOBAL_ACTION_KEY_SILENT = "silent";
     private static final String GLOBAL_ACTION_KEY_USERS = "users";
     private static final String GLOBAL_ACTION_KEY_SETTINGS = "settings";
@@ -564,18 +564,22 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
      * whether controls are enabled and whether the max number of shown items has been reached.
      */
     private void addActionItem(Action action) {
-        if (shouldShowAction(action)) {
-            if (mItems.size() < getMaxShownPowerItems()) {
-                mItems.add(action);
-            } else {
-                mOverflowItems.add(action);
-            }
+        if (mItems.size() < getMaxShownPowerItems()) {
+            mItems.add(action);
+        } else {
+            mOverflowItems.add(action);
         }
     }
 
     @VisibleForTesting
     protected String[] getDefaultActions() {
         return mResources.getStringArray(R.array.config_globalActionsList);
+    }
+
+    private void addIfShouldShowAction(List<Action> actions, Action action) {
+        if (shouldShowAction(action)) {
+            actions.add(action);
+        }
     }
 
     @VisibleForTesting
@@ -597,10 +601,12 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         ShutDownAction shutdownAction = new ShutDownAction();
         RestartAction restartAction = new RestartAction();
         ArraySet<String> addedKeys = new ArraySet<String>();
+        List<Action> tempActions = new ArrayList<>();
+        CurrentUserProvider currentUser = new CurrentUserProvider();
 
         // make sure emergency affordance action is first, if needed
         if (mEmergencyAffordanceManager.needsEmergencyAffordance()) {
-            addActionItem(new EmergencyAffordanceAction());
+            addIfShouldShowAction(tempActions, new EmergencyAffordanceAction());
             addedKeys.add(GLOBAL_ACTION_KEY_EMERGENCY);
         }
 
@@ -611,43 +617,43 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                 continue;
             }
             if (GLOBAL_ACTION_KEY_POWER.equals(actionKey)) {
-                addActionItem(shutdownAction);
+                addIfShouldShowAction(tempActions, shutdownAction);
             } else if (GLOBAL_ACTION_KEY_AIRPLANE.equals(actionKey)) {
-                addActionItem(mAirplaneModeOn);
+                addIfShouldShowAction(tempActions, mAirplaneModeOn);
             } else if (GLOBAL_ACTION_KEY_BUGREPORT.equals(actionKey)) {
-                if (Settings.Global.getInt(mContentResolver,
-                        Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0 && isCurrentUserOwner()) {
-                    addActionItem(new BugReportAction());
+                if (shouldDisplayBugReport(currentUser.get())) {
+                    addIfShouldShowAction(tempActions, new BugReportAction());
                 }
             } else if (GLOBAL_ACTION_KEY_SILENT.equals(actionKey)) {
                 if (mShowSilentToggle) {
-                    addActionItem(mSilentModeAction);
+                    addIfShouldShowAction(tempActions, mSilentModeAction);
                 }
             } else if (GLOBAL_ACTION_KEY_USERS.equals(actionKey)) {
                 if (SystemProperties.getBoolean("fw.power_user_switcher", false)) {
-                    addUsersToMenu();
+                    addUserActions(tempActions, currentUser.get());
                 }
             } else if (GLOBAL_ACTION_KEY_SETTINGS.equals(actionKey)) {
-                addActionItem(getSettingsAction());
+                addIfShouldShowAction(tempActions, getSettingsAction());
             } else if (GLOBAL_ACTION_KEY_LOCKDOWN.equals(actionKey)) {
-                if (shouldDisplayLockdown(getCurrentUser())) {
-                    addActionItem(getLockdownAction());
+                if (shouldDisplayLockdown(currentUser.get())) {
+                    addIfShouldShowAction(tempActions, new LockDownAction());
                 }
             } else if (GLOBAL_ACTION_KEY_VOICEASSIST.equals(actionKey)) {
-                addActionItem(getVoiceAssistAction());
+                addIfShouldShowAction(tempActions, getVoiceAssistAction());
             } else if (GLOBAL_ACTION_KEY_ASSIST.equals(actionKey)) {
-                addActionItem(getAssistAction());
+                addIfShouldShowAction(tempActions, getAssistAction());
             } else if (GLOBAL_ACTION_KEY_RESTART.equals(actionKey)) {
-                addActionItem(restartAction);
+                addIfShouldShowAction(tempActions, restartAction);
             } else if (GLOBAL_ACTION_KEY_SCREENSHOT.equals(actionKey)) {
-                addActionItem(new ScreenshotAction());
+                addIfShouldShowAction(tempActions, new ScreenshotAction());
             } else if (GLOBAL_ACTION_KEY_LOGOUT.equals(actionKey)) {
                 if (mDevicePolicyManager.isLogoutEnabled()
-                        && getCurrentUser().id != UserHandle.USER_SYSTEM) {
-                    addActionItem(new LogoutAction());
+                        && currentUser.get() != null
+                        && currentUser.get().id != UserHandle.USER_SYSTEM) {
+                    addIfShouldShowAction(tempActions, new LogoutAction());
                 }
             } else if (GLOBAL_ACTION_KEY_EMERGENCY.equals(actionKey)) {
-                addActionItem(new EmergencyDialerAction());
+                addIfShouldShowAction(tempActions, new EmergencyDialerAction());
             } else {
                 Log.e(TAG, "Invalid global action key " + actionKey);
             }
@@ -656,22 +662,21 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
 
         // replace power and restart with a single power options action, if needed
-        if (mItems.contains(shutdownAction) && mItems.contains(restartAction)
-                && mOverflowItems.size() > 0) {
+        if (tempActions.contains(shutdownAction) && tempActions.contains(restartAction)
+                && tempActions.size() > getMaxShownPowerItems()) {
             // transfer shutdown and restart to their own list of power actions
-            mItems.remove(shutdownAction);
-            mItems.remove(restartAction);
+            int powerOptionsIndex = Math.min(tempActions.indexOf(restartAction),
+                    tempActions.indexOf(shutdownAction));
+            tempActions.remove(shutdownAction);
+            tempActions.remove(restartAction);
             mPowerItems.add(shutdownAction);
             mPowerItems.add(restartAction);
 
             // add the PowerOptionsAction after Emergency, if present
-            int powerIndex = addedKeys.contains(GLOBAL_ACTION_KEY_EMERGENCY) ? 1 : 0;
-            mItems.add(powerIndex, new PowerOptionsAction());
-
-            // transfer the first overflow action to the main set of items
-            Action firstOverflowAction = mOverflowItems.get(0);
-            mOverflowItems.remove(0);
-            mItems.add(firstOverflowAction);
+            tempActions.add(powerOptionsIndex, new PowerOptionsAction());
+        }
+        for (Action action : tempActions) {
+            addActionItem(action);
         }
     }
 
@@ -716,7 +721,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     @VisibleForTesting
-    protected boolean shouldDisplayLockdown(UserInfo user) {
+    boolean shouldDisplayLockdown(UserInfo user) {
         if (user == null) {
             return false;
         }
@@ -738,6 +743,13 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         int state = mLockPatternUtils.getStrongAuthForUser(userId);
         return (state == STRONG_AUTH_NOT_REQUIRED
                 || state == SOME_AUTH_REQUIRED_AFTER_USER_REQUEST);
+    }
+
+    @VisibleForTesting
+    boolean shouldDisplayBugReport(UserInfo currentUser) {
+        return Settings.Global.getInt(
+                mContentResolver, Settings.Global.BUGREPORT_IN_POWER_MENU, 0) != 0
+                && (currentUser == null || currentUser.isPrimary());
     }
 
     @Override
@@ -804,7 +816,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private final class ShutDownAction extends SinglePressAction implements LongPressAction {
+    @VisibleForTesting
+    final class ShutDownAction extends SinglePressAction implements LongPressAction {
         private ShutDownAction() {
             super(R.drawable.ic_lock_power_off,
                     R.string.global_action_power_off);
@@ -916,7 +929,8 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         return new EmergencyDialerAction();
     }
 
-    private final class RestartAction extends SinglePressAction implements LongPressAction {
+    @VisibleForTesting
+    final class RestartAction extends SinglePressAction implements LongPressAction {
         private RestartAction() {
             super(R.drawable.ic_restart, R.string.global_action_restart);
         }
@@ -1161,33 +1175,34 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         };
     }
 
-    private Action getLockdownAction() {
-        return new SinglePressAction(R.drawable.ic_lock_lockdown,
-                R.string.global_action_lockdown) {
+    @VisibleForTesting
+    class LockDownAction extends SinglePressAction {
+        LockDownAction() {
+            super(R.drawable.ic_lock_lockdown, R.string.global_action_lockdown);
+        }
 
-            @Override
-            public void onPress() {
-                mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
-                        UserHandle.USER_ALL);
-                try {
-                    mIWindowManager.lockNow(null);
-                    // Lock profiles (if any) on the background thread.
-                    mBackgroundExecutor.execute(() -> lockProfiles());
-                } catch (RemoteException e) {
-                    Log.e(TAG, "Error while trying to lock device.", e);
-                }
+        @Override
+        public void onPress() {
+            mLockPatternUtils.requireStrongAuth(STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN,
+                    UserHandle.USER_ALL);
+            try {
+                mIWindowManager.lockNow(null);
+                // Lock profiles (if any) on the background thread.
+                mBackgroundExecutor.execute(() -> lockProfiles());
+            } catch (RemoteException e) {
+                Log.e(TAG, "Error while trying to lock device.", e);
             }
+        }
 
-            @Override
-            public boolean showDuringKeyguard() {
-                return true;
-            }
+        @Override
+        public boolean showDuringKeyguard() {
+            return true;
+        }
 
-            @Override
-            public boolean showBeforeProvisioning() {
-                return false;
-            }
-        };
+        @Override
+        public boolean showBeforeProvisioning() {
+            return false;
+        }
     }
 
     private void lockProfiles() {
@@ -1208,15 +1223,27 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         }
     }
 
-    private boolean isCurrentUserOwner() {
-        UserInfo currentUser = getCurrentUser();
-        return currentUser == null || currentUser.isPrimary();
+    /**
+     * Non-thread-safe current user provider that caches the result - helpful when a method needs
+     * to fetch it an indeterminate number of times.
+     */
+    private class CurrentUserProvider {
+        private UserInfo mUserInfo = null;
+        private boolean mFetched = false;
+
+        @Nullable
+        UserInfo get() {
+            if (!mFetched) {
+                mFetched = true;
+                mUserInfo = getCurrentUser();
+            }
+            return mUserInfo;
+        }
     }
 
-    private void addUsersToMenu() {
+    private void addUserActions(List<Action> actions, UserInfo currentUser) {
         if (mUserManager.isUserSwitcherEnabled()) {
             List<UserInfo> users = mUserManager.getUsers();
-            UserInfo currentUser = getCurrentUser();
             for (final UserInfo user : users) {
                 if (user.supportsSwitchToByUser()) {
                     boolean isCurrentUser = currentUser == null
@@ -1243,7 +1270,7 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
                             return false;
                         }
                     };
-                    addActionItem(switchToUser);
+                    addIfShouldShowAction(actions, switchToUser);
                 }
             }
         }
