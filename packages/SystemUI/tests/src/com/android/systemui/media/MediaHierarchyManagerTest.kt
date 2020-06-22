@@ -70,7 +70,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock
     private lateinit var notificationLockscreenUserManager: NotificationLockscreenUserManager
     @Mock
-    private lateinit var mediaViewManager: MediaViewManager
+    private lateinit var mediaCarouselController: MediaCarouselController
     @Mock
     private lateinit var wakefulnessLifecycle: WakefulnessLifecycle
     @Captor
@@ -82,13 +82,13 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        `when`(mediaViewManager.mediaFrame).thenReturn(mediaFrame)
+        `when`(mediaCarouselController.mediaFrame).thenReturn(mediaFrame)
         mediaHiearchyManager = MediaHierarchyManager(
                 context,
                 statusBarStateController,
                 keyguardStateController,
                 bypassController,
-                mediaViewManager,
+                mediaCarouselController,
                 notificationLockscreenUserManager,
                 wakefulnessLifecycle)
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
@@ -97,7 +97,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         setupHost(qqsHost, MediaHierarchyManager.LOCATION_QQS)
         `when`(statusBarStateController.state).thenReturn(StatusBarState.SHADE)
         // We'll use the viewmanager to verify a few calls below, let's reset this.
-        clearInvocations(mediaViewManager)
+        clearInvocations(mediaCarouselController)
 
     }
 
@@ -118,14 +118,14 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     fun testBlockedWhenScreenTurningOff() {
         // Let's set it onto QS:
         mediaHiearchyManager.qsExpansion = 1.0f
-        verify(mediaViewManager).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
+        verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
                 any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
         observer.onStartedGoingToSleep()
-        clearInvocations(mediaViewManager)
+        clearInvocations(mediaCarouselController)
         mediaHiearchyManager.qsExpansion = 0.0f
-        verify(mediaViewManager, times(0)).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
+        verify(mediaCarouselController, times(0)).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
                 any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
     }
 
@@ -133,13 +133,13 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     fun testAllowedWhenNotTurningOff() {
         // Let's set it onto QS:
         mediaHiearchyManager.qsExpansion = 1.0f
-        verify(mediaViewManager).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
+        verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
                 any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
-        clearInvocations(mediaViewManager)
+        clearInvocations(mediaCarouselController)
         mediaHiearchyManager.qsExpansion = 0.0f
-        verify(mediaViewManager).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
+        verify(mediaCarouselController).onDesiredLocationChanged(ArgumentMatchers.anyInt(),
                 any(MediaHostState::class.java), anyBoolean(), anyLong(), anyLong())
     }
 }
