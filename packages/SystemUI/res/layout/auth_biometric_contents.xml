@@ -50,8 +50,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="24dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="24dp"
+        android:paddingVertical="12dp"
         android:textSize="12sp"
         android:gravity="center_horizontal"
         android:accessibilityLiveRegion="polite"
@@ -60,22 +59,23 @@
     <LinearLayout
         android:id="@+id/button_bar"
         android:layout_width="match_parent"
-        android:layout_height="72dip"
-        android:paddingTop="24dp"
-        android:layout_gravity="center_vertical"
+        android:layout_height="88dp"
         style="?android:attr/buttonBarStyle"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:paddingTop="16dp">
         <Space android:id="@+id/leftSpacer"
-            android:layout_width="12dp"
+            android:layout_width="8dp"
             android:layout_height="match_parent"
             android:visibility="visible" />
         <!-- Negative Button -->
         <Button android:id="@+id/button_negative"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             style="@*android:style/Widget.DeviceDefault.Button.Borderless.Colored"
-            android:gravity="center"
-            android:maxLines="2"/>
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:maxWidth="@dimen/biometric_dialog_button_negative_max_width"/>
         <Space android:id="@+id/middleSpacer"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -84,23 +84,27 @@
         <!-- Positive Button -->
         <Button android:id="@+id/button_positive"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             style="@*android:style/Widget.DeviceDefault.Button.Colored"
-            android:gravity="center"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
             android:maxLines="2"
+            android:maxWidth="@dimen/biometric_dialog_button_positive_max_width"
             android:text="@string/biometric_dialog_confirm"
             android:visibility="gone"/>
         <!-- Try Again Button -->
         <Button android:id="@+id/button_try_again"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             style="@*android:style/Widget.DeviceDefault.Button.Colored"
-            android:gravity="center"
+            android:layout_gravity="center_vertical"
+            android:ellipsize="end"
             android:maxLines="2"
+            android:maxWidth="@dimen/biometric_dialog_button_positive_max_width"
             android:text="@string/biometric_dialog_try_again"
             android:visibility="gone"/>
         <Space android:id="@+id/rightSpacer"
-            android:layout_width="12dip"
+            android:layout_width="8dp"
             android:layout_height="match_parent"
             android:visibility="visible" />
     </LinearLayout>
