@@ -126,10 +126,6 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
     private final RootWindowContainer.FindTaskResult
             mTmpFindTaskResult = new RootWindowContainer.FindTaskResult();
 
-    // Indicates whether the Assistant should show on top of the Dream (respectively, above
-    // everything else on screen). Otherwise, it will be put under always-on-top stacks.
-    private final boolean mAssistantOnTopOfDream;
-
     /**
      * If this is the same as {@link #getFocusedStack} then the activity on the top of the focused
      * stack has been resumed. If stacks are changing position this will hold the old stack until
@@ -155,9 +151,6 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
         mDisplayContent = displayContent;
         mRootWindowContainer = service.mRoot;
         mAtmService = service.mAtmService;
-
-        mAssistantOnTopOfDream = mWmService.mContext.getResources().getBoolean(
-                    com.android.internal.R.bool.config_assistantOnTopOfDream);
     }
 
     /**
@@ -392,7 +385,7 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
      * @return the priority of the stack
      */
     private int getPriority(ActivityStack stack) {
-        if (mAssistantOnTopOfDream && stack.isActivityTypeAssistant()) return 4;
+        if (mWmService.mAssistantOnTopOfDream && stack.isActivityTypeAssistant()) return 4;
         if (stack.isActivityTypeDream()) return 3;
         if (stack.inPinnedWindowingMode()) return 2;
         if (stack.isAlwaysOnTop()) return 1;
