@@ -25,6 +25,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.UserInfo;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
@@ -34,11 +35,15 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.UserHandle;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.text.format.Formatter;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -96,6 +101,7 @@ public class KeyguardIndicationController implements StateListener,
     private final SettableWakeLock mWakeLock;
     private final DockManager mDockManager;
     private final DevicePolicyManager mDevicePolicyManager;
+    private final UserManager mUserManager;
 
     private BroadcastReceiver mBroadcastReceiver;
     private LockscreenLockIconController mLockIconController;
@@ -142,7 +148,8 @@ public class KeyguardIndicationController implements StateListener,
             DockManager dockManager,
             BroadcastDispatcher broadcastDispatcher,
             DevicePolicyManager devicePolicyManager,
-            IBatteryStats iBatteryStats) {
+            IBatteryStats iBatteryStats,
+            UserManager userManager) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
         mDevicePolicyManager = devicePolicyManager;
@@ -155,6 +162,7 @@ public class KeyguardIndicationController implements StateListener,
         mWakeLock = new SettableWakeLock(
                 wakeLockBuilder.setTag("Doze:KeyguardIndication").build(), TAG);
         mBatteryInfo = iBatteryStats;
+        mUserManager = userManager;
 
         mKeyguardUpdateMonitor.registerCallback(getKeyguardCallback());
         mKeyguardUpdateMonitor.registerCallback(mTickReceiver);
@@ -180,8 +188,10 @@ public class KeyguardIndicationController implements StateListener,
                     updateDisclosure();
                 }
             };
-            mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, new IntentFilter(
-                    DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
+            IntentFilter intentFilter = new IntentFilter();
+            intentFilter.addAction(DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED);
+            intentFilter.addAction(Intent.ACTION_USER_REMOVED);
+            mBroadcastDispatcher.registerReceiver(mBroadcastReceiver, intentFilter);
         }
     }
 
@@ -223,9 +233,8 @@ public class KeyguardIndicationController implements StateListener,
 
     private void updateDisclosure() {
         // NOTE: Because this uses IPC, avoid calling updateDisclosure() on a critical path.
-        if (whitelistIpcs(mDevicePolicyManager::isDeviceManaged)) {
-            final CharSequence organizationName =
-                    mDevicePolicyManager.getDeviceOwnerOrganizationName();
+        if (whitelistIpcs(this::isOrganizationOwnedDevice)) {
+            CharSequence organizationName = getOrganizationOwnedDeviceOrganizationName();
             if (organizationName != null) {
                 mDisclosure.switchIndication(mContext.getResources().getString(
                         R.string.do_disclosure_with_name, organizationName));
@@ -236,6 +245,38 @@ public class KeyguardIndicationController implements StateListener,
         } else {
             mDisclosure.setVisibility(View.GONE);
         }
+    }
+
+    private boolean isOrganizationOwnedDevice() {
+        return mDevicePolicyManager.isDeviceManaged()
+                || mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile();
+    }
+
+    @Nullable
+    private CharSequence getOrganizationOwnedDeviceOrganizationName() {
+        if (mDevicePolicyManager.isDeviceManaged()) {
+            return mDevicePolicyManager.getDeviceOwnerOrganizationName();
+        } else if (mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()) {
+            return getWorkProfileOrganizationName();
+        }
+        return null;
+    }
+
+    private CharSequence getWorkProfileOrganizationName() {
+        final int profileId = getWorkProfileUserId(UserHandle.myUserId());
+        if (profileId == UserHandle.USER_NULL) {
+            return null;
+        }
+        return mDevicePolicyManager.getOrganizationNameForUser(profileId);
+    }
+
+    private int getWorkProfileUserId(int userId) {
+        for (final UserInfo userInfo : mUserManager.getProfiles(userId)) {
+            if (userInfo.isManagedProfile()) {
+                return userInfo.id;
+            }
+        }
+        return UserHandle.USER_NULL;
     }
 
     public void setVisible(boolean visible) {
