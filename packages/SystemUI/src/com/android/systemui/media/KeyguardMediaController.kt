@@ -56,7 +56,7 @@ class KeyguardMediaController @Inject constructor(
     fun attach(mediaView: MediaHeaderView) {
         view = mediaView
         // First let's set the desired state that we want for this host
-        mediaHost.visibleChangedListener = { updateVisibility() }
+        mediaHost.addVisibilityChangeListener { updateVisibility() }
         mediaHost.expansion = 0.0f
         mediaHost.showsOnlyActiveMedia = true
         mediaHost.falsingProtectionNeeded = true
