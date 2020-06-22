@@ -227,6 +227,10 @@ class MediaHierarchyManager @Inject constructor(
     fun register(mediaObject: MediaHost): UniqueObjectHostView {
         val viewHost = createUniqueObjectHost()
         mediaObject.hostView = viewHost
+        mediaObject.addVisibilityChangeListener {
+            // Never animate because of a visibility change, only state changes should do that
+            updateDesiredLocation(forceNoAnimation = true)
+        }
         mediaHosts[mediaObject.location] = mediaObject
         if (mediaObject.location == desiredLocation) {
             // In case we are overriding a view that is already visible, make sure we attach it
@@ -260,8 +264,10 @@ class MediaHierarchyManager @Inject constructor(
     /**
      * Updates the location that the view should be in. If it changes, an animation may be triggered
      * going from the old desired location to the new one.
+     *
+     * @param forceNoAnimation optional parameter telling the system not to animate
      */
-    private fun updateDesiredLocation() {
+    private fun updateDesiredLocation(forceNoAnimation: Boolean = false) {
         val desiredLocation = calculateLocation()
         if (desiredLocation != this.desiredLocation) {
             if (this.desiredLocation >= 0) {
@@ -270,7 +276,8 @@ class MediaHierarchyManager @Inject constructor(
             val isNewView = this.desiredLocation == -1
             this.desiredLocation = desiredLocation
             // Let's perform a transition
-            val animate = shouldAnimateTransition(desiredLocation, previousLocation)
+            val animate = !forceNoAnimation &&
+                    shouldAnimateTransition(desiredLocation, previousLocation)
             val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
             val host = getHost(desiredLocation)
             mediaCarouselController.onDesiredLocationChanged(desiredLocation, host, animate,
