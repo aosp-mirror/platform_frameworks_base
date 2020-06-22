@@ -97,6 +97,9 @@ public class ScreenRecordDialog extends Activity {
                 mModes);
         a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mOptions.setAdapter(a);
+        mOptions.setOnItemClickListenerInt((parent, view, position, id) -> {
+            mAudioSwitch.setChecked(true);
+        });
 
     }
 
