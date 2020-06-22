@@ -41,6 +41,7 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
@@ -266,6 +267,30 @@ public class HdmiControlServiceTest {
     }
 
     @Test
+    public void setAndGetCecVolumeControlEnabled_changesSetting() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(false);
+        assertThat(mHdmiControlService.readBooleanSetting(
+                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true)).isFalse();
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+        assertThat(mHdmiControlService.readBooleanSetting(
+                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true)).isTrue();
+    }
+
+    @Test
+    public void setAndGetCecVolumeControlEnabledInternal_doesNotChangeSetting() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(true);
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(false);
+        assertThat(mHdmiControlService.readBooleanSetting(
+                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true)).isTrue();
+
+        mHdmiControlService.setHdmiCecVolumeControlEnabledInternal(true);
+        assertThat(mHdmiControlService.readBooleanSetting(
+                Settings.Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true)).isTrue();
+    }
+
+    @Test
     public void disableAndReenableCec_volumeControlReturnsToOriginalValue() {
         boolean volumeControlEnabled = true;
         mHdmiControlService.setHdmiCecVolumeControlEnabled(volumeControlEnabled);
@@ -276,6 +301,22 @@ public class HdmiControlServiceTest {
         mHdmiControlService.setControlEnabled(true);
         assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isEqualTo(
                 volumeControlEnabled);
+    }
+
+    @Test
+    public void disableAndReenableCec_volumeControlFeatureListenersNotified() {
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(true);
+
+        VolumeControlFeatureCallback callback = new VolumeControlFeatureCallback();
+        mHdmiControlService.addHdmiCecVolumeControlFeatureListener(callback);
+
+        mHdmiControlService.setControlEnabled(false);
+        assertThat(callback.mCallbackReceived).isTrue();
+        assertThat(callback.mVolumeControlEnabled).isFalse();
+
+
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(callback.mVolumeControlEnabled).isTrue();
     }
 
     @Test
