@@ -34,6 +34,7 @@ java_defaults {
         "net-utils-framework-common",
     ],
     libs: [
+        "framework-statsd.stubs.module_lib",
         "framework-tethering.impl",
         "framework-telephony-stubs",
         "framework-wifi",
