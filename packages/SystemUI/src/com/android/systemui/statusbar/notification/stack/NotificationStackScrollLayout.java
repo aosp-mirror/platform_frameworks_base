@@ -201,6 +201,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final KeyguardBypassController mKeyguardBypassController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final SysuiStatusBarStateController mStatusbarStateController;
+    private final KeyguardMediaController mKeyguardMediaController;
 
     private ExpandHelper mExpandHelper;
     private final NotificationSwipeHelper mSwipeHelper;
@@ -672,6 +673,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         initializeForegroundServiceSection(fgsFeatureController);
         mUiEventLogger = uiEventLogger;
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
+        mKeyguardMediaController = keyguardMediaController;
         keyguardMediaController.setVisibilityChangedListener((visible) -> {
             if (visible) {
                 generateAddAnimation(keyguardMediaController.getView(), false /*fromMoreCard */);
@@ -6638,7 +6640,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         /* Only ever called as a consequence of a lockscreen expansion gesture. */
         @Override
         public boolean onDraggedDown(View startingChild, int dragLengthY) {
-            if (mStatusBarState == StatusBarState.KEYGUARD && hasActiveNotifications()) {
+            boolean canDragDown = hasActiveNotifications()
+                    || mKeyguardMediaController.getView().getVisibility() == VISIBLE;
+            if (mStatusBarState == StatusBarState.KEYGUARD && canDragDown) {
                 mLockscreenGestureLogger.write(
                         MetricsEvent.ACTION_LS_SHADE,
                         (int) (dragLengthY / mDisplayMetrics.density),
