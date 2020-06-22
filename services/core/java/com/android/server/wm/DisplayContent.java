@@ -1425,7 +1425,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     @Surface.Rotation
     int rotationForActivityInDifferentOrientation(@NonNull ActivityRecord r) {
-        if (!mWmService.mIsFixedRotationTransformEnabled) {
+        if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM) {
             return ROTATION_UNDEFINED;
         }
         if (r.inMultiWindowMode()
@@ -1453,7 +1453,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     boolean handleTopActivityLaunchingInDifferentOrientation(@NonNull ActivityRecord r,
             boolean checkOpening) {
-        if (!mWmService.mIsFixedRotationTransformEnabled) {
+        if (!WindowManagerService.ENABLE_FIXED_ROTATION_TRANSFORM) {
             return false;
         }
         if (r.isFinishingFixedRotationTransform()) {
