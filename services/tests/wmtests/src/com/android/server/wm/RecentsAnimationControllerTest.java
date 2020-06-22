@@ -321,7 +321,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testRecentViewInFixedPortraitWhenTopAppInLandscape() {
-        mWm.mIsFixedRotationTransformEnabled = true;
         mWm.setRecentsAnimationController(mController);
 
         final ActivityRecord homeActivity = createHomeActivity();
@@ -390,7 +389,6 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Test
     public void testWallpaperHasFixedRotationApplied() {
-        mWm.mIsFixedRotationTransformEnabled = true;
         mWm.setRecentsAnimationController(mController);
 
         // Create a portrait home activity, a wallpaper and a landscape activity displayed on top.
