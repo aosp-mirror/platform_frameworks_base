@@ -529,6 +529,10 @@ public class WindowManagerService extends IWindowManager.Stub
 
     final boolean mAllowBootMessages;
 
+    // Indicates whether the Assistant should show on top of the Dream (respectively, above
+    // everything else on screen). Otherwise, it will be put under always-on-top stacks.
+    final boolean mAssistantOnTopOfDream;
+
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
@@ -1183,6 +1187,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_disableTransitionAnimation);
         mPerDisplayFocusEnabled = context.getResources().getBoolean(
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
+        mAssistantOnTopOfDream = context.getResources().getBoolean(
+                com.android.internal.R.bool.config_assistantOnTopOfDream);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 

@@ -6807,7 +6807,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     }
                     mWindowManager.closeSystemDialogs(reason);
 
-                    mRootWindowContainer.closeSystemDialogs();
+                    mRootWindowContainer.closeSystemDialogActivities(reason);
                 }
                 // Call into AM outside the synchronized block.
                 mAmInternal.broadcastCloseSystemDialogs(reason);
