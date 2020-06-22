@@ -122,6 +122,23 @@
             android:textSize="14sp" />
     </LinearLayout>
 
+    <ImageView
+        android:id="@+id/media_seamless_fallback"
+        android:layout_width="@dimen/qs_seamless_icon_size"
+        android:layout_height="@dimen/qs_seamless_icon_size"
+        android:tint="@color/media_primary_text"
+        android:src="@drawable/ic_cast_connected"
+        android:forceHasOverlappingRendering="false" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_seamless_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="start"
+        app:constraint_referenced_ids="media_seamless,media_seamless_fallback"
+        app:barrierAllowsGoneWidgets="false"
+        />
+
     <!-- Seek Bar -->
     <SeekBar
         android:id="@+id/media_progress_bar"
