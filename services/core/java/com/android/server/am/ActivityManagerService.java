@@ -335,7 +335,7 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FrameworkStatsLog;
 import com.android.internal.util.MemInfoReader;
 import com.android.internal.util.Preconditions;
-import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.server.AlarmManagerInternal;
@@ -3270,7 +3270,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private boolean hasUsageStatsPermission(String callingPackage) {
         final int mode = mAppOpsService.noteOperation(AppOpsManager.OP_GET_USAGE_STATS,
-                Binder.getCallingUid(), callingPackage, null, false, "");
+                Binder.getCallingUid(), callingPackage, null, false, "", false);
         if (mode == AppOpsManager.MODE_DEFAULT) {
             return checkCallingPermission(Manifest.permission.PACKAGE_USAGE_STATS)
                     == PackageManager.PERMISSION_GRANTED;
@@ -6098,7 +6098,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             // TODO moltmann: Allow to specify featureId
             return mActivityManagerService.mAppOpsService
                     .noteOperation(AppOpsManager.strOpToOp(op), uid, packageName, null,
-                            false, "");
+                            false, "", false);
         }
 
         @Override
@@ -20183,8 +20183,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         private final int mTargetUid;
         private @Nullable String[] mPermissions;
 
-        ShellDelegate(String targetPacakgeName, int targetUid, @Nullable String[] permissions) {
-            mTargetPackageName = targetPacakgeName;
+        ShellDelegate(String targetPackageName, int targetUid, @Nullable String[] permissions) {
+            mTargetPackageName = targetPackageName;
             mTargetUid = targetUid;
             mPermissions = permissions;
         }
@@ -20231,20 +20231,20 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message,
-                @NonNull HexFunction<Integer, Integer, String, String, Boolean, String, Integer>
-                        superImpl) {
+                @Nullable String message, boolean shouldCollectMessage,
+                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
+                        Integer> superImpl) {
             if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, Process.SHELL_UID, "com.android.shell", featureId,
-                            shouldCollectAsyncNotedOp, message);
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
             return superImpl.apply(code, uid, packageName, featureId, shouldCollectAsyncNotedOp,
-                    message);
+                    message, shouldCollectMessage);
         }
 
         @Override
