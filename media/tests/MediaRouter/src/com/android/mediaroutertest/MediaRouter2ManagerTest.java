@@ -97,7 +97,6 @@ public class MediaRouter2ManagerTest {
 
     public static final List<String> FEATURES_ALL = new ArrayList();
     public static final List<String> FEATURES_SPECIAL = new ArrayList();
-    private static final List<String> FEATURES_LIVE_AUDIO = new ArrayList<>();
 
     static {
         FEATURES_ALL.add(FEATURE_SAMPLE);
@@ -105,8 +104,6 @@ public class MediaRouter2ManagerTest {
         FEATURES_ALL.add(FEATURE_LIVE_AUDIO);
 
         FEATURES_SPECIAL.add(FEATURE_SPECIAL);
-
-        FEATURES_LIVE_AUDIO.add(FEATURE_LIVE_AUDIO);
     }
 
     @Before
