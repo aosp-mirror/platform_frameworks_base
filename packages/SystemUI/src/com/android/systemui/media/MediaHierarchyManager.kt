@@ -49,7 +49,7 @@ class MediaHierarchyManager @Inject constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     private val keyguardStateController: KeyguardStateController,
     private val bypassController: KeyguardBypassController,
-    private val mediaViewManager: MediaViewManager,
+    private val mediaCarouselController: MediaCarouselController,
     private val notifLockscreenUserManager: NotificationLockscreenUserManager,
     wakefulnessLifecycle: WakefulnessLifecycle
 ) {
@@ -65,7 +65,7 @@ class MediaHierarchyManager @Inject constructor(
     private var animationStartBounds: Rect = Rect()
     private var targetBounds: Rect = Rect()
     private val mediaFrame
-        get() = mediaViewManager.mediaFrame
+        get() = mediaCarouselController.mediaFrame
     private var statusbarState: Int = statusBarStateController.state
     private var animator = ValueAnimator.ofFloat(0.0f, 1.0f).apply {
         interpolator = Interpolators.FAST_OUT_SLOW_IN
@@ -273,8 +273,8 @@ class MediaHierarchyManager @Inject constructor(
             val animate = shouldAnimateTransition(desiredLocation, previousLocation)
             val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
             val host = getHost(desiredLocation)
-            mediaViewManager.onDesiredLocationChanged(desiredLocation, host, animate, animDuration,
-                    delay)
+            mediaCarouselController.onDesiredLocationChanged(desiredLocation, host, animate,
+                    animDuration, delay)
             performTransitionToNewLocation(isNewView, animate)
         }
     }
@@ -457,7 +457,7 @@ class MediaHierarchyManager @Inject constructor(
         val startLocation = if (currentlyInGuidedTransformation) previousLocation else -1
         val progress = if (currentlyInGuidedTransformation) getTransformationProgress() else 1.0f
         val endLocation = desiredLocation
-        mediaViewManager.setCurrentState(startLocation, endLocation, progress, immediately)
+        mediaCarouselController.setCurrentState(startLocation, endLocation, progress, immediately)
         updateHostAttachment()
         if (currentAttachmentLocation == IN_OVERLAY) {
             mediaFrame.setLeftTopRightBottom(
