@@ -226,7 +226,7 @@ public final class MediaRoute2Info implements Parcelable {
     public static final int TYPE_GROUP = 2000;
 
     /**
-     * Media feature: Live audio.
+     * Route feature: Live audio.
      * <p>
      * A route that supports live audio routing will allow the media audio stream
      * to be sent to supported destinations.  This can include internal speakers or
@@ -241,7 +241,7 @@ public final class MediaRoute2Info implements Parcelable {
     public static final String FEATURE_LIVE_AUDIO = "android.media.route.feature.LIVE_AUDIO";
 
     /**
-     * Media feature: Live video.
+     * Route feature: Live video.
      * <p>
      * A route that supports live video routing will allow a mirrored version
      * of the device's primary display or a customized
@@ -262,7 +262,14 @@ public final class MediaRoute2Info implements Parcelable {
     public static final String FEATURE_LIVE_VIDEO = "android.media.route.feature.LIVE_VIDEO";
 
     /**
-     * Media feature: Remote playback.
+     * Route feature: Local playback.
+     * @hide
+     */
+    public static final String FEATURE_LOCAL_PLAYBACK =
+            "android.media.route.feature.LOCAL_PLAYBACK";
+
+    /**
+     * Route feature: Remote playback.
      * <p>
      * A route that supports remote playback routing will allow an application to send
      * requests to play content remotely to supported destinations.
@@ -283,7 +290,7 @@ public final class MediaRoute2Info implements Parcelable {
             "android.media.route.feature.REMOTE_PLAYBACK";
 
     /**
-     * Media feature: Remote audio playback.
+     * Route feature: Remote audio playback.
      * <p>
      * A route that supports remote audio playback routing will allow an application to send
      * requests to play audio content remotely to supported destinations.
@@ -295,7 +302,7 @@ public final class MediaRoute2Info implements Parcelable {
             "android.media.route.feature.REMOTE_AUDIO_PLAYBACK";
 
     /**
-     * Media feature: Remote video playback.
+     * Route feature: Remote video playback.
      * <p>
      * A route that supports remote video playback routing will allow an application to send
      * requests to play video content remotely to supported destinations.
