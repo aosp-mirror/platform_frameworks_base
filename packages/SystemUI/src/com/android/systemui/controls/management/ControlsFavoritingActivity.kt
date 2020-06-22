@@ -174,30 +174,32 @@ class ControlsFavoritingActivity @Inject constructor(
                         subtitleView.visibility = View.GONE
                     } else {
                         statusText.visibility = View.GONE
-                    }
-                    pageIndicator.setNumPages(listOfStructures.size)
-                    pageIndicator.setLocation(0f)
-                    pageIndicator.visibility =
-                        if (listOfStructures.size > 1) View.VISIBLE else View.INVISIBLE
 
-                    ControlsAnimations.enterAnimation(pageIndicator).apply {
-                        addListener(object : AnimatorListenerAdapter() {
-                            override fun onAnimationEnd(animation: Animator?) {
-                                // Position the tooltip if necessary after animations are complete
-                                // so we can get the position on screen. The tooltip is not
-                                // rooted in the layout root.
-                                if (pageIndicator.visibility == View.VISIBLE &&
+                        pageIndicator.setNumPages(listOfStructures.size)
+                        pageIndicator.setLocation(0f)
+                        pageIndicator.visibility =
+                            if (listOfStructures.size > 1) View.VISIBLE else View.INVISIBLE
+
+                        ControlsAnimations.enterAnimation(pageIndicator).apply {
+                            addListener(object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator?) {
+                                    // Position the tooltip if necessary after animations are complete
+                                    // so we can get the position on screen. The tooltip is not
+                                    // rooted in the layout root.
+                                    if (pageIndicator.visibility == View.VISIBLE &&
                                         mTooltipManager != null) {
-                                    val p = IntArray(2)
-                                    pageIndicator.getLocationOnScreen(p)
-                                    val x = p[0] + pageIndicator.width / 2
-                                    val y = p[1] + pageIndicator.height
-                                    mTooltipManager?.show(R.string.controls_structure_tooltip, x, y)
+                                        val p = IntArray(2)
+                                        pageIndicator.getLocationOnScreen(p)
+                                        val x = p[0] + pageIndicator.width / 2
+                                        val y = p[1] + pageIndicator.height
+                                        mTooltipManager?.show(
+                                            R.string.controls_structure_tooltip, x, y)
+                                    }
                                 }
-                            }
-                        })
-                    }.start()
-                    ControlsAnimations.enterAnimation(structurePager).start()
+                            })
+                        }.start()
+                        ControlsAnimations.enterAnimation(structurePager).start()
+                    }
                 }
             }, Consumer { runnable -> cancelLoadRunnable = runnable })
         }
