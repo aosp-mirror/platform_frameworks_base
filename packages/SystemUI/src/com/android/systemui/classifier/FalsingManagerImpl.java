@@ -481,15 +481,15 @@ public class FalsingManagerImpl implements FalsingManager {
         mDataCollector.onNotificationDismissed();
     }
 
-    public void onNotificatonStartDismissing() {
+    public void onNotificationStartDismissing() {
         if (FalsingLog.ENABLED) {
-            FalsingLog.i("onNotificatonStartDismissing", "");
+            FalsingLog.i("onNotificationStartDismissing", "");
         }
         mHumanInteractionClassifier.setType(Classifier.NOTIFICATION_DISMISS);
         mDataCollector.onNotificatonStartDismissing();
     }
 
-    public void onNotificatonStopDismissing() {
+    public void onNotificationStopDismissing() {
         mDataCollector.onNotificatonStopDismissing();
     }
 

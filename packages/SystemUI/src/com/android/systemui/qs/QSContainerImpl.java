@@ -26,8 +26,12 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import androidx.dynamicanimation.animation.FloatPropertyCompat;
+import androidx.dynamicanimation.animation.SpringForce;
+
 import com.android.systemui.R;
 import com.android.systemui.qs.customize.QSCustomizer;
+import com.android.systemui.util.animation.PhysicsAnimator;
 
 /**
  * Wrapper view with background which contains {@link QSPanel} and {@link BaseStatusBarHeader}
@@ -35,7 +39,22 @@ import com.android.systemui.qs.customize.QSCustomizer;
 public class QSContainerImpl extends FrameLayout {
 
     private final Point mSizePoint = new Point();
+    private static final FloatPropertyCompat<QSContainerImpl> BACKGROUND_BOTTOM =
+            new FloatPropertyCompat<QSContainerImpl>("backgroundBottom") {
+                @Override
+                public float getValue(QSContainerImpl qsImpl) {
+                    return qsImpl.getBackgroundBottom();
+                }
 
+                @Override
+                public void setValue(QSContainerImpl background, float value) {
+                    background.setBackgroundBottom((int) value);
+                }
+            };
+    private static final PhysicsAnimator.SpringConfig BACKGROUND_SPRING
+            = new PhysicsAnimator.SpringConfig(SpringForce.STIFFNESS_MEDIUM,
+            SpringForce.DAMPING_RATIO_LOW_BOUNCY);
+    private int mBackgroundBottom = -1;
     private int mHeightOverride = -1;
     private QSPanel mQSPanel;
     private View mQSDetail;
@@ -53,6 +72,7 @@ public class QSContainerImpl extends FrameLayout {
     private boolean mQsDisabled;
     private int mContentPaddingStart = -1;
     private int mContentPaddingEnd = -1;
+    private boolean mAnimateBottomOnNextLayout;
 
     public QSContainerImpl(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -71,8 +91,28 @@ public class QSContainerImpl extends FrameLayout {
         mStatusBarBackground = findViewById(R.id.quick_settings_status_bar_background);
         mBackgroundGradient = findViewById(R.id.quick_settings_gradient_view);
         updateResources();
+        mHeader.getHeaderQsPanel().setMediaVisibilityChangedListener((visible) -> {
+            if (mHeader.getHeaderQsPanel().isShown()) {
+                mAnimateBottomOnNextLayout = true;
+            }
+        });
+
 
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
+    }
+
+    private void setBackgroundBottom(int value) {
+        // We're saving the bottom separately since otherwise the bottom would be overridden in
+        // the layout and the animation wouldn't properly start at the old position.
+        mBackgroundBottom = value;
+        mBackground.setBottom(value);
+    }
+
+    private float getBackgroundBottom() {
+        if (mBackgroundBottom == -1) {
+            return mBackground.getBottom();
+        }
+        return mBackgroundBottom;
     }
 
     @Override
@@ -140,7 +180,8 @@ public class QSContainerImpl extends FrameLayout {
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         super.onLayout(changed, left, top, right, bottom);
-        updateExpansion();
+        updateExpansion(mAnimateBottomOnNextLayout /* animate */);
+        mAnimateBottomOnNextLayout = false;
     }
 
     public void disable(int state1, int state2, boolean animate) {
@@ -181,13 +222,31 @@ public class QSContainerImpl extends FrameLayout {
     }
 
     public void updateExpansion() {
+        updateExpansion(false /* animate */);
+    }
+
+    public void updateExpansion(boolean animate) {
         int height = calculateContainerHeight();
         setBottom(getTop() + height);
         mQSDetail.setBottom(getTop() + height);
         // Pin the drag handle to the bottom of the panel.
         mDragHandle.setTranslationY(height - mDragHandle.getHeight());
         mBackground.setTop(mQSPanelContainer.getTop());
-        mBackground.setBottom(height);
+        updateBackgroundBottom(height, animate);
+    }
+
+    private void updateBackgroundBottom(int height, boolean animated) {
+        PhysicsAnimator<QSContainerImpl> physicsAnimator = PhysicsAnimator.getInstance(this);
+        if (physicsAnimator.isPropertyAnimating(BACKGROUND_BOTTOM) || animated) {
+            // An animation is running or we want to animate
+            // Let's make sure to set the currentValue again, since the call below might only
+            // start in the next frame and otherwise we'd flicker
+            BACKGROUND_BOTTOM.setValue(this, BACKGROUND_BOTTOM.getValue(this));
+            physicsAnimator.spring(BACKGROUND_BOTTOM, height, BACKGROUND_SPRING).start();
+        } else {
+            BACKGROUND_BOTTOM.setValue(this, height);
+        }
+
     }
 
     protected int calculateContainerHeight() {
