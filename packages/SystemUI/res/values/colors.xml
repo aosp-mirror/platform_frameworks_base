@@ -251,6 +251,7 @@
     <color name="media_seekbar_progress">#c0ffffff</color>
     <color name="media_disabled">#80ffffff</color>
     <color name="media_seamless_border">#26ffffff</color> <!-- 15% -->
+    <color name="media_divider">#1d000000</color>
 
     <!-- controls -->
     <color name="control_primary_text">#E6FFFFFF</color>
