@@ -920,6 +920,8 @@ public class AudioService extends IAudioService.Stub
                 if (mHdmiManager != null) {
                     mHdmiManager.addHdmiControlStatusChangeListener(
                             mHdmiControlStatusChangeListenerCallback);
+                    mHdmiManager.addHdmiCecVolumeControlFeatureListener(mContext.getMainExecutor(),
+                            mMyHdmiCecVolumeControlFeatureListener);
                 }
                 mHdmiTvClient = mHdmiManager.getTvClient();
                 if (mHdmiTvClient != null) {
@@ -2248,6 +2250,7 @@ public class AudioService extends IAudioService.Stub
                 if (mHdmiManager != null) {
                     // mHdmiCecSink true => mHdmiPlaybackClient != null
                     if (mHdmiCecSink
+                            && mHdmiCecVolumeControlEnabled
                             && streamTypeAlias == AudioSystem.STREAM_MUSIC
                             // vol change on a full volume device
                             && isFullVolumeDevice(device)) {
@@ -2320,7 +2323,8 @@ public class AudioService extends IAudioService.Stub
     @GuardedBy("mHdmiClientLock")
     private void maybeSendSystemAudioStatusCommand(boolean isMuteAdjust) {
         if (mHdmiAudioSystemClient == null
-                || !mHdmiSystemAudioSupported) {
+                || !mHdmiSystemAudioSupported
+                || !mHdmiCecVolumeControlEnabled) {
             return;
         }
 
@@ -2340,7 +2344,8 @@ public class AudioService extends IAudioService.Stub
                     || mHdmiTvClient == null
                     || oldVolume == newVolume
                     || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0
-                    || !mHdmiSystemAudioSupported) {
+                    || !mHdmiSystemAudioSupported
+                    || !mHdmiCecVolumeControlEnabled) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
@@ -2940,16 +2945,18 @@ public class AudioService extends IAudioService.Stub
         mVolumeController.postVolumeChanged(streamType, flags);
     }
 
-    // If Hdmi-CEC system audio mode is on and we are a TV panel, never show volume bar.
+    // Don't show volume UI when:
+    //  - Hdmi-CEC system audio mode is on and we are a TV panel
+    //  - CEC volume control enabled on a set-top box
     private int updateFlagsForTvPlatform(int flags) {
         synchronized (mHdmiClientLock) {
-            if (mHdmiTvClient != null && mHdmiSystemAudioSupported) {
+            if ((mHdmiTvClient != null && mHdmiSystemAudioSupported && mHdmiCecVolumeControlEnabled)
+                    || (mHdmiPlaybackClient != null && mHdmiCecVolumeControlEnabled)) {
                 flags &= ~AudioManager.FLAG_SHOW_UI;
             }
         }
         return flags;
     }
-
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
         mVolumeController.postMasterMuteChanged(updateFlagsForTvPlatform(flags));
@@ -7141,9 +7148,21 @@ public class AudioService extends IAudioService.Stub
         }
     };
 
+    private class MyHdmiCecVolumeControlFeatureListener
+            implements HdmiControlManager.HdmiCecVolumeControlFeatureListener {
+        public void onHdmiCecVolumeControlFeature(boolean enabled) {
+            synchronized (mHdmiClientLock) {
+                if (mHdmiManager == null) return;
+                mHdmiCecVolumeControlEnabled = enabled;
+            }
+        }
+    };
+
     private final Object mHdmiClientLock = new Object();
 
     // If HDMI-CEC system audio is supported
+    // Note that for CEC volume commands mHdmiCecVolumeControlEnabled will play a role on volume
+    // commands
     private boolean mHdmiSystemAudioSupported = false;
     // Set only when device is tv.
     @GuardedBy("mHdmiClientLock")
@@ -7161,9 +7180,15 @@ public class AudioService extends IAudioService.Stub
     // Set only when device is an audio system.
     @GuardedBy("mHdmiClientLock")
     private HdmiAudioSystemClient mHdmiAudioSystemClient;
+    // True when volume control over HDMI CEC is used when CEC is enabled (meaningless otherwise)
+    @GuardedBy("mHdmiClientLock")
+    private boolean mHdmiCecVolumeControlEnabled;
 
     private MyHdmiControlStatusChangeListenerCallback mHdmiControlStatusChangeListenerCallback =
             new MyHdmiControlStatusChangeListenerCallback();
+
+    private MyHdmiCecVolumeControlFeatureListener mMyHdmiCecVolumeControlFeatureListener =
+            new MyHdmiCecVolumeControlFeatureListener();
 
     @Override
     public int setHdmiSystemAudioSupported(boolean on) {
@@ -7403,6 +7428,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
         pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);
         pw.print("  mHdmiSystemAudioSupported="); pw.println(mHdmiSystemAudioSupported);
+        pw.print("  mHdmiCecVolumeControlEnabled="); pw.println(mHdmiCecVolumeControlEnabled);
         pw.print("  mIsCallScreeningModeSupported="); pw.println(mIsCallScreeningModeSupported);
         pw.print("  mic mute FromSwitch=" + mMicMuteFromSwitch
                         + " FromRestrictions=" + mMicMuteFromRestrictions
