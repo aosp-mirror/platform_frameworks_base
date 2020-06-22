@@ -1067,7 +1067,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testApplyTopFixedRotationTransform() {
-        mWm.mIsFixedRotationTransformEnabled = true;
         final DisplayPolicy displayPolicy = mDisplayContent.getDisplayPolicy();
         // Only non-movable (gesture) navigation bar will be animated by fixed rotation animation.
         doReturn(false).when(displayPolicy).navigationBarCanMove();
@@ -1183,7 +1182,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testNoFixedRotationWithPip() {
-        mWm.mIsFixedRotationTransformEnabled = true;
         // Make resume-top really update the activity state.
         doReturn(false).when(mWm.mAtmService).isBooting();
         doReturn(true).when(mWm.mAtmService).isBooted();
