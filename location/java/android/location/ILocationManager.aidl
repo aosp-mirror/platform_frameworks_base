@@ -76,6 +76,7 @@ interface ILocationManager
 
     void addGnssMeasurementsListener(in GnssRequest request, in IGnssMeasurementsListener listener, String packageName, String attributionTag);
     void removeGnssMeasurementsListener(in IGnssMeasurementsListener listener);
+    void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections);
 
     void addGnssAntennaInfoListener(in IGnssAntennaInfoListener listener, String packageName, String attributionTag);
     void removeGnssAntennaInfoListener(in IGnssAntennaInfoListener listener);
@@ -83,13 +84,11 @@ interface ILocationManager
     void addGnssNavigationMessageListener(in IGnssNavigationMessageListener listener, String packageName, String attributionTag);
     void removeGnssNavigationMessageListener(in IGnssNavigationMessageListener listener);
 
-    void injectGnssMeasurementCorrections(in GnssMeasurementCorrections corrections, String packageName);
-
-    int getGnssBatchSize(String packageName);
+    int getGnssBatchSize();
     void setGnssBatchingCallback(in IBatchedLocationCallback callback, String packageName, String attributionTag);
     void removeGnssBatchingCallback();
     void startGnssBatch(long periodNanos, boolean wakeOnFifoFull, String packageName, String attributionTag);
-    void flushGnssBatch(String packageName);
+    void flushGnssBatch();
     void stopGnssBatch();
     void injectLocation(in Location location);
 

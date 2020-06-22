@@ -31,7 +31,7 @@ import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
 
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
-import android.Manifest;
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -1431,8 +1431,8 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public int getGnssBatchSize(String packageName) {
-        return mGnssManagerService == null ? 0 : mGnssManagerService.getGnssBatchSize(packageName);
+    public int getGnssBatchSize() {
+        return mGnssManagerService == null ? 0 : mGnssManagerService.getGnssBatchSize();
     }
 
     @Override
@@ -1460,9 +1460,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void flushGnssBatch(String packageName) {
+    public void flushGnssBatch() {
         if (mGnssManagerService != null) {
-            mGnssManagerService.flushGnssBatch(packageName);
+            mGnssManagerService.flushGnssBatch();
         }
     }
 
@@ -1950,19 +1950,19 @@ public class LocationManagerService extends ILocationManager.Stub {
         WorkSource workSource = request.getWorkSource();
         if (workSource != null && !workSource.isEmpty()) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.UPDATE_DEVICE_STATS, null);
+                    permission.UPDATE_DEVICE_STATS, null);
         }
         boolean hideFromAppOps = request.getHideFromAppOps();
         if (hideFromAppOps) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.UPDATE_APP_OPS_STATS, null);
+                    permission.UPDATE_APP_OPS_STATS, null);
         }
         if (request.isLocationSettingsIgnored()) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.WRITE_SECURE_SETTINGS, null);
+                    permission.WRITE_SECURE_SETTINGS, null);
         }
         boolean callerHasLocationHardwarePermission =
-                mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
+                mContext.checkCallingPermission(permission.LOCATION_HARDWARE)
                         == PERMISSION_GRANTED;
         LocationRequest sanitizedRequest = createSanitizedRequest(request,
                 callerHasLocationHardwarePermission,
@@ -1996,19 +1996,19 @@ public class LocationManagerService extends ILocationManager.Stub {
         WorkSource workSource = request.getWorkSource();
         if (workSource != null && !workSource.isEmpty()) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.UPDATE_DEVICE_STATS, null);
+                    permission.UPDATE_DEVICE_STATS, null);
         }
         boolean hideFromAppOps = request.getHideFromAppOps();
         if (hideFromAppOps) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.UPDATE_APP_OPS_STATS, null);
+                    permission.UPDATE_APP_OPS_STATS, null);
         }
         if (request.isLocationSettingsIgnored()) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.WRITE_SECURE_SETTINGS, null);
+                    permission.WRITE_SECURE_SETTINGS, null);
         }
         boolean callerHasLocationHardwarePermission =
-                mContext.checkCallingPermission(android.Manifest.permission.LOCATION_HARDWARE)
+                mContext.checkCallingPermission(permission.LOCATION_HARDWARE)
                         == PERMISSION_GRANTED;
         LocationRequest sanitizedRequest = createSanitizedRequest(request,
                 callerHasLocationHardwarePermission,
@@ -2221,7 +2221,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void injectLocation(Location location) {
-        mContext.enforceCallingPermission(android.Manifest.permission.LOCATION_HARDWARE, null);
+        mContext.enforceCallingPermission(permission.LOCATION_HARDWARE, null);
         mContext.enforceCallingPermission(ACCESS_FINE_LOCATION, null);
 
         Preconditions.checkArgument(location.isComplete());
@@ -2279,11 +2279,9 @@ public class LocationManagerService extends ILocationManager.Stub {
     }
 
     @Override
-    public void injectGnssMeasurementCorrections(
-            GnssMeasurementCorrections measurementCorrections, String packageName) {
+    public void injectGnssMeasurementCorrections(GnssMeasurementCorrections corrections) {
         if (mGnssManagerService != null) {
-            mGnssManagerService.injectGnssMeasurementCorrections(measurementCorrections,
-                    packageName);
+            mGnssManagerService.injectGnssMeasurementCorrections(corrections);
         }
     }
 
@@ -2329,7 +2327,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     public boolean sendExtraCommand(String provider, String command, Bundle extras) {
         LocationPermissions.enforceCallingOrSelfLocationPermission(mContext, PERMISSION_COARSE);
         mContext.enforceCallingOrSelfPermission(
-                Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS, null);
+                permission.ACCESS_LOCATION_EXTRA_COMMANDS, null);
 
         LocationProviderManager manager = getLocationProviderManager(
                 Objects.requireNonNull(provider));
@@ -2362,7 +2360,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public boolean isProviderPackage(String provider, String packageName) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG, null);
+        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
 
         for (LocationProviderManager manager : mProviderManagers) {
             if (provider != null && !provider.equals(manager.getName())) {
@@ -2382,7 +2380,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public List<String> getProviderPackages(String provider) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG, null);
+        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {
@@ -2399,8 +2397,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void setExtraLocationControllerPackage(String packageName) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                Manifest.permission.LOCATION_HARDWARE + " permission required");
+        mContext.enforceCallingPermission(permission.LOCATION_HARDWARE,
+                permission.LOCATION_HARDWARE + " permission required");
         synchronized (mLock) {
             mExtraLocationControllerPackage = packageName;
         }
@@ -2415,8 +2413,8 @@ public class LocationManagerService extends ILocationManager.Stub {
 
     @Override
     public void setExtraLocationControllerPackageEnabled(boolean enabled) {
-        mContext.enforceCallingPermission(Manifest.permission.LOCATION_HARDWARE,
-                Manifest.permission.LOCATION_HARDWARE + " permission required");
+        mContext.enforceCallingPermission(permission.LOCATION_HARDWARE,
+                permission.LOCATION_HARDWARE + " permission required");
         synchronized (mLock) {
             mExtraLocationControllerPackageEnabled = enabled;
         }
@@ -2435,7 +2433,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         userId = ActivityManager.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
                 userId, false, false, "setLocationEnabledForUser", null);
 
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.WRITE_SECURE_SETTINGS, null);
+        mContext.enforceCallingOrSelfPermission(permission.WRITE_SECURE_SETTINGS, null);
 
         LocationManager.invalidateLocalLocationEnabledCaches();
         mSettingsHelper.setLocationEnabled(enabled, userId);
@@ -2722,7 +2720,7 @@ public class LocationManagerService extends ILocationManager.Stub {
     @Override
     @NonNull
     public List<LocationRequest> getTestProviderCurrentRequests(String provider) {
-        mContext.enforceCallingOrSelfPermission(Manifest.permission.READ_DEVICE_CONFIG, null);
+        mContext.enforceCallingOrSelfPermission(permission.READ_DEVICE_CONFIG, null);
 
         LocationProviderManager manager = getLocationProviderManager(provider);
         if (manager == null) {

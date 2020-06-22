@@ -32,13 +32,14 @@ import java.util.Objects;
 public abstract class RemovableListenerRegistration<TRequest, TListener> extends
         ListenerRegistration<TRequest, TListener> {
 
-    private static final String TAG = "RemovableRegistration";
+    protected final String mTag;
 
     private volatile @Nullable Object mKey;
 
-    protected RemovableListenerRegistration(@Nullable TRequest request,
+    protected RemovableListenerRegistration(String tag, @Nullable TRequest request,
             CallerIdentity callerIdentity, TListener listener) {
         super(request, callerIdentity, listener);
+        mTag = tag;
     }
 
     /**
@@ -49,14 +50,19 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
     protected abstract ListenerMultiplexer<?, TRequest, TListener, ?, ?> getOwner();
 
     /**
-     * Removes this registration. If called before {@link #onRegister(Object)} or after
-     * {@link #onUnregister()}, then this will have no effect.
+     * Returns the key associated with this registration. May not be invoked before
+     * {@link #onRegister(Object)} or after {@link #onUnregister()}.
+     */
+    protected final Object getKey() {
+        return Objects.requireNonNull(mKey);
+    }
+
+    /**
+     * Removes this registration. May not be invoked before {@link #onRegister(Object)} or after
+     * {@link #onUnregister()}.
      */
     public final void remove() {
-        Object key = mKey;
-        if (key != null) {
-            getOwner().removeRegistration(key, this);
-        }
+        getOwner().removeRegistration(Objects.requireNonNull(mKey), this);
     }
 
     @Override
@@ -64,8 +70,9 @@ public abstract class RemovableListenerRegistration<TRequest, TListener> extends
         if (e instanceof RuntimeException) {
             throw (RuntimeException) e;
         } else {
-            Log.w(TAG, "registration " + this + " (" + mKey + "/" + getIdentity()
-                    + ") removed due to unexpected exception", e);
+            Log.w(mTag,
+                    "registration " + getIdentity() + " removed due to unexpected exception",
+                    e);
             remove();
         }
     }

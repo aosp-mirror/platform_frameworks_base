@@ -25,6 +25,7 @@ import android.os.WorkSource;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.HexDump;
 
 import java.util.Objects;
 
@@ -170,7 +171,7 @@ public final class CallerIdentity {
         }
 
         StringBuilder builder = new StringBuilder(length);
-        builder.append(mPid).append("/").append(mPackageName);
+        builder.append(mUid).append("/").append(mPackageName);
         if (mAttributionTag != null) {
             builder.append("[");
             if (mAttributionTag.startsWith(mPackageName)) {
@@ -179,6 +180,9 @@ public final class CallerIdentity {
                 builder.append(mAttributionTag);
             }
             builder.append("]");
+        }
+        if (mListenerId != null) {
+            builder.append("/").append(HexDump.toHexString(mListenerId.hashCode()));
         }
         return builder.toString();
     }
@@ -192,10 +196,11 @@ public final class CallerIdentity {
             return false;
         }
         CallerIdentity that = (CallerIdentity) o;
-        return getUid() == that.getUid()
+        return mUid == that.mUid
                 && mPid == that.mPid
                 && mPackageName.equals(that.mPackageName)
-                && Objects.equals(mAttributionTag, that.mAttributionTag);
+                && Objects.equals(mAttributionTag, that.mAttributionTag)
+                && Objects.equals(mListenerId, that.mListenerId);
     }
 
     @Override

@@ -21,10 +21,10 @@ import android.annotation.Nullable;
 import android.os.Binder;
 import android.os.Build;
 import android.util.ArrayMap;
+import android.util.IndentingPrintWriter;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.server.location.listeners.ListenerRegistration.ListenerOperation;
 
@@ -40,7 +40,7 @@ import java.util.function.Predicate;
  * A base class to multiplex client listener registrations within system server. Registrations are
  * divided into two categories, active registrations and inactive registrations, as defined by
  * {@link #isActive(ListenerRegistration)}. If a registration's active state changes,
- * {@link #updateRegistrations(Function)} or {@link #updateRegistration(Object, Function)} must be
+ * {@link #updateRegistrations(Predicate)} or {@link #updateRegistration(Object, Predicate)} must be
  * invoked and return true for any registration whose active state may have changed.
  *
  * Callbacks invoked for various changes will always be ordered according to this lifecycle list:
@@ -126,7 +126,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
      * Defines whether a registration is currently active or not. Only active registrations will be
      * considered within {@link #mergeRequests(Collection)} to calculate the merged request, and
      * listener invocations will only be delivered to active requests. If a registration's active
-     * state changes, {@link #updateRegistrations(Function)} must be invoked with a function that
+     * state changes, {@link #updateRegistrations(Predicate)} must be invoked with a function that
      * returns true for any registrations that may have changed their active state.
      */
     protected abstract boolean isActive(@NonNull TRegistration registration);
@@ -402,13 +402,12 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     }
 
     /**
-     * Performs some function on all registrations. The function should return true if the active
+     * Evaluates the predicate on all registrations. The predicate should return true if the active
      * state of the registration may have changed as a result. Any {@link #updateService()}
      * invocations made while this method is executing will be deferred until after the method is
      * complete so as to avoid redundant work.
      */
-    protected final void updateRegistrations(
-            @NonNull Function<TRegistration, Boolean> function) {
+    protected final void updateRegistrations(@NonNull Predicate<TRegistration> predicate) {
         synchronized (mRegistrations) {
             // since updating a registration can invoke a variety of callbacks, we need to ensure
             // those callbacks themselves do not re-enter, as this could lead to out-of-order
@@ -421,7 +420,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
                 for (int i = 0; i < mRegistrations.size(); i++) {
                     TRegistration registration = mRegistrations.valueAt(i);
-                    if (function.apply(registration)) {
+                    if (predicate.test(registration)) {
                         onRegistrationActiveChanged(registration);
                     }
                 }
@@ -432,13 +431,12 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     }
 
     /**
-     * Performs some function on the registration with the given key. The function should return
+     * Evaluates the predicate on the registration with the given key. The predicate should return
      * true if the active state of the registration may have changed as a result. Any
      * {@link #updateService()} invocations made while this method is executing will be deferred
      * until after the method is complete so as to avoid redundant work.
      */
-    protected final void updateRegistration(TKey key,
-            @NonNull Function<TRegistration, Boolean> function) {
+    protected final void updateRegistration(TKey key, @NonNull Predicate<TRegistration> predicate) {
         synchronized (mRegistrations) {
             // since updating a registration can invoke a variety of callbacks, we need to ensure
             // those callbacks themselves do not re-enter, as this could lead to out-of-order
@@ -450,7 +448,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
                  ReentrancyGuard ignored2 = mReentrancyGuard.acquire()) {
 
                 TRegistration registration = mRegistrations.get(key);
-                if (registration != null && function.apply(registration)) {
+                if (registration != null && predicate.test(registration)) {
                     onRegistrationActiveChanged(registration);
                 }
             } finally {
@@ -489,7 +487,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
 
     /**
      * Executes the given function for all active registrations. If the function returns a non-null
-     * consumer, that consumer will be invoked with the associated listener. The function may not
+     * operation, that operation will be invoked with the associated listener. The function may not
      * change the active state of the registration.
      */
     protected final void deliverToListeners(
@@ -547,9 +545,7 @@ public abstract class ListenerMultiplexer<TKey, TRequest, TListener,
     /**
      * Dumps debug information.
      */
-    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-        IndentingPrintWriter ipw = new IndentingPrintWriter(pw, "  ");
-
+    public void dump(FileDescriptor fd, IndentingPrintWriter ipw, String[] args) {
         synchronized (mRegistrations) {
             ipw.print("service: ");
             dumpServiceState(ipw);

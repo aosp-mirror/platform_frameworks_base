@@ -126,6 +126,9 @@ public final class ProviderRequest implements Parcelable {
             if (locationSettingsIgnored) {
                 s.append(", locationSettingsIgnored");
             }
+            if (!workSource.isEmpty()) {
+                s.append(", ").append(workSource);
+            }
         } else {
             s.append("OFF");
         }

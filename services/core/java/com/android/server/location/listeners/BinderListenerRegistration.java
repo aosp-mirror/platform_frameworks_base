@@ -21,6 +21,7 @@ import android.location.util.identity.CallerIdentity;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Log;
 
 /**
  * A registration that works with IBinder keys, and registers a DeathListener to automatically
@@ -43,9 +44,9 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
         IBinder getBinder();
     }
 
-    protected BinderListenerRegistration(@Nullable TRequest request, CallerIdentity callerIdentity,
-            TListener listener) {
-        super(request, callerIdentity, listener);
+    protected BinderListenerRegistration(String tag, @Nullable TRequest request,
+            CallerIdentity callerIdentity, TListener listener) {
+        super(tag, request, callerIdentity, listener);
     }
 
     /**
@@ -85,7 +86,16 @@ public abstract class BinderListenerRegistration<TRequest, TListener> extends
 
     @Override
     public void binderDied() {
-        remove();
+        try {
+            if (Log.isLoggable(mTag, Log.DEBUG)) {
+                Log.d(mTag, "binder registration " + getIdentity() + " died");
+            }
+            remove();
+        } catch (RuntimeException e) {
+            // the caller may swallow runtime exceptions, so we rethrow as assertion errors to
+            // ensure the crash is seen
+            throw new AssertionError(e);
+        }
     }
 
     private IBinder getBinderFromKey(Object key) {
