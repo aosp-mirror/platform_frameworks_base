@@ -381,7 +381,7 @@ public class BrightLineFalsingManager implements FalsingManager {
 
 
     @Override
-    public void onNotificatonStopDismissing() {
+    public void onNotificationStopDismissing() {
     }
 
     @Override
@@ -389,7 +389,7 @@ public class BrightLineFalsingManager implements FalsingManager {
     }
 
     @Override
-    public void onNotificatonStartDismissing() {
+    public void onNotificationStartDismissing() {
         updateInteractionType(Classifier.NOTIFICATION_DISMISS);
     }
 
