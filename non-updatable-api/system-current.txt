@@ -11649,6 +11649,7 @@ package android.webkit {
     method public void super_computeScroll();
     method public boolean super_dispatchKeyEvent(android.view.KeyEvent);
     method public int super_getScrollBarStyle();
+    method @Nullable public android.view.WindowInsets super_onApplyWindowInsets(@Nullable android.view.WindowInsets);
     method public void super_onDrawVerticalScrollBar(android.graphics.Canvas, android.graphics.drawable.Drawable, int, int, int, int);
     method public boolean super_onGenericMotionEvent(android.view.MotionEvent);
     method public boolean super_onHoverEvent(android.view.MotionEvent);
@@ -11851,6 +11852,7 @@ package android.webkit {
     method public android.os.Handler getHandler(android.os.Handler);
     method public default boolean isVisibleToUserForAutofill(int);
     method public void onActivityResult(int, int, android.content.Intent);
+    method @Nullable public default android.view.WindowInsets onApplyWindowInsets(@Nullable android.view.WindowInsets);
     method public void onAttachedToWindow();
     method public default boolean onCheckIsTextEditor();
     method public void onConfigurationChanged(android.content.res.Configuration);
