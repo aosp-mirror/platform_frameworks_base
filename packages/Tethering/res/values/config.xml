@@ -43,6 +43,13 @@
     </string-array>
 
     <!-- List of regexpressions describing the interface (if any) that represent tetherable
+         WiGig interfaces.  If the device doesn't want to support tethering over WiGig this
+         should be empty.  An example would be "wigig\\d" -->
+    <string-array translatable="false" name="config_tether_wigig_regexs">
+        <item>"wigig\\d"</item>
+    </string-array>
+
+    <!-- List of regexpressions describing the interface (if any) that represent tetherable
          Wifi P2P interfaces.  If the device doesn't want to support tethering over Wifi P2p this
          should be empty.  An example would be "p2p-p2p.*" -->
     <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
