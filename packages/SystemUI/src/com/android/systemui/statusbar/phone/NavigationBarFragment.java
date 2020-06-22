@@ -221,7 +221,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
      */
     private VerticalNavigationHandle mOrientationHandle;
     private WindowManager.LayoutParams mOrientationParams;
-    private int mStartingQuickSwitchRotation;
+    private int mStartingQuickSwitchRotation = -1;
     private int mCurrentRotation;
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
     private UiEventLogger mUiEventLogger;
