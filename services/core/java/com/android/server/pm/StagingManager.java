@@ -968,18 +968,18 @@ public class StagingManager {
                     // name and the session we are checking is not a parent session either.
                     continue;
                 }
-
-                // From here on, stagedSession is a non-parent active staged session
-
                 // Check if stagedSession has an active parent session or not
                 if (stagedSession.hasParentSessionId()) {
                     int parentId = stagedSession.getParentSessionId();
                     PackageInstallerSession parentSession = mStagedSessions.get(parentId);
-                    if (parentSession == null || parentSession.isStagedAndInTerminalState()) {
+                    if (parentSession == null || parentSession.isStagedAndInTerminalState()
+                            || parentSession.isDestroyed()) {
                         // Parent session has been abandoned or terminated already
                         continue;
                     }
                 }
+
+                // From here on, stagedSession is a non-parent active staged session
 
                 // Check if session is one of the active sessions
                 if (session.sessionId == stagedSession.sessionId) {
