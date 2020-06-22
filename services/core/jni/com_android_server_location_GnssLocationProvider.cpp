@@ -3109,9 +3109,7 @@ static jboolean android_location_GnssMeasurementsProvider_start_measurement_coll
         result = gnssMeasurementIface_V1_1->setCallback_1_1(cbIface, enableFullTracking);
     } else {
         if (enableFullTracking == JNI_TRUE) {
-            // full tracking mode not supported in 1.0 HAL
-            result.assertOk(); // isOk() must be called before result destructor is invoked.
-            return JNI_FALSE;
+            ALOGW("Full tracking mode not supported in 1.0 GNSS HAL.");
         }
         result = gnssMeasurementIface->setCallback(cbIface);
     }
