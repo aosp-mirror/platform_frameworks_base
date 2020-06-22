@@ -1407,14 +1407,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 // start
                 translationY = height - appearStartPosition + getExpandTranslationStart();
             }
+            stackHeight = (int) (height - translationY);
             if (isHeadsUpTransition()) {
-                stackHeight =
-                        getFirstVisibleSection().getFirstVisibleChild().getPinnedHeadsUpHeight();
                 translationY = MathUtils.lerp(mHeadsUpInset - mTopPadding, 0, appearFraction);
-            } else {
-                stackHeight = (int) (height - translationY);
             }
         }
+        mAmbientState.setAppearFraction(appearFraction);
         if (stackHeight != mCurrentStackHeight) {
             mCurrentStackHeight = stackHeight;
             updateAlgorithmHeightAndPadding();
@@ -1532,17 +1530,18 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getAppearEndPosition() {
-        int appearPosition;
-        int notGoneChildCount = getNotGoneChildCount();
-        if (mEmptyShadeView.getVisibility() == GONE && notGoneChildCount != 0) {
+        int appearPosition = 0;
+        int visibleNotifCount = getVisibleNotificationCount();
+        if (mEmptyShadeView.getVisibility() == GONE && visibleNotifCount > 0) {
             if (isHeadsUpTransition()
                     || (mHeadsUpManager.hasPinnedHeadsUp() && !mAmbientState.isDozing())) {
-                appearPosition = getTopHeadsUpPinnedHeight();
-            } else {
-                appearPosition = 0;
-                if (notGoneChildCount >= 1 && mShelf.getVisibility() != GONE) {
-                    appearPosition += mShelf.getIntrinsicHeight();
+                if (mShelf.getVisibility() != GONE && visibleNotifCount > 1) {
+                    appearPosition += mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
                 }
+                appearPosition += getTopHeadsUpPinnedHeight()
+                        + getPositionInLinearLayout(mAmbientState.getTrackedHeadsUpRow());
+            } else if (mShelf.getVisibility() != GONE) {
+                appearPosition += mShelf.getIntrinsicHeight();
             }
         } else {
             appearPosition = mEmptyShadeView.getHeight();
@@ -1552,9 +1551,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean isHeadsUpTransition() {
-        NotificationSection firstVisibleSection = getFirstVisibleSection();
-        return mTrackingHeadsUp && firstVisibleSection != null
-                && firstVisibleSection.getFirstVisibleChild().isAboveShelf();
+        return mAmbientState.getTrackedHeadsUpRow() != null;
     }
 
     /**
@@ -2962,7 +2959,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public int getLayoutMinHeight() {
         if (isHeadsUpTransition()) {
-            return getTopHeadsUpPinnedHeight();
+            ExpandableNotificationRow trackedHeadsUpRow = mAmbientState.getTrackedHeadsUpRow();
+            if (trackedHeadsUpRow.isAboveShelf()) {
+                int hunDistance = (int) MathUtils.lerp(
+                        0,
+                        getPositionInLinearLayout(trackedHeadsUpRow),
+                        mAmbientState.getAppearFraction());
+                return getTopHeadsUpPinnedHeight() + hunDistance;
+            } else {
+                return getTopHeadsUpPinnedHeight();
+            }
         }
         return mShelf.getVisibility() == GONE ? 0 : mShelf.getIntrinsicHeight();
     }
@@ -5284,6 +5290,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setTrackingHeadsUp(ExpandableNotificationRow row) {
+        mAmbientState.setTrackedHeadsUpRow(row);
         mTrackingHeadsUp = row != null;
         mRoundnessManager.setTrackingHeadsUp(row);
     }
