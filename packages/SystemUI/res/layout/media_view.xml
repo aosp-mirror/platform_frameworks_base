@@ -115,7 +115,7 @@
             android:id="@+id/media_seamless_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="@*android:string/config_bodyFontFamily"
+            android:fontFamily="@*android:string/config_headlineFontFamily"
             android:singleLine="true"
             android:text="@*android:string/ext_media_seamless_action"
             android:textColor="@color/media_primary_text"
@@ -161,6 +161,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:singleLine="true"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
         android:textSize="14sp" />
 
     <!-- Song name -->
@@ -178,7 +179,7 @@
         android:id="@+id/header_artist"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="@*android:string/config_bodyFontFamily"
+        android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
         android:textColor="@color/media_secondary_text"
         android:textSize="14sp" />
@@ -186,8 +187,8 @@
     <com.android.internal.widget.CachingIconView
         android:id="@+id/icon"
         android:tint="@color/media_primary_text"
-        android:layout_width="16dp"
-        android:layout_height="16dp" />
+        android:layout_width="20dp"
+        android:layout_height="20dp" />
 
     <!-- Buttons to remove this view when no longer needed -->
     <include
