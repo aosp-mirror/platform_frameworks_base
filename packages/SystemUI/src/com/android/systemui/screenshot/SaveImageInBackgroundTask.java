@@ -281,11 +281,13 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 Intent.createChooser(sharingIntent, null, chooserAction.getIntentSender())
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
                         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, requestCode,
+                sharingChooserIntent, 0, null, UserHandle.CURRENT);
 
         // Create a share action for the notification
         PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                 new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
-                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, sharingChooserIntent)
+                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, pendingIntent)
                         .putExtra(GlobalScreenshot.EXTRA_DISALLOW_ENTER_PIP, true)
                         .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
                         .putExtra(GlobalScreenshot.EXTRA_SMART_ACTIONS_ENABLED,
@@ -320,14 +322,17 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
         editIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         editIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
+                editIntent, 0, null, UserHandle.CURRENT);
+
         // Make sure pending intents for the system user are still unique across users
         // by setting the (otherwise unused) request code to the current user id.
         int requestCode = mContext.getUserId();
 
         // Create a edit action
-        PendingIntent editAction = PendingIntent.getBroadcast(context, requestCode,
+        PendingIntent editAction = PendingIntent.getBroadcastAsUser(context, requestCode,
                 new Intent(context, GlobalScreenshot.ActionProxyReceiver.class)
-                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, editIntent)
+                        .putExtra(GlobalScreenshot.EXTRA_ACTION_INTENT, pendingIntent)
                         .putExtra(GlobalScreenshot.EXTRA_CANCEL_NOTIFICATION,
                                 editIntent.getComponent() != null)
                         .putExtra(GlobalScreenshot.EXTRA_ID, mScreenshotId)
@@ -335,7 +340,7 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                                 mSmartActionsEnabled)
                         .setAction(Intent.ACTION_EDIT)
                         .addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
-                PendingIntent.FLAG_CANCEL_CURRENT);
+                PendingIntent.FLAG_CANCEL_CURRENT, UserHandle.SYSTEM);
         Notification.Action.Builder editActionBuilder = new Notification.Action.Builder(
                 Icon.createWithResource(r, R.drawable.ic_screenshot_edit),
                 r.getString(com.android.internal.R.string.screenshot_edit), editAction);
