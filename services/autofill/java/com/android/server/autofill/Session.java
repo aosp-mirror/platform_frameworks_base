@@ -2979,8 +2979,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 inlineSuggestionsRequest.get(), response, focusedId, filterText,
                 /*uiCallback*/this, /*onErrorCallback*/ () -> {
                     synchronized (mLock) {
-                        mInlineSessionController.hideInlineSuggestionsUiLocked(
-                                focusedId);
+                        mInlineSessionController.setInlineFillUiLocked(
+                                InlineFillUi.emptyUi(focusedId));
                     }
                 }, remoteRenderService);
         return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
@@ -3284,6 +3284,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 /*onErrorCallback=*/ () -> {
                                     synchronized (mLock) {
                                         cancelAugmentedAutofillLocked();
+
+                                        // Also cancel augmented in IME
+                                        mInlineSessionController.setInlineFillUiLocked(
+                                                InlineFillUi.emptyUi(mCurrentViewId));
                                     }
                                 }, mService.getRemoteInlineSuggestionRenderServiceLocked());
                     }
