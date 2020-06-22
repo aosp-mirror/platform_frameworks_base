@@ -458,6 +458,12 @@ class StorageManagerService extends IStorageManager.Stub
             "(?i)(^/storage/[^/]+/(?:([0-9]+)/)?Android/(?:data|media|obb|sandbox)/)([^/]+)(/.*)?");
 
 
+    /** Automotive device unlockes users before system boot complete and this requires special
+     * handling as vold reset can lead into race conditions. When this is set, all users unlocked
+     * in {@code UserManager} level are unlocked after vold reset.
+     */
+    private final boolean mIsAutomotive;
+
     private VolumeInfo findVolumeByIdOrThrow(String id) {
         synchronized (mLock) {
             final VolumeInfo vol = mVolumes.get(id);
@@ -1082,14 +1088,12 @@ class StorageManagerService extends IStorageManager.Stub
         Slog.d(TAG, "Thinking about reset, mBootCompleted=" + mBootCompleted
                 + ", mDaemonConnected=" + mDaemonConnected);
         if (mBootCompleted && mDaemonConnected) {
-            final List<UserInfo> users = mContext.getSystemService(UserManager.class).getUsers();
+            final UserManager userManager = mContext.getSystemService(UserManager.class);
+            final List<UserInfo> users = userManager.getUsers();
 
             if (mIsFuseEnabled) {
                 mStorageSessionController.onReset(mVold, () -> {
-                    mHandler.removeMessages(H_RESET);
-                    mHandler.removeMessages(H_VOLUME_BROADCAST);
-                    mHandler.removeMessages(H_VOLUME_MOUNT);
-                    mHandler.removeMessages(H_VOLUME_UNMOUNT);
+                    mHandler.removeCallbacksAndMessages(null);
                 });
             } else {
                 killMediaProvider(users);
@@ -1097,7 +1101,9 @@ class StorageManagerService extends IStorageManager.Stub
 
             final int[] systemUnlockedUsers;
             synchronized (mLock) {
-                systemUnlockedUsers = mSystemUnlockedUsers;
+                // make copy as sorting can change order
+                systemUnlockedUsers = Arrays.copyOf(mSystemUnlockedUsers,
+                        mSystemUnlockedUsers.length);
 
                 mDisks.clear();
                 mVolumes.clear();
@@ -1119,11 +1125,37 @@ class StorageManagerService extends IStorageManager.Stub
                     mVold.onUserStarted(userId);
                     mStoraged.onUserStarted(userId);
                 }
+                if (mIsAutomotive) {
+                    restoreAllUnlockedUsers(userManager, users, systemUnlockedUsers);
+                }
                 mVold.onSecureKeyguardStateChanged(mSecureKeyguardShowing);
                 mStorageManagerInternal.onReset(mVold);
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
             }
+        }
+    }
+
+    private void restoreAllUnlockedUsers(UserManager userManager, List<UserInfo> allUsers,
+            int[] systemUnlockedUsers) throws Exception {
+        Arrays.sort(systemUnlockedUsers);
+        UserManager.invalidateIsUserUnlockedCache();
+        for (UserInfo user : allUsers) {
+            int userId = user.id;
+            if (!userManager.isUserRunning(userId)) {
+                continue;
+            }
+            if (Arrays.binarySearch(systemUnlockedUsers, userId) >= 0) {
+                continue;
+            }
+            boolean unlockingOrUnlocked = userManager.isUserUnlockingOrUnlocked(userId);
+            if (!unlockingOrUnlocked) {
+                continue;
+            }
+            Slog.w(TAG, "UNLOCK_USER lost from vold reset, will retry, user:" + userId);
+            mVold.onUserStarted(userId);
+            mStoraged.onUserStarted(userId);
+            mHandler.obtainMessage(H_COMPLETE_UNLOCK_USER, userId).sendToTarget();
         }
     }
 
@@ -1157,6 +1189,15 @@ class StorageManagerService extends IStorageManager.Stub
         // Record user as started so newly mounted volumes kick off events
         // correctly, then synthesize events for any already-mounted volumes.
         synchronized (mLock) {
+            if (mIsAutomotive) {
+                for (int unlockedUser : mSystemUnlockedUsers) {
+                    if (unlockedUser == userId) {
+                        // This can happen as restoreAllUnlockedUsers can double post the message.
+                        Log.i(TAG, "completeUnlockUser called for already unlocked user:" + userId);
+                        return;
+                    }
+                }
+            }
             for (int i = 0; i < mVolumes.size(); i++) {
                 final VolumeInfo vol = mVolumes.valueAt(i);
                 if (vol.isVisibleForRead(userId) && vol.isMountedReadable()) {
@@ -1822,6 +1863,9 @@ class StorageManagerService extends IStorageManager.Stub
         if (WATCHDOG_ENABLE) {
             Watchdog.getInstance().addMonitor(this);
         }
+
+        mIsAutomotive = context.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_AUTOMOTIVE);
     }
 
     /**
@@ -4477,6 +4521,7 @@ class StorageManagerService extends IStorageManager.Stub
             pw.println("Forced scoped storage app list: "
                     + DeviceConfig.getProperty(DeviceConfig.NAMESPACE_STORAGE_NATIVE_BOOT,
                     PROP_FORCED_SCOPED_STORAGE_WHITELIST));
+            pw.println("isAutomotive:" + mIsAutomotive);
         }
 
         synchronized (mObbMounts) {
