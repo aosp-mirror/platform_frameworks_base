@@ -2281,7 +2281,7 @@ class PackageManagerShellCommand extends ShellCommand {
         if (grant) {
             mPermissionManager.grantRuntimePermission(pkg, perm, translatedUserId);
         } else {
-            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUserId);
+            mPermissionManager.revokeRuntimePermission(pkg, perm, translatedUserId, null);
         }
         return 0;
     }
