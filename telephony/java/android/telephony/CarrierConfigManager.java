@@ -4191,8 +4191,8 @@ public class CarrierConfigManager {
                 "GPRS:24,24", "EDGE:70,18", "UMTS:115,115", "CDMA-IS95A:14,14", "CDMA-IS95B:14,14",
                 "1xRTT:30,30", "EvDo-rev.0:750,48", "EvDo-rev.A:950,550", "HSDPA:4300,620",
                 "HSUPA:4300,1800", "HSPA:4300,1800", "EvDo-rev.B:1500,550", "eHRPD:750,48",
-                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,15000",
-                "NR_NSA_MMWAVE:145000,15000", "NR_SA:145000,15000"});
+                "HSPAP:13000,3400", "TD-SCDMA:115,115", "LTE:30000,15000", "NR_NSA:47000,18000",
+                "NR_NSA_MMWAVE:145000,60000", "NR_SA:145000,60000"});
         sDefaults.putBoolean(KEY_BANDWIDTH_NR_NSA_USE_LTE_VALUE_FOR_UPSTREAM_BOOL, false);
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "rssi");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
