@@ -57,6 +57,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 
@@ -64,7 +65,9 @@ import java.util.stream.Collectors;
  * Encapsulate the management of DNS settings for networks.
  *
  * This class it NOT designed for concurrent access. Furthermore, all non-static
- * methods MUST be called from ConnectivityService's thread.
+ * methods MUST be called from ConnectivityService's thread. However, an exceptional
+ * case is getPrivateDnsConfig(Network) which is exclusively for
+ * ConnectivityService#dumpNetworkDiagnostics() on a random binder thread.
  *
  * [ Private DNS ]
  * The code handling Private DNS is spread across several components, but this
@@ -236,8 +239,8 @@ public class DnsManager {
     private final ContentResolver mContentResolver;
     private final IDnsResolver mDnsResolver;
     private final MockableSystemProperties mSystemProperties;
-    // TODO: Replace these Maps with SparseArrays.
-    private final Map<Integer, PrivateDnsConfig> mPrivateDnsMap;
+    private final ConcurrentHashMap<Integer, PrivateDnsConfig> mPrivateDnsMap;
+    // TODO: Replace the Map with SparseArrays.
     private final Map<Integer, PrivateDnsValidationStatuses> mPrivateDnsValidationMap;
     private final Map<Integer, LinkProperties> mLinkPropertiesMap;
     private final Map<Integer, int[]> mTransportsMap;
@@ -247,15 +250,13 @@ public class DnsManager {
     private int mSuccessThreshold;
     private int mMinSamples;
     private int mMaxSamples;
-    private String mPrivateDnsMode;
-    private String mPrivateDnsSpecifier;
 
     public DnsManager(Context ctx, IDnsResolver dnsResolver, MockableSystemProperties sp) {
         mContext = ctx;
         mContentResolver = mContext.getContentResolver();
         mDnsResolver = dnsResolver;
         mSystemProperties = sp;
-        mPrivateDnsMap = new HashMap<>();
+        mPrivateDnsMap = new ConcurrentHashMap<>();
         mPrivateDnsValidationMap = new HashMap<>();
         mLinkPropertiesMap = new HashMap<>();
         mTransportsMap = new HashMap<>();
@@ -273,6 +274,12 @@ public class DnsManager {
         mPrivateDnsValidationMap.remove(network.netId);
         mTransportsMap.remove(network.netId);
         mLinkPropertiesMap.remove(network.netId);
+    }
+
+    // This is exclusively called by ConnectivityService#dumpNetworkDiagnostics() which
+    // is not on the ConnectivityService handler thread.
+    public PrivateDnsConfig getPrivateDnsConfig(@NonNull Network network) {
+        return mPrivateDnsMap.getOrDefault(network.netId, PRIVATE_DNS_OFF);
     }
 
     public PrivateDnsConfig updatePrivateDns(Network network, PrivateDnsConfig cfg) {
