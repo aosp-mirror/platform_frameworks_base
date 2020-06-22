@@ -74,6 +74,7 @@ java_sdk_library {
     visibility: [
         "//frameworks/base", // Framework
         "//frameworks/base/apex/statsd:__subpackages__", // statsd apex
+        "//frameworks/base/packages/Tethering", // Tethering
         "//frameworks/opt/net/wifi/service", // wifi service
         "//packages/providers/MediaProvider", // MediaProvider apk
     ],
