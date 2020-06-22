@@ -53,6 +53,7 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManagerFake;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.FeatureFlags;
@@ -133,6 +134,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private MetricsLogger mMetricsLogger;
     @Mock private NotificationRoundnessManager mNotificationRoundnessManager;
     @Mock private KeyguardBypassController mKeyguardBypassController;
+    @Mock private KeyguardMediaController mKeyguardMediaController;
     @Mock private ZenModeController mZenModeController;
     @Mock private NotificationSectionsManager mNotificationSectionsManager;
     @Mock private NotificationSection mNotificationSection;
@@ -209,6 +211,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                 mock(SysuiStatusBarStateController.class),
                 mHeadsUpManager,
                 mKeyguardBypassController,
+                mKeyguardMediaController,
                 new FalsingManagerFake(),
                 mLockscreenUserManager,
                 mock(NotificationGutsManager.class),
