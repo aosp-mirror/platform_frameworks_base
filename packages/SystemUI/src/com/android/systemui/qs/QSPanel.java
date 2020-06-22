@@ -160,7 +160,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mMediaHost = mediaHost;
-        mMediaHost.setVisibleChangedListener((visible) -> {
+        mMediaHost.addVisibilityChangeListener((visible) -> {
             onMediaVisibilityChanged(visible);
             return null;
         });
