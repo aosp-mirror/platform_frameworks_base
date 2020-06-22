@@ -416,6 +416,13 @@ public class WindowManagerService extends IWindowManager.Stub
     static boolean sEnableTripleBuffering = !SystemProperties.getBoolean(
             DISABLE_TRIPLE_BUFFERING_PROPERTY, false);
 
+    /**
+     * Allows a fullscreen windowing mode activity to launch in its desired orientation directly
+     * when the display has different orientation.
+     */
+    static final boolean ENABLE_FIXED_ROTATION_TRANSFORM =
+            SystemProperties.getBoolean("persist.wm.fixed_rotation_transform", true);
+
     // Enums for animation scale update types.
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({WINDOW_ANIMATION_SCALE, TRANSITION_ANIMATION_SCALE, ANIMATION_DURATION_SCALE})
@@ -431,10 +438,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /** System UI can create more window context... */
     private static final int SYSTEM_UI_MULTIPLIER = 2;
-
-    // TODO(b/143053092): Remove the settings if it becomes stable.
-    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
-    boolean mIsFixedRotationTransformEnabled;
 
     final WindowManagerConstants mConstants;
 
@@ -767,8 +770,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM);
         private final Uri mRenderShadowsInCompositorUri = Settings.Global.getUriFor(
                 DEVELOPMENT_RENDER_SHADOWS_IN_COMPOSITOR);
-        private final Uri mFixedRotationTransformUri = Settings.Global.getUriFor(
-                FIXED_ROTATION_TRANSFORM_SETTING_NAME);
 
         public SettingsObserver() {
             super(new Handler());
@@ -792,8 +793,6 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mSizeCompatFreeformUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mRenderShadowsInCompositorUri, false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(mFixedRotationTransformUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -838,11 +837,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (mFixedRotationTransformUri.equals(uri)) {
-                updateFixedRotationTransform();
-                return;
-            }
-
             @UpdateAnimationScaleMode
             final int mode;
             if (mWindowAnimationScaleUri.equals(uri)) {
@@ -862,7 +856,6 @@ public class WindowManagerService extends IWindowManager.Stub
         void loadSettings() {
             updateSystemUiSettings();
             updatePointerLocation();
-            updateFixedRotationTransform();
         }
 
         void updateSystemUiSettings() {
@@ -933,17 +926,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_ENABLE_SIZECOMPAT_FREEFORM, 0) != 0;
 
             mAtmService.mSizeCompatFreeform = sizeCompatFreeform;
-        }
-
-        void updateFixedRotationTransform() {
-            final int enabled = Settings.Global.getInt(mContext.getContentResolver(),
-                    FIXED_ROTATION_TRANSFORM_SETTING_NAME, 2);
-            if (enabled == 2) {
-                // Make sure who read the settings won't use inconsistent default value.
-                Settings.Global.putInt(mContext.getContentResolver(),
-                        FIXED_ROTATION_TRANSFORM_SETTING_NAME, 1);
-            }
-            mIsFixedRotationTransformEnabled = enabled != 0;
         }
     }
 
