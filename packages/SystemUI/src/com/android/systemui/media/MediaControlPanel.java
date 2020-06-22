@@ -20,13 +20,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.RippleDrawable;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -257,12 +254,6 @@ public class MediaControlPanel {
 
         ImageView iconView = mViewHolder.getSeamlessIcon();
         TextView deviceName = mViewHolder.getSeamlessText();
-
-        // Update the outline color
-        RippleDrawable bkgDrawable = (RippleDrawable) mViewHolder.getSeamless().getForeground();
-        GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
-        rect.setStroke(2, deviceName.getCurrentTextColor());
-        rect.setColor(Color.TRANSPARENT);
 
         final MediaDeviceData device = data.getDevice();
         final int seamlessId = mViewHolder.getSeamless().getId();
