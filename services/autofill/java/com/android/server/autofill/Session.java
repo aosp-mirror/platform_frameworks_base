@@ -1005,6 +1005,10 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 || disableDuration > 0) {
             // Response is "empty" from an UI point of view, need to notify client.
             notifyUnavailableToClient(sessionFinishedState, /* autofillableIds= */ null);
+            synchronized (mLock) {
+                mInlineSessionController.setInlineFillUiLocked(
+                        InlineFillUi.emptyUi(mCurrentViewId));
+            }
         }
 
         if (requestLog != null) {
@@ -3166,12 +3170,15 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             notifyUnavailableToClient(AutofillManager.STATE_FINISHED, autofillableIds);
             removeSelf();
         } else {
-            if (sVerbose) {
-                if ((flags & FLAG_PASSWORD_INPUT_TYPE) != 0) {
+            if ((flags & FLAG_PASSWORD_INPUT_TYPE) != 0) {
+                if (sVerbose) {
                     Slog.v(TAG, "keeping session " + id + " when service returned null and "
                             + "augmented service is disabled for password fields. "
                             + "AutofillableIds: " + autofillableIds);
-                } else {
+                }
+                mInlineSessionController.hideInlineSuggestionsUiLocked(mCurrentViewId);
+            } else {
+                if (sVerbose) {
                     Slog.v(TAG, "keeping session " + id + " when service returned null but "
                             + "it can be augmented. AutofillableIds: " + autofillableIds);
                 }
@@ -3197,7 +3204,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     // non-null response but without datasets (for example, just SaveInfo)
     @GuardedBy("mLock")
     private Runnable triggerAugmentedAutofillLocked(int flags) {
-        // (TODO: b/141703197) Fix later by passing info to service.
+        // TODO: (b/141703197) Fix later by passing info to service.
         if ((flags & FLAG_PASSWORD_INPUT_TYPE) != 0) {
             return null;
         }
@@ -3242,7 +3249,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         + ComponentName.flattenToShortString(mComponentName) + " not whitelisted ");
             }
             logAugmentedAutofillRequestLocked(mode, remoteService.getComponentName(),
-                    mCurrentViewId, isWhitelisted, /*isInline*/null);
+                    mCurrentViewId, isWhitelisted, /* isInline= */ null);
             return null;
         }
 
