@@ -1007,8 +1007,11 @@ public class ChooserActivity extends ResolverActivity implements
      * <p>If {@code listAdapter} is {@code null}, both profile list adapters are updated.
      */
     private void handlePackagesChanged(@Nullable ResolverListAdapter listAdapter) {
+        // Refresh pinned items
+        mPinnedSharedPrefs = getPinnedSharedPrefs(this);
         if (listAdapter == null) {
             mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
+            mChooserMultiProfilePagerAdapter.getInactiveListAdapter().handlePackagesChanged();
         } else {
             listAdapter.handlePackagesChanged();
         }
