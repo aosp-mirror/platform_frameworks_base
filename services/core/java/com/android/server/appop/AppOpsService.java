@@ -1724,12 +1724,12 @@ public class AppOpsService extends IAppOpsService.Stub {
                                 return Zygote.MOUNT_EXTERNAL_NONE;
                             }
                             if (noteOperation(AppOpsManager.OP_READ_EXTERNAL_STORAGE, uid,
-                                    packageName, null, true, "External storage policy")
+                                    packageName, null, true, "External storage policy", true)
                                     != AppOpsManager.MODE_ALLOWED) {
                                 return Zygote.MOUNT_EXTERNAL_NONE;
                             }
                             if (noteOperation(AppOpsManager.OP_WRITE_EXTERNAL_STORAGE, uid,
-                                    packageName, null, true, "External storage policy")
+                                    packageName, null, true, "External storage policy", true)
                                     != AppOpsManager.MODE_ALLOWED) {
                                 return Zygote.MOUNT_EXTERNAL_READ;
                             }
@@ -2955,7 +2955,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int noteProxyOperation(int code, int proxiedUid, String proxiedPackageName,
             String proxiedAttributionTag, int proxyUid, String proxyPackageName,
-            String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message) {
+            String proxyAttributionTag, boolean shouldCollectAsyncNotedOp, String message,
+            boolean shouldCollectMessage) {
         verifyIncomingUid(proxyUid);
         verifyIncomingOp(code);
 
@@ -2972,7 +2973,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXY;
         final int proxyMode = noteOperationUnchecked(code, proxyUid, resolveProxyPackageName,
                 proxyAttributionTag, Process.INVALID_UID, null, null, proxyFlags,
-                !isProxyTrusted, "proxy " + message);
+                !isProxyTrusted, "proxy " + message, shouldCollectMessage);
         if (proxyMode != AppOpsManager.MODE_ALLOWED || Binder.getCallingUid() == proxiedUid) {
             return proxyMode;
         }
@@ -2985,27 +2986,28 @@ public class AppOpsService extends IAppOpsService.Stub {
                 : AppOpsManager.OP_FLAG_UNTRUSTED_PROXIED;
         return noteOperationUnchecked(code, proxiedUid, resolveProxiedPackageName,
                 proxiedAttributionTag, proxyUid, resolveProxyPackageName, proxyAttributionTag,
-                proxiedFlags, shouldCollectAsyncNotedOp, message);
+                proxiedFlags, shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
     @Override
     public int noteOperation(int code, int uid, String packageName, String attributionTag,
-            boolean shouldCollectAsyncNotedOp, String message) {
+            boolean shouldCollectAsyncNotedOp, String message, boolean shouldCollectMessage) {
         final CheckOpsDelegate delegate;
         synchronized (this) {
             delegate = mCheckOpsDelegate;
         }
         if (delegate == null) {
             return noteOperationImpl(code, uid, packageName, attributionTag,
-                    shouldCollectAsyncNotedOp, message);
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
         }
         return delegate.noteOperation(code, uid, packageName, attributionTag,
-                shouldCollectAsyncNotedOp, message, AppOpsService.this::noteOperationImpl);
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage,
+                AppOpsService.this::noteOperationImpl);
     }
 
     private int noteOperationImpl(int code, int uid, @Nullable String packageName,
             @Nullable String attributionTag, boolean shouldCollectAsyncNotedOp,
-            @Nullable String message) {
+            @Nullable String message, boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
@@ -3014,13 +3016,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         return noteOperationUnchecked(code, uid, resolvedPackageName, attributionTag,
                 Process.INVALID_UID, null, null, AppOpsManager.OP_FLAG_SELF,
-                shouldCollectAsyncNotedOp, message);
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
     }
 
     private int noteOperationUnchecked(int code, int uid, @NonNull String packageName,
             @Nullable String attributionTag, int proxyUid, String proxyPackageName,
             @Nullable String proxyAttributionTag, @OpFlags int flags,
-            boolean shouldCollectAsyncNotedOp, @Nullable String message) {
+            boolean shouldCollectAsyncNotedOp, @Nullable String message,
+            boolean shouldCollectMessage) {
         RestrictionBypass bypass;
         try {
             bypass = verifyAndGetBypass(uid, packageName, attributionTag);
@@ -3090,7 +3093,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     flags);
 
             if (shouldCollectAsyncNotedOp) {
-                collectAsyncNotedOp(uid, packageName, code, attributionTag, message);
+                collectAsyncNotedOp(uid, packageName, code, attributionTag, flags, message,
+                        shouldCollectMessage);
             }
 
             return AppOpsManager.MODE_ALLOWED;
@@ -3247,7 +3251,8 @@ public class AppOpsService extends IAppOpsService.Stub {
      * @param message The message for the op noting
      */
     private void collectAsyncNotedOp(int uid, @NonNull String packageName, int opCode,
-            @Nullable String attributionTag, @NonNull String message) {
+            @Nullable String attributionTag, @OpFlags int flags, @NonNull String message,
+            boolean shouldCollectMessage) {
         Objects.requireNonNull(message);
 
         int callingUid = Binder.getCallingUid();
@@ -3262,8 +3267,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                         attributionTag, message, System.currentTimeMillis());
                 final boolean[] wasNoteForwarded = {false};
 
-                reportRuntimeAppOpAccessMessageAsyncLocked(uid, packageName, opCode, attributionTag,
-                        message);
+                if ((flags & (OP_FLAG_SELF | OP_FLAG_TRUSTED_PROXIED)) != 0
+                        && shouldCollectMessage) {
+                    reportRuntimeAppOpAccessMessageAsyncLocked(uid, packageName, opCode,
+                            attributionTag, message);
+                }
 
                 if (callbacks != null) {
                     callbacks.broadcast((cb) -> {
@@ -3376,7 +3384,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     @Override
     public int startOperation(IBinder clientId, int code, int uid, String packageName,
             String attributionTag, boolean startIfModeDefault, boolean shouldCollectAsyncNotedOp,
-            String message) {
+            String message, boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
         String resolvedPackageName = resolvePackageName(uid, packageName);
@@ -3447,7 +3455,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
 
         if (shouldCollectAsyncNotedOp) {
-            collectAsyncNotedOp(uid, packageName, code, attributionTag, message);
+            collectAsyncNotedOp(uid, packageName, code, attributionTag, AppOpsManager.OP_FLAG_SELF,
+                    message, shouldCollectMessage);
         }
 
         return AppOpsManager.MODE_ALLOWED;
@@ -4910,7 +4919,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     if (shell.packageName != null) {
                         shell.mInterface.startOperation(shell.mToken, shell.op, shell.packageUid,
                                 shell.packageName, shell.attributionTag, true, true,
-                                "appops start shell command");
+                                "appops start shell command", true);
                     } else {
                         return -1;
                     }
