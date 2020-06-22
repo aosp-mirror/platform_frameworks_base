@@ -344,6 +344,8 @@ public final class MediaRouter2Manager {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         Objects.requireNonNull(route, "route must not be null");
 
+        Log.v(TAG, "Transferring routing session. session= " + sessionInfo + ", route=" + route);
+
         synchronized (mRoutesLock) {
             if (!mRoutes.containsKey(route.getId())) {
                 Log.w(TAG, "transfer: Ignoring an unknown route id=" + route.getId());
