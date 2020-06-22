@@ -103,7 +103,8 @@ public class DnsManagerTest {
             @NonNull ResolverOptionsParcel expected) {
         assertEquals(actual.hosts, expected.hosts);
         assertEquals(actual.tcMode, expected.tcMode);
-        assertFieldCountEquals(2, ResolverOptionsParcel.class);
+        assertEquals(actual.enforceDnsUid, expected.enforceDnsUid);
+        assertFieldCountEquals(3, ResolverOptionsParcel.class);
     }
 
     private void assertResolverParamsEquals(@NonNull ResolverParamsParcel actual,
