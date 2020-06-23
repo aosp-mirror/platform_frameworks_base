@@ -197,7 +197,6 @@ public class ConversationLayout extends FrameLayout
         super.onFinishInflate();
         mMessagingLinearLayout = findViewById(R.id.notification_messaging);
         mActions = findViewById(R.id.actions);
-        mMessagingLinearLayout.setMessagingLayout(this);
         mImageMessageContainer = findViewById(R.id.conversation_image_message_container);
         // We still want to clip, but only on the top, since views can temporarily out of bounds
         // during transitions.
