@@ -535,6 +535,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private float mLastSentAppear;
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
+    private int mGapHeight;
 
     private int mWaterfallTopInset;
 
@@ -1060,6 +1061,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         Resources res = context.getResources();
         mCollapsedSize = res.getDimensionPixelSize(R.dimen.notification_min_height);
+        mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
         mStackScrollAlgorithm.initView(context);
         mAmbientState.reload(context);
         mPaddingBetweenElements = Math.max(1,
@@ -5099,8 +5101,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public int getFooterViewHeight() {
-        return mFooterView == null ? 0 : mFooterView.getHeight() + mPaddingBetweenElements;
+    public int getFooterViewHeightWithPadding() {
+        return mFooterView == null ? 0 : mFooterView.getHeight()
+                + mPaddingBetweenElements
+                + mGapHeight;
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
