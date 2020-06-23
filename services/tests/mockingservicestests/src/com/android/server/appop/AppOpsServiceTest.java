@@ -169,12 +169,13 @@ public class AppOpsServiceTest {
         mAppOpsService.setMode(OP_WRITE_SMS, mMyUid, sMyPackageName, MODE_ERRORED);
 
         // Note an op that's allowed.
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
         List<PackageOps> loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
 
         // Note another op that's not allowed.
-        mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null,
+                false);
         loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
         assertContainsOp(loggedOps, OP_WRITE_SMS, -1, mTestStartMillis, MODE_ERRORED);
@@ -191,7 +192,7 @@ public class AppOpsServiceTest {
         mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_ALLOWED);
 
         assertThat(mAppOpsService.noteOperation(OP_WIFI_SCAN, mMyUid, sMyPackageName, null, false,
-                null)).isEqualTo(MODE_ALLOWED);
+                null, false)).isEqualTo(MODE_ALLOWED);
 
         assertContainsOp(getLoggedOps(), OP_WIFI_SCAN, mTestStartMillis, -1,
                 MODE_ALLOWED /* default for WIFI_SCAN; this is not changed or used in this test */);
@@ -199,7 +200,7 @@ public class AppOpsServiceTest {
         // Now set COARSE_LOCATION to ERRORED -> this will make WIFI_SCAN disabled as well.
         mAppOpsService.setMode(OP_COARSE_LOCATION, mMyUid, sMyPackageName, MODE_ERRORED);
         assertThat(mAppOpsService.noteOperation(OP_WIFI_SCAN, mMyUid, sMyPackageName, null, false,
-                null)).isEqualTo(MODE_ERRORED);
+                null, false)).isEqualTo(MODE_ERRORED);
 
         assertContainsOp(getLoggedOps(), OP_WIFI_SCAN, mTestStartMillis, mTestStartMillis,
                 MODE_ALLOWED /* default for WIFI_SCAN; this is not changed or used in this test */);
@@ -210,8 +211,9 @@ public class AppOpsServiceTest {
     public void testStatePersistence() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
         mAppOpsService.setMode(OP_WRITE_SMS, mMyUid, sMyPackageName, MODE_ERRORED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
-        mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
+        mAppOpsService.noteOperation(OP_WRITE_SMS, mMyUid, sMyPackageName, null, false, null,
+                false);
         mAppOpsService.writeState();
 
         // Create a new app ops service, and initialize its state from XML.
@@ -228,7 +230,7 @@ public class AppOpsServiceTest {
     @Test
     public void testShutdown() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
         mAppOpsService.shutdown();
 
         // Create a new app ops service, and initialize its state from XML.
@@ -243,7 +245,7 @@ public class AppOpsServiceTest {
     @Test
     public void testGetOpsForPackage() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
 
         // Query all ops
         List<PackageOps> loggedOps = mAppOpsService.getOpsForPackage(
@@ -272,7 +274,7 @@ public class AppOpsServiceTest {
     @Test
     public void testPackageRemoved() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
 
         List<PackageOps> loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
@@ -287,7 +289,7 @@ public class AppOpsServiceTest {
     @Test
     public void testPackageRemovedHistoricalOps() throws InterruptedException {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
 
         AppOpsManager.HistoricalOps historicalOps = new AppOpsManager.HistoricalOps(0, 15000);
         historicalOps.increaseAccessCount(OP_READ_SMS, mMyUid, sMyPackageName, null,
@@ -327,7 +329,7 @@ public class AppOpsServiceTest {
     @Test
     public void testUidRemoved() {
         mAppOpsService.setMode(OP_READ_SMS, mMyUid, sMyPackageName, MODE_ALLOWED);
-        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null);
+        mAppOpsService.noteOperation(OP_READ_SMS, mMyUid, sMyPackageName, null, false, null, false);
 
         List<PackageOps> loggedOps = getLoggedOps();
         assertContainsOp(loggedOps, OP_READ_SMS, mTestStartMillis, -1, MODE_ALLOWED);
@@ -351,12 +353,12 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP,
                 ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isEqualTo(MODE_ALLOWED);
+                false, null, false)).isEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
@@ -365,7 +367,7 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
     }
 
     @Test
@@ -374,12 +376,12 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
     }
 
     @Test
@@ -389,12 +391,12 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isEqualTo(MODE_ALLOWED);
+                false, null, false)).isEqualTo(MODE_ALLOWED);
     }
 
     @Test
@@ -404,12 +406,12 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP,
                 ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isEqualTo(MODE_ALLOWED);
+                false, null, false)).isEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
@@ -418,7 +420,7 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
     }
 
     @Test
@@ -428,12 +430,12 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_CACHED_EMPTY,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, ActivityManager.PROCESS_STATE_TOP,
                 ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isEqualTo(MODE_ALLOWED);
+                false, null, false)).isEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
@@ -442,7 +444,7 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_FOREGROUND_LOCATION);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isEqualTo(MODE_ALLOWED);
+                false, null, false)).isEqualTo(MODE_ALLOWED);
 
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
@@ -451,7 +453,7 @@ public class AppOpsServiceTest {
         mAppOpsService.updateUidProcState(mMyUid, PROCESS_STATE_FOREGROUND_SERVICE,
                 ActivityManager.PROCESS_CAPABILITY_NONE);
         assertThat(mAppOpsService.noteOperation(OP_COARSE_LOCATION, mMyUid, sMyPackageName, null,
-                false, null)).isNotEqualTo(MODE_ALLOWED);
+                false, null, false)).isNotEqualTo(MODE_ALLOWED);
     }
 
     private List<PackageOps> getLoggedOps() {

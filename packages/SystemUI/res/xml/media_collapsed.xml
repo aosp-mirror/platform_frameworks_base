@@ -36,7 +36,7 @@
         android:layout_marginTop="20dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toEndOf="@id/icon"
-        app:layout_constraintEnd_toStartOf="@id/media_seamless"
+        app:layout_constraintEnd_toStartOf="@id/media_seamless_barrier"
         app:layout_constraintHorizontal_bias="0"
         />
 
@@ -49,6 +49,18 @@
         app:layout_constraintWidth_min="60dp"
         android:layout_marginTop="@dimen/qs_media_panel_outer_padding"
         android:layout_marginEnd="@dimen/qs_media_panel_outer_padding"
+        />
+
+    <Constraint
+        android:id="@+id/media_seamless_fallback"
+        android:layout_width="@dimen/qs_seamless_fallback_icon_size"
+        android:layout_height="@dimen/qs_seamless_fallback_icon_size"
+        android:layout_marginTop="@dimen/qs_seamless_fallback_top_margin"
+        android:layout_marginEnd="@dimen/qs_seamless_fallback_end_margin"
+        android:alpha="0.5"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
         />
 
     <Constraint

@@ -113,8 +113,11 @@ class MediaHost @Inject constructor(
         } else {
             mediaDataManager.hasAnyMedia()
         }
-        hostView.visibility = if (visible) View.VISIBLE else View.GONE
-        visibleChangedListener?.invoke(visible)
+        val newVisibility = if (visible) View.VISIBLE else View.GONE
+        if (newVisibility != hostView.visibility) {
+            hostView.visibility = newVisibility
+            visibleChangedListener?.invoke(visible)
+        }
     }
 
     class MediaHostStateHolder @Inject constructor() : MediaHostState {
@@ -153,6 +156,15 @@ class MediaHost @Inject constructor(
                 changedListener?.invoke()
             }
 
+        override var falsingProtectionNeeded: Boolean = false
+            set(value) {
+                if (field == value) {
+                    return
+                }
+                field = value
+                changedListener?.invoke()
+            }
+
         override fun getPivotX(): Float = gonePivot.x
         override fun getPivotY(): Float = gonePivot.y
         override fun setGonePivot(x: Float, y: Float) {
@@ -178,6 +190,7 @@ class MediaHost @Inject constructor(
             mediaHostState.measurementInput = measurementInput?.copy()
             mediaHostState.visible = visible
             mediaHostState.gonePivot.set(gonePivot)
+            mediaHostState.falsingProtectionNeeded = falsingProtectionNeeded
             return mediaHostState
         }
 
@@ -197,6 +210,9 @@ class MediaHost @Inject constructor(
             if (visible != other.visible) {
                 return false
             }
+            if (falsingProtectionNeeded != other.falsingProtectionNeeded) {
+                return false
+            }
             if (!gonePivot.equals(other.getPivotX(), other.getPivotY())) {
                 return false
             }
@@ -206,6 +222,7 @@ class MediaHost @Inject constructor(
         override fun hashCode(): Int {
             var result = measurementInput?.hashCode() ?: 0
             result = 31 * result + expansion.hashCode()
+            result = 31 * result + falsingProtectionNeeded.hashCode()
             result = 31 * result + showsOnlyActiveMedia.hashCode()
             result = 31 * result + if (visible) 1 else 2
             result = 31 * result + gonePivot.hashCode()
@@ -237,6 +254,11 @@ interface MediaHostState {
      * If the view should be VISIBLE or GONE.
      */
     var visible: Boolean
+
+    /**
+     * Does this host need any falsing protection?
+     */
+    var falsingProtectionNeeded: Boolean
 
     /**
      * Sets the pivot point when clipping the height or width.

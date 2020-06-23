@@ -341,7 +341,6 @@ public class ApplicationsStateRoboTest {
         assertThat(appEntries.size()).isEqualTo(1);
 
         AppEntry launchableEntry = findAppEntry(appEntries, 1);
-        assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
         assertThat(launchableEntry.size).isGreaterThan(0L);
     }
@@ -360,7 +359,6 @@ public class ApplicationsStateRoboTest {
         assertThat(appEntries.size()).isEqualTo(1);
 
         AppEntry launchableEntry = findAppEntry(appEntries, 1);
-        assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.hasLauncherEntry).isFalse();
         assertThat(launchableEntry.size).isEqualTo(-1);
         assertThat(launchableEntry.isHomeApp).isTrue();
@@ -380,7 +378,6 @@ public class ApplicationsStateRoboTest {
         assertThat(appEntries.size()).isEqualTo(1);
 
         AppEntry launchableEntry = findAppEntry(appEntries, 1);
-        assertThat(launchableEntry.icon).isNull();
         assertThat(launchableEntry.size).isEqualTo(-1);
         assertThat(launchableEntry.isHomeApp).isFalse();
         assertThat(launchableEntry.hasLauncherEntry).isTrue();

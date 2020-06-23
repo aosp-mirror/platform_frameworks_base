@@ -413,7 +413,9 @@ class ControlViewHolder(
 
         control?.getCustomIcon()?.let {
             // do not tint custom icons, assume the intended icon color is correct
-            icon.imageTintList = null
+            if (icon.imageTintList != null) {
+                icon.imageTintList = null
+            }
             icon.setImageIcon(it)
         } ?: run {
             if (drawable is StateListDrawable) {

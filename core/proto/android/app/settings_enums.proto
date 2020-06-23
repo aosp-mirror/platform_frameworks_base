@@ -2683,4 +2683,9 @@ enum PageId {
     // CATEGORY: SETTINGS
     // OS: R
     DEVICE_CONTROLS_SETTINGS = 1844;
+
+    // OPEN: Settings > Sound > Media
+    // CATEGORY: SETTINGS
+    // OS: R
+    MEDIA_CONTROLS_SETTINGS = 1845;
 }

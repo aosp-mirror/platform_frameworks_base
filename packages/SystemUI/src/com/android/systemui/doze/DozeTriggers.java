@@ -416,6 +416,9 @@ public class DozeTriggers implements DozeMachine.Part {
                 mDockManager.removeListener(mDockEventListener);
                 mDozeSensors.setListening(false);
                 mDozeSensors.setProxListening(false);
+                mWantSensors = false;
+                mWantProx = false;
+                mWantTouchScreenSensors = false;
                 break;
             default:
         }
@@ -431,7 +434,7 @@ public class DozeTriggers implements DozeMachine.Part {
             mDozeSensors.setTouchscreenSensorsListening(mWantTouchScreenSensors);
         } else {
             mDozeSensors.setProxListening(false);
-            mDozeSensors.setListening(false);
+            mDozeSensors.setListening(mWantSensors);
         }
     }
 

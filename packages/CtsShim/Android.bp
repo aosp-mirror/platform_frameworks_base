@@ -43,6 +43,16 @@ android_app_import {
         },
     },
     presigned: true,
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v3",
+    ],
 }
 
 //##########################################################
@@ -71,4 +81,14 @@ android_app_import {
         },
     },
     presigned: true,
+
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.apex.cts.shim.v1",
+        "com.android.apex.cts.shim.v2",
+        "com.android.apex.cts.shim.v2_legacy",
+        "com.android.apex.cts.shim.v2_no_hashtree",
+        "com.android.apex.cts.shim.v2_sdk_target_p",
+        "com.android.apex.cts.shim.v3",
+    ],
 }

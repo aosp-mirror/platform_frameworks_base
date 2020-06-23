@@ -16,7 +16,6 @@
 
 package com.android.systemui.media
 
-import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ComponentName
 import android.content.Context
@@ -25,12 +24,13 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.media.MediaDescription
 import android.media.session.MediaController
-import android.media.session.MediaSession
 import android.os.UserHandle
+import android.provider.Settings
 import android.service.media.MediaBrowserService
 import android.util.Log
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.Utils
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.Executor
@@ -46,21 +46,14 @@ private const val MEDIA_PREFERENCE_KEY = "browser_components_"
 class MediaResumeListener @Inject constructor(
     private val context: Context,
     private val broadcastDispatcher: BroadcastDispatcher,
-    @Background private val backgroundExecutor: Executor
+    @Background private val backgroundExecutor: Executor,
+    private val tunerService: TunerService
 ) : MediaDataManager.Listener {
 
-    private val useMediaResumption: Boolean = Utils.useMediaResumption(context)
+    private var useMediaResumption: Boolean = Utils.useMediaResumption(context)
     private val resumeComponents: ConcurrentLinkedQueue<ComponentName> = ConcurrentLinkedQueue()
 
-    lateinit var addTrackToResumeCallback: (
-        MediaDescription,
-        Runnable,
-        MediaSession.Token,
-        String,
-        PendingIntent,
-        String
-    ) -> Unit
-    lateinit var resumeComponentFoundCallback: (String, Runnable?) -> Unit
+    private lateinit var mediaDataManager: MediaDataManager
 
     private var mediaBrowser: ResumeMediaBrowser? = null
     private var currentUserId: Int
@@ -96,8 +89,8 @@ class MediaResumeListener @Inject constructor(
             }
 
             Log.d(TAG, "Adding resume controls $desc")
-            addTrackToResumeCallback(desc, resumeAction, token, appName.toString(), appIntent,
-                component.packageName)
+            mediaDataManager.addResumptionControls(desc, resumeAction, token, appName.toString(),
+                appIntent, component.packageName)
         }
     }
 
@@ -111,6 +104,18 @@ class MediaResumeListener @Inject constructor(
                 UserHandle.ALL)
             loadSavedComponents()
         }
+    }
+
+    fun setManager(manager: MediaDataManager) {
+        mediaDataManager = manager
+
+        // Add listener for resumption setting changes
+        tunerService.addTunable(object : TunerService.Tunable {
+            override fun onTuningChanged(key: String?, newValue: String?) {
+                useMediaResumption = Utils.useMediaResumption(context)
+                mediaDataManager.setMediaResumptionEnabled(useMediaResumption)
+            }
+        }, Settings.Secure.MEDIA_CONTROLS_RESUME)
     }
 
     private fun loadSavedComponents() {
@@ -165,7 +170,7 @@ class MediaResumeListener @Inject constructor(
                     }
                 } else {
                     // No service found
-                    resumeComponentFoundCallback(key, null)
+                    mediaDataManager.setResumeAction(key, null)
                 }
             }
         }
@@ -182,7 +187,7 @@ class MediaResumeListener @Inject constructor(
                 object : ResumeMediaBrowser.Callback() {
                     override fun onConnected() {
                         Log.d(TAG, "yes we can resume with $componentName")
-                        resumeComponentFoundCallback(key, getResumeAction(componentName))
+                        mediaDataManager.setResumeAction(key, getResumeAction(componentName))
                         updateResumptionList(componentName)
                         mediaBrowser?.disconnect()
                         mediaBrowser = null
@@ -190,7 +195,7 @@ class MediaResumeListener @Inject constructor(
 
                     override fun onError() {
                         Log.e(TAG, "Cannot resume with $componentName")
-                        resumeComponentFoundCallback(key, null)
+                        mediaDataManager.setResumeAction(key, null)
                         mediaBrowser?.disconnect()
                         mediaBrowser = null
                     }

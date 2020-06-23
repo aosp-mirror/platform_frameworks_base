@@ -65,6 +65,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -141,6 +142,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private int mLastOrientation = -1;
     private int mMediaTotalBottomMargin;
     private int mFooterMarginStartHorizontal;
+    private Consumer<Boolean> mMediaVisibilityChangedListener;
 
 
     @Inject
@@ -159,7 +161,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 R.dimen.quick_settings_bottom_margin_media);
         mMediaHost = mediaHost;
         mMediaHost.setVisibleChangedListener((visible) -> {
-            switchTileLayout();
+            onMediaVisibilityChanged(visible);
             return null;
         });
         mContext = context;
@@ -205,6 +207,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
         mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), mCachedSpecs);
         updateResources();
+    }
+
+    protected void onMediaVisibilityChanged(Boolean visible) {
+        switchTileLayout();
+        if (mMediaVisibilityChangedListener != null) {
+            mMediaVisibilityChangedListener.accept(visible);
+        }
     }
 
     protected void addSecurityFooter() {
@@ -1063,6 +1072,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      */
     public void setHeaderContainer(@NonNull ViewGroup headerContainer) {
         mHeaderContainer = headerContainer;
+    }
+
+    public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
+        mMediaVisibilityChangedListener = visibilityChangedListener;
     }
 
     private class H extends Handler {

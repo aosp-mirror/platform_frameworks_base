@@ -17,6 +17,7 @@
 package com.android.systemui.controls
 
 import android.content.ComponentName
+import android.graphics.drawable.Icon
 import android.service.controls.Control
 import android.service.controls.DeviceTypes
 
@@ -28,6 +29,7 @@ interface ControlInterface {
     val subtitle: CharSequence
     val removed: Boolean
         get() = false
+    val customIcon: Icon?
     @DeviceTypes.DeviceType val deviceType: Int
 }
 
@@ -45,6 +47,9 @@ data class ControlStatus(
 
     override val subtitle: CharSequence
         get() = control.subtitle
+
+    override val customIcon: Icon?
+        get() = control.customIcon
 
     @DeviceTypes.DeviceType override val deviceType: Int
         get() = control.deviceType

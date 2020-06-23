@@ -22,7 +22,7 @@ import android.util.SparseArray;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IAppOpsCallback;
-import com.android.internal.util.function.HexFunction;
+import com.android.internal.util.function.HeptFunction;
 import com.android.internal.util.function.QuadFunction;
 
 /**
@@ -73,9 +73,9 @@ public abstract class AppOpsManagerInternal {
          */
         int noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message,
-                @NonNull HexFunction<Integer, Integer, String, String, Boolean, String, Integer>
-                        superImpl);
+                @Nullable String message, boolean shouldCollectMessage,
+                @NonNull HeptFunction<Integer, Integer, String, String, Boolean, String, Boolean,
+                        Integer> superImpl);
     }
 
     /**
