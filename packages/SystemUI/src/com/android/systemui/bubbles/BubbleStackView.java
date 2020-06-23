@@ -1554,6 +1554,14 @@ public class BubbleStackView extends FrameLayout
             mBubbleData.setShowingOverflow(true);
         }
 
+        if (mIsExpanded && mIsExpansionAnimating) {
+            // If the bubble selection changed during the expansion animation, the expanding bubble
+            // probably crashed or immediately removed itself (or, we just got unlucky with a new
+            // auto-expanding bubble showing up at just the right time). Cancel the animations so we
+            // can start fresh.
+            cancelAllExpandCollapseSwitchAnimations();
+        }
+
         // If we're expanded, screenshot the currently expanded bubble (before expanding the newly
         // selected bubble) so we can animate it out.
         if (mIsExpanded && mExpandedBubble != null && mExpandedBubble.getExpandedView() != null) {
@@ -1879,35 +1887,37 @@ public class BubbleStackView extends FrameLayout
             mExpandedBubble.getExpandedView().setSurfaceZOrderedOnTop(false);
         }
 
-        mDelayedAnimationHandler.postDelayed(() ->
-                        PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
-                                .spring(AnimatableScaleMatrix.SCALE_X,
-                                        AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
-                                        mScaleInSpringConfig)
-                                .spring(AnimatableScaleMatrix.SCALE_Y,
-                                        AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
-                                        mScaleInSpringConfig)
-                                .addUpdateListener((target, values) -> {
-                                    if (mExpandedBubble.getIconView() == null) {
-                                        return;
-                                    }
-                                    mExpandedViewContainerMatrix.postTranslate(
-                                            mExpandedBubble.getIconView().getTranslationX()
-                                                    - bubbleWillBeAtX,
-                                            0);
-                                    mExpandedViewContainer.setAnimationMatrix(
-                                            mExpandedViewContainerMatrix);
-                                })
-                                .withEndActions(() -> {
-                                    if (mExpandedBubble != null
-                                            && mExpandedBubble.getExpandedView() != null) {
-                                        mExpandedBubble.getExpandedView()
-                                                .setContentVisibility(true);
-                                        mExpandedBubble.getExpandedView()
-                                                .setSurfaceZOrderedOnTop(false);
-                                    }
-                                })
-                                .start(), startDelay);
+        mDelayedAnimationHandler.postDelayed(() -> {
+            PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
+            PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
+                    .spring(AnimatableScaleMatrix.SCALE_X,
+                            AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
+                            mScaleInSpringConfig)
+                    .spring(AnimatableScaleMatrix.SCALE_Y,
+                            AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
+                            mScaleInSpringConfig)
+                    .addUpdateListener((target, values) -> {
+                        if (mExpandedBubble.getIconView() == null) {
+                            return;
+                        }
+                        mExpandedViewContainerMatrix.postTranslate(
+                                mExpandedBubble.getIconView().getTranslationX()
+                                        - bubbleWillBeAtX,
+                                0);
+                        mExpandedViewContainer.setAnimationMatrix(
+                                mExpandedViewContainerMatrix);
+                    })
+                    .withEndActions(() -> {
+                        if (mExpandedBubble != null
+                                && mExpandedBubble.getExpandedView() != null) {
+                            mExpandedBubble.getExpandedView()
+                                    .setContentVisibility(true);
+                            mExpandedBubble.getExpandedView()
+                                    .setSurfaceZOrderedOnTop(false);
+                        }
+                    })
+                    .start();
+        }, startDelay);
     }
 
     private void animateCollapse() {
@@ -2035,6 +2045,7 @@ public class BubbleStackView extends FrameLayout
                 return;
             }
 
+            PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
             PhysicsAnimator.getInstance(mExpandedViewContainerMatrix)
                     .spring(AnimatableScaleMatrix.SCALE_X,
                             AnimatableScaleMatrix.getAnimatableValueForScaleFactor(1f),
@@ -2066,6 +2077,15 @@ public class BubbleStackView extends FrameLayout
 
         mIsExpansionAnimating = false;
         mIsBubbleSwitchAnimating = false;
+    }
+
+    private void cancelAllExpandCollapseSwitchAnimations() {
+        cancelDelayedExpandCollapseSwitchAnimations();
+
+        PhysicsAnimator.getInstance(mAnimatingOutSurfaceView).cancel();
+        PhysicsAnimator.getInstance(mExpandedViewContainerMatrix).cancel();
+
+        mExpandedViewContainer.setAnimationMatrix(null);
     }
 
     private void notifyExpansionChanged(BubbleViewProvider bubble, boolean expanded) {
@@ -2587,6 +2607,7 @@ public class BubbleStackView extends FrameLayout
             bev.setContentVisibility(false);
             mExpandedViewContainerMatrix.setScaleX(0f);
             mExpandedViewContainerMatrix.setScaleY(0f);
+            mExpandedViewContainerMatrix.setTranslate(0f, 0f);
             mExpandedViewContainer.setVisibility(View.INVISIBLE);
             mExpandedViewContainer.setAlpha(0f);
             mExpandedViewContainer.addView(bev);
