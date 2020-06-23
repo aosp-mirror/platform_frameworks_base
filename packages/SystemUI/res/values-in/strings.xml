@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Jeda"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Lewati ke berikutnya"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Lewati ke sebelumnya"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ubah ukuran"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Ponsel dimatikan karena panas"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Ponsel kini berfungsi normal"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Ponsel menjadi terlalu panas, jadi dimatikan untuk mendinginkan. Ponsel kini berfungsi normal.\n\nPonsel dapat menjadi terlalu panas jika Anda:\n	• Menggunakan aplikasi yang menggunakan sumber daya secara intensif (seperti aplikasi game, video, atau navigasi)\n	• Mendownload atau mengupload file besar\n	• Menggunakan ponsel dalam suhu tinggi"</string>

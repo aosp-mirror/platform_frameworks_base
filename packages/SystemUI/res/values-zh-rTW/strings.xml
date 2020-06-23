@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"暫停"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"跳到下一個"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"跳到上一個"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"調整大小"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手機先前過熱，因此關閉電源"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"手機現在已恢復正常運作"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"手機先前的溫度過高，因此關閉了電源以進行降溫。手機現在已恢復正常運作。\n\n以下情況可能會導致你的手機溫度過高：\n	• 使用需要密集處理資料的應用程式 (例如遊戲、影片或導航應用程式)\n	• 下載或上傳大型檔案\n	• 在高溫環境下使用手機"</string>
@@ -1080,15 +1079,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"確認「<xliff:g id="DEVICE">%s</xliff:g>」的變更"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"滑動即可查看其他結構"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在載入建議控制項"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"媒體"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"隱藏目前的工作階段。"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"隱藏"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"繼續播放"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"設定"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"無效，請查看應用程式"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"發生錯誤，正在重試…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"找不到控制項"</string>

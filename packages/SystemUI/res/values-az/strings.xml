@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Fasilə verin"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Növbətiyə keçin"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Əvvəlkinə keçin"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Ölçüsünü dəyişin"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"İstiliyə görə telefon söndü"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Telefon indi normal işləyir"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Telefon çox isti idi və soyumaq üçün söndü. Hazırda telefon normal işləyir.\n\n Telefon bu hallarda çox isti ola bilər:\n 	• Çox resurslu tətbiq istifadə etsəniz (oyun, video və ya naviqasiya tətbiqi kimi)\n	• Böyük həcmli fayl endirsəniz və ya yükləsəniz\n	• Telefonu yüksək temperaturda istifadə etsəniz"</string>
