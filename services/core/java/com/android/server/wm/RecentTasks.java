@@ -961,7 +961,7 @@ class RecentTasks {
                 continue;
             }
 
-            res.add(createRecentTaskInfo(task));
+            res.add(createRecentTaskInfo(task, true /* stripExtras */));
         }
         return res;
     }
@@ -1832,9 +1832,9 @@ class RecentTasks {
     /**
      * Creates a new RecentTaskInfo from a Task.
      */
-    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr) {
+    ActivityManager.RecentTaskInfo createRecentTaskInfo(Task tr, boolean stripExtras) {
         ActivityManager.RecentTaskInfo rti = new ActivityManager.RecentTaskInfo();
-        tr.fillTaskInfo(rti);
+        tr.fillTaskInfo(rti, stripExtras);
         // Fill in some deprecated values
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
