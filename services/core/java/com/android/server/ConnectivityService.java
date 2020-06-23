@@ -67,6 +67,7 @@ import android.app.BroadcastOptions;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -3069,7 +3070,11 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // Only the system server can register notifications with package "android"
             final long token = Binder.clearCallingIdentity();
             try {
-                pendingIntent = PendingIntent.getBroadcast(mContext, 0, intent, 0);
+                pendingIntent = PendingIntent.getBroadcast(
+                        mContext,
+                        0 /* requestCode */,
+                        intent,
+                        PendingIntent.FLAG_IMMUTABLE);
             } finally {
                 Binder.restoreCallingIdentity(token);
             }
@@ -3925,6 +3930,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
         pw.decreaseIndent();
     }
 
+    // TODO: This method is copied from TetheringNotificationUpdater. Should have a utility class to
+    // unify the method.
+    private static @NonNull String getSettingsPackageName(@NonNull final PackageManager pm) {
+        final Intent settingsIntent = new Intent(Settings.ACTION_SETTINGS);
+        final ComponentName settingsComponent = settingsIntent.resolveActivity(pm);
+        return settingsComponent != null
+                ? settingsComponent.getPackageName() : "com.android.settings";
+    }
+
     private void showNetworkNotification(NetworkAgentInfo nai, NotificationType type) {
         final String action;
         final boolean highPriority;
@@ -3959,12 +3973,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (type != NotificationType.PRIVATE_DNS_BROKEN) {
             intent.setData(Uri.fromParts("netId", Integer.toString(nai.network.netId), null));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            intent.setClassName("com.android.settings",
-                    "com.android.settings.wifi.WifiNoInternetDialog");
+            // Some OEMs have their own Settings package. Thus, need to get the current using
+            // Settings package name instead of just use default name "com.android.settings".
+            final String settingsPkgName = getSettingsPackageName(mContext.getPackageManager());
+            intent.setClassName(settingsPkgName,
+                    settingsPkgName + ".wifi.WifiNoInternetDialog");
         }
 
         PendingIntent pendingIntent = PendingIntent.getActivityAsUser(
-                mContext, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
+                mContext,
+                0 /* requestCode */,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT | PendingIntent.FLAG_IMMUTABLE,
+                null /* options */,
+                UserHandle.CURRENT);
 
         mNotifier.showNotification(nai.network.netId, type, nai, null, pendingIntent, highPriority);
     }
