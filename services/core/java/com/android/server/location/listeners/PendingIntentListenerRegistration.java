@@ -19,6 +19,7 @@ package com.android.server.location.listeners;
 import android.annotation.Nullable;
 import android.app.PendingIntent;
 import android.location.util.identity.CallerIdentity;
+import android.util.Log;
 
 /**
  * A registration that works with PendingIntent keys, and registers a CancelListener to
@@ -41,9 +42,9 @@ public abstract class PendingIntentListenerRegistration<TRequest, TListener> ext
         PendingIntent getPendingIntent();
     }
 
-    protected PendingIntentListenerRegistration(@Nullable TRequest request,
+    protected PendingIntentListenerRegistration(String tag, @Nullable TRequest request,
             CallerIdentity callerIdentity, TListener listener) {
-        super(request, callerIdentity, listener);
+        super(tag, request, callerIdentity, listener);
     }
 
     /**
@@ -79,6 +80,10 @@ public abstract class PendingIntentListenerRegistration<TRequest, TListener> ext
 
     @Override
     public void onCancelled(PendingIntent intent) {
+        if (Log.isLoggable(mTag, Log.DEBUG)) {
+            Log.d(mTag, "pending intent registration " + getIdentity() + " canceled");
+        }
+
         remove();
     }
 

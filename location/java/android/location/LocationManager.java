@@ -2157,8 +2157,7 @@ public class LocationManager {
             @NonNull GnssMeasurementCorrections measurementCorrections) {
         Preconditions.checkArgument(measurementCorrections != null);
         try {
-            mService.injectGnssMeasurementCorrections(
-                    measurementCorrections, mContext.getPackageName());
+            mService.injectGnssMeasurementCorrections(measurementCorrections);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2302,7 +2301,7 @@ public class LocationManager {
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public int getGnssBatchSize() {
         try {
-            return mService.getGnssBatchSize(mContext.getPackageName());
+            return mService.getGnssBatchSize();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2365,7 +2364,7 @@ public class LocationManager {
     @RequiresPermission(Manifest.permission.LOCATION_HARDWARE)
     public void flushGnssBatch() {
         try {
-            mService.flushGnssBatch(mContext.getPackageName());
+            mService.flushGnssBatch();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

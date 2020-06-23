@@ -93,7 +93,7 @@ public class GeofenceManager extends
 
         protected GeofenceRegistration(Geofence geofence, CallerIdentity identity,
                 PendingIntent pendingIntent) {
-            super(geofence, identity, pendingIntent);
+            super(TAG, geofence, identity, pendingIntent);
 
             mCenter = new Location("");
             mCenter.setLatitude(geofence.getLatitude());
@@ -233,7 +233,7 @@ public class GeofenceManager extends
     protected final LocationUsageLogger mLocationUsageLogger;
 
     @GuardedBy("mLock")
-    private LocationManager mLocationManager;
+    private @Nullable LocationManager mLocationManager;
 
     @GuardedBy("mLock")
     private @Nullable Location mLastLocation;

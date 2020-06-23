@@ -29,6 +29,7 @@ import com.android.internal.location.ProviderRequest;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -308,7 +309,8 @@ public abstract class AbstractLocationProvider {
         if (listener != null) {
             long identity = Binder.clearCallingIdentity();
             try {
-                listener.onReportLocation(location);
+                // copy location so if provider makes further changes they do not propagate
+                listener.onReportLocation(new Location(location));
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
@@ -323,7 +325,12 @@ public abstract class AbstractLocationProvider {
         if (listener != null) {
             long identity = Binder.clearCallingIdentity();
             try {
-                listener.onReportLocation(locations);
+                // copy location so if provider makes further changes they do not propagate
+                ArrayList<Location> copy = new ArrayList<>(locations.size());
+                for (Location location : locations) {
+                    copy.add(new Location(location));
+                }
+                listener.onReportLocation(copy);
             } finally {
                 Binder.restoreCallingIdentity(identity);
             }
