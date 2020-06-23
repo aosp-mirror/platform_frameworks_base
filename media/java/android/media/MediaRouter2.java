@@ -151,7 +151,7 @@ public final class MediaRouter2 {
      *
      * @hide
      */
-    public static boolean checkRouteListContainsRouteId(@NonNull List<MediaRoute2Info> routeList,
+    static boolean checkRouteListContainsRouteId(@NonNull List<MediaRoute2Info> routeList,
             @NonNull String routeId) {
         for (MediaRoute2Info info : routeList) {
             if (TextUtils.equals(routeId, info.getId())) {
@@ -258,8 +258,6 @@ public final class MediaRouter2 {
      * Gets the unmodifiable list of {@link MediaRoute2Info routes} currently
      * known to the media router.
      * <p>
-     * {@link MediaRoute2Info#isSystemRoute() System routes} such as phone speaker,
-     * Bluetooth devices are always included in the list.
      * Please note that the list can be changed before callbacks are invoked.
      * </p>
      *
@@ -274,8 +272,7 @@ public final class MediaRouter2 {
 
                 List<MediaRoute2Info> filteredRoutes = new ArrayList<>();
                 for (MediaRoute2Info route : mRoutes.values()) {
-                    if (route.isSystemRoute()
-                            || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                    if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                         filteredRoutes.add(route);
                     }
                 }
@@ -526,8 +523,7 @@ public final class MediaRouter2 {
                 if (!currentRoutesIds.contains(routeId)) {
                     // This route is removed while the callback is unregistered.
                     MediaRoute2Info route = mRoutes.get(routeId);
-                    if (route.isSystemRoute()
-                            || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                    if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                         removedRoutes.add(mRoutes.get(routeId));
                     }
                 }
@@ -537,16 +533,14 @@ public final class MediaRouter2 {
                 if (mRoutes.containsKey(route.getId())) {
                     if (!route.equals(mRoutes.get(route.getId()))) {
                         // This route is changed while the callback is unregistered.
-                        if (route.isSystemRoute()
-                                || route.hasAnyFeatures(
+                        if (route.hasAnyFeatures(
                                         mDiscoveryPreference.getPreferredFeatures())) {
                             changedRoutes.add(route);
                         }
                     }
                 } else {
                     // This route is added while the callback is unregistered.
-                    if (route.isSystemRoute()
-                            || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                    if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                         addedRoutes.add(route);
                     }
                 }
@@ -582,8 +576,7 @@ public final class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
-                if (route.isSystemRoute()
-                        || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                     addedRoutes.add(route);
                 }
             }
@@ -599,8 +592,7 @@ public final class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.remove(route.getId());
-                if (route.isSystemRoute()
-                        || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                     removedRoutes.add(route);
                 }
             }
@@ -616,8 +608,7 @@ public final class MediaRouter2 {
         synchronized (sRouterLock) {
             for (MediaRoute2Info route : routes) {
                 mRoutes.put(route.getId(), route);
-                if (route.isSystemRoute()
-                        || route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
+                if (route.hasAnyFeatures(mDiscoveryPreference.getPreferredFeatures())) {
                     changedRoutes.add(route);
                 }
             }
@@ -799,8 +790,7 @@ public final class MediaRouter2 {
     private List<MediaRoute2Info> filterRoutes(List<MediaRoute2Info> routes,
             RouteDiscoveryPreference discoveryRequest) {
         return routes.stream()
-                .filter(route -> route.isSystemRoute()
-                        || route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
+                .filter(route -> route.hasAnyFeatures(discoveryRequest.getPreferredFeatures()))
                 .collect(Collectors.toList());
     }
 
