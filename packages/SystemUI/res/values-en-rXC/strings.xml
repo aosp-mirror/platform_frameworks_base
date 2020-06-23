@@ -1063,15 +1063,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‏‎‏‎‏‏‎‏‏‏‏‎‎‎‏‎‎‏‎‏‏‎‎‏‏‏‎‏‎‏‏‏‏‏‎‎‏‏‏‏‎‏‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‎‏‎‏‏‎Confirm change for ‎‏‎‎‏‏‎<xliff:g id="DEVICE">%s</xliff:g>‎‏‎‎‏‏‏‎‎‏‎‎‏‎"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‎‎‎‏‏‏‎‎‏‏‎‏‎‏‏‎‎‎‎‎‏‎‏‏‏‎‏‏‎‏‏‏‏‏‏‏‎‏‎‏‎‏‎‏‏‎‏‏‎‏‎‏‏‏‏‎‏‏‎Swipe to see more‎‏‎‎‏‎"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‎‏‎‏‎‎‎‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‏‎‏‏‎‏‏‏‏‏‎‎‏‎‎‏‎‏‎‏‏‏‎‎‎‏‎‎‏‎‎‎‏‎‏‎‏‎‎‎Loading recommendations‎‏‎‎‏‎"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‎‎‎‎‏‏‏‏‏‎‎‏‏‎‎‏‏‏‎‏‎‎‏‏‎‎‏‏‎‎‎‎‏‏‏‎‎‏‎‏‏‎‏‎‎‎‎‏‎‏‎‎‎‎‎‏‎‏‎Media‎‏‎‎‏‎"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‎‏‏‎‏‏‏‎‏‎‏‎‎‏‏‎‏‎‏‏‏‎‎‎‎‎‎‏‎‏‎‏‏‎‏‎‎‎‏‎‎‎‎‏‎‎‎‏‏‏‎‏‏‏‏‏‏‎‎‏‎Hide the current session.‎‏‎‎‏‎"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‎‏‏‏‏‏‎‎‏‎‎‎‎‎‎‎‏‎‏‎‎‏‎‎‏‎‎‎‏‏‎‏‏‎‏‎‎‏‏‎‏‎‏‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‏‏‏‎‎Hide‎‏‎‎‏‎"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‏‏‏‎‏‎‏‏‎‏‎‏‎‏‎‎‏‏‏‏‏‎‏‏‎‏‎‎‎‏‎‏‏‏‏‏‎‎‎‏‏‎‎‏‎‏‎‎‏‎‎‎‏‏‏‎‎‎‎‏‎‏‎Resume‎‏‎‎‏‎"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‎‎‎‎‏‎‏‏‎‏‎‏‏‏‎‏‎‏‏‎‏‎‎‎‎‎‎‏‎‏‏‎‏‎‎‎‏‏‎‏‏‎‏‏‎‎‎‎‎‎‏‏‎‎‎‏‏‎‎‎‎Settings‎‏‎‎‏‎"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‎‎‎‎‎‏‎‏‏‎‎‎‏‏‏‎‎‎‏‏‏‎‏‎‎‎‏‎‏‎‏‎‎‏‏‏‏‎‏‏‎‏‎‎‎‎‏‎‎‏‏‏‏‏‏‎‎Inactive, check app‎‏‎‎‏‎"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‎‎‏‎‏‏‏‏‏‏‏‏‎‏‏‎‏‎‎‎‏‎‏‏‏‏‎‏‏‎‎‏‏‏‎‎‎‏‏‎‏‏‎‏‎‏‏‎‎‎‎‎‎‏‏‏‏‎‎‏‏‎‎Error, retrying…‎‏‎‎‏‎"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"‎‏‎‎‎‎‎‏‎‏‏‏‎‎‎‎‎‎‏‎‎‏‎‎‎‎‏‏‏‏‏‏‏‏‎‏‏‏‎‎‏‎‏‎‎‏‎‎‏‎‏‎‎‎‎‏‎‏‏‏‎‏‎‎‏‎‎‏‏‎‏‎‎‎‏‏‏‏‏‎‏‏‏‏‏‎‎‏‏‎‎‏‏‏‏‎‎Not found‎‏‎‎‏‎"</string>

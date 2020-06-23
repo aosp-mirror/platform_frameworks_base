@@ -946,8 +946,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Призупинити"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Перейти далі"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Перейти назад"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Змінити розмір"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон перегрівся й вимкнувся"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Зараз телефон працює, як зазвичай"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефон перегрівся, тому вимкнувся, щоб охолонути. Зараз він працює, як зазвичай.\n\nТелефон перегрівається, якщо ви:\n	• використовуєте ресурсомісткі додатки (ігри, відео, навігація)\n	• завантажуєте великі файли на телефон або з нього\n	• використовуєте телефон за високої температури"</string>

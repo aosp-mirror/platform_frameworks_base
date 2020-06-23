@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"일시중지"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"다음으로 건너뛰기"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"이전으로 건너뛰기"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"크기 조절"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"발열로 인해 휴대전화 전원이 종료됨"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"휴대전화가 정상적으로 실행 중입니다."</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"휴대전화가 과열되어 온도를 낮추기 위해 전원이 종료되었습니다. 지금은 휴대전화가 정상적으로 실행 중입니다.\n\n휴대전화가 과열되는 이유는 다음과 같습니다.\n	• 리소스를 많이 사용하는 앱 사용(예: 게임, 동영상 또는 내비게이션 앱)\n	• 대용량 파일을 다운로드 또는 업로드\n	• 온도가 높은 곳에서 휴대폰 사용"</string>

@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Suspendre"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Passer au contenu suivant"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Passer au contenu précédent"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Redimensionner"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Tél. éteint car il surchauffait"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"À présent, votre téléphone fonctionne normalement"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Votre téléphone s\'est éteint, car il surchauffait. Il s\'est refroidi et fonctionne normalement.\n\nIl peut surchauffer si vous :\n	• exécutez applis utilisant beaucoup de ressources (jeux, vidéo, navigation, etc.) ;\n	• téléchargez ou importez gros fichiers ;\n	• utilisez téléphone à des températures élevées."</string>
@@ -1033,9 +1032,9 @@
     <string name="inattentive_sleep_warning_title" msgid="3891371591713990373">"Mode Veille imminent"</string>
     <string name="priority_onboarding_title" msgid="2893070698479227616">"Conversation définie comme prioritaire"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"Les conversations prioritaires :"</string>
-    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"S\'affichent en haut de la liste des conversations"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Affichent la photo de profil sur l\'écran de verrouillage"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Sous forme d\'info-bulle au-dessus des applications"</string>
+    <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"Apparaîtront en haut de la liste des conversations"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"Afficheront la photo de profil sur l\'écran de verrouillage"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"Apparaîtront sous forme de bulle au-dessus des applications"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"Interrompre Ne pas déranger"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"OK"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"Paramètres"</string>
@@ -1080,15 +1079,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"Confirmer la modification pour <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"Balayer l\'écran pour voir plus d\'annonces"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"Chargement des recommandations"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"Multimédia"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"Masquer la session en cours."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"Masquer"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"Reprendre"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"Paramètres"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"Délai expiré, vérifier l\'appli"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"Erreur. Nouvelle tentative…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"Introuvable"</string>

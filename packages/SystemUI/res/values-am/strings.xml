@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"ባለበት አቁም"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"ወደ ቀጣይ ዝለል"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"ወደ ቀዳሚ ዝለል"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"መጠን ይቀይሩ"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"ስልክ በሙቀት ምክንያት ጠፍቷል"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"የእርስዎ ስልክ በጣም ግሎ ነበር፣ ስለዚህ እንዲቀዘቅዝ ጠፍቷል። የእርስዎ ስልክ አሁን በመደበኝነት እያሄደ ነው።\n\nየሚከተሉትን ካደረጉ የእርስዎ በጣም ሊግል ይችላል፦\n	• ኃይል በጣም የሚጠቀሙ መተግበሪያዎችን (እንደ ጨዋታ፣ ቪዲዮ ወይም የአሰሳ መተግበሪያዎች ያሉ) ከተጠቀሙ\n	• ትላልቅ ፋይሎችን ካወረዱ ወይም ከሰቀሉ\n	• ስልክዎን በከፍተኛ ሙቀት ውስጥ ከተጠቀሙ"</string>
@@ -1080,15 +1079,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"ለ<xliff:g id="DEVICE">%s</xliff:g> ለውጥን ያረጋግጡ"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"ተጨማሪ ለማየት ያንሸራትቱ"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"ምክሮችን በመጫን ላይ"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"ሚዲያ"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"የአሁኑን ክፍለ-ጊዜ ደብቅ።"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"ደብቅ"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ከቆመበት ቀጥል"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"ቅንብሮች"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"ንቁ ያልኾነ፣ መተግበሪያን ይፈትሹ"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ስህተት፣ እንደገና በመሞከር ላይ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"አልተገኘም"</string>
