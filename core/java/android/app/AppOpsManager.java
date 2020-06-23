@@ -182,6 +182,22 @@ public class AppOpsManager {
     @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.Q)
     public static final long CALL_BACK_ON_CHANGED_LISTENER_WITH_SWITCHED_OP_CHANGE = 148180766L;
 
+    /**
+     * Enforce that all attributionTags send to {@link #noteOp}, {@link #noteProxyOp},
+     * and {@link #startOp} are defined in the manifest of the package that is specified as
+     * parameter to the methods.
+     *
+     * <p>To enable this change both the package calling {@link #noteOp} as well as the package
+     * specified as parameter to the method need to have this change enable.
+     *
+     * @hide
+     */
+    @TestApi
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = Build.VERSION_CODES.R)
+    public static final long SECURITY_EXCEPTION_ON_INVALID_ATTRIBUTION_TAG_CHANGE = 151105954L;
+
+
     private static final int MAX_UNFORWARDED_OPS = 10;
 
     final Context mContext;
