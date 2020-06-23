@@ -221,6 +221,10 @@ public final class MultiClientInputMethodManagerService {
                             reportNotSupported();
                             return false;
                         }
+
+                        @Override
+                        public void reportImeControl(@Nullable IBinder windowToken) {
+                        }
                     });
         }
 
@@ -1748,6 +1752,12 @@ public final class MultiClientInputMethodManagerService {
         @Override
         public void reportActivityView(IInputMethodClient parentClient, int childDisplayId,
                 float[] matrixValues) {
+            reportNotSupported();
+        }
+
+        @BinderThread
+        @Override
+        public void reportPerceptible(IBinder windowClient, boolean perceptible) {
             reportNotSupported();
         }
 
