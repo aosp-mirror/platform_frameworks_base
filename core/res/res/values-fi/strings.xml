@@ -238,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"Näytön lukitus"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Katkaise virta"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"Virta"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"Uudelleenkäynnistys"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"Käynnistä uudelleen"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hätäpuhelu"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Virheraportti"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"Lopeta käyttökerta"</string>

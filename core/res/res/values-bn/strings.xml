@@ -238,7 +238,7 @@
     <string name="global_action_lock" msgid="6949357274257655383">"স্ক্রীণ লক"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"পাওয়ার বন্ধ করুন"</string>
     <string name="global_action_power_options" msgid="1185286119330160073">"ফোন বন্ধ করুন"</string>
-    <string name="global_action_restart" msgid="4678451019561687074">"ফোন আবার চালু করুন"</string>
+    <string name="global_action_restart" msgid="4678451019561687074">"ফোন রিস্টার্ট করুন"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"জরুরী"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"ত্রুটির প্রতিবেদন"</string>
     <string name="global_action_logout" msgid="6093581310002476511">"সেশন শেষ করুন"</string>
