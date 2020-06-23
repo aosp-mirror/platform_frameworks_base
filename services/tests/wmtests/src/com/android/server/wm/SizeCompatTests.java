@@ -511,7 +511,6 @@ public class SizeCompatTests extends ActivityTestsBase {
 
     @Test
     public void testLaunchWithFixedRotationTransform() {
-        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
         final int dw = 1000;
         final int dh = 2500;
         final int notchHeight = 200;

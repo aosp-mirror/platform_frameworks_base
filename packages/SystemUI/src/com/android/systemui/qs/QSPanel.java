@@ -65,6 +65,7 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -117,6 +118,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     @Nullable
     protected View mFooter;
+    @Nullable
+    protected View mDivider;
 
     @Nullable
     private ViewGroup mHeaderContainer;
@@ -141,6 +144,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private int mLastOrientation = -1;
     private int mMediaTotalBottomMargin;
     private int mFooterMarginStartHorizontal;
+    private Consumer<Boolean> mMediaVisibilityChangedListener;
 
 
     @Inject
@@ -158,8 +162,8 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         mMediaTotalBottomMargin = getResources().getDimensionPixelSize(
                 R.dimen.quick_settings_bottom_margin_media);
         mMediaHost = mediaHost;
-        mMediaHost.setVisibleChangedListener((visible) -> {
-            switchTileLayout();
+        mMediaHost.addVisibilityChangeListener((visible) -> {
+            onMediaVisibilityChanged(visible);
             return null;
         });
         mContext = context;
@@ -205,6 +209,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         }
         mQSLogger.logAllTilesChangeListening(mListening, getDumpableTag(), mCachedSpecs);
         updateResources();
+    }
+
+    protected void onMediaVisibilityChanged(Boolean visible) {
+        switchTileLayout();
+        if (mMediaVisibilityChangedListener != null) {
+            mMediaVisibilityChangedListener.accept(visible);
+        }
     }
 
     protected void addSecurityFooter() {
@@ -479,6 +490,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void onFinishInflate() {
         super.onFinishInflate();
         mFooter = findViewById(R.id.qs_footer);
+        mDivider = findViewById(R.id.divider);
         switchTileLayout(true /* force */);
     }
 
@@ -489,6 +501,13 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     private boolean switchTileLayout(boolean force) {
         /** Whether or not the QuickQSPanel currently contains a media player. */
         boolean horizontal = shouldUseHorizontalLayout();
+        if (mDivider != null) {
+            if (!horizontal && mUsingMediaPlayer && mMediaHost.getVisible()) {
+                mDivider.setVisibility(View.VISIBLE);
+            } else {
+                mDivider.setVisibility(View.GONE);
+            }
+        }
         if (horizontal != mUsingHorizontalLayout || force) {
             mUsingHorizontalLayout = horizontal;
             View visibleView = horizontal ? mHorizontalLinearLayout : (View) mRegularTileLayout;
@@ -522,6 +541,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             }
             updateTileLayoutMargins();
             updateFooterMargin();
+            updateDividerMargin();
             updateMediaHostContentMargins();
             updateHorizontalLinearLayoutMargins();
             updatePadding();
@@ -971,6 +991,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         return mSecurityFooter;
     }
 
+    @Nullable
+    public View getDivider() {
+        return mDivider;
+    }
+
     public void showDeviceMonitoringDialog() {
         if (mSecurityFooter != null) {
             mSecurityFooter.showDeviceMonitoringDialog();
@@ -986,6 +1011,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
                 mContentMarginEnd - mVisualTilePadding);
         updateMediaHostContentMargins();
         updateFooterMargin();
+        updateDividerMargin();
     }
 
     private void updateFooterMargin() {
@@ -1027,6 +1053,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
         updateMargins((View) mTileLayout, mVisualMarginStart, marginEnd);
     }
 
+    private void updateDividerMargin() {
+        if (mDivider == null) return;
+        updateMargins(mDivider, mContentMarginStart, mContentMarginEnd);
+    }
+
     /**
      * Update the margins of the media hosts
      */
@@ -1063,6 +1094,10 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
      */
     public void setHeaderContainer(@NonNull ViewGroup headerContainer) {
         mHeaderContainer = headerContainer;
+    }
+
+    public void setMediaVisibilityChangedListener(Consumer<Boolean> visibilityChangedListener) {
+        mMediaVisibilityChangedListener = visibilityChangedListener;
     }
 
     private class H extends Handler {

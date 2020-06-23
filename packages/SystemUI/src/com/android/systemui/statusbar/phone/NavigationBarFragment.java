@@ -152,8 +152,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     private static final String EXTRA_DISABLE2_STATE = "disabled2_state";
     private static final String EXTRA_APPEARANCE = "appearance";
     private static final String EXTRA_TRANSIENT_STATE = "transient_state";
-    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
-
 
     /** Allow some time inbetween the long press for back and recents. */
     private static final int LOCK_TO_APP_GESTURE_TOLERENCE = 200;
@@ -223,9 +221,8 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
      */
     private VerticalNavigationHandle mOrientationHandle;
     private WindowManager.LayoutParams mOrientationParams;
-    private int mStartingQuickSwitchRotation;
+    private int mStartingQuickSwitchRotation = -1;
     private int mCurrentRotation;
-    private boolean mFixedRotationEnabled;
     private ViewTreeObserver.OnGlobalLayoutListener mOrientationHandleGlobalLayoutListener;
     private UiEventLogger mUiEventLogger;
 
@@ -370,14 +367,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
     };
 
-    private final ContentObserver mFixedRotationObserver = new ContentObserver(
-            new Handler(Looper.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updatedFixedRotation();
-        }
-    };
-
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener =
             new DeviceConfig.OnPropertiesChangedListener() {
         @Override
@@ -439,10 +428,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
                 Settings.Secure.getUriFor(Settings.Secure.ASSISTANT),
                 false /* notifyForDescendants */, mAssistContentObserver, UserHandle.USER_ALL);
 
-        mContentResolver.registerContentObserver(
-                Settings.Global.getUriFor(FIXED_ROTATION_TRANSFORM_SETTING_NAME),
-                false /* notifyForDescendants */, mFixedRotationObserver, UserHandle.USER_ALL);
-
         if (savedInstanceState != null) {
             mDisabledFlags1 = savedInstanceState.getInt(EXTRA_DISABLE_STATE, 0);
             mDisabledFlags2 = savedInstanceState.getInt(EXTRA_DISABLE2_STATE, 0);
@@ -468,7 +453,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         mNavigationModeController.removeListener(this);
         mAccessibilityManagerWrapper.removeCallback(mAccessibilityListener);
         mContentResolver.unregisterContentObserver(mAssistContentObserver);
-        mContentResolver.unregisterContentObserver(mFixedRotationObserver);
 
         DeviceConfig.removeOnPropertiesChangedListener(mOnPropertiesChangedListener);
     }
@@ -499,7 +483,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         }
         mNavigationBarView.setNavigationIconHints(mNavigationIconHints);
         mNavigationBarView.setWindowVisible(isNavBarWindowVisible());
-        updatedFixedRotation();
 
         prepareNavigationBarView();
         checkNavBarModes();
@@ -691,14 +674,6 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
         int delta = newRotation - oldRotation;
         if (delta < 0) delta += 4;
         return delta;
-    }
-
-    private void updatedFixedRotation() {
-        mFixedRotationEnabled = Settings.Global.getInt(mContentResolver,
-                FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
-        if (!canShowSecondaryHandle()) {
-            resetSecondaryHandle();
-        }
     }
 
     @Override
@@ -1409,7 +1384,7 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private boolean canShowSecondaryHandle() {
-        return mFixedRotationEnabled && mNavBarMode == NAV_BAR_MODE_GESTURAL;
+        return mNavBarMode == NAV_BAR_MODE_GESTURAL;
     }
 
     private final Consumer<Integer> mRotationWatcher = rotation -> {

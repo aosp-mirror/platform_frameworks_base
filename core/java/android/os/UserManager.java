@@ -2699,15 +2699,12 @@ public class UserManager {
      * @param name     the user's name
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
      * @param flags    UserInfo flags that specify user properties.
-     * @return the {@link UserInfo} object for the created user,
-     *         or throws {@link UserOperationException} if the user could not be created
-     *         and calling app is targeting {@link android.os.Build.VERSION_CODES#R} or above
-     *         (otherwise returns {@code null}).
+     * @return the {@link UserInfo} object for the created user, or {@code null} if the user
+     *         could not be created.
      *
-     * @throws UserOperationException if the user could not be created and the calling app is
-     *         targeting {@link android.os.Build.VERSION_CODES#R} or above.
-     * @hide
      * @see UserInfo
+     *
+     * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
@@ -2716,8 +2713,7 @@ public class UserManager {
         try {
             return mService.createUserWithThrow(name, userType, flags);
         } catch (ServiceSpecificException e) {
-            return returnNullOrThrowUserOperationException(e,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
+            return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2743,25 +2739,19 @@ public class UserManager {
      * com.android.server.pm.UserManagerService#ALLOWED_FLAGS_FOR_CREATE_USERS_PERMISSION}.
      *
      * @param userType the type of user, such as {@link UserManager#USER_TYPE_FULL_GUEST}.
-     * @return the {@link UserInfo} object for the created user,
-     *         or throws {@link UserOperationException} if the user could not be created
-     *         and calling app is targeting {@link android.os.Build.VERSION_CODES#R} or above
-     *         (otherwise returns {@code null}).
+     * @return the {@link UserInfo} object for the created user.
      *
-     * @throws UserOperationException if the user could not be created and the calling app is
-     *         targeting {@link android.os.Build.VERSION_CODES#R} or above.
-     *
+     * @throws UserOperationException if the user could not be created.
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public @Nullable UserInfo preCreateUser(@NonNull String userType)
+    public @NonNull UserInfo preCreateUser(@NonNull String userType)
             throws UserOperationException {
         try {
             return mService.preCreateUserWithThrow(userType);
         } catch (ServiceSpecificException e) {
-            return returnNullOrThrowUserOperationException(e,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
+            throw UserOperationException.from(e);
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2771,18 +2761,14 @@ public class UserManager {
      * Creates a guest user and configures it.
      * @param context an application context
      * @param name the name to set for the user
-     * @return the {@link UserInfo} object for the created user,
-     *         or throws {@link UserOperationException} if the user could not be created
-     *         and calling app is targeting {@link android.os.Build.VERSION_CODES#R} or above
-     *         (otherwise returns {@code null}).
+     * @return the {@link UserInfo} object for the created user, or {@code null} if the user
+     *         could not be created.
      *
-     * @throws UserOperationException if the user could not be created and the calling app is
-     *         targeting {@link android.os.Build.VERSION_CODES#R} or above.
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createGuest(Context context, String name) throws UserOperationException {
+    public UserInfo createGuest(Context context, String name) {
         UserInfo guest = null;
         try {
             guest = mService.createUserWithThrow(name, USER_TYPE_FULL_GUEST, 0);
@@ -2791,8 +2777,7 @@ public class UserManager {
                         Settings.Secure.SKIP_FIRST_USE_HINTS, "1", guest.id);
             }
         } catch (ServiceSpecificException e) {
-            return returnNullOrThrowUserOperationException(e,
-                    context.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
+            return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2902,26 +2887,20 @@ public class UserManager {
      * @param userId new user will be a profile of this user.
      * @param disallowedPackages packages that will not be installed in the profile being created.
      *
-     * @return the {@link UserInfo} object for the created user,
-     *         or throws {@link UserOperationException} if the user could not be created
-     *         and calling app is targeting {@link android.os.Build.VERSION_CODES#R} or above
-     *         (otherwise returns {@code null}).
+     * @return the {@link UserInfo} object for the created user, or {@code null} if the user could
+     *         not be created.
      *
-     * @throws UserOperationException if the user could not be created and the calling app is
-     *         targeting {@link android.os.Build.VERSION_CODES#R} or above.
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
     public UserInfo createProfileForUser(String name, @NonNull String userType,
-            @UserInfoFlag int flags, @UserIdInt int userId, String[] disallowedPackages)
-            throws UserOperationException {
+            @UserInfoFlag int flags, @UserIdInt int userId, String[] disallowedPackages) {
         try {
             return mService.createProfileForUserWithThrow(name, userType, flags, userId,
                     disallowedPackages);
         } catch (ServiceSpecificException e) {
-            return returnNullOrThrowUserOperationException(e,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
+            return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2938,13 +2917,12 @@ public class UserManager {
             Manifest.permission.CREATE_USERS})
     public UserInfo createProfileForUserEvenWhenDisallowed(String name,
             @NonNull String userType, @UserInfoFlag int flags, @UserIdInt int userId,
-            String[] disallowedPackages) throws UserOperationException {
+            String[] disallowedPackages) {
         try {
             return mService.createProfileForUserEvenWhenDisallowedWithThrow(name, userType, flags,
                     userId, disallowedPackages);
         } catch (ServiceSpecificException e) {
-            return returnNullOrThrowUserOperationException(e,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
+            return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -2955,18 +2933,14 @@ public class UserManager {
      * restrictions and adds shared accounts.
      *
      * @param name profile's name
-     * @return the {@link UserInfo} object for the created user,
-     *         or throws {@link UserOperationException} if the user could not be created
-     *         and calling app is targeting {@link android.os.Build.VERSION_CODES#R} or above
-     *         (otherwise returns {@code null}).
+     * @return the {@link UserInfo} object for the created user, or {@code null} if the user
+     *         could not be created.
      *
-     * @throws UserOperationException if the user could not be created and the calling app is
-     *         targeting {@link android.os.Build.VERSION_CODES#R} or above.
      * @hide
      */
     @RequiresPermission(anyOf = {Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS})
-    public UserInfo createRestrictedProfile(String name) throws UserOperationException {
+    public UserInfo createRestrictedProfile(String name) {
         try {
             UserHandle parentUserHandle = Process.myUserHandle();
             UserInfo user = mService.createRestrictedProfileWithThrow(name,
@@ -2977,8 +2951,7 @@ public class UserManager {
             }
             return user;
         } catch (ServiceSpecificException e) {
-            return returnNullOrThrowUserOperationException(e,
-                    mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.R);
+            return null;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4009,15 +3982,15 @@ public class UserManager {
      * Sets the user's photo.
      * @param userId the user for whom to change the photo.
      * @param icon the bitmap to set as the photo.
+     *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
-    public void setUserIcon(@UserIdInt int userId, @NonNull Bitmap icon)
-            throws UserOperationException {
+    public void setUserIcon(@UserIdInt int userId, @NonNull Bitmap icon) {
         try {
             mService.setUserIcon(userId, icon);
         } catch (ServiceSpecificException e) {
-            throw UserOperationException.from(e);
+            return;
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
@@ -4027,6 +4000,10 @@ public class UserManager {
      * Sets the context user's photo.
      *
      * @param icon the bitmap to set as the photo.
+     *
+     * @throws UserOperationException according to the function signature, but may not actually
+     * throw it in practice. Catch RuntimeException instead.
+     *
      * @hide
      */
     @SystemApi

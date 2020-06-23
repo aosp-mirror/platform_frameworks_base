@@ -1105,14 +1105,19 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
                     return;
                 }
 
-                Intent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
+                PendingIntent actionIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
                 if (intent.getBooleanExtra(EXTRA_CANCEL_NOTIFICATION, false)) {
                     ScreenshotNotificationsController.cancelScreenshotNotification(context);
                 }
                 ActivityOptions opts = ActivityOptions.makeBasic();
                 opts.setDisallowEnterPictureInPictureWhileLaunching(
                         intent.getBooleanExtra(EXTRA_DISALLOW_ENTER_PIP, false));
-                context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
+                try {
+                    actionIntent.send(context, 0, null, null, null, null, opts.toBundle());
+                } catch (PendingIntent.CanceledException e) {
+                    Log.e(TAG, "Pending intent canceled", e);
+                }
+
             };
 
             if (mStatusBar != null) {

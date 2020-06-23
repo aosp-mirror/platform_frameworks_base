@@ -1,41 +1,65 @@
 package com.android.systemui.media
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
+import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
 import android.view.LayoutInflater
-import android.view.GestureDetector
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.HorizontalScrollView
 import android.widget.LinearLayout
-import androidx.core.view.GestureDetectorCompat
 import com.android.systemui.R
+import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.VisualStabilityManager
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
+import com.android.systemui.util.concurrency.DelayableExecutor
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-private const val FLING_SLOP = 1000000
+private val settingsIntent = Intent().setAction(ACTION_MEDIA_CONTROLS_SETTINGS)
 
 /**
  * Class that is responsible for keeping the view carousel up to date.
  * This also handles changes in state and applies them to the media carousel like the expansion.
  */
 @Singleton
-class MediaViewManager @Inject constructor(
+class MediaCarouselController @Inject constructor(
     private val context: Context,
     private val mediaControlPanelFactory: Provider<MediaControlPanel>,
     private val visualStabilityManager: VisualStabilityManager,
     private val mediaHostStatesManager: MediaHostStatesManager,
+    private val activityStarter: ActivityStarter,
+    @Main executor: DelayableExecutor,
     mediaManager: MediaDataCombineLatest,
-    configurationController: ConfigurationController
+    configurationController: ConfigurationController,
+    mediaDataManager: MediaDataManager,
+    falsingManager: FalsingManager
 ) {
+    /**
+     * The current width of the carousel
+     */
+    private var currentCarouselWidth: Int = 0
 
+    /**
+     * The current height of the carousel
+     */
+    private var currentCarouselHeight: Int = 0
+
+    /**
+     * Are we currently showing only active players
+     */
+    private var currentlyShowingOnlyActive: Boolean = false
+
+    /**
+     * Is the player currently visible (at the end of the transformation
+     */
+    private var playersVisible: Boolean = false
     /**
      * The desired location where we'll be at the end of the transformation. Usually this matches
      * the end location, except when we're still waiting on a state update call.
@@ -73,17 +97,16 @@ class MediaViewManager @Inject constructor(
     private var carouselMeasureHeight: Int = 0
     private var playerWidthPlusPadding: Int = 0
     private var desiredHostState: MediaHostState? = null
-    private val mediaCarousel: HorizontalScrollView
+    private val mediaCarousel: MediaScrollView
+    private val mediaCarouselScrollHandler: MediaCarouselScrollHandler
     val mediaFrame: ViewGroup
     val mediaPlayers: MutableMap<String, MediaControlPanel> = mutableMapOf()
+    private lateinit var settingsButton: View
     private val mediaData: MutableMap<String, MediaData> = mutableMapOf()
     private val mediaContent: ViewGroup
     private val pageIndicator: PageIndicator
-    private val gestureDetector: GestureDetectorCompat
     private val visualStabilityCallback: VisualStabilityManager.Callback
-    private var activeMediaIndex: Int = 0
     private var needsReordering: Boolean = false
-    private var scrollIntoCurrentMedia: Int = 0
     private var currentlyExpanded = true
         set(value) {
             if (field != value) {
@@ -93,50 +116,25 @@ class MediaViewManager @Inject constructor(
                 }
             }
         }
-    private val scrollChangedListener = object : View.OnScrollChangeListener {
-        override fun onScrollChange(
-            v: View?,
-            scrollX: Int,
-            scrollY: Int,
-            oldScrollX: Int,
-            oldScrollY: Int
-        ) {
-            if (playerWidthPlusPadding == 0) {
-                return
-            }
-            onMediaScrollingChanged(scrollX / playerWidthPlusPadding,
-                    scrollX % playerWidthPlusPadding)
-        }
-    }
-    private val gestureListener = object : GestureDetector.SimpleOnGestureListener() {
-        override fun onFling(
-            eStart: MotionEvent?,
-            eCurrent: MotionEvent?,
-            vX: Float,
-            vY: Float
-        ): Boolean {
-            return this@MediaViewManager.onFling(eStart, eCurrent, vX, vY)
-        }
-    }
-    private val touchListener = object : View.OnTouchListener {
-        override fun onTouch(view: View, motionEvent: MotionEvent?): Boolean {
-            return this@MediaViewManager.onTouch(view, motionEvent)
-        }
-    }
     private val configListener = object : ConfigurationController.ConfigurationListener {
         override fun onDensityOrFontScaleChanged() {
             recreatePlayers()
+            inflateSettingsButton()
+        }
+
+        override fun onOverlayChanged() {
+            inflateSettingsButton()
         }
     }
 
     init {
-        gestureDetector = GestureDetectorCompat(context, gestureListener)
         mediaFrame = inflateMediaCarousel()
         mediaCarousel = mediaFrame.requireViewById(R.id.media_carousel_scroller)
         pageIndicator = mediaFrame.requireViewById(R.id.media_page_indicator)
-        mediaCarousel.setOnScrollChangeListener(scrollChangedListener)
-        mediaCarousel.setOnTouchListener(touchListener)
-        mediaCarousel.setOverScrollMode(View.OVER_SCROLL_NEVER)
+        mediaCarouselScrollHandler = MediaCarouselScrollHandler(mediaCarousel, pageIndicator,
+                executor, mediaDataManager::onSwipeToDismiss, this::updatePageIndicatorLocation,
+                falsingManager)
+        inflateSettingsButton()
         mediaContent = mediaCarousel.requireViewById(R.id.media_carousel)
         configurationController.addCallback(configListener)
         visualStabilityCallback = VisualStabilityManager.Callback {
@@ -161,6 +159,11 @@ class MediaViewManager @Inject constructor(
                 removePlayer(key)
             }
         })
+        mediaFrame.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            // The pageIndicator is not laid out yet when we get the current state update,
+            // Lets make sure we have the right dimensions
+            updatePageIndicatorLocation()
+        }
         mediaHostStatesManager.addCallback(object : MediaHostStatesManager.Callback {
             override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
                 if (location == desiredLocation) {
@@ -168,6 +171,20 @@ class MediaViewManager @Inject constructor(
                 }
             }
         })
+    }
+
+    private fun inflateSettingsButton() {
+        val settings = LayoutInflater.from(context).inflate(R.layout.media_carousel_settings_button,
+                mediaFrame, false) as View
+        if (this::settingsButton.isInitialized) {
+            mediaFrame.removeView(settingsButton)
+        }
+        settingsButton = settings
+        mediaFrame.addView(settingsButton)
+        mediaCarouselScrollHandler.onSettingsButtonUpdated(settings)
+        settingsButton.setOnClickListener {
+            activityStarter.startActivity(settingsIntent, true /* dismissShade */)
+        }
     }
 
     private fun inflateMediaCarousel(): ViewGroup {
@@ -183,68 +200,7 @@ class MediaViewManager @Inject constructor(
                 mediaContent.addView(view, 0)
             }
         }
-        updateMediaPaddings()
-        updatePlayerVisibilities()
-    }
-
-    private fun onMediaScrollingChanged(newIndex: Int, scrollInAmount: Int) {
-        val wasScrolledIn = scrollIntoCurrentMedia != 0
-        scrollIntoCurrentMedia = scrollInAmount
-        val nowScrolledIn = scrollIntoCurrentMedia != 0
-        if (newIndex != activeMediaIndex || wasScrolledIn != nowScrolledIn) {
-            activeMediaIndex = newIndex
-            updatePlayerVisibilities()
-        }
-        val location = activeMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
-                scrollInAmount.toFloat() / playerWidthPlusPadding else 0f
-        pageIndicator.setLocation(location)
-    }
-
-    private fun onTouch(view: View, motionEvent: MotionEvent?): Boolean {
-        if (gestureDetector.onTouchEvent(motionEvent)) {
-            return true
-        }
-        if (motionEvent?.getAction() == MotionEvent.ACTION_UP) {
-            val pos = mediaCarousel.scrollX % playerWidthPlusPadding
-            if (pos > playerWidthPlusPadding / 2) {
-                mediaCarousel.smoothScrollBy(playerWidthPlusPadding - pos, 0)
-            } else {
-                mediaCarousel.smoothScrollBy(-1 * pos, 0)
-            }
-            return true
-        }
-        return view.onTouchEvent(motionEvent)
-    }
-
-    private fun onFling(
-        eStart: MotionEvent?,
-        eCurrent: MotionEvent?,
-        vX: Float,
-        vY: Float
-    ): Boolean {
-        if (vX * vX < 0.5 * vY * vY) {
-            return false
-        }
-        if (vX * vX < FLING_SLOP) {
-            return false
-        }
-        val pos = mediaCarousel.scrollX
-        val currentIndex = if (playerWidthPlusPadding > 0) pos / playerWidthPlusPadding else 0
-        var destIndex = if (vX <= 0) currentIndex + 1 else currentIndex
-        destIndex = Math.max(0, destIndex)
-        destIndex = Math.min(mediaContent.getChildCount() - 1, destIndex)
-        val view = mediaContent.getChildAt(destIndex)
-        mediaCarousel.smoothScrollTo(view.left, mediaCarousel.scrollY)
-        return true
-    }
-
-    private fun updatePlayerVisibilities() {
-        val scrolledIn = scrollIntoCurrentMedia != 0
-        for (i in 0 until mediaContent.childCount) {
-            val view = mediaContent.getChildAt(i)
-            val visible = (i == activeMediaIndex) || ((i == (activeMediaIndex + 1)) && scrolledIn)
-            view.visibility = if (visible) View.VISIBLE else View.INVISIBLE
-        }
+        mediaCarouselScrollHandler.onPlayersChanged()
     }
 
     private fun addOrUpdatePlayer(key: String, oldKey: String?, data: MediaData) {
@@ -259,6 +215,7 @@ class MediaViewManager @Inject constructor(
             existingPlayer = mediaControlPanelFactory.get()
             existingPlayer.attach(PlayerViewHolder.create(LayoutInflater.from(context),
                     mediaContent))
+            existingPlayer.mediaViewController.sizeChangedListener = this::updateCarouselDimensions
             mediaPlayers[key] = existingPlayer
             val lp = LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT)
@@ -280,28 +237,18 @@ class MediaViewManager @Inject constructor(
             }
         }
         existingPlayer?.bind(data)
-        updateMediaPaddings()
         updatePageIndicator()
-        updatePlayerVisibilities()
+        mediaCarouselScrollHandler.onPlayersChanged()
         mediaCarousel.requiresRemeasuring = true
     }
 
     private fun removePlayer(key: String) {
         val removed = mediaPlayers.remove(key)
         removed?.apply {
-            val beforeActive = mediaContent.indexOfChild(removed.view?.player) <=
-                    activeMediaIndex
+            mediaCarouselScrollHandler.onPrePlayerRemoved(removed)
             mediaContent.removeView(removed.view?.player)
             removed.onDestroy()
-            updateMediaPaddings()
-            if (beforeActive) {
-                // also update the index here since the scroll below might not always lead
-                // to a scrolling changed
-                activeMediaIndex = Math.max(0, activeMediaIndex - 1)
-                mediaCarousel.scrollX = Math.max(mediaCarousel.scrollX -
-                        playerWidthPlusPadding, 0)
-            }
-            updatePlayerVisibilities()
+            mediaCarouselScrollHandler.onPlayersChanged()
             updatePageIndicator()
         }
     }
@@ -317,20 +264,6 @@ class MediaViewManager @Inject constructor(
         }
     }
 
-    private fun updateMediaPaddings() {
-        val padding = context.resources.getDimensionPixelSize(R.dimen.qs_media_padding)
-        val childCount = mediaContent.childCount
-        for (i in 0 until childCount) {
-            val mediaView = mediaContent.getChildAt(i)
-            val desiredPaddingEnd = if (i == childCount - 1) 0 else padding
-            val layoutParams = mediaView.layoutParams as ViewGroup.MarginLayoutParams
-            if (layoutParams.marginEnd != desiredPaddingEnd) {
-                layoutParams.marginEnd = desiredPaddingEnd
-                mediaView.layoutParams = layoutParams
-            }
-        }
-    }
-
     private fun updatePageIndicator() {
         val numPages = mediaContent.getChildCount()
         pageIndicator.setNumPages(numPages, Color.WHITE)
@@ -342,6 +275,12 @@ class MediaViewManager @Inject constructor(
     /**
      * Set a new interpolated state for all players. This is a state that is usually controlled
      * by a finger movement where the user drags from one state to the next.
+     *
+     * @param startLocation the start location of our state or -1 if this is directly set
+     * @param endLocation the ending location of our state.
+     * @param progress the progress of the transition between startLocation and endlocation. If
+     *                 this is not a guided transformation, this will be 1.0f
+     * @param immediately should this state be applied immediately, canceling all animations?
      */
     fun setCurrentState(
         @MediaLocation startLocation: Int,
@@ -349,9 +288,6 @@ class MediaViewManager @Inject constructor(
         progress: Float,
         immediately: Boolean
     ) {
-        // Hack: Since the indicator doesn't move with the player expansion, just make it disappear
-        // and then reappear at the end.
-        pageIndicator.alpha = if (progress == 1f || progress == 0f) 1f else 0f
         if (startLocation != currentStartLocation ||
                 endLocation != currentEndLocation ||
                 progress != currentTransitionProgress ||
@@ -363,6 +299,51 @@ class MediaViewManager @Inject constructor(
             for (mediaPlayer in mediaPlayers.values) {
                 updatePlayerToState(mediaPlayer, immediately)
             }
+            maybeResetSettingsCog()
+        }
+    }
+
+    private fun updatePageIndicatorLocation() {
+        // Update the location of the page indicator, carousel clipping
+        pageIndicator.translationX = (currentCarouselWidth - pageIndicator.width) / 2.0f +
+                mediaCarouselScrollHandler.contentTranslation
+        val layoutParams = pageIndicator.layoutParams as ViewGroup.MarginLayoutParams
+        pageIndicator.translationY = (currentCarouselHeight - pageIndicator.height -
+                layoutParams.bottomMargin).toFloat()
+    }
+
+    /**
+     * Update the dimension of this carousel.
+     */
+    private fun updateCarouselDimensions() {
+        var width = 0
+        var height = 0
+        for (mediaPlayer in mediaPlayers.values) {
+            val controller = mediaPlayer.mediaViewController
+            width = Math.max(width, controller.currentWidth)
+            height = Math.max(height, controller.currentHeight)
+        }
+        if (width != currentCarouselWidth || height != currentCarouselHeight) {
+            currentCarouselWidth = width
+            currentCarouselHeight = height
+            mediaCarouselScrollHandler.setCarouselBounds(currentCarouselWidth, currentCarouselHeight)
+            updatePageIndicatorLocation()
+        }
+    }
+
+    private fun maybeResetSettingsCog() {
+        val hostStates = mediaHostStatesManager.mediaHostStates
+        val endShowsActive = hostStates[currentEndLocation]?.showsOnlyActiveMedia
+                ?: true
+        val startShowsActive = hostStates[currentStartLocation]?.showsOnlyActiveMedia
+                ?: endShowsActive
+        if (currentlyShowingOnlyActive != endShowsActive ||
+                ((currentTransitionProgress != 1.0f && currentTransitionProgress != 0.0f) &&
+                            startShowsActive != endShowsActive)) {
+            /// Whenever we're transitioning from between differing states or the endstate differs
+            // we reset the translation
+            currentlyShowingOnlyActive = endShowsActive
+            mediaCarouselScrollHandler.resetTranslation(animate = true)
         }
     }
 
@@ -404,6 +385,15 @@ class MediaViewManager @Inject constructor(
                 }
                 mediaPlayer.mediaViewController.onLocationPreChange(desiredLocation)
             }
+            mediaCarouselScrollHandler.showsSettingsButton = !it.showsOnlyActiveMedia
+            mediaCarouselScrollHandler.falsingProtectionNeeded = it.falsingProtectionNeeded
+            val nowVisible = it.visible
+            if (nowVisible != playersVisible) {
+                playersVisible = nowVisible
+                if (nowVisible) {
+                    mediaCarouselScrollHandler.resetTranslation()
+                }
+            }
             updateCarouselSize()
         }
     }
@@ -420,16 +410,7 @@ class MediaViewManager @Inject constructor(
             carouselMeasureHeight = height
             playerWidthPlusPadding = carouselMeasureWidth + context.resources.getDimensionPixelSize(
                     R.dimen.qs_media_padding)
-            // The player width has changed, let's update the scroll position to make sure
-            // it's still at the same place
-            var newScroll = activeMediaIndex * playerWidthPlusPadding
-            if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
-                newScroll += playerWidthPlusPadding -
-                        (scrollIntoCurrentMedia - playerWidthPlusPadding)
-            } else {
-                newScroll += scrollIntoCurrentMedia
-            }
-            mediaCarousel.scrollX = newScroll
+            mediaCarouselScrollHandler.playerWidthPlusPadding = playerWidthPlusPadding
             // Let's remeasure the carousel
             val widthSpec = desiredHostState?.measurementInput?.widthMeasureSpec ?: 0
             val heightSpec = desiredHostState?.measurementInput?.heightMeasureSpec ?: 0

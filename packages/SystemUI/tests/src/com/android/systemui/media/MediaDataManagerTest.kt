@@ -1,6 +1,11 @@
 package com.android.systemui.media
 
-import android.app.Notification
+import android.app.Notification.MediaStyle
+import android.app.PendingIntent
+import android.media.MediaDescription
+import android.media.MediaMetadata
+import android.media.session.MediaController
+import android.media.session.MediaSession
 import android.service.notification.StatusBarNotification
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
@@ -8,6 +13,9 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.statusbar.SbnBuilder
+import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
 import org.junit.Before
@@ -18,12 +26,14 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.junit.MockitoJUnit
-import java.util.concurrent.Executor
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.junit.MockitoJUnit
 
 private const val KEY = "KEY"
 private const val PACKAGE_NAME = "com.android.systemui"
+private const val APP_NAME = "SystemUI"
+private const val SESSION_ARTIST = "artist"
+private const val SESSION_TITLE = "title"
 
 private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
@@ -36,33 +46,47 @@ private fun <T> anyObject(): T {
 class MediaDataManagerTest : SysuiTestCase() {
 
     @Mock lateinit var mediaControllerFactory: MediaControllerFactory
-    @Mock lateinit var backgroundExecutor: Executor
-    @Mock lateinit var foregroundExecutor: Executor
+    @Mock lateinit var controller: MediaController
+    lateinit var session: MediaSession
+    lateinit var metadataBuilder: MediaMetadata.Builder
+    lateinit var backgroundExecutor: FakeExecutor
+    lateinit var foregroundExecutor: FakeExecutor
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock lateinit var mediaTimeoutListener: MediaTimeoutListener
     @Mock lateinit var mediaResumeListener: MediaResumeListener
+    @Mock lateinit var pendingIntent: PendingIntent
     @JvmField @Rule val mockito = MockitoJUnit.rule()
     lateinit var mediaDataManager: MediaDataManager
     lateinit var mediaNotification: StatusBarNotification
 
     @Before
     fun setup() {
+        foregroundExecutor = FakeExecutor(FakeSystemClock())
+        backgroundExecutor = FakeExecutor(FakeSystemClock())
         mediaDataManager = MediaDataManager(context, backgroundExecutor, foregroundExecutor,
                 mediaControllerFactory, broadcastDispatcher, dumpManager,
                 mediaTimeoutListener, mediaResumeListener, useMediaResumption = true,
                 useQsMediaPlayer = true)
-        val sbn = mock(StatusBarNotification::class.java)
-        val notification = mock(Notification::class.java)
-        whenever(notification.hasMediaSession()).thenReturn(true)
-        whenever(notification.notificationStyle).thenReturn(Notification.MediaStyle::class.java)
-        whenever(sbn.notification).thenReturn(notification)
-        whenever(sbn.packageName).thenReturn(PACKAGE_NAME)
-        mediaNotification = sbn
+        session = MediaSession(context, "MediaDataManagerTestSession")
+        mediaNotification = SbnBuilder().run {
+            setPkg(PACKAGE_NAME)
+            modifyNotification(context).also {
+                it.setSmallIcon(android.R.drawable.ic_media_pause)
+                it.setStyle(MediaStyle().apply { setMediaSession(session.sessionToken) })
+            }
+            build()
+        }
+        metadataBuilder = MediaMetadata.Builder().apply {
+            putString(MediaMetadata.METADATA_KEY_ARTIST, SESSION_ARTIST)
+            putString(MediaMetadata.METADATA_KEY_TITLE, SESSION_TITLE)
+        }
+        whenever(mediaControllerFactory.create(eq(session.sessionToken))).thenReturn(controller)
     }
 
     @After
     fun tearDown() {
+        session.release()
         mediaDataManager.destroy()
     }
 
@@ -82,7 +106,7 @@ class MediaDataManagerTest : SysuiTestCase() {
     @Test
     fun testLoadsMetadataOnBackground() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
-        verify(backgroundExecutor).execute(anyObject())
+        assertThat(backgroundExecutor.numPending()).isEqualTo(1)
     }
 
     @Test
@@ -122,5 +146,67 @@ class MediaDataManagerTest : SysuiTestCase() {
         mediaDataManager.onNotificationRemoved(KEY)
 
         verify(listener).onMediaDataRemoved(eq(KEY))
+    }
+
+    @Test
+    fun testOnNotificationRemoved_withResumption() {
+        // GIVEN that the manager has a notification with a resume action
+        val listener = TestListener()
+        mediaDataManager.addListener(listener)
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        val data = listener.data!!
+        assertThat(data.resumption).isFalse()
+        mediaDataManager.onMediaDataLoaded(KEY, null, data.copy(resumeAction = Runnable {}))
+        // WHEN the notification is removed
+        mediaDataManager.onNotificationRemoved(KEY)
+        // THEN the media data indicates that it is
+        assertThat(listener.data!!.resumption).isTrue()
+    }
+
+    @Test
+    fun testAddResumptionControls() {
+        val listener = TestListener()
+        mediaDataManager.addListener(listener)
+        // WHEN resumption controls are added`
+        val desc = MediaDescription.Builder().run {
+            setTitle(SESSION_TITLE)
+            build()
+        }
+        mediaDataManager.addResumptionControls(desc, Runnable {}, session.sessionToken, APP_NAME,
+                pendingIntent, PACKAGE_NAME)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        // THEN the media data indicates that it is for resumption
+        val data = listener.data!!
+        assertThat(data.resumption).isTrue()
+        assertThat(data.song).isEqualTo(SESSION_TITLE)
+        assertThat(data.app).isEqualTo(APP_NAME)
+        assertThat(data.actions).hasSize(1)
+    }
+
+    /**
+     * Simple implementation of [MediaDataManager.Listener] for the test.
+     *
+     * Giving up on trying to get a mock Listener and ArgumentCaptor to work.
+     */
+    private class TestListener : MediaDataManager.Listener {
+        var data: MediaData? = null
+        var key: String? = null
+        var oldKey: String? = null
+
+        override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
+            this.key = key
+            this.oldKey = oldKey
+            this.data = data
+        }
+
+        override fun onMediaDataRemoved(key: String) {
+            this.key = key
+            oldKey = null
+            data = null
+        }
     }
 }

@@ -56,12 +56,14 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
 
     private static final boolean DEBUG = false;
 
+    // NOTE: All these constants came from InsetsController.
     public static final int ANIMATION_DURATION_SHOW_MS = 275;
     public static final int ANIMATION_DURATION_HIDE_MS = 340;
     public static final Interpolator INTERPOLATOR = new PathInterpolator(0.4f, 0f, 0.2f, 1f);
     private static final int DIRECTION_NONE = 0;
     private static final int DIRECTION_SHOW = 1;
     private static final int DIRECTION_HIDE = 2;
+    private static final int FLOATING_IME_BOTTOM_INSET = -80;
 
     SystemWindows mSystemWindows;
     final Handler mHandler;
@@ -271,8 +273,16 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
             // Set frame, but only if the new frame isn't empty -- this maintains continuity
             final Rect newFrame = imeSource.getFrame();
-            if (newFrame.height() != 0) {
+            mImeFrame.set(newFrame);
+            final boolean isFloating = newFrame.height() == 0;
+            if (isFloating) {
+                // This is likely a "floating" or "expanded" IME, so to get animations, just
+                // pretend the ime has some size just below the screen.
                 mImeFrame.set(newFrame);
+                final int floatingInset = (int) (
+                        mSystemWindows.mDisplayController.getDisplayLayout(mDisplayId).density()
+                                * FLOATING_IME_BOTTOM_INSET);
+                mImeFrame.bottom -= floatingInset;
             }
             if (DEBUG) {
                 Slog.d(TAG, "Run startAnim  show:" + show + "  was:"
@@ -316,6 +326,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 SurfaceControl.Transaction t = mTransactionPool.acquire();
                 float value = (float) animation.getAnimatedValue();
                 t.setPosition(mImeSourceControl.getLeash(), x, value);
+                final float alpha = isFloating ? (value - hiddenY) / (shownY - hiddenY) : 1.f;
+                t.setAlpha(mImeSourceControl.getLeash(), alpha);
                 dispatchPositionChanged(mDisplayId, imeTop(value), t);
                 t.apply();
                 mTransactionPool.release(t);
@@ -327,6 +339,8 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 public void onAnimationStart(Animator animation) {
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
                     t.setPosition(mImeSourceControl.getLeash(), x, startY);
+                    final float alpha = isFloating ? (startY - hiddenY) / (shownY - hiddenY) : 1.f;
+                    t.setAlpha(mImeSourceControl.getLeash(), alpha);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
                                 + imeTop(hiddenY) + "->" + imeTop(shownY)
@@ -351,6 +365,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     SurfaceControl.Transaction t = mTransactionPool.acquire();
                     if (!mCancelled) {
                         t.setPosition(mImeSourceControl.getLeash(), x, endY);
+                        t.setAlpha(mImeSourceControl.getLeash(), 1.f);
                     }
                     dispatchEndPositioning(mDisplayId, mCancelled, t);
                     if (mAnimationDirection == DIRECTION_HIDE && !mCancelled) {

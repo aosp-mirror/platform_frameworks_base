@@ -221,12 +221,11 @@ public class MediaRouter {
 
             if (!TextUtils.equals(newRoutes.bluetoothName, mCurAudioRoutesInfo.bluetoothName)) {
                 forceUseDefaultRoute = false;
-                mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
-                if (mCurAudioRoutesInfo.bluetoothName != null) {
+                if (newRoutes.bluetoothName != null) {
                     if (mBluetoothA2dpRoute == null) {
                         // BT connected
                         final RouteInfo info = new RouteInfo(mSystemCategory);
-                        info.mName = mCurAudioRoutesInfo.bluetoothName;
+                        info.mName = newRoutes.bluetoothName;
                         info.mDescription = mResources.getText(
                                 com.android.internal.R.string.bluetooth_a2dp_audio_route_name);
                         info.mSupportedTypes = ROUTE_TYPE_LIVE_AUDIO;
@@ -234,13 +233,14 @@ public class MediaRouter {
                         mBluetoothA2dpRoute = info;
                         addRouteStatic(mBluetoothA2dpRoute);
                     } else {
-                        mBluetoothA2dpRoute.mName = mCurAudioRoutesInfo.bluetoothName;
+                        mBluetoothA2dpRoute.mName = newRoutes.bluetoothName;
                         dispatchRouteChanged(mBluetoothA2dpRoute);
                     }
                 } else if (mBluetoothA2dpRoute != null) {
                     // BT disconnected
-                    removeRouteStatic(mBluetoothA2dpRoute);
+                    RouteInfo btRoute = mBluetoothA2dpRoute;
                     mBluetoothA2dpRoute = null;
+                    removeRouteStatic(btRoute);
                 }
                 audioRoutesChanged = true;
             }
@@ -256,6 +256,7 @@ public class MediaRouter {
                     }
                 }
             }
+            mCurAudioRoutesInfo.bluetoothName = newRoutes.bluetoothName;
         }
 
         boolean isBluetoothA2dpOn() {

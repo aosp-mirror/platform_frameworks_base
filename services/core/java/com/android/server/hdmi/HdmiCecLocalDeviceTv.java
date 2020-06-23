@@ -213,6 +213,7 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         mLocalDeviceAddresses = initLocalDeviceAddresses();
         resetSelectRequestBuffer();
         launchDeviceDiscovery();
+        startQueuedActions();
     }
 
 
