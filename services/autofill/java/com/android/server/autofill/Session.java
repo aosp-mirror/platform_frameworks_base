@@ -155,6 +155,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
      */
     public final int id;
 
+    /** userId the session belongs to */
+    public final int userId;
+
     /** uid the session is for */
     public final int uid;
 
@@ -823,6 +826,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
         id = sessionId;
         mFlags = flags;
+        this.userId = userId;
         this.taskId = taskId;
         this.uid = uid;
         mStartTime = SystemClock.elapsedRealtime();
@@ -2982,7 +2986,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                         mInlineSessionController.hideInlineSuggestionsUiLocked(
                                 focusedId);
                     }
-                }, remoteRenderService);
+                }, remoteRenderService, userId, id);
         return mInlineSessionController.setInlineFillUiLocked(inlineFillUi);
     }
 
@@ -3285,7 +3289,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                     synchronized (mLock) {
                                         cancelAugmentedAutofillLocked();
                                     }
-                                }, mService.getRemoteInlineSuggestionRenderServiceLocked());
+                                }, mService.getRemoteInlineSuggestionRenderServiceLocked(), userId);
                     }
                 };
 
@@ -3785,6 +3789,12 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (mCurrentViewId != null) {
             mInlineSessionController.destroyLocked(mCurrentViewId);
         }
+        final RemoteInlineSuggestionRenderService remoteRenderService =
+                mService.getRemoteInlineSuggestionRenderServiceLocked();
+        if (remoteRenderService != null) {
+            remoteRenderService.destroySuggestionViews(userId, id);
+        }
+
         mDestroyed = true;
 
         // Log metrics
