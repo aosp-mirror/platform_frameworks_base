@@ -64,6 +64,8 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -152,7 +154,8 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 () -> mStatusBar, mHandler, mHandler, mAccessibilityManager, mHighPriorityProvider,
                 mINotificationManager, mLauncherApps, mShortcutManager,
                 mChannelEditorDialogController, mContextTracker, mProvider,
-                mAssistantFeedbackController, mBubbleController);
+                mAssistantFeedbackController, mBubbleController,
+                new UiEventLoggerFake());
         mGutsManager.setUpWithPresenter(mPresenter, mStackScroller,
                 mCheckSaveListener, mOnSettingsClickListener);
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarter);
@@ -365,6 +368,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(false),
                 eq(false),
                 eq(true), /* wasShownHighPriority */
@@ -398,6 +402,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(true),
                 eq(false),
                 eq(false), /* wasShownHighPriority */
@@ -429,6 +434,7 @@ public class NotificationGutsManagerTest extends SysuiTestCase {
                 eq(entry),
                 any(NotificationInfo.OnSettingsClickListener.class),
                 any(NotificationInfo.OnAppSettingsClickListener.class),
+                any(UiEventLogger.class),
                 eq(false),
                 eq(false),
                 eq(false), /* wasShownHighPriority */

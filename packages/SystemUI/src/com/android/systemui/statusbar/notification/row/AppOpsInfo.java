@@ -31,6 +31,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
 
@@ -50,6 +51,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     private MetricsLogger mMetricsLogger;
     private OnSettingsClickListener mOnSettingsClickListener;
     private NotificationGuts mGutsContainer;
+    private UiEventLogger mUiEventLogger;
 
     private OnClickListener mOnOk = v -> {
         mGutsContainer.closeControls(v, false);
@@ -66,6 +68,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     public void bindGuts(final PackageManager pm,
             final OnSettingsClickListener onSettingsClick,
             final StatusBarNotification sbn,
+            final UiEventLogger uiEventLogger,
             ArraySet<Integer> activeOps) {
         mPkg = sbn.getPackageName();
         mSbn = sbn;
@@ -73,11 +76,13 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
         mAppName = mPkg;
         mOnSettingsClickListener = onSettingsClick;
         mAppOps = activeOps;
+        mUiEventLogger = uiEventLogger;
 
         bindHeader();
         bindPrompt();
         bindButtons();
 
+        logUiEvent(NotificationAppOpsEvent.NOTIFICATION_APP_OPS_OPEN);
         mMetricsLogger = new MetricsLogger();
         mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, true);
     }
@@ -188,6 +193,7 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
 
     @Override
     public boolean handleCloseControls(boolean save, boolean force) {
+        logUiEvent(NotificationAppOpsEvent.NOTIFICATION_APP_OPS_CLOSE);
         if (mMetricsLogger != null) {
             mMetricsLogger.visibility(MetricsEvent.APP_OPS_GUTS, false);
         }
@@ -197,5 +203,12 @@ public class AppOpsInfo extends LinearLayout implements NotificationGuts.GutsCon
     @Override
     public int getActualHeight() {
         return getHeight();
+    }
+
+    private void logUiEvent(NotificationAppOpsEvent event) {
+        if (mSbn != null) {
+            mUiEventLogger.logWithInstanceId(event,
+                    mSbn.getUid(), mSbn.getPackageName(), mSbn.getInstanceId());
+        }
     }
 }
