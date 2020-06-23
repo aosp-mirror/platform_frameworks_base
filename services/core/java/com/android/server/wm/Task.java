@@ -3549,11 +3549,19 @@ class Task extends WindowContainer<WindowContainer> {
         }
     }
 
+
     /**
      * Fills in a {@link TaskInfo} with information from this task. Note that the base intent in the
      * task info will not include any extras or clip data.
      */
     void fillTaskInfo(TaskInfo info) {
+        fillTaskInfo(info, true /* stripExtras */);
+    }
+
+    /**
+     * Fills in a {@link TaskInfo} with information from this task.
+     */
+    void fillTaskInfo(TaskInfo info, boolean stripExtras) {
         getNumRunningActivities(mReuseActivitiesReport);
         info.userId = mUserId;
         info.stackId = getRootTaskId();
@@ -3564,7 +3572,9 @@ class Task extends WindowContainer<WindowContainer> {
         // Make a copy of base intent because this is like a snapshot info.
         // Besides, {@link RecentTasks#getRecentTasksImpl} may modify it.
         final int baseIntentFlags = baseIntent == null ? 0 : baseIntent.getFlags();
-        info.baseIntent = baseIntent == null ? new Intent() : baseIntent.cloneFilter();
+        info.baseIntent = baseIntent == null
+                ? new Intent()
+                : stripExtras ? baseIntent.cloneFilter() : new Intent(baseIntent);
         info.baseIntent.setFlags(baseIntentFlags);
         info.baseActivity = mReuseActivitiesReport.base != null
                 ? mReuseActivitiesReport.base.intent.getComponent()
