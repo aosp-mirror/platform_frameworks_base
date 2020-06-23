@@ -841,6 +841,35 @@ public final class MediaParser {
      */
     public static final String PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT =
             "android.media.mediaParser.exposeChunkIndexAsMediaFormat";
+    /**
+     * Sets a list of closed-caption {@link MediaFormat MediaFormats} that should be exposed as part
+     * of the extracted media. {@code List<MediaFormat>} expected. Default value is an empty list.
+     *
+     * <p>Expected keys in the {@link MediaFormat} are:
+     *
+     * <ul>
+     *   <p>{@link MediaFormat#KEY_MIME}: Determine the type of captions (for example,
+     *   application/cea-608). Mandatory.
+     *   <p>{@link MediaFormat#KEY_CAPTION_SERVICE_NUMBER}: Determine the channel on which the
+     *   captions are transmitted. Optional.
+     * </ul>
+     *
+     * @hide
+     */
+    public static final String PARAMETER_EXPOSE_CAPTION_FORMATS =
+            "android.media.mediaParser.exposeCaptionFormats";
+    /**
+     * Sets whether the value associated with {@link #PARAMETER_EXPOSE_CAPTION_FORMATS} should
+     * override any in-band caption service declarations. {@code boolean} expected. Default value is
+     * {@link false}.
+     *
+     * <p>When {@code false}, any present in-band caption services information will override the
+     * values associated with {@link #PARAMETER_EXPOSE_CAPTION_FORMATS}.
+     *
+     * @hide
+     */
+    public static final String PARAMETER_OVERRIDE_IN_BAND_CAPTION_DECLARATIONS =
+            "android.media.mediaParser.overrideInBandCaptionDeclarations";
 
     // Private constants.
 
@@ -1000,6 +1029,7 @@ public final class MediaParser {
     private final DataReaderAdapter mScratchDataReaderAdapter;
     private final ParsableByteArrayAdapter mScratchParsableByteArrayAdapter;
     @Nullable private final Constructor<DrmInitData.SchemeInitData> mSchemeInitDataConstructor;
+    private final ArrayList<Format> mMuxedCaptionFormats;
     private boolean mInBandCryptoInfo;
     private boolean mIncludeSupplementalData;
     private boolean mIgnoreTimestampOffset;
@@ -1071,6 +1101,9 @@ public final class MediaParser {
         if (PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT.equals(parameterName)) {
             mExposeChunkIndexAsMediaFormat = (boolean) value;
         }
+        if (PARAMETER_EXPOSE_CAPTION_FORMATS.equals(parameterName)) {
+            setMuxedCaptionFormats((List<MediaFormat>) value);
+        }
         mParserParameters.put(parameterName, value);
         return this;
     }
@@ -1109,8 +1142,8 @@ public final class MediaParser {
      *
      * <p>This method will block until some progress has been made.
      *
-     * <p>If this instance was created using {@link #create}. the first call to this method will
-     * sniff the content with the parsers with the provided names.
+     * <p>If this instance was created using {@link #create}, the first call to this method will
+     * sniff the content using the selected parser implementations.
      *
      * @param seekableInputReader The {@link SeekableInputReader} from which to obtain the media
      *     container data.
@@ -1242,6 +1275,14 @@ public final class MediaParser {
         mScratchDataReaderAdapter = new DataReaderAdapter();
         mScratchParsableByteArrayAdapter = new ParsableByteArrayAdapter();
         mSchemeInitDataConstructor = getSchemeInitDataConstructor();
+        mMuxedCaptionFormats = new ArrayList<>();
+    }
+
+    private void setMuxedCaptionFormats(List<MediaFormat> mediaFormats) {
+        mMuxedCaptionFormats.clear();
+        for (MediaFormat mediaFormat : mediaFormats) {
+            mMuxedCaptionFormats.add(toExoPlayerCaptionFormat(mediaFormat));
+        }
     }
 
     private boolean isPendingSeek() {
@@ -1280,7 +1321,11 @@ public final class MediaParser {
                                 ? FragmentedMp4Extractor
                                         .FLAG_WORKAROUND_EVERY_VIDEO_FRAME_IS_SYNC_FRAME
                                 : 0;
-                return new FragmentedMp4Extractor(flags, timestampAdjuster);
+                return new FragmentedMp4Extractor(
+                        flags,
+                        timestampAdjuster,
+                        /* sideloadedTrack= */ null,
+                        mMuxedCaptionFormats);
             case PARSER_NAME_MP4:
                 flags |=
                         getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
@@ -1331,6 +1376,10 @@ public final class MediaParser {
                         getBooleanParameter(PARAMETER_TS_IGNORE_SPLICE_INFO_STREAM)
                                 ? DefaultTsPayloadReaderFactory.FLAG_IGNORE_SPLICE_INFO_STREAM
                                 : 0;
+                flags |=
+                        getBooleanParameter(PARAMETER_OVERRIDE_IN_BAND_CAPTION_DECLARATIONS)
+                                ? DefaultTsPayloadReaderFactory.FLAG_OVERRIDE_CAPTION_DESCRIPTORS
+                                : 0;
                 String tsMode = getStringParameter(PARAMETER_TS_MODE, TS_MODE_SINGLE_PMT);
                 int hlsMode =
                         TS_MODE_SINGLE_PMT.equals(tsMode)
@@ -1343,7 +1392,7 @@ public final class MediaParser {
                         timestampAdjuster != null
                                 ? timestampAdjuster
                                 : new TimestampAdjuster(/* firstSampleTimestampUs= */ 0),
-                        new DefaultTsPayloadReaderFactory(flags));
+                        new DefaultTsPayloadReaderFactory(flags, mMuxedCaptionFormats));
             case PARSER_NAME_FLV:
                 return new FlvExtractor();
             case PARSER_NAME_OGG:
@@ -1789,6 +1838,16 @@ public final class MediaParser {
 
     // Private static methods.
 
+    private static Format toExoPlayerCaptionFormat(MediaFormat mediaFormat) {
+        Format.Builder formatBuilder =
+                new Format.Builder().setSampleMimeType(mediaFormat.getString(MediaFormat.KEY_MIME));
+        if (mediaFormat.containsKey(MediaFormat.KEY_CAPTION_SERVICE_NUMBER)) {
+            formatBuilder.setAccessibilityChannel(
+                    mediaFormat.getInteger(MediaFormat.KEY_CAPTION_SERVICE_NUMBER));
+        }
+        return formatBuilder.build();
+    }
+
     private static MediaFormat toMediaFormat(Format format) {
         MediaFormat result = new MediaFormat();
         setOptionalMediaFormatInt(result, MediaFormat.KEY_BIT_RATE, format.bitrate);
@@ -2041,6 +2100,11 @@ public final class MediaParser {
         expectedTypeByParameterName.put(PARAMETER_EXPOSE_DUMMY_SEEKMAP, Boolean.class);
         expectedTypeByParameterName.put(
                 PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT, Boolean.class);
+        expectedTypeByParameterName.put(
+                PARAMETER_OVERRIDE_IN_BAND_CAPTION_DECLARATIONS, Boolean.class);
+        // We do not check PARAMETER_EXPOSE_CAPTION_FORMATS here, and we do it in setParameters
+        // instead. Checking that the value is a List is insufficient to catch wrong parameter
+        // value types.
         EXPECTED_TYPE_BY_PARAMETER_NAME = Collections.unmodifiableMap(expectedTypeByParameterName);
     }
 }
