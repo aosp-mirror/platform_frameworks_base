@@ -280,11 +280,15 @@ public class AppsFilter {
 
         @Override
         public void onCompatChange(String packageName) {
-            updateEnabledState(mPmInternal.getPackage(packageName));
+            AndroidPackage pkg = mPmInternal.getPackage(packageName);
+            if (pkg == null) {
+                return;
+            }
+            updateEnabledState(pkg);
             mAppsFilter.updateShouldFilterCacheForPackage(packageName);
         }
 
-        private void updateEnabledState(AndroidPackage pkg) {
+        private void updateEnabledState(@NonNull AndroidPackage pkg) {
             // TODO(b/135203078): Do not use toAppInfo
             final boolean enabled = mInjector.getCompatibility().isChangeEnabledInternal(
                     PackageManager.FILTER_APPLICATION_QUERY, pkg.toAppInfoWithoutState());
@@ -297,12 +301,12 @@ public class AppsFilter {
 
         @Override
         public void updatePackageState(PackageSetting setting, boolean removed) {
-            final boolean enableLogging =
+            final boolean enableLogging = setting.pkg != null &&
                     !removed && (setting.pkg.isTestOnly() || setting.pkg.isDebuggable());
             enableLogging(setting.appId, enableLogging);
             if (removed) {
-                mDisabledPackages.remove(setting.pkg.getPackageName());
-            } else {
+                mDisabledPackages.remove(setting.name);
+            } else if (setting.pkg != null) {
                 updateEnabledState(setting.pkg);
             }
         }
@@ -578,8 +582,9 @@ public class AppsFilter {
                 }
             }
             // if either package instruments the other, mark both as visible to one another
-            if (pkgInstruments(newPkgSetting, existingSetting)
-                    || pkgInstruments(existingSetting, newPkgSetting)) {
+            if (newPkgSetting.pkg != null && existingSetting.pkg != null
+                    && (pkgInstruments(newPkgSetting.pkg, existingSetting.pkg)
+                    || pkgInstruments(existingSetting.pkg, newPkgSetting.pkg))) {
                 mQueriesViaPackage.add(newPkgSetting.appId, existingSetting.appId);
                 mQueriesViaPackage.add(existingSetting.appId, newPkgSetting.appId);
             }
@@ -817,7 +822,7 @@ public class AppsFilter {
                 }
             }
 
-            if (!setting.pkg.getProtectedBroadcasts().isEmpty()) {
+            if (setting.pkg != null && !setting.pkg.getProtectedBroadcasts().isEmpty()) {
                 final String removingPackageName = setting.pkg.getPackageName();
                 final Set<String> protectedBroadcasts = mProtectedBroadcasts;
                 mProtectedBroadcasts = collectProtectedBroadcasts(settings, removingPackageName);
@@ -1091,16 +1096,14 @@ public class AppsFilter {
     }
 
     /** Returns {@code true} if the source package instruments the target package. */
-    private static boolean pkgInstruments(PackageSetting source, PackageSetting target) {
+    private static boolean pkgInstruments(
+            @NonNull AndroidPackage source, @NonNull AndroidPackage target) {
         try {
             Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "pkgInstruments");
-            final String packageName = target.pkg.getPackageName();
-            final List<ParsedInstrumentation> inst = source.pkg.getInstrumentations();
+            final String packageName = target.getPackageName();
+            final List<ParsedInstrumentation> inst = source.getInstrumentations();
             for (int i = ArrayUtils.size(inst) - 1; i >= 0; i--) {
                 if (Objects.equals(inst.get(i).getTargetPackage(), packageName)) {
-                    if (DEBUG_LOGGING) {
-                        log(source, target, "instrumentation");
-                    }
                     return true;
                 }
             }
