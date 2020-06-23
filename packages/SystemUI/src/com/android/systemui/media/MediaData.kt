@@ -81,6 +81,11 @@ data class MediaData(
      */
     var resumeAction: Runnable?,
     /**
+     * Indicates that this player is a resumption player (ie. It only shows a play actions which
+     * will start the app and start playing).
+     */
+    var resumption: Boolean = false,
+    /**
      * Notification key for cancelling a media player after a timeout (when not using resumption.)
      */
     val notificationKey: String? = null,
