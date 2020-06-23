@@ -336,8 +336,10 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
         @Override
         public List<String> getAssociations(String callingPackage, int userId)
                 throws RemoteException {
-            checkCallerIsSystemOr(callingPackage, userId);
-            checkUsesFeature(callingPackage, getCallingUserId());
+            if (!callerCanManageCompanionDevices()) {
+                checkCallerIsSystemOr(callingPackage, userId);
+                checkUsesFeature(callingPackage, getCallingUserId());
+            }
             return new ArrayList<>(CollectionUtils.map(
                     readAllAssociations(userId, callingPackage),
                     a -> a.deviceAddress));
@@ -351,6 +353,12 @@ public class CompanionDeviceManagerService extends SystemService implements Bind
             checkCallerIsSystemOr(callingPackage);
             checkUsesFeature(callingPackage, getCallingUserId());
             removeAssociation(getCallingUserId(), callingPackage, deviceMacAddress);
+        }
+
+        private boolean callerCanManageCompanionDevices() {
+            return getContext().checkCallingOrSelfPermission(
+                    android.Manifest.permission.MANAGE_COMPANION_DEVICES)
+                    == PackageManager.PERMISSION_GRANTED;
         }
 
         private void checkCallerIsSystemOr(String pkg) throws RemoteException {
