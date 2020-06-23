@@ -2935,7 +2935,7 @@ class Task extends WindowContainer<WindowContainer> {
             final Task rootTask = getRootTask();
             final Task topNonOrgTask =
                     rootTask.mCreatedByOrganizer ? rootTask.getTopMostTask() : rootTask;
-            if (isDescendantOf(topNonOrgTask)) {
+            if (this == topNonOrgTask || isDescendantOf(topNonOrgTask)) {
                 return false;
             }
         }
