@@ -91,6 +91,21 @@ TEST(AnnotationProcessorTest, EmitsTestApiAnnotationAndRemovesFromComment) {
   EXPECT_THAT(annotations, HasSubstr("This is a test API"));
 }
 
+TEST(AnnotationProcessorTest, NotEmitSystemApiAnnotation) {
+  AnnotationProcessor processor;
+  processor.AppendComment("@SystemApi This is a system API");
+
+  std::string annotations;
+  StringOutputStream out(&annotations);
+  Printer printer(&out);
+  processor.Print(&printer, true /* strip_api_annotations */);
+  out.Flush();
+
+  EXPECT_THAT(annotations, Not(HasSubstr("@android.annotation.SystemApi")));
+  EXPECT_THAT(annotations, Not(HasSubstr("@SystemApi")));
+  EXPECT_THAT(annotations, HasSubstr("This is a system API"));
+}
+
 TEST(AnnotationProcessor, ExtractsFirstSentence) {
   EXPECT_THAT(AnnotationProcessor::ExtractFirstSentence("This is the only sentence"),
               Eq("This is the only sentence"));
