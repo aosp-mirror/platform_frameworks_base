@@ -25,6 +25,7 @@ import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.content.ClipDescription;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
 import android.content.ContentUris;
@@ -50,11 +51,13 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.LongSparseArray;
 import android.util.Pair;
+import android.webkit.MimeTypeMap;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * The download manager is a system service that handles long-running HTTP downloads. Clients may
@@ -1554,6 +1557,7 @@ public class DownloadManager {
         values.put(Downloads.Impl.COLUMN_DESTINATION,
                 Downloads.Impl.DESTINATION_NON_DOWNLOADMANAGER_DOWNLOAD);
         values.put(Downloads.Impl._DATA, path);
+        values.put(Downloads.Impl.COLUMN_MIME_TYPE, resolveMimeType(new File(path)));
         values.put(Downloads.Impl.COLUMN_STATUS, Downloads.Impl.STATUS_SUCCESS);
         values.put(Downloads.Impl.COLUMN_TOTAL_BYTES, length);
         values.put(Downloads.Impl.COLUMN_MEDIA_SCANNED,
@@ -1567,6 +1571,58 @@ public class DownloadManager {
             return -1;
         }
         return Long.parseLong(downloadUri.getLastPathSegment());
+    }
+
+    /**
+     * Shamelessly borrowed from
+     * {@code packages/providers/MediaProvider/src/com/android/providers/media/util/MimeUtils.java}
+     *
+     * @hide
+     */
+    private static @NonNull String resolveMimeType(@NonNull File file) {
+        final String extension = extractFileExtension(file.getPath());
+        if (extension == null) return ClipDescription.MIMETYPE_UNKNOWN;
+
+        final String mimeType = MimeTypeMap.getSingleton()
+                .getMimeTypeFromExtension(extension.toLowerCase(Locale.ROOT));
+        if (mimeType == null) return ClipDescription.MIMETYPE_UNKNOWN;
+
+        return mimeType;
+    }
+
+    /**
+     * Shamelessly borrowed from
+     * {@code packages/providers/MediaProvider/src/com/android/providers/media/util/FileUtils.java}
+     *
+     * @hide
+     */
+    private static @Nullable String extractDisplayName(@Nullable String data) {
+        if (data == null) return null;
+        if (data.indexOf('/') == -1) {
+            return data;
+        }
+        if (data.endsWith("/")) {
+            data = data.substring(0, data.length() - 1);
+        }
+        return data.substring(data.lastIndexOf('/') + 1);
+    }
+
+    /**
+     * Shamelessly borrowed from
+     * {@code packages/providers/MediaProvider/src/com/android/providers/media/util/FileUtils.java}
+     *
+     * @hide
+     */
+    private static @Nullable String extractFileExtension(@Nullable String data) {
+        if (data == null) return null;
+        data = extractDisplayName(data);
+
+        final int lastDot = data.lastIndexOf('.');
+        if (lastDot == -1) {
+            return null;
+        } else {
+            return data.substring(lastDot + 1);
+        }
     }
 
     private static final String NON_DOWNLOADMANAGER_DOWNLOAD =
