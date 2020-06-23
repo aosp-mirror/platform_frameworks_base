@@ -29,15 +29,20 @@ import android.util.Log;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.doze.dagger.DozeScope;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.util.Calendar;
 
+import javax.inject.Inject;
+
 /**
  * The policy controlling doze.
  */
+@DozeScope
 public class DozeUi implements DozeMachine.Part {
 
     private static final long TIME_TICK_DEADLINE_MILLIS = 90 * 1000; // 1.5min
@@ -45,7 +50,7 @@ public class DozeUi implements DozeMachine.Part {
     private final DozeHost mHost;
     private final Handler mHandler;
     private final WakeLock mWakeLock;
-    private final DozeMachine mMachine;
+    private DozeMachine mMachine;
     private final AlarmTimeout mTimeTicker;
     private final boolean mCanAnimateTransition;
     private final DozeParameters mDozeParameters;
@@ -64,12 +69,12 @@ public class DozeUi implements DozeMachine.Part {
 
     private long mLastTimeTickElapsed = 0;
 
-    public DozeUi(Context context, AlarmManager alarmManager, DozeMachine machine,
-            WakeLock wakeLock, DozeHost host, Handler handler,
+    @Inject
+    public DozeUi(Context context, AlarmManager alarmManager,
+            WakeLock wakeLock, DozeHost host, @Main Handler handler,
             DozeParameters params, KeyguardUpdateMonitor keyguardUpdateMonitor,
             DozeLog dozeLog) {
         mContext = context;
-        mMachine = machine;
         mWakeLock = wakeLock;
         mHost = host;
         mHandler = handler;
@@ -78,6 +83,11 @@ public class DozeUi implements DozeMachine.Part {
         mTimeTicker = new AlarmTimeout(alarmManager, this::onTimeTick, "doze_time_tick", handler);
         keyguardUpdateMonitor.registerCallback(mKeyguardVisibilityCallback);
         mDozeLog = dozeLog;
+    }
+
+    @Override
+    public void setDozeMachine(DozeMachine dozeMachine) {
+        mMachine = dozeMachine;
     }
 
     /**

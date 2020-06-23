@@ -97,9 +97,10 @@ public class DozeTriggersTest extends SysuiTestCase {
         thresholdSensor.setLoaded(true);
         mProximitySensor = new FakeProximitySensor(thresholdSensor,  null, mExecutor);
 
-        mTriggers = new DozeTriggers(mContext, mMachine, mHost, mAlarmManager, config, parameters,
-                asyncSensorManager, wakeLock, true, mDockManager, mProximitySensor,
+        mTriggers = new DozeTriggers(mContext, mHost, mAlarmManager, config, parameters,
+                asyncSensorManager, wakeLock, mDockManager, mProximitySensor,
                 mProximityCheck, mock(DozeLog.class), mBroadcastDispatcher);
+        mTriggers.setDozeMachine(mMachine);
         waitForSensorManager();
     }
 

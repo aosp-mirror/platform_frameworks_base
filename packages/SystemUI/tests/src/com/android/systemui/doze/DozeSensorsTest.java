@@ -152,7 +152,7 @@ public class DozeSensorsTest extends SysuiTestCase {
     private class TestableDozeSensors extends DozeSensors {
 
         TestableDozeSensors() {
-            super(getContext(), mAlarmManager, mSensorManager, mDozeParameters,
+            super(getContext(), mSensorManager, mDozeParameters,
                     mAmbientDisplayConfiguration, mWakeLock, mCallback, mProxCallback, mDozeLog,
                     mProximitySensor);
             for (TriggerSensor sensor : mSensors) {
