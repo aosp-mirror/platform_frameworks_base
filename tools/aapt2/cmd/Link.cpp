@@ -1272,7 +1272,8 @@ class Linker {
       return false;
     }
 
-    ClassDefinition::WriteJavaFile(manifest_class.get(), package_utf8, true, &fout);
+    ClassDefinition::WriteJavaFile(manifest_class.get(), package_utf8, true,
+                                   false /* strip_api_annotations */, &fout);
     fout.Flush();
 
     if (fout.HadError()) {
