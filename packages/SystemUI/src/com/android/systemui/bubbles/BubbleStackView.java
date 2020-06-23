@@ -1504,6 +1504,7 @@ public class BubbleStackView extends FrameLayout
                     && ((BadgedImageView) v).getKey().equals(bubble.getKey())) {
                 mBubbleContainer.removeViewAt(i);
                 bubble.cleanupViews();
+                updatePointerPosition();
                 logBubbleEvent(bubble, SysUiStatsLog.BUBBLE_UICHANGED__ACTION__DISMISSED);
                 return;
             }
