@@ -477,12 +477,11 @@ final class InputMonitor {
                     mService.getRecentsAnimationController();
             final boolean shouldApplyRecentsInputConsumer = recentsAnimationController != null
                     && recentsAnimationController.shouldApplyInputConsumer(w.mActivityRecord);
-            if (inputChannel == null || inputWindowHandle == null || w.mRemoved
-                    || (w.cantReceiveTouchInput() && !shouldApplyRecentsInputConsumer)) {
+            if (inputWindowHandle == null || w.mRemoved) {
                 if (w.mWinAnimator.hasSurface()) {
                     mInputTransaction.setInputWindowInfo(
-                        w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
-                        mInvalidInputWindow);
+                            w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
+                            mInvalidInputWindow);
                 }
                 // Skip this window because it cannot possibly receive input.
                 return;
@@ -491,9 +490,23 @@ final class InputMonitor {
             final int flags = w.mAttrs.flags;
             final int privateFlags = w.mAttrs.privateFlags;
             final int type = w.mAttrs.type;
-            final boolean hasFocus = w.isFocused();
             final boolean isVisible = w.isVisibleLw();
 
+            // Assign an InputInfo with type to the overlay window which can't receive input event.
+            // This is used to omit Surfaces from occlusion detection.
+            if (inputChannel == null
+                    || (w.cantReceiveTouchInput() && !shouldApplyRecentsInputConsumer))  {
+                if (!w.mWinAnimator.hasSurface()) {
+                    return;
+                }
+                populateOverlayInputInfo(inputWindowHandle, w.getName(), type, isVisible);
+                mInputTransaction.setInputWindowInfo(
+                        w.mWinAnimator.mSurfaceController.getClientViewRootSurface(),
+                        inputWindowHandle);
+                return;
+            }
+
+            final boolean hasFocus = w.isFocused();
             if (mAddRecentsAnimationInputConsumerHandle && shouldApplyRecentsInputConsumer) {
                 if (recentsAnimationController.updateInputConsumerForApp(
                         mRecentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
@@ -555,6 +568,22 @@ final class InputMonitor {
         }
     }
 
+    private static void populateOverlayInputInfo(final InputWindowHandle inputWindowHandle,
+            final String name, final int type, final boolean isVisible) {
+        inputWindowHandle.name = name;
+        inputWindowHandle.layoutParamsType = type;
+        inputWindowHandle.dispatchingTimeoutNanos =
+                WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
+        inputWindowHandle.visible = isVisible;
+        inputWindowHandle.canReceiveKeys = false;
+        inputWindowHandle.hasFocus = false;
+        inputWindowHandle.ownerPid = myPid();
+        inputWindowHandle.ownerUid = myUid();
+        inputWindowHandle.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL;
+        inputWindowHandle.scaleFactor = 1;
+        inputWindowHandle.layoutParamsFlags = FLAG_NOT_TOUCH_MODAL;
+    }
+
     /**
      * Helper function to generate an InputInfo with type SECURE_SYSTEM_OVERLAY. This input
      * info will not have an input channel or be touchable, but is used to omit Surfaces
@@ -564,16 +593,7 @@ final class InputMonitor {
     static void setTrustedOverlayInputInfo(SurfaceControl sc, SurfaceControl.Transaction t,
             int displayId, String name) {
         InputWindowHandle inputWindowHandle = new InputWindowHandle(null, displayId);
-        inputWindowHandle.name = name;
-        inputWindowHandle.layoutParamsType = TYPE_SECURE_SYSTEM_OVERLAY;
-        inputWindowHandle.dispatchingTimeoutNanos = -1;
-        inputWindowHandle.visible = true;
-        inputWindowHandle.canReceiveKeys = false;
-        inputWindowHandle.hasFocus = false;
-        inputWindowHandle.ownerPid = myPid();
-        inputWindowHandle.ownerUid = myUid();
-        inputWindowHandle.inputFeatures = INPUT_FEATURE_NO_INPUT_CHANNEL;
-        inputWindowHandle.scaleFactor = 1;
+        populateOverlayInputInfo(inputWindowHandle, name, TYPE_SECURE_SYSTEM_OVERLAY, true);
         t.setInputWindowInfo(sc, inputWindowHandle);
     }
 }

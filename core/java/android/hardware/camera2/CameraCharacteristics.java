@@ -4089,10 +4089,11 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The accuracy of frame timestamp synchronization between physical cameras</p>
      * <p>The accuracy of the frame timestamp synchronization determines the physical cameras'
-     * ability to start exposure at the same time. If the sensorSyncType is CALIBRATED,
-     * the physical camera sensors usually run in master-slave mode so that their shutter
-     * time is synchronized. For APPROXIMATE sensorSyncType, the camera sensors usually run in
-     * master-master mode, and there could be offset between their start of exposure.</p>
+     * ability to start exposure at the same time. If the sensorSyncType is CALIBRATED, the
+     * physical camera sensors usually run in leader/follower mode where one sensor generates a
+     * timing signal for the other, so that their shutter time is synchronized. For APPROXIMATE
+     * sensorSyncType, the camera sensors usually run in leader/leader mode, where both sensors
+     * use their own timing generator, and there could be offset between their start of exposure.</p>
      * <p>In both cases, all images generated for a particular capture request still carry the same
      * timestamps, so that they can be used to look up the matching frame number and
      * onCaptureStarted callback.</p>

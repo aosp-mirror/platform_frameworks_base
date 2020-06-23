@@ -685,7 +685,7 @@ public class HdmiControlService extends SystemService {
                     setControlEnabled(enabled);
                     break;
                 case Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED:
-                    setHdmiCecVolumeControlEnabled(enabled);
+                    setHdmiCecVolumeControlEnabledInternal(enabled);
                     break;
                 case Global.HDMI_CONTROL_AUTO_WAKEUP_ENABLED:
                     if (isTvDeviceEnabled()) {
@@ -3076,6 +3076,14 @@ public class HdmiControlService extends SystemService {
     }
 
     void setHdmiCecVolumeControlEnabled(boolean isHdmiCecVolumeControlEnabled) {
+        setHdmiCecVolumeControlEnabledInternal(isHdmiCecVolumeControlEnabled);
+
+        writeBooleanSetting(Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
+                isHdmiCecVolumeControlEnabled);
+    }
+
+    @VisibleForTesting
+    void setHdmiCecVolumeControlEnabledInternal(boolean isHdmiCecVolumeControlEnabled) {
         synchronized (mLock) {
             mHdmiCecVolumeControlEnabled = isHdmiCecVolumeControlEnabled;
 
@@ -3083,8 +3091,6 @@ public class HdmiControlService extends SystemService {
                     true);
             if (storedValue != isHdmiCecVolumeControlEnabled) {
                 HdmiLogger.debug("Changing HDMI CEC volume control feature state: %s",
-                        isHdmiCecVolumeControlEnabled);
-                writeBooleanSetting(Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED,
                         isHdmiCecVolumeControlEnabled);
             }
         }
@@ -3137,12 +3143,12 @@ public class HdmiControlService extends SystemService {
 
         if (enabled) {
             enableHdmiControlService();
-            setHdmiCecVolumeControlEnabled(
+            setHdmiCecVolumeControlEnabledInternal(
                     readBooleanSetting(Global.HDMI_CONTROL_VOLUME_CONTROL_ENABLED, true));
             return;
         }
 
-        mHdmiCecVolumeControlEnabled = false;
+        setHdmiCecVolumeControlEnabledInternal(false);
         // Call the vendor handler before the service is disabled.
         invokeVendorCommandListenersOnControlStateChanged(false,
                 HdmiControlManager.CONTROL_STATE_CHANGED_REASON_SETTING);

@@ -22,14 +22,17 @@ import android.media.MediaFormat;
 import android.media.MediaTranscodeManager;
 import android.media.MediaTranscodeManager.TranscodingJob;
 import android.media.MediaTranscodeManager.TranscodingRequest;
-import android.media.TranscodingTestConfig;
 import android.net.Uri;
+import android.os.FileUtils;
 import android.test.ActivityInstrumentationTestCase2;
 import android.util.Log;
 
 import org.junit.Test;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Semaphore;
@@ -59,6 +62,7 @@ public class MediaTranscodeManagerTest
     private Context mContext;
     private MediaTranscodeManager mMediaTranscodeManager = null;
     private Uri mSourceHEVCVideoUri = null;
+    private Uri mSourceAVCVideoUri = null;
     private Uri mDestinationUri = null;
 
     // Setting for transcoding to H.264.
@@ -72,14 +76,24 @@ public class MediaTranscodeManagerTest
     }
 
 
-    private static Uri resourceToUri(Context context, int resId) {
-        Uri uri = new Uri.Builder()
+    // Copy the resource to cache.
+    private Uri resourceToUri(Context context, int resId, String name) throws IOException {
+        Uri resUri = new Uri.Builder()
                 .scheme(ContentResolver.SCHEME_ANDROID_RESOURCE)
                 .authority(context.getResources().getResourcePackageName(resId))
                 .appendPath(context.getResources().getResourceTypeName(resId))
                 .appendPath(context.getResources().getResourceEntryName(resId))
                 .build();
-        return uri;
+
+        Uri cacheUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/" + name);
+
+        InputStream is = mContext.getResources().openRawResource(resId);
+        OutputStream os = mContext.getContentResolver().openOutputStream(cacheUri);
+
+        FileUtils.copy(is, os);
+
+        return cacheUri;
     }
 
     private static Uri generateNewUri(Context context, String filename) {
@@ -111,7 +125,11 @@ public class MediaTranscodeManagerTest
         assertNotNull(mMediaTranscodeManager);
 
         // Setup source HEVC file uri.
-        mSourceHEVCVideoUri = resourceToUri(mContext, R.raw.VideoOnlyHEVC);
+        mSourceHEVCVideoUri = resourceToUri(mContext, R.raw.VideoOnlyHEVC, "VideoOnlyHEVC.mp4");
+
+        // Setup source AVC file uri.
+        mSourceAVCVideoUri = resourceToUri(mContext, R.raw.VideoOnlyAVC,
+                "VideoOnlyAVC.mp4");
 
         // Setup destination file.
         mDestinationUri = generateNewUri(mContext, "transcoded.mp4");
@@ -123,22 +141,26 @@ public class MediaTranscodeManagerTest
     }
 
     @Test
-    public void testTranscodingOneVideo() throws Exception {
+    public void testTranscodingFromAvcToAvc() throws Exception {
         Log.d(TAG, "Starting: testMediaTranscodeManager");
 
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
-        TranscodingTestConfig testConfig = new TranscodingTestConfig();
-        testConfig.passThroughMode = true;
-        testConfig.processingTotalTimeMs = 300; // minimum time spent on transcoding.
+
+        // Create a file Uri: file:///data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
+        // The full path of this file is:
+        // /data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
+        Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
+                + mContext.getCacheDir().getAbsolutePath() + "/temp.mp4");
+
+        Log.d(TAG, "Transcoding to " + destinationUri.getPath());
 
         TranscodingRequest request =
                 new TranscodingRequest.Builder()
-                        .setSourceUri(mSourceHEVCVideoUri)
-                        .setDestinationUri(mDestinationUri)
+                        .setSourceUri(mSourceAVCVideoUri)
+                        .setDestinationUri(destinationUri)
                         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
                         .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
                         .setVideoTrackFormat(createMediaFormat())
-                        .setTestConfig(testConfig)
                         .build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
 
@@ -156,6 +178,8 @@ public class MediaTranscodeManagerTest
                     TRANSCODE_TIMEOUT_SECONDS, TimeUnit.SECONDS);
             assertTrue("Transcode failed to complete in time.", finishedOnTime);
         }
+
+        //TODO(hkuang): Verify the transcoded video's psnr to make sure it is correct.
     }
 
 }

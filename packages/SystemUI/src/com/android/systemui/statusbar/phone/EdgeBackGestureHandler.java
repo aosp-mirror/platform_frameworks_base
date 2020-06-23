@@ -23,7 +23,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
-import android.database.ContentObserver;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -31,15 +30,11 @@ import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
 import android.hardware.input.InputManager;
-import android.net.Uri;
-import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
@@ -92,8 +87,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     private static final String TAG = "EdgeBackGestureHandler";
     private static final int MAX_LONG_PRESS_TIMEOUT = SystemProperties.getInt(
             "gestures.back_timeout", 250);
-    private static final String FIXED_ROTATION_TRANSFORM_SETTING_NAME = "fixed_rotation_transform";
-
 
     private ISystemGestureExclusionListener mGestureExclusionListener =
             new ISystemGestureExclusionListener.Stub() {
@@ -118,14 +111,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                     updateDisabledForQuickstep();
                 }
             };
-
-    private final ContentObserver mFixedRotationObserver = new ContentObserver(
-            new Handler(Looper.getMainLooper())) {
-        @Override
-        public void onChange(boolean selfChange, Uri uri) {
-            updatedFixedRotation();
-        }
-    };
 
     private TaskStackChangeListener mTaskStackListener = new TaskStackChangeListener() {
         @Override
@@ -162,7 +147,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
     // We temporarily disable back gesture when user is quickswitching
     // between apps of different orientations
     private boolean mDisabledForQuickstep;
-    private boolean mFixedRotationFlagEnabled;
 
     private final PointF mDownPoint = new PointF();
     private final PointF mEndPoint = new PointF();
@@ -290,13 +274,7 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
      */
     public void onNavBarAttached() {
         mIsAttached = true;
-        updatedFixedRotation();
-        if (mFixedRotationFlagEnabled) {
-            setRotationCallbacks(true);
-        }
-        mContext.getContentResolver().registerContentObserver(
-                Settings.Global.getUriFor(FIXED_ROTATION_TRANSFORM_SETTING_NAME),
-                false /* notifyForDescendants */, mFixedRotationObserver, UserHandle.USER_ALL);
+        mOverviewProxyService.addCallback(mQuickSwitchListener);
         updateIsEnabled();
         startTracking();
     }
@@ -306,20 +284,9 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
      */
     public void onNavBarDetached() {
         mIsAttached = false;
-        if (mFixedRotationFlagEnabled) {
-            setRotationCallbacks(false);
-        }
-        mContext.getContentResolver().unregisterContentObserver(mFixedRotationObserver);
+        mOverviewProxyService.removeCallback(mQuickSwitchListener);
         updateIsEnabled();
         stopTracking();
-    }
-
-    private void setRotationCallbacks(boolean enable) {
-        if (enable) {
-            mOverviewProxyService.addCallback(mQuickSwitchListener);
-        } else {
-            mOverviewProxyService.removeCallback(mQuickSwitchListener);
-        }
     }
 
     /**
@@ -639,17 +606,6 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             ev.setDisplayId(bubbleDisplayId);
         }
         InputManager.getInstance().injectInputEvent(ev, InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
-    }
-
-    private void updatedFixedRotation() {
-        boolean oldFlag = mFixedRotationFlagEnabled;
-        mFixedRotationFlagEnabled = Settings.Global.getInt(mContext.getContentResolver(),
-                FIXED_ROTATION_TRANSFORM_SETTING_NAME, 0) != 0;
-        if (oldFlag == mFixedRotationFlagEnabled) {
-            return;
-        }
-
-        setRotationCallbacks(mFixedRotationFlagEnabled);
     }
 
     public void setInsets(int leftInset, int rightInset) {

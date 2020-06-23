@@ -1423,7 +1423,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testActivityOnCancelFixedRotationTransform() {
-        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
         final DisplayRotation displayRotation = mActivity.mDisplayContent.getDisplayRotation();
         spyOn(displayRotation);
 
@@ -1480,7 +1479,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testIsSnapshotCompatible() {
-        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
         final TaskSnapshot snapshot = new TaskSnapshotPersisterTestBase.TaskSnapshotBuilder()
                 .setRotation(mActivity.getWindowConfiguration().getRotation())
                 .build();
@@ -1494,7 +1492,6 @@ public class ActivityRecordTests extends ActivityTestsBase {
 
     @Test
     public void testFixedRotationSnapshotStartingWindow() {
-        mService.mWindowManager.mIsFixedRotationTransformEnabled = true;
         // TaskSnapshotSurface requires a fullscreen opaque window.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.TYPE_APPLICATION_STARTING);

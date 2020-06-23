@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.logging;
 
-import static com.android.systemui.statusbar.notification.stack.NotificationSectionsManagerKt.BUCKET_ALERTING;
-
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -200,7 +198,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         assertEquals(TEST_UID, n.uid);
         assertEquals(1, n.instanceId);
         assertFalse(n.isGroupSummary);
-        assertEquals(1 + BUCKET_ALERTING, n.section);
+        assertEquals(Notifications.Notification.SECTION_ALERTING, n.section);
     }
 
     @Test
@@ -217,7 +215,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         assertEquals(TEST_UID, n.uid);
         assertEquals(1, n.instanceId);
         assertFalse(n.isGroupSummary);
-        assertEquals(1 + BUCKET_ALERTING, n.section);
+        assertEquals(Notifications.Notification.SECTION_ALERTING, n.section);
     }
 
 

@@ -26,6 +26,7 @@ import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -72,6 +73,7 @@ public class NetworkStagedRollbackTest extends BaseHostJUnit4Test {
     /**
      * Tests failed network health check triggers watchdog staged rollbacks.
      */
+    @Ignore("b/159569441")
     @Test
     public void testNetworkFailedRollback() throws Exception {
         try {

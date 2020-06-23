@@ -486,6 +486,7 @@ message Atom {
         KeystoreKeyEventReported keystore_key_event_reported = 302;
         NetworkTetheringReported  network_tethering_reported =
             303 [(module) = "network_tethering"];
+        ImeTouchReported ime_touch_reported = 304 [(module) = "sysui"];
 
         // StatsdStats tracks platform atoms with ids upto 500.
         // Update StatsdStats::kMaxPushedAtomId when atom ids here approach that value.
@@ -3058,6 +3059,18 @@ message ExclusionRectStateChanged {
     optional bool landscape = 5;
     optional bool splitscreen = 6;
     optional int32 duration_millis = 7;
+}
+
+/**
+ * Logs when IME is on.
+ *
+ * Logged from: /packages/SystemUI/src/com/android/systemui/
+                statusbar/phone/NavigationBarView.java
+ *
+ */
+message ImeTouchReported {
+    optional int32 x_coordinate = 1;  // X coordinate for ACTION_DOWN event.
+    optional int32 y_coordinate = 2;  // Y coordinate for ACTION_DOWN event.
 }
 
 /**

@@ -2817,6 +2817,11 @@ public class Activity extends ContextThemeWrapper
      * The system may disallow entering picture-in-picture in various cases, including when the
      * activity is not visible, if the screen is locked or if the user has an activity pinned.
      *
+     * <p>By default, system calculates the dimension of picture-in-picture window based on the
+     * given {@param params}.
+     * See <a href="{@docRoot}guide/topics/ui/picture-in-picture">Picture-in-picture Support</a>
+     * on how to override this behavior.</p>
+     *
      * @see android.R.attr#supportsPictureInPicture
      * @see PictureInPictureParams
      *

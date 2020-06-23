@@ -30,8 +30,6 @@ import android.service.media.MediaBrowserService;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.android.systemui.util.Utils;
-
 import java.util.List;
 
 /**
@@ -46,7 +44,6 @@ public class ResumeMediaBrowser {
     public static final String DELIMITER = ":";
 
     private static final String TAG = "ResumeMediaBrowser";
-    private boolean mIsEnabled = false;
     private final Context mContext;
     private final Callback mCallback;
     private MediaBrowser mMediaBrowser;
@@ -59,7 +56,6 @@ public class ResumeMediaBrowser {
      * @param componentName Component name of the MediaBrowserService this browser will connect to
      */
     public ResumeMediaBrowser(Context context, Callback callback, ComponentName componentName) {
-        mIsEnabled = Utils.useMediaResumption(context);
         mContext = context;
         mCallback = callback;
         mComponentName = componentName;
@@ -74,9 +70,6 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect will be called automatically with this function.
      */
     public void findRecentMedia() {
-        if (!mIsEnabled) {
-            return;
-        }
         Log.d(TAG, "Connecting to " + mComponentName);
         disconnect();
         Bundle rootHints = new Bundle();
@@ -186,9 +179,6 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect should be called after this to ensure the connection is closed.
      */
     public void restart() {
-        if (!mIsEnabled) {
-            return;
-        }
         disconnect();
         Bundle rootHints = new Bundle();
         rootHints.putBoolean(MediaBrowserService.BrowserRoot.EXTRA_RECENT, true);
@@ -250,9 +240,6 @@ public class ResumeMediaBrowser {
      * ResumeMediaBrowser#disconnect should be called after this to ensure the connection is closed.
      */
     public void testConnection() {
-        if (!mIsEnabled) {
-            return;
-        }
         disconnect();
         final MediaBrowser.ConnectionCallback connectionCallback =
                 new MediaBrowser.ConnectionCallback() {

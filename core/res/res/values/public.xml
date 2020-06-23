@@ -3022,6 +3022,8 @@
     <public type="id" name="accessibilitySystemActionTakeScreenshot" id="0x01020053" />
     <public type="id" name="accessibilityActionImeEnter" id="0x01020054" />
 
+    <!-- @hide @TestApi -->
+    <public type="bool" name="config_assistantOnTopOfDream" id="0x01110005" />
   <!-- ===============================================================
      Resources added in version S of the platform
 
@@ -3056,7 +3058,7 @@
     <!-- dimension definitions go here -->
   </public-group>
 
-  <public-group type="bool" first-id="0x01110005">
+  <public-group type="bool" first-id="0x01110006">
     <!-- boolean definitions go here -->
   </public-group>
 

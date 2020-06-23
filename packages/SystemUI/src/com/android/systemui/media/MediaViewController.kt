@@ -35,6 +35,10 @@ class MediaViewController @Inject constructor(
     private val mediaHostStatesManager: MediaHostStatesManager
 ) {
 
+    /**
+     * A listener when the current dimensions of the player change
+     */
+    lateinit var sizeChangedListener: () -> Unit
     private var firstRefresh: Boolean = true
     private var transitionLayout: TransitionLayout? = null
     private val layoutController = TransitionLayoutController()
@@ -76,6 +80,17 @@ class MediaViewController @Inject constructor(
     private val tmpPoint = PointF()
 
     /**
+     * The current width of the player. This might not factor in case the player is animating
+     * to the current state, but represents the end state
+     */
+    var currentWidth: Int = 0
+    /**
+     * The current height of the player. This might not factor in case the player is animating
+     * to the current state, but represents the end state
+     */
+    var currentHeight: Int = 0
+
+    /**
      * A callback for media state changes
      */
     val stateCallback = object : MediaHostStatesManager.Callback {
@@ -105,6 +120,11 @@ class MediaViewController @Inject constructor(
         collapsedLayout.load(context, R.xml.media_collapsed)
         expandedLayout.load(context, R.xml.media_expanded)
         mediaHostStatesManager.addController(this)
+        layoutController.sizeChangedListener = { width: Int, height: Int ->
+            currentWidth = width
+            currentHeight = height
+            sizeChangedListener.invoke()
+        }
     }
 
     /**
@@ -279,6 +299,8 @@ class MediaViewController @Inject constructor(
                     tmpPoint, tmpState)
             tmpState
         }
+        currentWidth = result.width
+        currentHeight = result.height
         layoutController.setState(result, applyImmediately, shouldAnimate, animationDuration,
                 animationDelay)
     }

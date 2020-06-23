@@ -97,6 +97,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
+import com.android.systemui.media.KeyguardMediaController;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
@@ -200,6 +201,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private final KeyguardBypassController mKeyguardBypassController;
     private final DynamicPrivacyController mDynamicPrivacyController;
     private final SysuiStatusBarStateController mStatusbarStateController;
+    private final KeyguardMediaController mKeyguardMediaController;
 
     private ExpandHelper mExpandHelper;
     private final NotificationSwipeHelper mSwipeHelper;
@@ -552,6 +554,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             SysuiStatusBarStateController statusBarStateController,
             HeadsUpManagerPhone headsUpManager,
             KeyguardBypassController keyguardBypassController,
+            KeyguardMediaController keyguardMediaController,
             FalsingManager falsingManager,
             NotificationLockscreenUserManager notificationLockscreenUserManager,
             NotificationGutsManager notificationGutsManager,
@@ -670,6 +673,16 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         initializeForegroundServiceSection(fgsFeatureController);
         mUiEventLogger = uiEventLogger;
         mColorExtractor.addOnColorsChangedListener(mOnColorsChangedListener);
+        mKeyguardMediaController = keyguardMediaController;
+        keyguardMediaController.setVisibilityChangedListener((visible) -> {
+            if (visible) {
+                generateAddAnimation(keyguardMediaController.getView(), false /*fromMoreCard */);
+            } else {
+                generateRemoveAnimation(keyguardMediaController.getView());
+            }
+            requestChildrenUpdate();
+            return null;
+        });
     }
 
     private void initializeForegroundServiceSection(
@@ -3101,9 +3114,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private boolean generateRemoveAnimation(ExpandableView child) {
-        if (!child.wantsAddAndRemoveAnimations()) {
-            return false;
-        }
         if (removeRemovedChildFromHeadsUpChangeAnimations(child)) {
             mAddedHeadsUpChildren.remove(child);
             return false;
@@ -3458,8 +3468,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateAddAnimation(ExpandableView child, boolean fromMoreCard) {
-        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()
-                && child.wantsAddAndRemoveAnimations()) {
+        if (mIsExpanded && mAnimationsEnabled && !mChangePositionInProgress && !isFullyHidden()) {
             // Generate Animations
             mChildrenToAddAnimated.add(child);
             if (fromMoreCard) {
@@ -3654,6 +3663,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     ignoreChildren = false;
                 }
                 childWasSwipedOut |= Math.abs(row.getTranslation()) == row.getWidth();
+            } else if (child instanceof MediaHeaderView) {
+                childWasSwipedOut = true;
             }
             if (!childWasSwipedOut) {
                 Rect clipBounds = child.getClipBounds();
@@ -6370,7 +6381,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public void onDragCancelled(View v) {
             setSwipingInProgress(false);
-            mFalsingManager.onNotificatonStopDismissing();
+            mFalsingManager.onNotificationStopDismissing();
         }
 
         /**
@@ -6470,7 +6481,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
         @Override
         public void onBeginDrag(View v) {
-            mFalsingManager.onNotificatonStartDismissing();
+            mFalsingManager.onNotificationStartDismissing();
             setSwipingInProgress(true);
             mAmbientState.onBeginDrag((ExpandableView) v);
             updateContinuousShadowDrawing();
@@ -6629,7 +6640,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         /* Only ever called as a consequence of a lockscreen expansion gesture. */
         @Override
         public boolean onDraggedDown(View startingChild, int dragLengthY) {
-            if (mStatusBarState == StatusBarState.KEYGUARD && hasActiveNotifications()) {
+            boolean canDragDown = hasActiveNotifications()
+                    || mKeyguardMediaController.getView().getVisibility() == VISIBLE;
+            if (mStatusBarState == StatusBarState.KEYGUARD && canDragDown) {
                 mLockscreenGestureLogger.write(
                         MetricsEvent.ACTION_LS_SHADE,
                         (int) (dragLengthY / mDisplayMetrics.density),

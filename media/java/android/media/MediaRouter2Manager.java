@@ -165,20 +165,8 @@ public final class MediaRouter2Manager {
     public List<MediaRoute2Info> getAvailableRoutes(@NonNull String packageName) {
         Objects.requireNonNull(packageName, "packageName must not be null");
 
-        List<MediaRoute2Info> routes = new ArrayList<>();
-
-        List<String> preferredFeatures = mPreferredFeaturesMap.get(packageName);
-        if (preferredFeatures == null) {
-            preferredFeatures = Collections.emptyList();
-        }
-        synchronized (mRoutesLock) {
-            for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.isSystemRoute() || route.hasAnyFeatures(preferredFeatures)) {
-                    routes.add(route);
-                }
-            }
-        }
-        return routes;
+        List<RoutingSessionInfo> sessions = getRoutingSessions(packageName);
+        return getAvailableRoutesForRoutingSession(sessions.get(sessions.size() - 1));
     }
 
     /**
@@ -202,7 +190,7 @@ public final class MediaRouter2Manager {
         }
         synchronized (mRoutesLock) {
             for (MediaRoute2Info route : mRoutes.values()) {
-                if (route.isSystemRoute() || route.hasAnyFeatures(preferredFeatures)
+                if (route.hasAnyFeatures(preferredFeatures)
                         || sessionInfo.getSelectedRoutes().contains(route.getId())
                         || sessionInfo.getTransferableRoutes().contains(route.getId())) {
                     routes.add(route);
@@ -303,7 +291,7 @@ public final class MediaRouter2Manager {
     }
 
     /**
-     * Gets the list of all discovered routes
+     * Gets the list of all discovered routes.
      */
     @NonNull
     public List<MediaRoute2Info> getAllRoutes() {
@@ -343,6 +331,8 @@ public final class MediaRouter2Manager {
             @NonNull MediaRoute2Info route) {
         Objects.requireNonNull(sessionInfo, "sessionInfo must not be null");
         Objects.requireNonNull(route, "route must not be null");
+
+        Log.v(TAG, "Transferring routing session. session= " + sessionInfo + ", route=" + route);
 
         synchronized (mRoutesLock) {
             if (!mRoutes.containsKey(route.getId())) {
