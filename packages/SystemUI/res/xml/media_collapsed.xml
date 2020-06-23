@@ -85,10 +85,11 @@
     <!-- Song name -->
     <Constraint
         android:id="@+id/header_title"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="17dp"
         android:layout_marginStart="16dp"
+        app:layout_constrainedWidth="true"
         app:layout_constraintTop_toBottomOf="@id/app_name"
         app:layout_constraintBottom_toTopOf="@id/header_artist"
         app:layout_constraintStart_toEndOf="@id/album_art"
@@ -98,10 +99,11 @@
     <!-- Artist name -->
     <Constraint
         android:id="@+id/header_artist"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="3dp"
         android:layout_marginBottom="24dp"
+        app:layout_constrainedWidth="true"
         app:layout_constraintTop_toBottomOf="@id/header_title"
         app:layout_constraintStart_toStartOf="@id/header_title"
         app:layout_constraintEnd_toStartOf="@id/media_action_barrier"
@@ -135,27 +137,6 @@
         />
 
     <Constraint
-        android:id="@+id/media_action_barrier"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintTop_toTopOf="parent"
-        app:barrierDirection="start"
-        app:constraint_referenced_ids="media_action_guidebox,action0,action1,action2,action3,action4"
-        />
-
-    <Constraint
-        android:id="@+id/media_action_guidebox"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginTop="18dp"
-        android:visibility="invisible"
-        app:layout_constraintTop_toBottomOf="@id/app_name"
-        app:layout_constraintStart_toEndOf="@id/header_title"
-        app:layout_constraintEnd_toEndOf="parent"
-        />
-
-    <Constraint
         android:id="@+id/action0"
         android:layout_width="48dp"
         android:layout_height="48dp"
@@ -165,8 +146,9 @@
         android:visibility="gone"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintTop_toBottomOf="@id/app_name"
-        app:layout_constraintLeft_toLeftOf="@id/media_action_guidebox"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toLeftOf="@id/action1"
+        app:layout_constraintHorizontal_bias="1"
         >
     </Constraint>
 
@@ -220,7 +202,8 @@
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintTop_toBottomOf="@id/app_name"
         app:layout_constraintLeft_toRightOf="@id/action3"
-        app:layout_constraintRight_toRightOf="@id/media_action_guidebox"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintHorizontal_bias="0"
         >
     </Constraint>
 </ConstraintSet>
