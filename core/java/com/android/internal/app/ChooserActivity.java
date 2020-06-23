@@ -1017,14 +1017,17 @@ public class ChooserActivity extends ResolverActivity implements
 
     /**
      * Update UI to reflect changes in data.
-     * <p>If {@code listAdapter} is {@code null}, both profile list adapters are updated.
+     * <p>If {@code listAdapter} is {@code null}, both profile list adapters are updated if
+     * available.
      */
     private void handlePackagesChanged(@Nullable ResolverListAdapter listAdapter) {
         // Refresh pinned items
         mPinnedSharedPrefs = getPinnedSharedPrefs(this);
         if (listAdapter == null) {
             mChooserMultiProfilePagerAdapter.getActiveListAdapter().handlePackagesChanged();
-            mChooserMultiProfilePagerAdapter.getInactiveListAdapter().handlePackagesChanged();
+            if (mChooserMultiProfilePagerAdapter.getCount() > 1) {
+                mChooserMultiProfilePagerAdapter.getInactiveListAdapter().handlePackagesChanged();
+            }
         } else {
             listAdapter.handlePackagesChanged();
         }
