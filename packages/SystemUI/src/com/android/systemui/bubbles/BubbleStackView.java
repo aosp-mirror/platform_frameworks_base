@@ -1145,9 +1145,6 @@ public class BubbleStackView extends FrameLayout
     }
 
     private void setUpOverflow() {
-        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            return;
-        }
         int overflowBtnIndex = 0;
         if (mBubbleOverflow == null) {
             mBubbleOverflow = new BubbleOverflow(getContext());
@@ -1512,8 +1509,7 @@ public class BubbleStackView extends FrameLayout
     }
 
     private void updateOverflowVisibility() {
-        if (!BubbleExperimentConfig.allowBubbleOverflow(mContext)
-                || mBubbleOverflow == null) {
+        if (mBubbleOverflow == null) {
             return;
         }
         mBubbleOverflow.setVisible(mIsExpanded ? VISIBLE : GONE);
@@ -2754,11 +2750,8 @@ public class BubbleStackView extends FrameLayout
      * @return the number of bubbles in the stack view.
      */
     public int getBubbleCount() {
-        if (BubbleExperimentConfig.allowBubbleOverflow(mContext)) {
-            // Subtract 1 for the overflow button that is always in the bubble container.
-            return mBubbleContainer.getChildCount() - 1;
-        }
-        return mBubbleContainer.getChildCount();
+        // Subtract 1 for the overflow button that is always in the bubble container.
+        return mBubbleContainer.getChildCount() - 1;
     }
 
     /**
