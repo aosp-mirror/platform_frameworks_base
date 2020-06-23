@@ -110,7 +110,7 @@ void AnnotationProcessor::AppendNewLine() {
   }
 }
 
-void AnnotationProcessor::Print(Printer* printer) const {
+void AnnotationProcessor::Print(Printer* printer, bool strip_api_annotations) const {
   if (has_comments_) {
     std::string result = comment_.str();
     for (const StringPiece& line : util::Tokenize(result, '\n')) {
@@ -123,6 +123,9 @@ void AnnotationProcessor::Print(Printer* printer) const {
     printer->Println("@Deprecated");
   }
 
+  if (strip_api_annotations) {
+    return;
+  }
   for (const AnnotationRule& rule : sAnnotationRules) {
     if (annotation_bit_mask_ & rule.bit_mask) {
       printer->Println(rule.annotation);
