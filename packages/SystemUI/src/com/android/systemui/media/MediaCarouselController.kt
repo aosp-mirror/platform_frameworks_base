@@ -15,6 +15,7 @@ import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.PageIndicator
 import com.android.systemui.statusbar.notification.VisualStabilityManager
 import com.android.systemui.statusbar.policy.ConfigurationController
+import com.android.systemui.util.Utils
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.animation.requiresRemeasuring
 import com.android.systemui.util.concurrency.DelayableExecutor
@@ -150,8 +151,15 @@ class MediaCarouselController @Inject constructor(
         mediaManager.addListener(object : MediaDataManager.Listener {
             override fun onMediaDataLoaded(key: String, oldKey: String?, data: MediaData) {
                 oldKey?.let { mediaData.remove(it) }
-                mediaData.put(key, data)
-                addOrUpdatePlayer(key, oldKey, data)
+                if (!data.active && !Utils.useMediaResumption(context)) {
+                    // This view is inactive, let's remove this! This happens e.g when dismissing /
+                    // timing out a view. We still have the data around because resumption could
+                    // be on, but we should save the resources and release this.
+                    onMediaDataRemoved(key)
+                } else {
+                    mediaData.put(key, data)
+                    addOrUpdatePlayer(key, oldKey, data)
+                }
             }
 
             override fun onMediaDataRemoved(key: String) {
