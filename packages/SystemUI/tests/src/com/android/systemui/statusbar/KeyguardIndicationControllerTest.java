@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static android.content.pm.UserInfo.FLAG_MANAGED_PROFILE;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -40,6 +42,7 @@ import android.app.trust.TrustManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.UserInfo;
 import android.graphics.Color;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
@@ -78,6 +81,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Collections;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -154,7 +159,8 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         mController = new KeyguardIndicationController(mContext, mWakeLockBuilder,
                 mKeyguardStateController, mStatusBarStateController, mKeyguardUpdateMonitor,
-                mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats);
+                mDockManager, mBroadcastDispatcher, mDevicePolicyManager, mIBatteryStats,
+                mUserManager);
         mController.setIndicationArea(mIndicationArea);
         mController.setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         clearInvocations(mIBatteryStats);
@@ -242,6 +248,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     @Test
     public void disclosure_unmanaged() {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(false);
+        when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(false);
         createController();
 
         verify(mDisclosure).setVisibility(View.GONE);
@@ -249,9 +256,22 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void disclosure_managedNoOwnerName() {
+    public void disclosure_deviceOwner_noOwnerName() {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(null);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(R.string.do_disclosure_generic);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_orgOwnedDeviceWithManagedProfile_noOwnerName() {
+        when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
+                new UserInfo(10, /* name */ null, /* flags */ FLAG_MANAGED_PROFILE)));
+        when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(null);
         createController();
 
         verify(mDisclosure).setVisibility(View.VISIBLE);
@@ -292,9 +312,22 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
     }
 
     @Test
-    public void disclosure_managedOwnerName() {
+    public void disclosure_deviceOwner_withOwnerName() {
         when(mDevicePolicyManager.isDeviceManaged()).thenReturn(true);
         when(mDevicePolicyManager.getDeviceOwnerOrganizationName()).thenReturn(ORGANIZATION_NAME);
+        createController();
+
+        verify(mDisclosure).setVisibility(View.VISIBLE);
+        verify(mDisclosure).switchIndication(mDisclosureWithOrganization);
+        verifyNoMoreInteractions(mDisclosure);
+    }
+
+    @Test
+    public void disclosure_orgOwnedDeviceWithManagedProfile_withOwnerName() {
+        when(mDevicePolicyManager.isOrganizationOwnedDeviceWithManagedProfile()).thenReturn(true);
+        when(mUserManager.getProfiles(anyInt())).thenReturn(Collections.singletonList(
+                new UserInfo(10, /* name */ null, FLAG_MANAGED_PROFILE)));
+        when(mDevicePolicyManager.getOrganizationNameForUser(eq(10))).thenReturn(ORGANIZATION_NAME);
         createController();
 
         verify(mDisclosure).setVisibility(View.VISIBLE);

@@ -59,15 +59,15 @@ public class Utils {
     public static void writeToSession(BlobStoreManager.Session session, ParcelFileDescriptor input,
             long lengthBytes) throws IOException {
         try (FileInputStream in = new ParcelFileDescriptor.AutoCloseInputStream(input)) {
-            writeToSession(session, in, 0, lengthBytes);
+            writeToSession(session, in, 0, lengthBytes, lengthBytes);
         }
     }
 
     public static void writeToSession(BlobStoreManager.Session session, FileInputStream in,
-            long offsetBytes, long lengthBytes) throws IOException {
+            long offsetBytes, long lengthBytes, long allocateBytes) throws IOException {
         in.getChannel().position(offsetBytes);
         try (FileOutputStream out = new ParcelFileDescriptor.AutoCloseOutputStream(
-                session.openWrite(offsetBytes, lengthBytes))) {
+                session.openWrite(offsetBytes, allocateBytes))) {
             copy(in, out, lengthBytes);
         }
     }

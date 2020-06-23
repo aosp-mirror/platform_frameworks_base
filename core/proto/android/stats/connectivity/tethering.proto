@@ -87,7 +87,7 @@ enum UpstreamType {
 
 enum UserType {
     // Unknown.
-    USER_UNKOWNN = 0;
+    USER_UNKNOWN = 0;
     // Settings.
     USER_SETTINGS = 1;
     // System UI.
