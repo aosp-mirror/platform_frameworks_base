@@ -19,12 +19,8 @@ package com.android.server.location.util;
 import static android.app.AppOpsManager.OP_MONITOR_HIGH_POWER_LOCATION;
 import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 
-import static com.android.server.location.LocationManagerService.D;
-import static com.android.server.location.LocationManagerService.TAG;
-
 import android.app.AppOpsManager;
 import android.location.util.identity.CallerIdentity;
-import android.util.Log;
 
 import com.android.server.location.LocationPermissions;
 import com.android.server.location.LocationPermissions.PermissionLevel;
@@ -54,10 +50,6 @@ public abstract class AppOpsHelper {
     }
 
     protected final void notifyAppOpChanged(String packageName) {
-        if (D) {
-            Log.v(TAG, "location appop changed for " + packageName);
-        }
-
         for (LocationAppOpListener listener : mListeners) {
             listener.onAppOpsChanged(packageName);
         }

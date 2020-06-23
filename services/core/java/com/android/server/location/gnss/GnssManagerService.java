@@ -177,7 +177,7 @@ public class GnssManagerService implements GnssNative.Callbacks {
     /**
      * Get size of GNSS batch (GNSS location results are batched together for power savings).
      */
-    public int getGnssBatchSize(String packageName) {
+    public int getGnssBatchSize() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         synchronized (mGnssBatchingLock) {
@@ -242,10 +242,8 @@ public class GnssManagerService implements GnssNative.Callbacks {
 
     /**
      * Force flush GNSS location results from batch.
-     *
-     * @param packageName name of requesting package
      */
-    public void flushGnssBatch(String packageName) {
+    public void flushGnssBatch() {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
 
         synchronized (mGnssBatchingLock) {
@@ -318,13 +316,11 @@ public class GnssManagerService implements GnssNative.Callbacks {
     /**
      * Injects GNSS measurement corrections.
      */
-    public void injectGnssMeasurementCorrections(
-            GnssMeasurementCorrections measurementCorrections, String packageName) {
+    public void injectGnssMeasurementCorrections(GnssMeasurementCorrections corrections) {
         mContext.enforceCallingOrSelfPermission(Manifest.permission.LOCATION_HARDWARE, null);
         mContext.enforceCallingOrSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION, null);
 
-        mGnssMeasurementCorrectionsProvider.injectGnssMeasurementCorrections(
-                measurementCorrections);
+        mGnssMeasurementCorrectionsProvider.injectGnssMeasurementCorrections(corrections);
     }
 
     /**
