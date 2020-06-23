@@ -36,12 +36,11 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
     /** Updates seek bar views when the data model changes. */
     @UiThread
     override fun onChanged(data: SeekBarViewModel.Progress) {
-        val previouslyEnabled = holder.seekBar.isEnabled
         if (!data.enabled) {
-            holder.seekBar.setEnabled(false)
-            if (previouslyEnabled) {
+            if (holder.seekBar.maxHeight != seekBarDisabledHeight) {
                 holder.seekBar.maxHeight = seekBarDisabledHeight
             }
+            holder.seekBar.setEnabled(false)
             holder.seekBar.getThumb().setAlpha(0)
             holder.seekBar.setProgress(0)
             holder.elapsedTimeView.setText("")
@@ -52,12 +51,8 @@ class SeekBarObserver(private val holder: PlayerViewHolder) : Observer<SeekBarVi
         holder.seekBar.getThumb().setAlpha(if (data.seekAvailable) 255 else 0)
         holder.seekBar.setEnabled(data.seekAvailable)
 
-        if (previouslyEnabled != holder.seekBar.isEnabled) {
-            holder.seekBar.maxHeight = if (holder.seekBar.isEnabled) {
-                seekBarDefaultMaxHeight
-            } else {
-                seekBarDisabledHeight
-            }
+        if (holder.seekBar.maxHeight != seekBarDefaultMaxHeight) {
+            holder.seekBar.maxHeight = seekBarDefaultMaxHeight
         }
 
         data.elapsedTime?.let {
