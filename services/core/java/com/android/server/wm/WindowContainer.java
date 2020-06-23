@@ -1897,6 +1897,7 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     boolean needsZBoost() {
+        if (mNeedsZBoost) return true;
         for (int i = 0; i < mChildren.size(); i++) {
             if (mChildren.get(i).needsZBoost()) {
                 return true;
