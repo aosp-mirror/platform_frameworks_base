@@ -517,6 +517,7 @@ public class SizeCompatTests extends ActivityTestsBase {
         setUpApp(new TestDisplayContent.Builder(mService, dw, dh).setNotch(notchHeight).build());
         addStatusBar(mActivity.mDisplayContent);
 
+        mActivity.setVisible(false);
         mActivity.mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */);
         mActivity.mDisplayContent.mOpeningApps.add(mActivity);
