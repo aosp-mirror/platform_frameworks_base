@@ -782,7 +782,6 @@ public class AppsFilter {
      * @param setting the setting of the package being removed.
      */
     public void removePackage(PackageSetting setting) {
-        removeAppIdFromVisibilityCache(setting.appId);
         mStateProvider.runWithState((settings, users) -> {
             final int userCount = users.length;
             for (int u = 0; u < userCount; u++) {
@@ -805,17 +804,7 @@ public class AppsFilter {
                 mQueriesViaPackage.remove(mQueriesViaPackage.keyAt(i), setting.appId);
             }
 
-            // re-add other shared user members to re-establish visibility between them and other
-            // packages
-            if (setting.sharedUser != null) {
-                for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
-                    if (setting.sharedUser.packages.valueAt(i) == setting) {
-                        continue;
-                    }
-                    addPackageInternal(
-                            setting.sharedUser.packages.valueAt(i), settings);
-                }
-            }
+            mForceQueryable.remove(setting.appId);
 
             if (setting.pkg != null && !setting.pkg.getProtectedBroadcasts().isEmpty()) {
                 final String removingPackageName = setting.pkg.getPackageName();
@@ -829,6 +818,21 @@ public class AppsFilter {
             mOverlayReferenceMapper.removePkg(setting.name);
             mFeatureConfig.updatePackageState(setting, true /*removed*/);
 
+            // After removing all traces of the package, if it's part of a shared user, re-add other
+            // shared user members to re-establish visibility between them and other packages.
+            // NOTE: this must come after all removals from data structures but before we update the
+            //       cache
+            if (setting.sharedUser != null) {
+                for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
+                    if (setting.sharedUser.packages.valueAt(i) == setting) {
+                        continue;
+                    }
+                    addPackageInternal(
+                            setting.sharedUser.packages.valueAt(i), settings);
+                }
+            }
+
+            removeAppIdFromVisibilityCache(setting.appId);
             if (mShouldFilterCache != null && setting.sharedUser != null) {
                 for (int i = setting.sharedUser.packages.size() - 1; i >= 0; i--) {
                     PackageSetting siblingSetting = setting.sharedUser.packages.valueAt(i);
@@ -840,9 +844,6 @@ public class AppsFilter {
                 }
             }
         });
-        mForceQueryable.remove(setting.appId);
-
-
     }
 
     /**
