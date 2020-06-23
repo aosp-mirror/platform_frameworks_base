@@ -20,13 +20,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.Color;
 import android.graphics.Outline;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.RippleDrawable;
 import android.media.session.MediaController;
 import android.media.session.MediaSession;
 import android.media.session.PlaybackState;
@@ -258,28 +255,24 @@ public class MediaControlPanel {
         ImageView iconView = mViewHolder.getSeamlessIcon();
         TextView deviceName = mViewHolder.getSeamlessText();
 
-        // Update the outline color
-        RippleDrawable bkgDrawable = (RippleDrawable) mViewHolder.getSeamless().getForeground();
-        GradientDrawable rect = (GradientDrawable) bkgDrawable.getDrawable(0);
-        rect.setStroke(2, deviceName.getCurrentTextColor());
-        rect.setColor(Color.TRANSPARENT);
-
         final MediaDeviceData device = data.getDevice();
-        int seamlessId = mViewHolder.getSeamless().getId();
-        if (device != null && !device.getEnabled()) {
-            mViewHolder.getSeamless().setEnabled(false);
-            expandedSet.setAlpha(seamlessId, 0.38f);
-            collapsedSet.setAlpha(seamlessId, 0.38f);
-            iconView.setImageResource(R.drawable.ic_hardware_speaker);
-            iconView.setVisibility(View.VISIBLE);
-            deviceName.setText(R.string.media_seamless_remote_device);
+        final int seamlessId = mViewHolder.getSeamless().getId();
+        final int seamlessFallbackId = mViewHolder.getSeamlessFallback().getId();
+        final boolean showFallback = device != null && !device.getEnabled();
+        final int seamlessFallbackVisibility = showFallback ? View.VISIBLE : View.GONE;
+        mViewHolder.getSeamlessFallback().setVisibility(seamlessFallbackVisibility);
+        expandedSet.setVisibility(seamlessFallbackId, seamlessFallbackVisibility);
+        collapsedSet.setVisibility(seamlessFallbackId, seamlessFallbackVisibility);
+        final int seamlessVisibility = showFallback ? View.GONE : View.VISIBLE;
+        mViewHolder.getSeamless().setVisibility(seamlessVisibility);
+        expandedSet.setVisibility(seamlessId, seamlessVisibility);
+        collapsedSet.setVisibility(seamlessId, seamlessVisibility);
+        if (showFallback) {
+            iconView.setImageDrawable(null);
+            deviceName.setText(null);
         } else if (device != null) {
-            mViewHolder.getSeamless().setEnabled(true);
-            expandedSet.setAlpha(seamlessId, 1.0f);
-            collapsedSet.setAlpha(seamlessId, 1.0f);
             Drawable icon = device.getIcon();
             iconView.setVisibility(View.VISIBLE);
-
             if (icon instanceof AdaptiveIcon) {
                 AdaptiveIcon aIcon = (AdaptiveIcon) icon;
                 aIcon.setBackgroundColor(mBackgroundColor);
@@ -291,9 +284,6 @@ public class MediaControlPanel {
         } else {
             // Reset to default
             Log.w(TAG, "device is null. Not binding output chip.");
-            mViewHolder.getSeamless().setEnabled(true);
-            expandedSet.setAlpha(seamlessId, 1.0f);
-            collapsedSet.setAlpha(seamlessId, 1.0f);
             iconView.setVisibility(View.GONE);
             deviceName.setText(com.android.internal.R.string.ext_media_seamless_action);
         }

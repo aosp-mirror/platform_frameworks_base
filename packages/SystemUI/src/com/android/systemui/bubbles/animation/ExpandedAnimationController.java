@@ -237,6 +237,10 @@ public class ExpandedAnimationController
                 }
 
                 mAfterExpand = null;
+
+                // Update bubble positions in case any bubbles were added or removed during the
+                // expansion animation.
+                updateBubblePositions();
             };
         } else {
             after = () -> {

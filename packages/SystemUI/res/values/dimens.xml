@@ -1269,8 +1269,13 @@
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_album_size">52dp</dimen>
     <dimen name="qs_seamless_icon_size">20dp</dimen>
+    <dimen name="qs_seamless_fallback_icon_size">20dp</dimen>
+    <dimen name="qs_seamless_fallback_top_margin">18dp</dimen>
+    <dimen name="qs_seamless_fallback_end_margin">16dp</dimen>
     <dimen name="qqs_media_spacing">16dp</dimen>
     <dimen name="qs_footer_horizontal_margin">22dp</dimen>
+    <dimen name="qs_media_disabled_seekbar_height">1dp</dimen>
+    <dimen name="qs_media_enabled_seekbar_height">3dp</dimen>
 
     <dimen name="magnification_border_size">5dp</dimen>
     <dimen name="magnification_frame_move_short">5dp</dimen>

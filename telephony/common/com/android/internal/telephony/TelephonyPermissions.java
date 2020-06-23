@@ -303,12 +303,6 @@ public final class TelephonyPermissions {
             String message, boolean allowCarrierPrivilegeOnAnySub) {
         int uid = Binder.getCallingUid();
         int pid = Binder.getCallingPid();
-        PermissionManager permissionManager = (PermissionManager) context.getSystemService(
-                Context.PERMISSION_SERVICE);
-        if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message, callingFeatureId,
-                pid, uid) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
 
         // If the calling package has carrier privileges for specified sub, then allow access.
         if (checkCarrierPrivilegeForSubId(context, subId)) return true;
@@ -316,6 +310,13 @@ public final class TelephonyPermissions {
         // If the calling package has carrier privileges for any subscription
         // and allowCarrierPrivilegeOnAnySub is set true, then allow access.
         if (allowCarrierPrivilegeOnAnySub && checkCarrierPrivilegeForAnySubId(context, uid)) {
+            return true;
+        }
+
+        PermissionManager permissionManager = (PermissionManager) context.getSystemService(
+                Context.PERMISSION_SERVICE);
+        if (permissionManager.checkDeviceIdentifierAccess(callingPackage, message, callingFeatureId,
+                pid, uid) == PackageManager.PERMISSION_GRANTED) {
             return true;
         }
 
@@ -433,16 +434,6 @@ public final class TelephonyPermissions {
     public static boolean checkReadPhoneNumber(
             Context context, int subId, int pid, int uid,
             String callingPackage, @Nullable String callingFeatureId, String message) {
-        // Default SMS app can always read it.
-        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
-        if (appOps.noteOp(AppOpsManager.OPSTR_WRITE_SMS, uid, callingPackage, callingFeatureId,
-                null) == AppOpsManager.MODE_ALLOWED) {
-            return true;
-        }
-
-        // NOTE(b/73308711): If an app has one of the following AppOps bits explicitly revoked, they
-        // will be denied access, even if they have another permission and AppOps bit if needed.
-
         // First, check if the SDK version is below R
         boolean preR = false;
         try {
@@ -477,21 +468,29 @@ public final class TelephonyPermissions {
             }
         }
 
+        // Default SMS app can always read it.
+        AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
+        if (appOps.noteOp(AppOpsManager.OPSTR_WRITE_SMS, uid, callingPackage, callingFeatureId,
+                null) == AppOpsManager.MODE_ALLOWED) {
+            return true;
+        }
         // Can be read with READ_SMS too.
         try {
             context.enforcePermission(android.Manifest.permission.READ_SMS, pid, uid, message);
-            return appOps.noteOp(AppOpsManager.OPSTR_READ_SMS, uid, callingPackage,
-                    callingFeatureId, null) == AppOpsManager.MODE_ALLOWED;
-
+            if (appOps.noteOp(AppOpsManager.OPSTR_READ_SMS, uid, callingPackage,
+                    callingFeatureId, null) == AppOpsManager.MODE_ALLOWED) {
+                return true;
+            }
         } catch (SecurityException readSmsSecurityException) {
         }
         // Can be read with READ_PHONE_NUMBERS too.
         try {
             context.enforcePermission(android.Manifest.permission.READ_PHONE_NUMBERS, pid, uid,
                     message);
-            return appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_NUMBERS, uid, callingPackage,
-                    callingFeatureId, null) == AppOpsManager.MODE_ALLOWED;
-
+            if (appOps.noteOp(AppOpsManager.OPSTR_READ_PHONE_NUMBERS, uid, callingPackage,
+                    callingFeatureId, null) == AppOpsManager.MODE_ALLOWED) {
+                return true;
+            }
         } catch (SecurityException readPhoneNumberSecurityException) {
         }
 

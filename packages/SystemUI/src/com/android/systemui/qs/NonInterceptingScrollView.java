@@ -46,6 +46,11 @@ public class NonInterceptingScrollView extends ScrollView {
                     if (parent != null) {
                         parent.requestDisallowInterceptTouchEvent(true);
                     }
+                } else if (!canScrollVertically(-1)) {
+                    // Don't pass on the touch to the view, because scrolling will unconditionally
+                    // disallow interception even if we can't scroll.
+                    // if a user can't scroll at all, we should never listen to the touch.
+                    return false;
                 }
                 break;
         }

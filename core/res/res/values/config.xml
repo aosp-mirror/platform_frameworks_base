@@ -403,33 +403,18 @@
     <!-- Allowed unprivileged keepalive slots per uid. -->
     <integer translatable="false" name="config_allowedUnprivilegedKeepalivePerUid">2</integer>
 
-    <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         USB interfaces.  If the device doesn't want to support tethering over USB this should
-         be empty.  An example would be "usb.*" -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.array.config_tether_usb_regexs instead. -->
     <string-array translatable="false" name="config_tether_usb_regexs">
     </string-array>
 
-    <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         Wifi interfaces.  If the device doesn't want to support tethering over Wifi this
-         should be empty.  An example would be "softap.*" -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.array.config_tether_wifi_regexs instead. -->
     <string-array translatable="false" name="config_tether_wifi_regexs">
     </string-array>
 
-    <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         Wifi P2P interfaces.  If the device doesn't want to support tethering over Wifi P2p this
-         should be empty.  An example would be "p2p-p2p.*" -->
-    <string-array translatable="false" name="config_tether_wifi_p2p_regexs">
-    </string-array>
-
-    <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         WiMAX interfaces.  If the device doesn't want to support tethering over Wifi this
-         should be empty.  An example would be "softap.*" -->
-    <string-array translatable="false" name="config_tether_wimax_regexs">
-    </string-array>
-
-    <!-- List of regexpressions describing the interface (if any) that represent tetherable
-         bluetooth interfaces.  If the device doesn't want to support tethering over bluetooth this
-         should be empty. -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.array.config_tether_bluetooth_regexs instead. -->
     <string-array translatable="false" name="config_tether_bluetooth_regexs">
     </string-array>
 
@@ -437,7 +422,8 @@
          updated config_tether_dhcp_range has to be updated appropriately. -->
     <integer translatable="false" name="config_max_pan_devices">5</integer>
 
-    <!-- Dhcp range (min, max) to use for tethering purposes -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.array.config_dhcp_range instead. -->
     <string-array translatable="false" name="config_tether_dhcp_range">
     </string-array>
 
@@ -477,31 +463,8 @@
         -->
     </string-array>
 
-    <!-- If the mobile hotspot feature requires provisioning, a package name and class name
-        can be provided to launch a supported application that provisions the devices.
-
-        Example Usage:
-
-        String[] appDetails = getStringArray(R.array.config_mobile_hotspot_provision_app);
-        Intent intent = new Intent(Intent.ACTION_MAIN);
-        intent.setClassName(appDetails[0], appDetails[1]);
-        startActivityForResult(intent, 0);
-
-        public void onActivityResult(int requestCode, int resultCode, Intent intent) {
-            super.onActivityResult(requestCode, resultCode, intent);
-            if (requestCode == 0) {
-                if (resultCode == Activity.RESULT_OK) {
-                    //Mobile hotspot provisioning successful
-                } else {
-                    //Mobile hotspot provisioning failed
-                }
-            }
-
-        See src/com/android/settings/TetherSettings.java for more details.
-        For ui-less/periodic recheck support see config_mobile_hotspot_provision_app_no_ui
-        -->
-    <!-- The first element is the package name and the second element is the class name
-         of the provisioning app -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.array.config_mobile_hotspot_provision_app instead. -->
     <string-array translatable="false" name="config_mobile_hotspot_provision_app">
     <!--
         <item>com.example.provisioning</item>
@@ -509,85 +472,32 @@
     -->
     </string-array>
 
-    <!-- If the mobile hotspot feature requires provisioning, an action can be provided
-         that will be broadcast in non-ui cases for checking the provisioning status.
-
-         A second broadcast, action defined by config_mobile_hotspot_provision_response,
-         will be sent back to notify if provisioning succeeded or not.  The response will
-         match that of the activity in config_mobile_hotspot_provision_app, but instead
-         contained within the int extra "EntitlementResult".
-
-         Example Usage:
-         String provisionAction = getString(R.string.config_mobile_hotspot_provision_check);
-         sendBroadcast(new Intent(provisionAction));
-
-         public void onReceive(Context context, Intent intent) {
-             String provisionResponse =
-                    getString(R.string.config_mobile_hotspot_provision_response);
-             if (provisionResponse.equals(intent.getAction())
-                    && intent.getIntExtra("EntitlementResult") == Activity.RESULT_OK) {
-                 //Mobile hotspot provisioning successful
-             } else {
-                 //Mobile hotspot provisioning failed
-             }
-         }
-        -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.string.config_mobile_hotspot_provision_app_no_ui
+         instead. -->
     <string translatable="false" name="config_mobile_hotspot_provision_app_no_ui"></string>
-    <!-- Sent in response to a provisioning check. The caller must hold the
-         permission android.permission.TETHER_PRIVILEGED for Settings to
-         receive this response.
 
-         See config_mobile_hotspot_provision_response
-         -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.string.config_mobile_hotspot_provision_response
+         instead. -->
     <string translatable="false" name="config_mobile_hotspot_provision_response"></string>
-    <!-- Number of hours between each background provisioning call -->
+
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.integer.config_mobile_hotspot_provision_check_period
+         instead. -->
     <integer translatable="false" name="config_mobile_hotspot_provision_check_period">24</integer>
 
-    <!-- Activity name to enable wifi tethering after provisioning app succeeds -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.string.config_wifi_tether_enable instead. -->
     <string translatable="false" name="config_wifi_tether_enable">com.android.settings/.wifi.tether.TetherService</string>
 
-    <!-- Array of ConnectivityManager.TYPE_xxxx values allowable for tethering.
-
-         Common options are [1, 4] for TYPE_WIFI and TYPE_MOBILE_DUN or
-         [1,7,0] for TYPE_WIFI, TYPE_BLUETOOTH, and TYPE_MOBILE.
-
-         This list is also modified by code within the framework, including:
-
-             - TYPE_ETHERNET (9) is prepended to this list, and
-
-             - the return value of TelephonyManager.isTetheringApnRequired()
-               determines how the array is further modified:
-
-                   * TRUE (DUN REQUIRED).
-                     TYPE_MOBILE is removed (if present).
-                     TYPE_MOBILE_HIPRI is removed (if present).
-                     TYPE_MOBILE_DUN is appended (if not already present).
-
-                   * FALSE (DUN NOT REQUIRED).
-                     TYPE_MOBILE_DUN is removed (if present).
-                     If both of TYPE_MOBILE{,_HIPRI} are not present:
-                        TYPE_MOBILE is appended.
-                        TYPE_MOBILE_HIPRI is appended.
-
-         For other changes applied to this list, now and in the future, see
-         com.android.server.connectivity.tethering.TetheringConfiguration.
-
-         Note also: the order of this is important. The first upstream type
-         for which a satisfying network exists is used.
-    -->
+    <!-- This setting is deprecated, please use
+         com.android.networkstack.tethering.R.array.config_tether_upstream_types. -->
     <integer-array translatable="false" name="config_tether_upstream_types">
         <item>1</item>
         <item>7</item>
         <item>0</item>
     </integer-array>
-
-    <!-- When true, the tethering upstream network follows the current default
-         Internet network (except when the current default network is mobile,
-         in which case a DUN network will be used if required).
-
-         When true, overrides the config_tether_upstream_types setting above.
-    -->
-    <bool translatable="false" name="config_tether_upstream_automatic">true</bool>
 
     <!-- If the DUN connection for this CDMA device supports more than just DUN -->
     <!-- traffic you should list them here. -->

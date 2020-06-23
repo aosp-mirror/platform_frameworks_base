@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.statusbar.notification.stack.MediaHeaderView
 import com.android.systemui.statusbar.phone.KeyguardBypassController
+import com.android.systemui.util.mockito.capture
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -94,7 +95,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
     private fun triggerVisibilityListener() {
         keyguardMediaController.attach(mediaHeaderView)
-        verify(mediaHost).visibleChangedListener = visibilityListener.capture()
+        verify(mediaHost).addVisibilityChangeListener(capture(visibilityListener))
         visibilityListener.value.invoke(true)
     }
 }

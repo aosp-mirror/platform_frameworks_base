@@ -246,7 +246,7 @@ class InsetsStateController {
             // (e.g., z-order) have changed. They can affect the insets states that we dispatch to
             // the clients.
             for (int i = winInsetsChanged.size() - 1; i >= 0; i--) {
-                winInsetsChanged.get(i).notifyInsetsChanged();
+                mDispatchInsetsChanged.accept(winInsetsChanged.get(i));
             }
         }
         winInsetsChanged.clear();

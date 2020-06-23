@@ -592,6 +592,16 @@ class MediaDataManager(
         }
     }
 
+    /**
+     * Invoked when the user has dismissed the media carousel
+     */
+    fun onSwipeToDismiss() {
+        val mediaKeys = mediaEntries.keys.toSet()
+        mediaKeys.forEach {
+            setTimedOut(it, timedOut = true)
+        }
+    }
+
     interface Listener {
 
         /**

@@ -212,7 +212,7 @@ public class StatsPullAtomService extends SystemService {
     private static final int DIMENSION_KEY_SIZE_HARD_LIMIT = 800;
     private static final int DIMENSION_KEY_SIZE_SOFT_LIMIT = 500;
     private static final long APP_OPS_SAMPLING_INITIALIZATION_DELAY_MILLIS = 45000;
-    private static final int APP_OPS_SIZE_ESTIMATE = 5000;
+    private static final int APP_OPS_SIZE_ESTIMATE = 2000;
 
     private static final String RESULT_RECEIVER_CONTROLLER_KEY = "controller_activity";
     /**
@@ -320,8 +320,7 @@ public class StatsPullAtomService extends SystemService {
 
     private StatsPullAtomCallbackImpl mStatsCallbackImpl;
 
-    private final Object mAppOpsSamplingRateLock = new Object();
-    @GuardedBy("mAppOpsSamplingRateLock")
+    @GuardedBy("mAttributedAppOpsLock")
     private int mAppOpsSamplingRate = 0;
     private final Object mDangerousAppOpsListLock = new Object();
     @GuardedBy("mDangerousAppOpsListLock")
@@ -3084,7 +3083,7 @@ public class StatsPullAtomService extends SystemService {
     int pullDangerousPermissionStateLocked(int atomTag, List<StatsEvent> pulledData) {
         final long token = Binder.clearCallingIdentity();
         float samplingRate = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_PERMISSIONS,
-                DANGEROUS_PERMISSION_STATE_SAMPLE_RATE, 0.02f);
+                DANGEROUS_PERMISSION_STATE_SAMPLE_RATE, 0.015f);
         Set<Integer> reportedUids = new HashSet<>();
         try {
             PackageManager pm = mContext.getPackageManager();
@@ -3479,23 +3478,21 @@ public class StatsPullAtomService extends SystemService {
             HistoricalOps histOps = ops.get(EXTERNAL_STATS_SYNC_TIMEOUT_MILLIS,
                     TimeUnit.MILLISECONDS);
 
-            synchronized (mAppOpsSamplingRateLock) {
-                if (mAppOpsSamplingRate == 0) {
-                    mContext.getMainThreadHandler().postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                estimateAppOpsSamplingRate();
-                            } catch (Throwable e) {
-                                Slog.e(TAG, "AppOps sampling ratio estimation failed: ", e);
-                                synchronized (mAppOpsSamplingRateLock) {
-                                    mAppOpsSamplingRate = min(mAppOpsSamplingRate, 10);
-                                }
+            if (mAppOpsSamplingRate == 0) {
+                mContext.getMainThreadHandler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            estimateAppOpsSamplingRate();
+                        } catch (Throwable e) {
+                            Slog.e(TAG, "AppOps sampling ratio estimation failed: ", e);
+                            synchronized (mAttributedAppOpsLock) {
+                                mAppOpsSamplingRate = min(mAppOpsSamplingRate, 10);
                             }
                         }
-                    }, APP_OPS_SAMPLING_INITIALIZATION_DELAY_MILLIS);
-                    mAppOpsSamplingRate = 100;
-                }
+                    }
+                }, APP_OPS_SAMPLING_INITIALIZATION_DELAY_MILLIS);
+                mAppOpsSamplingRate = 100;
             }
 
             List<AppOpEntry> opsList =
@@ -3503,9 +3500,7 @@ public class StatsPullAtomService extends SystemService {
 
             int newSamplingRate = sampleAppOps(pulledData, opsList, atomTag, mAppOpsSamplingRate);
 
-            synchronized (mAppOpsSamplingRateLock) {
-                mAppOpsSamplingRate = min(mAppOpsSamplingRate, newSamplingRate);
-            }
+            mAppOpsSamplingRate = min(mAppOpsSamplingRate, newSamplingRate);
         } catch (Throwable t) {
             // TODO: catch exceptions at a more granular level
             Slog.e(TAG, "Could not read appops", t);
@@ -3544,7 +3539,7 @@ public class StatsPullAtomService extends SystemService {
         }
         int estimatedSamplingRate = (int) constrain(
                 appOpsTargetCollectionSize * 100 / estimatedSize, 0, 100);
-        synchronized (mAppOpsSamplingRateLock) {
+        synchronized (mAttributedAppOpsLock) {
             mAppOpsSamplingRate = min(mAppOpsSamplingRate, estimatedSamplingRate);
         }
     }

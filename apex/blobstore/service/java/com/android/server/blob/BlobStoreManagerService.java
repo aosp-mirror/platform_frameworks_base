@@ -34,6 +34,7 @@ import static com.android.server.blob.BlobStoreConfig.LOGV;
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_CURRENT;
 import static com.android.server.blob.BlobStoreConfig.getAdjustedCommitTimeMs;
+import static com.android.server.blob.BlobStoreConfig.getDeletionOnLastLeaseDelayMs;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
 import static com.android.server.blob.BlobStoreSession.STATE_COMMITTED;
 import static com.android.server.blob.BlobStoreSession.STATE_VERIFIED_INVALID;
@@ -488,9 +489,21 @@ public class BlobStoreManagerService extends SystemService {
                 Slog.v(TAG, "Released lease on " + blobHandle
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
             }
-            if (blobMetadata.shouldBeDeleted(true /* respectLeaseWaitTime */)) {
-                deleteBlobLocked(blobMetadata);
-                userBlobs.remove(blobHandle);
+            if (!blobMetadata.hasLeases()) {
+                mHandler.postDelayed(() -> {
+                    synchronized (mBlobsLock) {
+                        // Check if blobMetadata object is still valid. If it is not, then
+                        // it means that it was already deleted and nothing else to do here.
+                        if (!Objects.equals(userBlobs.get(blobHandle), blobMetadata)) {
+                            return;
+                        }
+                        if (blobMetadata.shouldBeDeleted(true /* respectLeaseWaitTime */)) {
+                            deleteBlobLocked(blobMetadata);
+                            userBlobs.remove(blobHandle);
+                        }
+                        writeBlobsInfoAsync();
+                    }
+                }, getDeletionOnLastLeaseDelayMs());
             }
             writeBlobsInfoAsync();
         }

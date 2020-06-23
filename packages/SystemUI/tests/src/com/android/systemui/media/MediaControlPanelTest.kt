@@ -25,6 +25,7 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
+import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
@@ -79,6 +80,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Mock private lateinit var seekBarViewModel: SeekBarViewModel
     @Mock private lateinit var seekBarData: LiveData<SeekBarViewModel.Progress>
     @Mock private lateinit var mediaViewController: MediaViewController
+    @Mock private lateinit var expandedSet: ConstraintSet
+    @Mock private lateinit var collapsedSet: ConstraintSet
     private lateinit var appIcon: ImageView
     private lateinit var appName: TextView
     private lateinit var albumView: ImageView
@@ -87,6 +90,7 @@ public class MediaControlPanelTest : SysuiTestCase() {
     private lateinit var seamless: ViewGroup
     private lateinit var seamlessIcon: ImageView
     private lateinit var seamlessText: TextView
+    private lateinit var seamlessFallback: ImageView
     private lateinit var seekBar: SeekBar
     private lateinit var elapsedTimeView: TextView
     private lateinit var totalTimeView: TextView
@@ -105,8 +109,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
     @Before
     fun setUp() {
         bgExecutor = FakeExecutor(FakeSystemClock())
-        whenever(mediaViewController.expandedLayout).thenReturn(mock(ConstraintSet::class.java))
-        whenever(mediaViewController.collapsedLayout).thenReturn(mock(ConstraintSet::class.java))
+        whenever(mediaViewController.expandedLayout).thenReturn(expandedSet)
+        whenever(mediaViewController.collapsedLayout).thenReturn(collapsedSet)
 
         player = MediaControlPanel(context, bgExecutor, activityStarter, mediaViewController,
                 seekBarViewModel)
@@ -133,6 +137,8 @@ public class MediaControlPanelTest : SysuiTestCase() {
         whenever(holder.seamlessIcon).thenReturn(seamlessIcon)
         seamlessText = TextView(context)
         whenever(holder.seamlessText).thenReturn(seamlessText)
+        seamlessFallback = ImageView(context)
+        whenever(holder.seamlessFallback).thenReturn(seamlessFallback)
         seekBar = SeekBar(context)
         whenever(holder.seekBar).thenReturn(seekBar)
         elapsedTimeView = TextView(context)
@@ -214,13 +220,16 @@ public class MediaControlPanelTest : SysuiTestCase() {
 
     @Test
     fun bindDisabledDevice() {
+        seamless.id = 1
+        seamlessFallback.id = 2
         player.attach(holder)
         val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
                 emptyList(), PACKAGE, session.getSessionToken(), null, disabledDevice, true, null)
         player.bind(state)
-        assertThat(seamless.isEnabled()).isFalse()
-        assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(
-                R.string.media_seamless_remote_device))
+        verify(expandedSet).setVisibility(seamless.id, View.GONE)
+        verify(expandedSet).setVisibility(seamlessFallback.id, View.VISIBLE)
+        verify(collapsedSet).setVisibility(seamless.id, View.GONE)
+        verify(collapsedSet).setVisibility(seamlessFallback.id, View.VISIBLE)
     }
 
     @Test
