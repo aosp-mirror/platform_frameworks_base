@@ -537,9 +537,9 @@ public abstract class PanelViewController {
         // the animation only to the last notification, and then jump to the maximum panel height so
         // clear all just fades in and the decelerating motion is towards the last notification.
         final boolean clearAllExpandHack = expand &&
-                shouldExpandToTopOfClearAll(getMaxPanelHeight() - getClearAllHeight());
+                shouldExpandToTopOfClearAll(getMaxPanelHeight() - getClearAllHeightWithPadding());
         if (clearAllExpandHack) {
-            target = getMaxPanelHeight() - getClearAllHeight();
+            target = getMaxPanelHeight() - getClearAllHeightWithPadding();
         }
         if (target == mExpandedHeight || getOverExpansionAmount() > 0f && expand) {
             notifyExpandingFinished();
@@ -1030,9 +1030,9 @@ public abstract class PanelViewController {
     protected abstract boolean isClearAllVisible();
 
     /**
-     * @return the height of the clear all button, in pixels
+     * @return the height of the clear all button, in pixels including padding
      */
-    protected abstract int getClearAllHeight();
+    protected abstract int getClearAllHeightWithPadding();
 
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
