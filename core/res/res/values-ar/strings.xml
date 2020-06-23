@@ -1981,9 +1981,9 @@
     <string name="expand_button_content_description_collapsed" msgid="3873368935659010279">"توسيع"</string>
     <string name="expand_button_content_description_expanded" msgid="7484217944948667489">"تصغير"</string>
     <string name="expand_action_accessibility" msgid="1947657036871746627">"تبديل التوسيع"</string>
-    <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏منفذ الأجهزة الطرفية المزودة بكابل USB ونظام التشغيل Android"</string>
+    <string name="usb_midi_peripheral_name" msgid="490523464968655741">"‏منفذ الأجهزة الملحقة المزودة بكابل USB ونظام التشغيل Android"</string>
     <string name="usb_midi_peripheral_manufacturer_name" msgid="7557148557088787741">"Android"</string>
-    <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"‏منفذ الأجهزة الطرفية المزودة بكابل USB"</string>
+    <string name="usb_midi_peripheral_product_name" msgid="2836276258480904434">"‏منفذ الأجهزة الملحقة المزودة بكابل USB"</string>
     <string name="floating_toolbar_open_overflow_description" msgid="2260297653578167367">"خيارات أخرى"</string>
     <string name="floating_toolbar_close_overflow_description" msgid="3949818077708138098">"إغلاق التجاوز"</string>
     <string name="maximize_button_text" msgid="4258922519914732645">"تكبير"</string>

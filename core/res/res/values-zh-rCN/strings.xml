@@ -92,7 +92,7 @@
     <string name="notification_channel_emergency_callback" msgid="54074839059123159">"紧急回拨模式"</string>
     <string name="notification_channel_mobile_data_status" msgid="1941911162076442474">"移动数据状态"</string>
     <string name="notification_channel_sms" msgid="1243384981025535724">"短信"</string>
-    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"语音邮件"</string>
+    <string name="notification_channel_voice_mail" msgid="8457433203106654172">"语音信息"</string>
     <string name="notification_channel_wfc" msgid="9048240466765169038">"WLAN 通话"</string>
     <string name="notification_channel_sim" msgid="5098802350325677490">"SIM 卡状态"</string>
     <string name="notification_channel_sim_high_prio" msgid="642361929452850928">"高优先顺序 SIM 卡状态"</string>
@@ -958,7 +958,7 @@
     <string name="permdesc_writeHistoryBookmarks" product="default" msgid="2245203087160913652">"允许该应用修改您手机上存储的浏览器历史记录或浏览器书签。此权限可让该应用清除或修改浏览器数据。请注意：此权限可能不适用于第三方浏览器或具备网页浏览功能的其他应用。"</string>
     <string name="permlab_setAlarm" msgid="1158001610254173567">"设置闹钟"</string>
     <string name="permdesc_setAlarm" msgid="2185033720060109640">"允许应用在已安装的闹钟应用中设置闹钟。有些闹钟应用可能无法实现此功能。"</string>
-    <string name="permlab_addVoicemail" msgid="4770245808840814471">"添加语音邮件"</string>
+    <string name="permlab_addVoicemail" msgid="4770245808840814471">"添加语音信息"</string>
     <string name="permdesc_addVoicemail" msgid="5470312139820074324">"允许应用在您的语音信箱中留言。"</string>
     <string name="permlab_writeGeolocationPermissions" msgid="8605631647492879449">"修改“浏览器”地理位置的权限"</string>
     <string name="permdesc_writeGeolocationPermissions" msgid="5817346421222227772">"允许应用修改“浏览器”的地理位置权限。恶意应用可能借此向任意网站发送位置信息。"</string>
