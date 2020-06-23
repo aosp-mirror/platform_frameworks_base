@@ -56,6 +56,7 @@ import android.widget.TextView;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
+import com.android.internal.logging.UiEventLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
@@ -122,6 +123,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private OnAppSettingsClickListener mAppSettingsClickListener;
     private NotificationGuts mGutsContainer;
     private Drawable mPkgIcon;
+    private UiEventLogger mUiEventLogger;
 
     @VisibleForTesting
     boolean mSkipPost = false;
@@ -182,6 +184,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             NotificationEntry entry,
             OnSettingsClickListener onSettingsClick,
             OnAppSettingsClickListener onAppSettingsClick,
+            UiEventLogger uiEventLogger,
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean wasShownHighPriority)
@@ -205,6 +208,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         mAppUid = mSbn.getUid();
         mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
+        mUiEventLogger = uiEventLogger;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
                 pkg, mAppUid, false /* includeDeleted */);
@@ -223,6 +227,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         bindInlineControls();
 
+        logUiEvent(NotificationControlsEvent.NOTIFICATION_CONTROLS_OPEN);
         mMetricsLogger.write(notificationControlsLogMaker());
     }
 
@@ -397,6 +402,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
      */
     private void updateImportance() {
         if (mChosenImportance != null) {
+            logUiEvent(NotificationControlsEvent.NOTIFICATION_CONTROLS_SAVE_IMPORTANCE);
             mMetricsLogger.write(importanceChangeLogMaker());
 
             int newImportance = mChosenImportance;
@@ -483,6 +489,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
         bindInlineControls();
 
+        logUiEvent(NotificationControlsEvent.NOTIFICATION_CONTROLS_CLOSE);
         mMetricsLogger.write(notificationControlsLogMaker().setType(MetricsEvent.TYPE_CLOSE));
     }
 
@@ -624,6 +631,13 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             } catch (RemoteException e) {
                 Log.e(TAG, "Unable to update notification importance", e);
             }
+        }
+    }
+
+    private void logUiEvent(NotificationControlsEvent event) {
+        if (mSbn != null) {
+            mUiEventLogger.logWithInstanceId(event,
+                    mSbn.getUid(), mSbn.getPackageName(), mSbn.getInstanceId());
         }
     }
 
