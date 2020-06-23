@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl;
@@ -164,6 +165,7 @@ public class InlineContentView extends ViewGroup {
     public InlineContentView(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr) {
         this(context, attrs, defStyleAttr, 0);
+        mSurfaceView.setEnableSurfaceClipping(true);
     }
 
     /**
@@ -175,6 +177,12 @@ public class InlineContentView extends ViewGroup {
     @Nullable
     public SurfaceControl getSurfaceControl() {
         return mSurfaceView.getSurfaceControl();
+    }
+
+    @Override
+    public void setClipBounds(Rect clipBounds) {
+        super.setClipBounds(clipBounds);
+        mSurfaceView.setClipBounds(clipBounds);
     }
 
     /**
