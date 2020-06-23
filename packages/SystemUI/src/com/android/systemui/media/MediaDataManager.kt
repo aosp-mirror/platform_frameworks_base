@@ -323,7 +323,7 @@ class MediaDataManager(
             onMediaDataLoaded(packageName, null, MediaData(true, bgColor, appName,
                     null, desc.subtitle, desc.title, artworkIcon, listOf(mediaAction), listOf(0),
                     packageName, token, appIntent, device = null, active = false,
-                    resumeAction = resumeAction, notificationKey = packageName,
+                    resumeAction = resumeAction, resumption = true, notificationKey = packageName,
                     hasCheckedForResume = true))
         }
     }
@@ -542,7 +542,7 @@ class MediaDataManager(
             val data = mediaEntries.remove(key)!!
             val resumeAction = getResumeMediaAction(data.resumeAction!!)
             val updated = data.copy(token = null, actions = listOf(resumeAction),
-                actionsToShowInCompact = listOf(0), active = false)
+                    actionsToShowInCompact = listOf(0), active = false, resumption = true)
             mediaEntries.put(data.packageName, updated)
             // Notify listeners of "new" controls
             val listenersCopy = listeners.toSet()
