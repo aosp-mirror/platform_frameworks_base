@@ -84,6 +84,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -188,6 +190,9 @@ public final class StrictMode {
 
     // Only show an annoying dialog at most every 30 seconds
     private static final long MIN_DIALOG_INTERVAL_MS = 30000;
+
+    // Only log a dropbox entry at most every 30 seconds
+    private static final long MIN_DROPBOX_INTERVAL_MS = 3000;
 
     // How many Span tags (e.g. animations) to report.
     private static final int MAX_SPAN_TAGS = 20;
@@ -1752,16 +1757,20 @@ public final class StrictMode {
             // Not perfect, but fast and good enough for dup suppression.
             Integer crashFingerprint = info.hashCode();
             long lastViolationTime = 0;
-            if (mLastViolationTime != null) {
-                Long vtime = mLastViolationTime.get(crashFingerprint);
-                if (vtime != null) {
-                    lastViolationTime = vtime;
-                }
-            } else {
-                mLastViolationTime = new ArrayMap<>(1);
-            }
             long now = SystemClock.uptimeMillis();
-            mLastViolationTime.put(crashFingerprint, now);
+            if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
+                if (mLastViolationTime != null) {
+                    Long vtime = mLastViolationTime.get(crashFingerprint);
+                    if (vtime != null) {
+                        lastViolationTime = vtime;
+                    }
+                    clampViolationTimeMap(mLastViolationTime, Math.max(MIN_LOG_INTERVAL_MS,
+                                Math.max(MIN_DIALOG_INTERVAL_MS, MIN_DROPBOX_INTERVAL_MS)));
+                } else {
+                    mLastViolationTime = new ArrayMap<>(1);
+                }
+                mLastViolationTime.put(crashFingerprint, now);
+            }
             long timeSinceLastViolationMillis =
                     lastViolationTime == 0 ? Long.MAX_VALUE : (now - lastViolationTime);
 
@@ -1780,7 +1789,8 @@ public final class StrictMode {
                 penaltyMask |= PENALTY_DIALOG;
             }
 
-            if (info.penaltyEnabled(PENALTY_DROPBOX) && lastViolationTime == 0) {
+            if (info.penaltyEnabled(PENALTY_DROPBOX)
+                    && timeSinceLastViolationMillis > MIN_DROPBOX_INTERVAL_MS) {
                 penaltyMask |= PENALTY_DROPBOX;
             }
 
@@ -2215,6 +2225,23 @@ public final class StrictMode {
     @UnsupportedAppUsage
     private static final HashMap<Integer, Long> sLastVmViolationTime = new HashMap<>();
 
+    /**
+     * Clamp the given map by removing elements with timestamp older than the given retainSince.
+     */
+    private static void clampViolationTimeMap(final @NonNull Map<Integer, Long> violationTime,
+            final long retainSince) {
+        final Iterator<Map.Entry<Integer, Long>> iterator = violationTime.entrySet().iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, Long> e = iterator.next();
+            if (e.getValue() < retainSince) {
+                // Remove stale entries
+                iterator.remove();
+            }
+        }
+        // Ideally we'd cap the total size of the map, though it'll involve quickselect of topK,
+        // seems not worth it (saving some space immediately but they will be obsoleted soon anyway)
+    }
+
     /** @hide */
     public static void onVmPolicyViolation(Violation originStack) {
         onVmPolicyViolation(originStack, false);
@@ -2238,13 +2265,17 @@ public final class StrictMode {
         final long now = SystemClock.uptimeMillis();
         long lastViolationTime;
         long timeSinceLastViolationMillis = Long.MAX_VALUE;
-        synchronized (sLastVmViolationTime) {
-            if (sLastVmViolationTime.containsKey(fingerprint)) {
-                lastViolationTime = sLastVmViolationTime.get(fingerprint);
-                timeSinceLastViolationMillis = now - lastViolationTime;
-            }
-            if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
-                sLastVmViolationTime.put(fingerprint, now);
+        if (sLogger == LOGCAT_LOGGER) { // Don't throttle it if there is a non-default logger
+            synchronized (sLastVmViolationTime) {
+                if (sLastVmViolationTime.containsKey(fingerprint)) {
+                    lastViolationTime = sLastVmViolationTime.get(fingerprint);
+                    timeSinceLastViolationMillis = now - lastViolationTime;
+                }
+                if (timeSinceLastViolationMillis > MIN_VM_INTERVAL_MS) {
+                    sLastVmViolationTime.put(fingerprint, now);
+                }
+                clampViolationTimeMap(sLastVmViolationTime,
+                        now - Math.max(MIN_VM_INTERVAL_MS, MIN_LOG_INTERVAL_MS));
             }
         }
         if (timeSinceLastViolationMillis <= MIN_VM_INTERVAL_MS) {
