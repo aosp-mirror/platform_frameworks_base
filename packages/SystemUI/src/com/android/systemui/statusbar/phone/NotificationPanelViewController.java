@@ -2397,8 +2397,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected int getClearAllHeight() {
-        return mNotificationStackScroller.getFooterViewHeight();
+    protected int getClearAllHeightWithPadding() {
+        return mNotificationStackScroller.getFooterViewHeightWithPadding();
     }
 
     @Override
