@@ -26,6 +26,7 @@
     android:gravity="center_horizontal|fill_vertical"
     android:background="@drawable/qs_media_background">
 
+    <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <FrameLayout
         android:id="@+id/notification_media_progress_time"
         android:layout_width="0dp"
@@ -36,7 +37,7 @@
             android:id="@+id/media_elapsed_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textColor="@color/media_primary_text"
             android:gravity="start"
@@ -46,12 +47,35 @@
             android:id="@+id/media_total_time"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:fontFamily="@*android:string/config_bodyFontFamily"
             android:textColor="@color/media_primary_text"
             android:gravity="end"
             android:textSize="14sp" />
     </FrameLayout>
+
+    <!--  Actions must be ordered left-to-right even in RTL layout.  However, they appear in a chain
+    with the album art and the title, and must as a group appear at the end of that chain.  This is
+    accomplished by having the guidebox (an invisible view that is positioned around all 5 actions)
+    in the chain with the album art and the title.  The actions are in a LTR chain bounded by that
+    guidebox, and the ambiguity of how wide the guidebox should be is resolved by using a barrier
+    which forces it's starting edge to be as far to the end as possible while fitting the actions.
+    -->
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/media_action_barrier"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:barrierDirection="start"
+        />
+
+    <View
+        android:id="@+id/media_action_guidebox"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="16dp"
+        android:visibility="invisible"
+        />
 
     <ImageButton
         android:id="@+id/action0"
@@ -98,16 +122,16 @@
         android:background="@drawable/qs_media_light_source"
         android:orientation="horizontal"
         android:forceHasOverlappingRendering="false"
-        android:paddingLeft="12dp"
+        android:paddingStart="12dp"
         android:paddingTop="6dp"
-        android:paddingRight="12dp"
+        android:paddingEnd="12dp"
         android:paddingBottom="6dp">
 
         <ImageView
             android:id="@+id/media_seamless_image"
             android:layout_width="@dimen/qs_seamless_icon_size"
             android:layout_height="@dimen/qs_seamless_icon_size"
-            android:layout_marginRight="8dp"
+            android:layout_marginEnd="8dp"
             android:tint="@color/media_primary_text"
             android:src="@*android:drawable/ic_media_seamless" />
 
@@ -119,6 +143,7 @@
             android:singleLine="true"
             android:text="@*android:string/ext_media_seamless_action"
             android:textColor="@color/media_primary_text"
+            android:textDirection="locale"
             android:textSize="14sp" />
     </LinearLayout>
 
@@ -140,6 +165,7 @@
         />
 
     <!-- Seek Bar -->
+    <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <SeekBar
         android:id="@+id/media_progress_bar"
         style="@android:style/Widget.ProgressBar.Horizontal"
@@ -162,6 +188,7 @@
         android:layout_height="wrap_content"
         android:singleLine="true"
         android:fontFamily="@*android:string/config_headlineFontFamily"
+        android:textDirection="locale"
         android:textSize="14sp" />
 
     <!-- Song name -->
@@ -172,6 +199,7 @@
         android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
         android:singleLine="true"
         android:textColor="@color/media_primary_text"
+        android:textDirection="locale"
         android:textSize="16sp" />
 
     <!-- Artist name -->
@@ -182,6 +210,7 @@
         android:fontFamily="@*android:string/config_headlineFontFamily"
         android:singleLine="true"
         android:textColor="@color/media_secondary_text"
+        android:textDirection="locale"
         android:textSize="14sp" />
 
     <com.android.internal.widget.CachingIconView
