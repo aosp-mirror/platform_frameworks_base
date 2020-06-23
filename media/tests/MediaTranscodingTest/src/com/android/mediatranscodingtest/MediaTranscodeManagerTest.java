@@ -141,7 +141,7 @@ public class MediaTranscodeManagerTest
     }
 
     @Test
-    public void testTranscodingFromAvcToAvc() throws Exception {
+    public void testTranscodingFromHevcToAvc() throws Exception {
         Log.d(TAG, "Starting: testMediaTranscodeManager");
 
         Semaphore transcodeCompleteSemaphore = new Semaphore(0);
@@ -150,19 +150,19 @@ public class MediaTranscodeManagerTest
         // The full path of this file is:
         // /data/user/0/com.android.mediatranscodingtest/cache/temp.mp4
         Uri destinationUri = Uri.parse(ContentResolver.SCHEME_FILE + "://"
-                + mContext.getCacheDir().getAbsolutePath() + "/temp.mp4");
-
-        Log.d(TAG, "Transcoding to " + destinationUri.getPath());
+                + mContext.getCacheDir().getAbsolutePath() + "/HevcTranscode.mp4");
 
         TranscodingRequest request =
                 new TranscodingRequest.Builder()
-                        .setSourceUri(mSourceAVCVideoUri)
+                        .setSourceUri(mSourceHEVCVideoUri)
                         .setDestinationUri(destinationUri)
                         .setType(MediaTranscodeManager.TRANSCODING_TYPE_VIDEO)
                         .setPriority(MediaTranscodeManager.PRIORITY_REALTIME)
                         .setVideoTrackFormat(createMediaFormat())
                         .build();
         Executor listenerExecutor = Executors.newSingleThreadExecutor();
+
+        Log.i(TAG, "transcoding to " + createMediaFormat());
 
         TranscodingJob job = mMediaTranscodeManager.enqueueRequest(request, listenerExecutor,
                 transcodingJob -> {
