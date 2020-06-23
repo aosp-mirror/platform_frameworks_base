@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.provider.Settings;
@@ -23,6 +24,7 @@ import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
 
 /**
@@ -42,23 +44,36 @@ class MagnificationModeSwitch {
     private boolean mIsVisible = false;
 
     MagnificationModeSwitch(Context context) {
+        this(context, createView(context));
+    }
+
+    @VisibleForTesting
+    MagnificationModeSwitch(Context context, @NonNull ImageView imageView) {
         mContext = context;
         mWindowManager = (WindowManager) mContext.getSystemService(
                 Context.WINDOW_SERVICE);
         mParams = createLayoutParams();
-        mImageView = createView(mContext, mMagnificationMode);
+        mImageView = imageView;
+        applyResourcesValues();
         mImageView.setOnClickListener(
                 view -> {
                     removeButton();
                     toggleMagnificationMode();
                 });
+        mImageView.setImageResource(getIconResId(mMagnificationMode));
+    }
+
+    private void applyResourcesValues() {
+        final int padding = mContext.getResources().getDimensionPixelSize(
+                R.dimen.magnification_switch_button_padding);
+        mImageView.setPadding(padding, padding, padding, padding);
     }
 
     void removeButton() {
-        mImageView.animate().cancel();
         if (!mIsVisible) {
             return;
         }
+        mImageView.animate().cancel();
         mWindowManager.removeView(mImageView);
         mIsVisible = false;
     }
@@ -72,7 +87,7 @@ class MagnificationModeSwitch {
             mWindowManager.addView(mImageView, mParams);
             mIsVisible = true;
         }
-
+        mImageView.setAlpha(1.0f);
         // TODO(b/143852371): use accessibility timeout as a delay.
         // Dismiss the magnification switch button after the button is displayed for a period of
         // time.
@@ -82,30 +97,29 @@ class MagnificationModeSwitch {
                 .setStartDelay(START_DELAY_MS)
                 .setDuration(DURATION_MS)
                 .withEndAction(
-                        () -> removeButton());
+                        () -> removeButton())
+                .start();
     }
 
     private void toggleMagnificationMode() {
         final int newMode =
                 mMagnificationMode ^ Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_ALL;
         mMagnificationMode = newMode;
+        mImageView.setImageResource(getIconResId(newMode));
         Settings.Secure.putInt(mContext.getContentResolver(),
                 Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE, newMode);
     }
 
-    private static ImageView createView(Context context, int mode) {
-        final int padding = context.getResources().getDimensionPixelSize(
-                R.dimen.magnification_switch_button_padding);
+    private static ImageView createView(Context context) {
         ImageView imageView  = new ImageView(context);
-        imageView.setImageResource(getIconResId(mode));
         imageView.setClickable(true);
         imageView.setFocusable(true);
-        imageView.setPadding(padding, padding, padding, padding);
         imageView.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         return imageView;
     }
 
-    private static int getIconResId(int mode) {
+    @VisibleForTesting
+    static int getIconResId(int mode) {
         return (mode == Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN)
                 ? R.drawable.ic_open_in_new_window
                 : R.drawable.ic_open_in_new_fullscreen;
