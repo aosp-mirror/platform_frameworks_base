@@ -145,8 +145,7 @@ message Atom {
         PacketWakeupOccurred packet_wakeup_occurred = 44 [(module) = "framework"];
         WallClockTimeShifted wall_clock_time_shifted = 45 [(module) = "framework"];
         AnomalyDetected anomaly_detected = 46 [(module) = "statsd"];
-        AppBreadcrumbReported app_breadcrumb_reported =
-                47 [(allow_from_any_uid) = true, (module) = "statsd"];
+        AppBreadcrumbReported app_breadcrumb_reported = 47 [(module) = "statsd"];
         AppStartOccurred app_start_occurred = 48 [(module) = "framework", (module) = "statsdtest"];
         AppStartCanceled app_start_canceled = 49 [(module) = "framework"];
         AppStartFullyDrawn app_start_fully_drawn = 50 [(module) = "framework"];
@@ -157,7 +156,7 @@ message Atom {
         AppStartMemoryStateCaptured app_start_memory_state_captured = 55 [(module) = "framework"];
         ShutdownSequenceReported shutdown_sequence_reported = 56 [(module) = "framework"];
         BootSequenceReported boot_sequence_reported = 57;
-        DaveyOccurred davey_occurred = 58 [(allow_from_any_uid) = true, (module) = "statsd"];
+        DaveyOccurred davey_occurred = 58 [(module) = "statsd"];
         OverlayStateChanged overlay_state_changed =
                 59 [(module) = "framework", (module) = "statsdtest"];
         ForegroundServiceStateChanged foreground_service_state_changed
@@ -186,8 +185,7 @@ message Atom {
         WTFOccurred wtf_occurred = 80 [(module) = "framework"];
         LowMemReported low_mem_reported = 81 [(module) = "framework"];
         GenericAtom generic_atom = 82;
-        KeyValuePairsAtom key_value_pairs_atom =
-                83 [(allow_from_any_uid) = true, (module) = "framework", (module) = "statsd"];
+        KeyValuePairsAtom key_value_pairs_atom = 83 [(module) = "framework", (module) = "statsd"];
         VibratorStateChanged vibrator_state_changed = 84 [(module) = "framework"];
         DeferredJobStatsReported deferred_job_stats_reported = 85 [(module) = "framework"];
         ThermalThrottlingStateChanged thermal_throttling = 86 [deprecated=true];
@@ -317,7 +315,7 @@ message Atom {
         AssistGestureFeedbackReported assist_gesture_feedback_reported = 175 [(module) = "sysui"];
         AssistGestureProgressReported assist_gesture_progress_reported = 176 [(module) = "sysui"];
         TouchGestureClassified touch_gesture_classified = 177 [(module) = "framework"];
-        HiddenApiUsed hidden_api_used = 178 [(allow_from_any_uid) = true, (module) = "framework"];
+        HiddenApiUsed hidden_api_used = 178 [(module) = "framework"];
         StyleUIChanged style_ui_changed = 179 [(module) = "sysui"];
         PrivacyIndicatorsInteracted privacy_indicators_interacted =
                 180 [(module) = "permissioncontroller"];
@@ -383,7 +381,7 @@ message Atom {
         UpdateEngineSuccessfulUpdateReported update_engine_successful_update_reported = 226;
         CameraActionEvent camera_action_event = 227 [(module) = "framework"];
         AppCompatibilityChangeReported app_compatibility_change_reported =
-            228 [(allow_from_any_uid) = true, (module) = "framework"];
+                228 [(module) = "framework"];
         PerfettoUploaded perfetto_uploaded = 229 [(module) = "perfetto"];
         VmsClientConnectionStateChanged vms_client_connection_state_changed =
                 230 [(module) = "car"];

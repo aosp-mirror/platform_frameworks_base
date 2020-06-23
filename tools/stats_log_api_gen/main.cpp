@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "Collation.h"
-#include "atoms_info_writer.h"
 #include "frameworks/base/cmds/statsd/src/atoms.pb.h"
 #include "java_writer.h"
 #include "java_writer_q.h"
@@ -30,12 +29,6 @@ static void print_usage() {
     fprintf(stderr, "OPTIONS\n");
     fprintf(stderr, "  --cpp FILENAME       the header file to output for write helpers\n");
     fprintf(stderr, "  --header FILENAME    the cpp file to output for write helpers\n");
-    fprintf(stderr,
-            "  --atomsInfoCpp FILENAME       the header file to output for "
-            "statsd metadata\n");
-    fprintf(stderr,
-            "  --atomsInfoHeader FILENAME    the cpp file to output for statsd "
-            "metadata\n");
     fprintf(stderr, "  --help               this message\n");
     fprintf(stderr, "  --java FILENAME      the java file to output\n");
     fprintf(stderr, "  --module NAME        optional, module name to generate outputs for\n");
@@ -49,10 +42,6 @@ static void print_usage() {
             "  --importHeader NAME  required for cpp/jni to say which header to "
             "import "
             "for write helpers\n");
-    fprintf(stderr,
-            "  --atomsInfoImportHeader NAME  required for cpp to say which "
-            "header to import "
-            "for statsd metadata\n");
     fprintf(stderr, "  --javaPackage PACKAGE             the package for the java file.\n");
     fprintf(stderr, "                                    required for java with module\n");
     fprintf(stderr, "  --javaClass CLASS    the class name of the java class.\n");
@@ -74,15 +63,12 @@ static int run(int argc, char const* const* argv) {
     string cppFilename;
     string headerFilename;
     string javaFilename;
-    string atomsInfoCppFilename;
-    string atomsInfoHeaderFilename;
     string javaPackage;
     string javaClass;
 
     string moduleName = DEFAULT_MODULE_NAME;
     string cppNamespace = DEFAULT_CPP_NAMESPACE;
     string cppHeaderImport = DEFAULT_CPP_HEADER_IMPORT;
-    string atomsInfoCppHeaderImport = DEFAULT_ATOMS_INFO_CPP_HEADER_IMPORT;
     bool supportQ = false;
     bool supportWorkSource = false;
     bool compileQ = false;
@@ -148,27 +134,6 @@ static int run(int argc, char const* const* argv) {
                 return 1;
             }
             javaClass = argv[index];
-        } else if (0 == strcmp("--atomsInfoHeader", argv[index])) {
-            index++;
-            if (index >= argc) {
-                print_usage();
-                return 1;
-            }
-            atomsInfoHeaderFilename = argv[index];
-        } else if (0 == strcmp("--atomsInfoCpp", argv[index])) {
-            index++;
-            if (index >= argc) {
-                print_usage();
-                return 1;
-            }
-            atomsInfoCppFilename = argv[index];
-        } else if (0 == strcmp("--atomsInfoImportHeader", argv[index])) {
-            index++;
-            if (index >= argc) {
-                print_usage();
-                return 1;
-            }
-            atomsInfoCppHeaderImport = argv[index];
         } else if (0 == strcmp("--supportQ", argv[index])) {
             supportQ = true;
         } else if (0 == strcmp("--worksource", argv[index])) {
@@ -180,8 +145,7 @@ static int run(int argc, char const* const* argv) {
         index++;
     }
 
-    if (cppFilename.size() == 0 && headerFilename.size() == 0 && javaFilename.size() == 0 &&
-        atomsInfoHeaderFilename.size() == 0 && atomsInfoCppFilename.size() == 0) {
+    if (cppFilename.size() == 0 && headerFilename.size() == 0 && javaFilename.size() == 0) {
         print_usage();
         return 1;
     }
@@ -209,29 +173,6 @@ static int run(int argc, char const* const* argv) {
     vector<java_type_t> attributionSignature;
     collate_atom(android::os::statsd::AttributionNode::descriptor(), &attributionDecl,
                  &attributionSignature);
-
-    // Write the atoms info .cpp file
-    if (atomsInfoCppFilename.size() != 0) {
-        FILE* out = fopen(atomsInfoCppFilename.c_str(), "w");
-        if (out == NULL) {
-            fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoCppFilename.c_str());
-            return 1;
-        }
-        errorCount = android::stats_log_api_gen::write_atoms_info_cpp(out, atoms, cppNamespace,
-                                                                      atomsInfoCppHeaderImport);
-        fclose(out);
-    }
-
-    // Write the atoms info .h file
-    if (atomsInfoHeaderFilename.size() != 0) {
-        FILE* out = fopen(atomsInfoHeaderFilename.c_str(), "w");
-        if (out == NULL) {
-            fprintf(stderr, "Unable to open file for write: %s\n", atomsInfoHeaderFilename.c_str());
-            return 1;
-        }
-        errorCount = android::stats_log_api_gen::write_atoms_info_header(out, cppNamespace);
-        fclose(out);
-    }
 
     // Write the .cpp file
     if (cppFilename.size() != 0) {
