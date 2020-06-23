@@ -32,7 +32,6 @@ using namespace std;
 
 const string DEFAULT_CPP_NAMESPACE = "android,util";
 const string DEFAULT_CPP_HEADER_IMPORT = "statslog.h";
-const string DEFAULT_ATOMS_INFO_CPP_HEADER_IMPORT = "atoms_info.h";
 
 const int JAVA_MODULE_REQUIRES_FLOAT = 0x01;
 const int JAVA_MODULE_REQUIRES_ATTRIBUTION = 0x02;
