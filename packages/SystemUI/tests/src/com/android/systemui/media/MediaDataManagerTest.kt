@@ -15,6 +15,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.statusbar.SbnBuilder
 import com.android.systemui.util.concurrency.FakeExecutor
+import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import org.junit.After
@@ -26,8 +27,8 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when` as whenever
 import org.mockito.junit.MockitoJUnit
+import org.mockito.Mockito.`when` as whenever
 
 private const val KEY = "KEY"
 private const val PACKAGE_NAME = "com.android.systemui"
@@ -35,7 +36,6 @@ private const val APP_NAME = "SystemUI"
 private const val SESSION_ARTIST = "artist"
 private const val SESSION_TITLE = "title"
 
-private fun <T> eq(value: T): T = Mockito.eq(value) ?: value
 private fun <T> anyObject(): T {
     return Mockito.anyObject<T>()
 }
@@ -104,6 +104,19 @@ class MediaDataManagerTest : SysuiTestCase() {
     }
 
     @Test
+    fun testOnSwipeToDismiss_deactivatesMedia() {
+        val data = MediaData(initialized = true, backgroundColor = 0, app = null, appIcon = null,
+                artist = null, song = null, artwork = null, actions = emptyList(),
+                actionsToShowInCompact = emptyList(), packageName = "INVALID", token = null,
+                clickIntent = null, device = null, active = true, resumeAction = null)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = data)
+
+        mediaDataManager.onSwipeToDismiss()
+        assertThat(data.active).isFalse()
+    }
+
+    @Test
     fun testLoadsMetadataOnBackground() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         assertThat(backgroundExecutor.numPending()).isEqualTo(1)
@@ -116,6 +129,30 @@ class MediaDataManagerTest : SysuiTestCase() {
         mediaDataManager.onNotificationAdded(KEY, mediaNotification)
         mediaDataManager.onMediaDataLoaded(KEY, oldKey = null, data = mock(MediaData::class.java))
         verify(listener).onMediaDataLoaded(eq(KEY), eq(null), anyObject())
+    }
+
+    @Test
+    fun testOnMetaDataLoaded_conservesActiveFlag() {
+        val listener = TestListener()
+        whenever(mediaControllerFactory.create(anyObject())).thenReturn(controller)
+        whenever(controller.metadata).thenReturn(metadataBuilder.build())
+        mediaDataManager.addListener(listener)
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(listener.data!!.active).isTrue()
+
+        // Swiping away makes the notification not active
+        mediaDataManager.onSwipeToDismiss()
+        assertThat(mediaDataManager.hasActiveMedia()).isFalse()
+
+        // And when a notification is updated
+        mediaDataManager.onNotificationAdded(KEY, mediaNotification)
+        assertThat(backgroundExecutor.runAllReady()).isEqualTo(1)
+        assertThat(foregroundExecutor.runAllReady()).isEqualTo(1)
+
+        // MediaData should still be inactive
+        assertThat(mediaDataManager.hasActiveMedia()).isFalse()
     }
 
     @Test
