@@ -24,6 +24,7 @@ import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.RemoteViews;
 
 import com.android.internal.R;
@@ -42,8 +43,6 @@ public class MessagingLinearLayout extends ViewGroup {
     private int mSpacing;
 
     private int mMaxDisplayedLines = Integer.MAX_VALUE;
-
-    private IMessagingLayout mMessagingLayout;
 
     public MessagingLinearLayout(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -292,12 +291,19 @@ public class MessagingLinearLayout extends ViewGroup {
         mMaxDisplayedLines = numberLines;
     }
 
-    public void setMessagingLayout(IMessagingLayout layout) {
-        mMessagingLayout = layout;
-    }
-
     public IMessagingLayout getMessagingLayout() {
-        return mMessagingLayout;
+        View view = this;
+        while (true) {
+            ViewParent p = view.getParent();
+            if (p instanceof View) {
+                view = (View) p;
+                if (view instanceof IMessagingLayout) {
+                    return (IMessagingLayout) view;
+                }
+            } else {
+                return null;
+            }
+        }
     }
 
     @Override

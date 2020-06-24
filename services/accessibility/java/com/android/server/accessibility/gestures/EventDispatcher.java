@@ -21,8 +21,11 @@ import static com.android.server.accessibility.gestures.TouchState.ALL_POINTER_I
 import static com.android.server.accessibility.gestures.TouchState.MAX_POINTER_COUNT;
 
 import android.content.Context;
+import android.graphics.Point;
 import android.util.Slog;
 import android.view.MotionEvent;
+import android.view.MotionEvent.PointerCoords;
+import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
 
@@ -37,19 +40,27 @@ import com.android.server.policy.WindowManagerPolicy;
  */
 class EventDispatcher {
     private static final String LOG_TAG = "EventDispatcher";
+    private static final int CLICK_LOCATION_NONE = 0;
+    private static final int CLICK_LOCATION_ACCESSIBILITY_FOCUS = 1;
+    private static final int CLICK_LOCATION_LAST_TOUCH_EXPLORED = 2;
 
     private final AccessibilityManagerService mAms;
     private Context mContext;
     // The receiver of motion events.
     private EventStreamTransformation mReceiver;
-    // Keep track of which pointers sent to the system are down.
-    private int mInjectedPointersDown;
 
-    // The time of the last injected down.
-    private long mLastInjectedDownEventTime;
+    // The long pressing pointer id if coordinate remapping is needed for double tap and hold
+    private int mLongPressingPointerId = -1;
 
-    // The last injected hover event.
-    private MotionEvent mLastInjectedHoverEvent;
+    // The long pressing pointer X if coordinate remapping is needed for double tap and hold.
+    private int mLongPressingPointerDeltaX;
+
+    // The long pressing pointer Y if coordinate remapping is needed for double tap and hold.
+    private int mLongPressingPointerDeltaY;
+
+    // Temporary point to avoid instantiation.
+    private final Point mTempPoint = new Point();
+
     private TouchState mState;
 
     EventDispatcher(
@@ -98,8 +109,18 @@ class EventDispatcher {
         if (action == MotionEvent.ACTION_DOWN) {
             event.setDownTime(event.getEventTime());
         } else {
-            event.setDownTime(getLastInjectedDownEventTime());
+            event.setDownTime(mState.getLastInjectedDownEventTime());
         }
+        // If the user is long pressing but the long pressing pointer
+        // was not exactly over the accessibility focused item we need
+        // to remap the location of that pointer so the user does not
+        // have to explicitly touch explore something to be able to
+        // long press it, or even worse to avoid the user long pressing
+        // on the wrong item since click and long press behave differently.
+        if (mLongPressingPointerId >= 0) {
+            event = offsetEvent(event, -mLongPressingPointerDeltaX, -mLongPressingPointerDeltaY);
+        }
+
         if (DEBUG) {
             Slog.d(
                     LOG_TAG,
@@ -116,7 +137,7 @@ class EventDispatcher {
         } else {
             Slog.e(LOG_TAG, "Error sending event: no receiver specified.");
         }
-        updateState(event);
+        mState.onInjectedMotionEvent(event);
 
         if (event != prototype) {
             event.recycle();
@@ -145,87 +166,15 @@ class EventDispatcher {
         mState.onInjectedAccessibilityEvent(type);
     }
 
-    /**
-     * Processes an injected {@link MotionEvent} event.
-     *
-     * @param event The event to process.
-     */
-    void updateState(MotionEvent event) {
-        final int action = event.getActionMasked();
-        final int pointerId = event.getPointerId(event.getActionIndex());
-        final int pointerFlag = (1 << pointerId);
-        switch (action) {
-            case MotionEvent.ACTION_DOWN:
-            case MotionEvent.ACTION_POINTER_DOWN:
-                mInjectedPointersDown |= pointerFlag;
-                mLastInjectedDownEventTime = event.getDownTime();
-                break;
-            case MotionEvent.ACTION_UP:
-            case MotionEvent.ACTION_POINTER_UP:
-                mInjectedPointersDown &= ~pointerFlag;
-                if (mInjectedPointersDown == 0) {
-                    mLastInjectedDownEventTime = 0;
-                }
-                break;
-            case MotionEvent.ACTION_HOVER_ENTER:
-            case MotionEvent.ACTION_HOVER_MOVE:
-            case MotionEvent.ACTION_HOVER_EXIT:
-                if (mLastInjectedHoverEvent != null) {
-                    mLastInjectedHoverEvent.recycle();
-                }
-                mLastInjectedHoverEvent = MotionEvent.obtain(event);
-                break;
-        }
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "Injected pointer:\n" + toString());
-        }
-    }
-
-    /** Clears the internals state. */
-    public void clear() {
-        mInjectedPointersDown = 0;
-    }
-
-    /** @return The time of the last injected down event. */
-    public long getLastInjectedDownEventTime() {
-        return mLastInjectedDownEventTime;
-    }
-
-    /** @return The number of down pointers injected to the view hierarchy. */
-    public int getInjectedPointerDownCount() {
-        return Integer.bitCount(mInjectedPointersDown);
-    }
-
-    /** @return The bits of the injected pointers that are down. */
-    public int getInjectedPointersDown() {
-        return mInjectedPointersDown;
-    }
-
-    /**
-     * Whether an injected pointer is down.
-     *
-     * @param pointerId The unique pointer id.
-     * @return True if the pointer is down.
-     */
-    public boolean isInjectedPointerDown(int pointerId) {
-        final int pointerFlag = (1 << pointerId);
-        return (mInjectedPointersDown & pointerFlag) != 0;
-    }
-
-    /** @return The the last injected hover event. */
-    public MotionEvent getLastInjectedHoverEvent() {
-        return mLastInjectedHoverEvent;
-    }
-
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
         builder.append("=========================");
         builder.append("\nDown pointers #");
-        builder.append(Integer.bitCount(mInjectedPointersDown));
+        builder.append(Integer.bitCount(mState.getInjectedPointersDown()));
         builder.append(" [ ");
         for (int i = 0; i < MAX_POINTER_COUNT; i++) {
-            if ((mInjectedPointersDown & i) != 0) {
+            if (mState.isInjectedPointerDown(i)) {
                 builder.append(i);
                 builder.append(" ");
             }
@@ -233,6 +182,48 @@ class EventDispatcher {
         builder.append("]");
         builder.append("\n=========================");
         return builder.toString();
+    }
+
+    /**
+     * /** Offsets all pointers in the given event by adding the specified X and Y offsets.
+     *
+     * @param event The event to offset.
+     * @param offsetX The X offset.
+     * @param offsetY The Y offset.
+     * @return An event with the offset pointers or the original event if both offsets are zero.
+     */
+    private MotionEvent offsetEvent(MotionEvent event, int offsetX, int offsetY) {
+        if (offsetX == 0 && offsetY == 0) {
+            return event;
+        }
+        final int remappedIndex = event.findPointerIndex(mLongPressingPointerId);
+        final int pointerCount = event.getPointerCount();
+        PointerProperties[] props = PointerProperties.createArray(pointerCount);
+        PointerCoords[] coords = PointerCoords.createArray(pointerCount);
+        for (int i = 0; i < pointerCount; i++) {
+            event.getPointerProperties(i, props[i]);
+            event.getPointerCoords(i, coords[i]);
+            if (i == remappedIndex) {
+                coords[i].x += offsetX;
+                coords[i].y += offsetY;
+            }
+        }
+        return MotionEvent.obtain(
+                event.getDownTime(),
+                event.getEventTime(),
+                event.getAction(),
+                event.getPointerCount(),
+                props,
+                coords,
+                event.getMetaState(),
+                event.getButtonState(),
+                1.0f,
+                1.0f,
+                event.getDeviceId(),
+                event.getEdgeFlags(),
+                event.getSource(),
+                event.getDisplayId(),
+                event.getFlags());
     }
 
     /**
@@ -247,7 +238,7 @@ class EventDispatcher {
             case MotionEvent.ACTION_DOWN:
             case MotionEvent.ACTION_POINTER_DOWN:
                 // Compute the action based on how many down pointers are injected.
-                if (getInjectedPointerDownCount() == 0) {
+                if (mState.getInjectedPointerDownCount() == 0) {
                     return MotionEvent.ACTION_DOWN;
                 } else {
                     return (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
@@ -255,7 +246,7 @@ class EventDispatcher {
                 }
             case MotionEvent.ACTION_POINTER_UP:
                 // Compute the action based on how many down pointers are injected.
-                if (getInjectedPointerDownCount() == 1) {
+                if (mState.getInjectedPointerDownCount() == 1) {
                     return MotionEvent.ACTION_UP;
                 } else {
                     return (pointerIndex << MotionEvent.ACTION_POINTER_INDEX_SHIFT)
@@ -280,7 +271,7 @@ class EventDispatcher {
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
             // Do not send event for already delivered pointers.
-            if (!isInjectedPointerDown(pointerId)) {
+            if (!mState.isInjectedPointerDown(pointerId)) {
                 pointerIdBits |= (1 << pointerId);
                 final int action = computeInjectionAction(MotionEvent.ACTION_DOWN, i);
                 sendMotionEvent(
@@ -306,7 +297,7 @@ class EventDispatcher {
         for (int i = 0; i < pointerCount; i++) {
             final int pointerId = prototype.getPointerId(i);
             // Skip non injected down pointers.
-            if (!isInjectedPointerDown(pointerId)) {
+            if (!mState.isInjectedPointerDown(pointerId)) {
                 continue;
             }
             final int action = computeInjectionAction(MotionEvent.ACTION_POINTER_UP, i);
@@ -314,5 +305,98 @@ class EventDispatcher {
                     prototype, action, mState.getLastReceivedEvent(), pointerIdBits, policyFlags);
             pointerIdBits &= ~(1 << pointerId);
         }
+    }
+
+    public boolean longPressWithTouchEvents(MotionEvent event, int policyFlags) {
+        final int pointerIndex = event.getActionIndex();
+        final int pointerId = event.getPointerId(pointerIndex);
+        Point clickLocation = mTempPoint;
+        final int result = computeClickLocation(clickLocation);
+        if (result == CLICK_LOCATION_NONE) {
+            return false;
+        }
+        mLongPressingPointerId = pointerId;
+        mLongPressingPointerDeltaX = (int) event.getX(pointerIndex) - clickLocation.x;
+        mLongPressingPointerDeltaY = (int) event.getY(pointerIndex) - clickLocation.y;
+        sendDownForAllNotInjectedPointers(event, policyFlags);
+        return true;
+    }
+
+    public void clickWithTouchEvents(MotionEvent event, MotionEvent rawEvent, int policyFlags) {
+        final int pointerIndex = event.getActionIndex();
+        final int pointerId = event.getPointerId(pointerIndex);
+        Point clickLocation = mTempPoint;
+        final int result = computeClickLocation(clickLocation);
+        if (result == CLICK_LOCATION_NONE) {
+            Slog.e(LOG_TAG, "Unable to compute click location.");
+            // We can't send a click to no location, but the gesture was still
+            // consumed.
+            return;
+        }
+        // Do the click.
+        PointerProperties[] properties = new PointerProperties[1];
+        properties[0] = new PointerProperties();
+        event.getPointerProperties(pointerIndex, properties[0]);
+        PointerCoords[] coords = new PointerCoords[1];
+        coords[0] = new PointerCoords();
+        coords[0].x = clickLocation.x;
+        coords[0].y = clickLocation.y;
+        MotionEvent clickEvent =
+                MotionEvent.obtain(
+                        event.getDownTime(),
+                        event.getEventTime(),
+                        MotionEvent.ACTION_DOWN,
+                        1,
+                        properties,
+                        coords,
+                        0,
+                        0,
+                        1.0f,
+                        1.0f,
+                        event.getDeviceId(),
+                        0,
+                        event.getSource(),
+                        event.getDisplayId(),
+                        event.getFlags());
+        final boolean targetAccessibilityFocus = (result == CLICK_LOCATION_ACCESSIBILITY_FOCUS);
+        sendActionDownAndUp(clickEvent, rawEvent, policyFlags, targetAccessibilityFocus);
+        clickEvent.recycle();
+    }
+
+    private int computeClickLocation(Point outLocation) {
+        if (mState.getLastInjectedHoverEventForClick() != null) {
+            final int lastExplorePointerIndex =
+                    mState.getLastInjectedHoverEventForClick().getActionIndex();
+            outLocation.x =
+                    (int) mState.getLastInjectedHoverEventForClick().getX(lastExplorePointerIndex);
+            outLocation.y =
+                    (int) mState.getLastInjectedHoverEventForClick().getY(lastExplorePointerIndex);
+            if (!mAms.accessibilityFocusOnlyInActiveWindow()
+                    || mState.getLastTouchedWindowId() == mAms.getActiveWindowId()) {
+                if (mAms.getAccessibilityFocusClickPointInScreen(outLocation)) {
+                    return CLICK_LOCATION_ACCESSIBILITY_FOCUS;
+                } else {
+                    return CLICK_LOCATION_LAST_TOUCH_EXPLORED;
+                }
+            }
+        }
+        if (mAms.getAccessibilityFocusClickPointInScreen(outLocation)) {
+            return CLICK_LOCATION_ACCESSIBILITY_FOCUS;
+        }
+        return CLICK_LOCATION_NONE;
+    }
+
+    private void sendActionDownAndUp(
+            MotionEvent prototype,
+            MotionEvent rawEvent,
+            int policyFlags,
+            boolean targetAccessibilityFocus) {
+        // Tap with the pointer that last explored.
+        final int pointerId = prototype.getPointerId(prototype.getActionIndex());
+        final int pointerIdBits = (1 << pointerId);
+        prototype.setTargetAccessibilityFocus(targetAccessibilityFocus);
+        sendMotionEvent(prototype, MotionEvent.ACTION_DOWN, rawEvent, pointerIdBits, policyFlags);
+        prototype.setTargetAccessibilityFocus(targetAccessibilityFocus);
+        sendMotionEvent(prototype, MotionEvent.ACTION_UP, rawEvent, pointerIdBits, policyFlags);
     }
 }

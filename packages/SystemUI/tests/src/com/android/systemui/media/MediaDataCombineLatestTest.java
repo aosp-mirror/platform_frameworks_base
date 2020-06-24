@@ -79,8 +79,8 @@ public class MediaDataCombineLatestTest extends SysuiTestCase {
         mManager.addListener(mListener);
 
         mMediaData = new MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null,
-                new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null, true, null, KEY,
-                false);
+                new ArrayList<>(), new ArrayList<>(), PACKAGE, null, null, null, true, null, false,
+                KEY, false);
         mDeviceData = new MediaDeviceData(true, null, DEVICE_NAME);
     }
 

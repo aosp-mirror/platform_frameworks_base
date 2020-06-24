@@ -443,6 +443,7 @@ public class NotificationPanelViewController extends PanelViewController {
      */
     private boolean mDelayShowingKeyguardStatusBar;
 
+    private boolean mAnimatingQS;
     private int mOldLayoutDirection;
 
     private View.AccessibilityDelegate mAccessibilityDelegate = new View.AccessibilityDelegate() {
@@ -1860,6 +1861,7 @@ public class NotificationPanelViewController extends PanelViewController {
 
             @Override
             public void onAnimationEnd(Animator animation) {
+                mAnimatingQS = false;
                 notifyExpandingFinished();
                 mNotificationStackScroller.resetCheckSnoozeLeavebehind();
                 mQsExpansionAnimator = null;
@@ -1868,6 +1870,9 @@ public class NotificationPanelViewController extends PanelViewController {
                 }
             }
         });
+        // Let's note that we're animating QS. Moving the animator here will cancel it immediately,
+        // so we need a separate flag.
+        mAnimatingQS = true;
         animator.start();
         mQsExpansionAnimator = animator;
         mQsAnimatorExpand = expanding;
@@ -2220,6 +2225,9 @@ public class NotificationPanelViewController extends PanelViewController {
         mNotificationStackScroller.onExpansionStarted();
         mIsExpanding = true;
         mQsExpandedWhenExpandingStarted = mQsFullyExpanded;
+        mMediaHierarchyManager.setCollapsingShadeFromQS(mQsExpandedWhenExpandingStarted &&
+                /* We also start expanding when flinging closed Qs. Let's exclude that */
+                !mAnimatingQS);
         if (mQsExpanded) {
             onQsExpansionStarted();
         }
@@ -2236,6 +2244,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mHeadsUpManager.onExpandingFinished();
         mConversationNotificationManager.onNotificationPanelExpandStateChanged(isFullyCollapsed());
         mIsExpanding = false;
+        mMediaHierarchyManager.setCollapsingShadeFromQS(false);
         if (isFullyCollapsed()) {
             DejankUtils.postAfterTraversal(new Runnable() {
                 @Override
@@ -2397,8 +2406,8 @@ public class NotificationPanelViewController extends PanelViewController {
     }
 
     @Override
-    protected int getClearAllHeight() {
-        return mNotificationStackScroller.getFooterViewHeight();
+    protected int getClearAllHeightWithPadding() {
+        return mNotificationStackScroller.getFooterViewHeightWithPadding();
     }
 
     @Override

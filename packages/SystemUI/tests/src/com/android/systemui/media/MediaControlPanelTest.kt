@@ -242,4 +242,15 @@ public class MediaControlPanelTest : SysuiTestCase() {
         assertThat(seamlessText.getText()).isEqualTo(context.getResources().getString(
                 com.android.internal.R.string.ext_media_seamless_action))
     }
+
+    @Test
+    fun bindDeviceResumptionPlayer() {
+        player.attach(holder)
+        val state = MediaData(true, BG_COLOR, APP, null, ARTIST, TITLE, null, emptyList(),
+                emptyList(), PACKAGE, session.getSessionToken(), null, device, true, null,
+                resumption = true)
+        player.bind(state)
+        assertThat(seamlessText.getText()).isEqualTo(DEVICE_NAME)
+        assertThat(seamless.isEnabled()).isFalse()
+    }
 }
