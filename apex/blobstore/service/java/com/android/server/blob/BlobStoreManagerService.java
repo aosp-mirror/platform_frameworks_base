@@ -35,6 +35,9 @@ import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_CURRENT;
 import static com.android.server.blob.BlobStoreConfig.getAdjustedCommitTimeMs;
 import static com.android.server.blob.BlobStoreConfig.getDeletionOnLastLeaseDelayMs;
+import static com.android.server.blob.BlobStoreConfig.getMaxActiveSessions;
+import static com.android.server.blob.BlobStoreConfig.getMaxCommittedBlobs;
+import static com.android.server.blob.BlobStoreConfig.getMaxLeasedBlobs;
 import static com.android.server.blob.BlobStoreSession.STATE_ABANDONED;
 import static com.android.server.blob.BlobStoreSession.STATE_COMMITTED;
 import static com.android.server.blob.BlobStoreSession.STATE_VERIFIED_INVALID;
@@ -124,6 +127,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -332,9 +336,26 @@ public class BlobStoreManagerService extends SystemService {
         mKnownBlobIds.add(id);
     }
 
+    @GuardedBy("mBlobsLock")
+    private int getSessionsCountLocked(int uid, String packageName) {
+        // TODO: Maintain a counter instead of traversing all the sessions
+        final AtomicInteger sessionsCount = new AtomicInteger(0);
+        forEachSessionInUser(session -> {
+            if (session.getOwnerUid() == uid && session.getOwnerPackageName().equals(packageName)) {
+                sessionsCount.getAndIncrement();
+            }
+        }, UserHandle.getUserId(uid));
+        return sessionsCount.get();
+    }
+
     private long createSessionInternal(BlobHandle blobHandle,
             int callingUid, String callingPackage) {
         synchronized (mBlobsLock) {
+            final int sessionsCount = getSessionsCountLocked(callingUid, callingPackage);
+            if (sessionsCount >= getMaxActiveSessions()) {
+                throw new LimitExceededException("Too many active sessions for the caller: "
+                        + sessionsCount);
+            }
             // TODO: throw if there is already an active session associated with blobHandle.
             final long sessionId = generateNextSessionIdLocked();
             final BlobStoreSession session = new BlobStoreSession(mContext,
@@ -408,10 +429,39 @@ public class BlobStoreManagerService extends SystemService {
         }
     }
 
+    @GuardedBy("mBlobsLock")
+    private int getCommittedBlobsCountLocked(int uid, String packageName) {
+        // TODO: Maintain a counter instead of traversing all the blobs
+        final AtomicInteger blobsCount = new AtomicInteger(0);
+        forEachBlobInUser((blobMetadata) -> {
+            if (blobMetadata.isACommitter(packageName, uid)) {
+                blobsCount.getAndIncrement();
+            }
+        }, UserHandle.getUserId(uid));
+        return blobsCount.get();
+    }
+
+    @GuardedBy("mBlobsLock")
+    private int getLeasedBlobsCountLocked(int uid, String packageName) {
+        // TODO: Maintain a counter instead of traversing all the blobs
+        final AtomicInteger blobsCount = new AtomicInteger(0);
+        forEachBlobInUser((blobMetadata) -> {
+            if (blobMetadata.isALeasee(packageName, uid)) {
+                blobsCount.getAndIncrement();
+            }
+        }, UserHandle.getUserId(uid));
+        return blobsCount.get();
+    }
+
     private void acquireLeaseInternal(BlobHandle blobHandle, int descriptionResId,
             CharSequence description, long leaseExpiryTimeMillis,
             int callingUid, String callingPackage) {
         synchronized (mBlobsLock) {
+            final int leasesCount = getLeasedBlobsCountLocked(callingUid, callingPackage);
+            if (leasesCount >= getMaxLeasedBlobs()) {
+                throw new LimitExceededException("Too many leased blobs for the caller: "
+                        + leasesCount);
+            }
             final BlobMetadata blobMetadata = getUserBlobsLocked(UserHandle.getUserId(callingUid))
                     .get(blobHandle);
             if (blobMetadata == null || !blobMetadata.isAccessAllowedForCaller(
@@ -626,6 +676,18 @@ public class BlobStoreManagerService extends SystemService {
                 break;
             case STATE_VERIFIED_VALID:
                 synchronized (mBlobsLock) {
+                    final int committedBlobsCount = getCommittedBlobsCountLocked(
+                            session.getOwnerUid(), session.getOwnerPackageName());
+                    if (committedBlobsCount >= getMaxCommittedBlobs()) {
+                        Slog.d(TAG, "Failed to commit: too many committed blobs. count: "
+                                + committedBlobsCount + "; blob: " + session);
+                        session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
+                        session.getSessionFile().delete();
+                        mActiveBlobIds.remove(session.getSessionId());
+                        getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
+                                .remove(session.getSessionId());
+                        break;
+                    }
                     final int userId = UserHandle.getUserId(session.getOwnerUid());
                     final ArrayMap<BlobHandle, BlobMetadata> userBlobs = getUserBlobsLocked(
                             userId);
@@ -656,7 +718,7 @@ public class BlobStoreManagerService extends SystemService {
                         } else {
                             blob.addOrReplaceCommitter(existingCommitter);
                         }
-                        Slog.d(TAG, "Error committing the blob", e);
+                        Slog.d(TAG, "Error committing the blob: " + session, e);
                         FrameworkStatsLog.write(FrameworkStatsLog.BLOB_COMMITTED,
                                 session.getOwnerUid(), blob.getBlobId(), blob.getSize(),
                                 FrameworkStatsLog.BLOB_COMMITTED__RESULT__ERROR_DURING_COMMIT);
@@ -1096,6 +1158,16 @@ public class BlobStoreManagerService extends SystemService {
 
     void runClearAllSessions(@UserIdInt int userId) {
         synchronized (mBlobsLock) {
+            for (int i = 0, userCount = mSessions.size(); i < userCount; ++i) {
+                final int sessionUserId = mSessions.keyAt(i);
+                if (userId != UserHandle.USER_ALL && userId != sessionUserId) {
+                    continue;
+                }
+                final LongSparseArray<BlobStoreSession> userSessions = mSessions.valueAt(i);
+                for (int j = 0, sessionsCount = userSessions.size(); j < sessionsCount; ++j) {
+                    mActiveBlobIds.remove(userSessions.valueAt(j).getSessionId());
+                }
+            }
             if (userId == UserHandle.USER_ALL) {
                 mSessions.clear();
             } else {
@@ -1107,6 +1179,16 @@ public class BlobStoreManagerService extends SystemService {
 
     void runClearAllBlobs(@UserIdInt int userId) {
         synchronized (mBlobsLock) {
+            for (int i = 0, userCount = mBlobsMap.size(); i < userCount; ++i) {
+                final int blobUserId = mBlobsMap.keyAt(i);
+                if (userId != UserHandle.USER_ALL && userId != blobUserId) {
+                    continue;
+                }
+                final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
+                for (int j = 0, blobsCount = userBlobs.size(); j < blobsCount; ++j) {
+                    mActiveBlobIds.remove(userBlobs.valueAt(j).getBlobId());
+                }
+            }
             if (userId == UserHandle.USER_ALL) {
                 mBlobsMap.clear();
             } else {
@@ -1331,8 +1413,11 @@ public class BlobStoreManagerService extends SystemService {
                         + "callingUid=" + callingUid + ", callingPackage=" + packageName);
             }
 
-            // TODO: Verify caller request is within limits (no. of calls/blob sessions/blobs)
-            return createSessionInternal(blobHandle, callingUid, packageName);
+            try {
+                return createSessionInternal(blobHandle, callingUid, packageName);
+            } catch (LimitExceededException e) {
+                throw new ParcelableException(e);
+            }
         }
 
         @Override
