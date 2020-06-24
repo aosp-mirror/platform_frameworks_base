@@ -351,9 +351,13 @@ class InsetsSourceProvider {
     }
 
     private void updateVisibility() {
+        // TODO(b/159699383): remove the client controlled check when the insets visibility can be
+        //                    driven by the system UI.
         final boolean isClientControlled = mControlTarget != null
                 && mControlTarget.isClientControlled();
-        mSource.setVisible(mServerVisible && (!isClientControlled || mClientVisible));
+        mSource.setVisible(mServerVisible
+                && ((!isClientControlled && mDisplayContent.inMultiWindowMode())
+                    || mClientVisible));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
                 mServerVisible, mClientVisible);
