@@ -466,7 +466,6 @@ public class BubbleExpandedView extends LinearLayout {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        hideImeIfVisible();
         mKeyboardVisible = false;
         mNeedsNewHeight = false;
         if (mActivityView != null) {
