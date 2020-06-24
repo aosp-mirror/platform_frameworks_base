@@ -6131,6 +6131,10 @@ message ProcessStatsAvailablePagesProto {
  */
 message ProcStats {
     optional ProcessStatsSectionProto proc_stats_section = 1;
+    // Data pulled from device into this is sometimes sharded across multiple atoms to work around
+    // a size limit. When this happens, this shard ID will contain an increasing 1-indexed integer
+    // with the number of this shard.
+    optional int32 shard_id = 2;
 }
 
 /**
