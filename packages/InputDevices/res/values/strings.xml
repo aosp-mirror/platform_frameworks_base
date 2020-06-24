@@ -134,4 +134,7 @@
 
     <!-- Mongolian keyboard layout label. [CHAR LIMIT=35] -->
     <string name="keyboard_layout_mongolian">Mongolian</string>
+
+    <!-- Georgian keyboard layout label. [CHAR LIMIT=35] -->
+    <string name="keyboard_layout_georgian">Georgian</string>
 </resources>
