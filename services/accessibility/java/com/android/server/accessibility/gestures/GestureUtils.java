@@ -1,5 +1,6 @@
 package com.android.server.accessibility.gestures;
 
+import android.graphics.PointF;
 import android.util.MathUtils;
 import android.view.MotionEvent;
 
@@ -36,6 +37,27 @@ public final class GestureUtils {
 
     public static double distance(MotionEvent first, MotionEvent second) {
         return MathUtils.dist(first.getX(), first.getY(), second.getX(), second.getY());
+    }
+
+    /**
+     * Returns the minimum distance between {@code pointerDown} and each pointer of
+     * {@link MotionEvent}.
+     *
+     * @param pointerDown The action pointer location of the {@link MotionEvent} with
+     *     {@link MotionEvent#ACTION_DOWN} or {@link MotionEvent#ACTION_POINTER_DOWN}
+     * @param moveEvent The {@link MotionEvent} with {@link MotionEvent#ACTION_MOVE}
+     * @return the movement of the pointer.
+     */
+    public static double distanceClosestPointerToPoint(PointF pointerDown, MotionEvent moveEvent) {
+        float movement = Float.MAX_VALUE;
+        for (int i = 0; i < moveEvent.getPointerCount(); i++) {
+            final float moveDelta = MathUtils.dist(pointerDown.x, pointerDown.y, moveEvent.getX(i),
+                    moveEvent.getY(i));
+            if (movement > moveDelta) {
+                movement = moveDelta;
+            }
+        }
+        return movement;
     }
 
     public static boolean isTimedOut(MotionEvent firstUp, MotionEvent secondUp, int timeout) {
