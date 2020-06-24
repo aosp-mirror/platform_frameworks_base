@@ -1916,8 +1916,10 @@ public final class MediaParser {
             // format for convenient use from ExoPlayer.
             result.setString("crypto-mode-fourcc", format.drmInitData.schemeType);
         }
+        if (format.subsampleOffsetUs != Format.OFFSET_SAMPLE_RELATIVE) {
+            result.setLong("subsample-offset-us-long", format.subsampleOffsetUs);
+        }
         // LACK OF SUPPORT FOR:
-        //    format.containerMimeType;
         //    format.id;
         //    format.metadata;
         //    format.stereoMode;
