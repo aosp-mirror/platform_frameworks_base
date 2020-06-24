@@ -870,6 +870,14 @@ public final class MediaParser {
      */
     public static final String PARAMETER_OVERRIDE_IN_BAND_CAPTION_DECLARATIONS =
             "android.media.mediaParser.overrideInBandCaptionDeclarations";
+    /**
+     * Sets whether a track for EMSG events should be exposed in case of parsing a container that
+     * supports them. {@code boolean} expected. Default value is {@link false}.
+     *
+     * @hide
+     */
+    public static final String PARAMETER_EXPOSE_EMSG_TRACK =
+            "android.media.mediaParser.exposeEmsgTrack";
 
     // Private constants.
 
@@ -1308,6 +1316,10 @@ public final class MediaParser {
                                 : 0;
                 return new MatroskaExtractor(flags);
             case PARSER_NAME_FMP4:
+                flags |=
+                        getBooleanParameter(PARAMETER_EXPOSE_EMSG_TRACK)
+                                ? FragmentedMp4Extractor.FLAG_ENABLE_EMSG_TRACK
+                                : 0;
                 flags |=
                         getBooleanParameter(PARAMETER_MP4_IGNORE_EDIT_LISTS)
                                 ? FragmentedMp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS
@@ -2102,6 +2114,7 @@ public final class MediaParser {
                 PARAMETER_EXPOSE_CHUNK_INDEX_AS_MEDIA_FORMAT, Boolean.class);
         expectedTypeByParameterName.put(
                 PARAMETER_OVERRIDE_IN_BAND_CAPTION_DECLARATIONS, Boolean.class);
+        expectedTypeByParameterName.put(PARAMETER_EXPOSE_EMSG_TRACK, Boolean.class);
         // We do not check PARAMETER_EXPOSE_CAPTION_FORMATS here, and we do it in setParameters
         // instead. Checking that the value is a List is insufficient to catch wrong parameter
         // value types.
