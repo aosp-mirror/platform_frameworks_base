@@ -82,8 +82,6 @@ import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
-import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
-import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
@@ -9202,16 +9200,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                boolean permissionChange = KILL_APP_REASON_PERMISSIONS_REVOKED.equals(reason)
-                        || KILL_APP_REASON_GIDS_CHANGED.equals(reason);
                 mProcessList.killPackageProcessesLocked(null /* packageName */, appId, userId,
                         ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
                         true /* callerWillRestart */, true /* doit */, true /* evenPersistent */,
                         false /* setRemoved */,
-                        permissionChange ? ApplicationExitInfo.REASON_PERMISSION_CHANGE
-                        : ApplicationExitInfo.REASON_OTHER,
-                        permissionChange ? ApplicationExitInfo.SUBREASON_UNKNOWN
-                        : ApplicationExitInfo.SUBREASON_KILL_UID,
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_KILL_UID,
+                        reason != null ? reason : "kill uid");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    @Override
+    public void killUidForPermissionChange(int appId, int userId, String reason) {
+        enforceCallingPermission(Manifest.permission.KILL_UID, "killUid");
+        synchronized (this) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mProcessList.killPackageProcessesLocked(null /* packageName */, appId, userId,
+                        ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
+                        true /* callerWillRestart */, true /* doit */, true /* evenPersistent */,
+                        false /* setRemoved */,
+                        ApplicationExitInfo.REASON_PERMISSION_CHANGE,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN,
                         reason != null ? reason : "kill uid");
             } finally {
                 Binder.restoreCallingIdentity(identity);
