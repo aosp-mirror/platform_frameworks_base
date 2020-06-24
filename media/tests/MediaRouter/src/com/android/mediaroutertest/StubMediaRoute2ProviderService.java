@@ -79,6 +79,7 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
     @GuardedBy("sLock")
     private static StubMediaRoute2ProviderService sInstance;
     private Proxy mProxy;
+    private Spy mSpy;
 
     private void initializeRoutes() {
         MediaRoute2Info route1 = new MediaRoute2Info.Builder(ROUTE_ID1, ROUTE_NAME1)
@@ -256,6 +257,11 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
 
     @Override
     public void onReleaseSession(long requestId, String sessionId) {
+        Spy spy = mSpy;
+        if (spy != null) {
+            spy.onReleaseSession(requestId, sessionId);
+        }
+
         RoutingSessionInfo sessionInfo = getSessionInfo(sessionId);
         if (sessionInfo == null) {
             return;
@@ -375,7 +381,21 @@ public class StubMediaRoute2ProviderService extends MediaRoute2ProviderService {
         mProxy = proxy;
     }
 
+    public void setSpy(@Nullable Spy spy) {
+        mSpy = spy;
+    }
+
+    /**
+     * It overrides the original service
+     */
     public static class Proxy {
         public void onSetRouteVolume(String routeId, int volume, long requestId) {}
+    }
+
+    /**
+     * It gets notified but doesn't prevent the original methods to be called.
+     */
+    public static class Spy {
+        public void onReleaseSession(long requestId, String sessionId) {}
     }
 }
