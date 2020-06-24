@@ -724,14 +724,17 @@ public final class SoftApConfiguration implements Parcelable {
          * @param bssid BSSID, or null to have the BSSID chosen by the framework. The caller is
          *              responsible for avoiding collisions.
          * @return Builder for chaining.
-         * @throws IllegalArgumentException when the given BSSID is the all-zero or broadcast MAC
-         *                                  address.
+         * @throws IllegalArgumentException when the given BSSID is the all-zero
+         *                                  , multicast or broadcast MAC address.
          */
         @NonNull
         public Builder setBssid(@Nullable MacAddress bssid) {
             if (bssid != null) {
                 Preconditions.checkArgument(!bssid.equals(WifiManager.ALL_ZEROS_MAC_ADDRESS));
-                Preconditions.checkArgument(!bssid.equals(MacAddress.BROADCAST_ADDRESS));
+                if (bssid.getAddressType() != MacAddress.TYPE_UNICAST) {
+                    throw new IllegalArgumentException("bssid doesn't support "
+                            + "multicast or broadcast mac address");
+                }
             }
             mBssid = bssid;
             return this;
