@@ -77,7 +77,7 @@ internal class BubbleDataRepository @Inject constructor(
             BubbleEntity(
                     userId,
                     b.packageName,
-                    b.shortcutInfo?.id ?: return@mapNotNull null,
+                    b.metadataShortcutId ?: return@mapNotNull null,
                     b.key,
                     b.rawDesiredHeight,
                     b.rawDesiredHeightResId,
