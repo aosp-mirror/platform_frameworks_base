@@ -229,7 +229,7 @@ public final class SurfaceControl implements Parcelable {
             int transformHint);
 
     @Nullable
-    @GuardedBy("sLock")
+    @GuardedBy("mLock")
     private ArrayList<OnReparentListener> mReparentListeners;
 
     /**
