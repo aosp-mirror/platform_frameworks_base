@@ -239,7 +239,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Opcije telefona"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Zaključavanje zaslona"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Isključi"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Napajanje"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Uključi"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Ponovo pokreni"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Hitne službe"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Izvješće o bugovima"</string>
