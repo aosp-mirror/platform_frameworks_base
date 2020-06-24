@@ -173,7 +173,8 @@ public class BubbleExpandedView extends LinearLayout {
                             return;
                         }
                         try {
-                            if (!mIsOverflow && mBubble.getShortcutInfo() != null) {
+                            if (!mIsOverflow && mBubble.hasMetadataShortcutId()
+                                    && mBubble.getShortcutInfo() != null) {
                                 options.setApplyActivityFlagsForBubbles(true);
                                 mActivityView.startShortcutActivity(mBubble.getShortcutInfo(),
                                         options, null /* sourceBounds */);
@@ -617,7 +618,7 @@ public class BubbleExpandedView extends LinearLayout {
 
             if (isNew) {
                 mPendingIntent = mBubble.getBubbleIntent();
-                if (mPendingIntent != null || mBubble.getShortcutInfo() != null) {
+                if (mPendingIntent != null || mBubble.hasMetadataShortcutId()) {
                     setContentVisibility(false);
                     mActivityView.setVisibility(VISIBLE);
                 }
@@ -789,7 +790,7 @@ public class BubbleExpandedView extends LinearLayout {
     }
 
     private boolean usingActivityView() {
-        return (mPendingIntent != null || mBubble.getShortcutInfo() != null)
+        return (mPendingIntent != null || mBubble.hasMetadataShortcutId())
                 && mActivityView != null;
     }
 
