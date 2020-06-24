@@ -83,6 +83,8 @@ public class AmbientState {
     private float mDozeAmount = 0.0f;
     private HeadsUpManager mHeadUpManager;
     private Runnable mOnPulseHeightChangedListener;
+    private ExpandableNotificationRow mTrackedHeadsUpRow;
+    private float mAppearFraction;
 
     public AmbientState(
             Context context,
@@ -542,5 +544,28 @@ public class AmbientState {
 
     public Runnable getOnPulseHeightChangedListener() {
         return mOnPulseHeightChangedListener;
+    }
+
+    public void setTrackedHeadsUpRow(ExpandableNotificationRow row) {
+        mTrackedHeadsUpRow = row;
+    }
+
+    /**
+     * Returns the currently tracked heads up row, if there is one and it is currently above the
+     * shelf (still appearing).
+     */
+    public ExpandableNotificationRow getTrackedHeadsUpRow() {
+        if (mTrackedHeadsUpRow == null || !mTrackedHeadsUpRow.isAboveShelf()) {
+            return null;
+        }
+        return mTrackedHeadsUpRow;
+    }
+
+    public void setAppearFraction(float appearFraction) {
+        mAppearFraction = appearFraction;
+    }
+
+    public float getAppearFraction() {
+        return mAppearFraction;
     }
 }

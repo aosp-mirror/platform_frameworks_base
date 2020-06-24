@@ -104,6 +104,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
         mHandler = new Handler(context.getMainLooper());
         mListener = listener;
         mState = state;
+        mMultiFingerGesturesEnabled = false;
         // Set up gestures.
         // Start with double tap.
         mGestures.add(new MultiTap(context, 2, GESTURE_DOUBLE_TAP, this));
@@ -247,7 +248,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
          * and hold is dispatched via onGestureCompleted. Otherwise, this method is called when the
          * user has performed a double tap and then held down the second tap.
          */
-        void onDoubleTapAndHold();
+        void onDoubleTapAndHold(MotionEvent event, MotionEvent rawEvent, int policyFlags);
 
         /**
          * When FLAG_SERVICE_HANDLES_DOUBLE_TAP is enabled, this method is not called; double-tap is
@@ -256,7 +257,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
          *
          * @return true if the event is consumed, else false
          */
-        boolean onDoubleTap();
+        boolean onDoubleTap(MotionEvent event, MotionEvent rawEvent, int policyFlags);
 
         /**
          * Called when the system has decided the event stream is a potential gesture.
@@ -322,7 +323,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                             new AccessibilityGestureEvent(gestureId, event.getDisplayId());
                     mListener.onGestureCompleted(gestureEvent);
                 } else {
-                    mListener.onDoubleTap();
+                    mListener.onDoubleTap(event, rawEvent, policyFlags);
                 }
                 clear();
                 break;
@@ -332,7 +333,7 @@ class GestureManifold implements GestureMatcher.StateChangeListener {
                             new AccessibilityGestureEvent(gestureId, event.getDisplayId());
                     mListener.onGestureCompleted(gestureEvent);
                 } else {
-                    mListener.onDoubleTapAndHold();
+                    mListener.onDoubleTapAndHold(event, rawEvent, policyFlags);
                 }
                 clear();
                 break;

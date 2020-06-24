@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"暂停"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"跳到下一个"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"跳到上一个"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"调整大小"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"手机因严重发热而自动关机"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"现在，您的手机已恢复正常运行"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"由于发热严重，因此您的手机执行了自动关机以降温。现在，您的手机已恢复正常运行。\n\n以下情况可能会导致您的手机严重发热：\n • 使用占用大量资源的应用（例如游戏、视频或导航应用）\n • 下载或上传大型文件\n • 在高温环境下使用手机"</string>
@@ -1080,15 +1079,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"确认<xliff:g id="DEVICE">%s</xliff:g>的更改"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"滑动可查看更多结构"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"正在加载推荐内容"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"媒体"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"隐藏当前会话。"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"隐藏"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"继续播放"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"设置"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"无效，请检查应用"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"出现错误，正在重试…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"未找到"</string>
