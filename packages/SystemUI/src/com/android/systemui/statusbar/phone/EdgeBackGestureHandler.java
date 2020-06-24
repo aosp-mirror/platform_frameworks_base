@@ -121,6 +121,8 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
 
     private final Context mContext;
     private final OverviewProxyService mOverviewProxyService;
+    private final Runnable mStateChangeCallback;
+
     private final PluginManager mPluginManager;
     // Activities which should not trigger Back gesture.
     private final List<ComponentName> mGestureBlockingActivities = new ArrayList<>();
@@ -196,13 +198,15 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
             };
 
     public EdgeBackGestureHandler(Context context, OverviewProxyService overviewProxyService,
-            SysUiState sysUiFlagContainer, PluginManager pluginManager) {
+            SysUiState sysUiFlagContainer, PluginManager pluginManager,
+            Runnable stateChangeCallback) {
         super(Dependency.get(BroadcastDispatcher.class));
         mContext = context;
         mDisplayId = context.getDisplayId();
         mMainExecutor = context.getMainExecutor();
         mOverviewProxyService = overviewProxyService;
         mPluginManager = pluginManager;
+        mStateChangeCallback = stateChangeCallback;
         ComponentName recentsComponentName = ComponentName.unflattenFromString(
                 context.getString(com.android.internal.R.string.config_recentsComponentName));
         if (recentsComponentName != null) {
@@ -226,13 +230,13 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
                 Log.e(TAG, "Failed to add gesture blocking activities", e);
             }
         }
-        Dependency.get(ProtoTracer.class).add(this);
 
+        Dependency.get(ProtoTracer.class).add(this);
         mLongPressTimeout = Math.min(MAX_LONG_PRESS_TIMEOUT,
                 ViewConfiguration.getLongPressTimeout());
 
         mGestureNavigationSettingsObserver = new GestureNavigationSettingsObserver(
-                mContext.getMainThreadHandler(), mContext, this::updateCurrentUserResources);
+                mContext.getMainThreadHandler(), mContext, this::onNavigationSettingsChanged);
 
         updateCurrentUserResources();
         sysUiFlagContainer.addCallback(sysUiFlags -> mSysUiFlags = sysUiFlags);
@@ -261,6 +265,14 @@ public class EdgeBackGestureHandler extends CurrentUserTracker implements Displa
         final float backGestureSlop = DeviceConfig.getFloat(DeviceConfig.NAMESPACE_SYSTEMUI,
                         SystemUiDeviceConfigFlags.BACK_GESTURE_SLOP_MULTIPLIER, 0.75f);
         mTouchSlop = ViewConfiguration.get(mContext).getScaledTouchSlop() * backGestureSlop;
+    }
+
+    private void onNavigationSettingsChanged() {
+        boolean wasBackAllowed = isHandlingGestures();
+        updateCurrentUserResources();
+        if (wasBackAllowed != isHandlingGestures()) {
+            mStateChangeCallback.run();
+        }
     }
 
     @Override
