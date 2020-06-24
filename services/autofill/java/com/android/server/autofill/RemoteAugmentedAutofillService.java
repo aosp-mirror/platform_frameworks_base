@@ -149,7 +149,7 @@ final class RemoteAugmentedAutofillService
             @Nullable InlineSuggestionsRequest inlineSuggestionsRequest,
             @Nullable Function<InlineFillUi, Boolean> inlineSuggestionsCallback,
             @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService, int userId) {
         long requestTime = SystemClock.elapsedRealtime();
         AtomicReference<ICancellationSignal> cancellationRef = new AtomicReference<>();
 
@@ -173,7 +173,7 @@ final class RemoteAugmentedAutofillService
                                             inlineSuggestionsRequest, inlineSuggestionsData,
                                             clientState, focusedId, focusedValue,
                                             inlineSuggestionsCallback,
-                                            client, onErrorCallback, remoteRenderService);
+                                            client, onErrorCallback, remoteRenderService, userId);
                                     if (!showingFillWindow) {
                                         requestAutofill.complete(null);
                                     }
@@ -243,7 +243,8 @@ final class RemoteAugmentedAutofillService
             @NonNull AutofillId focusedId, @Nullable AutofillValue focusedValue,
             @Nullable Function<InlineFillUi, Boolean> inlineSuggestionsCallback,
             @NonNull IAutoFillManagerClient client, @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId) {
         if (inlineSuggestionsData == null || inlineSuggestionsData.isEmpty()
                 || inlineSuggestionsCallback == null || request == null
                 || remoteRenderService == null) {
@@ -312,7 +313,7 @@ final class RemoteAugmentedAutofillService
                                     Slog.w(TAG, "RemoteException starting intent sender");
                                 }
                             }
-                        }, onErrorCallback, remoteRenderService);
+                        }, onErrorCallback, remoteRenderService, userId, sessionId);
 
         if (inlineSuggestionsCallback.apply(inlineFillUi)) {
             mCallbacks.logAugmentedAutofillShown(sessionId, clientState);
