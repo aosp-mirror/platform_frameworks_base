@@ -184,9 +184,8 @@ public class BlobStoreManager {
      * @throws SecurityException when the caller is not allowed to create a session, such
      *                           as when called from an Instant app.
      * @throws IllegalArgumentException when {@code blobHandle} is invalid.
-     * @throws IllegalStateException when a new session could not be created, such as when the
-     *                               caller is trying to create too many sessions or when the
-     *                               device is running low on space.
+     * @throws LimitExceededException when a new session could not be created, such as when the
+     *                                caller is trying to create too many sessions.
      */
     public @IntRange(from = 1) long createSession(@NonNull BlobHandle blobHandle)
             throws IOException {
@@ -194,6 +193,7 @@ public class BlobStoreManager {
             return mService.createSession(blobHandle, mContext.getOpPackageName());
         } catch (ParcelableException e) {
             e.maybeRethrow(IOException.class);
+            e.maybeRethrow(LimitExceededException.class);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
@@ -302,8 +302,9 @@ public class BlobStoreManager {
      *                                  if the {@code leaseExpiryTimeMillis} is greater than the
      *                                  {@link BlobHandle#getExpiryTimeMillis()}.
      * @throws LimitExceededException when a lease could not be acquired, such as when the
-     *                                caller is trying to acquire leases on too much data. Apps
-     *                                can avoid this by checking the remaining quota using
+     *                                caller is trying to acquire too many leases or acquire
+     *                                leases on too much data. Apps can avoid this by checking
+     *                                the remaining quota using
      *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
      *                                acquire a lease.
      *
@@ -362,8 +363,9 @@ public class BlobStoreManager {
      *                                  if the {@code leaseExpiryTimeMillis} is greater than the
      *                                  {@link BlobHandle#getExpiryTimeMillis()}.
      * @throws LimitExceededException when a lease could not be acquired, such as when the
-     *                                caller is trying to acquire leases on too much data. Apps
-     *                                can avoid this by checking the remaining quota using
+     *                                caller is trying to acquire too many leases or acquire
+     *                                leases on too much data. Apps can avoid this by checking
+     *                                the remaining quota using
      *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
      *                                acquire a lease.
      *
@@ -415,8 +417,9 @@ public class BlobStoreManager {
      *                           exist or the caller does not have access to it.
      * @throws IllegalArgumentException when {@code blobHandle} is invalid.
      * @throws LimitExceededException when a lease could not be acquired, such as when the
-     *                                caller is trying to acquire leases on too much data. Apps
-     *                                can avoid this by checking the remaining quota using
+     *                                caller is trying to acquire too many leases or acquire
+     *                                leases on too much data. Apps can avoid this by checking
+     *                                the remaining quota using
      *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
      *                                acquire a lease.
      *
@@ -462,8 +465,9 @@ public class BlobStoreManager {
      *                           exist or the caller does not have access to it.
      * @throws IllegalArgumentException when {@code blobHandle} is invalid.
      * @throws LimitExceededException when a lease could not be acquired, such as when the
-     *                                caller is trying to acquire leases on too much data. Apps
-     *                                can avoid this by checking the remaining quota using
+     *                                caller is trying to acquire too many leases or acquire
+     *                                leases on too much data. Apps can avoid this by checking
+     *                                the remaining quota using
      *                                {@link #getRemainingLeaseQuotaBytes()} before trying to
      *                                acquire a lease.
      *
@@ -757,6 +761,8 @@ public class BlobStoreManager {
          * @throws SecurityException when the caller is not the owner of the session.
          * @throws IllegalStateException when the caller tries to change access for a blob which is
          *                               already committed.
+         * @throws LimitExceededException when the caller tries to explicitly allow too
+         *                                many packages using this API.
          */
         public void allowPackageAccess(@NonNull String packageName, @NonNull byte[] certificate)
                 throws IOException {
@@ -764,6 +770,7 @@ public class BlobStoreManager {
                 mSession.allowPackageAccess(packageName, certificate);
             } catch (ParcelableException e) {
                 e.maybeRethrow(IOException.class);
+                e.maybeRethrow(LimitExceededException.class);
                 throw new RuntimeException(e);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
