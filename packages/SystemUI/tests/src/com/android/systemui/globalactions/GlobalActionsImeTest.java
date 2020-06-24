@@ -18,6 +18,7 @@ package com.android.systemui.globalactions;
 
 import static android.view.WindowInsets.Type.ime;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -39,6 +40,7 @@ import androidx.test.rule.ActivityTestRule;
 
 import com.android.systemui.SysuiTestCase;
 
+import org.junit.After;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -51,6 +53,11 @@ public class GlobalActionsImeTest extends SysuiTestCase {
     @Rule
     public ActivityTestRule<TestActivity> mActivityTestRule = new ActivityTestRule<>(
             TestActivity.class, false, false);
+
+    @After
+    public void tearDown() {
+        executeShellCommand("input keyevent HOME");
+    }
 
     /**
      * This test verifies that GlobalActions, which is frequently used to capture bugreports,
@@ -68,6 +75,9 @@ public class GlobalActionsImeTest extends SysuiTestCase {
             waitUntil("Ime is not visible", activity::isImeVisible);
         }
 
+        // In some cases, IME is not controllable. e.g., floating IME or fullscreen IME.
+        final boolean activityControlledIme = activity.mControlsIme;
+
         executeShellCommand("input keyevent --longpress POWER");
 
         waitUntil("activity loses focus", () -> !activity.mHasFocus);
@@ -77,9 +87,9 @@ public class GlobalActionsImeTest extends SysuiTestCase {
 
         runAssertionOnMainThread(() -> {
             assertTrue("IME should remain visible behind GlobalActions, but didn't",
-                    activity.mControlsIme);
-            assertTrue("App behind GlobalActions should remain in control of IME, but didn't",
                     activity.mImeVisible);
+            assertEquals("App behind GlobalActions should remain in control of IME, but didn't",
+                    activityControlledIme, activity.mControlsIme);
         });
     }
 
@@ -181,7 +191,7 @@ public class GlobalActionsImeTest extends SysuiTestCase {
         }
 
         boolean isImeVisible() {
-            return mHasFocus && mControlsIme && mImeVisible;
+            return mHasFocus && mImeVisible;
         }
 
         @Override
