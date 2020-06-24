@@ -2192,7 +2192,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     void removeIfPossible() {
         super.removeIfPossible();
         removeIfPossible(false /*keepVisibleDeadWindow*/);
-        finishDrawing(null);
+        immediatelyNotifyBlastSync();
     }
 
     private void removeIfPossible(boolean keepVisibleDeadWindow) {
@@ -5806,7 +5806,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // client will not render when visibility is GONE. Therefore, call finishDrawing here to
         // prevent system server from blocking on a window that will not draw.
         if (viewVisibility == View.GONE && mUsingBLASTSyncTransaction) {
-            finishDrawing(null);
+            immediatelyNotifyBlastSync();
         }
     }
 
@@ -5844,7 +5844,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             return mWinAnimator.finishDrawingLocked(postDrawTransaction);
         }
 
-        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
         if (postDrawTransaction != null) {
             mBLASTSyncTransaction.merge(postDrawTransaction);
         }
@@ -5853,8 +5852,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return mWinAnimator.finishDrawingLocked(null);
     }
 
-    @VisibleForTesting
-    void notifyBlastSyncTransaction() {
+    private void notifyBlastSyncTransaction() {
+        mWmService.mH.removeMessages(WINDOW_STATE_BLAST_SYNC_TIMEOUT, this);
+
         if (!mNotifyBlastOnSurfacePlacement || mWaitingListener == null) {
             mNotifyBlastOnSurfacePlacement = false;
             return;
@@ -5875,6 +5875,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         mWaitingSyncId = 0;
         mWaitingListener = null;
         mNotifyBlastOnSurfacePlacement = false;
+    }
+
+    void immediatelyNotifyBlastSync() {
+        finishDrawing(null);
+        notifyBlastSyncTransaction();
     }
 
     private boolean requestResizeForBlastSync() {
