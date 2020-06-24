@@ -2543,7 +2543,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUiHandler = injector.getUiHandler(null /* service */);
         mUserController = hasHandlerThread ? new UserController(this) : null;
         mPendingIntentController = hasHandlerThread
-                ? new PendingIntentController(handlerThread.getLooper(), mUserController) : null;
+                ? new PendingIntentController(handlerThread.getLooper(), mUserController,
+                        mConstants) : null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
@@ -2640,7 +2641,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mUserController = new UserController(this);
 
         mPendingIntentController = new PendingIntentController(
-                mHandlerThread.getLooper(), mUserController);
+                mHandlerThread.getLooper(), mUserController, mConstants);
 
         if (SystemProperties.getInt("sys.use_fifo_ui", 0) != 0) {
             mUseFifoUiScheduling = true;
