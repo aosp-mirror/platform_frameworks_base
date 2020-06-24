@@ -122,9 +122,7 @@ void CacheManager::trimMemory(TrimMemoryMode mode) {
 
     // We must sync the cpu to make sure deletions of resources still queued up on the GPU actually
     // happen.
-    GrFlushInfo info;
-    info.fFlags = kSyncCpu_GrFlushFlag;
-    mGrContext->flush(info);
+    mGrContext->flush({});
     mGrContext->submit(true);
 }
 
