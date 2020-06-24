@@ -156,8 +156,7 @@ public class InlineContentView extends ViewGroup {
         @Override
         public void onDraw() {
             computeParentPositionAndScale();
-            final int visibility = InlineContentView.this.isShown() ? VISIBLE : GONE;
-            mSurfaceView.setVisibility(visibility);
+            mSurfaceView.setVisibility(VISIBLE);
         }
     };
 
