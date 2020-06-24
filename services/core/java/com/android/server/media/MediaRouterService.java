@@ -481,16 +481,10 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSessionWithRouter2(IMediaRouter2 router, int requestId,
+            long managerRequestId, RoutingSessionInfo oldSession,
             MediaRoute2Info route, Bundle sessionHints) {
-        mService2.requestCreateSessionWithRouter2(router, requestId, route, sessionHints);
-    }
-
-    // Binder call
-    @Override
-    public void notifySessionHintsForCreatingSession(IMediaRouter2 router,
-            long uniqueRequestId, MediaRoute2Info route, Bundle sessionHints) {
-        mService2.notifySessionHintsForCreatingSession(router,
-                uniqueRequestId, route, sessionHints);
+        mService2.requestCreateSessionWithRouter2(router, requestId, managerRequestId,
+                oldSession, route, sessionHints);
     }
 
     // Binder call
@@ -558,8 +552,8 @@ public final class MediaRouterService extends IMediaRouterService.Stub
     // Binder call
     @Override
     public void requestCreateSessionWithManager(IMediaRouter2Manager manager,
-            int requestId, String packageName, MediaRoute2Info route) {
-        mService2.requestCreateSessionWithManager(manager, requestId, packageName, route);
+            int requestId, RoutingSessionInfo oldSession, MediaRoute2Info route) {
+        mService2.requestCreateSessionWithManager(manager, requestId, oldSession, route);
     }
 
     // Binder call
