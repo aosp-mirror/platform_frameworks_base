@@ -28,4 +28,8 @@ public class UserHandle {
     public static int getUid(int userId, int appId) {
         throw new UnsupportedOperationException();
     }
+
+    public static int myUserId() {
+        throw new UnsupportedOperationException();
+    }
 }
