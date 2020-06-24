@@ -6174,12 +6174,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             assertPackageMatchesCallingUid(callingPackage);
-            synchronized (mGlobalLock) {
-                return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
-                        realCallingUid, callingPackage, callingFeatureId, intents, resolvedTypes,
-                        resultTo, options, userId, validateIncomingUser, originatingPendingIntent,
-                        allowBackgroundActivityStart);
-            }
+            return getActivityStartController().startActivitiesInPackage(uid, realCallingPid,
+                    realCallingUid, callingPackage, callingFeatureId, intents, resolvedTypes,
+                    resultTo, options, userId, validateIncomingUser, originatingPendingIntent,
+                    allowBackgroundActivityStart);
         }
 
         @Override
@@ -6190,13 +6188,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent,
                 boolean allowBackgroundActivityStart) {
             assertPackageMatchesCallingUid(callingPackage);
-            synchronized (mGlobalLock) {
-                return getActivityStartController().startActivityInPackage(uid, realCallingPid,
-                        realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
-                        resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
-                        reason, validateIncomingUser, originatingPendingIntent,
-                        allowBackgroundActivityStart);
-            }
+            return getActivityStartController().startActivityInPackage(uid, realCallingPid,
+                    realCallingUid, callingPackage, callingFeatureId, intent, resolvedType,
+                    resultTo, resultWho, requestCode, startFlags, options, userId, inTask,
+                    reason, validateIncomingUser, originatingPendingIntent,
+                    allowBackgroundActivityStart);
         }
 
         @Override
