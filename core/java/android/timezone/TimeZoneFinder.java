@@ -41,16 +41,17 @@ public final class TimeZoneFinder {
     public static TimeZoneFinder getInstance() {
         synchronized (sLock) {
             if (sInstance == null) {
-                sInstance = new TimeZoneFinder(libcore.timezone.TimeZoneFinder.getInstance());
+                sInstance = new TimeZoneFinder(com.android.i18n.timezone.TimeZoneFinder
+                    .getInstance());
             }
         }
         return sInstance;
     }
 
     @NonNull
-    private final libcore.timezone.TimeZoneFinder mDelegate;
+    private final com.android.i18n.timezone.TimeZoneFinder mDelegate;
 
-    private TimeZoneFinder(@NonNull libcore.timezone.TimeZoneFinder delegate) {
+    private TimeZoneFinder(@NonNull com.android.i18n.timezone.TimeZoneFinder delegate) {
         mDelegate = Objects.requireNonNull(delegate);
     }
 
@@ -70,7 +71,8 @@ public final class TimeZoneFinder {
      */
     @Nullable
     public CountryTimeZones lookupCountryTimeZones(@NonNull String countryIso) {
-        libcore.timezone.CountryTimeZones delegate = mDelegate.lookupCountryTimeZones(countryIso);
+        com.android.i18n.timezone.CountryTimeZones delegate = mDelegate
+                .lookupCountryTimeZones(countryIso);
         return delegate == null ? null : new CountryTimeZones(delegate);
     }
 }
