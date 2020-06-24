@@ -222,6 +222,11 @@ class SystemMediaRoute2Provider extends MediaRoute2Provider {
         // Do nothing since we don't support grouping volume yet.
     }
 
+    @Override
+    public void prepareReleaseSession(String sessionId) {
+        // Do nothing since the system session persists.
+    }
+
     public MediaRoute2Info getDefaultRoute() {
         return mDefaultRoute;
     }
