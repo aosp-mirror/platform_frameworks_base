@@ -93,6 +93,8 @@ public class WifiEnterpriseConfig implements Parcelable {
     public static final String OPP_KEY_CACHING     = "proactive_key_caching";
     /** @hide */
     public static final String EAP_ERP             = "eap_erp";
+    /** @hide */
+    public static final String OCSP                = "ocsp";
 
     /**
      * String representing the keystore OpenSSL ENGINE's ID.
