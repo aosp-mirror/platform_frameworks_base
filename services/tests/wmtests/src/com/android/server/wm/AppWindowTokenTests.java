@@ -456,6 +456,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
     @Test
     public void testTransferStartingWindowSetFixedRotation() {
         final ActivityRecord topActivity = createTestActivityRecordForGivenTask(mTask);
+        topActivity.setVisible(false);
         mTask.positionChildAt(topActivity, POSITION_TOP);
         mActivity.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
