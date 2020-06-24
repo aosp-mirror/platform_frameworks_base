@@ -335,7 +335,7 @@ jobject MediaEvent::getLinearBlock() {
     if (mLinearBlockObj != NULL) {
         return mLinearBlockObj;
     }
-    mIonHandle = new C2HandleIon(mAvHandle->data[0], mDataLength);
+    mIonHandle = new C2HandleIon(dup(mAvHandle->data[0]), mDataLength);
     std::shared_ptr<C2LinearBlock> block = _C2BlockFactory::CreateLinearBlock(mIonHandle);
 
     JNIEnv *env = AndroidRuntime::getJNIEnv();
