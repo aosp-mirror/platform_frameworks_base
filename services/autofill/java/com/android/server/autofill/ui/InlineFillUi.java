@@ -105,19 +105,20 @@ public final class InlineFillUi {
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull AutoFillUI.AutoFillUiCallback uiCallback,
             @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId) {
 
         if (InlineSuggestionFactory.responseNeedAuthentication(response)) {
             InlineSuggestion inlineAuthentication =
                     InlineSuggestionFactory.createInlineAuthentication(request, response,
-                            focusedViewId, uiCallback, onErrorCallback, remoteRenderService);
+                            uiCallback, onErrorCallback, remoteRenderService, userId, sessionId);
             return new InlineFillUi(focusedViewId, inlineAuthentication, filterText);
         } else if (response.getDatasets() != null) {
             SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions =
                     InlineSuggestionFactory.createAutofillInlineSuggestions(request,
                             response.getRequestId(),
                             response.getDatasets(), focusedViewId, uiCallback, onErrorCallback,
-                            remoteRenderService);
+                            remoteRenderService, userId, sessionId);
             return new InlineFillUi(focusedViewId, inlineSuggestions, filterText);
         }
         return new InlineFillUi(focusedViewId, new SparseArray<>(), filterText);
@@ -132,11 +133,12 @@ public final class InlineFillUi {
             @NonNull AutofillId focusedViewId, @Nullable String filterText,
             @NonNull InlineSuggestionUiCallback uiCallback,
             @NonNull Runnable onErrorCallback,
-            @Nullable RemoteInlineSuggestionRenderService remoteRenderService) {
+            @Nullable RemoteInlineSuggestionRenderService remoteRenderService,
+            int userId, int sessionId) {
         SparseArray<Pair<Dataset, InlineSuggestion>> inlineSuggestions =
                 InlineSuggestionFactory.createAugmentedAutofillInlineSuggestions(request, datasets,
                         focusedViewId,
-                        uiCallback, onErrorCallback, remoteRenderService);
+                        uiCallback, onErrorCallback, remoteRenderService, userId, sessionId);
         return new InlineFillUi(focusedViewId, inlineSuggestions, filterText);
     }
 
