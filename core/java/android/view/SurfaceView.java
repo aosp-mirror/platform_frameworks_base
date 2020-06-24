@@ -1231,7 +1231,7 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             float postScaleX, float postScaleY) {
         transaction.setPosition(surface, positionLeft, positionTop);
         transaction.setMatrix(surface, postScaleX /*dsdx*/, 0f /*dtdx*/,
-                0f /*dsdy*/, postScaleY /*dtdy*/);
+                0f /*dtdy*/, postScaleY /*dsdy*/);
     }
 
     /** @hide */
