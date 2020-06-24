@@ -70,9 +70,6 @@ public class BubbleExperimentConfig {
 
     private static final String WHITELISTED_AUTO_BUBBLE_APPS = "whitelisted_auto_bubble_apps";
 
-    private static final String ALLOW_BUBBLE_OVERFLOW = "allow_bubble_overflow";
-    private static final boolean ALLOW_BUBBLE_OVERFLOW_DEFAULT = true;
-
     /**
      * When true, if a notification has the information necessary to bubble (i.e. valid
      * contentIntent and an icon or image), then a {@link android.app.Notification.BubbleMetadata}
@@ -84,15 +81,6 @@ public class BubbleExperimentConfig {
         return Settings.Secure.getInt(context.getContentResolver(),
                 ALLOW_ANY_NOTIF_TO_BUBBLE,
                 ALLOW_ANY_NOTIF_TO_BUBBLE_DEFAULT ? 1 : 0) != 0;
-    }
-
-    /**
-     * When true, show a menu with dismissed and aged-out bubbles.
-     */
-    static boolean allowBubbleOverflow(Context context) {
-        return Settings.Secure.getInt(context.getContentResolver(),
-                ALLOW_BUBBLE_OVERFLOW,
-                ALLOW_BUBBLE_OVERFLOW_DEFAULT ? 1 : 0) != 0;
     }
 
     /**
