@@ -50,7 +50,10 @@ import android.view.Surface;
 
 import java.security.Signature;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
@@ -75,6 +78,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private static final int MSG_AUTHENTICATION_FAILED = 103;
     private static final int MSG_ERROR = 104;
     private static final int MSG_REMOVED = 105;
+    private static final int MSG_CHALLENGE_GENERATED = 106;
 
     private IFingerprintService mService;
     private Context mContext;
@@ -82,6 +86,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     private AuthenticationCallback mAuthenticationCallback;
     private EnrollmentCallback mEnrollmentCallback;
     private RemovalCallback mRemovalCallback;
+    private GenerateChallengeCallback mGenerateChallengeCallback;
     private CryptoObject mCryptoObject;
     private Fingerprint mRemovalFingerprint;
     private Handler mHandler;
@@ -346,6 +351,16 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     };
 
     /**
+     * @hide
+     */
+    public abstract static class GenerateChallengeCallback {
+        public abstract void onChallengeGenerated(long challenge);
+    }
+
+    private abstract static class InternalGenerateChallengeCallback
+            extends GenerateChallengeCallback {}
+
+    /**
      * Request authentication of a crypto object. This call warms up the fingerprint hardware
      * and starts scanning for a fingerprint. It terminates when
      * {@link AuthenticationCallback#onAuthenticationError(int, CharSequence)} or
@@ -514,19 +529,56 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
-     * Requests a pre-enrollment auth token to tie enrollment to the confirmation of
-     * existing device credentials (e.g. pin/pattern/password).
+     * Same as {@link #generateChallenge(GenerateChallengeCallback)}, except blocks until the
+     * TEE/hardware operation is complete.
+     * @return challenge generated in the TEE/hardware
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public long preEnroll() {
-        long result = 0;
+    public long generateChallengeBlocking() {
+        final AtomicReference<Long> result = new AtomicReference<>();
+        final CountDownLatch latch = new CountDownLatch(1);
+        final GenerateChallengeCallback callback = new InternalGenerateChallengeCallback() {
+            @Override
+            public void onChallengeGenerated(long challenge) {
+                result.set(challenge);
+                latch.countDown();
+            }
+        };
+
+        generateChallenge(callback);
+
+        try {
+            latch.await(1, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Slog.e(TAG, "Interrupted while generatingChallenge", e);
+            e.printStackTrace();
+        }
+
+        return result.get();
+    }
+
+
+    /**
+     * Generates a unique random challenge in the TEE. A typical use case is to have it wrapped in a
+     * HardwareAuthenticationToken, minted by Gatekeeper upon PIN/Pattern/Password verification.
+     * The HardwareAuthenticationToken can then be sent to the biometric HAL together with a
+     * request to perform sensitive operation(s) (for example enroll), represented by the challenge.
+     * Doing this ensures that a the sensitive operation cannot be performed unless the user has
+     * entered confirmed PIN/Pattern/Password.
+     *
+     * @see com.android.server.locksettings.LockSettingsService
+     *
+     * @hide
+     */
+    @RequiresPermission(MANAGE_FINGERPRINT)
+    public void generateChallenge(GenerateChallengeCallback callback) {
         if (mService != null) try {
-            result = mService.preEnroll(mToken);
+            mGenerateChallengeCallback = callback;
+            mService.generateChallenge(mToken, mServiceReceiver, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return result;
     }
 
     /**
@@ -534,14 +586,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
-    public int postEnroll() {
-        int result = 0;
+    public void revokeChallenge() {
         if (mService != null) try {
-            result = mService.postEnroll(mToken);
+            mService.revokeChallenge(mToken, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return result;
     }
 
     /**
@@ -760,6 +810,12 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
                 case MSG_REMOVED:
                     sendRemovedResult((Fingerprint) msg.obj, msg.arg1 /* remaining */);
                     break;
+                case MSG_CHALLENGE_GENERATED:
+                    sendChallengeGenerated((long) msg.obj /* challenge */);
+                    break;
+                default:
+                    Slog.w(TAG, "Unknown message: " + msg.what);
+
             }
         }
     };
@@ -839,6 +895,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         }
     }
 
+    private void sendChallengeGenerated(long challenge) {
+        if (mGenerateChallengeCallback == null) {
+            Slog.e(TAG, "sendChallengeGenerated, callback null");
+            return;
+        }
+        mGenerateChallengeCallback.onChallengeGenerated(challenge);
+    }
+
     /**
      * @hide
      */
@@ -846,7 +910,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         mContext = context;
         mService = service;
         if (mService == null) {
-            Slog.v(TAG, "FingerprintManagerService was null");
+            Slog.v(TAG, "FingerprintService was null");
         }
         mHandler = new MyHandler(context);
     }
@@ -991,6 +1055,17 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
         @Override // binder call
         public void onRemoved(Fingerprint fp, int remaining) {
             mHandler.obtainMessage(MSG_REMOVED, remaining, 0, fp).sendToTarget();
+        }
+
+        @Override // binder call
+        public void onChallengeGenerated(long challenge) {
+            if (mGenerateChallengeCallback instanceof InternalGenerateChallengeCallback) {
+                // Perform this on system_server thread, since the application's thread is
+                // blocked waiting for the result
+                mGenerateChallengeCallback.onChallengeGenerated(challenge);
+            } else {
+                mHandler.obtainMessage(MSG_CHALLENGE_GENERATED, challenge).sendToTarget();
+            }
         }
     };
 

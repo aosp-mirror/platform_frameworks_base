@@ -546,6 +546,18 @@ public abstract class BiometricServiceBase extends SystemService
         });
     }
 
+    protected void generateChallengeInternal(GenerateChallengeClient client) {
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
+        });
+    }
+
+    protected void revokeChallengeInternal(RevokeChallengeClient client) {
+        mHandler.post(() -> {
+            startClient(client, true /* initiatedByClient */);
+        });
+    }
+
     protected void authenticateInternal(AuthenticationClient client, String opPackageName) {
         final int callingUid = Binder.getCallingUid();
         final int callingPid = Binder.getCallingPid();

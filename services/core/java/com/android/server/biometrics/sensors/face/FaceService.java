@@ -61,9 +61,11 @@ import com.android.server.biometrics.sensors.BiometricUtils;
 import com.android.server.biometrics.sensors.ClientMonitor;
 import com.android.server.biometrics.sensors.ClientMonitorCallbackConverter;
 import com.android.server.biometrics.sensors.EnrollClient;
+import com.android.server.biometrics.sensors.GenerateChallengeClient;
 import com.android.server.biometrics.sensors.LockoutTracker;
 import com.android.server.biometrics.sensors.PerformanceTracker;
 import com.android.server.biometrics.sensors.RemovalClient;
+import com.android.server.biometrics.sensors.RevokeChallengeClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,7 +94,7 @@ public class FaceService extends BiometricServiceBase {
     private static final String FACE_DATA_DIR = "facedata";
     private static final String ACTION_LOCKOUT_RESET =
             "com.android.server.biometrics.face.ACTION_LOCKOUT_RESET";
-    private static final int CHALLENGE_TIMEOUT_SEC = 600; // 10 minutes
+
 
     static final String NOTIFICATION_TAG = "FaceService";
     static final int NOTIFICATION_ID = 1;
@@ -108,27 +110,46 @@ public class FaceService extends BiometricServiceBase {
          */
 
         @Override // Binder call
-        public long generateChallenge(IBinder token) {
+        public void generateChallenge(IBinder token, IFaceServiceReceiver receiver,
+                String opPackageName) throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
-            return startGenerateChallenge(token);
+
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to generateChallenge, daemon null");
+                receiver.onChallengeGenerated(0L);
+                return;
+            }
+
+            final GenerateChallengeClient client = new FaceGenerateChallengeClient(
+                    mClientFinishCallback, getContext(), daemon, token,
+                    new ClientMonitorCallbackConverter(receiver), opPackageName, getSensorId());
+            generateChallengeInternal(client);
         }
 
         @Override // Binder call
-        public int revokeChallenge(IBinder token) {
+        public void revokeChallenge(IBinder token, String owner) {
             checkPermission(MANAGE_BIOMETRIC);
-            mHandler.post(() -> {
-                // TODO(b/137106905): Schedule binder calls in FaceService to avoid deadlocks.
-                if (getCurrentClient() == null) {
-                    // if we aren't handling any other HIDL calls (mCurrentClient == null), revoke
-                    // the challenge right away.
-                    startRevokeChallenge(token);
-                } else {
-                    // postpone revoking the challenge until we finish processing the current HIDL
-                    // call.
-                    mRevokeChallengePending = true;
-                }
-            });
-            return Status.OK;
+
+            final IBiometricsFace daemon = getFaceDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "Unable to revokeChallenge, daemon null");
+                return;
+            }
+
+            final RevokeChallengeClient client = new FaceRevokeChallengeClient(
+                    mClientFinishCallback, getContext(), daemon, token, owner, getSensorId());
+
+            // TODO(b/137106905): Schedule binder calls in FaceService to avoid deadlocks.
+            if (getCurrentClient() == null) {
+                // if we aren't handling any other HIDL calls (mCurrentClient == null), revoke
+                // the challenge right away.
+                revokeChallengeInternal(client);
+            } else {
+                // postpone revoking the challenge until we finish processing the current HIDL
+                // call.
+                mPendingRevokeChallenge = client;
+            }
         }
 
         @Override // Binder call
@@ -480,7 +501,7 @@ public class FaceService extends BiometricServiceBase {
     @GuardedBy("this")
     private IBiometricsFace mDaemon;
     private UsageStats mUsageStats;
-    private boolean mRevokeChallengePending = false;
+    private RevokeChallengeClient mPendingRevokeChallenge;
 
     private NotificationManager mNotificationManager;
 
@@ -615,9 +636,9 @@ public class FaceService extends BiometricServiceBase {
     @Override
     protected void removeClient(ClientMonitor client) {
         super.removeClient(client);
-        if (mRevokeChallengePending) {
-            startRevokeChallenge(null);
-            mRevokeChallengePending = false;
+        if (mPendingRevokeChallenge != null) {
+            revokeChallengeInternal(mPendingRevokeChallenge);
+            mPendingRevokeChallenge = null;
         }
     }
 
@@ -804,38 +825,6 @@ public class FaceService extends BiometricServiceBase {
             }
         }
         return mDaemon;
-    }
-
-    private long startGenerateChallenge(IBinder token) {
-        IBiometricsFace daemon = getFaceDaemon();
-        if (daemon == null) {
-            Slog.w(TAG, "startGenerateChallenge: no face HAL!");
-            return 0;
-        }
-        try {
-            return daemon.generateChallenge(CHALLENGE_TIMEOUT_SEC).value;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startGenerateChallenge failed", e);
-        }
-        return 0;
-    }
-
-    private int startRevokeChallenge(IBinder token) {
-        IBiometricsFace daemon = getFaceDaemon();
-        if (daemon == null) {
-            Slog.w(TAG, "startRevokeChallenge: no face HAL!");
-            return 0;
-        }
-        try {
-            final int res = daemon.revokeChallenge();
-            if (res != Status.OK) {
-                Slog.e(TAG, "revokeChallenge returned " + res);
-            }
-            return res;
-        } catch (RemoteException e) {
-            Slog.e(TAG, "startRevokeChallenge failed", e);
-        }
-        return 0;
     }
 
     private native NativeHandle convertSurfaceToNativeHandle(Surface surface);
