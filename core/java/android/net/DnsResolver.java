@@ -38,6 +38,8 @@ import android.os.MessageQueue;
 import android.system.ErrnoException;
 import android.util.Log;
 
+import com.android.net.module.util.DnsPacket;
+
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -97,7 +99,7 @@ public final class DnsResolver {
     @interface DnsError {}
     /**
      * Indicates that there was an error parsing the response the query.
-     * The cause of this error is available via getCause() and is a ParseException.
+     * The cause of this error is available via getCause() and is a {@link ParseException}.
      */
     public static final int ERROR_PARSE = 0;
     /**
@@ -290,8 +292,15 @@ public final class DnsResolver {
             }
             try {
                 mAllAnswers.addAll(new DnsAddressAnswer(answer).getAddresses());
-            } catch (ParseException e) {
-                mDnsException = new DnsException(ERROR_PARSE, e);
+            } catch (DnsPacket.ParseException e) {
+                // Convert the com.android.net.module.util.DnsPacket.ParseException to an
+                // android.net.ParseException. This is the type that was used in Q and is implied
+                // by the public documentation of ERROR_PARSE.
+                //
+                // DnsPacket cannot throw android.net.ParseException directly because it's @hide.
+                ParseException pe = new ParseException(e.reason, e.getCause());
+                pe.setStackTrace(e.getStackTrace());
+                mDnsException = new DnsException(ERROR_PARSE, pe);
             }
             maybeReportAnswer();
         }
