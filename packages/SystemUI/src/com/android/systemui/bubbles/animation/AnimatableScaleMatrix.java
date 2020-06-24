@@ -134,4 +134,11 @@ public class AnimatableScaleMatrix extends Matrix {
     public float getPivotY() {
         return mPivotY;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        // Use object equality to allow this matrix to be used as a map key (which is required for
+        // PhysicsAnimator's animator caching).
+        return obj == this;
+    }
 }
