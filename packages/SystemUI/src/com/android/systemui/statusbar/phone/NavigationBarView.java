@@ -326,8 +326,8 @@ public class NavigationBarView extends FrameLayout implements
 
         mNavColorSampleMargin = getResources()
                         .getDimensionPixelSize(R.dimen.navigation_handle_sample_horizontal_margin);
-        mEdgeBackGestureHandler = new EdgeBackGestureHandler(
-                context, mOverviewProxyService, mSysUiFlagContainer, mPluginManager);
+        mEdgeBackGestureHandler = new EdgeBackGestureHandler(context, mOverviewProxyService,
+                mSysUiFlagContainer, mPluginManager, this::updateStates);
         mRegionSamplingHelper = new RegionSamplingHelper(this,
                 new RegionSamplingHelper.SamplingCallback() {
                     @Override
