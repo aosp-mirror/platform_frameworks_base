@@ -1506,6 +1506,7 @@ public class ActivityRecordTests extends ActivityTestsBase {
                 .setRotation((mActivity.getWindowConfiguration().getRotation() + 1) % 4)
                 .build();
         setRotatedScreenOrientationSilently(mActivity);
+        mActivity.setVisible(false);
 
         final IWindowSession session = WindowManagerGlobal.getWindowSession();
         spyOn(session);

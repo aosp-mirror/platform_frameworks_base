@@ -1185,6 +1185,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         activity.onRemovedFromDisplay();
+        if (activity == mFixedRotationLaunchingApp) {
+            setFixedRotationLaunchingAppUnchecked(null);
+        }
     }
 
     @Override
@@ -1467,6 +1470,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (r.hasFixedRotationTransform()) {
             // It has been set and not yet finished.
             return true;
+        }
+        if (!r.occludesParent() || r.isVisible()) {
+            // While entering or leaving a translucent or floating activity (e.g. dialog style),
+            // there is a visible activity in the background. Then it still needs rotation animation
+            // to cover the activity configuration change.
+            return false;
         }
         if (checkOpening) {
             if (!mAppTransition.isTransitionSet() || !mOpeningApps.contains(r)) {
@@ -5636,6 +5645,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
          */
         void onStartRecentsAnimation(@NonNull ActivityRecord r) {
             mAnimatingRecents = r;
+            if (r.isVisible() && mFocusedApp != null && !mFocusedApp.occludesParent()) {
+                // The recents activity has shown with the orientation determined by the top
+                // activity, keep its current orientation to avoid flicking by the configuration
+                // change of visible activity.
+                return;
+            }
             rotateInDifferentOrientationIfNeeded(r);
             if (r.hasFixedRotationTransform()) {
                 // Set the record so we can recognize it to continue to update display orientation
