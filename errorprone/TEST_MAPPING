@@ -1,0 +1,7 @@
+{
+    "presubmit": [
+        {
+            "name": "error_prone_android_framework_test"
+        }
+    ]
+}
