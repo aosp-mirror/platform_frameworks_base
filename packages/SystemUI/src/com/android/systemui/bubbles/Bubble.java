@@ -137,6 +137,7 @@ class Bubble implements BubbleViewProvider {
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
+        mMetadataShortcutId = shortcutInfo.getId();
         mShortcutInfo = shortcutInfo;
         mKey = key;
         mFlags = 0;
