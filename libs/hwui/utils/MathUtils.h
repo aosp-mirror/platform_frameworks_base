@@ -31,7 +31,9 @@ public:
      * Check for floats that are close enough to zero.
      */
     inline static bool isZero(float value) {
-        return (value >= -NON_ZERO_EPSILON) && (value <= NON_ZERO_EPSILON);
+        // Using fabsf is more performant as ARM computes
+        // fabsf in a single instruction.
+        return fabsf(value) <= NON_ZERO_EPSILON;
     }
 
     inline static bool isOne(float value) {
