@@ -880,6 +880,7 @@ public final class MediaParser {
     private static final String TS_MODE_MULTI_PMT = "multi_pmt";
     private static final String TS_MODE_HLS = "hls";
     private static final int BYTES_PER_SUBSAMPLE_ENCRYPTION_ENTRY = 6;
+    private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
 
     @IntDef(
             value = {
@@ -1674,6 +1675,9 @@ public final class MediaParser {
                 if (cryptoData != mLastReceivedCryptoData) {
                     mLastOutputCryptoInfo =
                             createNewCryptoInfoAndPopulateWithCryptoData(cryptoData);
+                    // We are using in-band crypto info, so the IV will be ignored. But we prevent
+                    // it from being null because toString assumes it non-null.
+                    mLastOutputCryptoInfo.iv = EMPTY_BYTE_ARRAY;
                 }
             } else /* We must populate the full CryptoInfo. */ {
                 // CryptoInfo.pattern is not accessible to the user, so the user needs to feed
