@@ -75,6 +75,7 @@ import android.Manifest;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.AppGlobals;
@@ -372,6 +373,10 @@ public class AppOpsService extends IAppOpsService.Stub {
     /** Last runtime permission access message collected and ready for reporting */
     @GuardedBy("this")
     private RuntimeAppOpAccessMessage mCollectedRuntimePermissionMessage;
+
+    /** Package Manager internal. Access via {@link #getPackageManagerInternal()} */
+    private @Nullable PackageManagerInternal mPackageManagerInternal;
+
     /**
      * An unsynchronized pool of {@link OpEventProxyInfo} objects.
      */
@@ -1522,8 +1527,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     }
                 }
             } else if (action.equals(Intent.ACTION_PACKAGE_REPLACED)) {
-                AndroidPackage pkg = LocalServices.getService(
-                        PackageManagerInternal.class).getPackage(pkgName);
+                AndroidPackage pkg = getPackageManagerInternal().getPackage(pkgName);
                 if (pkg == null) {
                     return;
                 }
@@ -1680,8 +1684,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                 final Uri data = intent.getData();
 
                 final String packageName = data.getSchemeSpecificPart();
-                PackageInfo pi = LocalServices.getService(
-                        PackageManagerInternal.class).getPackageInfo(packageName,
+                PackageInfo pi = getPackageManagerInternal().getPackageInfo(packageName,
                         PackageManager.GET_PERMISSIONS, Process.myUid(), mContext.getUserId());
                 if (isSamplingTarget(pi)) {
                     synchronized (this) {
@@ -1699,9 +1702,7 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }, RARELY_USED_PACKAGES_INITIALIZATION_DELAY_MILLIS);
 
-        PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                PackageManagerInternal.class);
-        packageManagerInternal.setExternalSourcesPolicy(
+        getPackageManagerInternal().setExternalSourcesPolicy(
                 new PackageManagerInternal.ExternalSourcesPolicy() {
                     @Override
                     public int getPackageTrustedToInstallApps(String packageName, int uid) {
@@ -2353,10 +2354,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                 continue;
             }
 
-            PackageManagerInternal packageManagerInternal = LocalServices.getService(
-                    PackageManagerInternal.class);
-            boolean supportsRuntimePermissions = packageManagerInternal.getUidTargetSdkVersion(uid)
-                    >= Build.VERSION_CODES.M;
+            boolean supportsRuntimePermissions = getPackageManagerInternal()
+                    .getUidTargetSdkVersion(uid) >= Build.VERSION_CODES.M;
 
             UserHandle user = UserHandle.getUserHandleForUid(uid);
             boolean isRevokedCompat;
@@ -2433,6 +2432,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             @Nullable IAppOpsCallback permissionPolicyCallback) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
 
@@ -2845,6 +2846,8 @@ public class AppOpsService extends IAppOpsService.Stub {
     private int checkOperationImpl(int code, int uid, String packageName,
                 boolean raw) {
         verifyIncomingOp(code);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
@@ -2964,6 +2967,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             boolean shouldCollectMessage) {
         verifyIncomingUid(proxyUid);
         verifyIncomingOp(code);
+        verifyIncomingPackage(proxiedPackageName, UserHandle.getUserId(proxiedUid));
+        verifyIncomingPackage(proxyPackageName, UserHandle.getUserId(proxyUid));
 
         String resolveProxyPackageName = resolvePackageName(proxyUid, proxyPackageName);
         if (resolveProxyPackageName == null) {
@@ -3015,6 +3020,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             @Nullable String message, boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return AppOpsManager.MODE_IGNORED;
@@ -3392,6 +3399,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             String message, boolean shouldCollectMessage) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return  AppOpsManager.MODE_IGNORED;
@@ -3472,6 +3481,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             String attributionTag) {
         verifyIncomingUid(uid);
         verifyIncomingOp(code);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+
         String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return;
@@ -3691,6 +3702,14 @@ public class AppOpsService extends IAppOpsService.Stub {
         throw new IllegalArgumentException("Bad operation #" + op);
     }
 
+    private void verifyIncomingPackage(@Nullable String packageName, @UserIdInt int userId) {
+        if (packageName != null && getPackageManagerInternal().filterAppAccess(packageName,
+                Binder.getCallingUid(), userId)) {
+            throw new IllegalArgumentException(
+                    packageName + " not found from " + Binder.getCallingUid());
+        }
+    }
+
     private @Nullable UidState getUidStateLocked(int uid, boolean edit) {
         UidState uidState = mUidStates.get(uid);
         if (uidState == null) {
@@ -3794,6 +3813,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 }
             }
         }
+    }
+
+    /**
+     * @return {@link PackageManagerInternal}
+     */
+    private @NonNull PackageManagerInternal getPackageManagerInternal() {
+        if (mPackageManagerInternal == null) {
+            mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        }
+
+        return mPackageManagerInternal;
     }
 
     /**
@@ -5760,6 +5790,8 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
         verifyIncomingOp(code);
+        verifyIncomingPackage(packageName, UserHandle.getUserId(uid));
+
         final String resolvedPackageName = resolvePackageName(uid, packageName);
         if (resolvedPackageName == null) {
             return false;
