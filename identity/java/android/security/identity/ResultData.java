@@ -68,8 +68,8 @@ public abstract class ResultData {
      * {@link #getMessageAuthenticationCode()} can be used to get a MAC.
      *
      * <p>The CBOR structure which is cryptographically authenticated is the
-     * {@code DeviceAuthentication} structure according to the following
-     * <a href="https://tools.ietf.org/html/draft-ietf-cbor-cddl-06">CDDL</a> schema:
+     * {@code DeviceAuthenticationBytes} structure according to the following
+     * <a href="https://tools.ietf.org/html/rfc8610">CDDL</a> schema:
      *
      * <pre>
      *   DeviceAuthentication = [
@@ -80,15 +80,9 @@ public abstract class ResultData {
      *   ]
      *
      *   DocType = tstr
-     *
-     *   SessionTranscript = [
-     *     DeviceEngagementBytes,
-     *     EReaderKeyBytes
-     *   ]
-     *
-     *   DeviceEngagementBytes = #6.24(bstr .cbor DeviceEngagement)
-     *   EReaderKeyBytes = #6.24(bstr .cbor EReaderKey.Pub)
+     *   SessionTranscript = any
      *   DeviceNameSpacesBytes = #6.24(bstr .cbor DeviceNameSpaces)
+     *   DeviceAuthenticationBytes = #6.24(bstr .cbor DeviceAuthentication)
      * </pre>
      *
      * <p>where
@@ -115,7 +109,7 @@ public abstract class ResultData {
     public abstract @NonNull byte[] getAuthenticatedData();
 
     /**
-     * Returns a message authentication code over the {@code DeviceAuthentication} CBOR
+     * Returns a message authentication code over the {@code DeviceAuthenticationBytes} CBOR
      * specified in {@link #getAuthenticatedData()}, to prove to the reader that the data
      * is from a trusted credential.
      *
