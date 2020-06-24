@@ -5503,6 +5503,19 @@ package android.widget {
 
 }
 
+package android.widget.inline {
+
+  public class InlineContentView extends android.view.ViewGroup {
+    method public void setChildSurfacePackageUpdater(@Nullable android.widget.inline.InlineContentView.SurfacePackageUpdater);
+  }
+
+  public static interface InlineContentView.SurfacePackageUpdater {
+    method public void getSurfacePackage(@NonNull java.util.function.Consumer<android.view.SurfaceControlViewHost.SurfacePackage>);
+    method public void onSurfacePackageReleased();
+  }
+
+}
+
 package android.window {
 
   public final class DisplayAreaInfo implements android.os.Parcelable {
