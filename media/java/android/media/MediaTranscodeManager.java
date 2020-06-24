@@ -414,11 +414,72 @@ public final class MediaTranscodeManager {
             parcel.transcodingType = mType;
             parcel.sourceFilePath = mSourceUri.toString();
             parcel.destinationFilePath = mDestinationUri.toString();
+            parcel.requestedVideoTrackFormat = convertToVideoTrackFormat(mVideoTrackFormat);
             if (mTestConfig != null) {
                 parcel.isForTesting = true;
                 parcel.testConfig = mTestConfig;
             }
             return parcel;
+        }
+
+        /* Converts the MediaFormat to TranscodingVideoTrackFormat. */
+        private static TranscodingVideoTrackFormat convertToVideoTrackFormat(MediaFormat format) {
+            if (format == null) {
+                throw new IllegalArgumentException("Invalid MediaFormat");
+            }
+
+            TranscodingVideoTrackFormat trackFormat = new TranscodingVideoTrackFormat();
+
+            if (format.containsKey(MediaFormat.KEY_MIME)) {
+                String mime = format.getString(MediaFormat.KEY_MIME);
+                if (MediaFormat.MIMETYPE_VIDEO_AVC.equals(mime)) {
+                    trackFormat.codecType = TranscodingVideoCodecType.kAvc;
+                } else if (MediaFormat.MIMETYPE_VIDEO_HEVC.equals(mime)) {
+                    trackFormat.codecType = TranscodingVideoCodecType.kHevc;
+                } else {
+                    throw new UnsupportedOperationException("Only support transcode to avc/hevc");
+                }
+            }
+
+            if (format.containsKey(MediaFormat.KEY_BIT_RATE)) {
+                int bitrateBps = format.getInteger(MediaFormat.KEY_BIT_RATE);
+                if (bitrateBps <= 0) {
+                    throw new IllegalArgumentException("Bitrate must be larger than 0");
+                }
+                trackFormat.bitrateBps = bitrateBps;
+            }
+
+            if (format.containsKey(MediaFormat.KEY_WIDTH) && format.containsKey(
+                    MediaFormat.KEY_HEIGHT)) {
+                int width = format.getInteger(MediaFormat.KEY_WIDTH);
+                int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+                if (width <= 0 || height <= 0) {
+                    throw new IllegalArgumentException("Width and height must be larger than 0");
+                }
+                // TODO(hkuang): Validate the aspect ratio after adding scaling.
+                trackFormat.width = width;
+                trackFormat.height = height;
+            }
+
+            if (format.containsKey(MediaFormat.KEY_PROFILE)) {
+                int profile = format.getInteger(MediaFormat.KEY_PROFILE);
+                if (profile <= 0) {
+                    throw new IllegalArgumentException("Invalid codec profile");
+                }
+                // TODO(hkuang): Validate the profile according to codec type.
+                trackFormat.profile = profile;
+            }
+
+            if (format.containsKey(MediaFormat.KEY_LEVEL)) {
+                int level = format.getInteger(MediaFormat.KEY_LEVEL);
+                if (level <= 0) {
+                    throw new IllegalArgumentException("Invalid codec level");
+                }
+                // TODO(hkuang): Validate the level according to codec type.
+                trackFormat.level = level;
+            }
+
+            return trackFormat;
         }
 
         /**
