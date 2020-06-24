@@ -729,7 +729,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // We should be rejected from the second sync since we are already
         // in one.
         assertEquals(false, bse.addToSyncSet(id2, task));
-        finishAndNotifyDrawing(w);
+        w.immediatelyNotifyBlastSync();
         assertEquals(true, bse.addToSyncSet(id2, task));
         bse.setReady(id2);
     }
@@ -753,7 +753,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
         // Since we have a window we have to wait for it to draw to finish sync.
         verify(transactionListener, never())
             .onTransactionReady(anyInt(), any());
-        finishAndNotifyDrawing(w);
+        w.immediatelyNotifyBlastSync();
         verify(transactionListener)
             .onTransactionReady(anyInt(), any());
     }
@@ -821,14 +821,14 @@ public class WindowOrganizerTests extends WindowTestsBase {
         int id = bse.startSyncSet(transactionListener);
         assertEquals(true, bse.addToSyncSet(id, task));
         bse.setReady(id);
-        finishAndNotifyDrawing(w);
+        w.immediatelyNotifyBlastSync();
 
         // Since we have a child window we still shouldn't be done.
         verify(transactionListener, never())
             .onTransactionReady(anyInt(), any());
         reset(transactionListener);
 
-        finishAndNotifyDrawing(child);
+        child.immediatelyNotifyBlastSync();
         // Ah finally! Done
         verify(transactionListener)
                 .onTransactionReady(anyInt(), any());
@@ -1002,20 +1002,15 @@ public class WindowOrganizerTests extends WindowTestsBase {
         verify(mockCallback, never()).onTransactionReady(anyInt(), any());
         assertTrue(w1.useBLASTSync());
         assertTrue(w2.useBLASTSync());
-        finishAndNotifyDrawing(w1);
+        w1.immediatelyNotifyBlastSync();
 
         // Even though one Window finished drawing, both windows should still be using blast sync
         assertTrue(w1.useBLASTSync());
         assertTrue(w2.useBLASTSync());
 
-        finishAndNotifyDrawing(w2);
+        w2.immediatelyNotifyBlastSync();
         verify(mockCallback).onTransactionReady(anyInt(), any());
         assertFalse(w1.useBLASTSync());
         assertFalse(w2.useBLASTSync());
-    }
-
-    private void finishAndNotifyDrawing(WindowState ws) {
-        ws.finishDrawing(null);
-        ws.notifyBlastSyncTransaction();
     }
 }
