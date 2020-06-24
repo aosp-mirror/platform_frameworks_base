@@ -281,8 +281,10 @@ class SaveImageInBackgroundTask extends AsyncTask<Void, Void, Void> {
                 Intent.createChooser(sharingIntent, null, chooserAction.getIntentSender())
                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK)
                         .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, requestCode,
-                sharingChooserIntent, 0, null, UserHandle.CURRENT);
+
+        // cancel current pending intent (if any) since clipData isn't used for matching
+        PendingIntent pendingIntent = PendingIntent.getActivityAsUser(context, 0,
+                sharingChooserIntent, PendingIntent.FLAG_CANCEL_CURRENT, null, UserHandle.CURRENT);
 
         // Create a share action for the notification
         PendingIntent shareAction = PendingIntent.getBroadcastAsUser(context, requestCode,
