@@ -113,8 +113,6 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
                 t.setColor(mSecondaryDim, new float[]{0f, 0f, 0f});
                 t.apply();
                 releaseTransaction(t);
-
-                mDivider.onTasksReady();
             }
         }
     }
