@@ -92,6 +92,11 @@ public class InsetsSource implements Parcelable {
         return mVisible;
     }
 
+    boolean isUserControllable() {
+        // If mVisibleFrame is null, it will be the same area as mFrame.
+        return mVisibleFrame == null || !mVisibleFrame.isEmpty();
+    }
+
     /**
      * Calculates the insets this source will cause to a client window.
      *
