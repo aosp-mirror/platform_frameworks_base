@@ -63,7 +63,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * Perf tests for user life cycle events.
  *
- * Running the tests:
+ * To run the tests: atest UserLifecycleTests
+ *
+ *
+ * Old methods for running the tests:
  *
  * make MultiUserPerfTests &&
  * adb install -r \
@@ -86,6 +89,10 @@ public class UserLifecycleTests {
     private static final int TIMEOUT_IN_SECOND = 30;
     private static final int CHECK_USER_REMOVED_INTERVAL_MS = 200;
 
+    /** Name of users/profiles in the test. Users with this name may be freely removed. */
+    private static final String TEST_USER_NAME = "UserLifecycleTests_test_user";
+
+    /** Name of dummy package used when timing how long app launches take. */
     private static final String DUMMY_PACKAGE_NAME = "perftests.multiuser.apps.dummyapp";
 
     // Copy of UserSystemPackageInstaller whitelist mode constants.
@@ -116,6 +123,11 @@ public class UserLifecycleTests {
         mUsersToRemove = new ArrayList<>();
         mPm = context.getPackageManager();
         mHasManagedUserFeature = mPm.hasSystemFeature(PackageManager.FEATURE_MANAGED_USERS);
+        removeAnyPreviousTestUsers();
+        if (mAm.getCurrentUser() != UserHandle.USER_SYSTEM) {
+            Log.w(TAG, "WARNING: Tests are being run from user " + mAm.getCurrentUser()
+                    + " rather than the system user");
+        }
     }
 
     @After
@@ -552,14 +564,14 @@ public class UserLifecycleTests {
 
     /** Creates a new user with the given flags, returning its userId. */
     private int createUserWithFlags(int flags) {
-        int userId = mUm.createUser("TestUser", flags).id;
+        int userId = mUm.createUser(TEST_USER_NAME, flags).id;
         mUsersToRemove.add(userId);
         return userId;
     }
 
     /** Creates a managed (work) profile under the current user, returning its userId. */
     private int createManagedProfile() {
-        final UserInfo userInfo = mUm.createProfileForUser("TestProfile",
+        final UserInfo userInfo = mUm.createProfileForUser(TEST_USER_NAME,
                 UserManager.USER_TYPE_PROFILE_MANAGED, /* flags */ 0, mAm.getCurrentUser());
         if (userInfo == null) {
             throw new IllegalStateException("Creating managed profile failed. Most likely there is "
@@ -765,6 +777,22 @@ public class UserLifecycleTests {
         }
         if (mUm.getUserInfo(userId) != null) {
             mUsersToRemove.add(userId);
+        }
+    }
+
+    private void removeAnyPreviousTestUsers() {
+        for (UserInfo user : mUm.getUsers()) {
+            if (TEST_USER_NAME.equals(user.name)) {
+                Log.i(TAG, "Found previous test user " + user.id + ". Removing it.");
+                if (mAm.getCurrentUser() == user.id) {
+                    try {
+                        switchUser(UserHandle.USER_SYSTEM);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to correctly switch to system user", e);
+                    }
+                }
+                mUm.removeUser(user.id);
+            }
         }
     }
 
