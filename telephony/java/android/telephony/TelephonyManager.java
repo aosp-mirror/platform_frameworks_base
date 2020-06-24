@@ -11973,6 +11973,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SuppressWarnings("AndroidFrameworkClientSidePermissionCheck")
     @SystemApi
     public boolean isEmergencyAssistanceEnabled() {
         mContext.enforceCallingOrSelfPermission(

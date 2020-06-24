@@ -57,6 +57,7 @@ import javax.inject.Inject;
  */
 public class MediaControlPanel {
     private static final String TAG = "MediaControlPanel";
+    private static final float DISABLED_ALPHA = 0.38f;
 
     // Button IDs for QS controls
     static final int[] ACTION_IDS = {
@@ -267,6 +268,11 @@ public class MediaControlPanel {
         mViewHolder.getSeamless().setVisibility(seamlessVisibility);
         expandedSet.setVisibility(seamlessId, seamlessVisibility);
         collapsedSet.setVisibility(seamlessId, seamlessVisibility);
+        final float seamlessAlpha = data.getResumption() ? DISABLED_ALPHA : 1.0f;
+        expandedSet.setAlpha(seamlessId, seamlessAlpha);
+        collapsedSet.setAlpha(seamlessId, seamlessAlpha);
+        // Disable clicking on output switcher for resumption controls.
+        mViewHolder.getSeamless().setEnabled(!data.getResumption());
         if (showFallback) {
             iconView.setImageDrawable(null);
             deviceName.setText(null);

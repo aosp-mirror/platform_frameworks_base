@@ -139,7 +139,7 @@
                 >
                     <TextView
                         android:id="@+id/conversation_text"
-                        android:layout_width="wrap_content"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"

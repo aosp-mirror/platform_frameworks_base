@@ -23,15 +23,15 @@ using ::android::StringPiece;
 
 namespace aapt {
 
-void ClassMember::Print(bool /*final*/, Printer* printer) const {
-  processor_.Print(printer);
+void ClassMember::Print(bool /*final*/, Printer* printer, bool strip_api_annotations) const {
+  processor_.Print(printer, strip_api_annotations);
 }
 
 void MethodDefinition::AppendStatement(const StringPiece& statement) {
   statements_.push_back(statement.to_string());
 }
 
-void MethodDefinition::Print(bool final, Printer* printer) const {
+void MethodDefinition::Print(bool final, Printer* printer, bool) const {
   printer->Print(signature_).Println(" {");
   printer->Indent();
   for (const auto& statement : statements_) {
@@ -74,12 +74,12 @@ bool ClassDefinition::empty() const {
   return true;
 }
 
-void ClassDefinition::Print(bool final, Printer* printer) const {
+void ClassDefinition::Print(bool final, Printer* printer, bool strip_api_annotations) const {
   if (empty() && !create_if_empty_) {
     return;
   }
 
-  ClassMember::Print(final, printer);
+  ClassMember::Print(final,  printer, strip_api_annotations);
 
   printer->Print("public ");
   if (qualifier_ == ClassQualifier::kStatic) {
@@ -93,7 +93,7 @@ void ClassDefinition::Print(bool final, Printer* printer) const {
     // and takes precedence over a previous member with the same name. The overridden member is
     // set to nullptr.
     if (member != nullptr) {
-      member->Print(final, printer);
+      member->Print(final, printer, strip_api_annotations);
       printer->Println();
     }
   }
@@ -111,11 +111,11 @@ constexpr static const char* sWarningHeader =
     " */\n\n";
 
 void ClassDefinition::WriteJavaFile(const ClassDefinition* def, const StringPiece& package,
-                                    bool final, io::OutputStream* out) {
+                                    bool final, bool strip_api_annotations, io::OutputStream* out) {
   Printer printer(out);
   printer.Print(sWarningHeader).Print("package ").Print(package).Println(";");
   printer.Println();
-  def->Print(final, &printer);
+  def->Print(final, &printer, strip_api_annotations);
 }
 
 }  // namespace aapt

@@ -17,6 +17,7 @@
 package com.android.server.location.gnss;
 
 import static com.android.server.location.LocationPermissions.PERMISSION_FINE;
+import static com.android.server.location.gnss.GnssManagerService.TAG;
 
 import android.annotation.Nullable;
 import android.location.LocationManagerInternal;
@@ -68,7 +69,7 @@ public abstract class GnssListenerMultiplexer<TRequest, TListener extends IInter
 
         protected GnssListenerRegistration(@Nullable TRequest request,
                 CallerIdentity callerIdentity, TListener listener) {
-            super(request, callerIdentity, listener);
+            super(TAG, request, callerIdentity, listener);
         }
 
         @Override

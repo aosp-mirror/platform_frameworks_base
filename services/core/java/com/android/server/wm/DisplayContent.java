@@ -208,6 +208,7 @@ import com.android.internal.util.function.pooled.PooledConsumer;
 import com.android.internal.util.function.pooled.PooledFunction;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.internal.util.function.pooled.PooledPredicate;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.protolog.common.ProtoLog;
 import com.android.server.wm.utils.DisplayRotationUtil;
@@ -3510,6 +3511,14 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
     private void updateImeControlTarget() {
         mInputMethodControlTarget = computeImeControlTarget();
         mInsetsStateController.onImeControlTargetChanged(mInputMethodControlTarget);
+
+        final WindowState win = mInputMethodControlTarget != null
+                ? mInputMethodControlTarget.getWindow() : null;
+        final IBinder token = win != null ? win.mClient.asBinder() : null;
+        // Note: not allowed to call into IMMS with the WM lock held, hence the post.
+        mWmService.mH.post(() ->
+                InputMethodManagerInternal.get().reportImeControl(token)
+        );
     }
 
     private void updateImeParent() {

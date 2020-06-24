@@ -164,10 +164,6 @@ struct AtomDecl {
 
     int uidField = 0;
 
-    bool whitelisted = false;
-
-    bool truncateTimestamp = false;
-
     AtomDecl();
     AtomDecl(const AtomDecl& that);
     AtomDecl(int code, const string& name, const string& message);
