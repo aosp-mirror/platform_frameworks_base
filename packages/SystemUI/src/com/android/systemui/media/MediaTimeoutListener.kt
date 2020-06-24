@@ -71,6 +71,7 @@ class MediaTimeoutListener @Inject constructor(
     ) : MediaController.Callback() {
 
         var timedOut = false
+        private var playing: Boolean? = null
 
         // Resume controls may have null token
         private val mediaController = if (data.token != null) {
@@ -94,7 +95,13 @@ class MediaTimeoutListener @Inject constructor(
                 Log.v(TAG, "onPlaybackStateChanged: $state")
             }
 
-            if (state == null || !isPlayingState(state.state)) {
+            val isPlaying = state != null && isPlayingState(state.state)
+            if (playing == isPlaying && playing != null) {
+                return
+            }
+            playing = isPlaying
+
+            if (!isPlaying) {
                 if (DEBUG) {
                     Log.v(TAG, "schedule timeout for $key")
                 }
