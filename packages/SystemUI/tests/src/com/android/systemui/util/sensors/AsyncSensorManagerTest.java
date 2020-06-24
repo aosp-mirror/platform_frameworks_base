@@ -23,15 +23,16 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import android.hardware.SensorEventListener;
-import android.os.Handler;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.util.concurrency.FakeExecutor;
+import com.android.systemui.util.concurrency.FakeThreadFactory;
+import com.android.systemui.util.time.FakeSystemClock;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -39,20 +40,20 @@ import org.junit.runner.RunWith;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
 public class AsyncSensorManagerTest extends SysuiTestCase {
 
     private AsyncSensorManager mAsyncSensorManager;
     private SensorEventListener mListener;
     private FakeSensorManager.FakeProximitySensor mSensor;
     private PluginManager mPluginManager;
+    private FakeExecutor mFakeExecutor = new FakeExecutor(new FakeSystemClock());
 
     @Before
     public void setUp() throws Exception {
         mPluginManager = mock(PluginManager.class);
         FakeSensorManager fakeSensorManager = new FakeSensorManager(mContext);
         mAsyncSensorManager = new AsyncSensorManager(
-                fakeSensorManager, mPluginManager, new Handler());
+                fakeSensorManager, new FakeThreadFactory(mFakeExecutor), mPluginManager);
         mSensor = fakeSensorManager.getFakeProximitySensor();
         mListener = mock(SensorEventListener.class);
     }
@@ -99,6 +100,6 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
     }
 
     public void waitUntilRequestsCompleted() {
-        TestableLooper.get(this).processAllMessages();
+        mFakeExecutor.runAllReady();
     }
 }
