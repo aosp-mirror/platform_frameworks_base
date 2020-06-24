@@ -21,3 +21,25 @@ java_library_host {
         "//external/dagger2:dagger2-auto-service",
     ],
 }
+
+java_test_host {
+    name: "error_prone_android_framework_test",
+    test_suites: ["general-tests"],
+    srcs: ["tests/java/**/*.java"],
+    java_resource_dirs: ["tests/res"],
+    java_resources: [":error_prone_android_framework_testdata"],
+    static_libs: [
+        "error_prone_android_framework_lib",
+        "error_prone_test_helpers",
+        "hamcrest-library",
+        "hamcrest",
+        "platform-test-annotations",
+        "junit",
+    ],
+}
+
+filegroup {
+    name: "error_prone_android_framework_testdata",
+    path: "tests/res",
+    srcs: ["tests/res/**/*.java"],
+}
