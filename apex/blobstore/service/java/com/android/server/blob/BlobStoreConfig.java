@@ -141,6 +141,36 @@ class BlobStoreConfig {
         public static long DELETE_ON_LAST_LEASE_DELAY_MS =
                 DEFAULT_DELETE_ON_LAST_LEASE_DELAY_MS;
 
+        /**
+         * Denotes the maximum number of active sessions per app at any time.
+         */
+        public static final String KEY_MAX_ACTIVE_SESSIONS = "max_active_sessions";
+        public static int DEFAULT_MAX_ACTIVE_SESSIONS = 250;
+        public static int MAX_ACTIVE_SESSIONS = DEFAULT_MAX_ACTIVE_SESSIONS;
+
+        /**
+         * Denotes the maximum number of committed blobs per app at any time.
+         */
+        public static final String KEY_MAX_COMMITTED_BLOBS = "max_committed_blobs";
+        public static int DEFAULT_MAX_COMMITTED_BLOBS = 1000;
+        public static int MAX_COMMITTED_BLOBS = DEFAULT_MAX_COMMITTED_BLOBS;
+
+        /**
+         * Denotes the maximum number of leased blobs per app at any time.
+         */
+        public static final String KEY_MAX_LEASED_BLOBS = "max_leased_blobs";
+        public static int DEFAULT_MAX_LEASED_BLOBS = 500;
+        public static int MAX_LEASED_BLOBS = DEFAULT_MAX_LEASED_BLOBS;
+
+        /**
+         * Denotes the maximum number of packages explicitly permitted to access a blob
+         * (permitted as part of creating a {@link BlobAccessMode}).
+         */
+        public static final String KEY_MAX_BLOB_ACCESS_PERMITTED_PACKAGES = "max_permitted_pks";
+        public static int DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES = 300;
+        public static int MAX_BLOB_ACCESS_PERMITTED_PACKAGES =
+                DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES;
+
         static void refresh(Properties properties) {
             if (!NAMESPACE_BLOBSTORE.equals(properties.getNamespace())) {
                 return;
@@ -178,6 +208,19 @@ class BlobStoreConfig {
                         DELETE_ON_LAST_LEASE_DELAY_MS = properties.getLong(key,
                                 DEFAULT_DELETE_ON_LAST_LEASE_DELAY_MS);
                         break;
+                    case KEY_MAX_ACTIVE_SESSIONS:
+                        MAX_ACTIVE_SESSIONS = properties.getInt(key, DEFAULT_MAX_ACTIVE_SESSIONS);
+                        break;
+                    case KEY_MAX_COMMITTED_BLOBS:
+                        MAX_COMMITTED_BLOBS = properties.getInt(key, DEFAULT_MAX_COMMITTED_BLOBS);
+                        break;
+                    case KEY_MAX_LEASED_BLOBS:
+                        MAX_LEASED_BLOBS = properties.getInt(key, DEFAULT_MAX_LEASED_BLOBS);
+                        break;
+                    case KEY_MAX_BLOB_ACCESS_PERMITTED_PACKAGES:
+                        MAX_BLOB_ACCESS_PERMITTED_PACKAGES = properties.getInt(key,
+                                DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES);
+                        break;
                     default:
                         Slog.wtf(TAG, "Unknown key in device config properties: " + key);
                 }
@@ -210,6 +253,15 @@ class BlobStoreConfig {
             fout.println(String.format(dumpFormat, KEY_DELETE_ON_LAST_LEASE_DELAY_MS,
                     TimeUtils.formatDuration(DELETE_ON_LAST_LEASE_DELAY_MS),
                     TimeUtils.formatDuration(DEFAULT_DELETE_ON_LAST_LEASE_DELAY_MS)));
+            fout.println(String.format(dumpFormat, KEY_MAX_ACTIVE_SESSIONS,
+                    MAX_ACTIVE_SESSIONS, DEFAULT_MAX_ACTIVE_SESSIONS));
+            fout.println(String.format(dumpFormat, KEY_MAX_COMMITTED_BLOBS,
+                    MAX_COMMITTED_BLOBS, DEFAULT_MAX_COMMITTED_BLOBS));
+            fout.println(String.format(dumpFormat, KEY_MAX_LEASED_BLOBS,
+                    MAX_LEASED_BLOBS, DEFAULT_MAX_LEASED_BLOBS));
+            fout.println(String.format(dumpFormat, KEY_MAX_BLOB_ACCESS_PERMITTED_PACKAGES,
+                    MAX_BLOB_ACCESS_PERMITTED_PACKAGES,
+                    DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES));
         }
     }
 
@@ -286,6 +338,34 @@ class BlobStoreConfig {
      */
     public static long getDeletionOnLastLeaseDelayMs() {
         return DeviceConfigProperties.DELETE_ON_LAST_LEASE_DELAY_MS;
+    }
+
+    /**
+     * Returns the maximum number of active sessions per app.
+     */
+    public static int getMaxActiveSessions() {
+        return DeviceConfigProperties.MAX_ACTIVE_SESSIONS;
+    }
+
+    /**
+     * Returns the maximum number of committed blobs per app.
+     */
+    public static int getMaxCommittedBlobs() {
+        return DeviceConfigProperties.MAX_COMMITTED_BLOBS;
+    }
+
+    /**
+     * Returns the maximum number of leased blobs per app.
+     */
+    public static int getMaxLeasedBlobs() {
+        return DeviceConfigProperties.MAX_LEASED_BLOBS;
+    }
+
+    /**
+     * Returns the maximum number of packages explicitly permitted to access a blob.
+     */
+    public static int getMaxPermittedPackages() {
+        return DeviceConfigProperties.MAX_BLOB_ACCESS_PERMITTED_PACKAGES;
     }
 
     @Nullable
