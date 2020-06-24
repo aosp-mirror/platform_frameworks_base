@@ -1601,8 +1601,8 @@ class ResTable_entry_handle {
       entry_ = handle.entry_;
     }
 
-    inline static ResTable_entry_handle managed(ResTable_entry* entry)  {
-      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry));
+    inline static ResTable_entry_handle managed(ResTable_entry* entry, void (*deleter)(void *)) {
+      return ResTable_entry_handle(std::shared_ptr<const ResTable_entry>(entry, deleter));
     }
 
     inline static ResTable_entry_handle unmanaged(const ResTable_entry* entry)  {

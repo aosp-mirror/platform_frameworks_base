@@ -3782,7 +3782,8 @@ public class DisplayPolicy {
                 && (behavior == BEHAVIOR_SHOW_BARS_BY_SWIPE
                         || behavior == BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE)
                 && getInsetsPolicy().isHidden(ITYPE_NAVIGATION_BAR)
-                && win != getNotificationShade();
+                && win != getNotificationShade()
+                && !win.isActivityTypeDream();
     }
 
     /**

@@ -316,7 +316,7 @@
     <string name="permgrouplab_sensors" msgid="9134046949784064495">"Body sensors"</string>
     <string name="permgroupdesc_sensors" msgid="2610631290633747752">"access sensor data about your vital signs"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="7554282892101587296">"Retrieve window content"</string>
-    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspect the content of a window that you\'re interacting with."</string>
+    <string name="capability_desc_canRetrieveWindowContent" msgid="6195610527625237661">"Inspect the content of a window you\'re interacting with."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="327598364696316213">"Turn on Explore by Touch"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="4394677060796752976">"Tapped items will be spoken aloud and the screen can be explored using gestures."</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"Observe text that you type"</string>
@@ -1006,7 +1006,7 @@
     <string name="hour" msgid="7796325297097314653">"hour"</string>
     <string name="hours" msgid="8517014849629200683">"hours"</string>
     <string name="minute" msgid="8369209540986467610">"min"</string>
-    <string name="minutes" msgid="3456532942641808971">"mins"</string>
+    <string name="minutes" msgid="3456532942641808971">"Min."</string>
     <string name="second" msgid="9210875257112211713">"sec"</string>
     <string name="seconds" msgid="2175052687727971048">"secs"</string>
     <string name="week" msgid="907127093960923779">"week"</string>
@@ -1649,7 +1649,7 @@
     <string name="disable_accessibility_shortcut" msgid="5806091378745232383">"Turn off Shortcut"</string>
     <string name="leave_accessibility_shortcut_on" msgid="6543362062336990814">"Use Shortcut"</string>
     <string name="color_inversion_feature_name" msgid="326050048927789012">"Colour Inversion"</string>
-    <string name="color_correction_feature_name" msgid="3655077237805422597">"Colour correction"</string>
+    <string name="color_correction_feature_name" msgid="3655077237805422597">"Color correction"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned on."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Held volume keys. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> turned off."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="4228997042855695090">"Press and hold both volume keys for three seconds to use <xliff:g id="SERVICE_NAME">%1$s</xliff:g>"</string>

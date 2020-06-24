@@ -22,6 +22,7 @@ import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.test.filters.SmallTest
+import com.android.systemui.R
 import com.android.systemui.SysuiTestCase
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -36,6 +37,9 @@ import org.mockito.Mockito.`when` as whenever
 @TestableLooper.RunWithLooper
 public class SeekBarObserverTest : SysuiTestCase() {
 
+    private val disabledHeight = 1
+    private val enabledHeight = 2
+
     private lateinit var observer: SeekBarObserver
     @Mock private lateinit var mockHolder: PlayerViewHolder
     private lateinit var seekBarView: SeekBar
@@ -45,12 +49,19 @@ public class SeekBarObserverTest : SysuiTestCase() {
     @Before
     fun setUp() {
         mockHolder = mock(PlayerViewHolder::class.java)
+
+        context.orCreateTestableResources
+            .addOverride(R.dimen.qs_media_enabled_seekbar_height, enabledHeight)
+        context.orCreateTestableResources
+            .addOverride(R.dimen.qs_media_disabled_seekbar_height, disabledHeight)
+
         seekBarView = SeekBar(context)
         elapsedTimeView = TextView(context)
         totalTimeView = TextView(context)
         whenever(mockHolder.seekBar).thenReturn(seekBarView)
         whenever(mockHolder.elapsedTimeView).thenReturn(elapsedTimeView)
         whenever(mockHolder.totalTimeView).thenReturn(totalTimeView)
+
         observer = SeekBarObserver(mockHolder)
     }
 
@@ -60,11 +71,12 @@ public class SeekBarObserverTest : SysuiTestCase() {
         val isEnabled = false
         val data = SeekBarViewModel.Progress(isEnabled, false, null, null)
         observer.onChanged(data)
-        // THEN seek bar shows just a line with no text
+        // THEN seek bar shows just a thin line with no text
         assertThat(seekBarView.isEnabled()).isFalse()
         assertThat(seekBarView.getThumb().getAlpha()).isEqualTo(0)
         assertThat(elapsedTimeView.getText()).isEqualTo("")
         assertThat(totalTimeView.getText()).isEqualTo("")
+        assertThat(seekBarView.maxHeight).isEqualTo(disabledHeight)
     }
 
     @Test
@@ -73,10 +85,11 @@ public class SeekBarObserverTest : SysuiTestCase() {
         val isEnabled = true
         val data = SeekBarViewModel.Progress(isEnabled, true, 3000, 12000)
         observer.onChanged(data)
-        // THEN seek bar is visible
+        // THEN seek bar is visible and thick
         assertThat(seekBarView.getVisibility()).isEqualTo(View.VISIBLE)
         assertThat(elapsedTimeView.getVisibility()).isEqualTo(View.VISIBLE)
         assertThat(totalTimeView.getVisibility()).isEqualTo(View.VISIBLE)
+        assertThat(seekBarView.maxHeight).isEqualTo(enabledHeight)
     }
 
     @Test

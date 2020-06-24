@@ -936,8 +936,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"Тындыруу"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"Кийинкисине өткөрүп жиберүү"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"Мурункусуна өткөрүп жиберүү"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"Өлчөмүн өзгөртүү"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"Телефон ысыгандыктан өчүрүлдү"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"Телефонуңуз кадимкидей иштеп жатат"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"Телефонуңуз өтө ысып кеткендиктен, аны муздатуу үчүн өчүрүлдү. Эми телефонуңуз кадимкидей иштеп жатат.\n\nТелефонуңуз төмөнкү шарттарда ысып кетиши мүмкүн:\n	• Ашыкча ресурс короткон колдонмолорду (оюндар, видео же чабыттоо колдонмолору) пайдалансаңыз \n	• Ири көлөмдөгү файлдарды жүктөп алсаңыз же берсеңиз\n	• Телефонуңузду жогорку температураларда пайдалансаңыз"</string>

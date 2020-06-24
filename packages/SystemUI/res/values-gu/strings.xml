@@ -1079,15 +1079,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"<xliff:g id="DEVICE">%s</xliff:g> માટે ફેરફાર કન્ફર્મ કરો"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"વધુ જોવા માટે સ્વાઇપ કરો"</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"સુઝાવ લોડ કરી રહ્યાં છીએ"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"મીડિયા"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"હાલનું સત્ર છુપાવો."</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"છુપાવો"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"ફરી શરૂ કરો"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"સેટિંગ"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"નિષ્ક્રિય, ઍપને ચેક કરો"</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"ભૂલ, ફરી પ્રયાસ કરી રહ્યા છીએ…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"મળ્યું નથી"</string>

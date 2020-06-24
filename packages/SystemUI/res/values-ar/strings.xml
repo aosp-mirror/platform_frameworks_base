@@ -956,8 +956,7 @@
     <string name="pip_pause" msgid="1139598607050555845">"إيقاف مؤقت"</string>
     <string name="pip_skip_to_next" msgid="3864212650579956062">"التخطي إلى التالي"</string>
     <string name="pip_skip_to_prev" msgid="3742589641443049237">"التخطي إلى السابق"</string>
-    <!-- no translation found for accessibility_action_pip_resize (8237306972921160456) -->
-    <skip />
+    <string name="accessibility_action_pip_resize" msgid="8237306972921160456">"تغيير الحجم"</string>
     <string name="thermal_shutdown_title" msgid="2702966892682930264">"تم إيقاف الهاتف بسبب الحرارة"</string>
     <string name="thermal_shutdown_message" msgid="7432744214105003895">"يعمل هاتفك الآن بشكل طبيعي"</string>
     <string name="thermal_shutdown_dialog_message" msgid="6745684238183492031">"ارتفعت درجة حرارة هاتفك بشدة، لذا تم إيقاف تشغيله لخفض درجة حرارته. يعمل هاتفك الآن بشكل طبيعي.\n\nقد ترتفع بشدة درجة حرارة هاتفك إذا:\n	• استخدمت تطبيقات كثيفة الاستخدام لموارد الجهاز (مثل الألعاب أو الفيديو أو تطبيقات التنقل)\n	• نزَّلت أو حمَّلت ملفات كبيرة الحجم\n	• استخدمت هاتفك وسط أجواء مرتفعة الحرارة"</string>
@@ -1104,15 +1103,11 @@
     <string name="controls_confirmation_message" msgid="7744104992609594859">"تأكيد التغيير لـ <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_structure_tooltip" msgid="4355922222944447867">"مرّر سريعًا لرؤية المزيد."</string>
     <string name="controls_seeding_in_progress" msgid="3033855341410264148">"جارٍ تحميل الاقتراحات"</string>
-    <!-- no translation found for controls_media_title (1746947284862928133) -->
-    <skip />
-    <!-- no translation found for controls_media_close_session (3957093425905475065) -->
-    <skip />
-    <!-- no translation found for controls_media_dismiss_button (4485675693008031646) -->
-    <skip />
+    <string name="controls_media_title" msgid="1746947284862928133">"الوسائط"</string>
+    <string name="controls_media_close_session" msgid="3957093425905475065">"إخفاء الجلسة الحالية"</string>
+    <string name="controls_media_dismiss_button" msgid="4485675693008031646">"إخفاء"</string>
     <string name="controls_media_resume" msgid="1933520684481586053">"استئناف التشغيل"</string>
-    <!-- no translation found for controls_media_settings_button (5815790345117172504) -->
-    <skip />
+    <string name="controls_media_settings_button" msgid="5815790345117172504">"الإعدادات"</string>
     <string name="controls_error_timeout" msgid="794197289772728958">"غير نشط، تحقّق من التطبيق."</string>
     <string name="controls_error_retryable" msgid="864025882878378470">"حدث خطأ، جارٍ إعادة المحاولة…"</string>
     <string name="controls_error_removed" msgid="6675638069846014366">"لم يتم العثور عليه."</string>

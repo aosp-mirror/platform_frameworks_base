@@ -87,6 +87,7 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
     private float mPendingAlpha = 1.0f;
     @VisibleForTesting(visibility = PACKAGE)
     public boolean mReadyDispatched;
+    private Boolean mPerceptible;
 
     @VisibleForTesting
     public InsetsAnimationControlImpl(SparseArray<InsetsSourceControl> controls, Rect frame,
@@ -119,6 +120,14 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mAnimationType = animationType;
         mController.startAnimation(this, listener, types, mAnimation,
                 new Bounds(mHiddenInsets, mShownInsets));
+    }
+
+    private boolean calculatePerceptible(Insets currentInsets, float currentAlpha) {
+        return 100 * currentInsets.left >= 5 * (mShownInsets.left - mHiddenInsets.left)
+                && 100 * currentInsets.top >= 5 * (mShownInsets.top - mHiddenInsets.top)
+                && 100 * currentInsets.right >= 5 * (mShownInsets.right - mHiddenInsets.right)
+                && 100 * currentInsets.bottom >= 5 * (mShownInsets.bottom - mHiddenInsets.bottom)
+                && currentAlpha >= 0.5f;
     }
 
     @Override
@@ -175,6 +184,11 @@ public class InsetsAnimationControlImpl implements WindowInsetsAnimationControll
         mPendingInsets = sanitize(insets);
         mPendingAlpha = sanitize(alpha);
         mController.scheduleApplyChangeInsets(this);
+        boolean perceptible = calculatePerceptible(mPendingInsets, mPendingAlpha);
+        if (mPerceptible == null || perceptible != mPerceptible) {
+            mController.reportPerceptible(mTypes, perceptible);
+            mPerceptible = perceptible;
+        }
     }
 
     @VisibleForTesting

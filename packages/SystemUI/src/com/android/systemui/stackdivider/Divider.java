@@ -387,6 +387,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
         }
         // Always set this because we could be entering split when mMinimized is already true
         wct.setFocusable(mSplits.mPrimary.token, !mMinimized);
+        boolean onlyFocusable = true;
 
         // Update home-stack resizability
         final boolean homeResizableChanged = mHomeStackResizable != homeStackResizable;
@@ -395,6 +396,7 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             if (isDividerVisible()) {
                 WindowManagerProxy.applyHomeTasksMinimized(
                         mSplitLayout, mSplits.mSecondary.token, wct);
+                onlyFocusable = false;
             }
         }
 
@@ -416,7 +418,15 @@ public class Divider extends SystemUI implements DividerView.DividerCallbacks,
             }
         }
         updateTouchable();
-        mWindowManagerProxy.applySyncTransaction(wct);
+        if (onlyFocusable) {
+            // If we are only setting focusability, a sync transaction isn't necessary (in fact it
+            // can interrupt other animations), so see if it can be submitted on pending instead.
+            if (!mSplits.mDivider.getWmProxy().queueSyncTransactionIfWaiting(wct)) {
+                WindowOrganizer.applyTransaction(wct);
+            }
+        } else {
+            mWindowManagerProxy.applySyncTransaction(wct);
+        }
     }
 
     void setAdjustedForIme(boolean adjustedForIme) {

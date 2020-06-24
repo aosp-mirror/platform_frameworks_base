@@ -273,8 +273,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             sendOnPipTransitionStarted(direction);
             // Don't bother doing an animation if the display rotation differs or if it's in
             // a non-supported windowing mode
-            wct.setWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+            applyWindowingModeChangeOnExit(wct, direction);
             WindowOrganizer.applyTransaction(wct);
             // Send finished callback though animation is ignored.
             sendOnPipTransitionFinished(direction);
@@ -301,6 +300,16 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             });
         }
         mExitingPip = true;
+    }
+
+    private void applyWindowingModeChangeOnExit(WindowContainerTransaction wct, int direction) {
+        // Reset the final windowing mode.
+        wct.setWindowingMode(mToken, getOutPipWindowingMode());
+        // Simply reset the activity mode set prior to the animation running.
+        wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
+        if (mSplitDivider != null && direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN) {
+            wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
+        }
     }
 
     /**
@@ -745,13 +754,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             // on the task to ensure that the task "matches" the parent's bounds.
             taskBounds = (direction == TRANSITION_DIRECTION_TO_FULLSCREEN)
                     ? null : destinationBounds;
-            // Reset the final windowing mode.
-            wct.setWindowingMode(mToken, getOutPipWindowingMode());
-            // Simply reset the activity mode set prior to the animation running.
-            wct.setActivityWindowingMode(mToken, WINDOWING_MODE_UNDEFINED);
-            if (mSplitDivider != null && direction == TRANSITION_DIRECTION_TO_SPLIT_SCREEN) {
-                wct.reparent(mToken, mSplitDivider.getSecondaryRoot(), true /* onTop */);
-            }
+            applyWindowingModeChangeOnExit(wct, direction);
         } else {
             // Just a resize in PIP
             taskBounds = destinationBounds;

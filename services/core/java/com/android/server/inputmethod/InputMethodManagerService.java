@@ -179,6 +179,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -591,6 +592,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     // Was the keyguard locked when this client became current?
     private boolean mCurClientInKeyguard;
+
+    /**
+     * {@code true} if the IME has not been mostly hidden via {@link android.view.InsetsController}
+     */
+    private boolean mCurPerceptible;
 
     /**
      * Set to true if our ServiceConnection is currently actively bound to
@@ -2936,6 +2942,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             if (vis != 0 && isKeyguardLocked() && !mCurClientInKeyguard) {
                 vis = 0;
             }
+            if (!mCurPerceptible) {
+                vis = 0;
+            }
             // mImeWindowVis should be updated before calling shouldShowImeSwitcherLocked().
             final boolean needsToShowImeSwitcher = shouldShowImeSwitcherLocked(vis);
             if (mStatusBar != null) {
@@ -3142,6 +3151,28 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (DEBUG) Slog.v(TAG, "Client requesting input be shown");
                 return showCurrentInputLocked(windowToken, flags, resultReceiver,
                         SoftInputShowHideReason.SHOW_SOFT_INPUT);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    @BinderThread
+    @Override
+    public void reportPerceptible(IBinder windowToken, boolean perceptible) {
+        Objects.requireNonNull(windowToken, "windowToken must not be null");
+        int uid = Binder.getCallingUid();
+        synchronized (mMethodMap) {
+            if (!calledFromValidUserLocked()) {
+                return;
+            }
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                if (mCurFocusedWindow == windowToken
+                        && mCurPerceptible != perceptible) {
+                    mCurPerceptible = perceptible;
+                    updateSystemUiLocked(mImeWindowVis, mBackDisposition);
+                }
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
@@ -3451,6 +3482,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurFocusedWindow = windowToken;
         mCurFocusedWindowSoftInputMode = softInputMode;
         mCurFocusedWindowClient = cs;
+        mCurPerceptible = true;
 
         // Should we auto-show the IME even if the caller has not
         // specified what should be done with it?
@@ -5010,6 +5042,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         return mInputManagerInternal.transferTouchFocus(sourceInputToken, curHostInputToken);
     }
 
+    private void reportImeControl(@Nullable IBinder windowToken) {
+        synchronized (mMethodMap) {
+            if (mCurFocusedWindow != windowToken) {
+                // mCurPerceptible was set by the focused window, but it is no longer in control,
+                // so we reset mCurPerceptible.
+                mCurPerceptible = true;
+            }
+        }
+    }
+
     private static final class LocalServiceImpl extends InputMethodManagerInternal {
         @NonNull
         private final InputMethodManagerService mService;
@@ -5061,6 +5103,11 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         public boolean transferTouchFocusToImeWindow(@NonNull IBinder sourceInputToken,
                 int displayId) {
             return mService.transferTouchFocusToImeWindow(sourceInputToken, displayId);
+        }
+
+        @Override
+        public void reportImeControl(@Nullable IBinder windowToken) {
+            mService.reportImeControl(windowToken);
         }
     }
 
@@ -5164,6 +5211,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurMethodId=" + mCurMethodId);
             client = mCurClient;
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
+            p.println("  mCurPerceptible=" + mCurPerceptible);
             p.println("  mCurFocusedWindow=" + mCurFocusedWindow
                     + " softInputMode=" +
                     InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode)

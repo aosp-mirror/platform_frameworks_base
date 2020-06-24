@@ -17,9 +17,11 @@
 package com.android.systemui.media
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.PointF
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.R
+import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.util.animation.MeasurementOutput
 import com.android.systemui.util.animation.TransitionLayout
 import com.android.systemui.util.animation.TransitionLayoutController
@@ -32,6 +34,7 @@ import javax.inject.Inject
  */
 class MediaViewController @Inject constructor(
     context: Context,
+    private val configurationController: ConfigurationController,
     private val mediaHostStatesManager: MediaHostStatesManager
 ) {
 
@@ -56,12 +59,14 @@ class MediaViewController @Inject constructor(
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
+    @MediaLocation
     private var currentEndLocation: Int = -1
 
     /**
      * The ending location of the view where it ends when all animations and transitions have
      * finished
      */
+    @MediaLocation
     private var currentStartLocation: Int = -1
 
     /**
@@ -91,10 +96,31 @@ class MediaViewController @Inject constructor(
     var currentHeight: Int = 0
 
     /**
+     * A callback for RTL config changes
+     */
+    private val configurationListener = object : ConfigurationController.ConfigurationListener {
+        override fun onConfigChanged(newConfig: Configuration?) {
+            // Because the TransitionLayout is not always attached (and calculates/caches layout
+            // results regardless of attach state), we have to force the layoutDirection of the view
+            // to the correct value for the user's current locale to ensure correct recalculation
+            // when/after calling refreshState()
+            newConfig?.apply {
+                if (transitionLayout?.rawLayoutDirection != layoutDirection) {
+                    transitionLayout?.layoutDirection = layoutDirection
+                    refreshState()
+                }
+            }
+        }
+    }
+
+    /**
      * A callback for media state changes
      */
     val stateCallback = object : MediaHostStatesManager.Callback {
-        override fun onHostStateChanged(location: Int, mediaHostState: MediaHostState) {
+        override fun onHostStateChanged(
+            @MediaLocation location: Int,
+            mediaHostState: MediaHostState
+        ) {
             if (location == currentEndLocation || location == currentStartLocation) {
                 setCurrentState(currentStartLocation,
                         currentEndLocation,
@@ -125,6 +151,7 @@ class MediaViewController @Inject constructor(
             currentHeight = height
             sizeChangedListener.invoke()
         }
+        configurationController.addCallback(configurationListener)
     }
 
     /**
@@ -132,6 +159,7 @@ class MediaViewController @Inject constructor(
      */
     fun onDestroy() {
         mediaHostStatesManager.removeController(this)
+        configurationController.removeCallback(configurationListener)
     }
 
     private fun ensureAllMeasurements() {
@@ -346,7 +374,7 @@ class MediaViewController @Inject constructor(
             // Let's clear all of our measurements and recreate them!
             viewStates.clear()
             setCurrentState(currentStartLocation, currentEndLocation, currentTransitionProgress,
-                    applyImmediately = false)
+                    applyImmediately = true)
         }
         firstRefresh = false
     }
