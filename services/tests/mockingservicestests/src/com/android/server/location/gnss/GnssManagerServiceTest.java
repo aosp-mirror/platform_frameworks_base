@@ -363,7 +363,7 @@ public class GnssManagerServiceTest {
         disableLocationPermissions();
 
         assertThrows(SecurityException.class,
-                () -> mGnssManagerService.getGnssBatchSize(TEST_PACKAGE));
+                () -> mGnssManagerService.getGnssBatchSize());
     }
 
     @Test
@@ -372,7 +372,7 @@ public class GnssManagerServiceTest {
         when(mMockGnssBatchingProvider.getBatchSize()).thenReturn(gnssBatchSize);
         enableLocationPermissions();
 
-        assertThat(mGnssManagerService.getGnssBatchSize(TEST_PACKAGE)).isEqualTo(
+        assertThat(mGnssManagerService.getGnssBatchSize()).isEqualTo(
                 gnssBatchSize);
     }
 
@@ -460,14 +460,14 @@ public class GnssManagerServiceTest {
         disableLocationPermissions();
 
         assertThrows(SecurityException.class,
-                () -> mGnssManagerService.flushGnssBatch(TEST_PACKAGE));
+                () -> mGnssManagerService.flushGnssBatch());
         verify(mMockGnssBatchingProvider, times(0)).flush();
     }
 
     @Test
     public void flushGnssBatchWithPermissionsTest() {
         enableLocationPermissions();
-        mGnssManagerService.flushGnssBatch(TEST_PACKAGE);
+        mGnssManagerService.flushGnssBatch();
 
         verify(mMockGnssBatchingProvider, times(1)).flush();
     }
@@ -625,7 +625,7 @@ public class GnssManagerServiceTest {
 
         assertThrows(SecurityException.class,
                 () -> mGnssManagerService.injectGnssMeasurementCorrections(
-                        gnssMeasurementCorrections, TEST_PACKAGE));
+                        gnssMeasurementCorrections));
         verify(mMockGnssMeasurementCorrectionsProvider, times(0))
                 .injectGnssMeasurementCorrections(
                         gnssMeasurementCorrections);
@@ -639,7 +639,7 @@ public class GnssManagerServiceTest {
         enableLocationPermissions();
 
         mGnssManagerService.injectGnssMeasurementCorrections(
-                gnssMeasurementCorrections, TEST_PACKAGE);
+                gnssMeasurementCorrections);
         verify(mMockGnssMeasurementCorrectionsProvider, times(1))
                 .injectGnssMeasurementCorrections(
                         gnssMeasurementCorrections);

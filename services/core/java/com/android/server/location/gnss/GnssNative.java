@@ -54,7 +54,7 @@ class GnssNative {
         void setGnssHardwareModelName(String modelName);
         void reportGnssServiceRestarted();
         void reportLocationBatch(Location[] locationArray);
-        void psdsDownloadRequest();
+        void psdsDownloadRequest(int psdsType);
         void reportGeofenceTransition(int geofenceId, Location location, int transition,
                 long transitionTimestamp);
         void reportGeofenceStatus(int status, Location location);
@@ -212,8 +212,8 @@ class GnssNative {
     }
 
     @NativeEntryPoint
-    private void psdsDownloadRequest() {
-        mCallbacks.psdsDownloadRequest();
+    private void psdsDownloadRequest(int psdsType) {
+        mCallbacks.psdsDownloadRequest(psdsType);
     }
 
     @NativeEntryPoint

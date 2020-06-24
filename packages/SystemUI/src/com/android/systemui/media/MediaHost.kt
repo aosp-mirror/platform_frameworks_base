@@ -2,6 +2,7 @@ package com.android.systemui.media
 
 import android.graphics.PointF
 import android.graphics.Rect
+import android.util.ArraySet
 import android.view.View
 import android.view.View.OnAttachStateChangeListener
 import com.android.systemui.util.animation.MeasurementInput
@@ -20,7 +21,7 @@ class MediaHost @Inject constructor(
     lateinit var hostView: UniqueObjectHostView
     var location: Int = -1
         private set
-    var visibleChangedListener: ((Boolean) -> Unit)? = null
+    private var visibleChangedListeners: ArraySet<(Boolean) -> Unit> = ArraySet()
 
     private val tmpLocationOnScreen: IntArray = intArrayOf(0, 0)
 
@@ -56,6 +57,10 @@ class MediaHost @Inject constructor(
         override fun onMediaDataRemoved(key: String) {
             updateViewVisibility()
         }
+    }
+
+    fun addVisibilityChangeListener(listener: (Boolean) -> Unit) {
+        visibleChangedListeners.add(listener)
     }
 
     /**
@@ -116,7 +121,9 @@ class MediaHost @Inject constructor(
         val newVisibility = if (visible) View.VISIBLE else View.GONE
         if (newVisibility != hostView.visibility) {
             hostView.visibility = newVisibility
-            visibleChangedListener?.invoke(visible)
+            visibleChangedListeners.forEach {
+                it.invoke(visible)
+            }
         }
     }
 

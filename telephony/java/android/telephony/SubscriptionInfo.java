@@ -305,11 +305,14 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Returns the ICC ID if the calling app has been granted the READ_PRIVILEGED_PHONE_STATE
-     * permission, has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or
-     * is a device owner or profile owner that has been granted the READ_PHONE_STATE permission.
-     * The profile owner is an app that owns a managed profile on the device; for more details see
-     * <a href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile
+     * Returns the ICC ID.
+     *
+     * Starting with API level 30, returns the ICC ID if the calling app has been granted the
+     * READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}), or is a device owner or profile owner that
+     * has been granted the READ_PHONE_STATE permission. The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile
      * owner access is deprecated and will be removed in a future release.
      *
      * @return the ICC ID, or an empty string if one of these requirements is not met
@@ -449,8 +452,22 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * @return the number of this subscription if the calling app has been granted the
-     * READ_PHONE_NUMBERS permission, or an empty string otherwise
+     * Returns the number of this subscription.
+     *
+     * Starting with API level 30, returns the number of this subscription if the calling app meets
+     * one of the following requirements:
+     * <ul>
+     *     <li>If the calling app's target SDK is API level 29 or lower and the app has been granted
+     *     the READ_PHONE_STATE permission.
+     *     <li>If the calling app has been granted any of READ_PRIVILEGED_PHONE_STATE,
+     *     READ_PHONE_NUMBERS, or READ_SMS.
+     *     <li>If the calling app has carrier privileges (see {@link
+     *     TelephonyManager#hasCarrierPrivileges}).
+     *     <li>If the calling app is the default SMS role holder.
+     * </ul>
+     *
+     * @return the number of this subscription, or an empty string if one of these requirements is
+     * not met
      */
     public String getNumber() {
         return mNumber;
@@ -670,12 +687,15 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Returns the card string if the calling app has been granted the READ_PRIVILEGED_PHONE_STATE
-     * permission, has carrier privileges (see {@link TelephonyManager#hasCarrierPrivileges}), or
-     * is a device owner or profile owner on an organization owned device that has been granted the
-     * READ_PHONE_STATE permission. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>.
+     * Returns the card string of the SIM card which contains the subscription.
+     *
+     * Starting with API level 30, returns the card string if the calling app has been granted the
+     * READ_PRIVILEGED_PHONE_STATE permission, has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}), or is a device owner or profile owner that
+     * has been granted the READ_PHONE_STATE permission. The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile
+     * owner access is deprecated and will be removed in a future release.
      *
      * @return the card string of the SIM card which contains the subscription or an empty string
      * if these requirements are not met. The card string is the ICCID for UICCs or the EID for

@@ -150,15 +150,10 @@ class TransitionLayout @JvmOverloads constructor(
     }
 
     override fun dispatchDraw(canvas: Canvas?) {
-        val clip = !boundsRect.isEmpty
-        if (clip) {
-            canvas?.save()
-            canvas?.clipRect(boundsRect)
-        }
+        canvas?.save()
+        canvas?.clipRect(boundsRect)
         super.dispatchDraw(canvas)
-        if (clip) {
-            canvas?.restore()
-        }
+        canvas?.restore()
     }
 
     private fun updateBounds() {

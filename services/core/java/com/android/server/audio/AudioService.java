@@ -413,6 +413,13 @@ public class AudioService extends IAudioService.Stub
         AppOpsManager.OP_AUDIO_MEDIA_VOLUME             // STREAM_ASSISTANT
     };
 
+    private static Set<Integer> sDeviceVolumeBehaviorSupportedDeviceOutSet = new HashSet<>(
+            Arrays.asList(
+                    AudioSystem.DEVICE_OUT_HDMI,
+                    AudioSystem.DEVICE_OUT_HDMI_ARC,
+                    AudioSystem.DEVICE_OUT_SPDIF,
+                    AudioSystem.DEVICE_OUT_LINE));
+
     private final boolean mUseFixedVolume;
 
     /**
@@ -525,7 +532,6 @@ public class AudioService extends IAudioService.Stub
 
     // Devices for which the volume is fixed (volume is either max or muted)
     Set<Integer> mFixedVolumeDevices = new HashSet<>(Arrays.asList(
-            AudioSystem.DEVICE_OUT_HDMI,
             AudioSystem.DEVICE_OUT_DGTL_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_ANLG_DOCK_HEADSET,
             AudioSystem.DEVICE_OUT_HDMI_ARC,
@@ -920,6 +926,8 @@ public class AudioService extends IAudioService.Stub
                 if (mHdmiManager != null) {
                     mHdmiManager.addHdmiControlStatusChangeListener(
                             mHdmiControlStatusChangeListenerCallback);
+                    mHdmiManager.addHdmiCecVolumeControlFeatureListener(mContext.getMainExecutor(),
+                            mMyHdmiCecVolumeControlFeatureListener);
                 }
                 mHdmiTvClient = mHdmiManager.getTvClient();
                 if (mHdmiTvClient != null) {
@@ -927,11 +935,6 @@ public class AudioService extends IAudioService.Stub
                             AudioSystem.DEVICE_ALL_HDMI_SYSTEM_AUDIO_AND_SPEAKER_SET);
                 }
                 mHdmiPlaybackClient = mHdmiManager.getPlaybackClient();
-                if (mHdmiPlaybackClient != null) {
-                    // not a television: HDMI output will be always at max
-                    mFixedVolumeDevices.remove(AudioSystem.DEVICE_OUT_HDMI);
-                    mFullVolumeDevices.add(AudioSystem.DEVICE_OUT_HDMI);
-                }
                 mHdmiAudioSystemClient = mHdmiManager.getAudioSystemClient();
             }
         }
@@ -2248,6 +2251,7 @@ public class AudioService extends IAudioService.Stub
                 if (mHdmiManager != null) {
                     // mHdmiCecSink true => mHdmiPlaybackClient != null
                     if (mHdmiCecSink
+                            && mHdmiCecVolumeControlEnabled
                             && streamTypeAlias == AudioSystem.STREAM_MUSIC
                             // vol change on a full volume device
                             && isFullVolumeDevice(device)) {
@@ -2320,7 +2324,8 @@ public class AudioService extends IAudioService.Stub
     @GuardedBy("mHdmiClientLock")
     private void maybeSendSystemAudioStatusCommand(boolean isMuteAdjust) {
         if (mHdmiAudioSystemClient == null
-                || !mHdmiSystemAudioSupported) {
+                || !mHdmiSystemAudioSupported
+                || !mHdmiCecVolumeControlEnabled) {
             return;
         }
 
@@ -2340,7 +2345,8 @@ public class AudioService extends IAudioService.Stub
                     || mHdmiTvClient == null
                     || oldVolume == newVolume
                     || (flags & AudioManager.FLAG_HDMI_SYSTEM_AUDIO_VOLUME) != 0
-                    || !mHdmiSystemAudioSupported) {
+                    || !mHdmiSystemAudioSupported
+                    || !mHdmiCecVolumeControlEnabled) {
                 return;
             }
             final long token = Binder.clearCallingIdentity();
@@ -2940,16 +2946,18 @@ public class AudioService extends IAudioService.Stub
         mVolumeController.postVolumeChanged(streamType, flags);
     }
 
-    // If Hdmi-CEC system audio mode is on and we are a TV panel, never show volume bar.
+    // Don't show volume UI when:
+    //  - Hdmi-CEC system audio mode is on and we are a TV panel
+    //  - CEC volume control enabled on a set-top box
     private int updateFlagsForTvPlatform(int flags) {
         synchronized (mHdmiClientLock) {
-            if (mHdmiTvClient != null && mHdmiSystemAudioSupported) {
+            if ((mHdmiTvClient != null && mHdmiSystemAudioSupported && mHdmiCecVolumeControlEnabled)
+                    || (mHdmiPlaybackClient != null && mHdmiCecVolumeControlEnabled)) {
                 flags &= ~AudioManager.FLAG_SHOW_UI;
             }
         }
         return flags;
     }
-
     // UI update and Broadcast Intent
     private void sendMasterMuteUpdate(boolean muted, int flags) {
         mVolumeController.postMasterMuteChanged(updateFlagsForTvPlatform(flags));
@@ -4042,6 +4050,11 @@ public class AudioService extends IAudioService.Stub
         }
 
         readVolumeGroupsSettings();
+
+        if (DEBUG_VOL) {
+            Log.d(TAG, "Restoring device volume behavior");
+        }
+        restoreDeviceVolumeBehavior();
     }
 
     /** @see AudioManager#setSpeakerphoneOn(boolean) */
@@ -4901,50 +4914,47 @@ public class AudioService extends IAudioService.Stub
         if (pkgName == null) {
             pkgName = "";
         }
-        // translate Java device type to native device type (for the devices masks for full / fixed)
-        final int type;
-        switch (device.getType()) {
-            case AudioDeviceInfo.TYPE_HDMI:
-                type = AudioSystem.DEVICE_OUT_HDMI;
-                break;
-            case AudioDeviceInfo.TYPE_HDMI_ARC:
-                type = AudioSystem.DEVICE_OUT_HDMI_ARC;
-                break;
-            case AudioDeviceInfo.TYPE_LINE_DIGITAL:
-                type = AudioSystem.DEVICE_OUT_SPDIF;
-                break;
-            case AudioDeviceInfo.TYPE_AUX_LINE:
-                type = AudioSystem.DEVICE_OUT_LINE;
-                break;
-            default:
-                // unsupported for now
-                throw new IllegalArgumentException("Unsupported device type " + device.getType());
+
+        int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
+                device.getType());
+        setDeviceVolumeBehaviorInternal(audioSystemDeviceOut, deviceVolumeBehavior, pkgName);
+
+        persistDeviceVolumeBehavior(audioSystemDeviceOut, deviceVolumeBehavior);
+    }
+
+    private void setDeviceVolumeBehaviorInternal(int audioSystemDeviceOut,
+            @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior, @NonNull String caller) {
+        if (!sDeviceVolumeBehaviorSupportedDeviceOutSet.contains(audioSystemDeviceOut)) {
+            // unsupported for now
+            throw new IllegalArgumentException("Unsupported device type " + audioSystemDeviceOut);
         }
+
         // update device masks based on volume behavior
         switch (deviceVolumeBehavior) {
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE:
-                mFullVolumeDevices.remove(type);
-                mFixedVolumeDevices.remove(type);
+                removeAudioSystemDeviceOutFromFullVolumeDevices(audioSystemDeviceOut);
+                removeAudioSystemDeviceOutFromFixedVolumeDevices(audioSystemDeviceOut);
                 break;
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED:
-                mFullVolumeDevices.remove(type);
-                mFixedVolumeDevices.add(type);
+                removeAudioSystemDeviceOutFromFullVolumeDevices(audioSystemDeviceOut);
+                addAudioSystemDeviceOutToFixedVolumeDevices(audioSystemDeviceOut);
                 break;
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL:
-                mFullVolumeDevices.add(type);
-                mFixedVolumeDevices.remove(type);
+                addAudioSystemDeviceOutToFullVolumeDevices(audioSystemDeviceOut);
+                removeAudioSystemDeviceOutFromFixedVolumeDevices(audioSystemDeviceOut);
                 break;
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE:
             case AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE:
                 throw new IllegalArgumentException("Absolute volume unsupported for now");
         }
+
         // log event and caller
         sDeviceLogger.log(new AudioEventLogger.StringEvent(
-                "Volume behavior " + deviceVolumeBehavior
-                        + " for dev=0x" + Integer.toHexString(type) + " by pkg:" + pkgName));
+                "Volume behavior " + deviceVolumeBehavior + " for dev=0x"
+                      + Integer.toHexString(audioSystemDeviceOut) + " from:" + caller));
         // make sure we have a volume entry for this device, and that volume is updated according
         // to volume behavior
-        checkAddAllFixedVolumeDevices(type, "setDeviceVolumeBehavior:" + pkgName);
+        checkAddAllFixedVolumeDevices(audioSystemDeviceOut, "setDeviceVolumeBehavior:" + caller);
     }
 
     /**
@@ -4952,45 +4962,38 @@ public class AudioService extends IAudioService.Stub
      * @param device the audio output device type
      * @return the volume behavior for the device
      */
-    public @AudioManager.DeviceVolumeBehavior int getDeviceVolumeBehavior(
+    public @AudioManager.DeviceVolumeBehaviorState int getDeviceVolumeBehavior(
             @NonNull AudioDeviceAttributes device) {
         // verify permissions
         enforceModifyAudioRoutingPermission();
+
         // translate Java device type to native device type (for the devices masks for full / fixed)
-        final int type;
-        switch (device.getType()) {
-            case AudioDeviceInfo.TYPE_HEARING_AID:
-                type = AudioSystem.DEVICE_OUT_HEARING_AID;
-                break;
-            case AudioDeviceInfo.TYPE_BLUETOOTH_A2DP:
-                type = AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP;
-                break;
-            case AudioDeviceInfo.TYPE_HDMI:
-                type = AudioSystem.DEVICE_OUT_HDMI;
-                break;
-            case AudioDeviceInfo.TYPE_HDMI_ARC:
-                type = AudioSystem.DEVICE_OUT_HDMI_ARC;
-                break;
-            case AudioDeviceInfo.TYPE_LINE_DIGITAL:
-                type = AudioSystem.DEVICE_OUT_SPDIF;
-                break;
-            case AudioDeviceInfo.TYPE_AUX_LINE:
-                type = AudioSystem.DEVICE_OUT_LINE;
-                break;
-            default:
-                // unsupported for now
-                throw new IllegalArgumentException("Unsupported device type " + device.getType());
+        final int audioSystemDeviceOut = AudioDeviceInfo.convertDeviceTypeToInternalDevice(
+                device.getType());
+        if (!sDeviceVolumeBehaviorSupportedDeviceOutSet.contains(audioSystemDeviceOut)
+                && audioSystemDeviceOut != AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
+                && audioSystemDeviceOut != AudioSystem.DEVICE_OUT_HEARING_AID) {
+            throw new IllegalArgumentException("Unsupported volume behavior "
+                    + audioSystemDeviceOut);
         }
-        if ((mFullVolumeDevices.contains(type))) {
+
+        int setDeviceVolumeBehavior = retrieveStoredDeviceVolumeBehavior(audioSystemDeviceOut);
+        if (setDeviceVolumeBehavior != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET) {
+            return setDeviceVolumeBehavior;
+        }
+
+        // setDeviceVolumeBehavior has not been explicitly called for the device type. Deduce the
+        // current volume behavior.
+        if ((mFullVolumeDevices.contains(audioSystemDeviceOut))) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_FULL;
         }
-        if ((mFixedVolumeDevices.contains(type))) {
+        if ((mFixedVolumeDevices.contains(audioSystemDeviceOut))) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_FIXED;
         }
-        if ((mAbsVolumeMultiModeCaseDevices.contains(type))) {
+        if ((mAbsVolumeMultiModeCaseDevices.contains(audioSystemDeviceOut))) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
         }
-        if (type == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
+        if (audioSystemDeviceOut == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
                 && mDeviceBroker.isAvrcpAbsoluteVolumeSupported()) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
         }
@@ -7137,18 +7140,20 @@ public class AudioService extends IAudioService.Stub
     @GuardedBy("mHdmiClientLock")
     private void updateHdmiCecSinkLocked(boolean hdmiCecSink) {
         mHdmiCecSink = hdmiCecSink;
-        if (mHdmiCecSink) {
-            if (DEBUG_VOL) {
-                Log.d(TAG, "CEC sink: setting HDMI as full vol device");
+        if (!hasDeviceVolumeBehavior(AudioSystem.DEVICE_OUT_HDMI)) {
+            if (mHdmiCecSink) {
+                if (DEBUG_VOL) {
+                    Log.d(TAG, "CEC sink: setting HDMI as full vol device");
+                }
+                addAudioSystemDeviceOutToFullVolumeDevices(AudioSystem.DEVICE_OUT_HDMI);
+            } else {
+                if (DEBUG_VOL) {
+                    Log.d(TAG, "TV, no CEC: setting HDMI as regular vol device");
+                }
+                // Android TV devices without CEC service apply software volume on
+                // HDMI output
+                removeAudioSystemDeviceOutFromFullVolumeDevices(AudioSystem.DEVICE_OUT_HDMI);
             }
-            mFullVolumeDevices.add(AudioSystem.DEVICE_OUT_HDMI);
-        } else {
-            if (DEBUG_VOL) {
-                Log.d(TAG, "TV, no CEC: setting HDMI as regular vol device");
-            }
-            // Android TV devices without CEC service apply software volume on
-            // HDMI output
-            mFullVolumeDevices.remove(AudioSystem.DEVICE_OUT_HDMI);
         }
 
         checkAddAllFixedVolumeDevices(AudioSystem.DEVICE_OUT_HDMI,
@@ -7165,9 +7170,21 @@ public class AudioService extends IAudioService.Stub
         }
     };
 
+    private class MyHdmiCecVolumeControlFeatureListener
+            implements HdmiControlManager.HdmiCecVolumeControlFeatureListener {
+        public void onHdmiCecVolumeControlFeature(boolean enabled) {
+            synchronized (mHdmiClientLock) {
+                if (mHdmiManager == null) return;
+                mHdmiCecVolumeControlEnabled = enabled;
+            }
+        }
+    };
+
     private final Object mHdmiClientLock = new Object();
 
     // If HDMI-CEC system audio is supported
+    // Note that for CEC volume commands mHdmiCecVolumeControlEnabled will play a role on volume
+    // commands
     private boolean mHdmiSystemAudioSupported = false;
     // Set only when device is tv.
     @GuardedBy("mHdmiClientLock")
@@ -7185,9 +7202,15 @@ public class AudioService extends IAudioService.Stub
     // Set only when device is an audio system.
     @GuardedBy("mHdmiClientLock")
     private HdmiAudioSystemClient mHdmiAudioSystemClient;
+    // True when volume control over HDMI CEC is used when CEC is enabled (meaningless otherwise)
+    @GuardedBy("mHdmiClientLock")
+    private boolean mHdmiCecVolumeControlEnabled;
 
     private MyHdmiControlStatusChangeListenerCallback mHdmiControlStatusChangeListenerCallback =
             new MyHdmiControlStatusChangeListenerCallback();
+
+    private MyHdmiCecVolumeControlFeatureListener mMyHdmiCecVolumeControlFeatureListener =
+            new MyHdmiCecVolumeControlFeatureListener();
 
     @Override
     public int setHdmiSystemAudioSupported(boolean on) {
@@ -7427,6 +7450,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mHdmiPlaybackClient="); pw.println(mHdmiPlaybackClient);
         pw.print("  mHdmiTvClient="); pw.println(mHdmiTvClient);
         pw.print("  mHdmiSystemAudioSupported="); pw.println(mHdmiSystemAudioSupported);
+        pw.print("  mHdmiCecVolumeControlEnabled="); pw.println(mHdmiCecVolumeControlEnabled);
         pw.print("  mIsCallScreeningModeSupported="); pw.println(mIsCallScreeningModeSupported);
         pw.print("  mic mute FromSwitch=" + mMicMuteFromSwitch
                         + " FromRestrictions=" + mMicMuteFromRestrictions
@@ -8967,5 +8991,92 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
         return mFullVolumeDevices.contains(deviceType);
+    }
+
+    //====================
+    // Helper functions for {set,get}DeviceVolumeBehavior
+    //====================
+    private static String getSettingsNameForDeviceVolumeBehavior(int deviceType) {
+        return "AudioService_DeviceVolumeBehavior_" + AudioSystem.getOutputDeviceName(deviceType);
+    }
+
+    private void persistDeviceVolumeBehavior(int deviceType,
+            @AudioManager.DeviceVolumeBehavior int deviceVolumeBehavior) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, "Persisting Volume Behavior for DeviceType: " + deviceType);
+        }
+        System.putIntForUser(mContentResolver,
+                getSettingsNameForDeviceVolumeBehavior(deviceType),
+                deviceVolumeBehavior,
+                UserHandle.USER_CURRENT);
+    }
+
+    @AudioManager.DeviceVolumeBehaviorState
+    private int retrieveStoredDeviceVolumeBehavior(int deviceType) {
+        return System.getIntForUser(mContentResolver,
+                getSettingsNameForDeviceVolumeBehavior(deviceType),
+                AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET,
+                UserHandle.USER_CURRENT);
+    }
+
+    private void restoreDeviceVolumeBehavior() {
+        for (int deviceType : sDeviceVolumeBehaviorSupportedDeviceOutSet) {
+            if (DEBUG_VOL) {
+                Log.d(TAG, "Retrieving Volume Behavior for DeviceType: " + deviceType);
+            }
+            int deviceVolumeBehavior = retrieveStoredDeviceVolumeBehavior(deviceType);
+            if (deviceVolumeBehavior == AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET) {
+                if (DEBUG_VOL) {
+                    Log.d(TAG, "Skipping Setting Volume Behavior for DeviceType: " + deviceType);
+                }
+                continue;
+            }
+
+            setDeviceVolumeBehaviorInternal(deviceType, deviceVolumeBehavior,
+                    "AudioService.restoreDeviceVolumeBehavior()");
+        }
+    }
+
+    /**
+     * @param audioSystemDeviceOut one of AudioSystem.DEVICE_OUT_*
+     * @return whether {@code audioSystemDeviceOut} has previously been set to a specific volume
+     * behavior
+     */
+    private boolean hasDeviceVolumeBehavior(
+            int audioSystemDeviceOut) {
+        return retrieveStoredDeviceVolumeBehavior(audioSystemDeviceOut)
+                != AudioManager.DEVICE_VOLUME_BEHAVIOR_UNSET;
+    }
+
+    private void addAudioSystemDeviceOutToFixedVolumeDevices(int audioSystemDeviceOut) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, "Adding DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
+                    + " to mFixedVolumeDevices");
+        }
+        mFixedVolumeDevices.add(audioSystemDeviceOut);
+    }
+
+    private void removeAudioSystemDeviceOutFromFixedVolumeDevices(int audioSystemDeviceOut) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, "Removing DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
+                    + " from mFixedVolumeDevices");
+        }
+        mFixedVolumeDevices.remove(audioSystemDeviceOut);
+    }
+
+    private void addAudioSystemDeviceOutToFullVolumeDevices(int audioSystemDeviceOut) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, "Adding DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
+                    + " to mFullVolumeDevices");
+        }
+        mFullVolumeDevices.add(audioSystemDeviceOut);
+    }
+
+    private void removeAudioSystemDeviceOutFromFullVolumeDevices(int audioSystemDeviceOut) {
+        if (DEBUG_VOL) {
+            Log.d(TAG, "Removing DeviceType: 0x" + Integer.toHexString(audioSystemDeviceOut)
+                    + " from mFullVolumeDevices");
+        }
+        mFullVolumeDevices.remove(audioSystemDeviceOut);
     }
 }

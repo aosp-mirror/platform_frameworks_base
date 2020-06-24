@@ -352,8 +352,6 @@ public class DividerView extends FrameLayout implements OnTouchListener,
                 minimizeLeft + mMinimizedShadow.getMeasuredWidth(),
                 minimizeTop + mMinimizedShadow.getMeasuredHeight());
         if (changed) {
-            mWindowManagerProxy.setTouchRegion(new Rect(mHandle.getLeft(), mHandle.getTop(),
-                    mHandle.getRight(), mHandle.getBottom()));
             notifySplitScreenBoundsChanged();
         }
     }
@@ -678,6 +676,14 @@ public class DividerView extends FrameLayout implements OnTouchListener,
 
     private void notifySplitScreenBoundsChanged() {
         mOtherTaskRect.set(mSplitLayout.mSecondary);
+
+        mTmpRect.set(mHandle.getLeft(), mHandle.getTop(), mHandle.getRight(), mHandle.getBottom());
+        if (isHorizontalDivision()) {
+            mTmpRect.offsetTo(0, mDividerPositionY);
+        } else {
+            mTmpRect.offsetTo(mDividerPositionX, 0);
+        }
+        mWindowManagerProxy.setTouchRegion(mTmpRect);
 
         mTmpRect.set(mSplitLayout.mDisplayLayout.stableInsets());
         switch (mSplitLayout.getPrimarySplitSide()) {

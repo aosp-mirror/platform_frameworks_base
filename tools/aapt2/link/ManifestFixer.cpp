@@ -376,10 +376,6 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   });
   manifest_action["instrumentation"]["meta-data"] = meta_data_action;
 
-  // TODO moltmann: Remove
-  manifest_action["feature"];
-  manifest_action["feature"]["inherit-from"];
-
   manifest_action["attribution"];
   manifest_action["attribution"]["inherit-from"];
   manifest_action["original-package"];

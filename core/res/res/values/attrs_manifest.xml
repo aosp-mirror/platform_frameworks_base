@@ -1862,8 +1862,6 @@
     <p>In case this attribution inherits from another attribution, this tag can contain one or
     multiple {@link #AndroidManifestAttributionInheritFrom inherit-from} tags. -->
     <declare-styleable name="AndroidManifestAttribution" parent="AndroidManifest">
-        <!-- TODO moltmann: Remove -->
-        <attr name="featureId" format="string" />
         <!-- Required identifier for a attribution. Can be passed to
         {@link android.content.Context#createAttributionContext} to create a context tagged with
         this attribution
@@ -1873,7 +1871,7 @@
         <attr name="label" format="string" />
     </declare-styleable>
 
-    <!-- Declares previously declared features this feature inherits from. -->
+    <!-- Declares previously declared attributions this attribution inherits from. -->
     <declare-styleable name="AndroidManifestAttributionInheritFrom"
                        parent="AndroidManifestAttribution">
         <!-- Identifier of the attribution this attribution inherits from -->

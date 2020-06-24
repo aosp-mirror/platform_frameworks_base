@@ -1574,6 +1574,7 @@ public class AlarmManagerService extends SystemService {
                 Slog.w(TAG, "Failed to open alarm driver. Falling back to a handler.");
             }
         }
+        mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         publishLocalService(AlarmManagerInternal.class, new LocalService());
         publishBinderService(Context.ALARM_SERVICE, mService);
     }
@@ -1584,7 +1585,6 @@ public class AlarmManagerService extends SystemService {
             synchronized (mLock) {
                 mConstants.start(getContext().getContentResolver());
                 mAppOps = (AppOpsManager) getContext().getSystemService(Context.APP_OPS_SERVICE);
-                mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
                 mLocalDeviceIdleController =
                         LocalServices.getService(DeviceIdleInternal.class);
                 mUsageStatsManagerInternal =
@@ -2137,11 +2137,9 @@ public class AlarmManagerService extends SystemService {
 
         @Override
         public AlarmManager.AlarmClockInfo getNextAlarmClock(int userId) {
-            if (mActivityManagerInternal != null) {
-                userId = mActivityManagerInternal.handleIncomingUser(Binder.getCallingPid(),
-                        Binder.getCallingUid(), userId, /*allowAll=*/false, ALLOW_NON_FULL,
-                        "getNextAlarmClock", null);
-            }
+            userId = mActivityManagerInternal.handleIncomingUser(Binder.getCallingPid(),
+                    Binder.getCallingUid(), userId, /*allowAll=*/false, ALLOW_NON_FULL,
+                    "getNextAlarmClock", null);
             return getNextAlarmClockImpl(userId);
         }
 

@@ -140,6 +140,18 @@ class MediaHierarchyManager @Inject constructor(
         }
 
     /**
+     * Is the shade currently collapsing from the expanded qs? If we're on the lockscreen and in qs,
+     * we wouldn't want to transition in that case.
+     */
+    var collapsingShadeFromQS: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                updateDesiredLocation(forceNoAnimation = true)
+            }
+        }
+
+    /**
      * Are location changes currently blocked?
      */
     private val blockLocationChanges: Boolean
@@ -156,6 +168,19 @@ class MediaHierarchyManager @Inject constructor(
                 field = value
                 if (!value) {
                     updateDesiredLocation()
+                }
+            }
+        }
+
+    /**
+     * Are we currently fullyAwake
+     */
+    private var fullyAwake: Boolean = false
+        set(value) {
+            if (field != value) {
+                field = value
+                if (value) {
+                    updateDesiredLocation(forceNoAnimation = true)
                 }
             }
         }
@@ -206,10 +231,12 @@ class MediaHierarchyManager @Inject constructor(
 
             override fun onStartedGoingToSleep() {
                 goingToSleep = true
+                fullyAwake = false
             }
 
             override fun onFinishedWakingUp() {
                 goingToSleep = false
+                fullyAwake = true
             }
 
             override fun onStartedWakingUp() {
@@ -227,6 +254,10 @@ class MediaHierarchyManager @Inject constructor(
     fun register(mediaObject: MediaHost): UniqueObjectHostView {
         val viewHost = createUniqueObjectHost()
         mediaObject.hostView = viewHost
+        mediaObject.addVisibilityChangeListener {
+            // Never animate because of a visibility change, only state changes should do that
+            updateDesiredLocation(forceNoAnimation = true)
+        }
         mediaHosts[mediaObject.location] = mediaObject
         if (mediaObject.location == desiredLocation) {
             // In case we are overriding a view that is already visible, make sure we attach it
@@ -260,8 +291,10 @@ class MediaHierarchyManager @Inject constructor(
     /**
      * Updates the location that the view should be in. If it changes, an animation may be triggered
      * going from the old desired location to the new one.
+     *
+     * @param forceNoAnimation optional parameter telling the system not to animate
      */
-    private fun updateDesiredLocation() {
+    private fun updateDesiredLocation(forceNoAnimation: Boolean = false) {
         val desiredLocation = calculateLocation()
         if (desiredLocation != this.desiredLocation) {
             if (this.desiredLocation >= 0) {
@@ -270,7 +303,8 @@ class MediaHierarchyManager @Inject constructor(
             val isNewView = this.desiredLocation == -1
             this.desiredLocation = desiredLocation
             // Let's perform a transition
-            val animate = shouldAnimateTransition(desiredLocation, previousLocation)
+            val animate = !forceNoAnimation &&
+                    shouldAnimateTransition(desiredLocation, previousLocation)
             val (animDuration, delay) = getAnimationParams(previousLocation, desiredLocation)
             val host = getHost(desiredLocation)
             mediaCarouselController.onDesiredLocationChanged(desiredLocation, host, animate,
@@ -523,6 +557,18 @@ class MediaHierarchyManager @Inject constructor(
         if (location == LOCATION_LOCKSCREEN && getHost(location)?.visible != true &&
                 !statusBarStateController.isDozing) {
             return LOCATION_QS
+        }
+        if (location == LOCATION_LOCKSCREEN && desiredLocation == LOCATION_QS &&
+                collapsingShadeFromQS) {
+            // When collapsing on the lockscreen, we want to remain in QS
+            return LOCATION_QS
+        }
+        if (location != LOCATION_LOCKSCREEN && desiredLocation == LOCATION_LOCKSCREEN
+                && !fullyAwake) {
+            // When unlocking from dozing / while waking up, the media shouldn't be transitioning
+            // in an animated way. Let's keep it in the lockscreen until we're fully awake and
+            // reattach it without an animation
+            return LOCATION_LOCKSCREEN
         }
         return location
     }

@@ -70,7 +70,10 @@ class UniqueObjectHostView(
     }
 
     override fun addView(child: View?, index: Int, params: ViewGroup.LayoutParams?) {
-        if (child?.measuredWidth == 0 || measuredWidth == 0 || child?.requiresRemeasuring == true) {
+        if (child == null) {
+            throw IllegalArgumentException("child must be non-null")
+        }
+        if (child.measuredWidth == 0 || measuredWidth == 0 || child.requiresRemeasuring == true) {
             super.addView(child, index, params)
             return
         }
@@ -78,11 +81,13 @@ class UniqueObjectHostView(
         // right size when being attached to this view
         invalidate()
         addViewInLayout(child, index, params, true /* preventRequestLayout */)
+        // RTL properties are normally resolved in onMeasure(), which we are intentionally skipping
+        child.resolveRtlPropertiesIfNeeded()
         val left = paddingLeft
         val top = paddingTop
         val paddingHorizontal = paddingStart + paddingEnd
         val paddingVertical = paddingTop + paddingBottom
-        child!!.layout(left,
+        child.layout(left,
                 top,
                 left + measuredWidth - paddingHorizontal,
                 top + measuredHeight - paddingVertical)
