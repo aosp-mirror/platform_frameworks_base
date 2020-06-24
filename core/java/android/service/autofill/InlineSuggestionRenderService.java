@@ -41,6 +41,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 
 /**
@@ -82,7 +84,7 @@ public abstract class InlineSuggestionRenderService extends Service {
                         Boolean newValue) {
                     if (evicted) {
                         Log.w(TAG,
-                                "Hit max=100 entries in the cache. Releasing oldest one to make "
+                                "Hit max=30 entries in the cache. Releasing oldest one to make "
                                         + "space.");
                         key.releaseSurfaceControlViewHost();
                     }
@@ -130,7 +132,7 @@ public abstract class InlineSuggestionRenderService extends Service {
 
     private void handleRenderSuggestion(IInlineSuggestionUiCallback callback,
             InlinePresentation presentation, int width, int height, IBinder hostInputToken,
-            int displayId) {
+            int displayId, int userId, int sessionId) {
         if (hostInputToken == null) {
             try {
                 callback.onError();
@@ -192,7 +194,8 @@ public abstract class InlineSuggestionRenderService extends Service {
                 }
                 return true;
             });
-            final InlineSuggestionUiImpl uiImpl = new InlineSuggestionUiImpl(host, mMainHandler);
+            final InlineSuggestionUiImpl uiImpl = new InlineSuggestionUiImpl(host, mMainHandler,
+                    userId, sessionId);
             mActiveInlineSuggestions.put(uiImpl, true);
 
             // We post the callback invocation to the end of the main thread handler queue, to make
@@ -216,6 +219,18 @@ public abstract class InlineSuggestionRenderService extends Service {
     private void handleGetInlineSuggestionsRendererInfo(@NonNull RemoteCallback callback) {
         final Bundle rendererInfo = onGetInlineSuggestionsRendererInfo();
         callback.sendResult(rendererInfo);
+    }
+
+    private void handleDestroySuggestionViews(int userId, int sessionId) {
+        Log.v(TAG, "handleDestroySuggestionViews called for " + userId + ":" + sessionId);
+        for (final InlineSuggestionUiImpl inlineSuggestionUi :
+                mActiveInlineSuggestions.snapshot().keySet()) {
+            if (inlineSuggestionUi.mUserId == userId
+                    && inlineSuggestionUi.mSessionId == sessionId) {
+                Log.v(TAG, "Destroy " + inlineSuggestionUi);
+                inlineSuggestionUi.releaseSurfaceControlViewHost();
+            }
+        }
     }
 
     /**
@@ -260,10 +275,15 @@ public abstract class InlineSuggestionRenderService extends Service {
         private SurfaceControlViewHost mViewHost;
         @NonNull
         private final Handler mHandler;
+        private final int mUserId;
+        private final int mSessionId;
 
-        InlineSuggestionUiImpl(SurfaceControlViewHost viewHost, Handler handler) {
+        InlineSuggestionUiImpl(SurfaceControlViewHost viewHost, Handler handler, int userId,
+                int sessionId) {
             this.mViewHost = viewHost;
             this.mHandler = handler;
+            this.mUserId = userId;
+            this.mSessionId = sessionId;
         }
 
         /**
@@ -302,6 +322,16 @@ public abstract class InlineSuggestionRenderService extends Service {
         }
     }
 
+    /** @hide */
+    @Override
+    protected final void dump(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
+            @NonNull String[] args) {
+        pw.println("mActiveInlineSuggestions: " + mActiveInlineSuggestions.size());
+        for (InlineSuggestionUiImpl impl : mActiveInlineSuggestions.snapshot().keySet()) {
+            pw.printf("ui: [%s] - [%d]  [%d]\n", impl, impl.mUserId, impl.mSessionId);
+        }
+    }
+
     @Override
     @Nullable
     public final IBinder onBind(@NonNull Intent intent) {
@@ -311,11 +341,12 @@ public abstract class InlineSuggestionRenderService extends Service {
                 @Override
                 public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
                         @NonNull InlinePresentation presentation, int width, int height,
-                        @Nullable IBinder hostInputToken, int displayId) {
+                        @Nullable IBinder hostInputToken, int displayId, int userId,
+                        int sessionId) {
                     mMainHandler.sendMessage(
                             obtainMessage(InlineSuggestionRenderService::handleRenderSuggestion,
                                     InlineSuggestionRenderService.this, callback, presentation,
-                                    width, height, hostInputToken, displayId));
+                                    width, height, hostInputToken, displayId, userId, sessionId));
                 }
 
                 @Override
@@ -323,6 +354,12 @@ public abstract class InlineSuggestionRenderService extends Service {
                     mMainHandler.sendMessage(obtainMessage(
                             InlineSuggestionRenderService::handleGetInlineSuggestionsRendererInfo,
                             InlineSuggestionRenderService.this, callback));
+                }
+                @Override
+                public void destroySuggestionViews(int userId, int sessionId) {
+                    mMainHandler.sendMessage(obtainMessage(
+                            InlineSuggestionRenderService::handleDestroySuggestionViews,
+                            InlineSuggestionRenderService.this, userId, sessionId));
                 }
             }.asBinder();
         }
