@@ -1081,6 +1081,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.onRequestedOverrideConfigurationChanged(config);
 
         final ActivityRecord app = mAppWindow.mActivityRecord;
+        app.setVisible(false);
         mDisplayContent.prepareAppTransition(WindowManager.TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */);
         mDisplayContent.mOpeningApps.add(app);
@@ -1135,6 +1136,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // Launch another activity before the transition is finished.
         final ActivityRecord app2 = new ActivityTestsBase.StackBuilder(mWm.mRoot)
                 .setDisplay(mDisplayContent).build().getTopMostActivity();
+        app2.setVisible(false);
         mDisplayContent.mOpeningApps.add(app2);
         app2.setRequestedOrientation(newOrientation);
 
@@ -1277,6 +1279,14 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.setFixedRotationLaunchingAppUnchecked(mAppWindow.mActivityRecord);
         displayRotation.setRotation((displayRotation.getRotation() + 1) % 4);
         assertTrue(displayRotation.updateRotationUnchecked(false));
+
+        // The recents activity should not apply fixed rotation if the top activity is not opaque.
+        mDisplayContent.mFocusedApp = mAppWindow.mActivityRecord;
+        doReturn(false).when(mDisplayContent.mFocusedApp).occludesParent();
+        doReturn(ROTATION_90).when(mDisplayContent).rotationForActivityInDifferentOrientation(
+                eq(recentsActivity));
+        mDisplayContent.mFixedRotationTransitionListener.onStartRecentsAnimation(recentsActivity);
+        assertFalse(recentsActivity.hasFixedRotationTransform());
     }
 
     @Test
