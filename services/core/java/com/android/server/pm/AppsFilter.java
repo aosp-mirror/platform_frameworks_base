@@ -495,10 +495,15 @@ public class AppsFilter {
      * Adds a package that should be considered when filtering visibility between apps.
      *
      * @param newPkgSetting the new setting being added
+     * @param isReplace if the package is being replaced and may need extra cleanup.
      */
-    public void addPackage(PackageSetting newPkgSetting) {
+    public void addPackage(PackageSetting newPkgSetting, boolean isReplace) {
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "filter.addPackage");
         try {
+            if (isReplace) {
+                // let's first remove any prior rules for this package
+                removePackage(newPkgSetting);
+            }
             mStateProvider.runWithState((settings, users) -> {
                 addPackageInternal(newPkgSetting, settings);
                 if (mShouldFilterCache != null) {
@@ -774,6 +779,15 @@ public class AppsFilter {
             result.put(userId, Arrays.copyOf(appIds, whitelistSize));
         }
         return result;
+    }
+
+    /**
+     * Equivalent to calling {@link #addPackage(PackageSetting, boolean)} with {@code isReplace}
+     * equal to {@code false}.
+     * @see AppsFilter#addPackage(PackageSetting, boolean)
+     */
+    public void addPackage(PackageSetting newPkgSetting) {
+        addPackage(newPkgSetting, false /* isReplace */);
     }
 
     /**
