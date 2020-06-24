@@ -71,6 +71,7 @@ class Bubble implements BubbleViewProvider {
     // Items that are typically loaded later
     private String mAppName;
     private ShortcutInfo mShortcutInfo;
+    private String mMetadataShortcutId;
     private BadgedImageView mIconView;
     private BubbleExpandedView mExpandedView;
 
@@ -218,6 +219,14 @@ class Bubble implements BubbleViewProvider {
         return mTitle;
     }
 
+    String getMetadataShortcutId() {
+        return mMetadataShortcutId;
+    }
+
+    boolean hasMetadataShortcutId() {
+        return (mMetadataShortcutId != null && !mMetadataShortcutId.isEmpty());
+    }
+
     /**
      * Call when the views should be removed, ensure this is called to clean up ActivityView
      * content.
@@ -350,9 +359,9 @@ class Bubble implements BubbleViewProvider {
         mAppUid = entry.getSbn().getUid();
         mInstanceId = entry.getSbn().getInstanceId();
         mFlyoutMessage = BubbleViewInfoTask.extractFlyoutMessage(entry);
-        mShortcutInfo = (entry.getBubbleMetadata() != null
-                && entry.getBubbleMetadata().getShortcutId() != null
-                && entry.getRanking() != null) ? entry.getRanking().getShortcutInfo() : null;
+        mShortcutInfo = (entry.getRanking() != null ? entry.getRanking().getShortcutInfo() : null);
+        mMetadataShortcutId = (entry.getBubbleMetadata() != null
+                ? entry.getBubbleMetadata().getShortcutId() : null);
         if (entry.getRanking() != null) {
             mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
         }
