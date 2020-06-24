@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"Жок кылуу"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"Жеке рингтон кошулбай жатат"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"Жеке рингтон жок кылынбай жатат"</string>
+    <string name="app_label" msgid="3091611356093417332">"Үндөр"</string>
 </resources>

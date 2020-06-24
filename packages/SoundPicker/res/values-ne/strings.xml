@@ -25,4 +25,6 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"मेट्नुहोस्"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"आफू अनुकूल रिङटोन थप्न सकिएन"</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"आफू अनुकूल रिङटोनलाई मेट्न सकिएन"</string>
+    <!-- no translation found for app_label (3091611356093417332) -->
+    <skip />
 </resources>
