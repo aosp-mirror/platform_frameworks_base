@@ -90,6 +90,11 @@ public class InsetsAnimationThreadControlRunner implements InsetsAnimationContro
             // Since we don't push the SurfaceParams to the RT we can release directly
             sc.release();
         }
+
+        @Override
+        public void reportPerceptible(int types, boolean perceptible) {
+            mMainThreadHandler.post(() -> mOuterCallbacks.reportPerceptible(types, perceptible));
+        }
     };
 
     @UiThread

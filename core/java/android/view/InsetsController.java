@@ -35,6 +35,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Trace;
 import android.util.ArraySet;
 import android.util.Log;
@@ -165,6 +166,12 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
 
         /** @see ViewRootImpl#dipToPx */
         int dipToPx(int dips);
+
+        /**
+         * @return token associated with the host, if it has one.
+         */
+        @Nullable
+        IBinder getWindowToken();
     }
 
     private static final String TAG = "InsetsController";
@@ -1351,6 +1358,18 @@ public class InsetsController implements WindowInsetsController, InsetsAnimation
     @Override
     public void releaseSurfaceControlFromRt(SurfaceControl sc) {
         mHost.releaseSurfaceControlFromRt(sc);
+    }
+
+    @Override
+    public void reportPerceptible(int types, boolean perceptible) {
+        final ArraySet<Integer> internalTypes = toInternalType(types);
+        final int size = mSourceConsumers.size();
+        for (int i = 0; i < size; i++) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            if (internalTypes.contains(consumer.getType())) {
+                consumer.onPerceptible(perceptible);
+            }
+        }
     }
 
     Host getHost() {
