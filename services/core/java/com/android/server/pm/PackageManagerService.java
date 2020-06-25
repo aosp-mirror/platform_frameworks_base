@@ -11733,6 +11733,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         } else {
             parsedPackage
+                    // Non system apps cannot mark any broadcast as protected
+                    .clearProtectedBroadcasts()
                     // non system apps can't be flagged as core
                     .setCoreApp(false)
                     // clear flags not applicable to regular apps
@@ -11744,7 +11746,6 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if ((scanFlags & SCAN_AS_PRIVILEGED) == 0) {
             parsedPackage
-                    .clearProtectedBroadcasts()
                     .markNotActivitiesAsNotExportedIfSingleUser();
         }
 
