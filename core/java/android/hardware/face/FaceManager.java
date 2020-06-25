@@ -449,8 +449,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mSetFeatureCallback = callback;
-                mService.setFeature(userId, feature, enabled, token, mServiceReceiver,
-                        mContext.getOpPackageName());
+                mService.setFeature(mToken, userId, feature, enabled, token,
+                        mServiceReceiver, mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -465,22 +465,8 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
         if (mService != null) {
             try {
                 mGetFeatureCallback = callback;
-                mService.getFeature(userId, feature, mServiceReceiver, mContext.getOpPackageName());
-            } catch (RemoteException e) {
-                throw e.rethrowFromSystemServer();
-            }
-        }
-    }
-
-    /**
-     * Pokes the the driver to have it start looking for faces again.
-     * @hide
-     */
-    @RequiresPermission(MANAGE_BIOMETRIC)
-    public void userActivity() {
-        if (mService != null) {
-            try {
-                mService.userActivity();
+                mService.getFeature(mToken, userId, feature, mServiceReceiver,
+                        mContext.getOpPackageName());
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

@@ -386,22 +386,24 @@ public class FaceService extends BiometricServiceBase {
 
                 Slog.d(TAG, "Resetting lockout for user: " + userId);
 
-                updateActiveGroup(userId, null /* opPackageName */);
-                try {
-                    final ArrayList<Byte> token = new ArrayList<>();
-                    for (int i = 0; i < hardwareAuthToken.length; i++) {
-                        token.add(hardwareAuthToken[i]);
-                    }
-                    mDaemon.resetLockout(token);
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to reset lockout", e);
+                final IBiometricsFace daemon = getFaceDaemon();
+                if (daemon == null) {
+                    Slog.e(TAG, "daemon null, skipping template cleanup");
+                    return;
                 }
+
+                updateActiveGroup(userId, null /* opPackageName */);
+                final FaceResetLockoutClient client = new FaceResetLockoutClient(
+                        mClientFinishCallback, getContext(), daemon, userId,
+                        getContext().getOpPackageName(), getSensorId(), hardwareAuthToken);
+                startClient(client, true /* initiatedByClient */);
             });
         }
 
         @Override
-        public void setFeature(int userId, int feature, boolean enabled, final byte[] token,
-                IFaceServiceReceiver receiver, final String opPackageName) {
+        public void setFeature(final IBinder token, int userId, int feature, boolean enabled,
+                final byte[] hardwareAuthToken, IFaceServiceReceiver receiver,
+                final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
 
             mHandler.post(() -> {
@@ -414,30 +416,26 @@ public class FaceService extends BiometricServiceBase {
                     return;
                 }
 
-                final ArrayList<Byte> byteToken = new ArrayList<>();
-                for (int i = 0; i < token.length; i++) {
-                    byteToken.add(token[i]);
-                }
-
-                // TODO: Support multiple faces
                 final int faceId = getFirstTemplateForUser(mCurrentUserId);
 
-                if (mDaemon != null) {
-                    try {
-                        final int result = mDaemon.setFeature(feature, enabled, byteToken, faceId);
-                        receiver.onFeatureSet(result == Status.OK, feature);
-                    } catch (RemoteException e) {
-                        Slog.e(getTag(), "Unable to set feature: " + feature
-                                        + " to enabled:" + enabled, e);
-                    }
+                final IBiometricsFace daemon = getFaceDaemon();
+                if (daemon == null) {
+                    Slog.e(TAG, "daemon null, skipping template cleanup");
+                    return;
                 }
+
+                final FaceSetFeatureClient client = new FaceSetFeatureClient(mClientFinishCallback,
+                        getContext(), daemon, token, new ClientMonitorCallbackConverter(receiver),
+                        userId, opPackageName, getSensorId(), feature, enabled, hardwareAuthToken,
+                        faceId);
+                startClient(client, true /* initiatedByClient */);
             });
 
         }
 
         @Override
-        public void getFeature(int userId, int feature, IFaceServiceReceiver receiver,
-                final String opPackageName) {
+        public void getFeature(final IBinder token, int userId, int feature,
+                IFaceServiceReceiver receiver, final String opPackageName) {
             checkPermission(MANAGE_BIOMETRIC);
 
             mHandler.post(() -> {
@@ -455,29 +453,18 @@ public class FaceService extends BiometricServiceBase {
                 // TODO: Support multiple faces
                 final int faceId = getFirstTemplateForUser(mCurrentUserId);
 
-                if (mDaemon != null) {
-                    try {
-                        OptionalBool result = mDaemon.getFeature(feature, faceId);
-                        receiver.onFeatureGet(result.status == Status.OK, feature, result.value);
-                    } catch (RemoteException e) {
-                        Slog.e(getTag(), "Unable to getRequireAttention", e);
-                    }
+                final IBiometricsFace daemon = getFaceDaemon();
+                if (daemon == null) {
+                    Slog.e(TAG, "daemon null, skipping template cleanup");
+                    return;
                 }
+
+                final FaceGetFeatureClient client = new FaceGetFeatureClient(mClientFinishCallback,
+                        getContext(), daemon, token, new ClientMonitorCallbackConverter(receiver),
+                        userId, opPackageName, getSensorId(), feature, faceId);
+                startClient(client, true /* initiatedByClient */);
             });
 
-        }
-
-        @Override
-        public void userActivity() {
-            checkPermission(MANAGE_BIOMETRIC);
-
-            if (mDaemon != null) {
-                try {
-                    mDaemon.userActivity();
-                } catch (RemoteException e) {
-                    Slog.e(getTag(), "Unable to send userActivity", e);
-                }
-            }
         }
 
         // TODO: Support multiple faces
