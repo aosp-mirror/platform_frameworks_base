@@ -25,4 +25,5 @@
     <string name="delete_ringtone_text" msgid="201443984070732499">"삭제"</string>
     <string name="unable_to_add_ringtone" msgid="4583511263449467326">"맞춤 벨소리를 추가할 수 없습니다."</string>
     <string name="unable_to_delete_ringtone" msgid="6792301380142859496">"맞춤 벨소리를 삭제할 수 없습니다."</string>
+    <string name="app_label" msgid="3091611356093417332">"소리"</string>
 </resources>

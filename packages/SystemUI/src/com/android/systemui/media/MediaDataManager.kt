@@ -432,12 +432,13 @@ class MediaDataManager(
             }
         }
 
-        val resumeAction: Runnable? = mediaEntries.get(key)?.resumeAction
-        val hasCheckedForResume = mediaEntries.get(key)?.hasCheckedForResume == true
         foregroundExecutor.execute {
+            val resumeAction: Runnable? = mediaEntries[key]?.resumeAction
+            val hasCheckedForResume = mediaEntries[key]?.hasCheckedForResume == true
+            val active = mediaEntries[key]?.active ?: true
             onMediaDataLoaded(key, oldKey, MediaData(true, bgColor, app, smallIconDrawable, artist,
                     song, artWorkIcon, actionIcons, actionsToShowCollapsed, sbn.packageName, token,
-                    notif.contentIntent, null, active = true, resumeAction = resumeAction,
+                    notif.contentIntent, null, active, resumeAction = resumeAction,
                     notificationKey = key, hasCheckedForResume = hasCheckedForResume))
         }
     }

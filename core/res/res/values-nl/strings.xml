@@ -237,7 +237,7 @@
     <string name="global_actions" product="default" msgid="6410072189971495460">"Telefoonopties"</string>
     <string name="global_action_lock" msgid="6949357274257655383">"Schermvergrendeling"</string>
     <string name="global_action_power_off" msgid="4404936470711393203">"Uitschakelen"</string>
-    <string name="global_action_power_options" msgid="1185286119330160073">"Voeding"</string>
+    <string name="global_action_power_options" msgid="1185286119330160073">"Aan/uit"</string>
     <string name="global_action_restart" msgid="4678451019561687074">"Opnieuw opstarten"</string>
     <string name="global_action_emergency" msgid="1387617624177105088">"Noodgeval"</string>
     <string name="global_action_bug_report" msgid="5127867163044170003">"Bugrapport"</string>

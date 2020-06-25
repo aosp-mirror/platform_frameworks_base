@@ -885,7 +885,8 @@ public final class SoftApConfiguration implements Parcelable {
 
         /**
          * Configure the Soft AP to require manual user control of client association.
-         * If disabled (the default) then any client can associate to this Soft AP using the
+         * If disabled (the default) then any client which isn't in the blocked list
+         * {@link #getBlockedClientList()} can associate to this Soft AP using the
          * correct credentials until the Soft AP capacity is reached (capacity is hardware, carrier,
          * or user limited - using {@link #setMaxNumberOfClients(int)}).
          *
@@ -945,21 +946,19 @@ public final class SoftApConfiguration implements Parcelable {
         }
 
         /**
-         * This method together with {@link setClientControlByUserEnabled(boolean)} control client
-         * connections to the AP. If client control by user is disabled using the above method then
-         * this API has no effect and clients are allowed to associate to the AP (within limit of
-         * max number of clients).
+         * This API configures the list of clients which are blocked and cannot associate
+         * to the Soft AP.
          *
-         * If client control by user is enabled then this API this API configures the list of
-         * clients which are blocked. These are rejected.
+         * <p>
+         * This method requires hardware support. Hardware support can be determined using
+         * {@link WifiManager.SoftApCallback#onCapabilityChanged(SoftApCapability)} and
+         * {@link SoftApCapability#areFeaturesSupported(int)}
+         * with {@link SoftApCapability.SOFTAP_FEATURE_CLIENT_FORCE_DISCONNECT}
          *
-         * All other clients which attempt to associate, whose MAC addresses are on neither list,
-         * are:
-         * <ul>
-         * <li>Rejected</li>
-         * <li>A callback {@link WifiManager.SoftApCallback#onBlockedClientConnecting(WifiClient)}
-         * is issued (which allows the user to add them to the allowed client list if desired).<li>
-         * </ul>
+         * <p>
+         * If the method is called on a device without hardware support then starting the soft AP
+         * using {@link WifiManager#startTetheredHotspot(SoftApConfiguration)} will fail with
+         * {@link WifiManager#SAP_START_FAILURE_UNSUPPORTED_CONFIGURATION}.
          *
          * @param blockedClientList list of clients which are not allowed to associate to the AP.
          * @return Builder for chaining.

@@ -88,9 +88,9 @@ public final class RemoteInlineSuggestionRenderService extends
      */
     public void renderSuggestion(@NonNull IInlineSuggestionUiCallback callback,
             @NonNull InlinePresentation presentation, int width, int height,
-            @Nullable IBinder hostInputToken, int displayId) {
+            @Nullable IBinder hostInputToken, int displayId, int userId, int sessionId) {
         scheduleAsyncRequest((s) -> s.renderSuggestion(callback, presentation, width, height,
-                hostInputToken, displayId));
+                hostInputToken, displayId, userId, sessionId));
     }
 
     /**
@@ -98,6 +98,13 @@ public final class RemoteInlineSuggestionRenderService extends
      */
     public void getInlineSuggestionsRendererInfo(@NonNull RemoteCallback callback) {
         scheduleAsyncRequest((s) -> s.getInlineSuggestionsRendererInfo(callback));
+    }
+
+    /**
+     * Destroys the remote inline suggestion views associated with the given user id and session id.
+     */
+    public void destroySuggestionViews(int userId, int sessionId) {
+        scheduleAsyncRequest((s) -> s.destroySuggestionViews(userId, sessionId));
     }
 
     @Nullable

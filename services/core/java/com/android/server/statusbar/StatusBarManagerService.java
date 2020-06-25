@@ -52,6 +52,7 @@ import android.view.WindowInsetsController.Appearance;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.SoftInputShowHideReason;
 import com.android.internal.statusbar.IStatusBar;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
@@ -61,6 +62,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.internal.view.AppearanceRegion;
 import com.android.server.LocalServices;
 import com.android.server.UiThread;
+import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.notification.NotificationDelegate;
 import com.android.server.policy.GlobalActionsProvider;
 import com.android.server.power.ShutdownThread;
@@ -1398,6 +1400,17 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
             mNotificationDelegate.onBubbleNotificationSuppressionChanged(key, isNotifSuppressed);
         } finally {
             Binder.restoreCallingIdentity(identity);
+        }
+    }
+
+    @Override
+    public void hideCurrentInputMethodForBubbles() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            InputMethodManagerInternal.get().hideCurrentInputMethod(
+                    SoftInputShowHideReason.HIDE_BUBBLES);
+        } finally {
+            Binder.restoreCallingIdentity(token);
         }
     }
 
