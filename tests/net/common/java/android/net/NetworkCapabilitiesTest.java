@@ -42,8 +42,8 @@ import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 import static android.net.NetworkCapabilities.UNRESTRICTED_CAPABILITIES;
 
-import static com.android.testutils.ParcelUtilsKt.assertParcelSane;
-import static com.android.testutils.ParcelUtilsKt.assertParcelingIsLossless;
+import static com.android.testutils.ParcelUtils.assertParcelSane;
+import static com.android.testutils.ParcelUtils.assertParcelingIsLossless;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
