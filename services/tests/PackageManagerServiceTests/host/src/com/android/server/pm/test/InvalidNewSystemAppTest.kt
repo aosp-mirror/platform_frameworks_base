@@ -45,23 +45,24 @@ class InvalidNewSystemAppTest : BaseHostJUnit4Test() {
 
     private val tempFolder = TemporaryFolder()
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
-            SystemPreparer.RebootStrategy.START_STOP, deviceRebootRule) { this.device }
+            SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
     @get:Rule
     val rules = RuleChain.outerRule(tempFolder).around(preparer)!!
+    private val filePath = HostUtils.makePathForApk("PackageManagerDummyApp.apk", Partition.PRODUCT)
 
     @Before
     @After
-    fun uninstallDataPackage() {
+    fun removeApk() {
         device.uninstallPackage(TEST_PKG_NAME)
+        device.deleteFile(filePath.parent.toString())
+        device.reboot()
     }
 
     @Test
     fun verify() {
         // First, push a system app to the device and then update it so there's a data variant
-        val filePath = HostUtils.makePathForApk("PackageManagerDummyApp.apk", Partition.PRODUCT)
-
-        preparer.pushResourceFile(VERSION_ONE, filePath)
+        preparer.pushResourceFile(VERSION_ONE, filePath.toString())
                 .reboot()
 
         val versionTwoFile = HostUtils.copyResourceToHostFile(VERSION_TWO, tempFolder.newFile())
@@ -69,8 +70,8 @@ class InvalidNewSystemAppTest : BaseHostJUnit4Test() {
         assertThat(device.installPackage(versionTwoFile, true)).isNull()
 
         // Then push a bad update to the system, overwriting the existing file as if an OTA occurred
-        preparer.deleteFile(filePath)
-                .pushResourceFile(VERSION_THREE_INVALID, filePath)
+        preparer.deleteFile(filePath.toString())
+                .pushResourceFile(VERSION_THREE_INVALID, filePath.toString())
                 .reboot()
 
         // This will remove the package from the device, which is expected
