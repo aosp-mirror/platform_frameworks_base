@@ -1,8 +1,6 @@
 {
   "presubmit": [
-    // TODO(159590499) add BugreportManagerTestCases
     {
-      "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "CtsBugreportTestCases",
       "options": [
         {
@@ -11,10 +9,6 @@
       ]
     },
     {
-      "name": "CtsUsbTests"
-    },
-    {
-      "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests",
       "options": [
         {
@@ -28,15 +22,9 @@
   ],
   "postsubmit": [
     {
-      "file_patterns": ["Bugreport[^/]*\\.java"],
-      "name": "BugreportManagerTestCases"
-    },
-    {
-      "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "CtsBugreportTestCases"
     },
     {
-      "file_patterns": ["Bugreport[^/]*\\.java"],
       "name": "ShellTests"
     }
   ]
