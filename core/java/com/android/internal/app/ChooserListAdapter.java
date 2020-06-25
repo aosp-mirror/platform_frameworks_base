@@ -885,6 +885,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
         if (getAppPredictor() != null) {
             getAppPredictor().unregisterPredictionUpdates(mAppPredictorCallback);
             getAppPredictor().destroy();
+            setAppPredictor(null);
         }
     }
 
