@@ -20,6 +20,8 @@ import com.android.internal.util.test.SystemPreparer
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test
 import com.google.common.truth.Truth.assertThat
+import org.junit.After
+import org.junit.Before
 import org.junit.ClassRule
 import org.junit.Rule
 import org.junit.Test
@@ -43,10 +45,17 @@ class OriginalPackageMigrationTest : BaseHostJUnit4Test() {
 
     private val tempFolder = TemporaryFolder()
     private val preparer: SystemPreparer = SystemPreparer(tempFolder,
-            SystemPreparer.RebootStrategy.START_STOP, deviceRebootRule) { this.device }
+            SystemPreparer.RebootStrategy.FULL, deviceRebootRule) { this.device }
 
     @get:Rule
     val rules = RuleChain.outerRule(tempFolder).around(preparer)!!
+
+    @Before
+    @After
+    fun deleteApkFolders() {
+        preparer.deleteApkFolders(Partition.SYSTEM, VERSION_ONE, VERSION_TWO, VERSION_THREE,
+                NEW_PKG)
+    }
 
     @Test
     fun lowerVersion() {
@@ -71,28 +80,28 @@ class OriginalPackageMigrationTest : BaseHostJUnit4Test() {
         preparer.pushApk(apk, Partition.SYSTEM)
                 .reboot()
 
-        device.getAppPackageInfo(TEST_PKG_NAME).run {
-            assertThat(codePath).contains(apk.removeSuffix(".apk"))
-        }
+        assertCodePath(apk)
 
         // Ensure data is preserved by writing to the original dataDir
         val file = tempFolder.newFile().apply { writeText("Test") }
         device.pushFile(file, "${HostUtils.getDataDir(device, TEST_PKG_NAME)}/files/test.txt")
 
-        preparer.deleteApk(apk, Partition.SYSTEM)
+        preparer.deleteApkFolders(Partition.SYSTEM, apk)
                 .pushApk(NEW_PKG, Partition.SYSTEM)
                 .reboot()
 
-        device.getAppPackageInfo(TEST_PKG_NAME)
-                .run {
-                    assertThat(this.toString()).isNotEmpty()
-                    assertThat(codePath)
-                            .contains(NEW_PKG.removeSuffix(".apk"))
-                }
+        assertCodePath(NEW_PKG)
 
         // And then reading the data contents back
         assertThat(device.pullFileContents(
                 "${HostUtils.getDataDir(device, TEST_PKG_NAME)}/files/test.txt"))
                 .isEqualTo("Test")
+    }
+
+    private fun assertCodePath(apk: String) {
+        // dumpsys package and therefore device.getAppPackageInfo doesn't work here for some reason,
+        // so parse the package dump directly to see if the path matches.
+        assertThat(device.executeShellCommand("pm dump $TEST_PKG_NAME"))
+                .contains(HostUtils.makePathForApk(apk, Partition.SYSTEM).parent.toString())
     }
 }
