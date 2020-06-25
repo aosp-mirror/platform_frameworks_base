@@ -85,6 +85,17 @@ public class JobInfo implements Parcelable {
     @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
     public static final long DISALLOW_DEADLINES_FOR_PREFETCH_JOBS = 194532703L;
 
+    /**
+     * Whether to throw an exception when an app provides an invalid priority value via
+     * {@link Builder#setPriority(int)}. Legacy apps may be incorrectly using the API and
+     * so the call will silently fail for them if they continue using the API.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledSince(targetSdkVersion = Build.VERSION_CODES.TIRAMISU)
+    public static final long THROW_ON_INVALID_PRIORITY_VALUE = 140852299L;
+
     /** @hide */
     @IntDef(prefix = { "NETWORK_TYPE_" }, value = {
             NETWORK_TYPE_NONE,
@@ -205,6 +216,67 @@ public class JobInfo implements Parcelable {
      * @hide
      */
     public static final int DEFAULT_BACKOFF_POLICY = BACKOFF_POLICY_EXPONENTIAL;
+
+    /**
+     * Job has minimal value to the user. The user has absolutely no expectation
+     * or knowledge of this task and it has no bearing on the user's perception of
+     * the app whatsoever. JobScheduler <i>may</i> decide to defer these tasks while
+     * there are higher priority tasks in order to ensure there is sufficient quota
+     * available for the higher priority tasks.
+     * A sample task of min priority: uploading analytics
+     */
+    public static final int PRIORITY_MIN = 100;
+
+    /**
+     * Low priority. The task provides some benefit to users, but is not critical
+     * and is more of a nice-to-have. This is more important than minimum priority
+     * jobs and will be prioritized ahead of them, but may still be deferred in lieu
+     * of higher priority jobs. JobScheduler <i>may</i> decide to defer these tasks
+     * while there are higher priority tasks in order to ensure there is sufficient
+     * quota available for the higher priority tasks.
+     * A sample task of low priority: prefetching data the user hasn't requested
+     */
+    public static final int PRIORITY_LOW = 200;
+
+    /**
+     * Default value for all regular jobs. As noted in {@link JobScheduler},
+     * these jobs have a general maximum execution time of 10 minutes.
+     * Receives the standard job management policy.
+     */
+    public static final int PRIORITY_DEFAULT = 300;
+
+    /**
+     * This task should be ordered ahead of most other tasks. It may be
+     * deferred a little, but if it doesn't run at some point, the user may think
+     * something is wrong. Assuming all constraints remain satisfied
+     * (including ideal system load conditions), these jobs will have a maximum
+     * execution time of at least 4 minutes. Setting all of your jobs to high
+     * priority will not be beneficial to your app and in fact may hurt its
+     * performance in the long run.
+     */
+    public static final int PRIORITY_HIGH = 400;
+
+    /**
+     * This task should be run ahead of all other tasks. Only Expedited Jobs
+     * {@link Builder#setExpedited(boolean)} can have this priority and as such,
+     * are subject to the same maximum execution time details noted in
+     * {@link Builder#setExpedited(boolean)}.
+     * A sample task of max priority: receiving a text message and processing it to
+     * show a notification
+     */
+    public static final int PRIORITY_MAX = 500;
+
+    /** @hide */
+    @IntDef(prefix = {"PRIORITY_"}, value = {
+            PRIORITY_MIN,
+            PRIORITY_LOW,
+            PRIORITY_DEFAULT,
+            PRIORITY_HIGH,
+            PRIORITY_MAX,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Priority {
+    }
 
     /**
      * Default of {@link #getBias}.
@@ -359,6 +431,8 @@ public class JobInfo implements Parcelable {
     private final long initialBackoffMillis;
     private final int backoffPolicy;
     private final int mBias;
+    @Priority
+    private final int mPriority;
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final int flags;
 
@@ -408,6 +482,14 @@ public class JobInfo implements Parcelable {
     /** @hide */
     public int getBias() {
         return mBias;
+    }
+
+    /**
+     * @see JobInfo.Builder#setPriority(int)
+     */
+    @Priority
+    public int getPriority() {
+        return mPriority;
     }
 
     /** @hide */
@@ -746,6 +828,9 @@ public class JobInfo implements Parcelable {
         if (mBias != j.mBias) {
             return false;
         }
+        if (mPriority != j.mPriority) {
+            return false;
+        }
         if (flags != j.flags) {
             return false;
         }
@@ -791,6 +876,7 @@ public class JobInfo implements Parcelable {
         hashCode = 31 * hashCode + Long.hashCode(initialBackoffMillis);
         hashCode = 31 * hashCode + backoffPolicy;
         hashCode = 31 * hashCode + mBias;
+        hashCode = 31 * hashCode + mPriority;
         hashCode = 31 * hashCode + flags;
         return hashCode;
     }
@@ -830,6 +916,7 @@ public class JobInfo implements Parcelable {
         hasEarlyConstraint = in.readInt() == 1;
         hasLateConstraint = in.readInt() == 1;
         mBias = in.readInt();
+        mPriority = in.readInt();
         flags = in.readInt();
     }
 
@@ -861,6 +948,7 @@ public class JobInfo implements Parcelable {
         hasEarlyConstraint = b.mHasEarlyConstraint;
         hasLateConstraint = b.mHasLateConstraint;
         mBias = b.mBias;
+        mPriority = b.mPriority;
         flags = b.mFlags;
     }
 
@@ -906,6 +994,7 @@ public class JobInfo implements Parcelable {
         out.writeInt(hasEarlyConstraint ? 1 : 0);
         out.writeInt(hasLateConstraint ? 1 : 0);
         out.writeInt(mBias);
+        out.writeInt(mPriority);
         out.writeInt(this.flags);
     }
 
@@ -1024,6 +1113,8 @@ public class JobInfo implements Parcelable {
         private ClipData mClipData;
         private int mClipGrantFlags;
         private int mBias = BIAS_DEFAULT;
+        @Priority
+        private int mPriority = PRIORITY_DEFAULT;
         private int mFlags;
         // Requirements.
         private int mConstraintFlags;
@@ -1100,6 +1191,7 @@ public class JobInfo implements Parcelable {
             // mBackoffPolicySet isn't set but it's fine since this is copying from an already valid
             // job.
             mBackoffPolicy = job.getBackoffPolicy();
+            mPriority = job.getPriority();
         }
 
         /** @hide */
@@ -1109,11 +1201,36 @@ public class JobInfo implements Parcelable {
             return this;
         }
 
-        /** @hide */
-        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
-        public Builder setPriority(int priority) {
-            // No-op for invalid calls. This wasn't a supported API before Tiramisu, so anyone
-            // calling this that isn't targeting T isn't guaranteed a behavior change.
+        /**
+         * Indicate the priority for this job. The priority set here will be used to sort jobs
+         * for a single app and apply slightly different policies based on the priority.
+         * The priority will <b>NOT</b> be used as a global sorting value to sort between
+         * different app's jobs. Use this to inform the system about which jobs it should try
+         * to run before other jobs. Giving the same priority to all of your jobs will result
+         * in them all being treated the same. The priorities each have slightly different
+         * behaviors, as noted in their relevant javadoc.
+         *
+         * <b>NOTE:</b> Setting all of your jobs to high priority will not be
+         * beneficial to your app and in fact may hurt its performance in the
+         * long run.
+         *
+         * In order to prevent starvation, repeatedly retried jobs (because of failures) will slowly
+         * have their priorities lowered.
+         *
+         * @see JobInfo#getPriority()
+         */
+        @NonNull
+        public Builder setPriority(@Priority int priority) {
+            if (priority > PRIORITY_MAX || priority < PRIORITY_MIN) {
+                if (Compatibility.isChangeEnabled(THROW_ON_INVALID_PRIORITY_VALUE)) {
+                    throw new IllegalArgumentException("Invalid priority value");
+                }
+                // No-op for invalid calls of apps that are targeting S-. This was an unsupported
+                // API before Tiramisu, so anyone calling this that isn't targeting T isn't
+                // guaranteed a behavior change.
+                return this;
+            }
+            mPriority = priority;
             return this;
         }
 
@@ -1637,7 +1754,17 @@ public class JobInfo implements Parcelable {
         public Builder setExpedited(boolean expedited) {
             if (expedited) {
                 mFlags |= FLAG_EXPEDITED;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for EJs is MAX, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_MAX;
+                }
             } else {
+                if (mPriority == PRIORITY_MAX && (mFlags & FLAG_EXPEDITED) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
                 mFlags &= (~FLAG_EXPEDITED);
             }
             return this;
@@ -1664,7 +1791,18 @@ public class JobInfo implements Parcelable {
         public Builder setImportantWhileForeground(boolean importantWhileForeground) {
             if (importantWhileForeground) {
                 mFlags |= FLAG_IMPORTANT_WHILE_FOREGROUND;
+                if (mPriority == PRIORITY_DEFAULT) {
+                    // The default priority for important-while-foreground is HIGH, but only change
+                    // this if .setPriority() hasn't been called yet.
+                    mPriority = PRIORITY_HIGH;
+                }
             } else {
+                if (mPriority == PRIORITY_HIGH
+                        && (mFlags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
+                    // Reset the priority for the job, but only change this if .setPriority()
+                    // hasn't been called yet.
+                    mPriority = PRIORITY_DEFAULT;
+                }
                 mFlags &= (~FLAG_IMPORTANT_WHILE_FOREGROUND);
             }
             return this;
@@ -1812,12 +1950,42 @@ public class JobInfo implements Parcelable {
             }
         }
 
-        if ((flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0 && hasEarlyConstraint) {
-            throw new IllegalArgumentException(
-                    "An important while foreground job cannot have a time delay");
+        if ((flags & FLAG_IMPORTANT_WHILE_FOREGROUND) != 0) {
+            if (hasEarlyConstraint) {
+                throw new IllegalArgumentException(
+                        "An important while foreground job cannot have a time delay");
+            }
+            if (mPriority != PRIORITY_HIGH && mPriority != PRIORITY_DEFAULT) {
+                throw new IllegalArgumentException(
+                        "An important while foreground job must be high or default priority."
+                                + " Don't mark unimportant tasks as important while foreground.");
+            }
         }
 
-        if ((flags & FLAG_EXPEDITED) != 0) {
+        final boolean isExpedited = (flags & FLAG_EXPEDITED) != 0;
+        switch (mPriority) {
+            case PRIORITY_MAX:
+                if (!isExpedited) {
+                    throw new IllegalArgumentException("Only expedited jobs can have max priority");
+                }
+                break;
+            case PRIORITY_HIGH:
+                if ((flags & FLAG_PREFETCH) != 0) {
+                    throw new IllegalArgumentException("Prefetch jobs cannot be high priority");
+                }
+                if (isPeriodic) {
+                    throw new IllegalArgumentException("Periodic jobs cannot be high priority");
+                }
+                break;
+            case PRIORITY_DEFAULT:
+            case PRIORITY_LOW:
+            case PRIORITY_MIN:
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid priority level provided: " + mPriority);
+        }
+
+        if (isExpedited) {
             if (hasEarlyConstraint) {
                 throw new IllegalArgumentException("An expedited job cannot have a time delay");
             }
@@ -1826,6 +1994,11 @@ public class JobInfo implements Parcelable {
             }
             if (isPeriodic) {
                 throw new IllegalArgumentException("An expedited job cannot be periodic");
+            }
+            if (mPriority != PRIORITY_MAX && mPriority != PRIORITY_HIGH) {
+                throw new IllegalArgumentException(
+                        "An expedited job must be high or max priority. Don't use expedited jobs"
+                                + " for unimportant tasks.");
             }
             if ((constraintFlags & ~CONSTRAINT_FLAG_STORAGE_NOT_LOW) != 0
                     || (flags & ~(FLAG_EXPEDITED | FLAG_EXEMPT_FROM_APP_STANDBY)) != 0) {
@@ -1862,5 +2035,25 @@ public class JobInfo implements Parcelable {
                 // No need to convert to strings.
         }
         return bias + " [UNKNOWN]";
+    }
+
+    /**
+     * Convert a priority integer into a human readable string for debugging.
+     * @hide
+     */
+    public static String getPriorityString(@Priority int priority) {
+        switch (priority) {
+            case PRIORITY_MIN:
+                return priority + " [MIN]";
+            case PRIORITY_LOW:
+                return priority + " [LOW]";
+            case PRIORITY_DEFAULT:
+                return priority + " [DEFAULT]";
+            case PRIORITY_HIGH:
+                return priority + " [HIGH]";
+            case PRIORITY_MAX:
+                return priority + " [MAX]";
+        }
+        return priority + " [UNKNOWN]";
     }
 }

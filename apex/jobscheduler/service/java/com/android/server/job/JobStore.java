@@ -335,7 +335,7 @@ public final class JobStore {
     }
 
     /** Version of the db schema. */
-    private static final int JOBS_FILE_VERSION = 0;
+    private static final int JOBS_FILE_VERSION = 1;
     /** Tag corresponds to constraints this job needs. */
     private static final String XML_TAG_PARAMS_CONSTRAINTS = "constraints";
     /** Tag corresponds to execution parameters. */
@@ -548,6 +548,7 @@ public final class JobStore {
             out.attribute(null, "sourceUserId", String.valueOf(jobStatus.getSourceUserId()));
             out.attribute(null, "uid", Integer.toString(jobStatus.getUid()));
             out.attribute(null, "bias", String.valueOf(jobStatus.getBias()));
+            out.attribute(null, "priority", String.valueOf(jobStatus.getEffectivePriority()));
             out.attribute(null, "flags", String.valueOf(jobStatus.getFlags()));
             if (jobStatus.getInternalFlags() != 0) {
                 out.attribute(null, "internalFlags", String.valueOf(jobStatus.getInternalFlags()));
@@ -771,10 +772,11 @@ public final class JobStore {
             String tagName = parser.getName();
             if ("job-info".equals(tagName)) {
                 final List<JobStatus> jobs = new ArrayList<JobStatus>();
+                final int version;
                 // Read in version info.
                 try {
-                    int version = Integer.parseInt(parser.getAttributeValue(null, "version"));
-                    if (version != JOBS_FILE_VERSION) {
+                    version = Integer.parseInt(parser.getAttributeValue(null, "version"));
+                    if (version > JOBS_FILE_VERSION || version < 0) {
                         Slog.d(TAG, "Invalid version number, aborting jobs file read.");
                         return null;
                     }
@@ -789,7 +791,7 @@ public final class JobStore {
                         tagName = parser.getName();
                         // Start reading job.
                         if ("job".equals(tagName)) {
-                            JobStatus persistedJob = restoreJobFromXml(rtcIsGood, parser);
+                            JobStatus persistedJob = restoreJobFromXml(rtcIsGood, parser, version);
                             if (persistedJob != null) {
                                 if (DEBUG) {
                                     Slog.d(TAG, "Read out " + persistedJob);
@@ -812,8 +814,8 @@ public final class JobStore {
          *               will take the parser into the body of the job tag.
          * @return Newly instantiated job holding all the information we just read out of the xml tag.
          */
-        private JobStatus restoreJobFromXml(boolean rtcIsGood, XmlPullParser parser)
-                throws XmlPullParserException, IOException {
+        private JobStatus restoreJobFromXml(boolean rtcIsGood, XmlPullParser parser,
+                int schemaVersion) throws XmlPullParserException, IOException {
             JobInfo.Builder jobBuilder;
             int uid, sourceUserId;
             long lastSuccessfulRunTime;
@@ -826,12 +828,21 @@ public final class JobStore {
                 jobBuilder.setPersisted(true);
                 uid = Integer.parseInt(parser.getAttributeValue(null, "uid"));
 
-                String val = parser.getAttributeValue(null, "bias");
-                if (val == null) {
+                String val;
+                if (schemaVersion == 0) {
                     val = parser.getAttributeValue(null, "priority");
-                }
-                if (val != null) {
-                    jobBuilder.setBias(Integer.parseInt(val));
+                    if (val != null) {
+                        jobBuilder.setBias(Integer.parseInt(val));
+                    }
+                } else if (schemaVersion >= 1) {
+                    val = parser.getAttributeValue(null, "bias");
+                    if (val != null) {
+                        jobBuilder.setBias(Integer.parseInt(val));
+                    }
+                    val = parser.getAttributeValue(null, "priority");
+                    if (val != null) {
+                        jobBuilder.setPriority(Integer.parseInt(val));
+                    }
                 }
                 val = parser.getAttributeValue(null, "flags");
                 if (val != null) {

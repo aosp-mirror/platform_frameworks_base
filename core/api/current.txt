@@ -7973,6 +7973,7 @@ package android.app.job {
     method public static final long getMinPeriodMillis();
     method public long getMinimumNetworkChunkBytes();
     method @Deprecated public int getNetworkType();
+    method public int getPriority();
     method @Nullable public android.net.NetworkRequest getRequiredNetwork();
     method @NonNull public android.content.ComponentName getService();
     method @NonNull public android.os.Bundle getTransientExtras();
@@ -8001,6 +8002,11 @@ package android.app.job {
     field public static final int NETWORK_TYPE_NONE = 0; // 0x0
     field public static final int NETWORK_TYPE_NOT_ROAMING = 3; // 0x3
     field public static final int NETWORK_TYPE_UNMETERED = 2; // 0x2
+    field public static final int PRIORITY_DEFAULT = 300; // 0x12c
+    field public static final int PRIORITY_HIGH = 400; // 0x190
+    field public static final int PRIORITY_LOW = 200; // 0xc8
+    field public static final int PRIORITY_MAX = 500; // 0x1f4
+    field public static final int PRIORITY_MIN = 100; // 0x64
   }
 
   public static final class JobInfo.Builder {
@@ -8020,6 +8026,7 @@ package android.app.job {
     method public android.app.job.JobInfo.Builder setPeriodic(long, long);
     method @RequiresPermission(android.Manifest.permission.RECEIVE_BOOT_COMPLETED) public android.app.job.JobInfo.Builder setPersisted(boolean);
     method public android.app.job.JobInfo.Builder setPrefetch(boolean);
+    method @NonNull public android.app.job.JobInfo.Builder setPriority(int);
     method public android.app.job.JobInfo.Builder setRequiredNetwork(@Nullable android.net.NetworkRequest);
     method public android.app.job.JobInfo.Builder setRequiredNetworkType(int);
     method public android.app.job.JobInfo.Builder setRequiresBatteryNotLow(boolean);
