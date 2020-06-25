@@ -29,6 +29,12 @@ import android.service.autofill.InlinePresentation;
 oneway interface IInlineSuggestionRenderService {
     void renderSuggestion(in IInlineSuggestionUiCallback callback,
                           in InlinePresentation presentation, int width, int height,
-                          in IBinder hostInputToken, int displayId);
+                          in IBinder hostInputToken, int displayId, int userId, int sessionId);
     void getInlineSuggestionsRendererInfo(in RemoteCallback callback);
+
+    /**
+     * Releases the inline suggestion SurfaceControlViewHosts hosted in the service, for the
+     * provided userId and sessionId.
+     */
+    void destroySuggestionViews(int userId, int sessionId);
 }

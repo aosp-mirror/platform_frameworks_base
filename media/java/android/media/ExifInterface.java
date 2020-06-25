@@ -16,6 +16,12 @@
 
 package android.media;
 
+import static android.media.ExifInterfaceUtils.byteArrayToHexString;
+import static android.media.ExifInterfaceUtils.closeQuietly;
+import static android.media.ExifInterfaceUtils.convertToLongArray;
+import static android.media.ExifInterfaceUtils.copy;
+import static android.media.ExifInterfaceUtils.startsWith;
+
 import android.annotation.CurrentTimeMillisLong;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
@@ -32,10 +38,6 @@ import android.util.Log;
 import android.util.Pair;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.ArrayUtils;
-
-import libcore.io.IoUtils;
-import libcore.io.Streams;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -1540,7 +1542,7 @@ public class ExifInterface {
             in = new FileInputStream(fileDescriptor, isFdOwner);
             loadAttributes(in);
         } finally {
-            IoUtils.closeQuietly(in);
+            closeQuietly(in);
         }
     }
 
@@ -2092,13 +2094,13 @@ public class ExifInterface {
                 Os.lseek(mSeekableFileDescriptor, 0, OsConstants.SEEK_SET);
                 in = new FileInputStream(mSeekableFileDescriptor);
                 out = new FileOutputStream(tempFile);
-                Streams.copy(in, out);
+                copy(in, out);
             }
         } catch (Exception e) {
             throw new IOException("Failed to copy original file to temp file", e);
         } finally {
-            IoUtils.closeQuietly(in);
-            IoUtils.closeQuietly(out);
+            closeQuietly(in);
+            closeQuietly(out);
         }
 
         in = null;
@@ -2129,8 +2131,8 @@ public class ExifInterface {
             }
             throw new IOException("Failed to save new file", e);
         } finally {
-            IoUtils.closeQuietly(in);
-            IoUtils.closeQuietly(out);
+            closeQuietly(in);
+            closeQuietly(out);
             tempFile.delete();
         }
 
@@ -2215,7 +2217,7 @@ public class ExifInterface {
             // Couldn't get a thumbnail image.
             Log.d(TAG, "Encountered exception while getting thumbnail", e);
         } finally {
-            IoUtils.closeQuietly(in);
+            closeQuietly(in);
         }
         return null;
     }
@@ -2536,7 +2538,7 @@ public class ExifInterface {
             }
             loadAttributes(in);
         } finally {
-            IoUtils.closeQuietly(in);
+            closeQuietly(in);
         }
     }
 
@@ -2839,14 +2841,14 @@ public class ExifInterface {
                     bytesRead += length;
                     length = 0;
 
-                    if (ArrayUtils.startsWith(bytes, IDENTIFIER_EXIF_APP1)) {
+                    if (startsWith(bytes, IDENTIFIER_EXIF_APP1)) {
                         final long offset = start + IDENTIFIER_EXIF_APP1.length;
                         final byte[] value = Arrays.copyOfRange(bytes,
                                 IDENTIFIER_EXIF_APP1.length, bytes.length);
                         // Save offset values for handleThumbnailFromJfif() function
                         mExifOffset = (int) offset;
                         readExifSegment(value, imageType);
-                    } else if (ArrayUtils.startsWith(bytes, IDENTIFIER_XMP_APP1)) {
+                    } else if (startsWith(bytes, IDENTIFIER_XMP_APP1)) {
                         // See XMP Specification Part 3: Storage in Files, 1.1.3 JPEG, Table 6
                         final long offset = start + IDENTIFIER_XMP_APP1.length;
                         final byte[] value = Arrays.copyOfRange(bytes,
@@ -3527,7 +3529,7 @@ public class ExifInterface {
                     dataOutputStream.writeByte(MARKER);
                     dataOutputStream.writeByte(marker);
                     // Copy all the remaining data
-                    Streams.copy(dataInputStream, dataOutputStream);
+                    copy(dataInputStream, dataOutputStream);
                     return;
                 }
                 default: {
@@ -3605,7 +3607,7 @@ public class ExifInterface {
             dataOutputStream.writeInt((int) crc.getValue());
         }
         // Copy the rest of the file
-        Streams.copy(dataInputStream, dataOutputStream);
+        copy(dataInputStream, dataOutputStream);
     }
 
     // Reads the given EXIF byte area and save its tag data into attributes.
@@ -4864,65 +4866,5 @@ public class ExifInterface {
                 mAttributes[secondIfdType] = tempMap;
             }
         }
-    }
-
-    // Checks if there is a match
-    private boolean containsMatch(byte[] mainBytes, byte[] findBytes) {
-        for (int i = 0; i < mainBytes.length - findBytes.length; i++) {
-            for (int j = 0; j < findBytes.length; j++) {
-                if (mainBytes[i + j] != findBytes[j]) {
-                    break;
-                }
-                if (j == findBytes.length - 1) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Copies the given number of the bytes from {@code in} to {@code out}. Neither stream is
-     * closed.
-     */
-    private static void copy(InputStream in, OutputStream out, int numBytes) throws IOException {
-        int remainder = numBytes;
-        byte[] buffer = new byte[8192];
-        while (remainder > 0) {
-            int bytesToRead = Math.min(remainder, 8192);
-            int bytesRead = in.read(buffer, 0, bytesToRead);
-            if (bytesRead != bytesToRead) {
-                throw new IOException("Failed to copy the given amount of bytes from the input"
-                        + "stream to the output stream.");
-            }
-            remainder -= bytesRead;
-            out.write(buffer, 0, bytesRead);
-        }
-    }
-
-    /**
-     * Convert given int[] to long[]. If long[] is given, just return it.
-     * Return null for other types of input.
-     */
-    private static long[] convertToLongArray(Object inputObj) {
-        if (inputObj instanceof int[]) {
-            int[] input = (int[]) inputObj;
-            long[] result = new long[input.length];
-            for (int i = 0; i < input.length; i++) {
-                result[i] = input[i];
-            }
-            return result;
-        } else if (inputObj instanceof long[]) {
-            return (long[]) inputObj;
-        }
-        return null;
-    }
-
-    private static String byteArrayToHexString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder(bytes.length * 2);
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append(String.format("%02x", bytes[i]));
-        }
-        return sb.toString();
     }
 }

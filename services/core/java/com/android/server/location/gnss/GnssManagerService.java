@@ -524,8 +524,8 @@ public class GnssManagerService implements GnssNative.Callbacks {
     }
 
     @Override
-    public void psdsDownloadRequest() {
-        mGnssLocationProvider.psdsDownloadRequest();
+    public void psdsDownloadRequest(int psdsType) {
+        mGnssLocationProvider.psdsDownloadRequest(psdsType);
     }
 
     @Override

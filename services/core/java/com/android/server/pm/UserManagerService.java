@@ -2534,12 +2534,7 @@ public class UserManagerService extends IUserManager.Stub {
                     if (name.equals(TAG_USER)) {
                         String id = parser.getAttributeValue(null, ATTR_ID);
 
-                        int userId = Integer.parseInt(id);
-                        UserData userData = readUserLP(userId);
-                        if (userData == null && userId == UserHandle.USER_SYSTEM) {
-                            fallbackToSingleUserLP();
-                            return;
-                        }
+                        UserData userData = readUserLP(Integer.parseInt(id));
 
                         if (userData != null) {
                             synchronized (mUsersLock) {
@@ -3005,8 +3000,10 @@ public class UserManagerService extends IUserManager.Stub {
                     new AtomicFile(new File(mUsersDir, Integer.toString(id) + XML_SUFFIX));
             fis = userFile.openRead();
             return readUserLP(id, fis);
-        } catch (IOException | XmlPullParserException e) {
-            Slog.e(LOG_TAG, "Error reading user " + id + ": " + e);
+        } catch (IOException ioe) {
+            Slog.e(LOG_TAG, "Error reading user list");
+        } catch (XmlPullParserException pe) {
+            Slog.e(LOG_TAG, "Error reading user list");
         } finally {
             IoUtils.closeQuietly(fis);
         }

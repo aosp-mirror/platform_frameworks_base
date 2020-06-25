@@ -2575,11 +2575,17 @@ public class StatsPullAtomService extends SystemService {
                     lastHighWaterMark, section, true, statsFiles, procStats);
             procStats.dumpAggregatedProtoForStatsd(protoStreams, MAX_PROCSTATS_RAW_SHARD_SIZE);
 
-            for (ProtoOutputStream proto : protoStreams) {
-                if (proto.getBytes().length > 0) {
+            for (int i = 0; i < protoStreams.length; i++) {
+                byte[] bytes = protoStreams[i].getBytes(); // cache the value
+                if (bytes.length > 0) {
                     StatsEvent e = StatsEvent.newBuilder()
                             .setAtomId(atomTag)
-                            .writeByteArray(proto.getBytes())
+                            .writeByteArray(bytes)
+                            // This is a shard ID, and is specified in the metric definition to be
+                            // a dimension. This will result in statsd using RANDOM_ONE_SAMPLE to
+                            // keep all the shards, as it thinks each shard is a different dimension
+                            // of data.
+                            .writeInt(i)
                             .build();
                     pulledData.add(e);
                 }

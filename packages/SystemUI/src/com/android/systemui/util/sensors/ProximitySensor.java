@@ -323,7 +323,7 @@ public class ProximitySensor implements ThresholdSensor {
         private final AtomicBoolean mRegistered = new AtomicBoolean();
 
         @Inject
-        public ProximityCheck(ProximitySensor sensor, DelayableExecutor delayableExecutor) {
+        public ProximityCheck(ProximitySensor sensor, @Main DelayableExecutor delayableExecutor) {
             mSensor = sensor;
             mSensor.setTag("prox_check");
             mDelayableExecutor = delayableExecutor;

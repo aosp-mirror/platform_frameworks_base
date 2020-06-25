@@ -171,4 +171,8 @@
     <keyboard-layout android:name="keyboard_layout_mongolian"
             android:label="@string/keyboard_layout_mongolian"
             android:keyboardLayout="@raw/keyboard_layout_mongolian" />
+
+    <keyboard-layout android:name="keyboard_layout_georgian"
+            android:label="@string/keyboard_layout_georgian"
+            android:keyboardLayout="@raw/keyboard_layout_georgian" />
 </keyboard-layouts>
