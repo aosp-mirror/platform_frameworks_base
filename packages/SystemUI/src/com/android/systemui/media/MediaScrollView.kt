@@ -15,7 +15,10 @@ import com.android.systemui.util.animation.physicsAnimator
  * when only measuring children but not the parent, when trying to apply a new scroll position
  */
 class MediaScrollView @JvmOverloads constructor(
-    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+)
     : HorizontalScrollView(context, attrs, defStyleAttr) {
 
     lateinit var contentContainer: ViewGroup
@@ -38,6 +41,26 @@ class MediaScrollView @JvmOverloads constructor(
     }
 
     /**
+     * Convert between the absolute (left-to-right) and relative (start-to-end) scrollX of the media
+     * carousel.  The player indices are always relative (start-to-end) and the scrollView.scrollX
+     * is always absolute.  This function is its own inverse.
+     */
+    private fun transformScrollX(scrollX: Int): Int = if (isLayoutRtl) {
+        contentContainer.width - width - scrollX
+    } else {
+        scrollX
+    }
+
+    /**
+     * Get the layoutDirection-relative (start-to-end) scroll X position of the carousel.
+     */
+    var relativeScrollX: Int
+        get() = transformScrollX(scrollX)
+        set(value) {
+            scrollX = transformScrollX(value)
+        }
+
+    /**
      * Allow all scrolls to go through, use base implementation
      */
     override fun scrollTo(x: Int, y: Int) {
@@ -55,15 +78,15 @@ class MediaScrollView @JvmOverloads constructor(
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        var intercept = false;
+        var intercept = false
         touchListener?.let {
             intercept = it.onInterceptTouchEvent(ev)
         }
-        return super.onInterceptTouchEvent(ev) || intercept;
+        return super.onInterceptTouchEvent(ev) || intercept
     }
 
     override fun onTouchEvent(ev: MotionEvent?): Boolean {
-        var touch = false;
+        var touch = false
         touchListener?.let {
             touch = it.onTouchEvent(ev)
         }
@@ -75,9 +98,17 @@ class MediaScrollView @JvmOverloads constructor(
         contentContainer = getChildAt(0) as ViewGroup
     }
 
-    override fun overScrollBy(deltaX: Int, deltaY: Int, scrollX: Int, scrollY: Int,
-                              scrollRangeX: Int, scrollRangeY: Int, maxOverScrollX: Int,
-                              maxOverScrollY: Int, isTouchEvent: Boolean): Boolean {
+    override fun overScrollBy(
+        deltaX: Int,
+        deltaY: Int,
+        scrollX: Int,
+        scrollY: Int,
+        scrollRangeX: Int,
+        scrollRangeY: Int,
+        maxOverScrollX: Int,
+        maxOverScrollY: Int,
+        isTouchEvent: Boolean
+    ): Boolean {
         if (getContentTranslation() != 0.0f) {
             // When we're dismissing we ignore all the scrolling
             return false
