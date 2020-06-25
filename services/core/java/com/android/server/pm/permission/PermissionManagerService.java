@@ -330,13 +330,17 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             mPackageManagerInt.writeSettings(true);
         }
         @Override
-        public void onPermissionRevoked(int uid, int userId) {
+        public void onPermissionRevoked(int uid, int userId, String reason) {
             mOnPermissionChangeListeners.onPermissionsChanged(uid);
 
             // Critical; after this call the application should never have the permission
             mPackageManagerInt.writeSettings(false);
             final int appId = UserHandle.getAppId(uid);
-            mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
+            if (reason == null) {
+                mHandler.post(() -> killUid(appId, userId, KILL_APP_REASON_PERMISSIONS_REVOKED));
+            } else {
+                mHandler.post(() -> killUid(appId, userId, reason));
+            }
         }
         @Override
         public void onInstallPermissionRevoked() {
@@ -473,7 +477,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             IActivityManager am = ActivityManager.getService();
             if (am != null) {
                 try {
-                    am.killUid(appId, userId, reason);
+                    am.killUidForPermissionChange(appId, userId, reason);
                 } catch (RemoteException e) {
                     /* ignore - same process */
                 }
@@ -1529,19 +1533,21 @@ public class PermissionManagerService extends IPermissionManager.Stub {
     }
 
     @Override
-    public void revokeRuntimePermission(String packageName, String permName, int userId) {
+    public void revokeRuntimePermission(String packageName, String permName, int userId,
+            String reason) {
         final int callingUid = Binder.getCallingUid();
         final boolean overridePolicy =
                 checkUidPermission(ADJUST_RUNTIME_PERMISSIONS_POLICY, callingUid)
                         == PackageManager.PERMISSION_GRANTED;
 
         revokeRuntimePermissionInternal(permName, packageName, overridePolicy, callingUid, userId,
-                mDefaultPermissionCallback);
+                reason, mDefaultPermissionCallback);
     }
 
     // TODO swap permission name and package name
     private void revokeRuntimePermissionInternal(String permName, String packageName,
-            boolean overridePolicy, int callingUid, final int userId, PermissionCallback callback) {
+            boolean overridePolicy, int callingUid, final int userId, String reason,
+            PermissionCallback callback) {
         if (ApplicationPackageManager.DEBUG_TRACE_PERMISSION_UPDATES
                 && ApplicationPackageManager.shouldTraceGrant(packageName, permName, userId)) {
             Log.i(TAG, "System is revoking " + packageName + " "
@@ -1632,7 +1638,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
         if (callback != null) {
             callback.onPermissionRevoked(UserHandle.getUid(userId,
-                    UserHandle.getAppId(pkg.getUid())), userId);
+                    UserHandle.getAppId(pkg.getUid())), userId, reason);
         }
 
         if (bp.isRuntime()) {
@@ -1706,7 +1712,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                 mDefaultPermissionCallback.onInstallPermissionGranted();
             }
 
-            public void onPermissionRevoked(int uid, int userId) {
+            public void onPermissionRevoked(int uid, int userId, String reason) {
                 revokedPermissions.add(IntPair.of(uid, userId));
 
                 syncUpdatedUsers.add(userId);
@@ -1819,7 +1825,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
             } else if ((flags & FLAG_PERMISSION_REVIEW_REQUIRED) == 0) {
                 // Otherwise, reset the permission.
                 revokeRuntimePermissionInternal(permName, packageName, false, Process.SYSTEM_UID,
-                        userId, delayingPermCallback);
+                        userId, null, delayingPermCallback);
             }
         }
 
@@ -2300,7 +2306,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
 
                                 try {
                                     revokeRuntimePermissionInternal(permissionName, packageName,
-                                            false, callingUid, userId, permissionCallback);
+                                            false, callingUid, userId, null, permissionCallback);
                                 } catch (IllegalArgumentException e) {
                                     Slog.e(TAG, "Could not revoke " + permissionName + " from "
                                             + packageName, e);
@@ -3886,7 +3892,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                             PackageManagerServiceUtils.getPermissionsState(mPackageManagerInt,
                                     pkg);
                     if (!newPermissionsState.hasPermission(permission, userId)) {
-                        callback.onPermissionRevoked(pkg.getUid(), userId);
+                        callback.onPermissionRevoked(pkg.getUid(), userId, null);
                         break;
                     }
                 }
@@ -4245,7 +4251,7 @@ public class PermissionManagerService extends IPermissionManager.Stub {
                         overridePolicy,
                         Process.SYSTEM_UID,
                         userId,
-                        callback);
+                        null, callback);
             } catch (IllegalArgumentException e) {
                 Slog.e(TAG,
                         "Failed to revoke "
