@@ -858,8 +858,7 @@ final class AccessibilityController {
                 mTempLayer = 0;
                 mDisplayContent.forAllWindows((w) -> {
                     if (w.isOnScreen() && w.isVisibleLw()
-                            && (w.mAttrs.alpha != 0)
-                            && !w.mWinAnimator.mEnterAnimationPending) {
+                            && (w.mAttrs.alpha != 0)) {
                         mTempLayer++;
                         outWindows.put(mTempLayer, w);
                     }
