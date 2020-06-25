@@ -32,6 +32,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.settings.CurrentUserContextTracker;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -58,6 +59,8 @@ public class RecordingServiceTest extends SysuiTestCase {
     private Notification mNotification;
     @Mock
     private Executor mExecutor;
+    @Mock
+    private CurrentUserContextTracker mUserContextTracker;
 
     private RecordingService mRecordingService;
 
@@ -65,7 +68,7 @@ public class RecordingServiceTest extends SysuiTestCase {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         mRecordingService = Mockito.spy(new RecordingService(mController, mExecutor, mUiEventLogger,
-                mNotificationManager));
+                mNotificationManager, mUserContextTracker));
 
         // Return actual context info
         doReturn(mContext).when(mRecordingService).getApplicationContext();
@@ -80,6 +83,8 @@ public class RecordingServiceTest extends SysuiTestCase {
 
         doNothing().when(mRecordingService).startForeground(anyInt(), any());
         doReturn(mScreenMediaRecorder).when(mRecordingService).getRecorder();
+
+        doReturn(mContext).when(mUserContextTracker).getCurrentUserContext();
     }
 
     @Test
