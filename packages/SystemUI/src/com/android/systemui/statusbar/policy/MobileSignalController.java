@@ -640,8 +640,7 @@ public class MobileSignalController extends SignalController<
                         + " dataState=" + state.getDataRegistrationState());
             }
             mServiceState = state;
-            // onDisplayInfoChanged is invoked directly after onServiceStateChanged, so not calling
-            // updateTelephony() to prevent icon flickering in case of overrides.
+            updateTelephony();
         }
 
         @Override
@@ -651,10 +650,6 @@ public class MobileSignalController extends SignalController<
                         + " type=" + networkType);
             }
             mDataState = state;
-            if (networkType != mTelephonyDisplayInfo.getNetworkType()) {
-                mTelephonyDisplayInfo = new TelephonyDisplayInfo(networkType,
-                        TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NONE);
-            }
             updateTelephony();
         }
 
