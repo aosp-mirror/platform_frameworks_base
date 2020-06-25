@@ -49,8 +49,15 @@ public class ContextUserIdCheckerTest {
                         "@SystemService(\"foo\") public class FooManager {",
                         "  Context mContext;",
                         "  IFooService mService;",
+                        "  final int mUserId;",
+                        "  FooManager(Context context) {",
+                        "    mUserId = mContext.getUserId();",
+                        "  }",
                         "  void bar() throws RemoteException {",
                         "    mService.baz(null, mContext.getUserId());",
+                        "  }",
+                        "  void baz() throws RemoteException {",
+                        "    mService.baz(null, mUserId);",
                         "  }",
                         "}")
                 .doTest();
@@ -63,11 +70,13 @@ public class ContextUserIdCheckerTest {
                 .addSourceFile("/android/content/Context.java")
                 .addSourceFile("/android/foo/IFooService.java")
                 .addSourceFile("/android/os/IInterface.java")
+                .addSourceFile("/android/os/UserHandle.java")
                 .addSourceFile("/android/os/RemoteException.java")
                 .addSourceLines("FooManager.java",
                         "import android.annotation.SystemService;",
                         "import android.content.Context;",
                         "import android.foo.IFooService;",
+                        "import android.os.UserHandle;",
                         "import android.os.RemoteException;",
                         "@SystemService(\"foo\") public class FooManager {",
                         "  Context mContext;",
@@ -75,6 +84,10 @@ public class ContextUserIdCheckerTest {
                         "  void bar() throws RemoteException {",
                         "    // BUG: Diagnostic contains:",
                         "    mService.baz(null, 0);",
+                        "  }",
+                        "  void baz() throws RemoteException {",
+                        "    // BUG: Diagnostic contains:",
+                        "    mService.baz(null, UserHandle.myUserId());",
                         "  }",
                         "}")
                 .doTest();

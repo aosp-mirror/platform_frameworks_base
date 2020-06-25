@@ -17,6 +17,7 @@
 package com.google.errorprone.bugpatterns.android;
 
 import static com.google.errorprone.BugPattern.SeverityLevel.WARNING;
+import static com.google.errorprone.bugpatterns.android.UidChecker.getFlavor;
 import static com.google.errorprone.matchers.Matchers.enclosingClass;
 import static com.google.errorprone.matchers.Matchers.hasAnnotation;
 import static com.google.errorprone.matchers.Matchers.instanceMethod;
@@ -27,17 +28,17 @@ import com.google.errorprone.BugPattern;
 import com.google.errorprone.VisitorState;
 import com.google.errorprone.bugpatterns.BugChecker;
 import com.google.errorprone.bugpatterns.BugChecker.MethodInvocationTreeMatcher;
+import com.google.errorprone.bugpatterns.android.UidChecker.Flavor;
 import com.google.errorprone.matchers.Description;
 import com.google.errorprone.matchers.Matcher;
 import com.google.errorprone.util.ASTHelpers;
 import com.sun.source.tree.ExpressionTree;
+import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 
 import java.util.List;
-import java.util.Locale;
-import java.util.function.Predicate;
 
 /**
  * To avoid an explosion of {@code startActivityForUser} style methods, we've
@@ -62,39 +63,34 @@ public final class ContextUserIdChecker extends BugChecker implements MethodInvo
     private static final Matcher<ExpressionTree> GET_USER_ID_CALL = methodInvocation(
             instanceMethod().onDescendantOf("android.content.Context").named("getUserId"));
 
+    private static final Matcher<ExpressionTree> USER_ID_FIELD = new Matcher<ExpressionTree>() {
+        @Override
+        public boolean matches(ExpressionTree tree, VisitorState state) {
+            if (tree instanceof IdentifierTree) {
+                return "mUserId".equals((((IdentifierTree) tree).getName().toString()));
+            }
+            return false;
+        }
+    };
+
     @Override
     public Description matchMethodInvocation(MethodInvocationTree tree, VisitorState state) {
         if (INSIDE_MANAGER.matches(tree, state)
                 && BINDER_CALL.matches(tree, state)) {
             final List<VarSymbol> vars = ASTHelpers.getSymbol(tree).params();
             for (int i = 0; i < vars.size(); i++) {
-                if (USER_ID_VAR.test(vars.get(i)) &&
-                        !GET_USER_ID_CALL.matches(tree.getArguments().get(i), state)) {
+                final Flavor varFlavor = getFlavor(vars.get(i));
+                final ExpressionTree arg = tree.getArguments().get(i);
+                if (varFlavor == Flavor.USER_ID &&
+                        !GET_USER_ID_CALL.matches(arg, state) &&
+                        !USER_ID_FIELD.matches(arg, state)) {
                     return buildDescription(tree)
                             .setMessage("Must pass Context.getUserId() as user ID"
-                                    + "to enable createContextAsUser()")
+                                    + " to enable createContextAsUser()")
                             .build();
                 }
             }
         }
         return Description.NO_MATCH;
-    }
-
-    private static final UserIdMatcher USER_ID_VAR = new UserIdMatcher();
-
-    private static class UserIdMatcher implements Predicate<VarSymbol> {
-        @Override
-        public boolean test(VarSymbol t) {
-            if ("int".equals(t.type.toString())) {
-                switch (t.name.toString().toLowerCase(Locale.ROOT)) {
-                    case "user":
-                    case "userid":
-                    case "userhandle":
-                    case "user_id":
-                        return true;
-                }
-            }
-            return false;
-        }
     }
 }
