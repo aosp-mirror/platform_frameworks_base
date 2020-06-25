@@ -27,7 +27,7 @@
 #include <inttypes.h>
 #include <media/NdkImage.h>
 #include <media/NdkImageReader.h>
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include <pipeline/skia/ShaderCache.h>
 #include <private/EGL/cache.h>
 #include <renderthread/CanvasContext.h>

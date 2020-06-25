@@ -134,7 +134,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
                         hdrCapabilities, isDefaultDisplay);
                 mDevices.put(physicalDisplayId, device);
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_ADDED);
-            } else if (device.updateDisplayProperties(configs, activeConfig,
+            } else if (device.updateDisplayPropertiesLocked(configs, activeConfig,
                     configSpecs, colorModes, activeColorMode, hdrCapabilities)) {
                 sendDisplayDeviceEventLocked(device, DISPLAY_DEVICE_EVENT_CHANGED);
             }
@@ -213,7 +213,7 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             mPhysicalDisplayId = physicalDisplayId;
             mIsDefaultDisplay = isDefaultDisplay;
             mDisplayInfo = info;
-            updateDisplayProperties(configs, activeConfigId, configSpecs, colorModes,
+            updateDisplayPropertiesLocked(configs, activeConfigId, configSpecs, colorModes,
                     activeColorMode, hdrCapabilities);
             mSidekickInternal = LocalServices.getService(SidekickInternal.class);
             if (mIsDefaultDisplay) {
@@ -238,12 +238,15 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         /**
          * Returns true if there is a change.
          **/
-        public boolean updateDisplayProperties(SurfaceControl.DisplayConfig[] configs,
+        public boolean updateDisplayPropertiesLocked(SurfaceControl.DisplayConfig[] configs,
                 int activeConfigId, SurfaceControl.DesiredDisplayConfigSpecs configSpecs,
                 int[] colorModes, int activeColorMode, Display.HdrCapabilities hdrCapabilities) {
             boolean changed = updateDisplayConfigsLocked(configs, activeConfigId, configSpecs);
             changed |= updateColorModesLocked(colorModes, activeColorMode);
             changed |= updateHdrCapabilitiesLocked(hdrCapabilities);
+            if (changed) {
+                mHavePendingChanges = true;
+            }
             return changed;
         }
 
@@ -327,8 +330,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (!recordsChanged) {
                 return false;
             }
-            // Update the index of modes.
-            mHavePendingChanges = true;
 
             mSupportedModes.clear();
             for (DisplayModeRecord record : records) {
@@ -442,8 +443,6 @@ final class LocalDisplayAdapter extends DisplayAdapter {
             if (!colorModesChanged) {
                 return false;
             }
-
-            mHavePendingChanges = true;
 
             mSupportedColorModes.clear();
             mSupportedColorModes.addAll(pendingColorModes);

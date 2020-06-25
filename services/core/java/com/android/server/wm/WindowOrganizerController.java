@@ -428,6 +428,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         try {
             callback.onTransactionReady(mSyncId, mergedTransaction);
         } catch (RemoteException e) {
+            // If there's an exception when trying to send the mergedTransaction to the client, we
+            // should immediately apply it here so the transactions aren't lost.
+            mergedTransaction.apply();
         }
 
         mTransactionCallbacksByPendingSyncId.remove(mSyncId);

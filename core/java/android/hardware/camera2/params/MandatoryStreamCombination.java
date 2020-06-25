@@ -685,6 +685,12 @@ public final class MandatoryStreamCombination {
                 "Standard still image capture"),
     };
 
+    private static StreamCombinationTemplate sConcurrentDepthOnlyStreamCombinations[] = {
+        new StreamCombinationTemplate(new StreamTemplate [] {
+                new StreamTemplate(ImageFormat.DEPTH16, SizeThreshold.VGA) },
+                "Depth capture for mesh based object rendering"),
+    };
+
     /**
      * Helper builder class to generate a list of available mandatory stream combinations.
      * @hide
@@ -729,19 +735,21 @@ public final class MandatoryStreamCombination {
                 getAvailableMandatoryConcurrentStreamCombinations() {
             // Since concurrent streaming support is optional, we mandate these stream
             // combinations regardless of camera device capabilities.
+
+            StreamCombinationTemplate []chosenStreamCombinations = sConcurrentStreamCombinations;
             if (!isColorOutputSupported()) {
-                Log.v(TAG, "Device is not backward compatible!");
-                throw new IllegalArgumentException("Camera device which is not BACKWARD_COMPATIBLE"
-                         + " cannot have mandatory concurrent streams");
+                Log.v(TAG, "Device is not backward compatible, depth streams are mandatory!");
+                chosenStreamCombinations = sConcurrentDepthOnlyStreamCombinations;
             }
+            Size sizeVGAp = new Size(640, 480);
             Size size720p = new Size(1280, 720);
             Size size1440p = new Size(1920, 1440);
 
             ArrayList<MandatoryStreamCombination> availableConcurrentStreamCombinations =
                     new ArrayList<MandatoryStreamCombination>();
             availableConcurrentStreamCombinations.ensureCapacity(
-                    sConcurrentStreamCombinations.length);
-            for (StreamCombinationTemplate combTemplate : sConcurrentStreamCombinations) {
+                    chosenStreamCombinations.length);
+            for (StreamCombinationTemplate combTemplate : chosenStreamCombinations) {
                 ArrayList<MandatoryStreamInformation> streamsInfo =
                         new ArrayList<MandatoryStreamInformation>();
                 streamsInfo.ensureCapacity(combTemplate.mStreamTemplates.length);
@@ -752,6 +760,9 @@ public final class MandatoryStreamCombination {
                     switch (template.mSizeThreshold) {
                         case s1440p:
                             formatSize = size1440p;
+                            break;
+                        case VGA:
+                            formatSize = sizeVGAp;
                             break;
                         default:
                             formatSize = size720p;
