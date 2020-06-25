@@ -422,6 +422,9 @@ public class AudioService extends IAudioService.Stub
 
     private final boolean mUseFixedVolume;
 
+    // If absolute volume is supported in AVRCP device
+    private volatile boolean mAvrcpAbsVolSupported = false;
+
     /**
     * Default stream type used for volume control in the absence of playback
     * e.g. user on homescreen, no app playing anything, presses hardware volume buttons, this
@@ -4994,7 +4997,7 @@ public class AudioService extends IAudioService.Stub
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE_MULTI_MODE;
         }
         if (audioSystemDeviceOut == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP
-                && mDeviceBroker.isAvrcpAbsoluteVolumeSupported()) {
+                && mAvrcpAbsVolSupported) {
             return AudioManager.DEVICE_VOLUME_BEHAVIOR_ABSOLUTE;
         }
         return AudioManager.DEVICE_VOLUME_BEHAVIOR_VARIABLE;
@@ -5687,12 +5690,12 @@ public class AudioService extends IAudioService.Stub
         }
 
         // must be called while synchronized VolumeStreamState.class
-        /*package*/ void applyDeviceVolume_syncVSS(int device, boolean isAvrcpAbsVolSupported) {
+        /*package*/ void applyDeviceVolume_syncVSS(int device) {
             int index;
             if (isFullyMuted()) {
                 index = 0;
             } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
-                    && isAvrcpAbsVolSupported) {
+                    && mAvrcpAbsVolSupported) {
                 index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
             } else if (isFullVolumeDevice(device)) {
                 index = (mIndexMax + 5)/10;
@@ -5705,7 +5708,6 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void applyAllVolumes() {
-            final boolean isAvrcpAbsVolSupported = mDeviceBroker.isAvrcpAbsoluteVolumeSupported();
             synchronized (VolumeStreamState.class) {
                 // apply device specific volumes first
                 int index;
@@ -5715,7 +5717,7 @@ public class AudioService extends IAudioService.Stub
                         if (isFullyMuted()) {
                             index = 0;
                         } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)
-                                && isAvrcpAbsVolSupported) {
+                                && mAvrcpAbsVolSupported) {
                             index = getAbsoluteVolumeIndex((getIndex(device) + 5)/10);
                         } else if (isFullVolumeDevice(device)) {
                             index = (mIndexMax + 5)/10;
@@ -5955,7 +5957,6 @@ public class AudioService extends IAudioService.Stub
         }
 
         public void checkFixedVolumeDevices() {
-            final boolean isAvrcpAbsVolSupported = mDeviceBroker.isAvrcpAbsoluteVolumeSupported();
             synchronized (VolumeStreamState.class) {
                 // ignore settings for fixed volume devices: volume should always be at max or 0
                 if (mStreamVolumeAlias[mStreamType] == AudioSystem.STREAM_MUSIC) {
@@ -5966,7 +5967,7 @@ public class AudioService extends IAudioService.Stub
                                 || (isFixedVolumeDevice(device) && index != 0)) {
                             mIndexMap.put(device, mIndexMax);
                         }
-                        applyDeviceVolume_syncVSS(device, isAvrcpAbsVolSupported);
+                        applyDeviceVolume_syncVSS(device);
                     }
                 }
             }
@@ -6130,11 +6131,9 @@ public class AudioService extends IAudioService.Stub
 
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
 
-        final boolean isAvrcpAbsVolSupported = mDeviceBroker.isAvrcpAbsoluteVolumeSupported();
-
         synchronized (VolumeStreamState.class) {
             // Apply volume
-            streamState.applyDeviceVolume_syncVSS(device, isAvrcpAbsVolSupported);
+            streamState.applyDeviceVolume_syncVSS(device);
 
             // Apply change to all streams using this one as alias
             int numStreamTypes = AudioSystem.getNumStreamTypes();
@@ -6144,13 +6143,11 @@ public class AudioService extends IAudioService.Stub
                     // Make sure volume is also maxed out on A2DP device for aliased stream
                     // that may have a different device selected
                     int streamDevice = getDeviceForStream(streamType);
-                    if ((device != streamDevice) && isAvrcpAbsVolSupported
+                    if ((device != streamDevice) && mAvrcpAbsVolSupported
                             && AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)) {
-                        mStreamStates[streamType].applyDeviceVolume_syncVSS(device,
-                                isAvrcpAbsVolSupported);
+                        mStreamStates[streamType].applyDeviceVolume_syncVSS(device);
                     }
-                    mStreamStates[streamType].applyDeviceVolume_syncVSS(streamDevice,
-                            isAvrcpAbsVolSupported);
+                    mStreamStates[streamType].applyDeviceVolume_syncVSS(streamDevice);
                 }
             }
         }
@@ -6458,6 +6455,7 @@ public class AudioService extends IAudioService.Stub
         // address is not used for now, but may be used when multiple a2dp devices are supported
         sVolumeLogger.log(new AudioEventLogger.StringEvent("avrcpSupportsAbsoluteVolume addr="
                 + address + " support=" + support));
+        mAvrcpAbsVolSupported = support;
         mDeviceBroker.setAvrcpAbsoluteVolumeSupported(support);
         sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
                     AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP, 0,
@@ -7415,8 +7413,7 @@ public class AudioService extends IAudioService.Stub
         pw.print("  mCameraSoundForced="); pw.println(mCameraSoundForced);
         pw.print("  mHasVibrator="); pw.println(mHasVibrator);
         pw.print("  mVolumePolicy="); pw.println(mVolumePolicy);
-        pw.print("  mAvrcpAbsVolSupported=");
-        pw.println(mDeviceBroker.isAvrcpAbsoluteVolumeSupported());
+        pw.print("  mAvrcpAbsVolSupported="); pw.println(mAvrcpAbsVolSupported);
         pw.print("  mIsSingleVolume="); pw.println(mIsSingleVolume);
         pw.print("  mUseFixedVolume="); pw.println(mUseFixedVolume);
         pw.print("  mFixedVolumeDevices="); pw.println(dumpDeviceTypes(mFixedVolumeDevices));
