@@ -365,6 +365,10 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     void flingToSnapTarget(
             float velocityX, float velocityY,
             @Nullable Runnable updateAction, @Nullable Runnable endAction) {
+        // If we're flinging to a snap target now, we're not springing to catch up to the touch
+        // location now.
+        mSpringingToTouch = false;
+
         mTemporaryBoundsPhysicsAnimator
                 .spring(FloatProperties.RECT_WIDTH, mBounds.width(), mSpringConfig)
                 .spring(FloatProperties.RECT_HEIGHT, mBounds.height(), mSpringConfig)
