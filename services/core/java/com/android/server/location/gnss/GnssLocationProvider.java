@@ -844,9 +844,10 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
             if (data == null) {
                 // try again later
-                // since this is delayed and not urgent we do not hold a wake lock her
+                // since this is delayed and not urgent we do not hold a wake lock here
+                // the arg2 below should not be 1 otherwise the wakelock will be under-locked.
                 mHandler.sendMessageDelayed(
-                        mHandler.obtainMessage(DOWNLOAD_PSDS_DATA, psdsType, 1, null),
+                        mHandler.obtainMessage(DOWNLOAD_PSDS_DATA, psdsType, 0, null),
                         mPsdsBackOff.nextBackoffMillis());
             }
 
