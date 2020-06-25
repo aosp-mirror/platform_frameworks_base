@@ -368,6 +368,10 @@ public class BubbleData {
 
         final Predicate<Bubble> invalidBubblesFromPackage = bubble -> {
             final boolean bubbleIsFromPackage = packageName.equals(bubble.getPackageName());
+            final boolean isShortcutBubble = bubble.hasMetadataShortcutId();
+            if (!bubbleIsFromPackage || !isShortcutBubble) {
+                return false;
+            }
             final boolean hasShortcutIdAndValidShortcut =
                     bubble.hasMetadataShortcutId()
                             && bubble.getShortcutInfo() != null
