@@ -95,6 +95,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
             mSelectableTargetInfoCommunicator;
 
     private int mNumShortcutResults = 0;
+    private Map<DisplayResolveInfo, LoadIconTask> mIconLoaders = new HashMap<>();
 
     // Reserve spots for incoming direct share targets by adding placeholders
     private ChooserTargetInfo
@@ -239,11 +240,42 @@ public class ChooserListAdapter extends ResolverListAdapter {
 
     @Override
     protected void onBindView(View view, TargetInfo info, int position) {
-        super.onBindView(view, info, position);
-        if (info == null) return;
+        final ViewHolder holder = (ViewHolder) view.getTag();
+        if (info == null) {
+            holder.icon.setImageDrawable(
+                    mContext.getDrawable(R.drawable.resolver_icon_placeholder));
+            return;
+        }
+
+        if (!(info instanceof DisplayResolveInfo)) {
+            holder.bindLabel(info.getDisplayLabel(), info.getExtendedInfo(), alwaysShowSubLabel());
+            holder.bindIcon(info);
+
+            if (info instanceof SelectableTargetInfo) {
+                // direct share targets should append the application name for a better readout
+                DisplayResolveInfo rInfo = ((SelectableTargetInfo) info).getDisplayResolveInfo();
+                CharSequence appName = rInfo != null ? rInfo.getDisplayLabel() : "";
+                CharSequence extendedInfo = info.getExtendedInfo();
+                String contentDescription = String.join(" ", info.getDisplayLabel(),
+                        extendedInfo != null ? extendedInfo : "", appName);
+                holder.updateContentDescription(contentDescription);
+            }
+        } else {
+            DisplayResolveInfo dri = (DisplayResolveInfo) info;
+            holder.bindLabel(dri.getDisplayLabel(), dri.getExtendedInfo(), alwaysShowSubLabel());
+            LoadIconTask task = mIconLoaders.get(dri);
+            if (task == null) {
+                task = new LoadIconTask(dri, holder);
+                mIconLoaders.put(dri, task);
+                task.execute();
+            } else {
+                // The holder was potentially changed as the underlying items were
+                // reshuffled, so reset the target holder
+                task.setViewHolder(holder);
+            }
+        }
 
         // If target is loading, show a special placeholder shape in the label, make unclickable
-        final ViewHolder holder = (ViewHolder) view.getTag();
         if (info instanceof ChooserActivity.PlaceHolderTargetInfo) {
             final int maxWidth = mContext.getResources().getDimensionPixelSize(
                     R.dimen.chooser_direct_share_label_placeholder_max_width);
