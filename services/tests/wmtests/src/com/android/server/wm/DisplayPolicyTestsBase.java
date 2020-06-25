@@ -27,7 +27,7 @@ import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import static org.junit.Assert.assertEquals;
@@ -68,7 +68,8 @@ public class DisplayPolicyTestsBase extends WindowTestsBase {
 
     @Before
     public void setUpDisplayPolicy() {
-        mDisplayPolicy = spy(mDisplayContent.getDisplayPolicy());
+        mDisplayPolicy = mDisplayContent.getDisplayPolicy();
+        spyOn(mDisplayPolicy);
 
         final TestContextWrapper context = new TestContextWrapper(
                 mDisplayPolicy.getContext(), mDisplayPolicy.getCurrentUserResources());
