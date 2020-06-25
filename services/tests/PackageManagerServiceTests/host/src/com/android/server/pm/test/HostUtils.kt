@@ -22,10 +22,16 @@ import java.io.File
 import java.io.FileOutputStream
 
 internal fun SystemPreparer.pushApk(file: String, partition: Partition) =
-        pushResourceFile(file, HostUtils.makePathForApk(file, partition))
+        pushResourceFile(file, HostUtils.makePathForApk(file, partition).toString())
 
-internal fun SystemPreparer.deleteApk(file: String, partition: Partition) =
-        deleteFile(partition.baseFolder.resolve(file.removeSuffix(".apk")).toString())
+internal fun SystemPreparer.deleteApkFolders(
+    partition: Partition,
+    vararg javaResourceNames: String
+) = apply {
+    javaResourceNames.forEach {
+        deleteFile(partition.baseAppFolder.resolve(it.removeSuffix(".apk")).toString())
+    }
+}
 
 internal object HostUtils {
 
@@ -40,10 +46,9 @@ internal object HostUtils {
             makePathForApk(File(fileName), partition)
 
     fun makePathForApk(file: File, partition: Partition) =
-            partition.baseFolder
+            partition.baseAppFolder
                     .resolve(file.nameWithoutExtension)
                     .resolve(file.name)
-                    .toString()
 
     fun copyResourceToHostFile(javaResourceName: String, file: File): File {
         javaClass.classLoader!!.getResource(javaResourceName).openStream().use { input ->
