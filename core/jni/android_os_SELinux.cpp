@@ -21,7 +21,7 @@
 
 #include <utils/Log.h>
 
-#include <nativehelper/JNIHelp.h>
+#include <nativehelper/JNIPlatformHelp.h>
 #include "jni.h"
 #include "core_jni_helpers.h"
 #include "selinux/selinux.h"
