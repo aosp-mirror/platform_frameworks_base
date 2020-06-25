@@ -20,9 +20,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 import com.android.ddmlib.Log;
 import com.android.tests.rollback.host.AbandonSessionsRule;
+import com.android.tests.util.ModuleTestUtils;
 import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
 import com.android.tradefed.testtype.junit4.BaseHostJUnit4Test;
 import com.android.tradefed.util.ProcessInfo;
@@ -33,6 +35,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.File;
+
 @RunWith(DeviceJUnit4ClassRunner.class)
 public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
@@ -41,6 +45,10 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
 
     @Rule
     public AbandonSessionsRule mHostTestRule = new AbandonSessionsRule(this);
+    private static final String SHIM_V2 = "com.android.apex.cts.shim.v2.apex";
+    private static final String APK_A = "TestAppAv1.apk";
+
+    private final ModuleTestUtils mTestUtils = new ModuleTestUtils(this);
 
     /**
      * Runs the given phase of a test by calling into the device.
@@ -80,6 +88,58 @@ public class StagedInstallInternalTest extends BaseHostJUnit4Test {
         runPhase("testSystemServerRestartDoesNotAffectStagedSessions_Commit");
         restartSystemServer();
         runPhase("testSystemServerRestartDoesNotAffectStagedSessions_Verify");
+    }
+
+    @Test
+    public void testAdbStagedInstallWaitForReadyFlagWorks() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mTestUtils.isApexUpdateSupported());
+
+        File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        String output = getDevice().executeAdbCommand("install", "--staged",
+                "--wait-for-staged-ready", "60000", apexFile.getAbsolutePath());
+        assertThat(output).contains("Reboot device to apply staged session");
+        String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isNotEmpty();
+    }
+
+    @Test
+    public void testAdbStagedInstallNoWaitFlagWorks() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mTestUtils.isApexUpdateSupported());
+
+        File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        String output = getDevice().executeAdbCommand("install", "--staged",
+                "--no-wait", apexFile.getAbsolutePath());
+        assertThat(output).doesNotContain("Reboot device to apply staged session");
+        assertThat(output).contains("Success");
+        String sessionId = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").trim();
+        assertThat(sessionId).isEmpty();
+    }
+
+    @Test
+    public void testAdbInstallMultiPackageCommandWorks() throws Exception {
+        assumeTrue("Device does not support updating APEX",
+                mTestUtils.isApexUpdateSupported());
+
+        File apexFile = mTestUtils.getTestFile(SHIM_V2);
+        File apkFile = mTestUtils.getTestFile(APK_A);
+        String output = getDevice().executeAdbCommand("install-multi-package",
+                apexFile.getAbsolutePath(), apkFile.getAbsolutePath());
+        assertThat(output).contains("Created parent session");
+        assertThat(output).contains("Created child session");
+        assertThat(output).contains("Success. Reboot device to apply staged session");
+
+        // Ensure there is only one parent session
+        String[] sessionIds = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-parent --only-sessionid").split("\n");
+        assertThat(sessionIds.length).isEqualTo(1);
+        // Ensure there are two children session
+        sessionIds = getDevice().executeShellCommand(
+                "pm get-stagedsessions --only-ready --only-sessionid").split("\n");
+        assertThat(sessionIds.length).isEqualTo(3);
     }
 
     private void restartSystemServer() throws Exception {
