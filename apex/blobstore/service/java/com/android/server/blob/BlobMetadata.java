@@ -398,6 +398,26 @@ class BlobMetadata {
         return revocableFd.getRevocableFileDescriptor();
     }
 
+    void destroy() {
+        revokeAllFds();
+        getBlobFile().delete();
+    }
+
+    private void revokeAllFds() {
+        synchronized (mRevocableFds) {
+            for (int i = 0, pkgCount = mRevocableFds.size(); i < pkgCount; ++i) {
+                final ArraySet<RevocableFileDescriptor> packageFds =
+                        mRevocableFds.valueAt(i);
+                if (packageFds == null) {
+                    continue;
+                }
+                for (int j = 0, fdCount = packageFds.size(); j < fdCount; ++j) {
+                    packageFds.valueAt(j).revoke();
+                }
+            }
+        }
+    }
+
     boolean shouldBeDeleted(boolean respectLeaseWaitTime) {
         // Expired data blobs
         if (getBlobHandle().isExpired()) {
