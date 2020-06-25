@@ -32,6 +32,7 @@ import static android.text.format.Formatter.formatFileSize;
 
 import static com.android.server.blob.BlobStoreConfig.TAG;
 import static com.android.server.blob.BlobStoreConfig.XML_VERSION_ADD_SESSION_CREATION_TIME;
+import static com.android.server.blob.BlobStoreConfig.getMaxPermittedPackages;
 import static com.android.server.blob.BlobStoreConfig.hasSessionExpired;
 
 import android.annotation.BytesLong;
@@ -43,7 +44,9 @@ import android.app.blob.IBlobStoreSession;
 import android.content.Context;
 import android.os.Binder;
 import android.os.FileUtils;
+import android.os.LimitExceededException;
 import android.os.ParcelFileDescriptor;
+import android.os.ParcelableException;
 import android.os.RemoteException;
 import android.os.RevocableFileDescriptor;
 import android.os.Trace;
@@ -76,7 +79,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
-/** TODO: add doc */
+/**
+ * Class to represent the state corresponding to an ongoing
+ * {@link android.app.blob.BlobStoreManager.Session}
+ */
 @VisibleForTesting
 class BlobStoreSession extends IBlobStoreSession.Stub {
 
@@ -326,6 +332,11 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
                 throw new IllegalStateException("Not allowed to change access type in state: "
                         + stateToString(mState));
             }
+            if (mBlobAccessMode.getNumWhitelistedPackages() >= getMaxPermittedPackages()) {
+                throw new ParcelableException(new LimitExceededException(
+                        "Too many packages permitted to access the blob: "
+                                + mBlobAccessMode.getNumWhitelistedPackages()));
+            }
             mBlobAccessMode.allowPackageAccess(packageName, certificate);
         }
     }
@@ -466,6 +477,11 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
             }
             mListener.onStateChanged(this);
         }
+    }
+
+    void destroy() {
+        revokeAllFds();
+        getSessionFile().delete();
     }
 
     private void revokeAllFds() {

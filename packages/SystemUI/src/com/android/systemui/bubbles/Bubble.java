@@ -71,6 +71,7 @@ class Bubble implements BubbleViewProvider {
     // Items that are typically loaded later
     private String mAppName;
     private ShortcutInfo mShortcutInfo;
+    private String mMetadataShortcutId;
     private BadgedImageView mIconView;
     private BubbleExpandedView mExpandedView;
 
@@ -136,6 +137,7 @@ class Bubble implements BubbleViewProvider {
             final int desiredHeight, final int desiredHeightResId, @Nullable final String title) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(shortcutInfo);
+        mMetadataShortcutId = shortcutInfo.getId();
         mShortcutInfo = shortcutInfo;
         mKey = key;
         mFlags = 0;
@@ -216,6 +218,14 @@ class Bubble implements BubbleViewProvider {
     @Nullable
     public String getTitle() {
         return mTitle;
+    }
+
+    String getMetadataShortcutId() {
+        return mMetadataShortcutId;
+    }
+
+    boolean hasMetadataShortcutId() {
+        return (mMetadataShortcutId != null && !mMetadataShortcutId.isEmpty());
     }
 
     /**
@@ -350,9 +360,9 @@ class Bubble implements BubbleViewProvider {
         mAppUid = entry.getSbn().getUid();
         mInstanceId = entry.getSbn().getInstanceId();
         mFlyoutMessage = BubbleViewInfoTask.extractFlyoutMessage(entry);
-        mShortcutInfo = (entry.getBubbleMetadata() != null
-                && entry.getBubbleMetadata().getShortcutId() != null
-                && entry.getRanking() != null) ? entry.getRanking().getShortcutInfo() : null;
+        mShortcutInfo = (entry.getRanking() != null ? entry.getRanking().getShortcutInfo() : null);
+        mMetadataShortcutId = (entry.getBubbleMetadata() != null
+                ? entry.getBubbleMetadata().getShortcutId() : null);
         if (entry.getRanking() != null) {
             mIsVisuallyInterruptive = entry.getRanking().visuallyInterruptive();
         }
