@@ -564,16 +564,23 @@ final class TaskDisplayArea extends DisplayArea<ActivityStack> {
             // Apps and their containers are not allowed to specify an orientation while using
             // root tasks...except for the home stack if it is not resizable and currently
             // visible (top of) its root task.
-            if (mRootHomeTask != null && mRootHomeTask.isVisible()
-                    && !mRootHomeTask.isResizeable()) {
+            if (mRootHomeTask != null && !mRootHomeTask.isResizeable()) {
                 // Manually nest one-level because because getOrientation() checks fillsParent()
                 // which checks that requestedOverrideBounds() is empty. However, in this case,
                 // it is not empty because it's been overridden to maintain the fullscreen size
                 // within a smaller split-root.
                 final Task topHomeTask = mRootHomeTask.getTopMostTask();
-                final int orientation = topHomeTask.getOrientation();
-                if (orientation != SCREEN_ORIENTATION_UNSET) {
-                    return orientation;
+                final ActivityRecord topHomeActivity = topHomeTask.getTopNonFinishingActivity();
+                // If a home activity is in the process of launching and isn't yet visible we
+                // should still respect the stack's preferred orientation to ensure rotation occurs
+                // before the home activity finishes launching.
+                final boolean isHomeActivityLaunching = topHomeActivity != null
+                        && topHomeActivity.mVisibleRequested;
+                if (topHomeTask.isVisible() || isHomeActivityLaunching) {
+                    final int orientation = topHomeTask.getOrientation();
+                    if (orientation != SCREEN_ORIENTATION_UNSET) {
+                        return orientation;
+                    }
                 }
             }
             return SCREEN_ORIENTATION_UNSPECIFIED;
