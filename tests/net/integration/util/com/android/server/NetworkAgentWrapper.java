@@ -24,7 +24,7 @@ import static android.net.NetworkCapabilities.TRANSPORT_VPN;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI_AWARE;
 
-import static com.android.server.ConnectivityServiceTestUtilsKt.transportToLegacyType;
+import static com.android.server.ConnectivityServiceTestUtils.transportToLegacyType;
 
 import static junit.framework.Assert.assertTrue;
 
@@ -49,7 +49,7 @@ import android.os.Message;
 import android.util.Log;
 
 import com.android.server.connectivity.ConnectivityConstants;
-import com.android.testutils.HandlerUtilsKt;
+import com.android.testutils.HandlerUtils;
 import com.android.testutils.TestableNetworkCallback;
 
 import java.util.Set;
@@ -265,6 +265,6 @@ public class NetworkAgentWrapper implements TestableNetworkCallback.HasNetwork {
     }
 
     public void waitForIdle(long timeoutMs) {
-        HandlerUtilsKt.waitForIdle(mHandlerThread, timeoutMs);
+        HandlerUtils.waitForIdle(mHandlerThread, timeoutMs);
     }
 }
