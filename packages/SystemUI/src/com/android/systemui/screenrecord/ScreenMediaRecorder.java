@@ -166,7 +166,7 @@ public class ScreenMediaRecorder {
                 mAudioSource == MIC_AND_INTERNAL) {
             mTempAudioFile = File.createTempFile("temp", ".aac",
                     mContext.getCacheDir());
-            mAudio = new ScreenInternalAudioRecorder(mTempAudioFile.getAbsolutePath(), mContext,
+            mAudio = new ScreenInternalAudioRecorder(mTempAudioFile.getAbsolutePath(),
                     mMediaProjection, mAudioSource == MIC_AND_INTERNAL);
         }
 
@@ -175,7 +175,7 @@ public class ScreenMediaRecorder {
     /**
     * Start screen recording
     */
-    void start() throws IOException, RemoteException {
+    void start() throws IOException, RemoteException, IllegalStateException {
         Log.d(TAG, "start recording");
         prepare();
         mMediaRecorder.start();
@@ -205,7 +205,7 @@ public class ScreenMediaRecorder {
         }
     }
 
-    private  void recordInternalAudio() {
+    private  void recordInternalAudio() throws IllegalStateException {
         if (mAudioSource == INTERNAL || mAudioSource == MIC_AND_INTERNAL) {
             mAudio.start();
         }
