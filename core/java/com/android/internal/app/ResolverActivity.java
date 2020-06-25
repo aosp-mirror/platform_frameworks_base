@@ -20,9 +20,6 @@ import static android.Manifest.permission.INTERACT_ACROSS_PROFILES;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.PermissionChecker.PID_UNKNOWN;
 
-import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_PERSONAL;
-import static com.android.internal.app.AbstractMultiProfilePagerAdapter.PROFILE_WORK;
-
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
@@ -158,6 +155,9 @@ public class ResolverActivity extends Activity implements
     private static final String OPEN_LINKS_COMPONENT_KEY = "app_link_state";
     protected static final String METRICS_CATEGORY_RESOLVER = "intent_resolver";
     protected static final String METRICS_CATEGORY_CHOOSER = "intent_chooser";
+
+    /** Tracks if we should ignore future broadcasts telling us the work profile is enabled */
+    private boolean mWorkProfileHasBeenEnabled = false;
 
     @VisibleForTesting
     public static boolean ENABLE_TABBED_VIEW = true;
@@ -825,12 +825,23 @@ public class ResolverActivity extends Activity implements
         if (shouldShowTabs()) {
             mWorkProfileStateReceiver = createWorkProfileStateReceiver();
             registerWorkProfileStateReceiver();
+
+            mWorkProfileHasBeenEnabled = isWorkProfileEnabled();
         }
+    }
+
+    private boolean isWorkProfileEnabled() {
+        UserHandle workUserHandle = getWorkProfileUserHandle();
+        UserManager userManager = getSystemService(UserManager.class);
+
+        return !userManager.isQuietModeEnabled(workUserHandle)
+                && userManager.isUserUnlocked(workUserHandle);
     }
 
     private void registerWorkProfileStateReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_USER_UNLOCKED);
+        filter.addAction(Intent.ACTION_MANAGED_PROFILE_AVAILABLE);
         filter.addAction(Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE);
         registerReceiverAsUser(mWorkProfileStateReceiver, UserHandle.ALL, filter, null, null);
     }
@@ -1961,17 +1972,29 @@ public class ResolverActivity extends Activity implements
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 if (!TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)
-                        && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)) {
+                        && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_UNAVAILABLE)
+                        && !TextUtils.equals(action, Intent.ACTION_MANAGED_PROFILE_AVAILABLE)) {
                     return;
                 }
-                int userHandle = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
-                if (TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)
-                        && userHandle != getWorkProfileUserHandle().getIdentifier()) {
+
+                int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, -1);
+
+                if (userId != getWorkProfileUserHandle().getIdentifier()) {
                     return;
                 }
-                if (TextUtils.equals(action, Intent.ACTION_USER_UNLOCKED)) {
+
+                if (isWorkProfileEnabled()) {
+                    if (mWorkProfileHasBeenEnabled) {
+                        return;
+                    }
+
+                    mWorkProfileHasBeenEnabled = true;
                     mMultiProfilePagerAdapter.markWorkProfileEnabledBroadcastReceived();
+                } else {
+                    // Must be an UNAVAILABLE broadcast, so we watch for the next availability
+                    mWorkProfileHasBeenEnabled = false;
                 }
+
                 if (mMultiProfilePagerAdapter.getCurrentUserHandle()
                         .equals(getWorkProfileUserHandle())) {
                     mMultiProfilePagerAdapter.rebuildActiveTab(true);
