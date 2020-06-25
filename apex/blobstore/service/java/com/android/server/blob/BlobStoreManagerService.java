@@ -539,7 +539,7 @@ public class BlobStoreManagerService extends SystemService {
                 Slog.v(TAG, "Released lease on " + blobHandle
                         + "; callingUid=" + callingUid + ", callingPackage=" + callingPackage);
             }
-            if (!blobMetadata.hasLeases()) {
+            if (!blobMetadata.hasValidLeases()) {
                 mHandler.postDelayed(() -> {
                     synchronized (mBlobsLock) {
                         // Check if blobMetadata object is still valid. If it is not, then
@@ -583,6 +583,9 @@ public class BlobStoreManagerService extends SystemService {
             getUserBlobsLocked(userId).forEach((blobHandle, blobMetadata) -> {
                 final ArrayList<LeaseInfo> leaseInfos = new ArrayList<>();
                 blobMetadata.forEachLeasee(leasee -> {
+                    if (!leasee.isStillValid()) {
+                        return;
+                    }
                     final int descriptionResId = leasee.descriptionResEntryName == null
                             ? Resources.ID_NULL
                             : getDescriptionResourceId(resourcesGetter.apply(leasee.packageName),
@@ -922,8 +925,8 @@ public class BlobStoreManagerService extends SystemService {
                         blobMetadata.getBlobFile().delete();
                     } else {
                         addBlobForUserLocked(blobMetadata, blobMetadata.getUserId());
-                        blobMetadata.removeInvalidCommitters(userPackages);
-                        blobMetadata.removeInvalidLeasees(userPackages);
+                        blobMetadata.removeCommittersFromUnknownPkgs(userPackages);
+                        blobMetadata.removeLeaseesFromUnknownPkgs(userPackages);
                     }
                     mCurrentMaxSessionId = Math.max(mCurrentMaxSessionId, blobMetadata.getBlobId());
                 }
@@ -1109,6 +1112,9 @@ public class BlobStoreManagerService extends SystemService {
             final ArrayMap<BlobHandle, BlobMetadata> userBlobs = mBlobsMap.valueAt(i);
             userBlobs.entrySet().removeIf(entry -> {
                 final BlobMetadata blobMetadata = entry.getValue();
+
+                // Remove expired leases
+                blobMetadata.removeExpiredLeases();
 
                 if (blobMetadata.shouldBeDeleted(true /* respectLeaseWaitTime */)) {
                     deleteBlobLocked(blobMetadata);
