@@ -23,11 +23,23 @@ android_app {
 
     name: "EasterEgg",
 
+    platform_apis: true,
     certificate: "platform",
-
-	sdk_version: "current",
 
     optimize: {
         enabled: false,
-    }
+    },
+
+	static_libs: [
+		"androidx.core_core",
+		"androidx.recyclerview_recyclerview",
+        "androidx.annotation_annotation",
+		"kotlinx-coroutines-android",
+		"kotlinx-coroutines-core",
+		//"kotlinx-coroutines-reactive",
+	],
+
+    manifest: "AndroidManifest.xml",
+
+    kotlincflags: ["-Xjvm-default=enable"],
 }
