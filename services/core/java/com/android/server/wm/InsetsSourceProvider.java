@@ -462,7 +462,10 @@ class InsetsSourceProvider {
 
             mCapturedLeash = animationLeash;
             final Rect frame = mWin.getWindowFrames().mFrame;
-            t.setPosition(mCapturedLeash, frame.left, frame.top);
+            Point position = new Point();
+            mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
+
+            t.setPosition(mCapturedLeash, position.x, position.y);
         }
 
         @Override
