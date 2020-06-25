@@ -3556,10 +3556,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     WindowState getImeTargetBelowWindow(WindowState w) {
         final int index = mChildren.indexOf(w);
         if (index > 0) {
-            final WindowState target = mChildren.get(index - 1);
-            if (target.canBeImeTarget()) {
-                return target;
-            }
+            return mChildren.get(index - 1)
+                    .getWindow(WindowState::canBeImeTarget);
         }
         return null;
     }
