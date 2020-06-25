@@ -20,6 +20,8 @@ import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.os.ShellCommand;
 
 import java.io.PrintWriter;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /** Implemented the shell command interface for {@link TimeZoneDetectorService}. */
 class TimeZoneDetectorShellCommand extends ShellCommand {
@@ -37,50 +39,44 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         }
 
         switch (cmd) {
-            case "suggest_telephony_time_zone":
-                return runSuggestTelephonyTimeZone();
+            case "suggest_geo_location_time_zone":
+                return runSuggestGeolocationTimeZone();
             case "suggest_manual_time_zone":
                 return runSuggestManualTimeZone();
+            case "suggest_telephony_time_zone":
+                return runSuggestTelephonyTimeZone();
             default: {
                 return handleDefaultCommands(cmd);
             }
         }
     }
 
-    private int runSuggestTelephonyTimeZone() {
-        final PrintWriter pw = getOutPrintWriter();
-        try {
-            TelephonyTimeZoneSuggestion suggestion = null;
-            String opt;
-            while ((opt = getNextArg()) != null) {
-                if ("--suggestion".equals(opt)) {
-                    suggestion = TelephonyTimeZoneSuggestion.parseCommandLineArg(this);
-                } else {
-                    pw.println("Error: Unknown option: " + opt);
-                    return 1;
-                }
-            }
-            if (suggestion == null) {
-                pw.println("Error: suggestion not specified");
-                return 1;
-            }
-            mInterface.suggestTelephonyTimeZone(suggestion);
-            pw.println("Suggestion " + suggestion + " injected.");
-            return 0;
-        } catch (RuntimeException e) {
-            pw.println(e.toString());
-            return 1;
-        }
+    private int runSuggestGeolocationTimeZone() {
+        return runSuggestTimeZone(
+                () -> GeolocationTimeZoneSuggestion.parseCommandLineArg(this),
+                mInterface::suggestGeolocationTimeZone);
     }
 
     private int runSuggestManualTimeZone() {
+        return runSuggestTimeZone(
+                () -> ManualTimeZoneSuggestion.parseCommandLineArg(this),
+                mInterface::suggestManualTimeZone);
+    }
+
+    private int runSuggestTelephonyTimeZone() {
+        return runSuggestTimeZone(
+                () -> TelephonyTimeZoneSuggestion.parseCommandLineArg(this),
+                mInterface::suggestTelephonyTimeZone);
+    }
+
+    private <T> int runSuggestTimeZone(Supplier<T> suggestionParser, Consumer<T> invoker) {
         final PrintWriter pw = getOutPrintWriter();
         try {
-            ManualTimeZoneSuggestion suggestion = null;
+            T suggestion = null;
             String opt;
             while ((opt = getNextArg()) != null) {
                 if ("--suggestion".equals(opt)) {
-                    suggestion = ManualTimeZoneSuggestion.parseCommandLineArg(this);
+                    suggestion = suggestionParser.get();
                 } else {
                     pw.println("Error: Unknown option: " + opt);
                     return 1;
@@ -90,7 +86,7 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
                 pw.println("Error: suggestion not specified");
                 return 1;
             }
-            mInterface.suggestManualTimeZone(suggestion);
+            invoker.accept(suggestion);
             pw.println("Suggestion " + suggestion + " injected.");
             return 0;
         } catch (RuntimeException e) {
@@ -105,10 +101,14 @@ class TimeZoneDetectorShellCommand extends ShellCommand {
         pw.println("Time Zone Detector (time_zone_detector) commands:");
         pw.println("  help");
         pw.println("    Print this help text.");
-        pw.println("  suggest_telephony_time_zone");
-        pw.println("    --suggestion <telephony suggestion opts>");
+        pw.println("  suggest_geolocation_time_zone");
+        pw.println("    --suggestion <geolocation suggestion opts>");
         pw.println("  suggest_manual_time_zone");
         pw.println("    --suggestion <manual suggestion opts>");
+        pw.println("  suggest_telephony_time_zone");
+        pw.println("    --suggestion <telephony suggestion opts>");
+        pw.println();
+        GeolocationTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();
         ManualTimeZoneSuggestion.printCommandLineOpts(pw);
         pw.println();

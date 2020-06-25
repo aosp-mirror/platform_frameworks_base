@@ -19,8 +19,6 @@ package com.android.server.timezonedetector;
 import static android.app.timezonedetector.TimeZoneCapabilities.CAPABILITY_POSSESSED;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,8 +29,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.annotation.NonNull;
-import android.annotation.UserIdInt;
 import android.app.timezonedetector.ITimeZoneConfigurationListener;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
@@ -50,15 +46,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.PrintWriter;
-
 @RunWith(AndroidJUnit4.class)
 public class TimeZoneDetectorServiceTest {
 
     private static final int ARBITRARY_USER_ID = 9999;
 
     private Context mMockContext;
-    private FakeTimeZoneDetectorStrategy mFakeTimeZoneDetectorStrategy;
+    private StubbedTimeZoneDetectorStrategy mStubbedTimeZoneDetectorStrategy;
 
     private TimeZoneDetectorService mTimeZoneDetectorService;
     private HandlerThread mHandlerThread;
@@ -74,10 +68,10 @@ public class TimeZoneDetectorServiceTest {
         mHandlerThread.start();
         mTestHandler = new TestHandler(mHandlerThread.getLooper());
 
-        mFakeTimeZoneDetectorStrategy = new FakeTimeZoneDetectorStrategy();
+        mStubbedTimeZoneDetectorStrategy = new StubbedTimeZoneDetectorStrategy();
 
         mTimeZoneDetectorService = new TimeZoneDetectorService(
-                mMockContext, mTestHandler, mFakeTimeZoneDetectorStrategy);
+                mMockContext, mTestHandler, mStubbedTimeZoneDetectorStrategy);
     }
 
     @After
@@ -106,7 +100,7 @@ public class TimeZoneDetectorServiceTest {
         doNothing().when(mMockContext).enforceCallingPermission(anyString(), any());
 
         TimeZoneCapabilities capabilities = createTimeZoneCapabilities();
-        mFakeTimeZoneDetectorStrategy.initializeCapabilities(capabilities);
+        mStubbedTimeZoneDetectorStrategy.initializeCapabilities(capabilities);
 
         assertEquals(capabilities, mTimeZoneDetectorService.getCapabilities());
 
@@ -136,7 +130,7 @@ public class TimeZoneDetectorServiceTest {
 
         TimeZoneConfiguration configuration =
                 createTimeZoneConfiguration(false /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategy.initializeConfiguration(configuration);
+        mStubbedTimeZoneDetectorStrategy.initializeConfiguration(configuration);
 
         assertEquals(configuration, mTimeZoneDetectorService.getConfiguration());
 
@@ -167,7 +161,7 @@ public class TimeZoneDetectorServiceTest {
 
         TimeZoneConfiguration autoDetectDisabledConfiguration =
                 createTimeZoneConfiguration(false /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategy.initializeConfiguration(autoDetectDisabledConfiguration);
+        mStubbedTimeZoneDetectorStrategy.initializeConfiguration(autoDetectDisabledConfiguration);
 
         IBinder mockListenerBinder = mock(IBinder.class);
         ITimeZoneConfigurationListener mockListener = mock(ITimeZoneConfigurationListener.class);
@@ -183,7 +177,7 @@ public class TimeZoneDetectorServiceTest {
         // Simulate the configuration being changed and verify the mockListener was notified.
         TimeZoneConfiguration autoDetectEnabledConfiguration =
                 createTimeZoneConfiguration(true /* autoDetectionEnabled */);
-        mFakeTimeZoneDetectorStrategy.updateConfiguration(
+        mStubbedTimeZoneDetectorStrategy.updateConfiguration(
                 ARBITRARY_USER_ID, autoDetectEnabledConfiguration);
 
         verify(mockListener).onChange(autoDetectEnabledConfiguration);
@@ -215,7 +209,7 @@ public class TimeZoneDetectorServiceTest {
         assertEquals(expectedResult,
                 mTimeZoneDetectorService.suggestManualTimeZone(timeZoneSuggestion));
 
-        mFakeTimeZoneDetectorStrategy.verifySuggestManualTimeZoneCalled(timeZoneSuggestion);
+        mStubbedTimeZoneDetectorStrategy.verifySuggestManualTimeZoneCalled(timeZoneSuggestion);
 
         verify(mMockContext).enforceCallingOrSelfPermission(
                 eq(android.Manifest.permission.SUGGEST_MANUAL_TIME_AND_ZONE),
@@ -267,7 +261,7 @@ public class TimeZoneDetectorServiceTest {
                 anyString());
 
         mTestHandler.waitForMessagesToBeProcessed();
-        mFakeTimeZoneDetectorStrategy.verifySuggestTelephonyTimeZoneCalled(timeZoneSuggestion);
+        mStubbedTimeZoneDetectorStrategy.verifySuggestTelephonyTimeZoneCalled(timeZoneSuggestion);
     }
 
     @Test
@@ -278,7 +272,7 @@ public class TimeZoneDetectorServiceTest {
         mTimeZoneDetectorService.dump(null, null, null);
 
         verify(mMockContext).checkCallingOrSelfPermission(eq(android.Manifest.permission.DUMP));
-        mFakeTimeZoneDetectorStrategy.verifyDumpCalled();
+        mStubbedTimeZoneDetectorStrategy.verifyDumpCalled();
     }
 
     @Test
@@ -286,14 +280,14 @@ public class TimeZoneDetectorServiceTest {
         mTimeZoneDetectorService.handleAutoTimeZoneDetectionChanged();
         mTestHandler.assertTotalMessagesEnqueued(1);
         mTestHandler.waitForMessagesToBeProcessed();
-        mFakeTimeZoneDetectorStrategy.verifyHandleAutoTimeZoneConfigChangedCalled();
+        mStubbedTimeZoneDetectorStrategy.verifyHandleAutoTimeZoneConfigChangedCalled();
 
-        mFakeTimeZoneDetectorStrategy.resetCallTracking();
+        mStubbedTimeZoneDetectorStrategy.resetCallTracking();
 
         mTimeZoneDetectorService.handleAutoTimeZoneDetectionChanged();
         mTestHandler.assertTotalMessagesEnqueued(2);
         mTestHandler.waitForMessagesToBeProcessed();
-        mFakeTimeZoneDetectorStrategy.verifyHandleAutoTimeZoneConfigChangedCalled();
+        mStubbedTimeZoneDetectorStrategy.verifyHandleAutoTimeZoneConfigChangedCalled();
     }
 
     private static TimeZoneConfiguration createTimeZoneConfiguration(
@@ -321,113 +315,5 @@ public class TimeZoneDetectorServiceTest {
                 .setMatchType(TelephonyTimeZoneSuggestion.MATCH_TYPE_NETWORK_COUNTRY_AND_OFFSET)
                 .setQuality(TelephonyTimeZoneSuggestion.QUALITY_SINGLE_ZONE)
                 .build();
-    }
-
-
-    private static class FakeTimeZoneDetectorStrategy implements TimeZoneDetectorStrategy {
-
-        private StrategyListener mListener;
-
-        // Fake state
-        private TimeZoneCapabilities mCapabilities;
-        private TimeZoneConfiguration mConfiguration;
-
-        // Call tracking.
-        private ManualTimeZoneSuggestion mLastManualSuggestion;
-        private TelephonyTimeZoneSuggestion mLastTelephonySuggestion;
-        private boolean mHandleAutoTimeZoneConfigChangedCalled;
-        private boolean mDumpCalled;
-
-        @Override
-        public void setStrategyListener(@NonNull StrategyListener listener) {
-            mListener = listener;
-        }
-
-        @Override
-        public TimeZoneCapabilities getCapabilities(@UserIdInt int userId) {
-            return mCapabilities;
-        }
-
-        @Override
-        public boolean updateConfiguration(
-                @UserIdInt int userId, @NonNull TimeZoneConfiguration configuration) {
-            assertNotNull(mConfiguration);
-            assertNotNull(configuration);
-
-            // Simulate the strategy's behavior: the new configuration will be the old configuration
-            // merged with the new.
-            TimeZoneConfiguration oldConfiguration = mConfiguration;
-            TimeZoneConfiguration newConfiguration =
-                    new TimeZoneConfiguration.Builder(mConfiguration)
-                            .mergeProperties(configuration)
-                            .build();
-
-            if (newConfiguration.equals(oldConfiguration)) {
-                return false;
-            }
-            mConfiguration = newConfiguration;
-            mListener.onConfigurationChanged();
-            return true;
-        }
-
-        @Override
-        @NonNull
-        public TimeZoneConfiguration getConfiguration(@UserIdInt int userId) {
-            return mConfiguration;
-        }
-
-        @Override
-        public boolean suggestManualTimeZone(
-                @UserIdInt int userId, @NonNull ManualTimeZoneSuggestion timeZoneSuggestion) {
-            mLastManualSuggestion = timeZoneSuggestion;
-            return true;
-        }
-
-        @Override
-        public void suggestTelephonyTimeZone(
-                @NonNull TelephonyTimeZoneSuggestion timeZoneSuggestion) {
-            mLastTelephonySuggestion = timeZoneSuggestion;
-        }
-
-        @Override
-        public void handleAutoTimeZoneConfigChanged() {
-            mHandleAutoTimeZoneConfigChangedCalled = true;
-        }
-
-        @Override
-        public void dump(PrintWriter pw, String[] args) {
-            mDumpCalled = true;
-        }
-
-        void initializeConfiguration(TimeZoneConfiguration configuration) {
-            mConfiguration = configuration;
-        }
-
-        void initializeCapabilities(TimeZoneCapabilities capabilities) {
-            mCapabilities = capabilities;
-        }
-
-        void resetCallTracking() {
-            mLastManualSuggestion = null;
-            mLastTelephonySuggestion = null;
-            mHandleAutoTimeZoneConfigChangedCalled = false;
-            mDumpCalled = false;
-        }
-
-        void verifySuggestManualTimeZoneCalled(ManualTimeZoneSuggestion expectedSuggestion) {
-            assertEquals(expectedSuggestion, mLastManualSuggestion);
-        }
-
-        void verifySuggestTelephonyTimeZoneCalled(TelephonyTimeZoneSuggestion expectedSuggestion) {
-            assertEquals(expectedSuggestion, mLastTelephonySuggestion);
-        }
-
-        void verifyHandleAutoTimeZoneConfigChangedCalled() {
-            assertTrue(mHandleAutoTimeZoneConfigChangedCalled);
-        }
-
-        void verifyDumpCalled() {
-            assertTrue(mDumpCalled);
-        }
     }
 }
