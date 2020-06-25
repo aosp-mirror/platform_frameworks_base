@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?><!--
+<!--
 Copyright (C) 2018 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,14 +13,7 @@ Copyright (C) 2018 The Android Open Source Project
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <string name="app_name" translatable="false">Android R Easter Egg</string>
-
-    <!-- name of the Q easter egg, a nonogram-style icon puzzle -->
-    <string name="q_egg_name" translatable="false">Icon Quiz</string>
-
-    <!-- name of the P easter egg, a humble paint program -->
-    <string name="p_egg_name" translatable="false">PAINT.APK</string>
-
-    <string name="r_egg_name" translatable="false">Cat Controls</string>
-</resources>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/icon_bg"/>
+    <foreground android:drawable="@drawable/android_11_dial"/>
+</adaptive-icon>
