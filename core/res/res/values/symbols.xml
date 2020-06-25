@@ -4058,4 +4058,5 @@
   <java-symbol type="integer" name="config_defaultBinderHeavyHitterAutoSamplerBatchSize" />
   <java-symbol type="dimen" name="config_defaultBinderHeavyHitterAutoSamplerThreshold" />
 
+  <java-symbol type="array" name="config_keep_warming_services" />
 </resources>

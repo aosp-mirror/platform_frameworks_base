@@ -43,6 +43,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.app.procstats.ServiceState;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.server.LocalServices;
@@ -148,6 +149,8 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
     String stringName;      // caching of toString
 
     private int lastStartId;    // identifier of most recent start request.
+
+    boolean mKeepWarming; // Whether or not it'll keep critical code path of the host warm
 
     static class StartItem {
         final ServiceRecord sr;
@@ -517,6 +520,7 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         lastActivity = SystemClock.uptimeMillis();
         userId = UserHandle.getUserId(appInfo.uid);
         createdFromFg = callerIsFg;
+        updateKeepWarmLocked();
     }
 
     public ServiceState getTracker() {
@@ -733,6 +737,14 @@ final class ServiceRecord extends Binder implements ComponentName.WithComponentN
         } else {
             app.removeAllowBackgroundActivityStartsToken(this);
         }
+    }
+
+    @GuardedBy("ams")
+    void updateKeepWarmLocked() {
+        mKeepWarming = ams.mConstants.KEEP_WARMING_SERVICES.contains(name)
+                && (ams.mUserController.getCurrentUserId() == userId
+                || ams.isSingleton(processName, appInfo, instanceName.getClassName(),
+                        serviceInfo.flags));
     }
 
     public AppBindRecord retrieveAppBindingLocked(Intent intent,
