@@ -377,11 +377,11 @@ public class BlobStoreManagerServiceTest {
     }
 
     private BlobMetadata createBlobMetadataMock(long blobId, File blobFile,
-            BlobHandle blobHandle, boolean hasLeases) {
+            BlobHandle blobHandle, boolean hasValidLeases) {
         final BlobMetadata blobMetadata = mock(BlobMetadata.class);
         doReturn(blobId).when(blobMetadata).getBlobId();
         doReturn(blobFile).when(blobMetadata).getBlobFile();
-        doReturn(hasLeases).when(blobMetadata).hasLeases();
+        doReturn(hasValidLeases).when(blobMetadata).hasValidLeases();
         doReturn(blobHandle).when(blobMetadata).getBlobHandle();
         doCallRealMethod().when(blobMetadata).shouldBeDeleted(anyBoolean());
         doReturn(true).when(blobMetadata).hasLeaseWaitTimeElapsedForAll();
