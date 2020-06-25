@@ -15,12 +15,18 @@
 android_test {
     name: "BugreportManagerTestCases",
     srcs: ["src/**/*.java"],
+    data: [":bugreport_artifacts"],
     libs: [
         "android.test.runner",
         "android.test.base",
     ],
     static_libs: ["androidx.test.rules", "truth-prebuilt"],
+    test_suites: ["general-tests"],
     sdk_version: "test_current",
     platform_apis: true,
 }
 
+filegroup {
+    name: "bugreport_artifacts",
+    srcs: ["config/test-sysconfig.xml"],
+}
