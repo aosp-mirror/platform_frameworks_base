@@ -606,7 +606,11 @@ public class BlobStoreManagerService extends SystemService {
                     UserHandle.getUserId(callingUid));
             userBlobs.entrySet().removeIf(entry -> {
                 final BlobMetadata blobMetadata = entry.getValue();
-                return blobMetadata.getBlobId() == blobId;
+                if (blobMetadata.getBlobId() == blobId) {
+                    deleteBlobLocked(blobMetadata);
+                    return true;
+                }
+                return false;
             });
             writeBlobsInfoAsync();
         }
@@ -657,11 +661,10 @@ public class BlobStoreManagerService extends SystemService {
         switch (session.getState()) {
             case STATE_ABANDONED:
             case STATE_VERIFIED_INVALID:
-                session.getSessionFile().delete();
                 synchronized (mBlobsLock) {
+                    deleteSessionLocked(session);
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
-                    mActiveBlobIds.remove(session.getSessionId());
                     if (LOGV) {
                         Slog.v(TAG, "Session is invalid; deleted " + session);
                     }
@@ -682,8 +685,7 @@ public class BlobStoreManagerService extends SystemService {
                         Slog.d(TAG, "Failed to commit: too many committed blobs. count: "
                                 + committedBlobsCount + "; blob: " + session);
                         session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
-                        session.getSessionFile().delete();
-                        mActiveBlobIds.remove(session.getSessionId());
+                        deleteSessionLocked(session);
                         getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                                 .remove(session.getSessionId());
                         break;
@@ -732,8 +734,7 @@ public class BlobStoreManagerService extends SystemService {
                     }
                     // Delete redundant data from recommits.
                     if (session.getSessionId() != blob.getBlobId()) {
-                        session.getSessionFile().delete();
-                        mActiveBlobIds.remove(session.getSessionId());
+                        deleteSessionLocked(session);
                     }
                     getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                             .remove(session.getSessionId());
@@ -1019,8 +1020,7 @@ public class BlobStoreManagerService extends SystemService {
             userSessions.removeIf((sessionId, blobStoreSession) -> {
                 if (blobStoreSession.getOwnerUid() == uid
                         && blobStoreSession.getOwnerPackageName().equals(packageName)) {
-                    blobStoreSession.getSessionFile().delete();
-                    mActiveBlobIds.remove(blobStoreSession.getSessionId());
+                    deleteSessionLocked(blobStoreSession);
                     return true;
                 }
                 return false;
@@ -1061,8 +1061,7 @@ public class BlobStoreManagerService extends SystemService {
             if (userSessions != null) {
                 for (int i = 0, count = userSessions.size(); i < count; ++i) {
                     final BlobStoreSession session = userSessions.valueAt(i);
-                    session.getSessionFile().delete();
-                    mActiveBlobIds.remove(session.getSessionId());
+                    deleteSessionLocked(session);
                 }
             }
 
@@ -1138,8 +1137,7 @@ public class BlobStoreManagerService extends SystemService {
                 }
 
                 if (shouldRemove) {
-                    blobStoreSession.getSessionFile().delete();
-                    mActiveBlobIds.remove(blobStoreSession.getSessionId());
+                    deleteSessionLocked(blobStoreSession);
                     deletedBlobIds.add(blobStoreSession.getSessionId());
                 }
                 return shouldRemove;
@@ -1151,8 +1149,14 @@ public class BlobStoreManagerService extends SystemService {
     }
 
     @GuardedBy("mBlobsLock")
+    private void deleteSessionLocked(BlobStoreSession blobStoreSession) {
+        blobStoreSession.destroy();
+        mActiveBlobIds.remove(blobStoreSession.getSessionId());
+    }
+
+    @GuardedBy("mBlobsLock")
     private void deleteBlobLocked(BlobMetadata blobMetadata) {
-        blobMetadata.getBlobFile().delete();
+        blobMetadata.destroy();
         mActiveBlobIds.remove(blobMetadata.getBlobId());
     }
 
