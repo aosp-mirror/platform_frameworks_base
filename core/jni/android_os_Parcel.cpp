@@ -230,47 +230,28 @@ static void android_os_Parcel_writeBlob(JNIEnv* env, jclass clazz, jlong nativeP
     blob.release();
 }
 
-static void android_os_Parcel_writeInt(JNIEnv* env, jclass clazz, jlong nativePtr, jint val) {
+static int android_os_Parcel_writeInt(jlong nativePtr, jint val) {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    if (parcel != NULL) {
-        const status_t err = parcel->writeInt32(val);
-        if (err != NO_ERROR) {
-            signalExceptionForError(env, clazz, err);
-        }
-    }
+    return (parcel != NULL) ? parcel->writeInt32(val) : OK;
 }
 
-static void android_os_Parcel_writeLong(JNIEnv* env, jclass clazz, jlong nativePtr, jlong val)
-{
+static int android_os_Parcel_writeLong(jlong nativePtr, jlong val) {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    if (parcel != NULL) {
-        const status_t err = parcel->writeInt64(val);
-        if (err != NO_ERROR) {
-            signalExceptionForError(env, clazz, err);
-        }
-    }
+    return (parcel != NULL) ? parcel->writeInt64(val) : OK;
 }
 
-static void android_os_Parcel_writeFloat(JNIEnv* env, jclass clazz, jlong nativePtr, jfloat val)
-{
+static int android_os_Parcel_writeFloat(jlong nativePtr, jfloat val) {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    if (parcel != NULL) {
-        const status_t err = parcel->writeFloat(val);
-        if (err != NO_ERROR) {
-            signalExceptionForError(env, clazz, err);
-        }
-    }
+    return (parcel != NULL) ? parcel->writeFloat(val) : OK;
 }
 
-static void android_os_Parcel_writeDouble(JNIEnv* env, jclass clazz, jlong nativePtr, jdouble val)
-{
+static int android_os_Parcel_writeDouble(jlong nativePtr, jdouble val) {
     Parcel* parcel = reinterpret_cast<Parcel*>(nativePtr);
-    if (parcel != NULL) {
-        const status_t err = parcel->writeDouble(val);
-        if (err != NO_ERROR) {
-            signalExceptionForError(env, clazz, err);
-        }
-    }
+    return (parcel != NULL) ? parcel->writeDouble(val) : OK;
+}
+
+static void android_os_Parcel_nativeSignalExceptionForError(JNIEnv* env, jclass clazz, jint err) {
+    signalExceptionForError(env, clazz, err);
 }
 
 static void android_os_Parcel_writeString8(JNIEnv* env, jclass clazz, jlong nativePtr, jstring val)
@@ -752,14 +733,15 @@ static const JNINativeMethod gParcelMethods[] = {
 
     {"nativeWriteByteArray",      "(J[BII)V", (void*)android_os_Parcel_writeByteArray},
     {"nativeWriteBlob",           "(J[BII)V", (void*)android_os_Parcel_writeBlob},
-    // @FastNative
-    {"nativeWriteInt",            "(JI)V", (void*)android_os_Parcel_writeInt},
-    // @FastNative
-    {"nativeWriteLong",           "(JJ)V", (void*)android_os_Parcel_writeLong},
-    // @FastNative
-    {"nativeWriteFloat",          "(JF)V", (void*)android_os_Parcel_writeFloat},
-    // @FastNative
-    {"nativeWriteDouble",         "(JD)V", (void*)android_os_Parcel_writeDouble},
+    // @CriticalNative
+    {"nativeWriteInt",            "(JI)I", (void*)android_os_Parcel_writeInt},
+    // @CriticalNative
+    {"nativeWriteLong",           "(JJ)I", (void*)android_os_Parcel_writeLong},
+    // @CriticalNative
+    {"nativeWriteFloat",          "(JF)I", (void*)android_os_Parcel_writeFloat},
+    // @CriticalNative
+    {"nativeWriteDouble",         "(JD)I", (void*)android_os_Parcel_writeDouble},
+    {"nativeSignalExceptionForError", "(I)V", (void*)android_os_Parcel_nativeSignalExceptionForError},
     // @FastNative
     {"nativeWriteString8",        "(JLjava/lang/String;)V", (void*)android_os_Parcel_writeString8},
     // @FastNative
