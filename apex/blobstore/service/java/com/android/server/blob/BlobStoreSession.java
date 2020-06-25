@@ -479,6 +479,11 @@ class BlobStoreSession extends IBlobStoreSession.Stub {
         }
     }
 
+    void destroy() {
+        revokeAllFds();
+        getSessionFile().delete();
+    }
+
     private void revokeAllFds() {
         synchronized (mRevocableFds) {
             for (int i = mRevocableFds.size() - 1; i >= 0; --i) {
