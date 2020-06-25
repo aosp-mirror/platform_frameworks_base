@@ -50,7 +50,6 @@ public class GeomagneticField {
 
     // These coefficients and the formulae used below are from:
     // NOAA Technical Report: The US/UK World Magnetic Model for 2020-2025
-
     static private final float[][] G_COEFF = new float[][]{
             {0.0f},
             {-29404.5f, -1450.7f},
