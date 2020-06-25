@@ -298,14 +298,15 @@ public final class Parcel {
 
     private static native void nativeWriteByteArray(long nativePtr, byte[] b, int offset, int len);
     private static native void nativeWriteBlob(long nativePtr, byte[] b, int offset, int len);
-    @FastNative
-    private static native void nativeWriteInt(long nativePtr, int val);
-    @FastNative
-    private static native void nativeWriteLong(long nativePtr, long val);
-    @FastNative
-    private static native void nativeWriteFloat(long nativePtr, float val);
-    @FastNative
-    private static native void nativeWriteDouble(long nativePtr, double val);
+    @CriticalNative
+    private static native int nativeWriteInt(long nativePtr, int val);
+    @CriticalNative
+    private static native int nativeWriteLong(long nativePtr, long val);
+    @CriticalNative
+    private static native int nativeWriteFloat(long nativePtr, float val);
+    @CriticalNative
+    private static native int nativeWriteDouble(long nativePtr, double val);
+    private static native void nativeSignalExceptionForError(int error);
     @FastNative
     private static native void nativeWriteString8(long nativePtr, String val);
     @FastNative
@@ -734,12 +735,20 @@ public final class Parcel {
         nativeWriteBlob(mNativePtr, b, offset, len);
     }
 
+    // The OK status from system/core/libutils/include/utils/Errors.h .
+    // We shall pass all other error codes back to native for throwing exceptions. The error
+    // check is done in Java to allow using @CriticalNative calls for the success path.
+    private static final int OK = 0;
+
     /**
      * Write an integer value into the parcel at the current dataPosition(),
      * growing dataCapacity() if needed.
      */
     public final void writeInt(int val) {
-        nativeWriteInt(mNativePtr, val);
+        int err = nativeWriteInt(mNativePtr, val);
+        if (err != OK) {
+            nativeSignalExceptionForError(err);
+        }
     }
 
     /**
@@ -747,7 +756,10 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeLong(long val) {
-        nativeWriteLong(mNativePtr, val);
+        int err = nativeWriteLong(mNativePtr, val);
+        if (err != OK) {
+            nativeSignalExceptionForError(err);
+        }
     }
 
     /**
@@ -755,7 +767,10 @@ public final class Parcel {
      * dataPosition(), growing dataCapacity() if needed.
      */
     public final void writeFloat(float val) {
-        nativeWriteFloat(mNativePtr, val);
+        int err = nativeWriteFloat(mNativePtr, val);
+        if (err != OK) {
+            nativeSignalExceptionForError(err);
+        }
     }
 
     /**
@@ -763,7 +778,10 @@ public final class Parcel {
      * current dataPosition(), growing dataCapacity() if needed.
      */
     public final void writeDouble(double val) {
-        nativeWriteDouble(mNativePtr, val);
+        int err = nativeWriteDouble(mNativePtr, val);
+        if (err != OK) {
+            nativeSignalExceptionForError(err);
+        }
     }
 
     /**
