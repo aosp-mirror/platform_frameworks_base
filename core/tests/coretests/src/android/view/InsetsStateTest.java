@@ -304,6 +304,7 @@ public class InsetsStateTest {
         mState.getSource(ITYPE_IME).setVisibleFrame(new Rect(0, 0, 50, 10));
         mState.getSource(ITYPE_IME).setVisible(true);
         mState.getSource(ITYPE_STATUS_BAR).setFrame(new Rect(0, 0, 100, 100));
+        mState2.getSource(ITYPE_NAVIGATION_BAR).setFrame(new Rect(0, 0, 100, 100));
         mState2.set(mState, true);
         assertEquals(mState, mState2);
     }
