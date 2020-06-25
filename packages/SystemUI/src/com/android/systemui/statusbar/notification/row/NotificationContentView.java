@@ -660,6 +660,14 @@ public class NotificationContentView extends FrameLayout {
 
     private void updateContentTransformation() {
         int visibleType = calculateVisibleType();
+        if (getTransformableViewForVisibleType(mVisibleType) == null) {
+            // Case where visible view was removed in middle of transformation. In this case, we
+            // just update immediately to the appropriate view.
+            mVisibleType = visibleType;
+            updateViewVisibilities(visibleType);
+            updateBackgroundColor(false);
+            return;
+        }
         if (visibleType != mVisibleType) {
             // A new transformation starts
             mTransformationStartVisibleType = mVisibleType;
