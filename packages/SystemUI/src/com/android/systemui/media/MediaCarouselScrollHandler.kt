@@ -59,6 +59,10 @@ class MediaCarouselScrollHandler(
     private val falsingManager: FalsingManager
 ) {
     /**
+     * Is the view in RTL
+     */
+    val isRtl: Boolean get() = scrollView.isLayoutRtl
+    /**
      * Do we need falsing protection?
      */
     var falsingProtectionNeeded: Boolean = false
@@ -121,14 +125,14 @@ class MediaCarouselScrollHandler(
             field = value
             // The player width has changed, let's update the scroll position to make sure
             // it's still at the same place
-            var newScroll = activeMediaIndex * playerWidthPlusPadding
+            var newRelativeScroll = activeMediaIndex * playerWidthPlusPadding
             if (scrollIntoCurrentMedia > playerWidthPlusPadding) {
-                newScroll += playerWidthPlusPadding -
+                newRelativeScroll += playerWidthPlusPadding -
                         (scrollIntoCurrentMedia - playerWidthPlusPadding)
             } else {
-                newScroll += scrollIntoCurrentMedia
+                newRelativeScroll += scrollIntoCurrentMedia
             }
-            scrollView.scrollX = newScroll
+            scrollView.relativeScrollX = newRelativeScroll
         }
 
     /**
@@ -184,8 +188,9 @@ class MediaCarouselScrollHandler(
             if (playerWidthPlusPadding == 0) {
                 return
             }
-            onMediaScrollingChanged(scrollX / playerWidthPlusPadding,
-                    scrollX % playerWidthPlusPadding)
+            val relativeScrollX = scrollView.relativeScrollX
+            onMediaScrollingChanged(relativeScrollX / playerWidthPlusPadding,
+                    relativeScrollX % playerWidthPlusPadding)
         }
     }
 
@@ -222,11 +227,19 @@ class MediaCarouselScrollHandler(
                     Math.abs(contentTranslation))
             val settingsTranslation = (1.0f - settingsOffset) * -settingsButton.width *
                     SETTINGS_BUTTON_TRANSLATION_FRACTION
-            val newTranslationX: Float
-            if (contentTranslation > 0) {
-                newTranslationX = settingsTranslation
+            val newTranslationX = if (isRtl) {
+                // In RTL, the 0-placement is on the right side of the view, not the left...
+                if (contentTranslation > 0) {
+                    -(scrollView.width - settingsTranslation - settingsButton.width)
+                } else {
+                    -settingsTranslation
+                }
             } else {
-                newTranslationX = scrollView.width - settingsTranslation - settingsButton.width
+                if (contentTranslation > 0) {
+                    settingsTranslation
+                } else {
+                    scrollView.width - settingsTranslation - settingsButton.width
+                }
             }
             val rotation = (1.0f - settingsOffset) * 50
             settingsButton.rotation = rotation * -Math.signum(contentTranslation)
@@ -259,26 +272,26 @@ class MediaCarouselScrollHandler(
         }
         if (isUp || motionEvent.action == MotionEvent.ACTION_CANCEL) {
             // It's an up and the fling didn't take it above
-            val pos = scrollView.scrollX % playerWidthPlusPadding
-            val scollXAmount: Int
-            if (pos > playerWidthPlusPadding / 2) {
-                scollXAmount = playerWidthPlusPadding - pos
+            val relativePos = scrollView.relativeScrollX % playerWidthPlusPadding
+            val scrollXAmount: Int
+            if (relativePos > playerWidthPlusPadding / 2) {
+                scrollXAmount = playerWidthPlusPadding - relativePos
             } else {
-                scollXAmount = -1 * pos
+                scrollXAmount = -1 * relativePos
             }
-            if (scollXAmount != 0) {
+            if (scrollXAmount != 0) {
                 // Delay the scrolling since scrollView calls springback which cancels
                 // the animation again..
                 mainExecutor.execute {
-                    scrollView.smoothScrollBy(scollXAmount, 0)
+                    scrollView.smoothScrollBy(if (isRtl) -scrollXAmount else scrollXAmount, 0)
                 }
             }
             val currentTranslation = scrollView.getContentTranslation()
             if (currentTranslation != 0.0f) {
                 // We started a Swipe but didn't end up with a fling. Let's either go to the
                 // dismissed position or go back.
-                val springBack = Math.abs(currentTranslation) < getMaxTranslation() / 2
-                        || isFalseTouch()
+                val springBack = Math.abs(currentTranslation) < getMaxTranslation() / 2 ||
+                        isFalseTouch()
                 val newTranslation: Float
                 if (springBack) {
                     newTranslation = 0.0f
@@ -313,9 +326,11 @@ class MediaCarouselScrollHandler(
         return gestureDetector.onTouchEvent(motionEvent)
     }
 
-    fun onScroll(down: MotionEvent,
-                 lastMotion: MotionEvent,
-                 distanceX: Float): Boolean {
+    fun onScroll(
+        down: MotionEvent,
+        lastMotion: MotionEvent,
+        distanceX: Float
+    ): Boolean {
         val totalX = lastMotion.x - down.x
         val currentTranslation = scrollView.getContentTranslation()
         if (currentTranslation != 0.0f ||
@@ -339,8 +354,8 @@ class MediaCarouselScrollHandler(
                 } // Otherwise we don't have do do anything, and will remove the unrubberbanded
                 // translation
             }
-            if (Math.signum(newTranslation) != Math.signum(currentTranslation)
-                    && currentTranslation != 0.0f) {
+            if (Math.signum(newTranslation) != Math.signum(currentTranslation) &&
+                    currentTranslation != 0.0f) {
                 // We crossed the 0.0 threshold of the translation. Let's see if we're allowed
                 // to scroll into the new direction
                 if (scrollView.canScrollHorizontally(-newTranslation.toInt())) {
@@ -394,9 +409,10 @@ class MediaCarouselScrollHandler(
             scrollView.animationTargetX = newTranslation
         } else {
             // We're flinging the player! Let's go either to the previous or to the next player
-            val pos = scrollView.scrollX
+            val pos = scrollView.relativeScrollX
             val currentIndex = if (playerWidthPlusPadding > 0) pos / playerWidthPlusPadding else 0
-            var destIndex = if (vX <= 0) currentIndex + 1 else currentIndex
+            val flungTowardEnd = if (isRtl) vX > 0 else vX < 0
+            var destIndex = if (flungTowardEnd) currentIndex + 1 else currentIndex
             destIndex = Math.max(0, destIndex)
             destIndex = Math.min(mediaContent.getChildCount() - 1, destIndex)
             val view = mediaContent.getChildAt(destIndex)
@@ -438,8 +454,14 @@ class MediaCarouselScrollHandler(
             activeMediaIndex = newIndex
             updatePlayerVisibilities()
         }
-        val location = activeMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
+        val relativeLocation = activeMediaIndex.toFloat() + if (playerWidthPlusPadding > 0)
             scrollInAmount.toFloat() / playerWidthPlusPadding else 0f
+        // Fix the location, because PageIndicator does not handle RTL internally
+        val location = if (isRtl) {
+            mediaContent.childCount - relativeLocation - 1
+        } else {
+            relativeLocation
+        }
         pageIndicator.setLocation(location)
         updateClipToOutline()
     }
@@ -480,13 +502,20 @@ class MediaCarouselScrollHandler(
      * where it was and update our scroll position.
      */
     fun onPrePlayerRemoved(removed: MediaControlPanel) {
-        val beforeActive = mediaContent.indexOfChild(removed.view?.player) <= activeMediaIndex
+        val removedIndex = mediaContent.indexOfChild(removed.view?.player)
+        // If the removed index is less than the activeMediaIndex, then we need to decrement it.
+        // RTL has no effect on this, because indices are always relative (start-to-end).
+        // Update the index 'manually' since we won't always get a call to onMediaScrollingChanged
+        val beforeActive = removedIndex <= activeMediaIndex
         if (beforeActive) {
-            // also update the index here since the scroll below might not always lead
-            // to a scrolling changed
             activeMediaIndex = Math.max(0, activeMediaIndex - 1)
-            scrollView.scrollX = Math.max(scrollView.scrollX -
-                    playerWidthPlusPadding, 0)
+        }
+        // If the removed media item is "left of" the active one (in an absolute sense), we need to
+        // scroll the view to keep that player in view.  This is because scroll position is always
+        // calculated from left to right.
+        val leftOfActive = if (isRtl) !beforeActive else beforeActive
+        if (leftOfActive) {
+            scrollView.scrollX = Math.max(scrollView.scrollX - playerWidthPlusPadding, 0)
         }
     }
 
@@ -499,6 +528,13 @@ class MediaCarouselScrollHandler(
             carouselHeight = currentCarouselHeight
             scrollView.invalidateOutline()
         }
+    }
+
+    /**
+     * Reset the MediaScrollView to the start.
+     */
+    fun scrollToStart() {
+        scrollView.relativeScrollX = 0
     }
 
     companion object {
