@@ -58,7 +58,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -1179,11 +1178,15 @@ public class GlobalScreenshot implements ViewTreeObserver.OnComputeInternalInset
         @Override
         public void onReceive(Context context, Intent intent) {
             PendingIntent pendingIntent = intent.getParcelableExtra(EXTRA_ACTION_INTENT);
-            Intent actionIntent = pendingIntent.getIntent();
             String actionType = intent.getStringExtra(EXTRA_ACTION_TYPE);
-            Slog.d(TAG, "Executing smart action [" + actionType + "]:" + actionIntent);
+            Slog.d(TAG, "Executing smart action [" + actionType + "]:" + pendingIntent.getIntent());
             ActivityOptions opts = ActivityOptions.makeBasic();
-            context.startActivityAsUser(actionIntent, opts.toBundle(), UserHandle.CURRENT);
+
+            try {
+                pendingIntent.send(context, 0, null, null, null, null, opts.toBundle());
+            } catch (PendingIntent.CanceledException e) {
+                Log.e(TAG, "Pending intent canceled", e);
+            }
 
             ScreenshotSmartActions.notifyScreenshotAction(
                     context, intent.getStringExtra(EXTRA_ID), actionType, true);
