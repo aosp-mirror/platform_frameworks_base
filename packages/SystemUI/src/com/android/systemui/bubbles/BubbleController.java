@@ -483,12 +483,13 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
     }
 
     /**
-     * Dispatches a back press into the expanded Bubble's ActivityView if its IME is visible,
-     * causing it to hide.
+     * Hides the current input method, wherever it may be focused, via InputMethodManagerInternal.
      */
-    public void hideImeFromExpandedBubble() {
-        if (mStackView != null) {
-            mStackView.hideImeFromExpandedBubble();
+    public void hideCurrentInputMethod() {
+        try {
+            mBarService.hideCurrentInputMethodForBubbles();
+        } catch (RemoteException e) {
+            e.printStackTrace();
         }
     }
 
@@ -693,8 +694,8 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         if (mStackView == null) {
             mStackView = new BubbleStackView(
                     mContext, mBubbleData, mSurfaceSynchronizer, mFloatingContentCoordinator,
-                    mSysUiState, this::onAllBubblesAnimatedOut,
-                    this::onImeVisibilityChanged);
+                    mSysUiState, this::onAllBubblesAnimatedOut, this::onImeVisibilityChanged,
+                    this::hideCurrentInputMethod);
             mStackView.addView(mBubbleScrim);
             if (mExpandListener != null) {
                 mStackView.setExpandListener(mExpandListener);
@@ -1589,7 +1590,11 @@ public class BubbleController implements ConfigurationController.ConfigurationLi
         @Override
         public void onBackPressedOnTaskRoot(RunningTaskInfo taskInfo) {
             if (mStackView != null && taskInfo.displayId == getExpandedDisplayId(mContext)) {
-                mBubbleData.setExpanded(false);
+                if (mImeVisible) {
+                    hideCurrentInputMethod();
+                } else {
+                    mBubbleData.setExpanded(false);
+                }
             }
         }
 
