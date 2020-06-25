@@ -126,6 +126,7 @@ public class MediaRouter2ManagerTest {
         StubMediaRoute2ProviderService instance = StubMediaRoute2ProviderService.getInstance();
         if (instance != null) {
             instance.setProxy(null);
+            instance.setSpy(null);
         }
     }
 
@@ -421,6 +422,79 @@ public class MediaRouter2ManagerTest {
                 () -> mManager.releaseSession(sessionInfo),
                 ROUTE_ID5_TO_TRANSFER_TO,
                 route -> TextUtils.equals(route.getClientPackageName(), null));
+    }
+
+    @Test
+    @LargeTest
+    public void testTransferTwice() throws Exception {
+        Map<String, MediaRoute2Info> routes = waitAndGetRoutesWithManager(FEATURES_ALL);
+        addRouterCallback(new RouteCallback() { });
+
+        CountDownLatch successLatch1 = new CountDownLatch(1);
+        CountDownLatch successLatch2 = new CountDownLatch(1);
+        CountDownLatch failureLatch = new CountDownLatch(1);
+        CountDownLatch managerOnSessionReleasedLatch = new CountDownLatch(1);
+        CountDownLatch serviceOnReleaseSessionLatch = new CountDownLatch(1);
+        List<RoutingSessionInfo> sessions = new ArrayList<>();
+
+        StubMediaRoute2ProviderService instance = StubMediaRoute2ProviderService.getInstance();
+        assertNotNull(instance);
+        instance.setSpy(new StubMediaRoute2ProviderService.Spy() {
+            @Override
+            public void onReleaseSession(long requestId, String sessionId) {
+                serviceOnReleaseSessionLatch.countDown();
+            }
+        });
+
+        addManagerCallback(new MediaRouter2Manager.Callback() {
+            @Override
+            public void onTransferred(RoutingSessionInfo oldSession,
+                    RoutingSessionInfo newSession) {
+                sessions.add(newSession);
+                if (successLatch1.getCount() > 0) {
+                    successLatch1.countDown();
+                } else {
+                    successLatch2.countDown();
+                }
+            }
+
+            @Override
+            public void onTransferFailed(RoutingSessionInfo session, MediaRoute2Info route) {
+                failureLatch.countDown();
+            }
+
+            @Override
+            public void onSessionReleased(RoutingSessionInfo session) {
+                managerOnSessionReleasedLatch.countDown();
+            }
+        });
+
+        MediaRoute2Info route1 = routes.get(ROUTE_ID1);
+        MediaRoute2Info route2 = routes.get(ROUTE_ID2);
+        assertNotNull(route1);
+        assertNotNull(route2);
+
+        mManager.selectRoute(mPackageName, route1);
+        assertTrue(successLatch1.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        mManager.selectRoute(mPackageName, route2);
+        assertTrue(successLatch2.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        // onTransferFailed/onSessionReleased should not be called.
+        assertFalse(failureLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        assertFalse(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+
+        assertEquals(2, sessions.size());
+        List<String> activeSessionIds = mManager.getActiveSessions().stream()
+                .map(RoutingSessionInfo::getId)
+                .collect(Collectors.toList());
+        // The old session shouldn't appear on the active session list.
+        assertFalse(activeSessionIds.contains(sessions.get(0).getId()));
+        assertTrue(activeSessionIds.contains(sessions.get(1).getId()));
+
+        assertFalse(serviceOnReleaseSessionLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
+        mManager.releaseSession(sessions.get(0));
+        assertTrue(serviceOnReleaseSessionLatch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+        assertFalse(managerOnSessionReleasedLatch.await(WAIT_TIME_MS, TimeUnit.MILLISECONDS));
     }
 
     @Test

@@ -156,7 +156,7 @@ public abstract class PermissionManagerServiceInternal extends PermissionManager
         }
         public void onInstallPermissionGranted() {
         }
-        public void onPermissionRevoked(int uid, @UserIdInt int userId) {
+        public void onPermissionRevoked(int uid, @UserIdInt int userId, String reason) {
         }
         public void onInstallPermissionRevoked() {
         }
