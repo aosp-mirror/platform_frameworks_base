@@ -97,6 +97,7 @@ import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
+import android.util.MathUtils;
 import android.util.Slog;
 import android.view.Display;
 import android.view.IWindowManager;
@@ -1156,6 +1157,15 @@ public class StatusBar extends SystemUI implements DemoMode,
         BackDropView backdrop = mNotificationShadeWindowView.findViewById(R.id.backdrop);
         mMediaManager.setup(backdrop, backdrop.findViewById(R.id.backdrop_front),
                 backdrop.findViewById(R.id.backdrop_back), mScrimController, mLockscreenWallpaper);
+        float maxWallpaperZoom = mContext.getResources().getFloat(
+                com.android.internal.R.dimen.config_wallpaperMaxScale);
+        mNotificationShadeDepthControllerLazy.get().addListener(depth -> {
+            float scale = MathUtils.lerp(maxWallpaperZoom, 1f, depth);
+            backdrop.setPivotX(backdrop.getWidth() / 2f);
+            backdrop.setPivotY(backdrop.getHeight() / 2f);
+            backdrop.setScaleX(scale);
+            backdrop.setScaleY(scale);
+        });
 
         mNotificationPanelViewController.setUserSetupComplete(mUserSetup);
         if (UserManager.get(mContext).isUserSwitcherEnabled()) {
