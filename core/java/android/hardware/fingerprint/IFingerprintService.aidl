@@ -104,4 +104,10 @@ interface IFingerprintService {
 
     // Give FingerprintService its ID. See AuthService.java
     void initializeConfiguration(int sensorId);
+
+    // Notifies about a finger touching the sensor area.
+    void onFingerDown(int x, int y, float minor, float major);
+
+    // Notifies about a finger leaving the sensor area.
+    void onFingerUp();
 }

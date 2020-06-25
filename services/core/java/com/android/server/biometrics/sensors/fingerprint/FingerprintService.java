@@ -345,6 +345,50 @@ public class FingerprintService extends BiometricServiceBase {
             checkPermission(USE_BIOMETRIC_INTERNAL);
             initializeConfigurationInternal(sensorId);
         }
+
+        @Override
+        public void onFingerDown(int x, int y, float minor, float major) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "onFingerDown | daemon is null");
+            } else {
+                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
+                        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
+                                daemon);
+                if (extension == null) {
+                    Slog.v(TAG, "onFingerDown | failed to cast the HIDL to V2_3");
+                } else {
+                    try {
+                        extension.onFingerDown(x, y, minor, major);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "onFingerDown | RemoteException: ", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onFingerUp() {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "onFingerUp | daemon is null");
+            } else {
+                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
+                        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
+                                daemon);
+                if (extension == null) {
+                    Slog.v(TAG, "onFingerUp | failed to cast the HIDL to V2_3");
+                } else {
+                    try {
+                        extension.onFingerUp();
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "onFingerUp | RemoteException: ", e);
+                    }
+                }
+            }
+        }
     }
 
     private final LockoutFrameworkImpl mLockoutTracker;
