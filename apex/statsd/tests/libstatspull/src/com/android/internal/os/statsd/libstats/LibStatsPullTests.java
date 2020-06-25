@@ -33,7 +33,6 @@ import com.android.internal.os.StatsdConfigProto.PullAtomPackages;
 import com.android.internal.os.StatsdConfigProto.SimpleAtomMatcher;
 import com.android.internal.os.StatsdConfigProto.StatsdConfig;
 import com.android.internal.os.StatsdConfigProto.TimeUnit;
-import com.android.internal.os.statsd.StatsConfigUtils;
 import com.android.internal.os.statsd.protos.TestAtoms;
 import com.android.os.AtomsProto.Atom;
 
