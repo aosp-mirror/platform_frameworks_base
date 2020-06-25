@@ -568,6 +568,7 @@ java_library {
         "libcore-platform-compat-config",
         "services-platform-compat-config",
         "documents-ui-compat-config",
+        "calendar-provider-compat-config",
     ],
     libs: ["framework-updatable-stubs-module_libs_api"],
     static_libs: [

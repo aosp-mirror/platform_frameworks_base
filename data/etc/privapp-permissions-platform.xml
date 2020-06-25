@@ -198,6 +198,8 @@ applications that come with the platform
         <permission name="android.permission.MANAGE_USERS" />
         <permission name="android.permission.UPDATE_APP_OPS_STATS"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
+        <permission name="android.permission.LOG_COMPAT_CHANGE" />
+        <permission name="android.permission.READ_COMPAT_CHANGE_CONFIG" />
     </privapp-permissions>
 
     <privapp-permissions package="com.android.providers.contacts">
