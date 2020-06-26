@@ -39,6 +39,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
+import android.view.WindowInsets;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.accessibility.AccessibilityNodeProvider;
@@ -447,6 +448,12 @@ public interface WebViewProvider {
         @SuppressWarnings("unused")
         default boolean onCheckIsTextEditor() {
             return false;
+        }
+
+        @SuppressWarnings("unused")
+        @Nullable
+        default WindowInsets onApplyWindowInsets(@Nullable WindowInsets insets) {
+            return null;
         }
     }
 
