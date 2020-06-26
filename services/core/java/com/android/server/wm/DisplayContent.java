@@ -5797,11 +5797,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
         }
-
-        @Override
-        public boolean isClientControlled() {
-            return false;
-        }
     }
 
     /**
