@@ -25,10 +25,12 @@ import android.content.pm.parsing.ParsingPackage;
 import android.content.pm.parsing.ParsingPackageUtils;
 import android.content.pm.parsing.ParsingUtils;
 import android.content.pm.parsing.result.ParseInput;
+import android.content.pm.parsing.result.ParseInput.DeferredError;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
+import android.os.Build;
 
 import com.android.internal.R;
 
@@ -157,7 +159,18 @@ public class ParsedServiceUtils {
         }
 
         if (!setExported) {
-            service.exported = service.getIntents().size() > 0;
+            boolean hasIntentFilters = service.getIntents().size() > 0;
+            if (hasIntentFilters) {
+                final ParseResult exportedCheckResult = input.deferError(
+                        service.getName() + ": Targeting S+ (version " + Build.VERSION_CODES.S
+                        + " and above) requires that an explicit value for android:exported be"
+                        + " defined when intent filters are present",
+                        DeferredError.MISSING_EXPORTED_FLAG);
+                if (exportedCheckResult.isError()) {
+                    return input.error(exportedCheckResult);
+                }
+            }
+            service.exported = hasIntentFilters;
         }
 
         return input.success(service);
