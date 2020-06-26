@@ -144,7 +144,7 @@ public class FingerprintService extends BiometricServiceBase {
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName, Surface surface) throws RemoteException {
             checkPermission(MANAGE_FINGERPRINT);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             final IBiometricsFingerprint daemon = getFingerprintDaemon();
             if (daemon == null) {
@@ -173,7 +173,7 @@ public class FingerprintService extends BiometricServiceBase {
         public void authenticate(final IBinder token, final long opId, final int userId,
                 final IFingerprintServiceReceiver receiver, final int flags,
                 final String opPackageName, Surface surface) throws RemoteException {
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             final IBiometricsFingerprint daemon = getFingerprintDaemon();
             if (daemon == null) {
@@ -208,7 +208,7 @@ public class FingerprintService extends BiometricServiceBase {
                 int cookie, int callingUid, int callingPid, int callingUserId,
                 Surface surface) throws RemoteException {
             checkPermission(MANAGE_BIOMETRIC);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             final IBiometricsFingerprint daemon = getFingerprintDaemon();
             if (daemon == null) {
@@ -257,7 +257,7 @@ public class FingerprintService extends BiometricServiceBase {
                 final IFingerprintServiceReceiver receiver, final String opPackageName)
                 throws RemoteException {
             checkPermission(MANAGE_FINGERPRINT);
-            updateActiveGroup(userId, opPackageName);
+            updateActiveGroup(userId);
 
             if (token == null) {
                 Slog.w(TAG, "remove(): token is null");
@@ -536,12 +536,11 @@ public class FingerprintService extends BiometricServiceBase {
     }
 
     @Override
-    protected void updateActiveGroup(int userId, String clientPackage) {
+    protected void updateActiveGroup(int userId) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
 
         if (daemon != null) {
             try {
-                userId = getUserOrWorkProfileId(clientPackage, userId);
                 if (userId != mCurrentUserId) {
                     int firstSdkInt = Build.VERSION.FIRST_SDK_INT;
                     if (firstSdkInt < Build.VERSION_CODES.BASE) {
@@ -694,7 +693,7 @@ public class FingerprintService extends BiometricServiceBase {
             if (halId != 0) {
                 loadAuthenticatorIds();
                 final int userId = ActivityManager.getCurrentUser();
-                updateActiveGroup(userId, null);
+                updateActiveGroup(userId);
                 doTemplateCleanupForUser(userId);
             } else {
                 Slog.w(TAG, "Failed to open Fingerprint HAL!");

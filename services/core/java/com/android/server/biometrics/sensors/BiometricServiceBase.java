@@ -120,7 +120,7 @@ public abstract class BiometricServiceBase extends SystemService
             if (!hasEnrolledBiometrics(userId)) {
                 Slog.d(getTag(), "Last biometric removed for user: " + userId
                         + ", updating active group");
-                updateActiveGroup(userId, null);
+                updateActiveGroup(userId);
             }
         }
 
@@ -153,9 +153,8 @@ public abstract class BiometricServiceBase extends SystemService
     /**
      * Notifies the HAL that the user has changed.
      * @param userId
-     * @param clientPackage
      */
-    protected abstract void updateActiveGroup(int userId, String clientPackage);
+    protected abstract void updateActiveGroup(int userId);
 
     /**
      * @param userId
@@ -456,7 +455,7 @@ public abstract class BiometricServiceBase extends SystemService
             // When enrollment finishes, update this group's authenticator id, as the HAL has
             // already generated a new authenticator id when the new biometric is enrolled.
             if (identifier instanceof Fingerprint) {
-                updateActiveGroup(((Fingerprint)identifier).getGroupId(), null);
+                updateActiveGroup(((Fingerprint)identifier).getGroupId());
             }
         }
     }
@@ -855,9 +854,9 @@ public abstract class BiometricServiceBase extends SystemService
         long t = System.currentTimeMillis();
         mAuthenticatorIds.clear();
         for (UserInfo user : UserManager.get(getContext()).getUsers(true /* excludeDying */)) {
-            int userId = getUserOrWorkProfileId(null, user.id);
+            int userId = user.id;
             if (!mAuthenticatorIds.containsKey(userId)) {
-                updateActiveGroup(userId, null);
+                updateActiveGroup(userId);
             }
         }
 
@@ -865,17 +864,6 @@ public abstract class BiometricServiceBase extends SystemService
         if (t > 1000) {
             Slog.w(getTag(), "loadAuthenticatorIds() taking too long: " + t + "ms");
         }
-    }
-
-    /**
-     * @param clientPackage the package of the caller
-     * @return the profile id
-     */
-    protected int getUserOrWorkProfileId(String clientPackage, int userId) {
-        if (!isKeyguard(clientPackage) && isWorkProfile(userId)) {
-            return userId;
-        }
-        return getEffectiveUserId(userId);
     }
 
     protected boolean isRestricted() {
@@ -920,8 +908,7 @@ public abstract class BiometricServiceBase extends SystemService
      * @return authenticator id for the calling user
      */
     protected long getAuthenticatorId(int callingUserId) {
-        final int userId = getUserOrWorkProfileId(null /* clientPackage */, callingUserId);
-        return mAuthenticatorIds.getOrDefault(userId, 0L);
+        return mAuthenticatorIds.getOrDefault(callingUserId, 0L);
     }
 
     /**
@@ -937,7 +924,7 @@ public abstract class BiometricServiceBase extends SystemService
         if (getCurrentClient() instanceof InternalCleanupClient) {
             Slog.w(getTag(), "User switched while performing cleanup");
         }
-        updateActiveGroup(userId, null);
+        updateActiveGroup(userId);
         doTemplateCleanupForUser(userId);
     }
 
@@ -962,26 +949,12 @@ public abstract class BiometricServiceBase extends SystemService
         return userInfo != null && userInfo.isManagedProfile();
     }
 
-
-    private int getEffectiveUserId(int userId) {
-        UserManager um = UserManager.get(mContext);
-        if (um != null) {
-            final long callingIdentity = Binder.clearCallingIdentity();
-            userId = um.getCredentialOwnerProfile(userId);
-            Binder.restoreCallingIdentity(callingIdentity);
-        } else {
-            Slog.e(getTag(), "Unable to acquire UserManager");
-        }
-        return userId;
-    }
-
-
     private void listenForUserSwitches() {
         try {
             ActivityManager.getService().registerUserSwitchObserver(
                     new SynchronousUserSwitchObserver() {
                         @Override
-                        public void onUserSwitching(int newUserId) throws RemoteException {
+                        public void onUserSwitching(int newUserId) {
                             mHandler.obtainMessage(MSG_USER_SWITCHING, newUserId, 0 /* unused */)
                                     .sendToTarget();
                         }
@@ -991,8 +964,7 @@ public abstract class BiometricServiceBase extends SystemService
         }
     }
 
-    private void removeLockoutResetCallback(
-            LockoutResetMonitor monitor) {
+    private void removeLockoutResetCallback(LockoutResetMonitor monitor) {
         mLockoutMonitors.remove(monitor);
     }
 }

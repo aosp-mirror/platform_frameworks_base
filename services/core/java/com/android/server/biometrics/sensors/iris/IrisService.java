@@ -95,7 +95,7 @@ public class IrisService extends BiometricServiceBase {
     }
 
     @Override
-    protected void updateActiveGroup(int userId, String clientPackage) {
+    protected void updateActiveGroup(int userId) {
 
     }
 
