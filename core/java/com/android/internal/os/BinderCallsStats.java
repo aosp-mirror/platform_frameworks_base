@@ -115,7 +115,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                     if (uidEntry != null) {
                         ArrayMap<CallStatKey, CallStat> callStats = uidEntry.mCallStats;
                         mCallStatsObserver.noteCallStats(uidEntry.workSourceUid,
-                                uidEntry.incrementalCallCount, callStats.values());
+                                uidEntry.incrementalCallCount, callStats.values(),
+                                mNativeTids.toArray());
                         uidEntry.incrementalCallCount = 0;
                         for (int j = callStats.size() - 1; j >= 0; j--) {
                             callStats.valueAt(j).incrementalCallCount = 0;
