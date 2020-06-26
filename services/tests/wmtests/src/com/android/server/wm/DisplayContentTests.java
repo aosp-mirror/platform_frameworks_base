@@ -96,13 +96,10 @@ import android.platform.test.annotations.Presubmit;
 import android.util.DisplayMetrics;
 import android.view.DisplayCutout;
 import android.view.Gravity;
-import android.view.IDisplayWindowInsetsController;
 import android.view.IDisplayWindowRotationCallback;
 import android.view.IDisplayWindowRotationController;
 import android.view.ISystemGestureExclusionListener;
 import android.view.IWindowManager;
-import android.view.InsetsSourceControl;
-import android.view.InsetsState;
 import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
@@ -927,28 +924,6 @@ public class DisplayContentTests extends WindowTestsBase {
         mDisplayContent.mInputMethodTarget = mDisplayContent.mInputMethodInputTarget;
         mDisplayContent.setRemoteInsetsController(createDisplayWindowInsetsController());
         assertEquals(mAppWindow, mDisplayContent.computeImeControlTarget());
-    }
-
-    private IDisplayWindowInsetsController createDisplayWindowInsetsController() {
-        return new IDisplayWindowInsetsController.Stub() {
-
-            @Override
-            public void insetsChanged(InsetsState insetsState) throws RemoteException {
-            }
-
-            @Override
-            public void insetsControlChanged(InsetsState insetsState,
-                    InsetsSourceControl[] insetsSourceControls) throws RemoteException {
-            }
-
-            @Override
-            public void showInsets(int i, boolean b) throws RemoteException {
-            }
-
-            @Override
-            public void hideInsets(int i, boolean b) throws RemoteException {
-            }
-        };
     }
 
     @Test

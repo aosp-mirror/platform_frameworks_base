@@ -5826,27 +5826,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    @Override
-    public void setForceShowSystemBars(boolean show) {
-        boolean isAutomotive = mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_AUTOMOTIVE);
-        if (!isAutomotive) {
-            throw new UnsupportedOperationException("Force showing system bars is only supported"
-                    + "for Automotive use cases.");
-        }
-        if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
-                != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Caller does not hold permission "
-                    + android.Manifest.permission.STATUS_BAR);
-        }
-        synchronized (mGlobalLock) {
-            final PooledConsumer c = PooledLambda.obtainConsumer(
-                    DisplayPolicy::setForceShowSystemBars, PooledLambda.__(), show);
-            mRoot.forAllDisplayPolicies(c);
-            c.recycle();
-        }
-    }
-
     public void setNavBarVirtualKeyHapticFeedbackEnabled(boolean enabled) {
         if (mContext.checkCallingOrSelfPermission(android.Manifest.permission.STATUS_BAR)
                 != PackageManager.PERMISSION_GRANTED) {
