@@ -819,7 +819,8 @@ public class ChooserActivity extends ResolverActivity implements
             if (chooserListAdapter.getCount() == 0) {
                 return;
             }
-            if (resultList.isEmpty()) {
+            if (resultList.isEmpty()
+                    && shouldQueryShortcutManager(chooserListAdapter.getUserHandle())) {
                 // APS may be disabled, so try querying targets ourselves.
                 queryDirectShareTargets(chooserListAdapter, true);
                 return;
@@ -2025,6 +2026,26 @@ public class ChooserActivity extends ResolverActivity implements
         });
     }
 
+    /**
+     * Returns {@code false} if {@code userHandle} is the work profile and it's either
+     * in quiet mode or not running.
+     */
+    private boolean shouldQueryShortcutManager(UserHandle userHandle) {
+        if (!shouldShowTabs()) {
+            return true;
+        }
+        if (!getWorkProfileUserHandle().equals(userHandle)) {
+            return true;
+        }
+        if (!isUserRunning(userHandle)) {
+            return false;
+        }
+        if (isQuietModeEnabled(userHandle)) {
+            return false;
+        }
+        return true;
+    }
+
     private void sendChooserTargetRankingScore(List<AppTarget> chooserTargetScores,
             UserHandle userHandle) {
         final Message msg = Message.obtain();
@@ -2839,8 +2860,8 @@ public class ChooserActivity extends ResolverActivity implements
             return;
         }
 
-        // no need to query direct share for work profile when its turned off
-        if (isQuietModeEnabled(chooserListAdapter.getUserHandle())) {
+        // no need to query direct share for work profile when its locked or disabled
+        if (!shouldQueryShortcutManager(chooserListAdapter.getUserHandle())) {
             getChooserActivityLogger().logSharesheetAppLoadComplete();
             return;
         }
@@ -2862,6 +2883,12 @@ public class ChooserActivity extends ResolverActivity implements
         }
 
         getChooserActivityLogger().logSharesheetAppLoadComplete();
+    }
+
+    @VisibleForTesting
+    protected boolean isUserRunning(UserHandle userHandle) {
+        UserManager userManager = getSystemService(UserManager.class);
+        return userManager.isUserRunning(userHandle);
     }
 
     @VisibleForTesting
