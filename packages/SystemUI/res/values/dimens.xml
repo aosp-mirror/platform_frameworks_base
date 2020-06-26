@@ -1061,6 +1061,7 @@
     <!-- Shutdown and restart actions are larger in power options dialog -->
     <dimen name="global_actions_power_dialog_item_height">190dp</dimen>
     <dimen name="global_actions_power_dialog_item_width">255dp</dimen>
+    <dimen name="global_actions_power_dialog_item_bottom_margin">45dp</dimen>
 
     <!-- The maximum offset in either direction that elements are moved horizontally to prevent
          burn-in on AOD. -->
