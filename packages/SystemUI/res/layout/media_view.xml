@@ -141,6 +141,7 @@
             android:layout_width="@dimen/qs_seamless_icon_size"
             android:layout_height="@dimen/qs_seamless_icon_size"
             android:layout_marginEnd="8dp"
+            android:layout_gravity="center_vertical"
             android:tint="@color/media_primary_text"
             android:src="@*android:drawable/ic_media_seamless" />
 
@@ -148,6 +149,7 @@
             android:id="@+id/media_seamless_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
             android:fontFamily="@*android:string/config_headlineFontFamily"
             android:singleLine="true"
             android:text="@*android:string/ext_media_seamless_action"
