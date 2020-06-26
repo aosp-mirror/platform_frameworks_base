@@ -39,6 +39,7 @@ import android.hardware.fingerprint.Fingerprint;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
@@ -412,11 +413,42 @@ public class FingerprintService extends BiometricServiceBase {
             }
             return false;
         }
+
+        @Override
+        public void showUdfpsOverlay() {
+            if (mUdfpsOverlayController == null) {
+                Slog.e(TAG, "showUdfpsOverlay | mUdfpsOverlayController is null");
+                return;
+            }
+            try {
+                mUdfpsOverlayController.showUdfpsOverlay();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "showUdfpsOverlay | RemoteException: ", e);
+            }
+        }
+
+        @Override
+        public void hideUdfpsOverlay() {
+            if (mUdfpsOverlayController == null) {
+                Slog.e(TAG, "hideUdfpsOverlay | mUdfpsOverlayController is null");
+                return;
+            }
+            try {
+                mUdfpsOverlayController.hideUdfpsOverlay();
+            } catch (RemoteException e) {
+                Slog.e(TAG, "hideUdfpsOverlay | RemoteException: ", e);
+            }
+        }
+
+        public void setUdfpsOverlayController(IUdfpsOverlayController controller) {
+            mUdfpsOverlayController = controller;
+        }
     }
 
     private final LockoutFrameworkImpl mLockoutTracker;
     private final CopyOnWriteArrayList<IFingerprintClientActiveCallback> mClientActiveCallbacks =
             new CopyOnWriteArrayList<>();
+    private IUdfpsOverlayController mUdfpsOverlayController;
 
     @GuardedBy("this")
     private IBiometricsFingerprint mDaemon;

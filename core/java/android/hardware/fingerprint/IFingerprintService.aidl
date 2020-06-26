@@ -19,6 +19,7 @@ import android.hardware.biometrics.IBiometricSensorReceiver;
 import android.hardware.biometrics.IBiometricServiceLockoutResetCallback;
 import android.hardware.fingerprint.IFingerprintClientActiveCallback;
 import android.hardware.fingerprint.IFingerprintServiceReceiver;
+import android.hardware.fingerprint.IUdfpsOverlayController;
 import android.hardware.fingerprint.Fingerprint;
 import android.view.Surface;
 import java.util.List;
@@ -111,6 +112,15 @@ interface IFingerprintService {
     // Notifies about a finger leaving the sensor area.
     void onFingerUp();
 
-    // Returns whether the specified sensor is a UDFPS.
+    // Returns whether the specified sensor is an under-display fingerprint sensor (UDFPS).
     boolean isUdfps(int sensorId);
+
+    // Shows the UDFPS overlay.
+    void showUdfpsOverlay();
+
+    // Hides the UDFPS overlay.
+    void hideUdfpsOverlay();
+
+    // Sets the controller for managing the UDFPS overlay.
+    void setUdfpsOverlayController(in IUdfpsOverlayController controller);
 }
