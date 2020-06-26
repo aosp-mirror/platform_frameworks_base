@@ -3506,6 +3506,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *                       1          PFLAG4_AUTOFILL_HIDE_HIGHLIGHT
      *                     11           PFLAG4_SCROLL_CAPTURE_HINT_MASK
      *                    1             PFLAG4_ALLOW_CLICK_WHEN_DISABLED
+     *                   1              PFLAG4_DETACHED
      * |-------|-------|-------|-------|
      */
 
@@ -3566,6 +3567,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Indicates if the view can receive click events when disabled.
      */
     private static final int PFLAG4_ALLOW_CLICK_WHEN_DISABLED = 0x000001000;
+
+    /**
+     * Indicates if the view is just detached.
+     */
+    private static final int PFLAG4_DETACHED = 0x000002000;
 
     /* End of masks for mPrivateFlags4 */
 
@@ -8330,7 +8336,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 (event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED);
         boolean isWindowDisappearedEvent = isWindowStateChanged && ((event.getContentChangeTypes()
                 & AccessibilityEvent.CONTENT_CHANGE_TYPE_PANE_DISAPPEARED) != 0);
-        if (!isShown() && !isWindowDisappearedEvent) {
+        boolean detached = detached();
+        if (!isShown() && !isWindowDisappearedEvent && !detached) {
             return;
         }
         onInitializeAccessibilityEvent(event);
@@ -8341,6 +8348,14 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         SendAccessibilityEventThrottle throttle = getThrottleForAccessibilityEvent(event);
         if (throttle != null) {
             throttle.post(event);
+        } else if (!isWindowDisappearedEvent && detached) {
+            // Views could be attached soon later. Accessibility events during this temporarily
+            // detached period should be sent too.
+            postDelayed(() -> {
+                if (AccessibilityManager.getInstance(mContext).isEnabled() && isShown()) {
+                    requestParentSendAccessibilityEvent(event);
+                }
+            }, ViewConfiguration.getSendRecurringAccessibilityEventsInterval());
         } else {
             requestParentSendAccessibilityEvent(event);
         }
@@ -11119,6 +11134,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
             if (!(parent instanceof View)) {
                 return true;
+            }
+            current = (View) parent;
+        } while (current != null);
+
+        return false;
+    }
+
+    private boolean detached() {
+        View current = this;
+        //noinspection ConstantConditions
+        do {
+            if ((current.mPrivateFlags4 & PFLAG4_DETACHED) != 0) {
+                return true;
+            }
+            ViewParent parent = current.mParent;
+            if (parent == null) {
+                return false;
+            }
+            if (!(parent instanceof View)) {
+                return false;
             }
             current = (View) parent;
         } while (current != null);
@@ -29443,7 +29478,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
 
         @Override
         public void run() {
-            if (AccessibilityManager.getInstance(mContext).isEnabled()) {
+            if (AccessibilityManager.getInstance(mContext).isEnabled() && isShown()) {
                 requestParentSendAccessibilityEvent(mAccessibilityEvent);
             }
             reset();
@@ -30430,6 +30465,21 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Set the view to be detached or not detached.
+     *
+     * @param detached Whether the view is detached.
+     *
+     * @hide
+     */
+    protected void setDetached(boolean detached) {
+        if (detached) {
+            mPrivateFlags4 |= PFLAG4_DETACHED;
+        } else {
+            mPrivateFlags4 &= ~PFLAG4_DETACHED;
         }
     }
 }

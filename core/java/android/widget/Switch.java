@@ -311,7 +311,7 @@ public class Switch extends CompoundButton {
         refreshDrawableState();
         // Default state is derived from on/off-text, so state has to be updated when on/off-text
         // are updated.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
         setChecked(isChecked());
     }
 
@@ -856,7 +856,7 @@ public class Switch extends CompoundButton {
         requestLayout();
         // Default state is derived from on/off-text, so state has to be updated when on/off-text
         // are updated.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
     }
 
     /**
@@ -879,7 +879,7 @@ public class Switch extends CompoundButton {
         requestLayout();
         // Default state is derived from on/off-text, so state has to be updated when on/off-text
         // are updated.
-        setDefaultStateDescritption();
+        setDefaultStateDescription();
     }
 
     /**
