@@ -819,7 +819,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     }
 
     private float getAspectRatioOrDefault(@Nullable PictureInPictureParams params) {
-        return params == null
+        return params == null || !params.hasSetAspectRatio()
                 ? mPipBoundsHandler.getDefaultAspectRatio()
                 : params.getAspectRatio();
     }
