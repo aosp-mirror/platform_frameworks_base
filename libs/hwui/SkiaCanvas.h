@@ -152,8 +152,6 @@ public:
 
     virtual void drawLayer(uirenderer::DeferredLayerUpdater* layerHandle) override;
     virtual void drawRenderNode(uirenderer::RenderNode* renderNode) override;
-    virtual void callDrawGLFunction(Functor* functor,
-                                    uirenderer::GlFunctorLifecycleListener* listener) override;
     virtual void drawPicture(const SkPicture& picture) override;
 
 protected:

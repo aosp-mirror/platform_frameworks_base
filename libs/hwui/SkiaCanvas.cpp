@@ -843,9 +843,4 @@ void SkiaCanvas::drawRenderNode(uirenderer::RenderNode* renderNode) {
     LOG_ALWAYS_FATAL("SkiaCanvas can't directly draw RenderNodes");
 }
 
-void SkiaCanvas::callDrawGLFunction(Functor* functor,
-                                    uirenderer::GlFunctorLifecycleListener* listener) {
-    LOG_ALWAYS_FATAL("SkiaCanvas can't directly draw GL Content");
-}
-
 }  // namespace android

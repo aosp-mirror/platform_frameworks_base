@@ -48,7 +48,10 @@ TEST(SkiaDisplayList, reset) {
     SkCanvas dummyCanvas;
     RenderNodeDrawable drawable(nullptr, &dummyCanvas);
     skiaDL->mChildNodes.emplace_back(nullptr, &dummyCanvas);
-    GLFunctorDrawable functorDrawable(nullptr, nullptr, &dummyCanvas);
+    int functor1 = WebViewFunctor_create(
+            nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
+    GLFunctorDrawable functorDrawable{functor1, &dummyCanvas};
+    WebViewFunctor_release(functor1);
     skiaDL->mChildFunctors.push_back(&functorDrawable);
     skiaDL->mMutableImages.push_back(nullptr);
     skiaDL->appendVD(nullptr);
@@ -97,16 +100,13 @@ TEST(SkiaDisplayList, syncContexts) {
     SkiaDisplayList skiaDL;
 
     SkCanvas dummyCanvas;
-    TestUtils::MockFunctor functor;
-    GLFunctorDrawable functorDrawable(&functor, nullptr, &dummyCanvas);
-    skiaDL.mChildFunctors.push_back(&functorDrawable);
 
-    int functor2 = WebViewFunctor_create(
+    int functor1 = WebViewFunctor_create(
             nullptr, TestUtils::createMockFunctor(RenderMode::OpenGL_ES), RenderMode::OpenGL_ES);
-    auto& counts = TestUtils::countsForFunctor(functor2);
+    auto& counts = TestUtils::countsForFunctor(functor1);
     skiaDL.mChildFunctors.push_back(
-            skiaDL.allocateDrawable<GLFunctorDrawable>(functor2, &dummyCanvas));
-    WebViewFunctor_release(functor2);
+            skiaDL.allocateDrawable<GLFunctorDrawable>(functor1, &dummyCanvas));
+    WebViewFunctor_release(functor1);
 
     SkRect bounds = SkRect::MakeWH(200, 200);
     VectorDrawableRoot vectorDrawable(new VectorDrawable::Group());
@@ -120,7 +120,6 @@ TEST(SkiaDisplayList, syncContexts) {
         });
     });
 
-    EXPECT_EQ(functor.getLastMode(), DrawGlInfo::kModeSync);
     EXPECT_EQ(counts.sync, 1);
     EXPECT_EQ(counts.destroyed, 0);
     EXPECT_EQ(vectorDrawable.mutateProperties()->getBounds(), bounds);

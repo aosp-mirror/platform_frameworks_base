@@ -128,20 +128,6 @@ void RenderProxy::destroy() {
     mRenderThread.queue().runSync([=]() { mContext->destroy(); });
 }
 
-void RenderProxy::invokeFunctor(Functor* functor, bool waitForCompletion) {
-    ATRACE_CALL();
-    RenderThread& thread = RenderThread::getInstance();
-    auto invoke = [&thread, functor]() { CanvasContext::invokeFunctor(thread, functor); };
-    if (waitForCompletion) {
-        // waitForCompletion = true is expected to be fairly rare and only
-        // happen in destruction. Thus it should be fine to temporarily
-        // create a Mutex
-        thread.queue().runSync(std::move(invoke));
-    } else {
-        thread.queue().post(std::move(invoke));
-    }
-}
-
 void RenderProxy::destroyFunctor(int functor) {
     ATRACE_CALL();
     RenderThread& thread = RenderThread::getInstance();

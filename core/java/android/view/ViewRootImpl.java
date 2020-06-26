@@ -1227,28 +1227,19 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
-    @UnsupportedAppUsage
-    public void detachFunctor(long functor) {
-        if (mAttachInfo.mThreadedRenderer != null) {
-            // Fence so that any pending invokeFunctor() messages will be processed
-            // before we return from detachFunctor.
-            mAttachInfo.mThreadedRenderer.stopDrawing();
-        }
-    }
+    /**
+     * Does nothing; Here only because of @UnsupportedAppUsage
+     */
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
+            publicAlternatives = "Use {@link android.webkit.WebView} instead")
+    public void detachFunctor(long functor) { }
 
     /**
-     * Schedules the functor for execution in either kModeProcess or
-     * kModeProcessNoContext, depending on whether or not there is an EGLContext.
-     *
-     * @param functor The native functor to invoke
-     * @param waitForCompletion If true, this will not return until the functor
-     *                          has invoked. If false, the functor may be invoked
-     *                          asynchronously.
+     * Does nothing; Here only because of @UnsupportedAppUsage
      */
-    @UnsupportedAppUsage
-    public static void invokeFunctor(long functor, boolean waitForCompletion) {
-        ThreadedRenderer.invokeFunctor(functor, waitForCompletion);
-    }
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R,
+            publicAlternatives = "Use {@link android.webkit.WebView} instead")
+    public static void invokeFunctor(long functor, boolean waitForCompletion) { }
 
     /**
      * @param animator animator to register with the hardware renderer
