@@ -164,6 +164,7 @@ public abstract class TaskEmbedder {
                 .setContainerLayer()
                 .setParent(parent)
                 .setName(name)
+                .setCallsite("TaskEmbedder.initialize")
                 .build();
 
         if (!onInitialize()) {

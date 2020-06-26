@@ -895,6 +895,7 @@ final class AccessibilityController {
                                 .setName(SURFACE_TITLE)
                                 .setBufferSize(mTempPoint.x, mTempPoint.y) // not a typo
                                 .setFormat(PixelFormat.TRANSLUCENT)
+                                .setCallsite("ViewportWindow")
                                 .build();
                     } catch (OutOfResourcesException oore) {
                         /* ignore */

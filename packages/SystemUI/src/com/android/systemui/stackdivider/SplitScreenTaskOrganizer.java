@@ -102,10 +102,14 @@ class SplitScreenTaskOrganizer extends TaskOrganizer {
                 // Initialize dim surfaces:
                 mPrimaryDim = new SurfaceControl.Builder(mSurfaceSession)
                         .setParent(mPrimarySurface).setColorLayer()
-                        .setName("Primary Divider Dim").build();
+                        .setName("Primary Divider Dim")
+                        .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
+                        .build();
                 mSecondaryDim = new SurfaceControl.Builder(mSurfaceSession)
                         .setParent(mSecondarySurface).setColorLayer()
-                        .setName("Secondary Divider Dim").build();
+                        .setName("Secondary Divider Dim")
+                        .setCallsite("SplitScreenTaskOrganizer.onTaskAppeared")
+                        .build();
                 SurfaceControl.Transaction t = getTransaction();
                 t.setLayer(mPrimaryDim, Integer.MAX_VALUE);
                 t.setColor(mPrimaryDim, new float[]{0f, 0f, 0f});
