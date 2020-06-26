@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Kontrolleri yeniden düzenlemek için basılı tutup sürükleyin"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Tüm kontroller kaldırıldı"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Değişiklikler kaydedilmedi"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Tüm uygulamaları göster"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Kontroller yüklenemedi. Uygulama ayarlarının değişmediğinden emin olmak için <xliff:g id="APP">%s</xliff:g> uygulamasını kontrol edin."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Uyumlu kontrol bulunamadı"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Diğer"</string>

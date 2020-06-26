@@ -548,8 +548,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Isključi VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Prekini VPN vezu"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Prikaži pravila"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVaš IT administrator može nadzirati postavke, korporativni pristup, aplikacije, podatke povezane s vašim uređajem i informacije o lokaciji uređaja te njima upravljati.\n\nZa više informacija, kontaktirajte IT administratora."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Ovaj uređaj pripada vašoj organizaciji.\n\nVaš IT administrator može nadzirati postavke, korporativni pristup, aplikacije, podatke povezane s vašim uređajem i informacije o lokaciji uređaja te njima upravljati.\n\nZa više informacija, kontaktirajte IT administratora."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Ovaj uređaj pripada organizaciji <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVaš IT administrator može nadzirati postavke, korporativni pristup, aplikacije, podatke povezane s vašim uređajem i informacije o lokaciji uređaja te njima upravljati.\n\nZa više informacija kontaktirajte IT administratora."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Ovaj uređaj pripada vašoj organizaciji.\n\nVaš IT administrator može nadzirati postavke, korporativni pristup, aplikacije, podatke povezane s vašim uređajem i informacije o lokaciji uređaja te njima upravljati.\n\nZa više informacija kontaktirajte IT administratora."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Vaša organizacija je instalirala CA certifikat na ovom uređaju. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Vaša organizacija je instalirala CA certifikat na vašem radnom profilu. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"CA certifikat je instaliran na ovom uređaju. Vaš saobraćaj preko sigurne mreže može se pratiti."</string>
@@ -1054,8 +1054,9 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Držite i prevucite da preuredite kontrole"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Sve kontrole su uklonjene"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Promjene nisu sačuvane"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Prikaži druge aplikacije"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Učitavanje kontrola nije uspjelo. Provjerite aplikaciju <xliff:g id="APP">%s</xliff:g> da se uvjerite da postavke aplikacije nisu izmijenjene."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole su nedostupne"</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilne kontrole nisu dostupne"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Drugo"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Dodajte u kontrole uređaja"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Dodaj"</string>

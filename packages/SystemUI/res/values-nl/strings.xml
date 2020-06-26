@@ -92,7 +92,7 @@
     <string name="screenrecord_background_processing_label" msgid="7244617554884238898">"Schermopname verwerken"</string>
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Doorlopende melding voor een schermopname-sessie"</string>
     <string name="screenrecord_start_label" msgid="1750350278888217473">"Opname starten?"</string>
-    <string name="screenrecord_description" msgid="1123231719680353736">"Tijdens de opname kan het Android-systeem gevoelige informatie opnemen die zichtbaar is op je scherm of wordt afgespeeld op je apparaat. Dit omvat wachtwoorden, betalingsgegevens, foto\'s, berichten en audio."</string>
+    <string name="screenrecord_description" msgid="1123231719680353736">"Tijdens de opname kan het Android-systeem gevoelige informatie opnemen die zichtbaar is op je scherm of wordt afgespeeld op je apparaat, waaronder wachtwoorden, betalingsgegevens, foto\'s, berichten en audio."</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Audio opnemen"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Audio van apparaat"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Geluid van je apparaat, zoals muziek, gesprekken en ringtones"</string>
@@ -1042,12 +1042,13 @@
     <string name="accessibility_control_change_unfavorite" msgid="6997408061750740327">"als favoriet verwijderen"</string>
     <string name="accessibility_control_move" msgid="8980344493796647792">"Verplaatsen naar positie <xliff:g id="NUMBER">%d</xliff:g>"</string>
     <string name="controls_favorite_default_title" msgid="967742178688938137">"Bedieningselementen"</string>
-    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je vanaf het aan/uit-menu wilt kunnen gebruiken"</string>
+    <string name="controls_favorite_subtitle" msgid="6604402232298443956">"Kies bedieningselementen die je via het aan/uit-menu wilt kunnen gebruiken"</string>
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Houd vast en sleep om de bedieningselementen opnieuw in te delen"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alle bedieningselementen verwijderd"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Wijzigingen zijn niet opgeslagen"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Andere apps bekijken"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Bedieningselementen kunnen niet worden geladen. Check de <xliff:g id="APP">%s</xliff:g>-app om na te gaan of de app-instellingen niet zijn gewijzigd."</string>
-    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Geen geschikte bedieningselementen beschikbaar."</string>
+    <string name="controls_favorite_load_none" msgid="7687593026725357775">"Geen geschikte bedieningselementen beschikbaar"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Overig"</string>
     <string name="controls_dialog_title" msgid="2343565267424406202">"Toevoegen aan apparaatbediening"</string>
     <string name="controls_dialog_ok" msgid="2770230012857881822">"Toevoegen"</string>

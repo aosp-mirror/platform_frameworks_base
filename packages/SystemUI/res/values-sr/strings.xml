@@ -1052,6 +1052,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Задржите и превуците да бисте променили распоред контрола"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Све контроле су уклоњене"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Промене нису сачуване"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Погледајте друге апликације"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Учитавање контрола није успело. Погледајте апликацију <xliff:g id="APP">%s</xliff:g> да бисте се уверили да се подешавања апликације нису променила."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Компатибилне контроле нису доступне"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Друго"</string>

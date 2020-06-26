@@ -1026,7 +1026,7 @@
     <string name="magnification_window_title" msgid="4863914360847258333">"Janela de ampliação"</string>
     <string name="magnification_controls_title" msgid="8421106606708891519">"Controlos da janela de ampliação"</string>
     <string name="quick_controls_title" msgid="6839108006171302273">"Controlos de dispositivos"</string>
-    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Adicione controlos para os seus dispositivos associados."</string>
+    <string name="quick_controls_subtitle" msgid="1667408093326318053">"Adicione controlos para os dispositivos associados."</string>
     <string name="quick_controls_setup_title" msgid="8901436655997849822">"Configure os controlos de dispositivos"</string>
     <string name="quick_controls_setup_subtitle" msgid="1681506617879773824">"Prima sem soltar o botão ligar/desligar para aceder aos controlos."</string>
     <string name="controls_providers_title" msgid="6879775889857085056">"Escolha uma app para adicionar controlos"</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Toque sem soltar e arraste para reorganizar os controlos."</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Todos os controlos foram removidos."</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Alterações não guardadas."</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Ver outras apps"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Não foi possível carregar os controlos. Verifique a app <xliff:g id="APP">%s</xliff:g> para se certificar de que as definições da mesma não foram alteradas."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Controlos compatíveis indisponíveis"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Outro"</string>
@@ -1054,7 +1055,7 @@
     <string name="controls_dialog_message" msgid="342066938390663844">"Sugerido por <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="controls_dialog_confirmation" msgid="586517302736263447">"Controlos atualizados"</string>
     <string name="controls_pin_use_alphanumeric" msgid="8478371861023048414">"O PIN contém letras ou símbolos."</string>
-    <string name="controls_pin_verify" msgid="3452778292918877662">"Valide <xliff:g id="DEVICE">%s</xliff:g>"</string>
+    <string name="controls_pin_verify" msgid="3452778292918877662">"Validar <xliff:g id="DEVICE">%s</xliff:g>"</string>
     <string name="controls_pin_wrong" msgid="6162694056042164211">"PIN incorreto"</string>
     <string name="controls_pin_verifying" msgid="3755045989392131746">"A validar…"</string>
     <string name="controls_pin_instructions" msgid="6363309783822475238">"Introduzir PIN"</string>
