@@ -37,7 +37,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Helper for querying shortcuts.
@@ -249,8 +251,11 @@ public class ShortcutHelper {
                 if (!TextUtils.isEmpty(shortcutId)) {
                     packageBubbles.remove(shortcutId);
                 } else {
+                    // Copy the shortcut IDs to avoid a concurrent modification exception.
+                    final Set<String> shortcutIds = new HashSet<>(packageBubbles.keySet());
+
                     // Check if there was a matching entry
-                    for (String pkgShortcutId : packageBubbles.keySet()) {
+                    for (String pkgShortcutId : shortcutIds) {
                         String entryKey = packageBubbles.get(pkgShortcutId);
                         if (r.getKey().equals(entryKey)) {
                             // No longer has shortcut id so remove it
