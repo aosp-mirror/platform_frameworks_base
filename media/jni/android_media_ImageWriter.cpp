@@ -86,6 +86,14 @@ public:
     void setBufferHeight(int height) { mHeight = height; }
     int getBufferHeight() { return mHeight; }
 
+    void queueAttachedFlag(bool isAttached) {
+        Mutex::Autolock l(mAttachedFlagQueueLock);
+        mAttachedFlagQueue.push_back(isAttached);
+    }
+    void dequeueAttachedFlag() {
+        Mutex::Autolock l(mAttachedFlagQueueLock);
+        mAttachedFlagQueue.pop_back();
+    }
 private:
     static JNIEnv* getJNIEnv(bool* needsDetach);
     static void detachJNI();
@@ -136,6 +144,11 @@ private:
     };
 
     static BufferDetacher sBufferDetacher;
+
+    // Buffer queue guarantees both producer and consumer side buffer flows are
+    // in order. See b/19977520. As a result, we can use a queue here.
+    Mutex mAttachedFlagQueueLock;
+    std::deque<bool> mAttachedFlagQueue;
 };
 
 JNIImageWriterContext::BufferDetacher JNIImageWriterContext::sBufferDetacher;
@@ -265,11 +278,23 @@ void JNIImageWriterContext::onBufferReleased() {
     ALOGV("%s: buffer released", __FUNCTION__);
     bool needsDetach = false;
     JNIEnv* env = getJNIEnv(&needsDetach);
+
+    bool bufferIsAttached = false;
+    {
+        Mutex::Autolock l(mAttachedFlagQueueLock);
+        if (!mAttachedFlagQueue.empty()) {
+            bufferIsAttached = mAttachedFlagQueue.front();
+            mAttachedFlagQueue.pop_front();
+        } else {
+            ALOGW("onBufferReleased called with no attached flag queued");
+        }
+    }
+
     if (env != NULL) {
         // Detach the buffer every time when a buffer consumption is done,
         // need let this callback give a BufferItem, then only detach if it was attached to this
-        // Writer. Do the detach unconditionally for opaque format now. see b/19977520
-        if (mFormat == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+        // Writer. see b/19977520
+        if (mFormat == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED || bufferIsAttached) {
             sBufferDetacher.detach(mProducer);
         }
 
@@ -622,10 +647,16 @@ static void ImageWriter_queueImage(JNIEnv* env, jobject thiz, jlong nativeCtx, j
         return;
     }
 
-    // Finally, queue input buffer
+    // Finally, queue input buffer.
+    //
+    // Because onBufferReleased may be called before queueBuffer() returns,
+    // queue the "attached" flag before calling queueBuffer. In case
+    // queueBuffer() fails, remove it from the queue.
+    ctx->queueAttachedFlag(false);
     res = anw->queueBuffer(anw.get(), buffer, fenceFd);
     if (res != OK) {
         ALOGE("%s: Queue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+        ctx->dequeueAttachedFlag();
         switch (res) {
             case NO_INIT:
                 jniThrowException(env, "java/lang/IllegalStateException",
@@ -720,10 +751,16 @@ static jint ImageWriter_attachAndQueueImage(JNIEnv* env, jobject thiz, jlong nat
     }
 
     // Step 3. Queue Image.
+    //
+    // Because onBufferReleased may be called before queueBuffer() returns,
+    // queue the "attached" flag before calling queueBuffer. In case
+    // queueBuffer() fails, remove it from the queue.
+    ctx->queueAttachedFlag(true);
     res = anw->queueBuffer(anw.get(), buffer->mGraphicBuffer.get(), /*fenceFd*/
             -1);
     if (res != OK) {
         ALOGE("%s: Queue buffer failed: %s (%d)", __FUNCTION__, strerror(-res), res);
+        ctx->dequeueAttachedFlag();
         switch (res) {
             case NO_INIT:
                 jniThrowException(env, "java/lang/IllegalStateException",
