@@ -1339,14 +1339,15 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    @Ignore
     public void testPostCancelPostNotifiesListeners() throws Exception {
         // WHEN a notification is posted
         final StatusBarNotification sbn = generateNotificationRecord(null).getSbn();
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
                 sbn.getNotification(), sbn.getUserId());
+        Thread.sleep(1);  // make sure the system clock advances before the next step
         // THEN it is canceled
         mBinderService.cancelNotificationWithTag(PKG, PKG, "tag", sbn.getId(), sbn.getUserId());
+        Thread.sleep(1);  // here too
         // THEN it is posted again (before the cancel has a chance to finish)
         mBinderService.enqueueNotificationWithTag(PKG, PKG, "tag", sbn.getId(),
                 sbn.getNotification(), sbn.getUserId());
