@@ -528,8 +528,9 @@ public abstract class WindowManagerInternal {
      * Hide IME using imeTargetWindow when requested.
      *
      * @param imeTargetWindowToken token of the (IME target) window on which IME should be hidden.
+     * @param displayId the id of the display the IME is on.
      */
-    public abstract void hideIme(IBinder imeTargetWindowToken);
+    public abstract void hideIme(IBinder imeTargetWindowToken, int displayId);
 
     /**
      * Tell window manager about a package that should not be running with high refresh rate
