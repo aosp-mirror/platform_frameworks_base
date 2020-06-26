@@ -27,6 +27,14 @@
     android:forceHasOverlappingRendering="false"
     android:background="@drawable/qs_media_background">
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/center_vertical_guideline"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"
+        />
+
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
     <FrameLayout
         android:id="@+id/notification_media_progress_time"
@@ -155,15 +163,6 @@
         android:tint="@color/media_primary_text"
         android:src="@drawable/ic_cast_connected"
         android:forceHasOverlappingRendering="false" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/media_seamless_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="start"
-        app:constraint_referenced_ids="media_seamless,media_seamless_fallback"
-        app:barrierAllowsGoneWidgets="false"
-        />
 
     <!-- Seek Bar -->
     <!-- As per Material Design on Biderectionality, this is forced to LTR in code -->
