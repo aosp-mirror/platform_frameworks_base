@@ -17,12 +17,17 @@
 package com.android.systemui.screenrecord;
 
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.CountDownTimer;
+import android.os.UserHandle;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.statusbar.policy.CallbackController;
 
 import java.util.ArrayList;
@@ -41,21 +46,30 @@ public class RecordingController
     private static final String SYSUI_SCREENRECORD_LAUNCHER =
             "com.android.systemui.screenrecord.ScreenRecordDialog";
 
-    private final Context mContext;
     private boolean mIsStarting;
     private boolean mIsRecording;
     private PendingIntent mStopIntent;
     private CountDownTimer mCountDownTimer = null;
+    private BroadcastDispatcher mBroadcastDispatcher;
 
     private ArrayList<RecordingStateChangeCallback> mListeners = new ArrayList<>();
 
+    @VisibleForTesting
+    protected final BroadcastReceiver mUserChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mStopIntent != null) {
+                stopRecording();
+            }
+        }
+    };
+
     /**
      * Create a new RecordingController
-     * @param context Context for the controller
      */
     @Inject
-    public RecordingController(Context context) {
-        mContext = context;
+    public RecordingController(BroadcastDispatcher broadcastDispatcher) {
+        mBroadcastDispatcher = broadcastDispatcher;
     }
 
     /**
@@ -99,6 +113,9 @@ public class RecordingController
                 }
                 try {
                     startIntent.send();
+                    IntentFilter userFilter = new IntentFilter(Intent.ACTION_USER_SWITCHED);
+                    mBroadcastDispatcher.registerReceiver(mUserChangeReceiver, userFilter, null,
+                            UserHandle.ALL);
                     Log.d(TAG, "sent start intent");
                 } catch (PendingIntent.CanceledException e) {
                     Log.e(TAG, "Pending intent was cancelled: " + e.getMessage());
@@ -146,11 +163,16 @@ public class RecordingController
      */
     public void stopRecording() {
         try {
-            mStopIntent.send();
+            if (mStopIntent != null) {
+                mStopIntent.send();
+            } else {
+                Log.e(TAG, "Stop intent was null");
+            }
             updateState(false);
         } catch (PendingIntent.CanceledException e) {
             Log.e(TAG, "Error stopping: " + e.getMessage());
         }
+        mBroadcastDispatcher.unregisterReceiver(mUserChangeReceiver);
     }
 
     /**

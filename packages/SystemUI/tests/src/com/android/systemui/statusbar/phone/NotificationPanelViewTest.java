@@ -180,6 +180,8 @@ public class NotificationPanelViewTest extends SysuiTestCase {
     @Mock
     private ConversationNotificationManager mConversationNotificationManager;
     @Mock
+    private BiometricUnlockController mBiometricUnlockController;
+    @Mock
     private StatusBarKeyguardViewManager mStatusBarKeyguardViewManager;
     private FlingAnimationUtils.Builder mFlingAnimationUtilsBuilder;
 
@@ -238,7 +240,7 @@ public class NotificationPanelViewTest extends SysuiTestCase {
                 mMetricsLogger, mActivityManager, mZenModeController, mConfigurationController,
                 mFlingAnimationUtilsBuilder, mStatusBarTouchableRegionManager,
                 mConversationNotificationManager, mMediaHiearchyManager,
-                mStatusBarKeyguardViewManager);
+                mBiometricUnlockController, mStatusBarKeyguardViewManager);
         mNotificationPanelViewController.initDependencies(mStatusBar, mGroupManager,
                 mNotificationShelf, mNotificationAreaController, mScrimController);
         mNotificationPanelViewController.setHeadsUpManager(mHeadsUpManager);

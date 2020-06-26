@@ -29,13 +29,12 @@ import android.testing.TestableLooper;
 
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.screenrecord.RecordingController;
+import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,18 +43,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ScreenRecordTileTest extends SysuiTestCase {
 
     @Mock
     private RecordingController mController;
     @Mock
-    private ActivityStarter mActivityStarter;
-    @Mock
     private QSTileHost mHost;
     @Mock
-    private UiEventLogger mUiEventLogger;
+    private KeyguardDismissUtil mKeyguardDismissUtil;
 
     private TestableLooper mTestableLooper;
     private ScreenRecordTile mTile;
@@ -67,11 +64,10 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
         mDependency.injectTestDependency(Dependency.BG_LOOPER, mTestableLooper.getLooper());
         mController = mDependency.injectMockDependency(RecordingController.class);
-        mActivityStarter = mDependency.injectMockDependency(ActivityStarter.class);
 
         when(mHost.getContext()).thenReturn(mContext);
 
-        mTile = new ScreenRecordTile(mHost, mController, mActivityStarter, mUiEventLogger);
+        mTile = new ScreenRecordTile(mHost, mController, mKeyguardDismissUtil);
     }
 
     // Test that the tile is inactive and labeled correctly when the controller is neither starting
@@ -89,6 +85,7 @@ public class ScreenRecordTileTest extends SysuiTestCase {
                 mContext.getString(R.string.quick_settings_screen_record_start)));
 
         mTile.handleClick();
+        mTestableLooper.processAllMessages();
         verify(mController, times(1)).getPromptIntent();
     }
 
