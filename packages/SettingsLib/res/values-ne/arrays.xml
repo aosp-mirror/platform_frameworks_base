@@ -238,7 +238,7 @@
   </string-array>
   <string-array name="show_non_rect_clip_entries">
     <item msgid="2482978351289846212">"बन्द"</item>
-    <item msgid="3405519300199774027">"गैर आयातकार क्षेत्र नीलो रङमा कोर्नुहोस्"</item>
+    <item msgid="3405519300199774027">"गैर आयातकार क्षेत्र निलो रङमा कोर्नुहोस्"</item>
     <item msgid="1212561935004167943">"हाइलाइट परीक्षण चित्र कोर्ने आदेशहरू हरियोमा"</item>
   </string-array>
   <string-array name="track_frame_time_entries">
