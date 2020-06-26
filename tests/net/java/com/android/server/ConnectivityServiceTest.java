@@ -1246,7 +1246,7 @@ public class ConnectivityServiceTest {
         // Create local CM before sending system ready so that we can answer
         // getSystemService() correctly.
         mCm = new WrappedConnectivityManager(InstrumentationRegistry.getContext(), mService);
-        mService.systemReady();
+        mService.systemReadyInternal();
         mockVpn(Process.myUid());
         mCm.bindProcessToNetwork(null);
 

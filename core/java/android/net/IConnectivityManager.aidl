@@ -233,4 +233,6 @@ interface IConnectivityManager
 
     void simulateDataStall(int detectionMethod, long timestampMillis, in Network network,
                 in PersistableBundle extras);
+
+    void systemReady();
 }
