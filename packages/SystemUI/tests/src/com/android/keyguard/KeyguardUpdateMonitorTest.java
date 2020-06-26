@@ -211,6 +211,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    public void testInitialBatteryLevelRequested() {
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.mBatteryStatus).isNotNull();
+    }
+
+    @Test
     public void testReceiversRegistered() {
         verify(mBroadcastDispatcher, atLeastOnce()).registerReceiverWithHandler(
                 eq(mKeyguardUpdateMonitor.mBroadcastReceiver),
