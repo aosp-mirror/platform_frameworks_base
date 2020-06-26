@@ -121,7 +121,7 @@ public class BiometricManager {
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Tier 3</strong> (formerly <strong>Strong</strong>), as defined
+         * requirements for <strong>Class 3</strong> (formerly <strong>Strong</strong>), as defined
          * by the Android CDD.
          *
          * <p>This corresponds to {@link KeyProperties#AUTH_BIOMETRIC_STRONG} during key generation.
@@ -132,7 +132,7 @@ public class BiometricManager {
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Tier 2</strong> (formerly <strong>Weak</strong>), as defined by
+         * requirements for <strong>Class 2</strong> (formerly <strong>Weak</strong>), as defined by
          * the Android CDD.
          *
          * <p>Note that this is a superset of {@link #BIOMETRIC_STRONG} and is defined such that
@@ -142,7 +142,7 @@ public class BiometricManager {
 
         /**
          * Any biometric (e.g. fingerprint, iris, or face) on the device that meets or exceeds the
-         * requirements for <strong>Tier 1</strong> (formerly <strong>Convenience</strong>), as
+         * requirements for <strong>Class 1</strong> (formerly <strong>Convenience</strong>), as
          * defined by the Android CDD.
          *
          * <p>This constant is intended for use by {@link android.provider.DeviceConfig} to adjust
