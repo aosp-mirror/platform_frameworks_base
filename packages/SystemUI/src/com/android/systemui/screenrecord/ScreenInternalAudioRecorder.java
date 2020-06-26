@@ -16,7 +16,6 @@
 
 package com.android.systemui.screenrecord;
 
-import android.content.Context;
 import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioPlaybackCaptureConfiguration;
@@ -39,7 +38,6 @@ public class ScreenInternalAudioRecorder {
     private static String TAG = "ScreenAudioRecorder";
     private static final int TIMEOUT = 500;
     private static final float MIC_VOLUME_SCALE = 1.4f;
-    private final Context mContext;
     private AudioRecord mAudioRecord;
     private AudioRecord mAudioRecordMic;
     private Config mConfig = new Config();
@@ -49,17 +47,14 @@ public class ScreenInternalAudioRecorder {
     private long mPresentationTime;
     private long mTotalBytes;
     private MediaMuxer mMuxer;
-    private String mOutFile;
     private boolean mMic;
 
     private int mTrackId = -1;
 
-    public ScreenInternalAudioRecorder(String outFile, Context context,
-            MediaProjection mp, boolean includeMicInput) throws IOException {
+    public ScreenInternalAudioRecorder(String outFile, MediaProjection mp, boolean includeMicInput)
+            throws IOException {
         mMic = includeMicInput;
-        mOutFile = outFile;
         mMuxer = new MediaMuxer(outFile, MediaMuxer.OutputFormat.MUXER_OUTPUT_MPEG_4);
-        mContext = context;
         mMediaProjection = mp;
         Log.d(TAG, "creating audio file " + outFile);
         setupSimple();
@@ -266,8 +261,9 @@ public class ScreenInternalAudioRecorder {
 
     /**
     * start recording
+     * @throws IllegalStateException if recording fails to initialize
     */
-    public void start() {
+    public void start() throws IllegalStateException {
         if (mThread != null) {
             Log.e(TAG, "a recording is being done in parallel or stop is not called");
         }
@@ -276,8 +272,7 @@ public class ScreenInternalAudioRecorder {
         Log.d(TAG, "channel count " + mAudioRecord.getChannelCount());
         mCodec.start();
         if (mAudioRecord.getRecordingState() != AudioRecord.RECORDSTATE_RECORDING) {
-            Log.e(TAG, "Error starting audio recording");
-            return;
+            throw new IllegalStateException("Audio recording failed to start");
         }
         mThread.start();
     }

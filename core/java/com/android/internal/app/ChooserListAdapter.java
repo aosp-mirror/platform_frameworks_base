@@ -561,7 +561,7 @@ public class ChooserListAdapter extends ResolverListAdapter {
                 mChooserTargetScores.put(componentName, new HashMap<>());
             }
             mChooserTargetScores.get(componentName).put(shortcutInfo.getShortLabel().toString(),
-                    shortcutInfo.getRank());
+                    target.getRank());
         }
         mChooserTargetScores.keySet().forEach(key -> rankTargetsWithinComponent(key));
     }

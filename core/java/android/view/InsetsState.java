@@ -427,8 +427,7 @@ public class InsetsState implements Parcelable {
         if (copySources) {
             for (int i = 0; i < SIZE; i++) {
                 InsetsSource source = other.mSources[i];
-                if (source == null) continue;
-                mSources[i] = new InsetsSource(source);
+                mSources[i] = source != null ? new InsetsSource(source) : null;
             }
         } else {
             for (int i = 0; i < SIZE; i++) {
