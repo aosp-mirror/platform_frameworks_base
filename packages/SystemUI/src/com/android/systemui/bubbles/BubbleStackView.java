@@ -273,7 +273,6 @@ public class BubbleStackView extends FrameLayout
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
     private int mCornerRadius;
-    private int mPointerHeight;
     private int mStatusBarHeight;
     private int mImeOffset;
     @Nullable private BubbleViewProvider mExpandedBubble;
@@ -784,7 +783,6 @@ public class BubbleStackView extends FrameLayout
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
-        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
 
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -2403,7 +2401,7 @@ public class BubbleStackView extends FrameLayout
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getExpandedViewY() {
-        return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop + mPointerHeight;
+        return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop;
     }
 
     /**
