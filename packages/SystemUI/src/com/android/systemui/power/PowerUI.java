@@ -225,6 +225,8 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
     @VisibleForTesting
     final class Receiver extends BroadcastReceiver {
 
+        private boolean mHasReceivedBattery = false;
+
         public void init() {
             // Register for Intent broadcasts for...
             IntentFilter filter = new IntentFilter();
@@ -234,6 +236,17 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
             filter.addAction(Intent.ACTION_SCREEN_ON);
             filter.addAction(Intent.ACTION_USER_SWITCHED);
             mBroadcastDispatcher.registerReceiverWithHandler(this, filter, mHandler);
+            // Force get initial values. Relying on Sticky behavior until API for getting info.
+            if (!mHasReceivedBattery) {
+                // Get initial state
+                Intent intent = mContext.registerReceiver(
+                        null,
+                        new IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+                );
+                if (intent != null) {
+                    onReceive(mContext, intent);
+                }
+            }
         }
 
         @Override
@@ -246,6 +259,7 @@ public class PowerUI extends SystemUI implements CommandQueue.Callbacks {
                     }
                 });
             } else if (Intent.ACTION_BATTERY_CHANGED.equals(action)) {
+                mHasReceivedBattery = true;
                 final int oldBatteryLevel = mBatteryLevel;
                 mBatteryLevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 100);
                 final int oldBatteryStatus = mBatteryStatus;
