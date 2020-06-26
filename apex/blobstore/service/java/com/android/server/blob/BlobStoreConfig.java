@@ -25,6 +25,7 @@ import android.content.Context;
 import android.os.Environment;
 import android.provider.DeviceConfig;
 import android.provider.DeviceConfig.Properties;
+import android.text.TextUtils;
 import android.util.DataUnit;
 import android.util.Log;
 import android.util.Slog;
@@ -171,6 +172,13 @@ class BlobStoreConfig {
         public static int MAX_BLOB_ACCESS_PERMITTED_PACKAGES =
                 DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES;
 
+        /**
+         * Denotes the maximum number of characters that a lease description can have.
+         */
+        public static final String KEY_LEASE_DESC_CHAR_LIMIT = "lease_desc_char_limit";
+        public static int DEFAULT_LEASE_DESC_CHAR_LIMIT = 300;
+        public static int LEASE_DESC_CHAR_LIMIT = DEFAULT_LEASE_DESC_CHAR_LIMIT;
+
         static void refresh(Properties properties) {
             if (!NAMESPACE_BLOBSTORE.equals(properties.getNamespace())) {
                 return;
@@ -221,6 +229,10 @@ class BlobStoreConfig {
                         MAX_BLOB_ACCESS_PERMITTED_PACKAGES = properties.getInt(key,
                                 DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES);
                         break;
+                    case KEY_LEASE_DESC_CHAR_LIMIT:
+                        LEASE_DESC_CHAR_LIMIT = properties.getInt(key,
+                                DEFAULT_LEASE_DESC_CHAR_LIMIT);
+                        break;
                     default:
                         Slog.wtf(TAG, "Unknown key in device config properties: " + key);
                 }
@@ -262,6 +274,8 @@ class BlobStoreConfig {
             fout.println(String.format(dumpFormat, KEY_MAX_BLOB_ACCESS_PERMITTED_PACKAGES,
                     MAX_BLOB_ACCESS_PERMITTED_PACKAGES,
                     DEFAULT_MAX_BLOB_ACCESS_PERMITTED_PACKAGES));
+            fout.println(String.format(dumpFormat, KEY_LEASE_DESC_CHAR_LIMIT,
+                    LEASE_DESC_CHAR_LIMIT, DEFAULT_LEASE_DESC_CHAR_LIMIT));
         }
     }
 
@@ -366,6 +380,18 @@ class BlobStoreConfig {
      */
     public static int getMaxPermittedPackages() {
         return DeviceConfigProperties.MAX_BLOB_ACCESS_PERMITTED_PACKAGES;
+    }
+
+    /**
+     * Returns the lease description truncated to
+     * {@link DeviceConfigProperties#LEASE_DESC_CHAR_LIMIT} characters.
+     */
+    public static CharSequence getTruncatedLeaseDescription(CharSequence description) {
+        if (TextUtils.isEmpty(description)) {
+            return description;
+        }
+        return TextUtils.trimToLengthWithEllipsis(description,
+                DeviceConfigProperties.LEASE_DESC_CHAR_LIMIT);
     }
 
     @Nullable

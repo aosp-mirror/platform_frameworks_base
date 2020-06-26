@@ -1494,6 +1494,8 @@ public class BlobStoreManagerService extends SystemService {
                     "leaseExpiryTimeMillis must not be negative");
             Objects.requireNonNull(packageName, "packageName must not be null");
 
+            description = BlobStoreConfig.getTruncatedLeaseDescription(description);
+
             final int callingUid = Binder.getCallingUid();
             verifyCallingPackage(callingUid, packageName);
 
