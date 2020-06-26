@@ -59,6 +59,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.PowerManager;
@@ -119,6 +120,7 @@ public class MediaSessionService extends SystemService implements Monitor {
     private final PowerManager.WakeLock mMediaEventWakeLock;
     private final INotificationManager mNotificationManager;
     private final Object mLock = new Object();
+    private final HandlerThread mRecordThread = new HandlerThread("SessionRecordThread");
     // Keeps the full user id for each user.
     @GuardedBy("mLock")
     private final SparseIntArray mFullUserIds = new SparseIntArray();
@@ -198,6 +200,7 @@ public class MediaSessionService extends SystemService implements Monitor {
 
         instantiateCustomProvider(null);
         instantiateCustomDispatcher(null);
+        mRecordThread.start();
     }
 
     private boolean isGlobalPriorityActiveLocked() {
@@ -599,8 +602,8 @@ public class MediaSessionService extends SystemService implements Monitor {
             final MediaSessionRecord session;
             try {
                 session = new MediaSessionRecord(callerPid, callerUid, userId,
-                        callerPackageName, cb, tag, sessionInfo, this, mHandler.getLooper(),
-                        policies);
+                        callerPackageName, cb, tag, sessionInfo, this,
+                        mRecordThread.getLooper(), policies);
             } catch (RemoteException e) {
                 throw new RuntimeException("Media Session owner died prematurely.", e);
             }
@@ -1157,8 +1160,8 @@ public class MediaSessionService extends SystemService implements Monitor {
                     throw new SecurityException("Unexpected Session2Token's UID, expected=" + uid
                             + " but actually=" + sessionToken.getUid());
                 }
-                MediaSession2Record record = new MediaSession2Record(
-                        sessionToken, MediaSessionService.this, mHandler.getLooper(), 0);
+                MediaSession2Record record = new MediaSession2Record(sessionToken,
+                        MediaSessionService.this, mRecordThread.getLooper(), 0);
                 synchronized (mLock) {
                     FullUserRecord user = getFullUserRecordLocked(record.getUserId());
                     user.mPriorityStack.addSession(record);

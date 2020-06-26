@@ -23,16 +23,19 @@ import static com.android.systemui.screenrecord.ScreenRecordingAudioSource.NONE;
 
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.Switch;
 
 import com.android.systemui.R;
+import com.android.systemui.settings.CurrentUserContextTracker;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,16 +51,17 @@ public class ScreenRecordDialog extends Activity {
     private static final String TAG = "ScreenRecordDialog";
 
     private final RecordingController mController;
+    private final CurrentUserContextTracker mCurrentUserContextTracker;
     private Switch mTapsSwitch;
     private Switch mAudioSwitch;
     private Spinner mOptions;
     private List<ScreenRecordingAudioSource> mModes;
-    private int mSelected;
-
 
     @Inject
-    public ScreenRecordDialog(RecordingController controller) {
+    public ScreenRecordDialog(RecordingController controller,
+            CurrentUserContextTracker currentUserContextTracker) {
         mController = controller;
+        mCurrentUserContextTracker = currentUserContextTracker;
     }
 
     @Override
@@ -68,6 +72,7 @@ public class ScreenRecordDialog extends Activity {
         // Inflate the decor view, so the attributes below are not overwritten by the theme.
         window.getDecorView();
         window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        window.addPrivateFlags(WindowManager.LayoutParams.SYSTEM_FLAG_SHOW_FOR_ALL_USERS);
         window.setGravity(Gravity.TOP);
         setTitle(R.string.screenrecord_name);
 
@@ -100,24 +105,24 @@ public class ScreenRecordDialog extends Activity {
         mOptions.setOnItemClickListenerInt((parent, view, position, id) -> {
             mAudioSwitch.setChecked(true);
         });
-
     }
 
     private void requestScreenCapture() {
+        Context userContext = mCurrentUserContextTracker.getCurrentUserContext();
         boolean showTaps = mTapsSwitch.isChecked();
         ScreenRecordingAudioSource audioMode = mAudioSwitch.isChecked()
                 ? (ScreenRecordingAudioSource) mOptions.getSelectedItem()
                 : NONE;
-        PendingIntent startIntent = PendingIntent.getForegroundService(this,
+        PendingIntent startIntent = PendingIntent.getForegroundService(userContext,
                 RecordingService.REQUEST_CODE,
                 RecordingService.getStartIntent(
-                        ScreenRecordDialog.this, RESULT_OK,
+                        userContext, RESULT_OK,
                         audioMode.ordinal(), showTaps),
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        PendingIntent stopIntent = PendingIntent.getService(this,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent stopIntent = PendingIntent.getService(userContext,
                 RecordingService.REQUEST_CODE,
-                RecordingService.getStopIntent(this),
-                PendingIntent.FLAG_UPDATE_CURRENT);
+                RecordingService.getStopIntent(userContext),
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         mController.startCountdown(DELAY_MS, INTERVAL_MS, startIntent, stopIntent);
     }
 }

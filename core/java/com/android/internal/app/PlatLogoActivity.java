@@ -55,6 +55,10 @@ import org.json.JSONObject;
 public class PlatLogoActivity extends Activity {
     private static final boolean WRITE_SETTINGS = true;
 
+    private static final String R_EGG_UNLOCK_SETTING = "egg_mode_r";
+
+    private static final int UNLOCK_TRIES = 3;
+
     BigDialView mDialView;
 
     @Override
@@ -77,8 +81,10 @@ public class PlatLogoActivity extends Activity {
 
         mDialView = new BigDialView(this, null);
         if (Settings.System.getLong(getContentResolver(),
-                "egg_mode" /* Settings.System.EGG_MODE */, 0) == 0) {
-            mDialView.setUnlockTries(3);
+                R_EGG_UNLOCK_SETTING, 0) == 0) {
+            mDialView.setUnlockTries(UNLOCK_TRIES);
+        } else {
+            mDialView.setUnlockTries(0);
         }
 
         final FrameLayout layout = new FrameLayout(this);
@@ -91,18 +97,16 @@ public class PlatLogoActivity extends Activity {
     private void launchNextStage(boolean locked) {
         final ContentResolver cr = getContentResolver();
 
-        if (Settings.System.getLong(cr, "egg_mode" /* Settings.System.EGG_MODE */, 0) == 0) {
-            // For posterity: the moment this user unlocked the easter egg
-            try {
-                if (WRITE_SETTINGS) {
-                    Settings.System.putLong(cr,
-                            "egg_mode", // Settings.System.EGG_MODE,
-                            locked ? 0 : System.currentTimeMillis());
-                }
-            } catch (RuntimeException e) {
-                Log.e("com.android.internal.app.PlatLogoActivity", "Can't write settings", e);
+        try {
+            if (WRITE_SETTINGS) {
+                Settings.System.putLong(cr,
+                        R_EGG_UNLOCK_SETTING,
+                        locked ? 0 : System.currentTimeMillis());
             }
+        } catch (RuntimeException e) {
+            Log.e("com.android.internal.app.PlatLogoActivity", "Can't write settings", e);
         }
+
         try {
             startActivity(new Intent(Intent.ACTION_MAIN)
                     .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
@@ -235,8 +239,8 @@ public class PlatLogoActivity extends Activity {
                     }
                     return true;
                 case MotionEvent.ACTION_UP:
-                    if (mWasLocked && !mDialDrawable.isLocked()) {
-                        launchNextStage(false);
+                    if (mWasLocked != mDialDrawable.isLocked()) {
+                        launchNextStage(mDialDrawable.isLocked());
                     }
                     return true;
             }
@@ -404,6 +408,8 @@ public class PlatLogoActivity extends Activity {
 
                     if (isLocked() && oldUserLevel != STEPS - 1 && getUserLevel() == STEPS - 1) {
                         mUnlockTries--;
+                    } else if (!isLocked() && getUserLevel() == 0) {
+                        mUnlockTries = UNLOCK_TRIES;
                     }
 
                     if (!isLocked()) {

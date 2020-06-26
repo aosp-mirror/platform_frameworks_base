@@ -154,10 +154,10 @@ class BlobMetadata {
         }
     }
 
-    void removeInvalidCommitters(SparseArray<String> packages) {
+    void removeCommittersFromUnknownPkgs(SparseArray<String> knownPackages) {
         synchronized (mMetadataLock) {
             mCommitters.removeIf(committer ->
-                    !committer.packageName.equals(packages.get(committer.uid)));
+                    !committer.packageName.equals(knownPackages.get(committer.uid)));
         }
     }
 
@@ -200,16 +200,27 @@ class BlobMetadata {
         }
     }
 
-    void removeInvalidLeasees(SparseArray<String> packages) {
+    void removeLeaseesFromUnknownPkgs(SparseArray<String> knownPackages) {
         synchronized (mMetadataLock) {
             mLeasees.removeIf(leasee ->
-                    !leasee.packageName.equals(packages.get(leasee.uid)));
+                    !leasee.packageName.equals(knownPackages.get(leasee.uid)));
         }
     }
 
-    boolean hasLeases() {
+    void removeExpiredLeases() {
         synchronized (mMetadataLock) {
-            return !mLeasees.isEmpty();
+            mLeasees.removeIf(leasee -> !leasee.isStillValid());
+        }
+    }
+
+    boolean hasValidLeases() {
+        synchronized (mMetadataLock) {
+            for (int i = 0, size = mLeasees.size(); i < size; ++i) {
+                if (mLeasees.valueAt(i).isStillValid()) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
@@ -226,8 +237,7 @@ class BlobMetadata {
             // Check if packageName already holds a lease on the blob.
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
-                if (leasee.equals(callingPackage, callingUid)
-                        && leasee.isStillValid()) {
+                if (leasee.isStillValid() && leasee.equals(callingPackage, callingUid)) {
                     return true;
                 }
             }
@@ -259,25 +269,32 @@ class BlobMetadata {
 
     boolean isALeasee(@Nullable String packageName, int uid) {
         synchronized (mMetadataLock) {
-            return isAnAccessor(mLeasees, packageName, uid);
+            final Leasee leasee = getAccessor(mLeasees, packageName, uid);
+            return leasee != null && leasee.isStillValid();
         }
     }
 
     private static <T extends Accessor> boolean isAnAccessor(@NonNull ArraySet<T> accessors,
             @Nullable String packageName, int uid) {
         // Check if the package is an accessor of the data blob.
+        return getAccessor(accessors, packageName, uid) != null;
+    }
+
+    private static <T extends Accessor> T getAccessor(@NonNull ArraySet<T> accessors,
+            @Nullable String packageName, int uid) {
+        // Check if the package is an accessor of the data blob.
         for (int i = 0, size = accessors.size(); i < size; ++i) {
             final Accessor accessor = accessors.valueAt(i);
             if (packageName != null && uid != INVALID_UID
                     && accessor.equals(packageName, uid)) {
-                return true;
+                return (T) accessor;
             } else if (packageName != null && accessor.packageName.equals(packageName)) {
-                return true;
+                return (T) accessor;
             } else if (uid != INVALID_UID && accessor.uid == uid) {
-                return true;
+                return (T) accessor;
             }
         }
-        return false;
+        return null;
     }
 
     boolean isALeasee(@NonNull String packageName) {
@@ -298,11 +315,11 @@ class BlobMetadata {
 
     private boolean hasOtherLeasees(@Nullable String packageName, int uid) {
         synchronized (mMetadataLock) {
-            if (mCommitters.size() > 1 || mLeasees.size() > 1) {
-                return true;
-            }
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
+                if (!leasee.isStillValid()) {
+                    continue;
+                }
                 // TODO: Also exclude packages which are signed with same cert?
                 if (packageName != null && uid != INVALID_UID
                         && !leasee.equals(packageName, uid)) {
@@ -322,6 +339,9 @@ class BlobMetadata {
         synchronized (mMetadataLock) {
             for (int i = 0, size = mLeasees.size(); i < size; ++i) {
                 final Leasee leasee = mLeasees.valueAt(i);
+                if (!leasee.isStillValid()) {
+                    continue;
+                }
                 if (leasee.uid == uid && leasee.packageName.equals(packageName)) {
                     final int descriptionResId = leasee.descriptionResEntryName == null
                             ? Resources.ID_NULL
@@ -398,6 +418,26 @@ class BlobMetadata {
         return revocableFd.getRevocableFileDescriptor();
     }
 
+    void destroy() {
+        revokeAllFds();
+        getBlobFile().delete();
+    }
+
+    private void revokeAllFds() {
+        synchronized (mRevocableFds) {
+            for (int i = 0, pkgCount = mRevocableFds.size(); i < pkgCount; ++i) {
+                final ArraySet<RevocableFileDescriptor> packageFds =
+                        mRevocableFds.valueAt(i);
+                if (packageFds == null) {
+                    continue;
+                }
+                for (int j = 0, fdCount = packageFds.size(); j < fdCount; ++j) {
+                    packageFds.valueAt(j).revoke();
+                }
+            }
+        }
+    }
+
     boolean shouldBeDeleted(boolean respectLeaseWaitTime) {
         // Expired data blobs
         if (getBlobHandle().isExpired()) {
@@ -406,7 +446,7 @@ class BlobMetadata {
 
         // Blobs with no active leases
         if ((!respectLeaseWaitTime || hasLeaseWaitTimeElapsedForAll())
-                && !hasLeases()) {
+                && !hasValidLeases()) {
             return true;
         }
 
@@ -695,7 +735,7 @@ class BlobMetadata {
         }
 
         boolean isStillValid() {
-            return expiryTimeMillis == 0 || expiryTimeMillis <= System.currentTimeMillis();
+            return expiryTimeMillis == 0 || expiryTimeMillis >= System.currentTimeMillis();
         }
 
         void dump(@NonNull Context context, @NonNull IndentingPrintWriter fout) {

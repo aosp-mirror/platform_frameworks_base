@@ -1013,4 +1013,27 @@ public class WindowOrganizerTests extends WindowTestsBase {
         assertFalse(w1.useBLASTSync());
         assertFalse(w2.useBLASTSync());
     }
+
+    @Test
+    public void testDisplayAreaHiddenTransaction() {
+        removeGlobalMinSizeRestriction();
+
+        WindowContainerTransaction trx = new WindowContainerTransaction();
+
+        TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+
+        trx.setHidden(taskDisplayArea.mRemoteToken.toWindowContainerToken(), true);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(trx);
+
+        taskDisplayArea.forAllTasks(daTask -> {
+            assertTrue(daTask.isForceHidden());
+        });
+
+        trx.setHidden(taskDisplayArea.mRemoteToken.toWindowContainerToken(), false);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(trx);
+
+        taskDisplayArea.forAllTasks(daTask -> {
+            assertFalse(daTask.isForceHidden());
+        });
+    }
 }
