@@ -45,6 +45,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import java.util.ArrayList;
@@ -85,14 +86,19 @@ public class ShortcutHelperTest extends UiServiceTestCase {
 
         mShortcutHelper = new ShortcutHelper(
                 mLauncherApps, mShortcutListener, mShortcutServiceInternal);
-        when(mNr.getKey()).thenReturn(KEY);
-        when(mNr.getSbn()).thenReturn(mSbn);
         when(mSbn.getPackageName()).thenReturn(PKG);
-        when(mNr.getNotification()).thenReturn(mNotif);
-        when(mNr.getShortcutInfo()).thenReturn(mShortcutInfo);
         when(mShortcutInfo.getId()).thenReturn(SHORTCUT_ID);
         when(mNotif.getBubbleMetadata()).thenReturn(mBubbleMetadata);
         when(mBubbleMetadata.getShortcutId()).thenReturn(SHORTCUT_ID);
+
+        setUpMockNotificationRecord(mNr, KEY);
+    }
+
+    private void setUpMockNotificationRecord(NotificationRecord mockRecord, String key) {
+        when(mockRecord.getKey()).thenReturn(key);
+        when(mockRecord.getSbn()).thenReturn(mSbn);
+        when(mockRecord.getNotification()).thenReturn(mNotif);
+        when(mockRecord.getShortcutInfo()).thenReturn(mShortcutInfo);
     }
 
     private LauncherApps.Callback addShortcutBubbleAndVerifyListener() {
@@ -159,9 +165,31 @@ public class ShortcutHelperTest extends UiServiceTestCase {
         // First set it up to listen
         addShortcutBubbleAndVerifyListener();
 
-        // Clear out shortcutId
-        when(mNr.getShortcutInfo()).thenReturn(null);
-        mShortcutHelper.maybeListenForShortcutChangesForBubbles(mNr,
+        NotificationRecord validMock1 = Mockito.mock(NotificationRecord.class);
+        setUpMockNotificationRecord(validMock1, "KEY1");
+
+        NotificationRecord validMock2 = Mockito.mock(NotificationRecord.class);
+        setUpMockNotificationRecord(validMock2, "KEY2");
+
+        NotificationRecord validMock3 = Mockito.mock(NotificationRecord.class);
+        setUpMockNotificationRecord(validMock3, "KEY3");
+
+        mShortcutHelper.maybeListenForShortcutChangesForBubbles(validMock1,
+                false /* removed */,
+                null /* handler */);
+
+        mShortcutHelper.maybeListenForShortcutChangesForBubbles(validMock2,
+                false /* removed */,
+                null /* handler */);
+
+        mShortcutHelper.maybeListenForShortcutChangesForBubbles(validMock3,
+                false /* removed */,
+                null /* handler */);
+
+        // Clear out shortcutId of the bubble in the middle, to double check that we don't hit a
+        // concurrent modification exception (removing the last bubble would sidestep that check).
+        when(validMock2.getShortcutInfo()).thenReturn(null);
+        mShortcutHelper.maybeListenForShortcutChangesForBubbles(validMock2,
                 false /* removed */,
                 null /* handler */);
 
