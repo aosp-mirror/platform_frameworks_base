@@ -193,12 +193,15 @@ class MediaDataManager(
     private fun clearData() {
         // Called on user change. Remove all current MediaData objects and inform listeners
         val listenersCopy = listeners.toSet()
-        mediaEntries.forEach {
+        val keyCopy = mediaEntries.keys.toMutableList()
+        // Clear the list first, to make sure callbacks from listeners if we have any entries
+        // are up to date
+        mediaEntries.clear()
+        keyCopy.forEach {
             listenersCopy.forEach { listener ->
-                listener.onMediaDataRemoved(it.key)
+                listener.onMediaDataRemoved(it)
             }
         }
-        mediaEntries.clear()
     }
 
     private fun removeAllForPackage(packageName: String) {
