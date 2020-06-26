@@ -1227,6 +1227,7 @@ public final class MediaParser {
             throw new ParsingException(e);
         }
         if (result == Extractor.RESULT_END_OF_INPUT) {
+            mExtractorInput = null;
             return false;
         }
         if (result == Extractor.RESULT_SEEK) {
