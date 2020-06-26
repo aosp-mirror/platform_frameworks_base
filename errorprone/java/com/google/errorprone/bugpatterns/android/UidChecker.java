@@ -63,7 +63,7 @@ public final class UidChecker extends BugChecker implements MethodInvocationTree
         return Description.NO_MATCH;
     }
 
-    private static enum Flavor {
+    public static enum Flavor {
         UNKNOWN(null),
         PID(Pattern.compile("(^pid$|Pid$)")),
         UID(Pattern.compile("(^uid$|Uid$)")),
@@ -78,7 +78,7 @@ public final class UidChecker extends BugChecker implements MethodInvocationTree
         }
     }
 
-    private static Flavor getFlavor(String name) {
+    public static Flavor getFlavor(String name) {
         for (Flavor f : Flavor.values()) {
             if (f.matches(name)) {
                 return f;
@@ -87,7 +87,7 @@ public final class UidChecker extends BugChecker implements MethodInvocationTree
         return Flavor.UNKNOWN;
     }
 
-    private static Flavor getFlavor(VarSymbol symbol) {
+    public static Flavor getFlavor(VarSymbol symbol) {
         final String type = symbol.type.toString();
         if ("int".equals(type)) {
             return getFlavor(symbol.name.toString());
@@ -95,7 +95,7 @@ public final class UidChecker extends BugChecker implements MethodInvocationTree
         return Flavor.UNKNOWN;
     }
 
-    private static Flavor getFlavor(ExpressionTree tree) {
+    public static Flavor getFlavor(ExpressionTree tree) {
         if (tree instanceof IdentifierTree) {
             return getFlavor(((IdentifierTree) tree).getName().toString());
         } else if (tree instanceof MemberSelectTree) {

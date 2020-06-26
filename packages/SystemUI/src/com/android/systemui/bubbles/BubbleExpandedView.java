@@ -507,6 +507,14 @@ public class BubbleExpandedView extends LinearLayout {
         }
     }
 
+    @Nullable ActivityView getActivityView() {
+        return mActivityView;
+    }
+
+    int getTaskId() {
+        return mTaskId;
+    }
+
     /**
      * Called by {@link BubbleStackView} when the insets for the expanded state should be updated.
      * This should be done post-move and post-animation.

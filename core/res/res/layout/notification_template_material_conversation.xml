@@ -128,6 +128,9 @@
                 android:layout_weight="1">
 
                 <!-- Header -->
+
+                <!-- Use layout_marginStart instead of paddingStart to work around strange
+                     measurement behavior on lower display densities. -->
                 <LinearLayout
                     android:id="@+id/conversation_header"
                     android:layout_width="wrap_content"
@@ -135,11 +138,11 @@
                     android:orientation="horizontal"
                     android:paddingTop="16dp"
                     android:layout_marginBottom="2dp"
-                    android:paddingStart="@dimen/conversation_content_start"
+                    android:layout_marginStart="@dimen/conversation_content_start"
                 >
                     <TextView
                         android:id="@+id/conversation_text"
-                        android:layout_width="0dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginEnd="@dimen/notification_conversation_header_separating_margin"
                         android:textAppearance="@style/TextAppearance.DeviceDefault.Notification.Title"

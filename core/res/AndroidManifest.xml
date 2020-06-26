@@ -4845,7 +4845,7 @@
     <!-- @SystemApi Allows an application to turn on / off quiet mode.
          @hide -->
     <permission android:name="android.permission.MODIFY_QUIET_MODE"
-                android:protectionLevel="signature|privileged|wellbeing" />
+                android:protectionLevel="signature|privileged|wellbeing|development" />
 
     <!-- Allows internal management of the camera framework
          @hide -->

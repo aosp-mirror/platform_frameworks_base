@@ -1900,13 +1900,11 @@ class ContextImpl extends Context {
 
     @Override
     public Object getSystemService(String name) {
-        // We may override this API from outer context.
-        final boolean isUiContext = isUiContext() || getOuterContext().isUiContext();
         // Check incorrect Context usage.
-        if (isUiComponent(name) && !isUiContext && vmIncorrectContextUseEnabled()) {
+        if (isUiComponent(name) && !isUiContext() && vmIncorrectContextUseEnabled()) {
             final String errorMessage = "Tried to access visual service "
                     + SystemServiceRegistry.getSystemServiceClassName(name)
-                    + " from a non-visual Context:" + getOuterContext();
+                    + " from a non-visual Context. ";
             final String message = "Visual services, such as WindowManager, WallpaperService or "
                     + "LayoutInflater should be accessed from Activity or other visual Context. "
                     + "Use an Activity or a Context created with "
@@ -2372,7 +2370,6 @@ class ContextImpl extends Context {
         context.setResources(createResources(mToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo(),
                 mResources.getLoaders()));
-        context.mIsUiContext = isUiContext() || getOuterContext().isUiContext();
         return context;
     }
 

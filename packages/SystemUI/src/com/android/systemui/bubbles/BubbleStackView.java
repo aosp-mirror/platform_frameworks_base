@@ -31,6 +31,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.app.ActivityView;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -293,11 +294,42 @@ public class BubbleStackView extends FrameLayout
     /** Description of current animation controller state. */
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         pw.println("Stack view state:");
-        pw.print("  gestureInProgress:    "); pw.println(mIsGestureInProgress);
-        pw.print("  showingDismiss:       "); pw.println(mShowingDismiss);
-        pw.print("  isExpansionAnimating: "); pw.println(mIsExpansionAnimating);
+        pw.print("  gestureInProgress:       "); pw.println(mIsGestureInProgress);
+        pw.print("  showingDismiss:          "); pw.println(mShowingDismiss);
+        pw.print("  isExpansionAnimating:    "); pw.println(mIsExpansionAnimating);
+        pw.print("  expandedContainerVis:    "); pw.println(mExpandedViewContainer.getVisibility());
+        pw.print("  expandedContainerAlpha:  "); pw.println(mExpandedViewContainer.getAlpha());
+        pw.print("  expandedContainerMatrix: ");
+        pw.println(mExpandedViewContainer.getAnimationMatrix());
+
         mStackAnimationController.dump(fd, pw, args);
         mExpandedAnimationController.dump(fd, pw, args);
+
+        if (mExpandedBubble != null) {
+            pw.println("Expanded bubble state:");
+            pw.println("  expandedBubbleKey: " + mExpandedBubble.getKey());
+
+            final BubbleExpandedView expandedView = mExpandedBubble.getExpandedView();
+
+            if (expandedView != null) {
+                pw.println("  expandedViewVis:    " + expandedView.getVisibility());
+                pw.println("  expandedViewAlpha:  " + expandedView.getAlpha());
+                pw.println("  expandedViewTaskId: " + expandedView.getTaskId());
+
+                final ActivityView av = expandedView.getActivityView();
+
+                if (av != null) {
+                    pw.println("  activityViewVis:    " + av.getVisibility());
+                    pw.println("  activityViewAlpha:  " + av.getAlpha());
+                } else {
+                    pw.println("  activityView is null");
+                }
+            } else {
+                pw.println("Expanded bubble view state: expanded bubble view is null");
+            }
+        } else {
+            pw.println("Expanded bubble state: expanded bubble is null");
+        }
     }
 
     private BubbleController.BubbleExpandListener mExpandListener;

@@ -351,13 +351,9 @@ class InsetsSourceProvider {
     }
 
     private void updateVisibility() {
-        // TODO(b/159699383): remove the client controlled check when the insets visibility can be
-        //                    driven by the system UI.
         final boolean isClientControlled = mControlTarget != null
                 && mControlTarget.isClientControlled();
-        mSource.setVisible(mServerVisible
-                && ((!isClientControlled && mDisplayContent.inMultiWindowMode())
-                    || mClientVisible));
+        mSource.setVisible(mServerVisible && (!isClientControlled || mClientVisible));
         ProtoLog.d(WM_DEBUG_IME,
                 "InsetsSource updateVisibility serverVisible: %s clientVisible: %s",
                 mServerVisible, mClientVisible);
@@ -466,7 +462,10 @@ class InsetsSourceProvider {
 
             mCapturedLeash = animationLeash;
             final Rect frame = mWin.getWindowFrames().mFrame;
-            t.setPosition(mCapturedLeash, frame.left, frame.top);
+            Point position = new Point();
+            mWin.transformFrameToSurfacePosition(frame.left, frame.top, position);
+
+            t.setPosition(mCapturedLeash, position.x, position.y);
         }
 
         @Override

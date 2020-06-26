@@ -9707,6 +9707,7 @@ message RuntimeAppOpAccess {
         UNIFORM = 1;
         RARELY_USED = 2;
         BOOT_TIME_SAMPLING = 3;
+        UNIFORM_OPS = 4;
     }
 
     // sampling strategy used to collect this message

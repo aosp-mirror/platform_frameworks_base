@@ -43,11 +43,15 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.testng.Assert.expectThrows;
 
@@ -61,6 +65,7 @@ import android.util.SparseArray;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.InsetsState;
+import android.view.View;
 import android.view.WindowInsets.Side;
 import android.view.WindowInsets.Type;
 import android.view.WindowManager;
@@ -95,6 +100,8 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
     private boolean mIsLongEdgeDisplayCutout;
     private static final int DECOR_WINDOW_INSET = 50;
 
+    private final Rect mDisplayBounds = new Rect();
+
     @Before
     public void setUp() throws Exception {
         mWindow = spy(createWindow(null, TYPE_APPLICATION, "window"));
@@ -106,6 +113,15 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
         attrs.width = MATCH_PARENT;
         attrs.height = MATCH_PARENT;
         attrs.format = PixelFormat.TRANSLUCENT;
+
+        spyOn(mStatusBarWindow);
+        spyOn(mNavBarWindow);
+
+        // Disabling this call for most tests since it can override the systemUiFlags when called.
+        doReturn(0).when(mDisplayPolicy).updateSystemUiVisibilityLw();
+
+        mDisplayPolicy.mLastSystemUiFlags |= View.STATUS_BAR_TRANSPARENT;
+        mDisplayPolicy.mLastSystemUiFlags |= View.NAVIGATION_BAR_TRANSPARENT;
 
         updateDisplayFrames();
     }
@@ -128,7 +144,12 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     private void updateDisplayFrames() {
         mFrames = createDisplayFrames();
+        mDisplayBounds.set(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight);
         mDisplayContent.mDisplayFrames = mFrames;
+
+        doReturn(mDisplayBounds).when(mStatusBarWindow).getBounds();
+        doReturn(mDisplayBounds).when(mNavBarWindow).getBounds();
+        doReturn(mDisplayBounds).when(mWindow).getBounds();
     }
 
     private DisplayFrames createDisplayFrames() {
@@ -808,6 +829,7 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void forceShowSystemBars_clearsSystemUIFlags() {
+        doCallRealMethod().when(mDisplayPolicy).updateSystemUiVisibilityLw();
         mDisplayPolicy.mLastSystemUiFlags |= SYSTEM_UI_FLAG_FULLSCREEN;
         mWindow.mAttrs.subtreeSystemUiVisibility |= SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
         mWindow.mAttrs.flags =
@@ -829,12 +851,15 @@ public class DisplayPolicyLayoutTests extends DisplayPolicyTestsBase {
 
     @Test
     public void testScreenDecorWindows() {
-        final WindowState decorWindow = createWindow(null, TYPE_APPLICATION_OVERLAY, "decorWindow");
+        final WindowState decorWindow = spy(
+                createWindow(null, TYPE_APPLICATION_OVERLAY, "decorWindow"));
         mWindow.mAttrs.flags = FLAG_NOT_FOCUSABLE | FLAG_LAYOUT_IN_SCREEN | FLAG_LAYOUT_INSET_DECOR
                 | FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         decorWindow.mAttrs.privateFlags |= PRIVATE_FLAG_IS_SCREEN_DECOR;
         addWindow(decorWindow);
         addWindow(mWindow);
+        doReturn(new Rect(0, 0, mFrames.mDisplayWidth, mFrames.mDisplayHeight))
+                .when(decorWindow).getBounds();
 
         // Decor on top
         updateDecorWindow(decorWindow, MATCH_PARENT, DECOR_WINDOW_INSET, TOP);

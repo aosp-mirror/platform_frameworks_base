@@ -82,8 +82,6 @@ import static android.os.Process.removeAllProcessGroups;
 import static android.os.Process.sendSignal;
 import static android.os.Process.setThreadPriority;
 import static android.os.Process.setThreadScheduler;
-import static android.permission.PermissionManager.KILL_APP_REASON_GIDS_CHANGED;
-import static android.permission.PermissionManager.KILL_APP_REASON_PERMISSIONS_REVOKED;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
 import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
@@ -1668,12 +1666,6 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Used to notify activity lifecycle events.
      */
     @Nullable ContentCaptureManagerInternal mContentCaptureService;
-
-    /**
-     * Set of {@link ProcessRecord} that have either {@link ProcessRecord#hasTopUi()} or
-     * {@link ProcessRecord#runningRemoteAnimation} set to {@code true}.
-     */
-    final ArraySet<ProcessRecord> mTopUiOrRunningRemoteAnimApps = new ArraySet<>();
 
     final class UiHandler extends Handler {
         public UiHandler() {
@@ -9209,16 +9201,31 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             final long identity = Binder.clearCallingIdentity();
             try {
-                boolean permissionChange = KILL_APP_REASON_PERMISSIONS_REVOKED.equals(reason)
-                        || KILL_APP_REASON_GIDS_CHANGED.equals(reason);
                 mProcessList.killPackageProcessesLocked(null /* packageName */, appId, userId,
                         ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
                         true /* callerWillRestart */, true /* doit */, true /* evenPersistent */,
                         false /* setRemoved */,
-                        permissionChange ? ApplicationExitInfo.REASON_PERMISSION_CHANGE
-                        : ApplicationExitInfo.REASON_OTHER,
-                        permissionChange ? ApplicationExitInfo.SUBREASON_UNKNOWN
-                        : ApplicationExitInfo.SUBREASON_KILL_UID,
+                        ApplicationExitInfo.REASON_OTHER,
+                        ApplicationExitInfo.SUBREASON_KILL_UID,
+                        reason != null ? reason : "kill uid");
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+    }
+
+    @Override
+    public void killUidForPermissionChange(int appId, int userId, String reason) {
+        enforceCallingPermission(Manifest.permission.KILL_UID, "killUid");
+        synchronized (this) {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                mProcessList.killPackageProcessesLocked(null /* packageName */, appId, userId,
+                        ProcessList.PERSISTENT_PROC_ADJ, false /* callerWillRestart */,
+                        true /* callerWillRestart */, true /* doit */, true /* evenPersistent */,
+                        false /* setRemoved */,
+                        ApplicationExitInfo.REASON_PERMISSION_CHANGE,
+                        ApplicationExitInfo.SUBREASON_UNKNOWN,
                         reason != null ? reason : "kill uid");
             } finally {
                 Binder.restoreCallingIdentity(identity);
@@ -14714,7 +14721,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mProcessesToGc.remove(app);
         mPendingPssProcesses.remove(app);
-        mTopUiOrRunningRemoteAnimApps.remove(app);
         ProcessList.abortNextPssTime(app.procStateMemTracker);
 
         // Dismiss any open dialogs.
@@ -18522,22 +18528,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return proc;
-    }
-
-    /**
-     * @return {@code true} if {@link #mTopUiOrRunningRemoteAnimApps} set contains {@code app} or when there are no apps
-     *         in this list, an false otherwise.
-     */
-    boolean containsTopUiOrRunningRemoteAnimOrEmptyLocked(ProcessRecord app) {
-        return mTopUiOrRunningRemoteAnimApps.isEmpty() || mTopUiOrRunningRemoteAnimApps.contains(app);
-    }
-
-    void addTopUiOrRunningRemoteAnim(ProcessRecord app) {
-        mTopUiOrRunningRemoteAnimApps.add(app);
-    }
-
-    void removeTopUiOrRunningRemoteAnim(ProcessRecord app) {
-        mTopUiOrRunningRemoteAnimApps.remove(app);
     }
 
     @Override
