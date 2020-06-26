@@ -471,6 +471,13 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
     }
 
     private void performDrawFinished() {
+        if (mDeferredDestroySurfaceControl != null) {
+            synchronized (mSurfaceControlLock) {
+                mTmpTransaction.remove(mDeferredDestroySurfaceControl).apply();
+                mDeferredDestroySurfaceControl = null;
+            }
+        }
+
         if (mPendingReportDraws > 0) {
             mDrawFinished = true;
             if (mAttachedToWindow) {
@@ -1190,13 +1197,6 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
         if (DEBUG) {
             Log.i(TAG, System.identityHashCode(this) + " "
                     + "finishedDrawing");
-        }
-
-        if (mDeferredDestroySurfaceControl != null) {
-            synchronized (mSurfaceControlLock) {
-                mTmpTransaction.remove(mDeferredDestroySurfaceControl).apply();
-                mDeferredDestroySurfaceControl = null;
-            }
         }
 
         runOnUiThread(this::performDrawFinished);
