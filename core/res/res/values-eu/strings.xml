@@ -1307,7 +1307,7 @@
     <string name="usb_unsupported_audio_accessory_title" msgid="2335775548086533065">"Audio-osagarri analogiko bat hauteman da"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="1300168007129796621">"Erantsitako gailua ez da telefono honekin bateragarria. Sakatu informazio gehiago lortzeko."</string>
     <string name="adb_active_notification_title" msgid="408390247354560331">"USB bidezko arazketa konektatuta"</string>
-    <string name="adb_active_notification_message" msgid="5617264033476778211">"Sakatu USB bidezko arazketa desaktibatzeko"</string>
+    <string name="adb_active_notification_message" msgid="5617264033476778211">"Sakatu hau USB bidezko arazketa desaktibatzeko"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Hautatu USB bidezko arazketa desgaitzeko."</string>
     <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Hari gabeko arazketa konektatuta dago"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Sakatu hau hari gabeko arazketa desaktibatzeko"</string>

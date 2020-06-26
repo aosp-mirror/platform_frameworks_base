@@ -1309,7 +1309,7 @@
     <string name="adb_active_notification_title" msgid="408390247354560331">"Ukulungisa iphutha le-USB kuxhunyiwe"</string>
     <string name="adb_active_notification_message" msgid="5617264033476778211">"Thepha ukuze uvale ukulungisa amaphutha kwe-USB"</string>
     <string name="adb_active_notification_message" product="tv" msgid="6624498401272780855">"Khetha ukuvimbela ukulungisa iphutha le-USB."</string>
-    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Ukulungisa amaphutha okungenantambo kuxhunyiwe"</string>
+    <string name="adbwifi_active_notification_title" msgid="6147343659168302473">"Ukulungisa amaphutha e-wireless kuxhunyiwe"</string>
     <string name="adbwifi_active_notification_message" msgid="930987922852867972">"Thepha ukuze ucishe ukulungisa amaphutha okungenantambo"</string>
     <string name="adbwifi_active_notification_message" product="tv" msgid="8633421848366915478">"Khetha ukukhubaza ukulungisa amaphutha okungenantambo."</string>
     <string name="test_harness_mode_notification_title" msgid="2282785860014142511">"Imodi yokuhlola i-harness inikwe amandla"</string>
