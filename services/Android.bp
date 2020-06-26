@@ -92,6 +92,7 @@ java_library {
         "services.voiceinteraction",
         "services.wifi",
         "service-blobstore",
+        "service-connectivity",
         "service-jobscheduler",
         "android.hidl.base-V1.0-java",
     ],
