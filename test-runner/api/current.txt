@@ -78,6 +78,7 @@ package android.test {
 
   @Deprecated public class InstrumentationTestRunner extends android.app.Instrumentation implements android.test.TestSuiteProvider {
     ctor @Deprecated public InstrumentationTestRunner();
+    method @Deprecated protected void addTestListener(junit.framework.TestListener);
     method @Deprecated public junit.framework.TestSuite getAllTests();
     method @Deprecated protected android.test.AndroidTestRunner getAndroidTestRunner();
     method @Deprecated public android.os.Bundle getArguments();
