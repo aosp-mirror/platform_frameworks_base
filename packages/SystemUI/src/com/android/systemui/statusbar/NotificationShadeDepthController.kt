@@ -84,6 +84,7 @@ class NotificationShadeDepthController @Inject constructor(
     private var isClosed: Boolean = true
     private var isOpen: Boolean = false
     private var isBlurred: Boolean = false
+    private var listeners = mutableListOf<DepthListener>()
 
     private var prevTracking: Boolean = false
     private var prevTimestamp: Long = -1
@@ -187,11 +188,14 @@ class NotificationShadeDepthController @Inject constructor(
         }
 
         blurUtils.applyBlur(blurRoot?.viewRootImpl ?: root.viewRootImpl, blur)
+        val zoomOut = blurUtils.ratioOfBlurRadius(blur)
         try {
-            wallpaperManager.setWallpaperZoomOut(root.windowToken,
-                    blurUtils.ratioOfBlurRadius(blur))
+            wallpaperManager.setWallpaperZoomOut(root.windowToken, zoomOut)
         } catch (e: IllegalArgumentException) {
             Log.w(TAG, "Can't set zoom. Window is gone: ${root.windowToken}", e)
+        }
+        listeners.forEach {
+            it.onWallpaperZoomOutChanged(zoomOut)
         }
         notificationShadeWindowController.setBackgroundBlurRadius(blur)
     }
@@ -269,6 +273,14 @@ class NotificationShadeDepthController @Inject constructor(
         }
         shadeAnimation.setStiffness(SpringForce.STIFFNESS_LOW)
         shadeAnimation.setDampingRatio(SpringForce.DAMPING_RATIO_NO_BOUNCY)
+    }
+
+    fun addListener(listener: DepthListener) {
+        listeners.add(listener)
+    }
+
+    fun removeListener(listener: DepthListener) {
+        listeners.remove(listener)
     }
 
     /**
@@ -481,5 +493,15 @@ class NotificationShadeDepthController @Inject constructor(
         fun setStartVelocity(velocity: Float) {
             springAnimation.setStartVelocity(velocity)
         }
+    }
+
+    /**
+     * Invoked when changes are needed in z-space
+     */
+    interface DepthListener {
+        /**
+         * Current wallpaper zoom out, where 0 is the closest, and 1 the farthest
+         */
+        fun onWallpaperZoomOutChanged(zoomOut: Float)
     }
 }
