@@ -90,6 +90,10 @@ class SoundEffectsHelper {
             mFileName = fileName;
             mSampleId = EFFECT_NOT_IN_SOUND_POOL;
         }
+        void unload() {
+            mSampleId = EFFECT_NOT_IN_SOUND_POOL;
+            mLoaded = false;
+        }
     }
     // All the fields below are accessed by the worker thread exclusively
     private final List<Resource> mResources = new ArrayList<Resource>();
@@ -230,6 +234,7 @@ class SoundEffectsHelper {
         for (Resource res : mResources) {
             if (res.mSampleId != EFFECT_NOT_IN_SOUND_POOL) {
                 mSoundPool.unload(res.mSampleId);
+                res.unload();
             }
         }
         mSoundPool.release();
