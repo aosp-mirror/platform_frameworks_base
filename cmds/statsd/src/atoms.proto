@@ -4948,6 +4948,8 @@ message BlobCommitted {
         ERROR_DURING_COMMIT = 2;
         // Commit Failed: Digest of the data did not match Blob digest
         DIGEST_MISMATCH = 3;
+        // Commit Failed: Allowed count limit exceeded
+        COUNT_LIMIT_EXCEEDED = 4;
     }
     optional Result result = 4;
 }
@@ -4980,6 +4982,8 @@ message BlobLeased{
         LEASE_EXPIRY_INVALID = 4;
         // Lease Failed: Leasee has exceeded the total data lease limit
         DATA_SIZE_LIMIT_EXCEEDED = 5;
+        // Leasee Failed: Allowed count limit exceeded
+        COUNT_LIMIT_EXCEEDED = 6;
     }
     optional Result result = 4;
 }
