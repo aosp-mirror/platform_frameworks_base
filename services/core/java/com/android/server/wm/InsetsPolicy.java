@@ -46,7 +46,9 @@ import android.view.WindowInsets.Type.InsetsType;
 import android.view.WindowInsetsAnimation;
 import android.view.WindowInsetsAnimation.Bounds;
 import android.view.WindowInsetsAnimationControlListener;
+import android.view.WindowManager;
 
+import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.DisplayThread;
 
@@ -97,12 +99,30 @@ class InsetsPolicy {
     private BarWindow mStatusBar = new BarWindow(StatusBarManager.WINDOW_STATUS_BAR);
     private BarWindow mNavBar = new BarWindow(StatusBarManager.WINDOW_NAVIGATION_BAR);
     private boolean mAnimatingShown;
+    /**
+     * Let remote insets controller control system bars regardless of other settings.
+     */
+    private boolean mRemoteInsetsControllerControlsSystemBars;
     private final float[] mTmpFloat9 = new float[9];
 
     InsetsPolicy(InsetsStateController stateController, DisplayContent displayContent) {
         mStateController = stateController;
         mDisplayContent = displayContent;
         mPolicy = displayContent.getDisplayPolicy();
+        mRemoteInsetsControllerControlsSystemBars = mPolicy.getContext().getResources().getBoolean(
+                R.bool.config_remoteInsetsControllerControlsSystemBars);
+    }
+
+    boolean getRemoteInsetsControllerControlsSystemBars() {
+        return mRemoteInsetsControllerControlsSystemBars;
+    }
+
+    /**
+     * Used only for testing.
+     */
+    @VisibleForTesting
+    void setRemoteInsetsControllerControlsSystemBars(boolean controlsSystemBars) {
+        mRemoteInsetsControllerControlsSystemBars = controlsSystemBars;
     }
 
     /** Updates the target which can control system bars. */
@@ -256,6 +276,11 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
+        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
+                    focusedWin.mAttrs.packageName);
+            return mDisplayContent.mRemoteInsetsControlTarget;
+        }
         if (forceShowsSystemBarsForWindowingMode) {
             // Status bar is forcibly shown for the windowing mode which is a steady state.
             // We don't want the client to control the status bar, and we will dispatch the real
@@ -285,6 +310,11 @@ class InsetsPolicy {
             // Notification shade has control anyways, no reason to force anything.
             return focusedWin;
         }
+        if (remoteInsetsControllerControlsSystemBars(focusedWin)) {
+            mDisplayContent.mRemoteInsetsControlTarget.topFocusedWindowChanged(
+                    focusedWin.mAttrs.packageName);
+            return mDisplayContent.mRemoteInsetsControlTarget;
+        }
         if (forceShowsSystemBarsForWindowingMode) {
             // Navigation bar is forcibly shown for the windowing mode which is a steady state.
             // We don't want the client to control the navigation bar, and we will dispatch the real
@@ -298,6 +328,28 @@ class InsetsPolicy {
             return mDummyControlTarget;
         }
         return focusedWin;
+    }
+
+    /**
+     * Determines whether the remote insets controller should take control of system bars for all
+     * windows.
+     */
+    boolean remoteInsetsControllerControlsSystemBars(@Nullable WindowState focusedWin) {
+        if (focusedWin == null) {
+            return false;
+        }
+        if (!mRemoteInsetsControllerControlsSystemBars) {
+            return false;
+        }
+        if (mDisplayContent == null || mDisplayContent.mRemoteInsetsControlTarget == null) {
+            // No remote insets control target to take control of insets.
+            return false;
+        }
+        // If necessary, auto can control application windows when
+        // config_remoteInsetsControllerControlsSystemBars is set to true. This is useful in cases
+        // where we want to dictate system bar inset state for applications.
+        return focusedWin.getAttrs().type >= WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW
+                && focusedWin.getAttrs().type <= WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
     }
 
     private boolean forceShowsStatusBarTransiently() {
@@ -321,10 +373,7 @@ class InsetsPolicy {
         // We need to force system bars when the docked stack is visible, when the freeform stack
         // is visible but also when we are resizing for the transitions when docked stack
         // visibility changes.
-        return isDockedStackVisible
-                || isFreeformStackVisible
-                || isResizing
-                || mPolicy.getForceShowSystemBars();
+        return isDockedStackVisible || isFreeformStackVisible || isResizing;
     }
 
     @VisibleForTesting

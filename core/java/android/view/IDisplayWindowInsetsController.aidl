@@ -27,6 +27,13 @@ import android.view.InsetsState;
 oneway interface IDisplayWindowInsetsController {
 
     /**
+     * Called when top focused window changes to determine whether or not to take over insets
+     * control. Won't be called if config_remoteInsetsControllerControlsSystemBars is false.
+     * @param packageName: Passes the top package name
+     */
+    void topFocusedWindowChanged(String packageName);
+
+    /**
      * @see IWindow#insetsChanged
      */
     void insetsChanged(in InsetsState insetsState);
