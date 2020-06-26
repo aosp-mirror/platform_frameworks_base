@@ -203,9 +203,9 @@
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"VPN postavke nisu dostupne za ovog korisnika"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"Postavke za povezivanje putem mobitela nisu dostupne za ovog korisnika"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"Postavke za ime pristupne tačke nisu dostupne za ovog korisnika"</string>
-    <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje grešaka putem uređaja spojenog na USB"</string>
+    <string name="enable_adb" msgid="8072776357237289039">"Otklanjanje grešaka putem USB-a"</string>
     <string name="enable_adb_summary" msgid="3711526030096574316">"Način rada za uklanjanje grešaka kada je povezan USB"</string>
-    <string name="clear_adb_keys" msgid="3010148733140369917">"Ukini odobrenja otklanjanja grešaka putem uređaja spojenog na USB"</string>
+    <string name="clear_adb_keys" msgid="3010148733140369917">"Ukini odobrenja otklanjanja grešaka putem USB-a"</string>
     <string name="enable_adb_wireless" msgid="6973226350963971018">"Bežično otklanjanje grešaka"</string>
     <string name="enable_adb_wireless_summary" msgid="7344391423657093011">"Način rada otklanjanja grešaka kada je WiFi mreža povezana"</string>
     <string name="adb_wireless_error" msgid="721958772149779856">"Greška"</string>
@@ -300,11 +300,11 @@
     <string name="debug_view_attributes" msgid="3539609843984208216">"Omogući pregled atributa prikaza"</string>
     <string name="mobile_data_always_on_summary" msgid="1112156365594371019">"Prijenos podataka na mobilnoj mreži ostaje aktivan čak i kada je aktiviran WiFi (za brzo prebacivanje između mreža)."</string>
     <string name="tethering_hardware_offload_summary" msgid="7801345335142803029">"Korištenje hardverskog ubrzavanja za povezivanje putem mobitela ako je dostupno"</string>
-    <string name="adb_warning_title" msgid="7708653449506485728">"Omogućiti otklanjanje grešaka putem uređaja spojenog na USB?"</string>
-    <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje grešaka putem uređaja spojenog na USB je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
+    <string name="adb_warning_title" msgid="7708653449506485728">"Omogućiti otklanjanje grešaka putem USB-a?"</string>
+    <string name="adb_warning_message" msgid="8145270656419669221">"Otklanjanje grešaka putem USB-a je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
     <string name="adbwifi_warning_title" msgid="727104571653031865">"Omogućiti bežično otklanjanje grešaka?"</string>
     <string name="adbwifi_warning_message" msgid="8005936574322702388">"Bežično otklanjanje grešaka je namijenjeno samo u svrhe razvoja aplikacija. Koristite ga za kopiranje podataka između računara i uređaja, instaliranje aplikacija na uređaj bez obavještenja te čitanje podataka iz zapisnika."</string>
-    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Opozvati pristup otklanjanju grešaka putem uređaja spojenog na USB za sve računare koje ste prethodno ovlastili?"</string>
+    <string name="adb_keys_warning_message" msgid="2968555274488101220">"Opozvati pristup otklanjanju grešaka putem USB-a za sve računare koje ste prethodno ovlastili?"</string>
     <string name="dev_settings_warning_title" msgid="8251234890169074553">"Dopustiti postavke za razvoj?"</string>
     <string name="dev_settings_warning_message" msgid="37741686486073668">"Ove postavke su namijenjene samo za svrhe razvoja. Mogu izazvati pogrešno ponašanje uređaja i aplikacija na njemu."</string>
     <string name="verify_apps_over_usb_title" msgid="6031809675604442636">"Potvrdi aplikacije putem USB-a"</string>
