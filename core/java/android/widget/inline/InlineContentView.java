@@ -21,8 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.content.Context;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.SurfaceControl;
@@ -156,7 +156,8 @@ public class InlineContentView extends ViewGroup {
         @Override
         public void onDraw() {
             computeParentPositionAndScale();
-            mSurfaceView.setVisibility(VISIBLE);
+            final int visibility = InlineContentView.this.isShown() ? VISIBLE : GONE;
+            mSurfaceView.setVisibility(visibility);
         }
     };
 
