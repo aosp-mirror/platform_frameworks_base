@@ -96,6 +96,11 @@ public class QSContainerImpl extends FrameLayout {
                 mAnimateBottomOnNextLayout = true;
             }
         });
+        mQSPanel.setMediaVisibilityChangedListener((visible) -> {
+            if (mQSPanel.isShown()) {
+                mAnimateBottomOnNextLayout = true;
+            }
+        });
 
 
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
