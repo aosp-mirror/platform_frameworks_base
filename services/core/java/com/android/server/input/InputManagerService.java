@@ -59,6 +59,8 @@ import android.os.Message;
 import android.os.MessageQueue;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.ResultReceiver;
+import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.provider.DeviceConfig;
 import android.provider.Settings;
@@ -115,6 +117,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+
 /*
  * Wraps the C++ InputManager and provides its callbacks.
  */
@@ -2506,4 +2509,11 @@ public class InputManagerService extends IInputManager.Stub
             return InputManagerService.this.transferTouchFocus(fromChannelToken, toChannelToken);
         }
     }
+
+    @Override
+    public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
+            String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
+        new InputShellCommand().exec(this, in, out, err, args, callback, resultReceiver);
+    }
+
 }
