@@ -8841,7 +8841,7 @@ public class AudioService extends IAudioService.Stub
 
 
     //======================
-    // Audioserver state displatch
+    // Audioserver state dispatch
     //======================
     private class AsdProxy implements IBinder.DeathRecipient {
         private final IAudioServerStateDispatcher mAsd;
