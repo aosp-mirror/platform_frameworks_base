@@ -11608,6 +11608,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     ~ApplicationInfo.PRIVATE_FLAG_DEFAULT_TO_DEVICE_PROTECTED_STORAGE;
             pkg.applicationInfo.privateFlags &=
                     ~ApplicationInfo.PRIVATE_FLAG_DIRECT_BOOT_AWARE;
+            // clear protected broadcasts
+            pkg.protectedBroadcasts = null;
             // cap permission priorities
             if (pkg.permissionGroups != null && pkg.permissionGroups.size() > 0) {
                 for (int i = pkg.permissionGroups.size() - 1; i >= 0; --i) {
@@ -11616,8 +11618,6 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         if ((scanFlags & SCAN_AS_PRIVILEGED) == 0) {
-            // clear protected broadcasts
-            pkg.protectedBroadcasts = null;
             // ignore export request for single user receivers
             if (pkg.receivers != null) {
                 for (int i = pkg.receivers.size() - 1; i >= 0; --i) {
