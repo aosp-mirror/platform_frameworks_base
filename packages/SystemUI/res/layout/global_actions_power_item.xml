@@ -26,7 +26,7 @@
         android:id="@*android:id/icon"
         android:layout_width="24dp"
         android:layout_height="24dp"
-        android:layout_marginBottom="45dp"
+        android:layout_marginBottom="@dimen/global_actions_power_dialog_item_bottom_margin"
         android:scaleType="centerInside"
         android:tint="@color/control_primary_text" />
     <TextView
