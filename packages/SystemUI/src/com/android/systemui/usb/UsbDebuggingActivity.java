@@ -139,13 +139,18 @@ public class UsbDebuggingActivity extends AlertActivity
         if (mDisconnectedReceiver != null) {
             mBroadcastDispatcher.unregisterReceiver(mDisconnectedReceiver);
         }
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
         // If the ADB service has not yet been notified due to this dialog being closed in some
         // other way then notify the service to deny the connection to ensure system_server sends
         // a response to adbd.
         if (!mServiceNotified) {
             notifyService(false);
         }
-        super.onStop();
+        super.onDestroy();
     }
 
     @Override
