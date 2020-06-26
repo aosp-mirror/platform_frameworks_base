@@ -4515,6 +4515,7 @@ class Task extends WindowContainer<WindowContainer> {
      */
     void setMainWindowSizeChangeTransaction(SurfaceControl.Transaction t) {
         setMainWindowSizeChangeTransaction(t, this);
+        forAllWindows(WindowState::requestRedrawForSync, true);
     }
 
     private void setMainWindowSizeChangeTransaction(SurfaceControl.Transaction t, Task origin) {
