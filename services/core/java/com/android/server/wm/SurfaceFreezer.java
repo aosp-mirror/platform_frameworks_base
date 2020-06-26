@@ -162,6 +162,7 @@ class SurfaceFreezer {
                     .setBufferSize(width, height)
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .setParent(parent)
+                    .setCallsite("SurfaceFreezer.Snapshot")
                     .build();
 
             ProtoLog.i(WM_SHOW_TRANSACTIONS, "  THUMBNAIL %s: CREATE", mSurfaceControl);
