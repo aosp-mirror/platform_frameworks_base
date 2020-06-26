@@ -7614,6 +7614,8 @@ public final class Settings {
          * @hide
          */
         @UnsupportedAppUsage
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String ANR_SHOW_BACKGROUND = "anr_show_background";
 
         /**
@@ -7621,6 +7623,8 @@ public final class Settings {
          * Otherwise, the process will be silently killed.
          * @hide
          */
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SHOW_FIRST_CRASH_DIALOG_DEV_OPTION =
                 "show_first_crash_dialog_dev_option";
 
@@ -14188,6 +14192,8 @@ public final class Settings {
          * Otherwise, the process will be silently killed.
          * @hide
          */
+        @TestApi
+        @SuppressLint("NoSettingsProvider")
         public static final String SHOW_FIRST_CRASH_DIALOG = "show_first_crash_dialog";
 
         /**
