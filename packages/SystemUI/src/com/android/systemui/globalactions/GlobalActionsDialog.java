@@ -2637,10 +2637,10 @@ public class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
     private boolean shouldShowControls() {
-        return (mKeyguardStateController.isUnlocked() || mShowLockScreenCardsAndControls)
-                && controlsAvailable()
-                && mLockPatternUtils.getStrongAuthForUser(getCurrentUser().id)
-                    != STRONG_AUTH_REQUIRED_AFTER_BOOT;
+        boolean showOnLockScreen = mShowLockScreenCardsAndControls && mLockPatternUtils
+                .getStrongAuthForUser(getCurrentUser().id) != STRONG_AUTH_REQUIRED_AFTER_BOOT;
+        return controlsAvailable()
+                && (mKeyguardStateController.isUnlocked() || showOnLockScreen);
     }
 
     private boolean controlsAvailable() {
