@@ -66,6 +66,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.volume.VolumeDialogComponent;
+import com.android.systemui.wm.DisplayImeController;
+import com.android.systemui.wm.DisplaySystemBarsController;
 
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -95,6 +97,10 @@ public abstract class CarSystemUIModule {
         return new HeadsUpManagerPhone(context, statusBarStateController, bypassController,
                 groupManager, configurationController);
     }
+
+    @Binds
+    abstract DisplayImeController bindDisplayImeController(
+            DisplaySystemBarsController displaySystemBarsController);
 
     @Singleton
     @Provides
