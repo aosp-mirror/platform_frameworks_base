@@ -110,4 +110,7 @@ interface IFingerprintService {
 
     // Notifies about a finger leaving the sensor area.
     void onFingerUp();
+
+    // Returns whether the specified sensor is a UDFPS.
+    boolean isUdfps(int sensorId);
 }

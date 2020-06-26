@@ -389,6 +389,29 @@ public class FingerprintService extends BiometricServiceBase {
                 }
             }
         }
+
+        @Override
+        public boolean isUdfps(int sensorId) {
+            checkPermission(USE_BIOMETRIC_INTERNAL);
+            IBiometricsFingerprint daemon = getFingerprintDaemon();
+            if (daemon == null) {
+                Slog.e(TAG, "isUdfps | daemon is null");
+            } else {
+                android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint extension =
+                        android.hardware.biometrics.fingerprint.V2_3.IBiometricsFingerprint.castFrom(
+                                daemon);
+                if (extension == null) {
+                    Slog.v(TAG, "isUdfps | failed to cast the HIDL to V2_3");
+                } else {
+                    try {
+                        return extension.isUdfps(sensorId);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "isUdfps | RemoteException: ", e);
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     private final LockoutFrameworkImpl mLockoutTracker;
