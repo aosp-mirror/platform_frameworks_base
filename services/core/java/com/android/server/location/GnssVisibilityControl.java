@@ -21,7 +21,6 @@ import android.annotation.SuppressLint;
 import android.app.AppOpsManager;
 import android.app.Notification;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -645,7 +644,6 @@ class GnssVisibilityControl {
                 .setTicker(accessibilityServicesText)
                 .setContentTitle(firstLineText)
                 .setContentText(secondLineText)
-                .setContentIntent(PendingIntent.getBroadcast(context, 0, new Intent(), 0))
                 .build();
     }
 
