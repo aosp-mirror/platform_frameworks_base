@@ -25,6 +25,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.PointF;
 import android.metrics.LogMaker;
 import android.os.Bundle;
 import android.os.Handler;
@@ -60,6 +61,7 @@ import com.android.systemui.statusbar.policy.BrightnessMirrorController;
 import com.android.systemui.statusbar.policy.BrightnessMirrorController.BrightnessMirrorListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
+import com.android.systemui.util.animation.DisappearParameters;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -246,9 +248,38 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     protected void initMediaHostState() {
         mMediaHost.setExpansion(1.0f);
         mMediaHost.setShowsOnlyActiveMedia(false);
-        // Reveal player with some parallax (1.0f would also work)
-        mMediaHost.setGonePivot(0.0f, 0.8f);
+        updateMediaDisappearParameters();
         mMediaHost.init(MediaHierarchyManager.LOCATION_QS);
+    }
+
+    /**
+     * Update the way the media disappears based on if we're using the horizontal layout
+     */
+    private void updateMediaDisappearParameters() {
+        if (!mUsingMediaPlayer) {
+            return;
+        }
+        DisappearParameters parameters = mMediaHost.getDisappearParameters();
+        if (mUsingHorizontalLayout) {
+            // Only height remaining
+            parameters.getDisappearSize().set(0.0f, 0.4f);
+            // Disappearing on the right side on the bottom
+            parameters.getGonePivot().set(1.0f, 1.0f);
+            // translating a bit horizontal
+            parameters.getContentTranslationFraction().set(0.25f, 1.0f);
+            parameters.setDisappearEnd(0.6f);
+        } else {
+            // Only width remaining
+            parameters.getDisappearSize().set(1.0f, 0.0f);
+            // Disappearing on the bottom
+            parameters.getGonePivot().set(0.0f, 1.0f);
+            // translating a bit vertical
+            parameters.getContentTranslationFraction().set(0.0f, 1.05f);
+            parameters.setDisappearEnd(0.95f);
+        }
+        parameters.setFadeStartPosition(0.95f);
+        parameters.setDisappearStart(0.0f);
+        mMediaHost.setDisappearParameters(parameters);
     }
 
     @Override
@@ -542,6 +573,7 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
             updateTileLayoutMargins();
             updateFooterMargin();
             updateDividerMargin();
+            updateMediaDisappearParameters();
             updateMediaHostContentMargins();
             updateHorizontalLinearLayoutMargins();
             updatePadding();
