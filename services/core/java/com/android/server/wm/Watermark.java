@@ -121,6 +121,7 @@ class Watermark {
                     .setName("WatermarkSurface")
                     .setBufferSize(1, 1)
                     .setFormat(PixelFormat.TRANSLUCENT)
+                    .setCallsite("Watermark")
                     .build();
             t.setLayer(ctrl, WindowManagerService.TYPE_LAYER_MULTIPLIER * 100)
                     .setPosition(ctrl, 0, 0)

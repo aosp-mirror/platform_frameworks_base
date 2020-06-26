@@ -375,6 +375,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 .setBufferSize(buffer.getWidth(), buffer.getHeight())
                 .setFormat(buffer.getFormat())
                 .setParent(mSurfaceControl)
+                .setCallsite("TaskSnapshotSurface.drawSizeMismatchSnapshot")
                 .build();
         Surface surface = mService.mSurfaceFactory.get();
         surface.copyFrom(mChildSurfaceControl);

@@ -52,6 +52,7 @@ class TaskScreenshotAnimatable implements SurfaceAnimator.Animatable {
         mSurfaceControl = surfaceControlFactory.apply(new SurfaceSession())
                 .setName("RecentTaskScreenshotSurface")
                 .setBufferSize(mWidth, mHeight)
+                .setCallsite("TaskScreenshotAnimatable")
                 .build();
         if (buffer != null) {
             final Surface surface = new Surface();
