@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.systemui.udfps.UdfpsView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:systemui="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/udfps_view"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    systemui:sensorRadius="140px"
+    systemui:sensorMarginBottom="630px"
+    systemui:sensorTouchAreaCoefficient="0.5"/>
