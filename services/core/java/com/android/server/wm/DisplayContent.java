@@ -5618,11 +5618,6 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
         }
-
-        @Override
-        public boolean isClientControlled() {
-            return false;
-        }
     }
 
     /**
