@@ -533,8 +533,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
                 && !mSpringingToTouch
                 && !mMagnetizedPip.getObjectStuckToTarget()) {
             mBounds.set(mTemporaryBounds);
-            mPipTaskOrganizer.scheduleFinishResizePip(mBounds);
-
+            if (!mDismissalPending) {
+                // do not schedule resize if PiP is dismissing, which may cause app re-open to
+                // mBounds instead of it's normal bounds.
+                mPipTaskOrganizer.scheduleFinishResizePip(mBounds);
+            }
             mTemporaryBounds.setEmpty();
         }
 
