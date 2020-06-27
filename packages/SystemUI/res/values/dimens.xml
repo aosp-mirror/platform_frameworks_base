@@ -1222,9 +1222,9 @@
     <!-- Padding of bubble overflow empty state subtitle -->
     <dimen name="bubble_empty_overflow_subtitle_padding">50dp</dimen>
     <!-- Height of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_height">4dp</dimen>
+    <dimen name="bubble_pointer_height">8dp</dimen>
     <!-- Width of the triangle that points to the expanded bubble -->
-    <dimen name="bubble_pointer_width">6dp</dimen>
+    <dimen name="bubble_pointer_width">12dp</dimen>
     <!-- Extra padding around the dismiss target for bubbles -->
     <dimen name="bubble_dismiss_slop">16dp</dimen>
     <!-- Height of button allowing users to adjust settings for bubbles. -->
