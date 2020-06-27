@@ -1270,6 +1270,7 @@
     <dimen name="qs_media_padding">16dp</dimen>
     <dimen name="qs_media_panel_outer_padding">16dp</dimen>
     <dimen name="qs_media_album_size">52dp</dimen>
+    <dimen name="qs_center_guideline_padding">10dp</dimen>
     <dimen name="qs_seamless_icon_size">20dp</dimen>
     <dimen name="qs_seamless_fallback_icon_size">20dp</dimen>
     <dimen name="qs_seamless_fallback_top_margin">18dp</dimen>
