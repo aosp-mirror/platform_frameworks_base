@@ -1630,14 +1630,14 @@ public class BiometricService extends SystemService {
     }
 
     private void handleOnSystemEvent(int event) {
-        final boolean shouldReceive = mCurrentAuthSession.mBundle
-                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
-        Slog.d(TAG, "onSystemEvent: " + event + ", shouldReceive: " + shouldReceive);
-
         if (mCurrentAuthSession == null) {
             Slog.e(TAG, "Auth session null");
             return;
         }
+
+        final boolean shouldReceive = mCurrentAuthSession.mBundle
+                .getBoolean(BiometricPrompt.KEY_RECEIVE_SYSTEM_EVENTS, false);
+        Slog.d(TAG, "onSystemEvent: " + event + ", shouldReceive: " + shouldReceive);
 
         if (!shouldReceive) {
             return;

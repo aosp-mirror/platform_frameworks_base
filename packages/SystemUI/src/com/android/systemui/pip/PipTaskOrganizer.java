@@ -228,7 +228,6 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         PipAnimationController.PipTransitionAnimator animator =
                 mPipAnimationController.getCurrentAnimator();
         if (animator != null && animator.isRunning()) {
-            System.out.println("RUNNING ANIM: anim=" + animator.getDestinationBounds() + " last=" + getLastReportedBounds());
             return new Rect(animator.getDestinationBounds());
         }
         return getLastReportedBounds();
@@ -236,6 +235,10 @@ public class PipTaskOrganizer extends TaskOrganizer implements
 
     public boolean isInPip() {
         return mInPip;
+    }
+
+    public boolean isDeferringEnterPipAnimation() {
+        return mInPip && mShouldDeferEnteringPip;
     }
 
     /**
@@ -533,12 +536,16 @@ public class PipTaskOrganizer extends TaskOrganizer implements
                 // If we are rotating while there is a current animation, immediately cancel the
                 // animation (remove the listeners so we don't trigger the normal finish resize
                 // call that should only happen on the update thread)
-                int direction = animator.getTransitionDirection();
-                animator.removeAllUpdateListeners();
-                animator.removeAllListeners();
-                animator.cancel();
-                // Do notify the listeners that this was canceled
-                sendOnPipTransitionCancelled(direction);
+                int direction = TRANSITION_DIRECTION_NONE;
+                if (animator != null) {
+                    direction = animator.getTransitionDirection();
+                    animator.removeAllUpdateListeners();
+                    animator.removeAllListeners();
+                    animator.cancel();
+                    // Do notify the listeners that this was canceled
+                    sendOnPipTransitionCancelled(direction);
+                    sendOnPipTransitionFinished(direction);
+                }
                 mLastReportedBounds.set(destinationBoundsOut);
 
                 // Create a reset surface transaction for the new bounds and update the window
@@ -612,7 +619,9 @@ public class PipTaskOrganizer extends TaskOrganizer implements
             @PipAnimationController.TransitionDirection int direction, int durationMs,
             Consumer<Rect> updateBoundsCallback) {
         if (!mInPip) {
-            // can be initiated in other component, ignore if we are no longer in PIP
+            // TODO: tend to use shouldBlockResizeRequest here as well but need to consider
+            // the fact that when in exitPip, scheduleAnimateResizePip is executed in the window
+            // container transaction callback and we want to set the mExitingPip immediately.
             return;
         }
 
@@ -668,8 +677,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
     private void scheduleFinishResizePip(Rect destinationBounds,
             @PipAnimationController.TransitionDirection int direction,
             Consumer<Rect> updateBoundsCallback) {
-        if (!mInPip) {
-            // can be initiated in other component, ignore if we are no longer in PIP
+        if (shouldBlockResizeRequest()) {
             return;
         }
 
@@ -697,8 +705,7 @@ public class PipTaskOrganizer extends TaskOrganizer implements
      */
     public void scheduleOffsetPip(Rect originalBounds, int offset, int duration,
             Consumer<Rect> updateBoundsCallback) {
-        if (!mInPip) {
-            // can be initiated in other component, ignore if we are no longer in PIP
+        if (shouldBlockResizeRequest()) {
             return;
         }
         if (mShouldDeferEnteringPip) {
@@ -867,6 +874,16 @@ public class PipTaskOrganizer extends TaskOrganizer implements
         return params == null || !params.hasSetAspectRatio()
                 ? mPipBoundsHandler.getDefaultAspectRatio()
                 : params.getAspectRatio();
+    }
+
+    /**
+     * Resize request can be initiated in other component, ignore if we are no longer in PIP
+     * or we're exiting from it.
+     *
+     * @return {@code true} if the resize request should be blocked/ignored.
+     */
+    private boolean shouldBlockResizeRequest() {
+        return !mInPip || mExitingPip;
     }
 
     /**

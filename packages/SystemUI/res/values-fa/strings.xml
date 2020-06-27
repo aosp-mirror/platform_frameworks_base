@@ -256,7 +256,7 @@
     <!-- no translation found for accessibility_work_mode (1280025758672376313) -->
     <skip />
     <string name="accessibility_notification_dismissed" msgid="4411652015138892952">"اعلان ردشد."</string>
-    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"ابزارک اعلان رد شد."</string>
+    <string name="accessibility_bubble_dismissed" msgid="270358867566720729">"حبابک رد شد."</string>
     <string name="accessibility_desc_notification_shade" msgid="5355229129428759989">"مجموعه اعلان."</string>
     <string name="accessibility_desc_quick_settings" msgid="4374766941484719179">"تنظیمات سریع."</string>
     <string name="accessibility_desc_lock_screen" msgid="5983125095181194887">"صفحه قفل."</string>
@@ -426,9 +426,9 @@
     <string name="quick_settings_dark_mode_secondary_label_until_sunrise" msgid="4404885070316716472">"تا طلوع آفتاب"</string>
     <string name="quick_settings_dark_mode_secondary_label_on_at" msgid="5128758823486361279">"ساعت <xliff:g id="TIME">%s</xliff:g> روشن می‌شود"</string>
     <string name="quick_settings_dark_mode_secondary_label_until" msgid="2289774641256492437">"تا<xliff:g id="TIME">%s</xliff:g>"</string>
-    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"NFC"</string>
-    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏NFC غیرفعال است"</string>
-    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏NFC فعال است"</string>
+    <string name="quick_settings_nfc_label" msgid="1054317416221168085">"‏ارتباط میدان نزدیک (NFC)"</string>
+    <string name="quick_settings_nfc_off" msgid="3465000058515424663">"‏«ارتباط میدان نزدیک» (NFC) غیرفعال است"</string>
+    <string name="quick_settings_nfc_on" msgid="1004976611203202230">"‏«ارتباط میدان نزدیک» (NFC) فعال است"</string>
     <string name="quick_settings_screen_record_label" msgid="1594046461509776676">"ضبط کردن صفحه‌نمایش"</string>
     <string name="quick_settings_screen_record_start" msgid="1574725369331638985">"شروع"</string>
     <string name="quick_settings_screen_record_stop" msgid="8087348522976412119">"توقف"</string>
@@ -720,8 +720,8 @@
     <string name="notification_conversation_channel_settings" msgid="2409977688430606835">"تنظیمات"</string>
     <string name="notification_priority_title" msgid="2079708866333537093">"اولویت"</string>
     <string name="no_shortcut" msgid="8257177117568230126">"<xliff:g id="APP_NAME">%1$s</xliff:g> از ویژگی‌های مکالمه پشتیبانی نمی‌کند"</string>
-    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"هیچ ابزارک اعلان جدیدی وجود ندارد"</string>
-    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"ابزارک اعلان اخیر و ابزارک اعلان ردشده اینجا ظاهر خواهند شد"</string>
+    <string name="bubble_overflow_empty_title" msgid="3120029421991510842">"هیچ حبابک جدیدی وجود ندارد"</string>
+    <string name="bubble_overflow_empty_subtitle" msgid="2030874469510497397">"حبابک‌ها اخیر و حبابک‌ها ردشده اینجا ظاهر خواهند شد"</string>
     <string name="notification_unblockable_desc" msgid="2073030886006190804">"این اعلان‌ها قابل اصلاح نیستند."</string>
     <string name="notification_multichannel_desc" msgid="7414593090056236179">"نمی‌توانید این گروه اعلان‌ها را در اینجا پیکربندی کنید"</string>
     <string name="notification_delegate_header" msgid="1264510071031479920">"اعلان‌های دارای پراکسی"</string>
@@ -748,8 +748,8 @@
     <string name="notification_conversation_unfavorite" msgid="181383708304763807">"مکالمه غیرمهم"</string>
     <string name="notification_conversation_mute" msgid="268951550222925548">"بی‌صدا شد"</string>
     <string name="notification_conversation_unmute" msgid="2692255619510896710">"هشدار دادن"</string>
-    <string name="notification_conversation_bubble" msgid="2242180995373949022">"نمایش ابزارک اعلان"</string>
-    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"برداشتن ابزارک اعلان"</string>
+    <string name="notification_conversation_bubble" msgid="2242180995373949022">"نمایش حبابک"</string>
+    <string name="notification_conversation_unbubble" msgid="6908427185031099868">"برداشتن حبابک‌ها"</string>
     <string name="notification_conversation_home_screen" msgid="8347136037958438935">"افزودن به صفحه اصلی"</string>
     <string name="notification_menu_accessibility" msgid="8984166825879886773">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="6429668976593634862">"کنترل‌های اعلان"</string>
@@ -992,7 +992,7 @@
     <string name="device_services" msgid="1549944177856658705">"سرویس‌های دستگاه"</string>
     <string name="music_controls_no_title" msgid="4166497066552290938">"بدون عنوان"</string>
     <string name="restart_button_description" msgid="6916116576177456480">"برای بازراه‌اندازی این برنامه و تغییر به حالت تمام‌صفحه، ضربه بزنید."</string>
-    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"تنظیم برای ابزارک‌های اعلان <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
+    <string name="bubbles_settings_button_description" msgid="7324245408859877545">"تنظیمات برای حبابک‌های <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="bubble_overflow_button_content_description" msgid="5523744621434300510">"لبریزشده"</string>
     <string name="bubble_accessibility_action_add_back" msgid="6217995665917123890">"افزودن برگشت به پشته"</string>
     <string name="manage_bubbles_text" msgid="6856830436329494850">"مدیریت"</string>
@@ -1005,10 +1005,10 @@
     <string name="bubble_accessibility_action_move_bottom_right" msgid="7471571700628346212">"انتقال به پایین سمت چپ"</string>
     <string name="bubble_dismiss_text" msgid="1314082410868930066">"رد کردن حبابک"</string>
     <string name="bubbles_dont_bubble_conversation" msgid="1033040343437428822">"مکالمه در حباب نشان داده نشود"</string>
-    <string name="bubbles_user_education_title" msgid="5547017089271445797">"گپ بااستفاده از ابزارک اعلان"</string>
-    <string name="bubbles_user_education_description" msgid="1160281719576715211">"مکالمه‌های جدید به‌صورت نمادهای شناور یا ابزارک اعلان نشان داده شوند. برای باز کردن ابزارک اعلان ضربه بزنید. برای جابه‌جایی، آن را بکشید."</string>
-    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کنترل ابزارک اعلان در هرزمانی"</string>
-    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن «ابزارک اعلان» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
+    <string name="bubbles_user_education_title" msgid="5547017089271445797">"گپ بااستفاده از حبابک‌ها"</string>
+    <string name="bubbles_user_education_description" msgid="1160281719576715211">"مکالمه‌های جدید به‌صورت نمادهای شناور یا حبابک‌ها نشان داده می‌شوند. برای باز کردن حبابک‌ها ضربه بزنید. برای جابه‌جایی، آن را بکشید."</string>
+    <string name="bubbles_user_education_manage_title" msgid="2848511858160342320">"کنترل حبابک‌ها در هرزمانی"</string>
+    <string name="bubbles_user_education_manage" msgid="1391639189507036423">"برای خاموش کردن «حبابک‌ها» از این برنامه، روی «مدیریت» ضربه بزنید"</string>
     <string name="bubbles_user_education_got_it" msgid="8282812431953161143">"متوجه‌ام"</string>
     <string name="bubbles_app_settings" msgid="5779443644062348657">"تنظیمات <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="notification_content_system_nav_changed" msgid="5077913144844684544">"پیمایش سیستم به‌روزرسانی شد. برای انجام تغییرات به «تنظیمات» بروید."</string>
@@ -1017,8 +1017,8 @@
     <string name="priority_onboarding_title" msgid="2893070698479227616">"مکالمه روی اولویت تنظیم شده است"</string>
     <string name="priority_onboarding_behavior" msgid="5342816047020432929">"مکالمه‌های اولویت‌دار:"</string>
     <string name="priority_onboarding_show_at_top_text" msgid="1678400241025513541">"نمایش در بالای بخش مکالمه"</string>
-    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"نمایش تصویر نمایه در صفحه قفل"</string>
-    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"به‌شکل ابزارک اعلان شناور روی برنامه‌ها ظاهر می‌شود"</string>
+    <string name="priority_onboarding_show_avatar_text" msgid="5756291381124091508">"تصویر نمایه را در صفحه قفل نمایش می‌دهد"</string>
+    <string name="priority_onboarding_appear_as_bubble_text" msgid="4227039772250263122">"به‌شکل حبابک شناور روی برنامه‌ها ظاهر می‌شود"</string>
     <string name="priority_onboarding_ignores_dnd_text" msgid="2918952762719600529">"وقفه در «مزاحم نشوید»"</string>
     <string name="priority_onboarding_done_button_title" msgid="4569550984286506007">"متوجه‌ام"</string>
     <string name="priority_onboarding_settings_button_title" msgid="6663601574303585927">"تنظیمات"</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"برای تغییر دادن ترتیب کنترل‌ها، آن‌ها را نگه دارید و بکشید"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"همه کنترل‌ها برداشته شده‌اند"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"تغییرات ذخیره نشد"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"دیدن برنامه‌های دیگر"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"کنترل‌ها بار نشدند. برنامه <xliff:g id="APP">%s</xliff:g> را بررسی کنید تا مطمئن شوید تنظیمات برنامه تغییر نکرده باشد."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"کنترل‌های سازگار دردسترس نیستند"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"موارد دیگر"</string>

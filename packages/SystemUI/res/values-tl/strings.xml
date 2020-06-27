@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"I-hold at i-drag para baguhin ang pagkakaayos ng mga kontrol"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Inalis ang lahat ng kontrol"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Hindi na-save ang mga pagbabago"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Tingnan ang iba pang app"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Hindi ma-load ang mga kontrol. Tingnan ang app na <xliff:g id="APP">%s</xliff:g> para matiyak na hindi nabago ang mga setting ng app."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Hindi available ang mga compatible na kontrol"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iba pa"</string>
