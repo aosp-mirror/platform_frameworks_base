@@ -64,6 +64,8 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
     private TouchAnimator mTranslationYAnimator;
     private TouchAnimator mNonfirstPageAnimator;
     private TouchAnimator mNonfirstPageDelayedAnimator;
+    // This animates fading of SecurityFooter and media divider
+    private TouchAnimator mAllPagesDelayedAnimator;
     private TouchAnimator mBrightnessAnimator;
     private boolean mNeedsAnimatorUpdate = false;
 
@@ -296,19 +298,24 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
             Builder builder = new Builder()
                     .setStartDelay(EXPANDED_TILE_DELAY)
                     .addFloat(tileLayout, "alpha", 0, 1);
+            mFirstPageDelayedAnimator = builder.build();
+
+            // Fade in the security footer and the divider as we reach the final position
+            builder = new Builder().setStartDelay(EXPANDED_TILE_DELAY);
             if (mQsPanel.getSecurityFooter() != null) {
                 builder.addFloat(mQsPanel.getSecurityFooter().getView(), "alpha", 0, 1);
             }
             if (mQsPanel.getDivider() != null) {
                 builder.addFloat(mQsPanel.getDivider(), "alpha", 0, 1);
             }
-            mFirstPageDelayedAnimator = builder.build();
+            mAllPagesDelayedAnimator = builder.build();
             if (mQsPanel.getSecurityFooter() != null) {
                 mAllViews.add(mQsPanel.getSecurityFooter().getView());
             }
             if (mQsPanel.getDivider() != null) {
                 mAllViews.add(mQsPanel.getDivider());
             }
+
             float px = 0;
             float py = 1;
             if (tiles.size() <= 3) {
@@ -387,6 +394,9 @@ public class QSAnimator implements Callback, PageListener, Listener, OnLayoutCha
         } else {
             mNonfirstPageAnimator.setPosition(position);
             mNonfirstPageDelayedAnimator.setPosition(position);
+        }
+        if (mAllowFancy) {
+            mAllPagesDelayedAnimator.setPosition(position);
         }
     }
 
