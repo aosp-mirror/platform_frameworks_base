@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.provider.Settings.ACTION_MEDIA_CONTROLS_SETTINGS
+import android.util.MathUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -328,7 +329,30 @@ class MediaCarouselController @Inject constructor(
                 updatePlayerToState(mediaPlayer, immediately)
             }
             maybeResetSettingsCog()
+            updatePageIndicatorAlpha()
         }
+    }
+
+    private fun updatePageIndicatorAlpha() {
+        val hostStates = mediaHostStatesManager.mediaHostStates
+        val endIsVisible = hostStates[currentEndLocation]?.visible ?: false
+        val startIsVisible = hostStates[currentStartLocation]?.visible ?: false
+        val startAlpha = if (startIsVisible) 1.0f else 0.0f
+        val endAlpha = if (endIsVisible) 1.0f else 0.0f
+        var alpha = 1.0f
+        if (!endIsVisible || !startIsVisible) {
+            var progress = currentTransitionProgress
+            if (!endIsVisible) {
+                progress = 1.0f - progress
+            }
+            // Let's fade in quickly at the end where the view is visible
+            progress = MathUtils.constrain(
+                    MathUtils.map(0.95f, 1.0f, 0.0f, 1.0f, progress),
+                    0.0f,
+                    1.0f)
+            alpha = MathUtils.lerp(startAlpha, endAlpha, progress)
+        }
+        pageIndicator.alpha = alpha
     }
 
     private fun updatePageIndicatorLocation() {
@@ -352,8 +376,10 @@ class MediaCarouselController @Inject constructor(
         var height = 0
         for (mediaPlayer in mediaPlayers.values) {
             val controller = mediaPlayer.mediaViewController
-            width = Math.max(width, controller.currentWidth)
-            height = Math.max(height, controller.currentHeight)
+            // When transitioning the view to gone, the view gets smaller, but the translation
+            // Doesn't, let's add the translation
+            width = Math.max(width, controller.currentWidth + controller.translationX.toInt())
+            height = Math.max(height, controller.currentHeight + controller.translationY.toInt())
         }
         if (width != currentCarouselWidth || height != currentCarouselHeight) {
             currentCarouselWidth = width

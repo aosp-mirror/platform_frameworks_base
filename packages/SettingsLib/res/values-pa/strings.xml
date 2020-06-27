@@ -549,7 +549,7 @@
     <string name="guest_new_guest" msgid="3482026122932643557">"ਮਹਿਮਾਨ ਸ਼ਾਮਲ ਕਰੋ"</string>
     <string name="guest_exit_guest" msgid="5908239569510734136">"ਮਹਿਮਾਨ ਹਟਾਓ"</string>
     <string name="guest_nickname" msgid="6332276931583337261">"ਮਹਿਮਾਨ"</string>
-    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ਪੂਰਵ-ਨਿਰਧਾਰਤ ਡੀਵਾਈਸ"</string>
+    <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"ਡੀਵਾਈਸ ਪੂਰਵ-ਨਿਰਧਾਰਤ"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"ਬੰਦ ਕੀਤਾ ਗਿਆ"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"ਚਾਲੂ ਕੀਤਾ ਗਿਆ"</string>
     <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"ਇਸ ਤਬਦੀਲੀ ਨੂੰ ਲਾਗੂ ਕਰਨ ਲਈ ਤੁਹਾਡੇ ਡੀਵਾਈਸ ਨੂੰ ਰੀਬੂਟ ਕਰਨਾ ਲਾਜ਼ਮੀ ਹੈ। ਹੁਣੇ ਰੀਬੂਟ ਕਰੋ ਜਾਂ ਰੱਦ ਕਰੋ।"</string>
