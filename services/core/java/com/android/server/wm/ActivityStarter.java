@@ -1668,6 +1668,12 @@ class ActivityStarter {
                     mTargetStack.setAlwaysOnTop(true);
                 }
             }
+            if (!mTargetStack.isTopStackInDisplayArea() && mService.mInternal.isDreaming()) {
+                // Launching underneath dream activity (fullscreen, always-on-top). Run the launch-
+                // -behind transition so the Activity gets created and starts in visible state.
+                mLaunchTaskBehind = true;
+                r.mLaunchTaskBehind = true;
+            }
         }
 
         mService.mUgmInternal.grantUriPermissionUncheckedFromIntent(intentGrants,
@@ -1915,6 +1921,12 @@ class ActivityStarter {
 
         if (mAddingToTask) {
             return START_SUCCESS;
+        }
+
+        // At this point we are certain we want the task moved to the front. If we need to dismiss
+        // any other always-on-top stacks, now is the time to do it.
+        if (targetTaskTop.canTurnScreenOn() && mService.mInternal.isDreaming()) {
+            targetTaskTop.mStackSupervisor.wakeUp("recycleTask#turnScreenOnFlag");
         }
 
         if (mMovedToFront) {
