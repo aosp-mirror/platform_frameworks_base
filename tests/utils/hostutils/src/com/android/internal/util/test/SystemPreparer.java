@@ -356,6 +356,9 @@ public class SystemPreparer extends ExternalResource {
         /**
          * Uses shell stop && start to "reboot" the device. May leave invalid state after each test.
          * Whether this matters or not depends on what's being tested.
+         *
+         * TODO(b/159540015): There's a bug with this causing unnecessary disk space usage, which
+         *  can eventually lead to an insufficient storage space error.
          */
         START_STOP
     }
