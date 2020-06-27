@@ -459,6 +459,9 @@ public class BlobStoreManagerService extends SystemService {
         synchronized (mBlobsLock) {
             final int leasesCount = getLeasedBlobsCountLocked(callingUid, callingPackage);
             if (leasesCount >= getMaxLeasedBlobs()) {
+                FrameworkStatsLog.write(FrameworkStatsLog.BLOB_LEASED, callingUid,
+                        INVALID_BLOB_ID, INVALID_BLOB_SIZE,
+                        FrameworkStatsLog.BLOB_LEASED__RESULT__COUNT_LIMIT_EXCEEDED);
                 throw new LimitExceededException("Too many leased blobs for the caller: "
                         + leasesCount);
             }
@@ -691,6 +694,9 @@ public class BlobStoreManagerService extends SystemService {
                         deleteSessionLocked(session);
                         getUserSessionsLocked(UserHandle.getUserId(session.getOwnerUid()))
                                 .remove(session.getSessionId());
+                        FrameworkStatsLog.write(FrameworkStatsLog.BLOB_COMMITTED,
+                                session.getOwnerUid(), session.getSessionId(), session.getSize(),
+                                FrameworkStatsLog.BLOB_COMMITTED__RESULT__COUNT_LIMIT_EXCEEDED);
                         break;
                     }
                     final int userId = UserHandle.getUserId(session.getOwnerUid());
@@ -725,7 +731,7 @@ public class BlobStoreManagerService extends SystemService {
                         }
                         Slog.d(TAG, "Error committing the blob: " + session, e);
                         FrameworkStatsLog.write(FrameworkStatsLog.BLOB_COMMITTED,
-                                session.getOwnerUid(), blob.getBlobId(), blob.getSize(),
+                                session.getOwnerUid(), session.getSessionId(), blob.getSize(),
                                 FrameworkStatsLog.BLOB_COMMITTED__RESULT__ERROR_DURING_COMMIT);
                         session.sendCommitCallbackResult(COMMIT_RESULT_ERROR);
                         // If the commit fails and this blob data didn't exist before, delete it.
