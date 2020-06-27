@@ -166,6 +166,7 @@ public class NotificationPanelViewController extends PanelViewController {
     private final ConfigurationListener mConfigurationListener = new ConfigurationListener();
     private final StatusBarStateListener mStatusBarStateListener = new StatusBarStateListener();
     private final ExpansionCallback mExpansionCallback = new ExpansionCallback();
+    private final BiometricUnlockController mBiometricUnlockController;
     private final NotificationPanelView mView;
     private final MetricsLogger mMetricsLogger;
     private final ActivityManager mActivityManager;
@@ -227,7 +228,8 @@ public class NotificationPanelViewController extends PanelViewController {
                             mBarState == StatusBarState.KEYGUARD
                                     || mBarState == StatusBarState.SHADE_LOCKED;
                     if (!running && mFirstBypassAttempt && keyguardOrShadeLocked && !mDozing
-                            && !mDelayShowingKeyguardStatusBar) {
+                            && !mDelayShowingKeyguardStatusBar
+                            && !mBiometricUnlockController.isBiometricUnlock()) {
                         mFirstBypassAttempt = false;
                         animateKeyguardStatusBarIn(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                     }
@@ -487,6 +489,7 @@ public class NotificationPanelViewController extends PanelViewController {
             StatusBarTouchableRegionManager statusBarTouchableRegionManager,
             ConversationNotificationManager conversationNotificationManager,
             MediaHierarchyManager mediaHierarchyManager,
+            BiometricUnlockController biometricUnlockController,
             StatusBarKeyguardViewManager statusBarKeyguardViewManager) {
         super(view, falsingManager, dozeLog, keyguardStateController,
                 (SysuiStatusBarStateController) statusBarStateController, vibratorHelper,
@@ -511,6 +514,7 @@ public class NotificationPanelViewController extends PanelViewController {
         mDisplayId = displayId;
         mPulseExpansionHandler = pulseExpansionHandler;
         mDozeParameters = dozeParameters;
+        mBiometricUnlockController = biometricUnlockController;
         pulseExpansionHandler.setPulseExpandAbortListener(() -> {
             if (mQs != null) {
                 mQs.animateHeaderSlidingOut();
