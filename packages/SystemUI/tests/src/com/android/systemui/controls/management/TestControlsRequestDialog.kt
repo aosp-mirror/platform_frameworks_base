@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2020 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,17 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package android.os.strictmode;
 
-public final class LeakedClosableViolation extends Violation {
-    /** @hide */
-    public LeakedClosableViolation(String message, Throwable allocationSite) {
-        super(message);
-        initCause(allocationSite);
-    }
+package com.android.systemui.controls.management
 
-    /** @hide */
-    public LeakedClosableViolation(String message) {
-        super(message);
-    }
-}
+import com.android.systemui.broadcast.BroadcastDispatcher
+import com.android.systemui.controls.controller.ControlsController
+
+class TestControlsRequestDialog(
+    controller: ControlsController,
+    dispatcher: BroadcastDispatcher,
+    listingController: ControlsListingController
+) : ControlsRequestDialog(controller, dispatcher, listingController)

@@ -273,7 +273,6 @@ public class BubbleStackView extends FrameLayout
     private int mBubbleTouchPadding;
     private int mExpandedViewPadding;
     private int mCornerRadius;
-    private int mPointerHeight;
     private int mStatusBarHeight;
     private int mImeOffset;
     @Nullable private BubbleViewProvider mExpandedBubble;
@@ -784,7 +783,6 @@ public class BubbleStackView extends FrameLayout
         mBubbleElevation = res.getDimensionPixelSize(R.dimen.bubble_elevation);
         mBubblePaddingTop = res.getDimensionPixelSize(R.dimen.bubble_padding_top);
         mBubbleTouchPadding = res.getDimensionPixelSize(R.dimen.bubble_touch_padding);
-        mPointerHeight = res.getDimensionPixelSize(R.dimen.bubble_pointer_height);
 
         mStatusBarHeight =
                 res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height);
@@ -1581,7 +1579,13 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "setSelectedBubble: " + bubbleToSelect);
         }
-        if (mExpandedBubble != null && mExpandedBubble.equals(bubbleToSelect)) {
+
+        // Ignore this new bubble only if it is the exact same bubble object. Otherwise, we'll want
+        // to re-render it even if it has the same key (equals() returns true). If the currently
+        // expanded bubble is removed and instantly re-added, we'll get back a new Bubble instance
+        // with the same key (with newly inflated expanded views), and we need to render those new
+        // views.
+        if (mExpandedBubble == bubbleToSelect) {
             return;
         }
         if (bubbleToSelect == null || bubbleToSelect.getKey() != BubbleOverflow.KEY) {
@@ -1661,6 +1665,13 @@ public class BubbleStackView extends FrameLayout
         if (DEBUG_BUBBLE_STACK_VIEW) {
             Log.d(TAG, "setExpanded: " + shouldExpand);
         }
+
+        if (!shouldExpand) {
+            // If we're collapsing, release the animating-out surface immediately since we have no
+            // need for it, and this ensures it cannot remain visible as we collapse.
+            releaseAnimatingOutBubbleBuffer();
+        }
+
         if (shouldExpand == mIsExpanded) {
             return;
         }
@@ -2390,7 +2401,7 @@ public class BubbleStackView extends FrameLayout
      * Calculates the y position of the expanded view when it is expanded.
      */
     float getExpandedViewY() {
-        return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop + mPointerHeight;
+        return getStatusBarHeight() + mBubbleSize + mBubblePaddingTop;
     }
 
     /**
@@ -2663,7 +2674,7 @@ public class BubbleStackView extends FrameLayout
      *                   expanded bubble.
      */
     private void screenshotAnimatingOutBubbleIntoSurface(Consumer<Boolean> onComplete) {
-        if (mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
+        if (!mIsExpanded || mExpandedBubble == null || mExpandedBubble.getExpandedView() == null) {
             // You can't animate null.
             onComplete.accept(false);
             return;

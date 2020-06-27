@@ -987,7 +987,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
                 .setOpaque(true)
                 .setContainerLayer();
-        mSurfaceControl = b.setName("Root").setContainerLayer().build();
+        mSurfaceControl = b.setName("Root")
+                .setContainerLayer()
+                .setCallsite("DisplayContent")
+                .build();
 
         getPendingTransaction()
                 .setLayer(mSurfaceControl, 0)
@@ -1110,7 +1113,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return null;
         }
         mShellRoots.put(windowType, root);
-        SurfaceControl out = new SurfaceControl(rootLeash);
+        SurfaceControl out = new SurfaceControl(rootLeash, "DisplayContent.addShellRoot");
         return out;
     }
 
@@ -5796,11 +5799,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             } catch (RemoteException e) {
                 Slog.w(TAG, "Failed to deliver showInsets", e);
             }
-        }
-
-        @Override
-        public boolean isClientControlled() {
-            return false;
         }
     }
 

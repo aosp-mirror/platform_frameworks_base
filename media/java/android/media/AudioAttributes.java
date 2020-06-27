@@ -452,6 +452,10 @@ public final class AudioAttributes implements Parcelable {
             | FLAG_NO_SYSTEM_CAPTURE | FLAG_CAPTURE_PRIVATE;
     private final static int FLAG_ALL_PUBLIC = FLAG_AUDIBILITY_ENFORCED |
             FLAG_HW_AV_SYNC | FLAG_LOW_LATENCY;
+    /* mask of flags that can be set by SDK and System APIs through the Builder */
+    private static final int FLAG_ALL_API_SET = FLAG_ALL_PUBLIC
+            | FLAG_BYPASS_INTERRUPTION_POLICY
+            | FLAG_BYPASS_MUTE;
 
     /**
      * Indicates that the audio may be captured by any app.
@@ -838,7 +842,7 @@ public final class AudioAttributes implements Parcelable {
          * @return the same Builder instance.
          */
         public Builder setFlags(int flags) {
-            flags &= AudioAttributes.FLAG_ALL_PUBLIC;
+            flags &= AudioAttributes.FLAG_ALL_API_SET;
             mFlags |= flags;
             return this;
         }
