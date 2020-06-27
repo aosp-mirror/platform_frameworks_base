@@ -480,6 +480,8 @@ public class PipTouchHandler {
                 mSnapAlgorithm.getMovementBounds(curBounds, insetBounds,
                         toMovementBounds, mIsImeShowing ? mImeHeight : 0);
                 final int prevBottom = mMovementBounds.bottom - mMovementBoundsExtraOffsets;
+                // This is to handle landscape fullscreen IMEs, don't apply the extra offset in this
+                // case
                 final int toBottom = toMovementBounds.bottom < toMovementBounds.top
                         ? toMovementBounds.bottom
                         : toMovementBounds.bottom - extraOffset;
@@ -490,10 +492,16 @@ public class PipTouchHandler {
                             mSavedSnapFraction);
                 }
 
-                if ((Math.min(prevBottom, toBottom) - mBottomOffsetBufferPx) <= curBounds.top
-                        && curBounds.top <= (Math.max(prevBottom, toBottom)
-                                + mBottomOffsetBufferPx)) {
-                    mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
+                if (prevBottom < toBottom) {
+                    // The movement bounds are expanding
+                    if (curBounds.top > prevBottom - mBottomOffsetBufferPx) {
+                        mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
+                    }
+                } else if (prevBottom > toBottom) {
+                    // The movement bounds are shrinking
+                    if (curBounds.top > toBottom - mBottomOffsetBufferPx) {
+                        mMotionHelper.animateToOffset(curBounds, toBottom - curBounds.top);
+                    }
                 }
             }
         }
@@ -971,6 +979,8 @@ public class PipTouchHandler {
                 }
                 mShouldHideMenuAfterFling = mMenuState == MENU_STATE_NONE;
 
+                // Reset the touch state on up before the fling settles
+                mTouchState.reset();
                 mMotionHelper.flingToSnapTarget(vel.x, vel.y,
                         PipTouchHandler.this::updateDismissFraction /* updateAction */,
                         this::flingEndAction /* endAction */);
@@ -997,7 +1007,6 @@ public class PipTouchHandler {
         }
 
         private void flingEndAction() {
-            mTouchState.setAllowTouches(true);
             if (mShouldHideMenuAfterFling) {
                 // If the menu is not visible, then we can still be showing the activity for the
                 // dismiss overlay, so just finish it after the animation completes
