@@ -554,6 +554,6 @@
     <string name="cached_apps_freezer_device_default" msgid="2616594131750144342">"Predvol. nastavenie zariadenia"</string>
     <string name="cached_apps_freezer_disabled" msgid="4816382260660472042">"Vypnuté"</string>
     <string name="cached_apps_freezer_enabled" msgid="8866703500183051546">"Zapnuté"</string>
-    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Táto zmena sa uplatní až po reštartovaní zariadenia. Zariadenie reštartujte alebo zmenu zrušte."</string>
+    <string name="cached_apps_freezer_reboot_dialog_text" msgid="695330563489230096">"Zmena sa prejaví až po reštarte zariadenia. Môžete ho teraz reštartovať alebo akciu zrušiť."</string>
     <string name="media_transfer_wired_usb_device_name" msgid="7699141088423210903">"Slúchadlá s káblom"</string>
 </resources>

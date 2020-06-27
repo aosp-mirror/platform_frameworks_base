@@ -974,7 +974,8 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
 
         final SurfaceControl.Builder b = mWmService.makeSurfaceBuilder(mSession)
                 .setOpaque(true)
-                .setContainerLayer();
+                .setContainerLayer()
+                .setCallsite("DisplayContent");
         mSurfaceControl = b.setName("Root").setContainerLayer().build();
         mOverlayLayer = b.setName("Display Overlays").setParent(mSurfaceControl).build();
 
@@ -1094,7 +1095,7 @@ class DisplayContent extends DisplayArea.Root implements WindowManagerPolicy.Dis
             return null;
         }
         mShellRoots.put(windowType, root);
-        SurfaceControl out = new SurfaceControl(rootLeash);
+        SurfaceControl out = new SurfaceControl(rootLeash, "DisplayContent.addShellRoot");
         return out;
     }
 

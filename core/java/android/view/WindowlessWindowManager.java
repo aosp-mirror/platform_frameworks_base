@@ -137,7 +137,8 @@ public class WindowlessWindowManager implements IWindowSession {
                 .setParent(mRootSurface)
                 .setFormat(attrs.format)
                 .setBufferSize(getSurfaceWidth(attrs), getSurfaceHeight(attrs))
-                .setName(attrs.getTitle().toString());
+                .setName(attrs.getTitle().toString())
+                .setCallsite("WindowlessWindowManager.addToDisplay");
         final SurfaceControl sc = b.build();
 
         if (((attrs.inputFeatures &
@@ -249,7 +250,7 @@ public class WindowlessWindowManager implements IWindowSession {
         if (viewFlags == View.VISIBLE) {
             t.setBufferSize(sc, getSurfaceWidth(attrs), getSurfaceHeight(attrs))
                     .setOpaque(sc, isOpaque(attrs)).show(sc).apply();
-            outSurfaceControl.copyFrom(sc);
+            outSurfaceControl.copyFrom(sc, "WindowlessWindowManager.relayout");
         } else {
             t.hide(sc).apply();
             outSurfaceControl.release();

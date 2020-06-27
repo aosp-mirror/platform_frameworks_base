@@ -290,6 +290,22 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         return effects;
     }
 
+    private int applyDisplayAreaChanges(WindowContainer container,
+            WindowContainerTransaction.Change c) {
+        final int[] effects = new int[1];
+
+        container.forAllTasks(task -> {
+            Task tr = (Task) task;
+            if ((c.getChangeMask() & WindowContainerTransaction.Change.CHANGE_HIDDEN) != 0) {
+                if (tr.setForceHidden(FLAG_FORCE_HIDDEN_FOR_TASK_ORG, c.getHidden())) {
+                    effects[0] |= TRANSACT_EFFECTS_LIFECYCLE;
+                }
+            }
+        });
+
+        return effects[0];
+    }
+
     private int sanitizeAndApplyHierarchyOp(WindowContainer container,
             WindowContainerTransaction.HierarchyOp hop) {
         final Task task = container.asTask();
@@ -366,7 +382,9 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
 
         int effects = applyChanges(wc, c);
 
-        if (wc instanceof Task) {
+        if (wc instanceof DisplayArea) {
+            effects |= applyDisplayAreaChanges(wc, c);
+        } else if (wc instanceof Task) {
             effects |= applyTaskChanges(wc.asTask(), c);
         }
 
@@ -459,6 +477,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 .setBufferSize(bounds.width(), bounds.height())
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .setParent(wc.getParentSurfaceControl())
+                .setCallsite("WindowOrganizerController.takeScreenshot")
                 .build();
 
         Surface surface = new Surface();
@@ -466,7 +485,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
         surface.attachAndQueueBufferWithColorSpace(buffer.getHardwareBuffer(), null);
         surface.release();
 
-        outSurfaceControl.copyFrom(screenshot);
+        outSurfaceControl.copyFrom(screenshot, "WindowOrganizerController.takeScreenshot");
         return true;
     }
 

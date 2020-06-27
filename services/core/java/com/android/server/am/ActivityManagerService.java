@@ -236,6 +236,7 @@ import android.location.LocationManager;
 import android.media.audiofx.AudioEffect;
 import android.net.Proxy;
 import android.net.Uri;
+import android.os.AndroidTimeoutException;
 import android.os.AppZygote;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -2864,7 +2865,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             // log all others.
             if (!(e instanceof SecurityException
                     || e instanceof IllegalArgumentException
-                    || e instanceof IllegalStateException)) {
+                    || e instanceof IllegalStateException
+                    || e instanceof AndroidTimeoutException)) {
                 Slog.wtf(TAG, "Activity Manager Crash."
                         + " UID:" + Binder.getCallingUid()
                         + " PID:" + Binder.getCallingPid()
@@ -7440,6 +7442,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     + name
                     + " providerRunning=" + providerRunning
                     + " caller=" + callerName + "/" + Binder.getCallingUid());
+
+            final int clientTargetSdk = mPackageManagerInt.getUidTargetSdkVersion(callingUid);
+            if (clientTargetSdk >= Build.VERSION_CODES.S) {
+                throw new AndroidTimeoutException("Timeout waiting for provider '" + name + "'");
+            }
             return null;
         }
 
@@ -7558,8 +7565,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private ContentProviderHolder getContentProviderExternalUnchecked(String name,
             IBinder token, int callingUid, String callingTag, int userId) {
-        return getContentProviderImpl(null, name, token, callingUid, null, callingTag,
-                true, userId);
+        try {
+            return getContentProviderImpl(null, name, token, callingUid, null, callingTag,
+                    true, userId);
+        } catch (AndroidTimeoutException ate) {
+            return null;
+        }
     }
 
     /**

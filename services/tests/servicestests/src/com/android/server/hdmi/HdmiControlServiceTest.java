@@ -291,8 +291,21 @@ public class HdmiControlServiceTest {
     }
 
     @Test
-    public void disableAndReenableCec_volumeControlReturnsToOriginalValue() {
+    public void disableAndReenableCec_volumeControlReturnsToOriginalValue_enabled() {
         boolean volumeControlEnabled = true;
+        mHdmiControlService.setHdmiCecVolumeControlEnabled(volumeControlEnabled);
+
+        mHdmiControlService.setControlEnabled(false);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isFalse();
+
+        mHdmiControlService.setControlEnabled(true);
+        assertThat(mHdmiControlService.isHdmiCecVolumeControlEnabled()).isEqualTo(
+                volumeControlEnabled);
+    }
+
+    @Test
+    public void disableAndReenableCec_volumeControlReturnsToOriginalValue_disabled() {
+        boolean volumeControlEnabled = false;
         mHdmiControlService.setHdmiCecVolumeControlEnabled(volumeControlEnabled);
 
         mHdmiControlService.setControlEnabled(false);
