@@ -878,6 +878,7 @@ public class AdbDebuggingManager {
 
                 case MESSAGE_ADB_DENY:
                     if (mThread != null) {
+                        Slog.w(TAG, "Denying adb confirmation");
                         mThread.sendResponse("NO");
                         logAdbConnectionChanged(null, AdbProtoEnums.USER_DENIED, false);
                     }
@@ -887,7 +888,7 @@ public class AdbDebuggingManager {
                     String key = (String) msg.obj;
                     if ("trigger_restart_min_framework".equals(
                             SystemProperties.get("vold.decrypt"))) {
-                        Slog.d(TAG, "Deferring adb confirmation until after vold decrypt");
+                        Slog.w(TAG, "Deferring adb confirmation until after vold decrypt");
                         if (mThread != null) {
                             mThread.sendResponse("NO");
                             logAdbConnectionChanged(key, AdbProtoEnums.DENIED_VOLD_DECRYPT, false);
