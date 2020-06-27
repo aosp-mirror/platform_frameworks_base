@@ -789,6 +789,31 @@ public class PermissionManagerService extends IPermissionManager.Stub {
         final PermissionsState permissionsState = ps.getPermissionsState();
         final boolean hadState =
                 permissionsState.getRuntimePermissionState(permName, userId) != null;
+        if (!hadState) {
+            boolean isRequested = false;
+            // Fast path, the current package has requested the permission.
+            if (pkg.getRequestedPermissions().contains(permName)) {
+                isRequested = true;
+            }
+            if (!isRequested) {
+                // Slow path, go through all shared user packages.
+                String[] sharedUserPackageNames =
+                        mPackageManagerInt.getSharedUserPackagesForPackage(packageName, userId);
+                for (String sharedUserPackageName : sharedUserPackageNames) {
+                    AndroidPackage sharedUserPkg = mPackageManagerInt.getPackage(
+                            sharedUserPackageName);
+                    if (sharedUserPkg != null
+                            && sharedUserPkg.getRequestedPermissions().contains(permName)) {
+                        isRequested = true;
+                        break;
+                    }
+                }
+            }
+            if (!isRequested) {
+                Log.e(TAG, "Permission " + permName + " isn't requested by package " + packageName);
+                return;
+            }
+        }
         final boolean permissionUpdated =
                 permissionsState.updatePermissionFlags(bp, userId, flagMask, flagValues);
         if (permissionUpdated && bp.isRuntime()) {
