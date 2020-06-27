@@ -545,7 +545,7 @@
     <string name="disable_vpn" msgid="482685974985502922">"Khubaza i-VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Nqamula i-VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Buka izinqubomgomo"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Le divayisi ngeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nYUmphathi wakho we-IT angakwazi ukugada nokulawula amasethingi, ukufinyelela kwenhlangano, izinhlelo zokusebenza, idatha ehlobene nedivayisi yakho, nolwazi lwendawo yedivayisi yakho.\n\nUkuze uthole ulwazi olwengeziwe, xhumana nomphathi wakho we-IT."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Le divayisi ngeye-<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nUmphathi wakho we-IT angakwazi ukugada nokulawula amasethingi, ukufinyelela kwenhlangano, izinhlelo zokusebenza, idatha ehlobene nedivayisi yakho, nolwazi lwendawo yedivayisi yakho.\n\nUkuze uthole ulwazi olwengeziwe, xhumana nomphathi wakho we-IT."</string>
     <string name="monitoring_description_management" msgid="4308879039175729014">"Le divayisi ngeyenhlangano.\n\nUmphathi wakho we-IT angakwazi ukugada nokulawula amasethingi, ukufinyelela kwenhlangano, izinhlelo zokusebenza, idatha ehlobene nedivayisi yakho, nolwazi lwendawo yedivayisi yakho.\n\nUkuze uthole ulwazi olwengeziwe, xhumana nomphathi wakho we-IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Inhlangano yakho ifake ukugunyazwa kwesitifiketi kule divayisi. Ithrafikhi yenethiwekhi yakho evikelekile kungenzeka iqashelwe noma ilungiswe."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Inhlangano yakho ifake ukugunyaza kwesitifiketi kuphrofayela yakho yomsebenzi. Ithrafikhi yenethiwekhi yakho evikelekile ingaqashwa noma ilungiswe."</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Bamba futhi uhudule ukuze uphinde ulungise izilawuli"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Zonke izilawuli zisusiwe"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Izinguquko azilondolozwanga"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Bona ezinye izinhlelo zokusebenza"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Izilawuli azikwazanga ukulayishwa. Hlola uhlelo lokusebenza le-<xliff:g id="APP">%s</xliff:g> ukuqinisekisa ukuthi amasethingi wohlelo lokusebenza awashintshile."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Izilawuli ezihambelanayo azitholakali"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Okunye"</string>

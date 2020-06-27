@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Järjestele säätimiä koskettamalla pitkään ja vetämällä"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kaikki säätimet poistettu"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Muutoksia ei tallennettu"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Katso muita sovelluksia"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Säätimiä ei voitu ladata. Avaa <xliff:g id="APP">%s</xliff:g> ja tarkista, että sovelluksen asetukset eivät ole muuttuneet."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Yhteensopivat säätimet eivät käytettävissä"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>

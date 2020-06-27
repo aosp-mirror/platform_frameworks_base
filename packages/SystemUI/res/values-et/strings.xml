@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Juhtelementide ümberpaigutamiseks hoidke neid all ja lohistage"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Kõik juhtelemendid eemaldati"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Muudatusi ei salvestatud"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Kuva muud rakendused"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Juhtelemente ei õnnestunud laadida. Kontrollige rakendust <xliff:g id="APP">%s</xliff:g> ja veenduge, et rakenduse seaded poleks muutunud."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Ühilduvaid juhtelemente pole saadaval"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Muu"</string>

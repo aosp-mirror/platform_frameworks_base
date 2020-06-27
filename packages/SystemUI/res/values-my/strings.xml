@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"ထိန်းချုပ်မှုများ ပြန်စီစဉ်ရန် ဖိပြီးဆွဲပါ"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"ထိန်းချုပ်မှုအားလုံး ဖယ်ရှားလိုက်သည်"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"အပြောင်းအလဲများကို သိမ်းမထားပါ"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"အခြားအက်ပ်များကိုကြည့်ပါ"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"ထိန်းချုပ်မှုများကို ဖွင့်၍မရပါ။ အက်ပ်ဆက်တင်များ ပြောင်းမထားကြောင်း သေချာစေရန် <xliff:g id="APP">%s</xliff:g> အက်ပ်ကို စစ်ဆေးပါ။"</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"ကိုက်ညီသော ထိန်းချုပ်မှုများကို မရရှိနိုင်ပါ"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"အခြား"</string>

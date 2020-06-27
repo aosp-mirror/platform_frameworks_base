@@ -529,8 +529,8 @@
     <string name="branded_vpn_footer" msgid="816930186313188514">"ייתכן שהרשת מנוטרת"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="8231336875820702180">"הארגון שלך הוא הבעלים של מכשיר זה והוא עשוי לנטר את התנועה ברשת"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="2831423806103479812">"הארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> הוא הבעלים של מכשיר זה והוא עשוי לנטר את התנועה ברשת"</string>
-    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"המכשיר הזה שייך לארגון שלך, והוא מחובר אל <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
-    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> והוא מחובר אל <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"המכשיר הזה שייך לארגון שלך, והוא מחובר ל-<xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> והוא מחובר ל-<xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"המכשיר הזה שייך לארגון שלך"</string>
     <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"המכשיר הזה שייך לארגון <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"‏המכשיר הזה שייך לארגון שלך והוא מחובר לרשתות VPN"</string>
@@ -1058,6 +1058,8 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"יש ללחוץ לחיצה ארוכה ולגרור כדי לארגן מחדש את הפקדים"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"כל הפקדים הוסרו"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"השינויים לא נשמרו"</string>
+    <!-- no translation found for controls_favorite_see_other_apps (7709087332255283460) -->
+    <skip />
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"לא ניתן היה לטעון את הפקדים. יש לבדוק את האפליקציה <xliff:g id="APP">%s</xliff:g> כדי לוודא שהגדרות האפליקציה לא השתנו."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"פקדים תואמים לא זמינים"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"אחר"</string>

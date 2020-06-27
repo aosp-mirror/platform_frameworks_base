@@ -459,7 +459,7 @@
     <string name="keyguard_unlock" msgid="8031975796351361601">"Otvorte potiahnutím prstom nahor"</string>
     <string name="keyguard_retry" msgid="886802522584053523">"Potiahnutím nahor to skúste znova"</string>
     <string name="do_disclosure_generic" msgid="4896482821974707167">"Toto zariadenie patrí vašej organizácii"</string>
-    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
+    <string name="do_disclosure_with_name" msgid="2091641464065004091">"Toto zariadení patrí organizácii <xliff:g id="ORGANIZATION_NAME">%s</xliff:g>"</string>
     <string name="phone_hint" msgid="6682125338461375925">"Telefón otvoríte prejdením prstom od ikony"</string>
     <string name="voice_hint" msgid="7476017460191291417">"Hlasového asistenta otvoríte prejdením prstom od ikony"</string>
     <string name="camera_hint" msgid="4519495795000658637">"Fotoaparát otvoríte prejdením prstom od ikony"</string>
@@ -532,7 +532,7 @@
     <string name="quick_settings_disclosure_management_named_vpn" msgid="6096715329056415588">"Toto zariadenie patrí vašej organizácii a je pripojené k sieti <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_named_management_named_vpn" msgid="5302786161534380104">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je pripojené k sieti <xliff:g id="VPN_APP">%2$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management" msgid="5515296598440684962">"Toto zariadenie patrí vašej organizácii"</string>
-    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
+    <string name="quick_settings_disclosure_named_management" msgid="3476472755775165827">"Toto zariadení patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_management_vpns" msgid="371835422690053154">"Toto zariadenie patrí vašej organizácii a je pripojené k sieťam VPN"</string>
     <string name="quick_settings_disclosure_named_management_vpns" msgid="4046375645500668555">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> a je pripojené k sieťam VPN"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="1423899084754272514">"Organizácia môže sledovať sieťovú premávku vo vašom pracovnom profile"</string>
@@ -551,8 +551,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"Deaktivovať VPN"</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"Odpojiť sieť VPN"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"Zobraziť pravidlá"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadení a informácie o jeho polohe.\n\nViac sa dozviete od svojho správcu IT."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zariadenie patrí vašej organizácii.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadením a informácie o jeho polohe.\n\nViac sa dozviete od svojho správcu IT."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"Toto zariadenie patrí organizácii <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g>.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadení a informácie o jeho polohe.\n\nViac sa dozviete od správcu IT."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"Toto zariadenie patrí vašej organizácii.\n\nVáš správca IT môže sledovať a spravovať nastavenia, podnikový prístup, aplikácie, údaje spojené s vaším zariadením a informácie o jeho polohe.\n\n. Viac sa dozviete od správcu IT."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"Organizácia nainštalovala pre toto zariadenie certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"Organizácia nainštalovala pre váš pracovný profil certifikačnú autoritu. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"V tomto zariadení je nainštalovaná certifikačná autorita. Zabezpečená sieťová premávka môže byť sledovaná či upravená."</string>
@@ -1058,6 +1058,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Polohu každého ovládača môžete zmeniť jeho pridržaním a presunutím"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Všetky ovládače boli odstránené"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Zmeny neboli uložené"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Zobraziť ďalšie aplikácie"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Ovládacie prvky sa nepodarilo načítať. V aplikácii <xliff:g id="APP">%s</xliff:g> skontrolujte, či sa nezmenili nastavenia."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Kompatibilné ovládacie prvky nie sú k dispozícii"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Iné"</string>

@@ -1123,9 +1123,7 @@
     <string name="checked" msgid="9179896827054513119">"បានធីក​"</string>
     <string name="not_checked" msgid="7972320087569023342">"មិន​បាន​ធីក​"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for whichApplicationNamed (6969946041713975681) -->
-    <skip />
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>

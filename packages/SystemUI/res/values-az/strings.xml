@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Nizamlayıcıları yenidən tənzimləmək üçün tutub sürüşdürün"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Bütün nizamlayıcılar silindi"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Dəyişikliklər yadda saxlanmadı"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Digər tətbiqlərə baxın"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Nizamlayıcıları yükləmək mümkün olmadı. <xliff:g id="APP">%s</xliff:g> tətbiqinə toxunaraq tətbiq ayarlarının dəyişmədiyinə əmin olun."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Uyğun nizamlayıcılar əlçatan deyil"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Digər"</string>

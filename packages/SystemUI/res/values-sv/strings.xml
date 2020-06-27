@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"Ändra ordning på kontrollerna genom att trycka och dra"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"Alla kontroller har tagits bort"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"Ändringarna har inte sparats"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"Visa andra appar"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"Det gick inte att läsa in enhetsstyrning. Kontrollera att inställningarna inte har ändrats i <xliff:g id="APP">%s</xliff:g>-appen."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"Ingen kompatibel enhetsstyrning tillgänglig"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"Övrigt"</string>

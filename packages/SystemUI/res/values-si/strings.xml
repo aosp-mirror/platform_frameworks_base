@@ -545,8 +545,8 @@
     <string name="disable_vpn" msgid="482685974985502922">"VPN අබල කරන්න."</string>
     <string name="disconnect_vpn" msgid="26286850045344557">"VPN විසන්ධි කරන්න"</string>
     <string name="monitoring_button_view_policies" msgid="3869724835853502410">"ප්‍රතිපත්ති පෙන්වන්න"</string>
-    <string name="monitoring_description_named_management" msgid="505833016545056036">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිතිය.\n\nඔබේ IT පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගයේ ස්ථාන තොරතුරු නිරීක්ෂණය කර කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබේ IT පරිපාලක අමතන්න."</string>
-    <string name="monitoring_description_management" msgid="4308879039175729014">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය.\n\nඔබේ IT පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගයේ ස්ථාන තොරතුරු නිරීක්ෂණය කර කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබේ IT පරිපාලක අමතන්න."</string>
+    <string name="monitoring_description_named_management" msgid="505833016545056036">"මෙම උපාංගය <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> සංවිධානයට අයිතිය.\n\nඔබේ IT පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගයේ ස්ථාන තොරතුරු නිරීක්ෂණය කර කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබේ IT අමතන්න."</string>
+    <string name="monitoring_description_management" msgid="4308879039175729014">"මෙම උපාංගය ඔබේ සංවිධානයට අයිතිය.\n\nඔබේ IT පරිපාලකට ඔබේ උපාංගය හා සම්බන්ධිත සැකසීම්, ආයතනික ප්‍රවේශය, යෙදුම්, දත්ත සහ ඔබේ උපාංගයේ ස්ථාන තොරතුරු නිරීක්ෂණය කර කළමනාකරණය කිරීමට හැකිය.\n\nවැඩිදුර තොරතුරු සඳහා, ඔබේ IT අමතන්න."</string>
     <string name="monitoring_description_management_ca_certificate" msgid="7785013130658110130">"ඔබගේ සංවිධානය ඔබගේ උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="7904323416598435647">"ඔබගේ සංවිධානය ඔබගේ කාර්යාල පැතිකඩ තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
     <string name="monitoring_description_ca_certificate" msgid="448923057059097497">"මෙම උපාංගය තුළ සහතික අධිකාරියක් ස්ථාපනය කර තිබේ. ඔබගේ ආරක්ෂක ජාල තදබදය නිරීක්ෂණය හෝ වෙනස් කිරීමට පුළුවනි."</string>
@@ -1046,6 +1046,7 @@
     <string name="controls_favorite_rearrange" msgid="5616952398043063519">"පාලන නැවත පිළියෙළ කිරීමට අල්ලාගෙන සිට අදින්න"</string>
     <string name="controls_favorite_removed" msgid="5276978408529217272">"සියලු පාලන ඉවත් කර ඇත"</string>
     <string name="controls_favorite_toast_no_changes" msgid="7094494210840877931">"වෙනස් කිරීම් නොසුරැකිණි"</string>
+    <string name="controls_favorite_see_other_apps" msgid="7709087332255283460">"වෙනත් යෙදුම් බලන්න"</string>
     <string name="controls_favorite_load_error" msgid="5126216176144877419">"පාලන පූරණය කළ නොහැකි විය. යෙදුම් සැකසීම් වෙනස් වී නැති බව සහතික කර ගැනීමට <xliff:g id="APP">%s</xliff:g> යෙදුම පරීක්ෂා කරන්න."</string>
     <string name="controls_favorite_load_none" msgid="7687593026725357775">"ගැළපෙන පාලන ලබා ගත නොහැකිය"</string>
     <string name="controls_favorite_other_zone_header" msgid="9089613266575525252">"වෙනත්"</string>
