@@ -95,6 +95,10 @@ public class PipManager implements BasePipManager, PipTaskOrganizer.PipTransitio
      */
     private final DisplayChangeController.OnDisplayChangingListener mRotationController = (
             int displayId, int fromRotation, int toRotation, WindowContainerTransaction t) -> {
+        if (!mPipTaskOrganizer.isInPip() || mPipTaskOrganizer.isDeferringEnterPipAnimation()) {
+            // Skip if we aren't in PIP or haven't actually entered PIP yet
+            return;
+        }
         // If there is an animation running (ie. from a shelf offset), then ensure that we calculate
         // the bounds for the next orientation using the destination bounds of the animation
         // TODO: Techincally this should account for movement animation bounds as well
