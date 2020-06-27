@@ -64,6 +64,9 @@ class KeyguardMediaController @Inject constructor(
         // Let's now initialize this view, which also creates the host view for us.
         mediaHost.init(MediaHierarchyManager.LOCATION_LOCKSCREEN)
         mediaView.setContentView(mediaHost.hostView)
+
+        // Ensure the visibility is correct
+        updateVisibility()
     }
 
     private fun updateVisibility() {
