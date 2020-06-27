@@ -1912,7 +1912,7 @@
     <string name="conference_call" msgid="5731633152336490471">"Conference Call"</string>
     <string name="tooltip_popup_title" msgid="7863719020269945722">"Tooltip"</string>
     <string name="app_category_game" msgid="4534216074910244790">"Games"</string>
-    <string name="app_category_audio" msgid="8296029904794676222">"Music &amp; Audio"</string>
+    <string name="app_category_audio" msgid="8296029904794676222">"Music and audio"</string>
     <string name="app_category_video" msgid="2590183854839565814">"Movies &amp; Video"</string>
     <string name="app_category_image" msgid="7307840291864213007">"Photos &amp; Images"</string>
     <string name="app_category_social" msgid="2278269325488344054">"Social &amp; Communication"</string>
